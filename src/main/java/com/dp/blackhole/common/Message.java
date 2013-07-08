@@ -1,4 +1,4 @@
-package com.dp.common;
+package com.dp.blackhole.common;
 
 public class Message {
 
