@@ -1,0 +1,27 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.common";
+option java_outer_classname = "MessagePB";
+
+import "AppReg.proto";
+import "AssignCollector.proto";
+import "AppRoll.proto";
+
+  message Message {
+    enum MessageType {
+      HEARTBEAT = 0;
+      APP_REG = 1;
+      HANDLER_REG = 2;
+      REPLY_HANDLER = 3;
+      ASSIGN_HANDLER = 4;
+      APP_RECOVERY = 5;
+      HDFS_UPLOAD = 6;
+      HDFS_RECOVERY = 7;
+      APP_ROLL = 8;
+    }
+
+    required MessageType type = 1;
+    optional AppReg appReg = 2;
+    optional AssignCollector assignCollector = 3;
+    optional AppRoll appRoll = 4;
+  }
