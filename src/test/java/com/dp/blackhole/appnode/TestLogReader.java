@@ -1,15 +1,18 @@
 package com.dp.blackhole.appnode;
 
+import static org.junit.Assert.*;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -23,76 +26,145 @@ import org.junit.Test;
 
 public class TestLogReader {
   private static final Log LOG = LogFactory.getLog(TestLogReader.class);
+  private static final int MAX_SIZE = 10;
+  private static final int PORT = 40000;
   private static AppLog appLog;
   private static Appnode appnode;
   private static final String MAGIC = "sdfjiojwe";
+  private static List<String> receives = new ArrayList<String>();
+  private static int before = 0;
+  private static int after = 0;
+  private Server server;
+  private Thread serverThread;
+  
+  public static int getBefore() {
+    return before;
+  }
+
+  public static void setBefore() {
+    TestLogReader.before = receives.size();
+  }
+
+  public static int getAfter() {
+    return after;
+  }
+
+  public static void setAfter() {
+    TestLogReader.after = receives.size();
+  }
+  
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
+  }
+
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+    List<File> candidateFiles = Arrays.asList(new File("/tmp").listFiles());
+    for (File file : candidateFiles) {
+      if (file.getName().startsWith(MAGIC)) {
+        file.deleteOnExit();
+      }
+    }
+  }
+
+  @Before
+  public void setUp() throws Exception {
     //build a server
-    new Thread(new Server(40000)).start();
+    server = new Server(PORT);
+    serverThread = new Thread(server);
+    serverThread.start();
 
     //build a app log
     File file = File.createTempFile(MAGIC, null);
     String fileAbsolutePath = file.getAbsolutePath();
     LOG.info(fileAbsolutePath);
-    new Thread(new Write(file)).start();
-    appLog = new AppLog(MAGIC, fileAbsolutePath, System.currentTimeMillis(), "127.0.0.1", 40000);
+    Thread t = new Thread(new Writer(fileAbsolutePath));
+    t.setDaemon(false);
+    t.start();
+    appLog = new AppLog(MAGIC, fileAbsolutePath, System.currentTimeMillis(), "localhost", PORT);
 
     //build a app node
     String appClient = "127.0.0.1";
     appnode = new Appnode(appClient);
   }
 
-
-
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-//    appLog.getTailFile().deleteOnExit();
-  }
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
   @After
   public void tearDown() throws Exception {
   }
 
-  static class Write implements Runnable {
-    private File file;
-    OutputStreamWriter writer;
-    public Write(File file) {
-      this.file = file;
+  static class Writer implements Runnable{
+    private String path;
+    private volatile boolean shouldBreak;
+    public Writer(String path) {
+      this.path = path;
+      this.shouldBreak = false;
     }
+
+    public boolean shouldBreakOrNot() {
+      return shouldBreak;
+    }
+    public void breakIt() {
+      shouldBreak = true;
+    }
+
+    @Override
+    public void run() {
+      Runtime runtime = Runtime.getRuntime();
+      String [] cmd= new String[3];
+      cmd[0] = "/bin/sh";
+      cmd[1] = "-c";
+      cmd[2] = "echo `date` >> " + path;
+      System.out.println(cmd[2]);
+      try {
+        while(true) {
+          Process process = runtime.exec(cmd);
+          StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR");
+          StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT");
+          errorGobbler.start();
+          outputGobbler.start();
+          int exitValue = process.waitFor();
+//          System.out.println("ExitValue:" + exitValue);
+          Thread.sleep(500);
+          if (shouldBreak) {
+            break;
+          }
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+        System.out.println("The command is incorrect!");
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+    
+  static class StreamGobbler extends Thread {
+    InputStream is;
+    String type;
+    StreamGobbler(InputStream is, String type) {
+      this.is = is;
+      this.type = type;
+    }
+    
+    @Override
     public void run() {
       try {
-        int i = 0;
-        writer = new OutputStreamWriter(new FileOutputStream(file));
-        while(true) {
-          try {
-            Thread.sleep(1000);
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
-          String line = "a message number " + i++;
-          try {
-            writer.write(line);
-            writer.write('\n');
-            writer.flush();
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
-          System.out.println("writetofile>" + line);
-        }
-      } catch (FileNotFoundException e) {
-        e.printStackTrace();
+        InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader br = new BufferedReader(isr);
+        String line=null;
+        while ( (line = br.readLine()) != null)
+        System.out.println(type + ">" + line);
+      } catch (IOException ioe) {
+        ioe.printStackTrace();
       }
     }
   }
   
   static class Server implements Runnable {
     private ServerSocket ss;
+    private volatile boolean shouldStop;
     public Server(int port) {
+      this.shouldStop = false;
       try {
         ss = new ServerSocket(port);
         System.out.println("server begin at " + port);
@@ -100,55 +172,102 @@ public class TestLogReader {
         e.printStackTrace();
       }
     }
+    
+    public boolean shouldStopOrNot() {
+      return shouldStop;
+    }
+    public void stopIt() {
+      shouldStop = true;
+    }
+    
     public void run() {
       Socket socket = null;
       InputStream in = null;
-      while (true) {
-        System.out.println(Thread.currentThread());
-        try {
-          String line = null;
-          socket = ss.accept();
-          in = socket.getInputStream();
-          BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-          while ((line = reader.readLine()) != null) {
-            System.out.println("server>" + line);
+      System.out.println(Thread.currentThread());
+      try {
+        String line = null;
+        socket = ss.accept();
+        in = socket.getInputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        while (!shouldStop && (line = reader.readLine()) != null) {
+          LOG.debug("server>" + line);
+          receives.add(line);
+          if (receives.size() == MAX_SIZE) {
+            break;
           }
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      } finally {
+        try {
+          in.close();
         } catch (IOException e) {
           e.printStackTrace();
-        } finally {
-          try {
-            in.close();
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
         }
       }
     }
   }
-  @Test
-  public void test() {
-    LogReader reader = new LogReader(appnode, appLog, false);
-    ExecutorService exec = Executors.newCachedThreadPool();
-    exec.execute(reader);
-    while(true) {
+
+  static class MVandRollCommand implements Runnable {
+    private Server server;
+    private File file;
+    public MVandRollCommand(File file, Server server) {
+      this.file = file;
+      this.server = server;
+    }
+    public void run() {
+      assertNotNull(file);
+      if (!file.exists()) {
+        LOG.debug(file + " not found.");
+        return;
+      }
       try {
-        Thread.sleep(1000);
+        Thread.sleep(3000);
+        File des = new File(file.getParent(), MAGIC 
+            + new SimpleDateFormat("yyyy-MM-dd.hh").format(new Date())
+            + ".mv");
+        file.renameTo(des);
+        setBefore();
+        Thread.sleep(3000);
+        if (!server.shouldStopOrNot()) {
+          LOG.info("time is up, shutdown the server");
+          server.stopIt();
+        }
+        setAfter();
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
     }
   }
 
   @Test
-  public void testBase() {
-    while(true) {
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
+  public void test() {
+//    System.out.println(System.getProperty("java.class.path"));
+    LogReader reader = new LogReader(appnode, appLog, true);
+    ExecutorService exec = Executors.newCachedThreadPool();
+    exec.execute(reader);
+    try {
+      serverThread.join();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
+    assertNotNull("tailer function fail.", receives.toArray());
+  }
+  
+  @Test
+  public void testFileNotFoundAndFileRotated() {
+    LogReader reader = new LogReader(appnode, appLog, true);
+    ExecutorService exec = Executors.newCachedThreadPool();
+    exec.execute(reader);
+    ExecutorService exec2 = Executors.newSingleThreadExecutor();
+    MVandRollCommand mvCommand = new MVandRollCommand(new File(appLog.getTailFile()), server);
+    exec2.execute(mvCommand);
+    try {
+      serverThread.join();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    assertNotNull("testFileNotFound function fail.", receives.toArray());
+    assertNotSame(getBefore(), getAfter());
   }
 }
