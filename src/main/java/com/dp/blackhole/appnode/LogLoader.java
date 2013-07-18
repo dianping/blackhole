@@ -18,19 +18,20 @@ public class LogLoader implements Runnable{
   private static final String RAF_MODE = "r";
   private static final int DEFAULT_BUFSIZE = 8102;
   private AppLog appLog;
-  private Appnode appnode;  //to persist it for next version
+//  private Appnode appnode;  //to persist it for next version
   private String rollIdent;
   private long offset;
   private Socket server;
   private byte[] inbuf;
-  public LogLoader(Appnode appnode, AppLog appLog, String rollIdent, long offset) {
-    this.appnode = appnode;
+  public LogLoader(AppLog appLog, String rollIdent, long offset) {
+//    this.appnode = appnode;
     this.appLog = appLog;
     this.rollIdent = rollIdent;
     this.offset = offset;
     this.inbuf = new byte[DEFAULT_BUFSIZE];
   }
-
+  
+  @Override
   public void run() {
     File rolledFile = AppUtil.findRealFileByIdent(appLog, rollIdent);
     RandomAccessFile reader = null;

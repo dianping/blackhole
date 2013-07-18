@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+  
+  <property>
+    <name>fs.default.name</name>
+    <value>hdfs://10.1.77.86/</value>
+  </property>
+
+  <property>
+    <name>io.compression.codecs</name>
+    <value>org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec,com.hadoop.compression.lzo.LzoCodec,com.hadoop.compression.lzo.LzopCodec,org.apache.hadoop.io.compress.BZip2Codec</value>
+  </property>
+
+  <property>
+    <name>io.compression.codec.lzo.class</name>
+    <value>com.hadoop.compression.lzo.LzoCodec</value>
+  </property>
+ 
+  <property>
+    <name>hadoop.security.authentication</name>
+    <!-- <value>simple</value> -->
+    <value>kerberos</value>
+  </property>
+  
+  <property>
+    <name>dfs.namenode.kerberos.principal</name>
+    <value>hadoop/test86.hadoop@DIANPING.COM</value>
+  </property>
+  
+  <property>
+    <name>test.hadoop.principal</name>
+    <value>hadoop@DIANPING.COM</value>
+  </property>
+  
+  <property>
+    <name>test.hadoop.keytab.file</name>
+    <value>/home/hadoop/.keytab</value>
+  </property>
+
+</configuration>

@@ -13,19 +13,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.util.AppUtil;
+import com.dp.blackhole.util.TestMode;
 
 public class LogTailerListener implements TailerListener {
   public static final Log LOG = LogFactory.getLog(LogTailerListener.class);
+
   private AppLog appLog;
   private Appnode appnode;
   private Socket server;
-  private static long lineCount = 0;
   private Tailer tailer;
   private OutputStreamWriter writer;
   public LogTailerListener(Appnode appnode, AppLog appLog) {
     this.appnode = appnode;
     this.appLog = appLog;
   }
+
   /**
    * The tailer will call this method during construction,
    * giving the listener a method of stopping the tailer.
@@ -58,20 +60,26 @@ public class LogTailerListener implements TailerListener {
 
   /**
    * Called if a file rotation is detected.
-   *
+   * Insert a "" string to tail stream to distinguish 
+   * different interval file like "trace.log.2013-07-11.12".
+   * And, send a message APP_ROLL to supervisor 
+   * which include file identify and its length.
+   * 
    * This method is called before the file is reopened, and fileNotFound may
    * be called if the new file has not yet been created.
    */
   public void fileRotated() {
-    int interval = 60;//TODO next version, read from configure trace.log.2013-07-11.12
+    handle("");
+    int interval = 60;//TODO next version, read from configure.
     String rollIdent = AppUtil.getRollIdentByTime(new Date(), interval);
     File rollFile = AppUtil.findRealFileByIdent(appLog, rollIdent);
     if (rollFile != null) {
       long fileLength = rollFile.length();
-      appnode.roll(appLog.getAppName(), rollIdent, fileLength);
+      if (!TestMode.test) {
+        appnode.roll(appLog.getAppName(), rollIdent, fileLength);
+      }
       LOG.info("File rotation is deteced. Roll file is " + rollFile
-      		+ ", line count is " + lineCount + ", size is " + fileLength);
-      lineCount = 0;
+      		+ ", size is " + fileLength);
     }
   }
 
@@ -89,7 +97,6 @@ public class LogTailerListener implements TailerListener {
 //    } else {
 //      //maybe stop the thread
 //    }
-      lineCount++;
     } catch (IOException e) {
       LOG.error(e);
     }

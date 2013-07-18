@@ -78,7 +78,7 @@ public class Appnode extends Node {
         tmpAppLog = appLogs.get(tmpAppName);
         tmpAppLog.setServer(recoveryRoll.getCollectorServer());
         tmpAppLog.setPort(recoveryRoll.getCollectorPort());
-        LogLoader loader = new LogLoader(this, tmpAppLog, rollIdent, offset);
+        LogLoader loader = new LogLoader(tmpAppLog, rollIdent, offset);
         exec.execute(loader);
       } else {
         LOG.error("AppName [" + recoveryRoll.getAppName()
@@ -113,7 +113,7 @@ public class Appnode extends Node {
     appRollBuilder.setRollIdent(rollIdent);
     appRollBuilder.setLength(fileLength);
     AppRoll appRoll = appRollBuilder.build();
-    super.sendMessage(wrapMessage(appRoll));
+    super.send(wrapMessage(appRoll));
   }
 
   /**
@@ -134,20 +134,20 @@ public class Appnode extends Node {
     return message;
   }
 
-  public void register(String appName, long regTimestamp) {
+  private void register(String appName, long regTimestamp) {
     AppReg.Builder appRegBuilder = AppReg.newBuilder();
     appRegBuilder.setAppName(appName);
     appRegBuilder.setAppServer(appClient);
     appRegBuilder.setRegTs(regTimestamp);
     AppReg appReg = appRegBuilder.build();
-    super.sendMessage(wrapMessage(appReg));
+    super.send(wrapMessage(appReg));
   }
 
   private boolean checkAllFilesExist() {
     boolean res = true;
     for (String appName : Configuration.appConfigMap.keySet()) {
       String path = Configuration.appConfigMap.get(appName)
-          .getString(BasicConfigurationConstants.WATCHDIR);
+          .getString(BasicConfigurationConstants.WATCH_FILE);
       File fileForTest = new File(path);
       if (!fileForTest.exists()) {
         LOG.error("Appnode process start faild, because file " + path + " not found.");
@@ -166,7 +166,7 @@ public class Appnode extends Node {
     }
     for (String appName : Configuration.appConfigMap.keySet()) {
       String path = Configuration.appConfigMap.get(appName)
-          .getString(BasicConfigurationConstants.WATCHDIR);
+          .getString(BasicConfigurationConstants.WATCH_FILE);
       AppLog appLog = new AppLog(appName, path);
       appLogs.put(appName, appLog);
       //register the app to supervisor
@@ -176,11 +176,11 @@ public class Appnode extends Node {
     super.loop();
   }
 
-	private void loadLionConfig() {
+	public void loadLionConfig() {
     // TODO Auto-generated method stub
   }
 
-  private void loadLocalConfig() {
+  public void loadLocalConfig() {
     BufferedReader reader = null;
     try {
       reader = new BufferedReader(new FileReader(configFile));
@@ -212,7 +212,7 @@ public class Appnode extends Node {
     }
   }
 
-  private void loadConfig() {
+  public void loadConfig() {
     if (configFile != null) {
       loadLocalConfig();
     } else {
@@ -220,7 +220,7 @@ public class Appnode extends Node {
     }
   }
 
-  private boolean parseOptions() throws ParseException {
+  public boolean parseOptions() throws ParseException {
     Options options = new Options();
   
     Option option = new Option("f", "conf", true, "specify a conf file");

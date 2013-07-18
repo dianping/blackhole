@@ -19,10 +19,10 @@ import org.junit.Test;
 
 import com.dp.blackhole.appnode.TestLogReader.Server;
 
-public class TestLogLoader {
-  private static final Log LOG = LogFactory.getLog(TestLogLoader.class);
+public class TestLogLoaderZero {
+  private static final Log LOG = LogFactory.getLog(TestLogLoaderZero.class);
   private static final int offset = 100;
-  private static final String MAGIC = "ctg4ewd2013-01-01.15:00:15";
+  private static final String MAGIC = "r34ff3r2013-01-01.15:00:15";
   private static final String rollIdent = MAGIC;
   private static File file;
   private static final int PORT = 40000;
@@ -35,18 +35,18 @@ public class TestLogLoader {
   public static void setUpBeforeClass() throws Exception {
     String string = 
         "begin>  owefoq jfojnofownfowofnownefowoefojweofjwosfnvvoco\n" +
-    		"jlsdfpasjdfaopsdpfaskdfkpasdkpfkasdfas   100>   jcsopdnvon\n" +
-    		"vononoifjopwejf opwjfiop jpwj fopqwejfop qjfopiqjqertgbrtg\n" +
-    		"aspd jfoiasj df ioajsiodf asj fasof jasdopjf pasfj asopfjo\n" +
-    		"rtgrtghrthrthrthrhrthtrp sjfop asdj fopasj fopsfjopsjf wef\n" +
-    		"j faiosjf opwqejo fjopwej faeopsf jopawefj opsjf opsafj ao\n" +
-    		" wopejf opwj efopqwj epo fjwopefj pwef opw ejfopwj efopwf \n" +
-    		"3 wjopef joiqwf io j 9049 fj2490r 0pjfioj fioj qiowegio f \n" +
-    		" f90fj 9034u j90 jgioqpwejf iopwe jfopqwefj opewji fopq934\n" +
-    		expected + "\n";
+        "jlsdfpasjdfaopsdpfaskdfkpasdkpfkasdfas   100>   jcsopdnvon\n" +
+        "vononoifjopwejf opwjfiop jpwj fopqwejfop qjfopiqjqertgbrtg\n" +
+        "aspd jfoiasj df ioajsiodf asj fasof jasdopjf pasfj asopfjo\n" +
+        "rtgrtghrthrthrthrhrthtrp sjfop asdj fopasj fopsfjopsjf wef\n" +
+        "j faiosjf opwqejo fjopwej faeopsf jopawefj opsjf opsafj ao\n" +
+        " wopejf opwj efopqwj epo fjwopefj pwef opw ejfopwj efopwf \n" +
+        "3 wjopef joiqwf io j 9049 fj2490r 0pjfioj fioj qiowegio f \n" +
+        " f90fj 9034u j90 jgioqpwejf iopwe jfopqwefj opewji fopq934\n" +
+        expected + "\n";
     //build a app log
     file = File.createTempFile(MAGIC, null);
-    LOG.info("create tmp file for test LogLoader " + file);
+    LOG.info("create tmp file for test LogLoaderZero " + file);
     BufferedWriter writer = new BufferedWriter(
         new OutputStreamWriter(new FileOutputStream(file)));
     writer.write(string);
@@ -56,7 +56,7 @@ public class TestLogLoader {
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
-    LOG.info("delete tmp file for test LogLoader " + file);
+    LOG.info("delete tmp file for test LogLoaderZero " + file);
     file.deleteOnExit();
   }
 
@@ -74,8 +74,8 @@ public class TestLogLoader {
 
   @Test
   public void test() {
-    LogLoader loader = new LogLoader(appLog, rollIdent, offset);
-    Thread thread = new Thread(loader);
+    LogLoaderZero loaderZ = new LogLoaderZero(appLog, rollIdent, offset);
+    Thread thread = new Thread(loaderZ);
     thread.start();
     try {
       serverThread.join();
@@ -84,4 +84,5 @@ public class TestLogLoader {
     }
     assertEquals("loader function fail.", expected, receives.get(receives.size()-1));
   }
+
 }

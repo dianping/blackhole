@@ -24,6 +24,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.dp.blackhole.util.AppUtil;
+import com.dp.blackhole.util.TestMode;
+
 public class TestLogReader {
   private static final Log LOG = LogFactory.getLog(TestLogReader.class);
   private static final int MAX_SIZE = 10;
@@ -59,25 +62,19 @@ public class TestLogReader {
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
-    List<File> candidateFiles = Arrays.asList(new File("/tmp").listFiles());
-    for (File file : candidateFiles) {
-      if (file.getName().startsWith(MAGIC)) {
-        file.deleteOnExit();
-      }
-    }
   }
 
   @Before
   public void setUp() throws Exception {
     //build a server
-    server = new Server(PORT);
+    server = new Server(PORT, receives);
     serverThread = new Thread(server);
     serverThread.start();
 
     //build a app log
     File file = File.createTempFile(MAGIC, null);
     String fileAbsolutePath = file.getAbsolutePath();
-    LOG.info(fileAbsolutePath);
+    LOG.info("create tmp file for test LogReader " + file);
     Thread t = new Thread(new Writer(fileAbsolutePath));
     t.setDaemon(false);
     t.start();
@@ -90,6 +87,13 @@ public class TestLogReader {
 
   @After
   public void tearDown() throws Exception {
+//    List<File> candidateFiles = Arrays.asList(new File("/tmp").listFiles());
+//    for (File file : candidateFiles) {
+//      if (file.getName().startsWith(MAGIC)) {
+//        LOG.info("delete tmp file for test LogReader " + file);
+//        file.deleteOnExit();
+//      }
+//    }
   }
 
   static class Writer implements Runnable{
@@ -162,9 +166,11 @@ public class TestLogReader {
   
   static class Server implements Runnable {
     private ServerSocket ss;
+    private List<String> receives;
     private volatile boolean shouldStop;
-    public Server(int port) {
+    public Server(int port, List<String> receives) {
       this.shouldStop = false;
+      this.receives = receives;
       try {
         ss = new ServerSocket(port);
         System.out.println("server begin at " + port);
@@ -224,7 +230,7 @@ public class TestLogReader {
       try {
         Thread.sleep(3000);
         File des = new File(file.getParent(), MAGIC 
-            + new SimpleDateFormat("yyyy-MM-dd.hh").format(new Date())
+            + new SimpleDateFormat("yyyy-MM-dd.hh").format(AppUtil.getOneHoursAgoTime(new Date()))
             + ".mv");
         file.renameTo(des);
         setBefore();
@@ -256,6 +262,7 @@ public class TestLogReader {
   
   @Test
   public void testFileNotFoundAndFileRotated() {
+    TestMode.test = true;
     LogReader reader = new LogReader(appnode, appLog, true);
     ExecutorService exec = Executors.newCachedThreadPool();
     exec.execute(reader);
