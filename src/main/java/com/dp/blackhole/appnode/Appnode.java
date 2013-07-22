@@ -102,7 +102,7 @@ public class Appnode extends Node {
       }
       break;
     default:
-      break;
+      throw new IllegalArgumentException("Illegal message type " + msg.getType());
     }
 	}
 
@@ -252,7 +252,7 @@ public class Appnode extends Node {
     try {
       client = InetAddress.getLocalHost().getHostName();
     } catch (UnknownHostException e1) {
-      LOG.error(e1);
+      LOG.error("Oops, got an exception:", e1);
       return;
     }
     Appnode appnode = new Appnode(client);
@@ -264,10 +264,9 @@ public class Appnode extends Node {
         appnode.run();
       }
     } catch (ParseException e) {
-      LOG.error(e.getMessage());
+      LOG.error("Oops, got an exception:", e);
     } catch (Exception e) {
-      LOG.error("A fatal error occurred while running. Exception follows.",
-          e);
+      LOG.error("A fatal error occurred while running. Exception follows.", e);
     }
   }
 

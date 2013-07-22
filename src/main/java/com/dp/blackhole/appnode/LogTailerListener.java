@@ -43,11 +43,11 @@ public class LogTailerListener implements TailerListener {
       tailer.stop();
       LOG.error("Faild to build a socket with host:" 
           + appLog.getServer() + " port:" + appLog.getPort()
-      		+ "This tailer thread stop! " + e);
+      		+ "This tailer thread stop! ", e);
     } catch (IOException e) {
       tailer.stop();
       LOG.error("Faild to build a socket. " +
-      		"This tailer thread stop! " + e);
+      		"This tailer thread stop! ", e);
     }
   }
 
@@ -98,7 +98,7 @@ public class LogTailerListener implements TailerListener {
 //      //maybe stop the thread
 //    }
     } catch (IOException e) {
-      LOG.error(e);
+      LOG.error("Oops, got an exception:", e);
     }
   }
 
@@ -107,7 +107,7 @@ public class LogTailerListener implements TailerListener {
    * @param ex the exception.
    */
   public void handle(Exception ex) {
-    LOG.error(ex);
+    LOG.error("Oops, got an exception:", ex);
   }
   
 //  public boolean isServerLive() {

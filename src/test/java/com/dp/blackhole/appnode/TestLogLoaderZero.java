@@ -2,10 +2,7 @@ package com.dp.blackhole.appnode;
 
 import static org.junit.Assert.*;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.dp.blackhole.appnode.TestLogReader.Server;
+import com.dp.blackhole.testutil.TestUtil;
 
 public class TestLogLoaderZero {
   private static final Log LOG = LogFactory.getLog(TestLogLoaderZero.class);
@@ -33,31 +31,14 @@ public class TestLogLoaderZero {
   private static final String expected = " 0f j2390jr092jf2f02jf02qjdf2-3j0 fiopwqejfjwffhg5_p  <end";
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    String string = 
-        "begin>  owefoq jfojnofownfowofnownefowoefojweofjwosfnvvoco\n" +
-        "jlsdfpasjdfaopsdpfaskdfkpasdkpfkasdfas   100>   jcsopdnvon\n" +
-        "vononoifjopwejf opwjfiop jpwj fopqwejfop qjfopiqjqertgbrtg\n" +
-        "aspd jfoiasj df ioajsiodf asj fasof jasdopjf pasfj asopfjo\n" +
-        "rtgrtghrthrthrthrhrthtrp sjfop asdj fopasj fopsfjopsjf wef\n" +
-        "j faiosjf opwqejo fjopwej faeopsf jopawefj opsjf opsafj ao\n" +
-        " wopejf opwj efopqwj epo fjwopefj pwef opw ejfopwj efopwf \n" +
-        "3 wjopef joiqwf io j 9049 fj2490r 0pjfioj fioj qiowegio f \n" +
-        " f90fj 9034u j90 jgioqpwejf iopwe jfopqwefj opewji fopq934\n" +
-        expected + "\n";
-    //build a app log
-    file = File.createTempFile(MAGIC, null);
-    LOG.info("create tmp file for test LogLoaderZero " + file);
-    BufferedWriter writer = new BufferedWriter(
-        new OutputStreamWriter(new FileOutputStream(file)));
-    writer.write(string);
-    writer.flush();
-    writer.close();
+    file = TestUtil.createTmpFile(MAGIC, expected);
   }
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
-    LOG.info("delete tmp file for test LogLoaderZero " + file);
-    file.deleteOnExit();
+    if (TestUtil.deleteTmpFile(file)) {
+      LOG.info("delete tmp file for test LogLoaderZero " + file);
+    }
   }
 
   @Before

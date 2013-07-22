@@ -50,12 +50,12 @@ public class LogLoader implements Runnable{
       }
       LOG.info("Roll file " + rolledFile + " has been transfered");
     } catch (FileNotFoundException e) {
-      LOG.error(e);
+      LOG.error("Oops, got an exception:", e);
     } catch (UnknownHostException e) {
       LOG.error("Faild to build a socket with host:" 
-          + appLog.getServer() + " port:" + appLog.getPort() + e);
+          + appLog.getServer() + " port:" + appLog.getPort(), e);
     } catch (IOException e) {
-      LOG.error("Faild to build Input/Output stream. " + e);
+      LOG.error("Faild to build Input/Output stream. ", e);
     } finally {
       try {
         if (out != null) {

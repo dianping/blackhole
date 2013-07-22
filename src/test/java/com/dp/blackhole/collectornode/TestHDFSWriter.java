@@ -22,27 +22,21 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.dp.blackhole.appnode.TestLogReader;
+import com.dp.blackhole.testutil.TestUtil;
 
 public class TestHDFSWriter {
   private static final Log LOG = LogFactory.getLog(TestHDFSWriter.class);
   private static final String MAGIC = "dcasdfef";
-  private static final String TEST_PATH = "hdfs://10.1.77.86:/user/workcron/tmp/";
+  private static final String TEST_PATH = "file:///tmp/";
+  private static final String expected = " 0f j2390jr092jf2f02jf02qjdf2-3j0 fiopwqejfjwffhg5_p  <end";
+  private static String md5sum;
   private File file;
   private static FileSystem fs;
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     Configuration conf = new Configuration();
-    UserGroupInformation.setConfiguration(conf);
-    try {
-        SecurityUtil.login(conf, "test.hadoop.keytab.file", "test.hadoop.principal");
-      } catch (IOException e) {
-        LOG.error("Faild to login with keytab security.");
-        e.printStackTrace();
-        throw e;
-      }
     try {
       fs = FileSystem.get(conf);
-      System.out.println(fs.getConf().get("fs.default.name"));
     } catch (IOException e) {
       LOG.error("Failed to get FileSystem.");
       e.printStackTrace();
@@ -57,13 +51,7 @@ public class TestHDFSWriter {
   @Before
   public void setUp() throws Exception {
     //build a tmp file
-    file = File.createTempFile(MAGIC, ".tmp");
-    OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file));
-    writer.write("123456789012345678901234567890");
-    writer.flush();
-    String fileAbsolutePath = file.getAbsolutePath();
-    LOG.info(fileAbsolutePath);
-    writer.close();
+    file = TestUtil.createTmpFile(MAGIC, expected);
   } 
 
   @After
@@ -78,10 +66,12 @@ public class TestHDFSWriter {
   }
 
   @Test
-  public void test() {
-    HDFSWriter writer = new HDFSWriter(fs, file, TEST_PATH + file.getName(), 0, 10);
+  public void test() throws InterruptedException {
+    HDFSWriter writer = new HDFSWriter(fs, file, TEST_PATH + file.getName() + "_hdfs", false);
     Thread thread = new Thread(writer);
     thread.start();
+    thread.join();
+    //TODO md5sum
   }
 
 }

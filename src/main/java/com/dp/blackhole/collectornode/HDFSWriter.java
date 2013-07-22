@@ -2,62 +2,88 @@ package com.dp.blackhole.collectornode;
 
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.channels.FileChannel;
+import java.io.RandomAccessFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.net.SocketOutputStream;
 
 public class HDFSWriter implements Runnable{
   private static final Log LOG = LogFactory.getLog(HDFSWriter.class);
   private FileSystem fs;
+  private static final String RAF_MODE = "r";
+  private static final int DEFAULT_BUFSIZE = 8102;
+  private boolean delsrc;
   private int position;
-  private int count;
+  private long length;
   private File file;
   private String dfsPath;
-  private FSDataInputStream fin;
-  private FSDataOutputStream fout;
-  private FileChannel fileChannel;
-  
   private DataOutputStream out;
   
-  public HDFSWriter(FileSystem fs, File file, String dfsPath, int position, int count) {
+  public HDFSWriter(FileSystem fs, File file, String dfsPath, boolean delsrc) {
     this.fs = fs;
     this.file = file;
     this.dfsPath = dfsPath;
+    this.delsrc = delsrc;
+    this.position = -1;
+  }
+  public HDFSWriter(FileSystem fs, File file, String dfsPath, boolean delsrc, 
+      int position, long length) {
+    this.fs = fs;
+    this.file = file;
+    this.dfsPath = dfsPath;
+    this.delsrc = delsrc;
     this.position = position;
-    this.count = count;
+    this.length = length;
   }
   @Override
   public void run() {
+    if (!file.isFile()) {
+      LOG.warn(file + "is not a FILE. Quite.");
+      return;
+    }
+    Path src = new Path(file.getPath());
+    Path dst = new Path(dfsPath);
+    RandomAccessFile reader = null;
+    
     try {
-      fileChannel = new FileInputStream(file).getChannel();
-      fout = fs.create(new Path(dfsPath));
-      OutputStream stream = fout.getWrappedStream();
-//      fileChannel.transferTo(position, count, target)
-      if (stream instanceof SocketOutputStream) {
-        System.out.println("return a socket out put stream. transfer to fully.");
-        ((SocketOutputStream) stream).transferToFully(fileChannel, position, count);
+      if (position == -1) {
+        fs.copyFromLocalFile(delsrc, true, src, dst);
+        LOG.info("Collector file " + file + " has been uploaded and deleted.");
       } else {
-        System.out.println("Oh, no!");
+        long count = 0;
+        byte[] inbuf = new byte[DEFAULT_BUFSIZE];
+        reader = new RandomAccessFile(file, RAF_MODE);
+        out = fs.create(dst);
+        reader.seek(position);
+        LOG.info("Seek to the position " + position + " ok. Begin to upload...");
+        int len = 0;
+        while (count != length && (len = reader.read(inbuf)) != -1) {
+          out.write(inbuf, 0, len);
+          out.flush();
+          count += len;
+        }
+        LOG.info("Collector file " + file + " has been uploaded " + count + " bytes.");
+        if (delsrc) {
+          LOG.info("Delete src file " + file);
+          if (!file.delete())
+            LOG.warn("Delete src file " + file + " faild.");
+        }
       }
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
     } catch (IOException e) {
-      e.printStackTrace();
+      LOG.error("Oops, got an exception:", e);
     } finally {
       try {
-        fout.close();
+        if (out != null) {
+          out.close();
+        }
+        if (reader != null) {
+          reader.close();
+        }
       } catch (IOException e) {
-        e.printStackTrace();
+        LOG.warn("Faild to close Outputstream or RandomAccessFile ", e);
       }
     }
   }
