@@ -1,0 +1,9 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.common";
+option java_outer_classname = "CollectorRegPB";
+
+  message CollectorReg{
+    required string servername = 1;
+    required int64 reg_ts = 2;
+  }
