@@ -90,6 +90,20 @@ public final class MessagePB {
      * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
      */
     com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollectorOrBuilder getRecoveryCollectorOrBuilder();
+
+    // optional .blackhole.ReadyCollector readyCollector = 7;
+    /**
+     * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+     */
+    boolean hasReadyCollector();
+    /**
+     * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+     */
+    com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector getReadyCollector();
+    /**
+     * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+     */
+    com.dp.blackhole.common.ReadyCollectorPB.ReadyCollectorOrBuilder getReadyCollectorOrBuilder();
   }
   /**
    * Protobuf type {@code blackhole.Message}
@@ -218,6 +232,19 @@ public final class MessagePB {
               bitField0_ |= 0x00000020;
               break;
             }
+            case 58: {
+              com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000040) == 0x00000040)) {
+                subBuilder = readyCollector_.toBuilder();
+              }
+              readyCollector_ = input.readMessage(com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(readyCollector_);
+                readyCollector_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000040;
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -267,13 +294,13 @@ public final class MessagePB {
        */
       APP_REG(0, 1),
       /**
-       * <code>HANDLER_REG = 2;</code>
+       * <code>COLLECTOR_REG = 2;</code>
        */
-      HANDLER_REG(1, 2),
+      COLLECTOR_REG(1, 2),
       /**
-       * <code>REPLY_COLLECTOR = 3;</code>
+       * <code>READY_COLLECTOR = 3;</code>
        */
-      REPLY_COLLECTOR(2, 3),
+      READY_COLLECTOR(2, 3),
       /**
        * <code>ASSIGN_COLLECTOR = 4;</code>
        */
@@ -305,13 +332,13 @@ public final class MessagePB {
        */
       public static final int APP_REG_VALUE = 1;
       /**
-       * <code>HANDLER_REG = 2;</code>
+       * <code>COLLECTOR_REG = 2;</code>
        */
-      public static final int HANDLER_REG_VALUE = 2;
+      public static final int COLLECTOR_REG_VALUE = 2;
       /**
-       * <code>REPLY_COLLECTOR = 3;</code>
+       * <code>READY_COLLECTOR = 3;</code>
        */
-      public static final int REPLY_COLLECTOR_VALUE = 3;
+      public static final int READY_COLLECTOR_VALUE = 3;
       /**
        * <code>ASSIGN_COLLECTOR = 4;</code>
        */
@@ -343,8 +370,8 @@ public final class MessagePB {
       public static MessageType valueOf(int value) {
         switch (value) {
           case 1: return APP_REG;
-          case 2: return HANDLER_REG;
-          case 3: return REPLY_COLLECTOR;
+          case 2: return COLLECTOR_REG;
+          case 3: return READY_COLLECTOR;
           case 4: return ASSIGN_COLLECTOR;
           case 5: return RECOVERY_COLLECTOR;
           case 6: return RECOVERY_ROLL;
@@ -529,6 +556,28 @@ public final class MessagePB {
       return recoveryCollector_;
     }
 
+    // optional .blackhole.ReadyCollector readyCollector = 7;
+    public static final int READYCOLLECTOR_FIELD_NUMBER = 7;
+    private com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector readyCollector_;
+    /**
+     * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+     */
+    public boolean hasReadyCollector() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+     */
+    public com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector getReadyCollector() {
+      return readyCollector_;
+    }
+    /**
+     * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+     */
+    public com.dp.blackhole.common.ReadyCollectorPB.ReadyCollectorOrBuilder getReadyCollectorOrBuilder() {
+      return readyCollector_;
+    }
+
     private void initFields() {
       type_ = com.dp.blackhole.common.MessagePB.Message.MessageType.APP_REG;
       appReg_ = com.dp.blackhole.common.AppRegPB.AppReg.getDefaultInstance();
@@ -536,6 +585,7 @@ public final class MessagePB {
       appRoll_ = com.dp.blackhole.common.AppRollPB.AppRoll.getDefaultInstance();
       recoveryRoll_ = com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll.getDefaultInstance();
       recoveryCollector_ = com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector.getDefaultInstance();
+      readyCollector_ = com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -576,6 +626,12 @@ public final class MessagePB {
           return false;
         }
       }
+      if (hasReadyCollector()) {
+        if (!getReadyCollector().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -600,6 +656,9 @@ public final class MessagePB {
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         output.writeMessage(6, recoveryCollector_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeMessage(7, readyCollector_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -633,6 +692,10 @@ public final class MessagePB {
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, recoveryCollector_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(7, readyCollector_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -747,6 +810,7 @@ public final class MessagePB {
           getAppRollFieldBuilder();
           getRecoveryRollFieldBuilder();
           getRecoveryCollectorFieldBuilder();
+          getReadyCollectorFieldBuilder();
         }
       }
       private static Builder create() {
@@ -787,6 +851,12 @@ public final class MessagePB {
           recoveryCollectorBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000020);
+        if (readyCollectorBuilder_ == null) {
+          readyCollector_ = com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.getDefaultInstance();
+        } else {
+          readyCollectorBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000040);
         return this;
       }
 
@@ -859,6 +929,14 @@ public final class MessagePB {
         } else {
           result.recoveryCollector_ = recoveryCollectorBuilder_.build();
         }
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        if (readyCollectorBuilder_ == null) {
+          result.readyCollector_ = readyCollector_;
+        } else {
+          result.readyCollector_ = readyCollectorBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -892,6 +970,9 @@ public final class MessagePB {
         }
         if (other.hasRecoveryCollector()) {
           mergeRecoveryCollector(other.getRecoveryCollector());
+        }
+        if (other.hasReadyCollector()) {
+          mergeReadyCollector(other.getReadyCollector());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -928,6 +1009,12 @@ public final class MessagePB {
         }
         if (hasRecoveryCollector()) {
           if (!getRecoveryCollector().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasReadyCollector()) {
+          if (!getReadyCollector().isInitialized()) {
             
             return false;
           }
@@ -1575,6 +1662,123 @@ public final class MessagePB {
         return recoveryCollectorBuilder_;
       }
 
+      // optional .blackhole.ReadyCollector readyCollector = 7;
+      private com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector readyCollector_ = com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector, com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.Builder, com.dp.blackhole.common.ReadyCollectorPB.ReadyCollectorOrBuilder> readyCollectorBuilder_;
+      /**
+       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       */
+      public boolean hasReadyCollector() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       */
+      public com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector getReadyCollector() {
+        if (readyCollectorBuilder_ == null) {
+          return readyCollector_;
+        } else {
+          return readyCollectorBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       */
+      public Builder setReadyCollector(com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector value) {
+        if (readyCollectorBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          readyCollector_ = value;
+          onChanged();
+        } else {
+          readyCollectorBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000040;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       */
+      public Builder setReadyCollector(
+          com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.Builder builderForValue) {
+        if (readyCollectorBuilder_ == null) {
+          readyCollector_ = builderForValue.build();
+          onChanged();
+        } else {
+          readyCollectorBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000040;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       */
+      public Builder mergeReadyCollector(com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector value) {
+        if (readyCollectorBuilder_ == null) {
+          if (((bitField0_ & 0x00000040) == 0x00000040) &&
+              readyCollector_ != com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.getDefaultInstance()) {
+            readyCollector_ =
+              com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.newBuilder(readyCollector_).mergeFrom(value).buildPartial();
+          } else {
+            readyCollector_ = value;
+          }
+          onChanged();
+        } else {
+          readyCollectorBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000040;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       */
+      public Builder clearReadyCollector() {
+        if (readyCollectorBuilder_ == null) {
+          readyCollector_ = com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.getDefaultInstance();
+          onChanged();
+        } else {
+          readyCollectorBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000040);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       */
+      public com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.Builder getReadyCollectorBuilder() {
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return getReadyCollectorFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       */
+      public com.dp.blackhole.common.ReadyCollectorPB.ReadyCollectorOrBuilder getReadyCollectorOrBuilder() {
+        if (readyCollectorBuilder_ != null) {
+          return readyCollectorBuilder_.getMessageOrBuilder();
+        } else {
+          return readyCollector_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector, com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.Builder, com.dp.blackhole.common.ReadyCollectorPB.ReadyCollectorOrBuilder> 
+          getReadyCollectorFieldBuilder() {
+        if (readyCollectorBuilder_ == null) {
+          readyCollectorBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector, com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.Builder, com.dp.blackhole.common.ReadyCollectorPB.ReadyCollectorOrBuilder>(
+                  readyCollector_,
+                  getParentForChildren(),
+                  isClean());
+          readyCollector_ = null;
+        }
+        return readyCollectorBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
 
@@ -1603,19 +1807,22 @@ public final class MessagePB {
       "\n\rMessage.proto\022\tblackhole\032\014AppReg.proto" +
       "\032\025AssignCollector.proto\032\rAppRoll.proto\032\027" +
       "RecoveryCollector.proto\032\022RecoveryRoll.pr" +
-      "oto\"\322\003\n\007Message\022,\n\004type\030\001 \002(\0162\036.blackhol" +
-      "e.Message.MessageType\022!\n\006appReg\030\002 \001(\0132\021." +
-      "blackhole.AppReg\0223\n\017assignCollector\030\003 \001(" +
-      "\0132\032.blackhole.AssignCollector\022#\n\007appRoll" +
-      "\030\004 \001(\0132\022.blackhole.AppRoll\022-\n\014recoveryRo" +
-      "ll\030\005 \001(\0132\027.blackhole.RecoveryRoll\0227\n\021rec" +
-      "overyCollector\030\006 \001(\0132\034.blackhole.Recover",
-      "yCollector\"\263\001\n\013MessageType\022\013\n\007APP_REG\020\001\022" +
-      "\017\n\013HANDLER_REG\020\002\022\023\n\017REPLY_COLLECTOR\020\003\022\024\n" +
-      "\020ASSIGN_COLLECTOR\020\004\022\026\n\022RECOVERY_COLLECTO" +
-      "R\020\005\022\021\n\rRECOVERY_ROLL\020\006\022\017\n\013HDFS_UPLOAD\020\007\022" +
-      "\021\n\rHDFS_RECOVERY\020\010\022\014\n\010APP_ROLL\020\tB$\n\027com." +
-      "dp.blackhole.commonB\tMessagePB"
+      "oto\032\024ReadyCollector.proto\032\022CollectorReg." +
+      "proto\"\207\004\n\007Message\022,\n\004type\030\001 \002(\0162\036.blackh" +
+      "ole.Message.MessageType\022!\n\006appReg\030\002 \001(\0132" +
+      "\021.blackhole.AppReg\0223\n\017assignCollector\030\003 " +
+      "\001(\0132\032.blackhole.AssignCollector\022#\n\007appRo" +
+      "ll\030\004 \001(\0132\022.blackhole.AppRoll\022-\n\014recovery" +
+      "Roll\030\005 \001(\0132\027.blackhole.RecoveryRoll\0227\n\021r",
+      "ecoveryCollector\030\006 \001(\0132\034.blackhole.Recov" +
+      "eryCollector\0221\n\016readyCollector\030\007 \001(\0132\031.b" +
+      "lackhole.ReadyCollector\"\265\001\n\013MessageType\022" +
+      "\013\n\007APP_REG\020\001\022\021\n\rCOLLECTOR_REG\020\002\022\023\n\017READY" +
+      "_COLLECTOR\020\003\022\024\n\020ASSIGN_COLLECTOR\020\004\022\026\n\022RE" +
+      "COVERY_COLLECTOR\020\005\022\021\n\rRECOVERY_ROLL\020\006\022\017\n" +
+      "\013HDFS_UPLOAD\020\007\022\021\n\rHDFS_RECOVERY\020\010\022\014\n\010APP" +
+      "_ROLL\020\tB$\n\027com.dp.blackhole.commonB\tMess" +
+      "agePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1627,7 +1834,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "RecoveryCollector", });
+              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "RecoveryCollector", "ReadyCollector", });
           return null;
         }
       };
@@ -1639,6 +1846,8 @@ public final class MessagePB {
           com.dp.blackhole.common.AppRollPB.getDescriptor(),
           com.dp.blackhole.common.RecoveryCollectorPB.getDescriptor(),
           com.dp.blackhole.common.RecoveryRollPB.getDescriptor(),
+          com.dp.blackhole.common.ReadyCollectorPB.getDescriptor(),
+          com.dp.blackhole.common.CollectorRegPB.getDescriptor(),
         }, assigner);
   }
 
