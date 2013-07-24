@@ -15,19 +15,19 @@ public class Context {
 	private Map<String, String> parameters;
 	
 	public Context() {
-	    parameters = Collections.synchronizedMap(new HashMap<String, String>());
+	        parameters = Collections.synchronizedMap(new HashMap<String, String>());
 	}
 	
 	public Context(String key, String value) {
-	    parameters = Collections.synchronizedMap(new HashMap<String, String>());
-	    put(key, value);
+	        parameters = Collections.synchronizedMap(new HashMap<String, String>());
+	        put(key, value);
 	}
 	
 	/**
 	 * Associates all of the given map's keys and values in the Context.
 	 */
 	public void putAll(Map<String, String> map) {
-	    parameters.putAll(map);
+	        parameters.putAll(map);
 	}
 	/**
 	 * Associates the specified value with the specified key in this context.
@@ -37,7 +37,7 @@ public class Context {
 	 * @param value to be associated with the specified key
 	 */
 	public void put(String key, String value) {
-	    parameters.put(key, value);
+	        parameters.put(key, value);
 	}
 	
 	/**
@@ -46,13 +46,13 @@ public class Context {
 	 * @param value to be associated with the specified key
 	 */
 	public void put(String key, int value) {
-	    parameters.put(key, String.valueOf(value));
+	        parameters.put(key, String.valueOf(value));
 	}
 	/**
 	 * Removes all of the mappings from this map.
 	 */
 	public void clear() {
-	    parameters.clear();
+	        parameters.clear();
 	}
 	
 	/**
@@ -62,11 +62,11 @@ public class Context {
 	 * @return value associated with key
 	 */
 	public Boolean getBoolean(String key, Boolean defaultValue) {
-	    String value = get(key);
-	    if(value != null) {
-	      return Boolean.parseBoolean(value.trim());
-	    }
-	    return defaultValue;
+	        String value = get(key);
+	        if(value != null) {
+	            return Boolean.parseBoolean(value.trim());
+	        }
+	        return defaultValue;
 	}
 	/**
 	 * Gets value mapped to key, returning null if unmapped.
@@ -80,7 +80,7 @@ public class Context {
 	 * @return value associated with key or null if unmapped
 	 */
 	public Boolean getBoolean(String key) {
-	    return getBoolean(key, null);
+	        return getBoolean(key, null);
 	}
 	/**
 	 * Gets value mapped to key, returning defaultValue if unmapped.
@@ -89,11 +89,11 @@ public class Context {
 	 * @return value associated with key
 	 */
 	public Integer getInteger(String key, Integer defaultValue) {
-	    String value = get(key);
-	    if(value != null) {
-	      return Integer.parseInt(value.trim());
-	    }
-	    return defaultValue;
+	        String value = get(key);
+	        if(value != null) {
+	            return Integer.parseInt(value.trim());
+	        }
+	        return defaultValue;
 	}
 	/**
 	 * Gets value mapped to key, returning null if unmapped.
@@ -107,7 +107,7 @@ public class Context {
 	 * @return value associated with key or null if unmapped
 	 */
 	public Integer getInteger(String key) {
-	    return getInteger(key, null);
+	        return getInteger(key, null);
 	}
 	/**
 	 * Gets value mapped to key, returning defaultValue if unmapped.
@@ -116,11 +116,11 @@ public class Context {
 	 * @return value associated with key
 	 */
 	public Long getLong(String key, Long defaultValue) {
-	    String value = get(key);
-	    if(value != null) {
-	      return Long.parseLong(value.trim());
-	    }
-	    return defaultValue;
+	        String value = get(key);
+	        if(value != null) {
+	            return Long.parseLong(value.trim());
+	        }
+	        return defaultValue;
 	}
 	/**
 	 * Gets value mapped to key, returning null if unmapped.
@@ -134,7 +134,7 @@ public class Context {
 	 * @return value associated with key or null if unmapped
 	 */
 	public Long getLong(String key) {
-	    return getLong(key, null);
+	        return getLong(key, null);
 	}
 	/**
 	 * Gets value mapped to key, returning defaultValue if unmapped.
@@ -143,7 +143,7 @@ public class Context {
 	 * @return value associated with key
 	 */
 	public String getString(String key, String defaultValue) {
-	    return get(key, defaultValue);
+	        return get(key, defaultValue);
 	}
 	/**
 	 * Gets value mapped to key, returning null if unmapped.
@@ -151,21 +151,21 @@ public class Context {
 	 * @return value associated with key or null if unmapped
 	 */
 	public String getString(String key) {
-	    return get(key);
+	        return get(key);
 	}
 	private String get(String key, String defaultValue) {
-	    String result = parameters.get(key);
-	    if(result != null) {
-	      return result;
-	    }
-	    return defaultValue;
+	        String result = parameters.get(key);
+	        if(result != null) {
+	            return result;
+	        }
+	        return defaultValue;
 	}
 	private String get(String key) {
-	    return get(key, null);
+	        return get(key, null);
 	}
 	@Override
 	public String toString() {
-	    return "{ parameters:" + parameters + " }";
+	        return "{ parameters:" + parameters + " }";
 	}
 
 	public Context config() {

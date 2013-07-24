@@ -8,13 +8,13 @@ import org.apache.commons.logging.LogFactory;
 
 
 public class LogReader extends Tailer{
-  public static final Log LOG = LogFactory.getLog(LogReader.class);
-  public LogReader(Appnode appnode, AppLog appLog, boolean end) {
-    super(new File(appLog.getTailFile()), new LogTailerListener(appnode, appLog), 100, end);
-  }
+    public static final Log LOG = LogFactory.getLog(LogReader.class);
+    public LogReader(Appnode appnode, AppLog appLog, boolean end) {
+        super(new File(appLog.getTailFile()), new LogTailerListener(appnode, appLog), 100, end);
+    }
 
-  @Override
-  public void run() {
-    super.run();
-  }
+    @Override
+    public void run() {
+        super.run();
+    }
 }
