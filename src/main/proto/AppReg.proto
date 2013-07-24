@@ -3,8 +3,8 @@ package blackhole;
 option java_package = "com.dp.blackhole.common";
 option java_outer_classname = "AppRegPB";
 
-  message AppReg{
+message AppReg{
     required string app_server = 1;
     required string app_name = 2;
     required int64 reg_ts = 3;
-  }
+}

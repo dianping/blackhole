@@ -41,30 +41,15 @@ public final class AppRollPB {
     com.google.protobuf.ByteString
         getAppServerBytes();
 
-    // required string roll_ident = 3;
+    // required int64 roll_ident = 3;
     /**
-     * <code>required string roll_ident = 3;</code>
+     * <code>required int64 roll_ident = 3;</code>
      */
     boolean hasRollIdent();
     /**
-     * <code>required string roll_ident = 3;</code>
+     * <code>required int64 roll_ident = 3;</code>
      */
-    java.lang.String getRollIdent();
-    /**
-     * <code>required string roll_ident = 3;</code>
-     */
-    com.google.protobuf.ByteString
-        getRollIdentBytes();
-
-    // required int64 length = 4;
-    /**
-     * <code>required int64 length = 4;</code>
-     */
-    boolean hasLength();
-    /**
-     * <code>required int64 length = 4;</code>
-     */
-    long getLength();
+    long getRollIdent();
   }
   /**
    * Protobuf type {@code blackhole.AppRoll}
@@ -127,14 +112,9 @@ public final class AppRollPB {
               appServer_ = input.readBytes();
               break;
             }
-            case 26: {
+            case 24: {
               bitField0_ |= 0x00000004;
-              rollIdent_ = input.readBytes();
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000008;
-              length_ = input.readInt64();
+              rollIdent_ = input.readInt64();
               break;
             }
           }
@@ -263,70 +243,26 @@ public final class AppRollPB {
       }
     }
 
-    // required string roll_ident = 3;
+    // required int64 roll_ident = 3;
     public static final int ROLL_IDENT_FIELD_NUMBER = 3;
-    private java.lang.Object rollIdent_;
+    private long rollIdent_;
     /**
-     * <code>required string roll_ident = 3;</code>
+     * <code>required int64 roll_ident = 3;</code>
      */
     public boolean hasRollIdent() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>required string roll_ident = 3;</code>
+     * <code>required int64 roll_ident = 3;</code>
      */
-    public java.lang.String getRollIdent() {
-      java.lang.Object ref = rollIdent_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          rollIdent_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>required string roll_ident = 3;</code>
-     */
-    public com.google.protobuf.ByteString
-        getRollIdentBytes() {
-      java.lang.Object ref = rollIdent_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        rollIdent_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    // required int64 length = 4;
-    public static final int LENGTH_FIELD_NUMBER = 4;
-    private long length_;
-    /**
-     * <code>required int64 length = 4;</code>
-     */
-    public boolean hasLength() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    /**
-     * <code>required int64 length = 4;</code>
-     */
-    public long getLength() {
-      return length_;
+    public long getRollIdent() {
+      return rollIdent_;
     }
 
     private void initFields() {
       appName_ = "";
       appServer_ = "";
-      rollIdent_ = "";
-      length_ = 0L;
+      rollIdent_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -345,10 +281,6 @@ public final class AppRollPB {
         memoizedIsInitialized = 0;
         return false;
       }
-      if (!hasLength()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -363,10 +295,7 @@ public final class AppRollPB {
         output.writeBytes(2, getAppServerBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, getRollIdentBytes());
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeInt64(4, length_);
+        output.writeInt64(3, rollIdent_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -387,11 +316,7 @@ public final class AppRollPB {
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, getRollIdentBytes());
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(4, length_);
+          .computeInt64Size(3, rollIdent_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -513,10 +438,8 @@ public final class AppRollPB {
         bitField0_ = (bitField0_ & ~0x00000001);
         appServer_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
-        rollIdent_ = "";
+        rollIdent_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000004);
-        length_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -557,10 +480,6 @@ public final class AppRollPB {
           to_bitField0_ |= 0x00000004;
         }
         result.rollIdent_ = rollIdent_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        result.length_ = length_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -588,12 +507,7 @@ public final class AppRollPB {
           onChanged();
         }
         if (other.hasRollIdent()) {
-          bitField0_ |= 0x00000004;
-          rollIdent_ = other.rollIdent_;
-          onChanged();
-        }
-        if (other.hasLength()) {
-          setLength(other.getLength());
+          setRollIdent(other.getRollIdent());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -609,10 +523,6 @@ public final class AppRollPB {
           return false;
         }
         if (!hasRollIdent()) {
-          
-          return false;
-        }
-        if (!hasLength()) {
           
           return false;
         }
@@ -786,109 +696,35 @@ public final class AppRollPB {
         return this;
       }
 
-      // required string roll_ident = 3;
-      private java.lang.Object rollIdent_ = "";
+      // required int64 roll_ident = 3;
+      private long rollIdent_ ;
       /**
-       * <code>required string roll_ident = 3;</code>
+       * <code>required int64 roll_ident = 3;</code>
        */
       public boolean hasRollIdent() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>required string roll_ident = 3;</code>
+       * <code>required int64 roll_ident = 3;</code>
        */
-      public java.lang.String getRollIdent() {
-        java.lang.Object ref = rollIdent_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          rollIdent_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      public long getRollIdent() {
+        return rollIdent_;
       }
       /**
-       * <code>required string roll_ident = 3;</code>
+       * <code>required int64 roll_ident = 3;</code>
        */
-      public com.google.protobuf.ByteString
-          getRollIdentBytes() {
-        java.lang.Object ref = rollIdent_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          rollIdent_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string roll_ident = 3;</code>
-       */
-      public Builder setRollIdent(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+      public Builder setRollIdent(long value) {
+        bitField0_ |= 0x00000004;
         rollIdent_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string roll_ident = 3;</code>
+       * <code>required int64 roll_ident = 3;</code>
        */
       public Builder clearRollIdent() {
         bitField0_ = (bitField0_ & ~0x00000004);
-        rollIdent_ = getDefaultInstance().getRollIdent();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string roll_ident = 3;</code>
-       */
-      public Builder setRollIdentBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        rollIdent_ = value;
-        onChanged();
-        return this;
-      }
-
-      // required int64 length = 4;
-      private long length_ ;
-      /**
-       * <code>required int64 length = 4;</code>
-       */
-      public boolean hasLength() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
-      }
-      /**
-       * <code>required int64 length = 4;</code>
-       */
-      public long getLength() {
-        return length_;
-      }
-      /**
-       * <code>required int64 length = 4;</code>
-       */
-      public Builder setLength(long value) {
-        bitField0_ |= 0x00000008;
-        length_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required int64 length = 4;</code>
-       */
-      public Builder clearLength() {
-        bitField0_ = (bitField0_ & ~0x00000008);
-        length_ = 0L;
+        rollIdent_ = 0L;
         onChanged();
         return this;
       }
@@ -918,10 +754,10 @@ public final class AppRollPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rAppRoll.proto\022\tblackhole\"S\n\007AppRoll\022\020\n" +
+      "\n\rAppRoll.proto\022\tblackhole\"C\n\007AppRoll\022\020\n" +
       "\010app_name\030\001 \002(\t\022\022\n\napp_server\030\002 \002(\t\022\022\n\nr" +
-      "oll_ident\030\003 \002(\t\022\016\n\006length\030\004 \002(\003B$\n\027com.d" +
-      "p.blackhole.commonB\tAppRollPB"
+      "oll_ident\030\003 \002(\003B$\n\027com.dp.blackhole.comm" +
+      "onB\tAppRollPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -933,7 +769,7 @@ public final class AppRollPB {
           internal_static_blackhole_AppRoll_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_AppRoll_descriptor,
-              new java.lang.String[] { "AppName", "AppServer", "RollIdent", "Length", });
+              new java.lang.String[] { "AppName", "AppServer", "RollIdent", });
           return null;
         }
       };
