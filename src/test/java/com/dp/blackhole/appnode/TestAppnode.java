@@ -116,7 +116,7 @@ public class TestAppnode {
         recoveryCollectorBuilder.setCollectorPort(40001);
         RecoveryCollector recoveryCollector = recoveryCollectorBuilder.build();
         Message.Builder messageBuilder = Message.newBuilder();
-        messageBuilder.setType(MessageType.REPLY_COLLECTOR);
+        messageBuilder.setType(MessageType.READY_COLLECTOR);
         messageBuilder.setRecoveryCollector(recoveryCollector);
         Message message = messageBuilder.build();
         return message;

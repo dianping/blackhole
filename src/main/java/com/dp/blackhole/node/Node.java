@@ -25,9 +25,9 @@ public abstract class Node {
     ByteBuffer readLength;
     ByteBuffer readbuffer;
     ByteBuffer writebuffer;
-
+    
     private ConcurrentLinkedQueue<Message> queue; 
-
+    
     protected void loop() {
         SelectionKey key = null;
         while (running) {
@@ -161,10 +161,8 @@ public abstract class Node {
         socketChannel.connect(supervisor);
         selector = Selector.open();
         socketChannel.register(selector, SelectionKey.OP_CONNECT);
-
         readLength = ByteBuffer.allocate(4);
         this.queue = new ConcurrentLinkedQueue<Message>();
     }
-
-
 }
+

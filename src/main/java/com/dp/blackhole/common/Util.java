@@ -25,53 +25,48 @@ import com.dp.blackhole.conf.Configuration;
 
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
-	public static String readString(DataInputStream in) throws IOException {
-		int length = in.readInt();
-		byte[] data = new byte[length];
-		in.readFully(data);
-		return new String(data);
-	}
 
-	public static void writeString(String str ,DataOutputStream out) throws IOException {
-		byte[] data = str.getBytes();
-		out.writeInt(data.length);
-		out.write(data);
-	}
-	
-	 public static void writeString(String str, SocketChannel channel) throws IOException {
-	        byte[] data = str.getBytes();
-	        ByteBuffer writeBuffer = ByteBuffer.allocate(4 + data.length);
-	        writeBuffer.putInt(data.length);
-	        writeBuffer.put(data);
-	        writeBuffer.flip();
-            while (writeBuffer.remaining() != 0) {
-                channel.write(writeBuffer);
-            }
-	    }
+    //-----------------------------collecotr------------------------------------//
+    public static String getHDFSPathByIdent(String appName, final String ident) {
+        // HDFS file: basePath / appName /    idents[0] / idents[1] /    appName.ident
+        // HDFS file: ..base.. / access    / 2013-07-11 /        12         /    access.2013-07-11.12
+        // HDFS file: ..base.. / access    / 2013-07-11 /                            access.2013-07-11
+        // ident: 2013-07-11.12
+        // ident: 2013-07-11
+        String basePath = Configuration.configMap.get(appName)
+                .getString(CollectorConfigurationConstants.BASE_HDFS_PATH);
+        String[] idents = ident.split(".");
+        String path = basePath + "/" + appName;
+        switch (idents.length) {
+        case 2: //2013-07-11.12 
+            path += ("/" + idents[0] + "/" + idents[1]);
+            break;
+        case 1: //appName.2013-07-11
+            path += ("/" + idents[0]);
+            break;
 
-	    public static void writeLong(long period, SocketChannel channel) throws IOException {
-	        ByteBuffer writeBuffer = ByteBuffer.allocate(8);
-	        writeBuffer.putLong(period);
-	        writeBuffer.flip();
-            while (writeBuffer.remaining() != 0) {
-                channel.write(writeBuffer);
-            }
-	    }
-	
-	//---------------------------app--------------------------------------//
+        default:
+            LOG.warn("Ident str " + ident + " is illegal");
+            break;
+        }
+        path += ("/" + appName + "." + ident);
+        return path;    //    ..base../appName/2013-07-11/12/appName.2013-07-11.12
+    }
+
+    //---------------------------app--------------------------------------//
     public static String getRollIdentByTime(Date date, int interval) {
         //first version, we use 60 min (1 hour) as fixed interval
         SimpleDateFormat dayFormat = new SimpleDateFormat("yyyy-MM-dd.hh:00:00");
         return dayFormat.format(getOneHoursAgoTime(date));
     }
-    
+
     public static Date getOneHoursAgoTime(Date date) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         cal.add(Calendar.HOUR, -1);
         return cal.getTime();
     }
-    
+
     public static File findRealFileByIdent(AppLog appLog, final String rollIdent) {
         // real file: trace.log.2013-07-11.12
         // rollIdent: 2013-07-11.12:00:00
@@ -101,8 +96,7 @@ public class Util {
             return candidateFiles.get(0);
         }
     }
-    
-    
+
     public static long getPeriodInSeconds(int value, String unit) {
         if (unit.equalsIgnoreCase("hour")) {
             return 3600 * value;
@@ -115,7 +109,7 @@ public class Util {
             return 3600 * value;
         }
     }
-    
+
     public static String getFormatByUnit(String unit) {
         if (unit.equalsIgnoreCase("hour")) {
             return "yyyy-MM-dd.hh";
@@ -128,31 +122,42 @@ public class Util {
             return "yyyy-MM-dd.hh";
         }
     }
-    
-    //-----------------------------collecotr------------------------------------//
-    public static String getHDFSPathByIdent(String appName, final String ident) {
-        // HDFS file: basePath / appName /    idents[0] / idents[1] /    appName.ident
-        // HDFS file: ..base.. / access    / 2013-07-11 /        12         /    access.2013-07-11.12
-        // HDFS file: ..base.. / access    / 2013-07-11 /                            access.2013-07-11
-        // ident: 2013-07-11.12
-        // ident: 2013-07-11
-        String basePath = Configuration.configMap.get(appName)
-                .getString(CollectorConfigurationConstants.BASE_HDFS_PATH);
-        String[] idents = ident.split(".");
-        String path = basePath + "/" + appName;
-        switch (idents.length) {
-        case 2: //2013-07-11.12 
-            path += ("/" + idents[0] + "/" + idents[1]);
-            break;
-        case 1: //appName.2013-07-11
-            path += ("/" + idents[0]);
-            break;
 
-        default:
-            LOG.warn("Ident str " + ident + " is illegal");
-            break;
+    public static void writeString(String str, SocketChannel channel) throws IOException {
+        byte[] data = str.getBytes();
+        ByteBuffer writeBuffer = ByteBuffer.allocate(4 + data.length);
+        writeBuffer.putInt(data.length);
+        writeBuffer.put(data);
+        writeBuffer.flip();
+        while (writeBuffer.remaining() != 0) {
+            channel.write(writeBuffer);
         }
-        path += ("/" + appName + "." + ident);
-        return path;    //    ..base../appName/2013-07-11/12/appName.2013-07-11.12
+    }
+
+    public static void writeLong(long period, SocketChannel channel) throws IOException {
+        ByteBuffer writeBuffer = ByteBuffer.allocate(8);
+        writeBuffer.putLong(period);
+        writeBuffer.flip();
+        while (writeBuffer.remaining() != 0) {
+            channel.write(writeBuffer);
+        }
+    }
+
+    public static String readString(DataInputStream in) throws IOException {
+        int length = in.readInt();
+        byte[] data = new byte[length];
+        in.readFully(data);
+        return new String(data);
+    }
+
+    public static void writeString(String str ,DataOutputStream out) throws IOException {
+        byte[] data = str.getBytes();
+        out.writeInt(data.length);
+        out.write(data);
+    }
+    
+    public static long getTS() {
+        Date now = new Date();
+        return now.getTime();
     }
 }

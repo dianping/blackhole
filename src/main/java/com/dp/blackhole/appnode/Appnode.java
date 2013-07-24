@@ -47,11 +47,12 @@ public class Appnode extends Node {
         this.appClient = appClient;
     }
 
-	public void process(Message msg) {
-	    String tmpAppName;
-	    AppLog tmpAppLog;
-	    MessageType type = msg.getType();
-	    switch (type) {
+
+    public void process(Message msg) {
+	      String tmpAppName;
+  	    AppLog tmpAppLog;
+  	    MessageType type = msg.getType();
+  	    switch (type) {
         case RECOVERY_COLLECTOR:
             RecoveryCollector recoveryCollector = msg.getRecoveryCollector();
             tmpAppName = recoveryCollector.getAppName();
@@ -103,14 +104,13 @@ public class Appnode extends Node {
         default:
             throw new IllegalArgumentException("Illegal message type " + msg.getType());
         }
-	}
+    }
 
-    public void roll(String appName, String rollIdent, long fileLength) {
+    public void roll(String appName, long rollIdent) {
         AppRoll.Builder appRollBuilder = AppRoll.newBuilder();
         appRollBuilder.setAppName(appName);
         appRollBuilder.setAppServer(appClient);
         appRollBuilder.setRollIdent(rollIdent);
-        appRollBuilder.setLength(fileLength);
         AppRoll appRoll = appRollBuilder.build();
         super.send(wrapMessage(appRoll));
     }

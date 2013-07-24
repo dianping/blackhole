@@ -71,12 +71,13 @@ public class LogTailerListener implements TailerListener {
     public void fileRotated() {
         handle("");
         int interval = 60;//TODO next version, read from configure.
-        String rollIdent = Util.getRollIdentByTime(new Date(), interval);
+        Date now = new Date();
+        String rollIdent = Util.getRollIdentByTime(now, interval);
         File rollFile = Util.findRealFileByIdent(appLog, rollIdent);
         if (rollFile != null) {
             long fileLength = rollFile.length();
             if (!TestMode.test) {
-                appnode.roll(appLog.getAppName(), rollIdent, fileLength);
+                appnode.roll(appLog.getAppName(), now.getTime());
             }
             LOG.info("File rotation is deteced. Roll file is " + rollFile
             		+ ", size is " + fileLength);

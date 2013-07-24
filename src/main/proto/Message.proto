@@ -8,19 +8,21 @@ import "AssignCollector.proto";
 import "AppRoll.proto";
 import "RecoveryCollector.proto";
 import "RecoveryRoll.proto";
+import "ReadyCollector.proto";
+import "CollectorReg.proto";
 
-  message Message {
-    enum MessageType {
+    message Message {
+        enum MessageType {
 
-      APP_REG = 1;
-      HANDLER_REG = 2;
-      REPLY_COLLECTOR = 3;
-      ASSIGN_COLLECTOR = 4;
-      RECOVERY_COLLECTOR = 5;
-      RECOVERY_ROLL = 6;
-      HDFS_UPLOAD = 7;
-      HDFS_RECOVERY = 8;
-      APP_ROLL = 9;
+        APP_REG = 1;
+        COLLECTOR_REG = 2;
+        READY_COLLECTOR = 3;
+        ASSIGN_COLLECTOR = 4;
+        RECOVERY_COLLECTOR = 5;
+        RECOVERY_ROLL = 6;
+        HDFS_UPLOAD = 7;
+        HDFS_RECOVERY = 8;
+        APP_ROLL = 9;
     }
 
     required MessageType type = 1;
@@ -29,4 +31,5 @@ import "RecoveryRoll.proto";
     optional AppRoll appRoll = 4;
     optional RecoveryRoll recoveryRoll = 5;
     optional RecoveryCollector recoveryCollector = 6;
+    optional ReadyCollector readyCollector = 7;
   }
