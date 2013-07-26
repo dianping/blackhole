@@ -1,4 +1,4 @@
-package com.dp.blackhole.testutil;
+package com.dp.blackhole.simutil;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -13,14 +13,14 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class RecoveryServer implements Runnable {
-    private static final Log LOG = LogFactory.getLog(RecoveryServer.class);
+public class SimRecoveryServer implements Runnable {
+    private static final Log LOG = LogFactory.getLog(SimRecoveryServer.class);
     
     private ServerSocket ss;
     private List<String> header;
     private List<String> receives;
     private volatile boolean shouldStop;
-    public RecoveryServer(int port, List<String> header, List<String> receives) {
+    public SimRecoveryServer(int port, List<String> header, List<String> receives) {
         this.shouldStop = false;
         this.header = header;
         this.receives = receives;

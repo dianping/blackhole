@@ -16,40 +16,39 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.appnode.AppLog;
 import com.dp.blackhole.common.AppRegPB.AppReg;
 import com.dp.blackhole.common.AppRollPB.AppRoll;
 import com.dp.blackhole.common.MessagePB.Message;
 import com.dp.blackhole.conf.CollectorConfigurationConstants;
-import com.dp.blackhole.conf.Configuration;
+import com.dp.blackhole.conf.ConfigKeeper;
 
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
 
     //-----------------------------collecotr------------------------------------//
-    public static String getHDFSPathByIdent(String appName, final String ident) {
-        // HDFS file: basePath / appName /    idents[0] / idents[1] /    appName.ident
-        // HDFS file: ..base.. / access    / 2013-07-11 /        12         /    access.2013-07-11.12
-        // HDFS file: ..base.. / access    / 2013-07-11 /                            access.2013-07-11
-        // ident: 2013-07-11.12
-        // ident: 2013-07-11
-        String basePath = Configuration.configMap.get(appName)
+    public static String getHDFSPathByIdent(String appName, String appHost, final String fileSuffix) {
+        // HDFS file: basePath / appName / filePerfix[0] / filePerfix[1] / appHost_appName_fileSuffix
+        // HDFS file: ..base.. / access  / 2013-07-11    /        12     / hostname_access_2013-07-11.12
+        // HDFS file: ..base.. / access  / 2013-07-11    /                 hostname_access_2013-07-11
+        // filePerfix: 2013-07-11.12
+        // filePerfix: 2013-07-11
+        String basePath = ConfigKeeper.configMap.get(appName)
                 .getString(CollectorConfigurationConstants.BASE_HDFS_PATH);
-        String[] idents = ident.split(".");
         String path = basePath + "/" + appName;
-        switch (idents.length) {
+        String[] fileSuffixs = fileSuffix.split("\\.");
+        switch (fileSuffixs.length) {
         case 2: //2013-07-11.12 
-            path += ("/" + idents[0] + "/" + idents[1]);
+            path += ("/" + fileSuffixs[0] + "/" + fileSuffixs[1]);
             break;
         case 1: //appName.2013-07-11
-            path += ("/" + idents[0]);
+            path += ("/" + fileSuffixs[0]);
             break;
 
         default:
-            LOG.warn("Ident str " + ident + " is illegal");
+            LOG.warn("fileSuffix " + fileSuffix + " is illegal");
             break;
         }
-        path += ("/" + appName + "." + ident);
+        path += ("/" + appHost + "_" + appName + "_" + fileSuffix);
         return path;    //    ..base../appName/2013-07-11/12/appName.2013-07-11.12
     }
 
@@ -67,12 +66,15 @@ public class Util {
         return cal.getTime();
     }
 
-    public static File findRealFileByIdent(AppLog appLog, final String rollIdent) {
+    public static File findRealFileByIdent(String appTailFile, final String rollIdent) {
         // real file: trace.log.2013-07-11.12
-        // rollIdent: 2013-07-11.12:00:00
+        // rollIdent is "2013-07-11.12" as long as time unit is "hour"
+        String directoryStr = appTailFile.substring(0, appTailFile.lastIndexOf('/'));
+        LOG.debug("DIR IS " + directoryStr);
+        
         FileFilter filter = new FileFilter() {
             public boolean accept(File pathName) {
-                CharSequence rollIdentSequence = rollIdent.subSequence(0, rollIdent.indexOf(':'));
+                CharSequence rollIdentSequence = rollIdent;
                 LOG.debug("rollIdent sequence is " + rollIdentSequence);
                 if ((pathName.getName().contains(rollIdentSequence))) {
                     return true;
@@ -80,11 +82,7 @@ public class Util {
                 return false;
             }
         };
-        int index = appLog.getTailFile().lastIndexOf('/');
-        String directoryStr = appLog.getTailFile().substring(0, index);
-        LOG.debug("DIR IS " + directoryStr);
         List<File> candidateFiles = Arrays.asList(new File(directoryStr).listFiles(filter));
-     
         if (candidateFiles.isEmpty()) {
             LOG.error("Can not find any candidate file for rollIdent " + rollIdent);
             return null;

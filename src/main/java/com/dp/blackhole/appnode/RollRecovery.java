@@ -8,33 +8,38 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.conf.AppConfigurationConstants;
-import com.dp.blackhole.conf.Configuration;
+import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.common.Util;
 
 public class RollRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(RollRecovery.class);
     private static final String RAF_MODE = "r";
-    private static final int DEFAULT_BUFSIZE = 8102;
+    private static final int DEFAULT_BUFSIZE = 8192;
     private AppLog appLog;
 //    private Appnode appnode;    //to persist it for next version
-    private String rollIdent;
+    private long rollTimestamp;
     private Socket server;
     private byte[] inbuf;
-    public RollRecovery(AppLog appLog, String rollIdent) {
+    public RollRecovery(AppLog appLog, long rollTimestamp) {
 //        this.appnode = appnode;
         this.appLog = appLog;
-        this.rollIdent = rollIdent;
+        this.rollTimestamp = rollTimestamp;
         this.inbuf = new byte[DEFAULT_BUFSIZE];
     }
     
     @Override
     public void run() {
-        File rolledFile = Util.findRealFileByIdent(appLog, rollIdent);
+        String unit = ConfigKeeper.configMap.get(appLog.getAppName())
+                .getString(AppConfigurationConstants.TRANSFER_PERIOD_UNIT, "hour");
+        SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatByUnit(unit));
+        String rollIdent = unitFormat.format(rollTimestamp);
+        File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
         RandomAccessFile reader = null;
         DataOutputStream out = null;
         DataInputStream in = null;
@@ -44,19 +49,20 @@ public class RollRecovery implements Runnable{
             out = sendHeaderReq();
             
             offset = receiveHeaderRes(in);
-            LOG.info("Receive a response including a offset " + offset);
+            LOG.info("Received offset [" + offset + "] in header response.");
             
             reader = new RandomAccessFile(rolledFile, RAF_MODE);
 //            long length = rolledFile.length();
             reader.seek(offset);
-            LOG.info("Seek to the position " + offset + " ok. Begin to transfer...");
+            LOG.info("Seeked to the position " + offset + ". Begin to transfer...");
             int len = 0;
+            long transferBytes = 0;
             LOG.debug("server socket in client " + server.isClosed());
             while ((len = reader.read(inbuf)) != -1) {
                 out.write(inbuf, 0, len);
-                out.flush();
+                transferBytes += len;
             }
-            LOG.info("Roll file " + rolledFile + " has been transfered");
+            LOG.info("Roll file transfered, including [" + transferBytes + "] bytes.");
         } catch (FileNotFoundException e) {
             LOG.error("Oops, got an exception:", e);
         } catch (UnknownHostException e) {
@@ -92,16 +98,16 @@ public class RollRecovery implements Runnable{
     private DataOutputStream sendHeaderReq() throws IOException {
         DataOutputStream out;
         out = new DataOutputStream(server.getOutputStream());
-        LOG.info("Writing... type]:recovery");
+        LOG.info("Writing... type:recovery");
         Util.writeString("recovery", out);
         
         String appname = appLog.getAppName();
         LOG.info("Writing... appname:" + appname);
         Util.writeString(appname, out);
         
-        String unit = Configuration.configMap.get(appLog.getAppName())
+        String unit = ConfigKeeper.configMap.get(appLog.getAppName())
                 .getString(AppConfigurationConstants.TRANSFER_PERIOD_UNIT, "hour");
-        int value = Configuration.configMap.get(appLog.getAppName())
+        int value = ConfigKeeper.configMap.get(appLog.getAppName())
                 .getInteger(AppConfigurationConstants.TRANSFER_PERIOD_VALUE, 1);
         long period = Util.getPeriodInSeconds(value, unit);
         LOG.info("Writing... period:" + period);

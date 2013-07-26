@@ -6,8 +6,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-public class Configuration {
-        private static final Log logger = LogFactory.getLog(Configuration.class);
+public class ConfigKeeper {
+        private static final Log logger = LogFactory.getLog(ConfigKeeper.class);
         public static Map<String, Context> configMap = new HashMap<String, Context>();
 
         public boolean addRawProperty(String name, String value) {

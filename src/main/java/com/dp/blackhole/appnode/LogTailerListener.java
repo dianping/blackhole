@@ -1,30 +1,23 @@
 package com.dp.blackhole.appnode;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Date;
 
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.common.TestMode;
-import com.dp.blackhole.common.Util;
-
 public class LogTailerListener implements TailerListener {
     public static final Log LOG = LogFactory.getLog(LogTailerListener.class);
 
     private AppLog appLog;
-    private Appnode appnode;
     private Socket server;
     private Tailer tailer;
     private OutputStreamWriter writer;
-    public LogTailerListener(Appnode appnode, AppLog appLog) {
-        this.appnode = appnode;
+    public LogTailerListener(AppLog appLog) {
         this.appLog = appLog;
     }
 
@@ -70,18 +63,7 @@ public class LogTailerListener implements TailerListener {
      */
     public void fileRotated() {
         handle("");
-        int interval = 60;//TODO next version, read from configure.
-        Date now = new Date();
-        String rollIdent = Util.getRollIdentByTime(now, interval);
-        File rollFile = Util.findRealFileByIdent(appLog, rollIdent);
-        if (rollFile != null) {
-            long fileLength = rollFile.length();
-            if (!TestMode.test) {
-                appnode.roll(appLog.getAppName(), now.getTime());
-            }
-            LOG.info("File rotation is deteced. Roll file is " + rollFile
-            		+ ", size is " + fileLength);
-        }
+        LOG.info("File rotation is deteced.");
     }
 
     /**
@@ -90,14 +72,10 @@ public class LogTailerListener implements TailerListener {
      */
     public void handle(String line) {
         try {
-//        if(isServerLive()) {
             writer.write(line);
             writer.write('\n'); //make server easy to handle
             writer.flush();
             LOG.debug("client>" + line);
-//        } else {
-//            //maybe stop the thread
-//        }
         } catch (IOException e) {
             LOG.error("Oops, got an exception:", e);
         }
@@ -110,13 +88,4 @@ public class LogTailerListener implements TailerListener {
     public void handle(Exception ex) {
         LOG.error("Oops, got an exception:", ex);
     }
-    
-//    public boolean isServerLive() {
-//        try{
-//            server.sendUrgentData(0xFF);
-//            return true;
-//        }catch(Exception ex){
-//            return false;
-//        }
-//    }
 }

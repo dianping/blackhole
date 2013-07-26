@@ -14,26 +14,23 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.dp.blackhole.conf.Configuration;
-import com.dp.blackhole.testutil.RecoveryServer;
-import com.dp.blackhole.testutil.Util;
+import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.simutil.SimRecoveryServer;
+import com.dp.blackhole.simutil.Util;
 
 public class TestRollRecovery {
     private static final Log LOG = LogFactory.getLog(TestRollRecovery.class);
     private static final String MAGIC = "ctg4ewd";
-    private static final String rollIdent = "2013-01-01.15:00:03";
     private static File file;
-    private static final int PORT = 40000;
     private static AppLog appLog;
     private static List<String> header = new ArrayList<String>();
     private static List<String> receives = new ArrayList<String>();
-    private RecoveryServer server;
+    private SimRecoveryServer server;
     private Thread serverThread;
-    private static final String expected = " 0f j2390jr092jf2f02jf02qjdf2-3j0 fiopwqejfjwffhg5_p    <end";
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
     //build a tmp file
-        file = Util.createTmpFile(MAGIC + rollIdent, expected);
+        file = Util.createTmpFile(MAGIC + Util.FILE_SUFFIX, Util.expected);
     }
 
     @AfterClass
@@ -44,11 +41,11 @@ public class TestRollRecovery {
 
     @Before
     public void setUp() throws Exception {
-        appLog = new AppLog(MAGIC, file.getAbsolutePath(), System.currentTimeMillis(), "localhost", PORT);
-        server = new RecoveryServer(PORT, header, receives);
+        appLog = new AppLog(MAGIC, file.getAbsolutePath(), System.currentTimeMillis(), "localhost", Util.PORT);
+        server = new SimRecoveryServer(Util.PORT, header, receives);
         serverThread = new Thread(server);
         serverThread.start();
-        Configuration conf = new Configuration();
+        ConfigKeeper conf = new ConfigKeeper();
         conf.addRawProperty(MAGIC+".transferPeriodValue", "1");
         conf.addRawProperty(MAGIC+".transferPeriodUnit", "hour");
     }
@@ -59,7 +56,7 @@ public class TestRollRecovery {
 
     @Test
     public void test() {
-        RollRecovery recovery = new RollRecovery(appLog, rollIdent);
+        RollRecovery recovery = new RollRecovery(appLog, Util.rollTS);
         Thread thread = new Thread(recovery);
         thread.start();
         try {
@@ -73,6 +70,6 @@ public class TestRollRecovery {
         expectedHeader[2] = "3600";
         expectedHeader[3] = "yyyy-MM-dd.hh";
         assertArrayEquals("head not match", expectedHeader, header.toArray());
-        assertEquals("loader function fail.", expected, receives.get(receives.size()-1));
+        assertEquals("loader function fail.", Util.expected, receives.get(receives.size()-1));
     }
 }

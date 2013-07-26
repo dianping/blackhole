@@ -17,26 +17,31 @@ import com.dp.blackhole.common.Util;
 public class HDFSRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(HDFSWriter.class);
     private FileSystem fs;
-    private static final int DEFAULT_BUFSIZE = 8102;
+    private static final int DEFAULT_BUFSIZE = 8192;
     private Socket client;
-    private int position;
-    private long length;
     private String appName;
-    private String ident;
+    private String appHost;
+    private String fileSuffix;
+    private long position;
+    private long length;
     
-    public HDFSRecovery(FileSystem fs, Socket client, String appName, String ident) {
+    public HDFSRecovery(FileSystem fs, Socket client, 
+            String appName, String appHost, String fileSuffix) {
         this.fs = fs;
         this.client = client;
         this.appName = appName;
-        this.ident = ident;
+        this.appHost = appHost;
+        this.fileSuffix = fileSuffix;
     }
     
-    public HDFSRecovery(FileSystem fs, Socket client, String appName, String ident,
-            int position, long length) {
+    public HDFSRecovery(FileSystem fs, Socket client, 
+            String appName, String appHost, String fileSuffix,
+            long position, long length) {
         this.fs = fs;
         this.client = client;
         this.appName = appName;
-        this.ident = ident;
+        this.appHost = appHost;
+        this.fileSuffix = fileSuffix;
         this.position = position;
         this.length = length;
     }
@@ -44,39 +49,39 @@ public class HDFSRecovery implements Runnable{
     @Override
     public void run() {
         GZIPOutputStream gout = null;
+        GZIPInputStream gin = null;
         try {
-            String oldPathStr = Util.getHDFSPathByIdent(appName, ident);
+            String oldPathStr = Util.getHDFSPathByIdent(appName, appHost, fileSuffix);
             Path old = new Path(oldPathStr);
             long offset = 0;
             if (fs.exists(old) && fs.isFile(old)) {
-                Path dst = new Path("." + oldPathStr);
-                gout = new GZIPOutputStream(fs.create(dst));
-                GZIPInputStream gin = new GZIPInputStream(fs.open(old));
+                Path dst = new Path(old.getParent(), old.getName() + ".r");
+                gout = new GZIPOutputStream(fs.create(dst));//TODO need buffer?
+                
+                gin = new GZIPInputStream(fs.open(old));
                 int len = 0;
-                byte[] buf = new byte[DEFAULT_BUFSIZE]; 
+                byte[] buf = new byte[DEFAULT_BUFSIZE];
                 while((len = gin.read(buf)) != -1) {
-                    gout.write(buf);
+                    gout.write(buf, 0, len);
                     offset += len;
                 }
-                gin.close();
-                LOG.info("Reload the data of hdfs file " + old + " completed.");
-                
+                LOG.info("Reloaded the hdfs file " + old);
+
                 DataOutputStream out = new DataOutputStream(client.getOutputStream());
                 out.writeLong(offset);
-                out.close();
-                LOG.info("Send an offset[" + offset + "] to client to load the uncompleted data");
+                LOG.info("Send an offset [" + offset + "] to client");
                 
                 BufferedInputStream in = new BufferedInputStream(client.getInputStream());
                 while((len = in.read(buf)) != -1) {
-                    gout.write(buf);
+                    gout.write(buf, 0, len);
                 }
-                LOG.info("Write to a new hdfs file " + dst + " completed.");
+                LOG.info("Finished to write " + dst);
                 
                 if (fs.delete(old, false)) {
                     if (fs.rename(dst, old)) {
-                        LOG.info("Rename " + dst + " to " + old);
+                        LOG.info("Finished to rename to " + old);
                     } else {
-                        LOG.error("Faild to rename " + dst + " to " + old);
+                        LOG.error("Faild to rename to " + old);
                     }
                 } else {
                     LOG.warn("Faild to delete " + old + " before mv.");
@@ -89,6 +94,9 @@ public class HDFSRecovery implements Runnable{
             LOG.error("Oops, got an exception:", e);
         } finally {
             try {
+                if (gin != null) {
+                    gin.close();
+                }
                 if (gout != null) {
                     gout.close();
                 }

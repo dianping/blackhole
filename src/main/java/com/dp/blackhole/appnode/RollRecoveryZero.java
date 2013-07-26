@@ -10,29 +10,34 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
+import java.text.SimpleDateFormat;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.AppConfigurationConstants;
-import com.dp.blackhole.conf.Configuration;
+import com.dp.blackhole.conf.ConfigKeeper;
 
 public class RollRecoveryZero implements Runnable{
     private static final Log LOG = LogFactory.getLog(RollRecoveryZero.class);
     private AppLog appLog;
-    private String rollIdent;
+    private long rollTimestamp;
     private Socket server;
-    public RollRecoveryZero(AppLog appLog, String rollIdent) {
+    public RollRecoveryZero(AppLog appLog, long rollTimestamp) {
         this.appLog = appLog;
-        this.rollIdent = rollIdent;
+        this.rollTimestamp = rollTimestamp;
     }
     
     @Override
     public void run() {
-        File rolledFile = Util.findRealFileByIdent(appLog, rollIdent);
+        String unit = ConfigKeeper.configMap.get(appLog.getAppName())
+                .getString(AppConfigurationConstants.TRANSFER_PERIOD_UNIT, "hour");
+        SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatByUnit(unit));
+        String rollIdent = unitFormat.format(rollTimestamp);
+        File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
         if (rolledFile == null) {
-            LOG.error("Can not find the file match rollIdent " + rollIdent);
+            LOG.error("Can not find the file match rollTimestamp " + rollTimestamp);
             return;
         }
         SocketChannel socketChannel = null;
@@ -95,9 +100,9 @@ public class RollRecoveryZero implements Runnable{
         LOG.info("Writing... appname:" + appname);
         Util.writeString(appname, out);
         
-        String unit = Configuration.configMap.get(appLog.getAppName())
+        String unit = ConfigKeeper.configMap.get(appLog.getAppName())
                 .getString(AppConfigurationConstants.TRANSFER_PERIOD_UNIT, "hour");
-        int value = Configuration.configMap.get(appLog.getAppName())
+        int value = ConfigKeeper.configMap.get(appLog.getAppName())
                 .getInteger(AppConfigurationConstants.TRANSFER_PERIOD_VALUE, 1);
         long period = Util.getPeriodInSeconds(value, unit);
         LOG.info("Writing... period:" + period);

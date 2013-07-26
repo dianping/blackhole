@@ -21,21 +21,19 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.dp.blackhole.common.TestMode;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.testutil.TailServer;
+import com.dp.blackhole.simutil.SimTailServer;
 
 public class TestLogReader {
     private static final Log LOG = LogFactory.getLog(TestLogReader.class);
 
-    private static final int PORT = 40000;
     private static AppLog appLog;
     private static Appnode appnode;
     private static final String MAGIC = "sdfjiojwe";
     private static List<String> receives = new ArrayList<String>();
     private static int before = 0;
     private static int after = 0;
-    private TailServer server;
+    private SimTailServer server;
     private Thread serverThread;
     
     public static int getBefore() {
@@ -65,7 +63,7 @@ public class TestLogReader {
     @Before
     public void setUp() throws Exception {
         //build a server
-        server = new TailServer(PORT, receives);
+        server = new SimTailServer(com.dp.blackhole.simutil.Util.PORT, receives);
         serverThread = new Thread(server);
         serverThread.start();
 
@@ -76,7 +74,8 @@ public class TestLogReader {
         Thread t = new Thread(new Writer(fileAbsolutePath));
         t.setDaemon(false);
         t.start();
-        appLog = new AppLog(MAGIC, fileAbsolutePath, System.currentTimeMillis(), "localhost", PORT);
+        appLog = new AppLog(MAGIC, fileAbsolutePath, System.currentTimeMillis(), 
+                "localhost", com.dp.blackhole.simutil.Util.PORT);
 
         //build a app node
         String appClient = "127.0.0.1";
@@ -163,9 +162,9 @@ public class TestLogReader {
     }
 
     static class MVandRollCommand implements Runnable {
-        private TailServer server;
+        private SimTailServer server;
         private File file;
-        public MVandRollCommand(File file, TailServer server) {
+        public MVandRollCommand(File file, SimTailServer server) {
             this.file = file;
             this.server = server;
         }
@@ -210,7 +209,6 @@ public class TestLogReader {
     
     @Test
     public void testFileNotFoundAndFileRotated() {
-        TestMode.test = true;
         LogReader reader = new LogReader(appnode, appLog, true);
         ExecutorService exec = Executors.newCachedThreadPool();
         exec.execute(reader);

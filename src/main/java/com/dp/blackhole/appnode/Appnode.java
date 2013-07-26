@@ -32,7 +32,7 @@ import com.dp.blackhole.common.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector;
 import com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.conf.AppConfigurationConstants;
-import com.dp.blackhole.conf.Configuration;
+import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.node.Node;
 
 public class Appnode extends Node {
@@ -74,7 +74,7 @@ public class Appnode extends Node {
             RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
             tmpAppName = recoveryRoll.getAppName();
             if (appReaders.containsKey(tmpAppName)) {
-                String rollIdent = recoveryRoll.getRollIdent();
+                long rollIdent = recoveryRoll.getRollIdent();//rollIdent is the same meaning roll timestamp
                 tmpAppLog = appLogs.get(tmpAppName);
                 tmpAppLog.setServer(recoveryRoll.getCollectorServer());
                 tmpAppLog.setPort(recoveryRoll.getCollectorPort());
@@ -102,17 +102,8 @@ public class Appnode extends Node {
             }
             break;
         default:
-            throw new IllegalArgumentException("Illegal message type " + msg.getType());
+            LOG.error("Illegal message type " + msg.getType());
         }
-    }
-
-    public void roll(String appName, long rollIdent) {
-        AppRoll.Builder appRollBuilder = AppRoll.newBuilder();
-        appRollBuilder.setAppName(appName);
-        appRollBuilder.setAppServer(appClient);
-        appRollBuilder.setRollIdent(rollIdent);
-        AppRoll appRoll = appRollBuilder.build();
-        super.send(wrapMessage(appRoll));
     }
 
     /**
@@ -144,8 +135,8 @@ public class Appnode extends Node {
 
     private boolean checkAllFilesExist() {
         boolean res = true;
-        for (String appName : Configuration.configMap.keySet()) {
-            String path = Configuration.configMap.get(appName)
+        for (String appName : ConfigKeeper.configMap.keySet()) {
+            String path = ConfigKeeper.configMap.get(appName)
                     .getString(AppConfigurationConstants.WATCH_FILE);
             File fileForTest = new File(path);
             if (!fileForTest.exists()) {
@@ -163,8 +154,8 @@ public class Appnode extends Node {
         if (!checkAllFilesExist()) {
             return;
         }
-        for (String appName : Configuration.configMap.keySet()) {
-            String path = Configuration.configMap.get(appName)
+        for (String appName : ConfigKeeper.configMap.keySet()) {
+            String path = ConfigKeeper.configMap.get(appName)
                     .getString(AppConfigurationConstants.WATCH_FILE);
             AppLog appLog = new AppLog(appName, path);
             appLogs.put(appName, appLog);
@@ -185,7 +176,7 @@ public class Appnode extends Node {
             reader = new BufferedReader(new FileReader(configFile));
             Properties properties = new Properties();
             properties.load(reader);
-            Configuration conf = new Configuration();
+            ConfigKeeper conf = new ConfigKeeper();
             Enumeration<?> propertyNames = properties.propertyNames();
             while (propertyNames.hasMoreElements()) {
                 String name = (String) propertyNames.nextElement();

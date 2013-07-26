@@ -26,12 +26,12 @@ import com.dp.blackhole.common.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector;
 import com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.conf.AppConfigurationConstants;
-import com.dp.blackhole.conf.Configuration;
+import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.simutil.Util;
 
 public class TestAppnode {
     private static final Log LOG = LogFactory.getLog(TestAppnode.class);
-    private static final String rollIdent = "2013-01-01.15:00:15";
-    private static final int offset = 100;
+
     private String client;
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -99,8 +99,7 @@ public class TestAppnode {
         recoveryRollBuilder.setAppName("testApp");
         recoveryRollBuilder.setCollectorServer("localhost");
         recoveryRollBuilder.setCollectorPort(40000);
-        recoveryRollBuilder.setRollIdent(rollIdent);
-        recoveryRollBuilder.setOffset(offset);
+        recoveryRollBuilder.setRollTS(Util.rollTS);
         RecoveryRoll recoveryRoll = recoveryRollBuilder.build();
         Message.Builder messageBuilder = Message.newBuilder();
         messageBuilder.setType(MessageType.RECOVERY_ROLL);
@@ -137,12 +136,12 @@ public class TestAppnode {
         appnode.setArgs(args);
         assertTrue(appnode.parseOptions());
         appnode.loadLocalConfig();
-        assertTrue(Configuration.configMap.containsKey("testApp"));
-        String path = Configuration.configMap.get("testApp")
+        assertTrue(ConfigKeeper.configMap.containsKey("testApp"));
+        String path = ConfigKeeper.configMap.get("testApp")
                 .getString(AppConfigurationConstants.WATCH_FILE);
         assertEquals(path, "/tmp/testApp.log");
-        assertTrue(Configuration.configMap.containsKey("testApp"));
-        String second = Configuration.configMap.get("testApp")
+        assertTrue(ConfigKeeper.configMap.containsKey("testApp"));
+        String second = ConfigKeeper.configMap.get("testApp")
                 .getString("second");
         assertEquals(second, "sencond preperty");
         confFile.deleteOnExit();

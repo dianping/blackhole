@@ -14,7 +14,7 @@ public class HDFSWriter implements Runnable{
     private static final Log LOG = LogFactory.getLog(HDFSWriter.class);
     private FileSystem fs;
     private static final String RAF_MODE = "r";
-    private static final int DEFAULT_BUFSIZE = 8102;
+    private static final int DEFAULT_BUFSIZE = 8192;
     private boolean delsrc;
     private int position;
     private long length;
@@ -51,7 +51,8 @@ public class HDFSWriter implements Runnable{
         try {
             if (position == -1) {
                 fs.copyFromLocalFile(delsrc, true, src, dst);
-                LOG.info("Collector file " + file + " has been uploaded and deleted.");
+                LOG.info("Collector file " + file + " has been uploaded. " +
+                		"Has deleted it? "+ delsrc);
             } else {
                 long count = 0;
                 byte[] inbuf = new byte[DEFAULT_BUFSIZE];
@@ -72,6 +73,7 @@ public class HDFSWriter implements Runnable{
                         LOG.warn("Delete src file " + file + " faild.");
                 }
             }
+            //rename
         } catch (IOException e) {
             LOG.error("Oops, got an exception:", e);
         } finally {

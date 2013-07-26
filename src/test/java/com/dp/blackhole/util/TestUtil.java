@@ -2,6 +2,9 @@ package com.dp.blackhole.util;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Date;
 
 import org.junit.After;
@@ -13,7 +16,16 @@ import org.junit.Test;
 import com.dp.blackhole.common.Util;
 
 public class TestUtil {
-
+    private static String[] unitStr;
+    private static final String ROLL_IDENT = "2013-01-01.03";
+    static {
+        unitStr = new String[4];
+        unitStr[0] = "hour";
+        unitStr[1] = "day";
+        unitStr[2] = "minute";
+        unitStr[3] = "unknow";
+    }
+    
     enum MONTH {
         JAN,
         FEB,
@@ -43,6 +55,7 @@ public class TestUtil {
 
     @After
     public void tearDown() throws Exception {
+        com.dp.blackhole.simutil.Util.deleteTmpFile(ROLL_IDENT);
     }
 
     @Test
@@ -67,8 +80,23 @@ public class TestUtil {
     }
 
     @Test
-    public void testFindRealFileByIdent() {
-        fail("Not yet implemented");
+    public void testGetFormatByUnit() {
+        String[] expecteds = new String[4];
+        expecteds[0] = "yyyy-MM-dd.hh";
+        expecteds[1] = "yyyy-MM-dd";
+        expecteds[2] = "yyyy-MM-dd.hh:mm";
+        expecteds[3] = "yyyy-MM-dd.hh";
+        for(int i = 0; i<unitStr.length; i++) {
+            assertEquals(expecteds[i], Util.getFormatByUnit(unitStr[i]));
+        }
     }
 
+    @Test
+    public void testFindRealFileByIdent() throws FileNotFoundException, IOException {
+        File file = com.dp.blackhole.simutil.Util.createTmpFile(ROLL_IDENT, "ok");
+        assertNotNull(Util.findRealFileByIdent(file.getAbsolutePath(), ROLL_IDENT));
+        com.dp.blackhole.simutil.Util.createTmpFile(ROLL_IDENT, "ok");
+        assertNull(Util.findRealFileByIdent(file.getAbsolutePath(), ROLL_IDENT));
+        com.dp.blackhole.simutil.Util.deleteTmpFile(ROLL_IDENT);
+    }
 }

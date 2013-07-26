@@ -1,4 +1,4 @@
-package com.dp.blackhole.testutil;
+package com.dp.blackhole.simutil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,14 +11,14 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class TailServer implements Runnable {
-    private static final Log LOG = LogFactory.getLog(TailServer.class);
+public class SimTailServer implements Runnable {
+    private static final Log LOG = LogFactory.getLog(SimTailServer.class);
     
     private static final int MAX_SIZE = 10;
     private ServerSocket ss;
     private List<String> receives;
     private volatile boolean shouldStop;
-    public TailServer(int port, List<String> receives) {
+    public SimTailServer(int port, List<String> receives) {
         this.shouldStop = false;
         this.receives = receives;
         try {
