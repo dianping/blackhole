@@ -21,7 +21,7 @@ public abstract class Node {
     private Selector selector;
     private SocketChannel socketChannel;
     volatile private boolean running = true;
-    
+
     ByteBuffer readLength;
     ByteBuffer readbuffer;
     ByteBuffer writebuffer;
@@ -146,7 +146,7 @@ public abstract class Node {
     }
 
     protected abstract void process(Message msg);
-    
+
     protected void send(Message msg) {
         queue.offer(msg);
         SelectionKey key = socketChannel.keyFor(selector);
@@ -161,10 +161,8 @@ public abstract class Node {
         socketChannel.connect(supervisor);
         selector = Selector.open();
         socketChannel.register(selector, SelectionKey.OP_CONNECT);
-        
         readLength = ByteBuffer.allocate(4);
         this.queue = new ConcurrentLinkedQueue<Message>();
     }
-
-
 }
+
