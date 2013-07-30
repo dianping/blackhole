@@ -14,11 +14,25 @@
       <artifactId>protobuf-java</artifactId>
       <version>2.5.0</version>
     </dependency>
-    
+    <dependency>
+      <groupId>com.dp.cosmos</groupId>
+      <artifactId>hadoop-core</artifactId>
+      <version>1.0.3.0</version>
+    </dependency>
+    <dependency>
+	  <groupId>commons-logging</groupId>
+	  <artifactId>commons-logging</artifactId>
+	  <version>1.1.1</version>
+    </dependency>
+    <dependency>
+	    <groupId>log4j</groupId>
+	    <artifactId>log4j</artifactId>
+	    <version>1.2.14</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.7</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
