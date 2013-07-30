@@ -1,6 +1,7 @@
 package com.dp.blackhole.node;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -14,10 +15,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.common.MessagePB.Message.MessageType;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.MessagePB.Message;
+import com.dp.blackhole.common.NodeRegPB.NodeReg;
 
 public abstract class Node {
     public static final Log LOG = LogFactory.getLog(Node.class);
+    private String host;
     private Selector selector;
     private SocketChannel socketChannel;
     volatile private boolean running = true;
@@ -27,6 +32,24 @@ public abstract class Node {
     ByteBuffer writebuffer;
     
     private ConcurrentLinkedQueue<Message> queue; 
+    
+    class HeartBeat extends Thread {
+        @Override
+        public void run() {
+            Message.Builder builder = Message.newBuilder();
+            builder.setType(MessageType.HEARTBEART);
+            Message heartbeat = builder.build();
+            while (true) {
+                try {
+                    sleep(1000);
+                    send(heartbeat);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
     
     protected void loop() {
         SelectionKey key = null;
@@ -155,6 +178,7 @@ public abstract class Node {
     }
 
     private void init() throws IOException, ClosedChannelException {
+        host = InetAddress.getLocalHost().getHostName();
         socketChannel = SocketChannel.open();
         socketChannel.configureBlocking(false);
         SocketAddress supervisor = new InetSocketAddress("localhost", 8080);    
@@ -163,6 +187,10 @@ public abstract class Node {
         socketChannel.register(selector, SelectionKey.OP_CONNECT);
         readLength = ByteBuffer.allocate(4);
         this.queue = new ConcurrentLinkedQueue<Message>();
+        
+        HeartBeat heartBeatThread = new HeartBeat();
+        heartBeatThread.setDaemon(true);
+        heartBeatThread.start();
     }
 }
 

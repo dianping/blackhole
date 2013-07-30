@@ -12,10 +12,17 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+<<<<<<< HEAD
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+=======
+>>>>>>> f01a5c2c642cef1819f8bc4896586c8d24d314ba
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.collectornode.RollIdent;
 import com.dp.blackhole.common.AppRegPB.AppReg;
 import com.dp.blackhole.common.AppRollPB.AppRoll;
 import com.dp.blackhole.common.MessagePB.Message;
@@ -157,5 +164,16 @@ public class Util {
     public static long getTS() {
         Date now = new Date();
         return now.getTime();
+    }
+    
+    public static long getRollTs(long rollPeriod) {
+        long ts = Util.getTS();
+        
+        if ((ts % rollPeriod) < (rollPeriod/2)) {
+            ts = (ts / rollPeriod) * rollPeriod * 1000;
+        } else {
+            ts = (ts / rollPeriod + 1) * rollPeriod *1000;
+        }
+        return ts;
     }
 }
