@@ -1,9 +1,9 @@
 package blackhole;
 
 option java_package = "com.dp.blackhole.common";
-option java_outer_classname = "AppRollPB";
+option java_outer_classname = "RollIDPB";
 
-message AppRoll {
+message RollID {
     required string app_name = 1;
     required string app_server = 2;
     required int64 roll_ts = 3;
