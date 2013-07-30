@@ -18,10 +18,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.dp.blackhole.simutil.SimCollectornode;
 import com.dp.blackhole.simutil.Util;
 
-public class TestHDFSWriter {
-    private static final Log LOG = LogFactory.getLog(TestHDFSWriter.class);
+public class TestHDFSUpload {
+    private static final Log LOG = LogFactory.getLog(TestHDFSUpload.class);
     private static final String MAGIC = "dcasdfef";
     private static final String HADOOP_PERFIX = "/tmp/hadoop.";
     private static File file;
@@ -56,8 +57,8 @@ public class TestHDFSWriter {
     }
 
     @Test
-    public void testWriteWhole() throws InterruptedException, IOException {
-        HDFSWriter writer = new HDFSWriter(fs, file, HADOOP_PERFIX + file.getName(), false);
+    public void testUploadWhole() throws InterruptedException, IOException {
+        HDFSUpload writer = new HDFSUpload(SimCollectornode.getSimpleInstance("upload", fs, MAGIC), fs, file, HADOOP_PERFIX + file.getName(), false);
         Thread thread = new Thread(writer);
         thread.start();
         thread.join();
@@ -74,8 +75,8 @@ public class TestHDFSWriter {
     }
 
     @Test
-    public void testWritePortion() throws InterruptedException, IOException {
-        HDFSWriter writer = new HDFSWriter(fs, file, HADOOP_PERFIX + file.getName(), false, 
+    public void testUploadPortion() throws InterruptedException, IOException {
+        HDFSUpload writer = new HDFSUpload(SimCollectornode.getSimpleInstance("upload", fs, MAGIC), fs, file, HADOOP_PERFIX + file.getName(), false, 
                 100, file.length() - 100);
         Thread thread = new Thread(writer);
         thread.start();

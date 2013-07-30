@@ -5,16 +5,21 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 
+import com.dp.blackhole.collectornode.Collectornode;
 import com.dp.blackhole.collectornode.HDFSRecovery;
+import com.dp.blackhole.collectornode.HDFSUpload;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.AppConfigurationConstants;
 import com.dp.blackhole.conf.ConfigKeeper;
 
 import static org.junit.Assert.*;
 
-public class SimCollectornode implements Runnable{
+public class SimCollectornode extends Collectornode implements Runnable{
+    private static final Log LOG = LogFactory.getLog(SimCollectornode.class);
     private FileSystem fs;
     private String simType;
     private ServerSocket ss;
@@ -24,7 +29,22 @@ public class SimCollectornode implements Runnable{
     private long position;
     private long length;
     private Socket client;
-    public SimCollectornode(String simType, int port,FileSystem fs, String appName, String appHost, 
+    
+    private SimCollectornode(String simType, FileSystem fs, String appName) throws IOException {
+        this.fs = fs;
+        this.simType = simType;
+        this.appName = appName;
+        this.appHost = "localhost";
+        this.fileSuffix = com.dp.blackhole.simutil.Util.FILE_SUFFIX;
+        this.position = 0;
+        this.length = 0;
+    }
+    
+    public static SimCollectornode getSimpleInstance(String simType, FileSystem fs, String appName) throws IOException {
+        return new SimCollectornode(simType, fs, appName);
+    }
+    
+    public SimCollectornode(String simType, int port, FileSystem fs, String appName, String appHost, 
             String fileSuffix, long position, long length) throws IOException {
         this.fs = fs;
         this.simType = simType;
@@ -35,6 +55,17 @@ public class SimCollectornode implements Runnable{
         this.length = length;
         ss = new ServerSocket(port);
     }
+    
+    @Override
+    public void recoveryResult(HDFSRecovery hdfsRecovery,
+            boolean recoverySuccess) {
+        LOG.info("send recovery result: " + recoverySuccess);
+    }
+    @Override
+    public void uploadResult(HDFSUpload hdfsUpload, boolean uploadSuccess) {
+        LOG.info("send upload result: " + uploadSuccess);
+    }
+    
     @Override
     public void run() {
         try {
@@ -50,7 +81,7 @@ public class SimCollectornode implements Runnable{
                 long period = Util.getPeriodInSeconds(value, unit);
                 assertEquals(period, din.readLong());
                 assertEquals(Util.getFormatByUnit(unit), Util.readString(din));
-                HDFSRecovery recovery = new HDFSRecovery(fs, client, appName, appHost, 
+                HDFSRecovery recovery = new HDFSRecovery(getSimpleInstance(simType, fs, appName), fs, client, appName, appHost, 
                         fileSuffix, position, length);
                 recovery.run();
             }

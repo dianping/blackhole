@@ -12,10 +12,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.dp.blackhole.common.BlackholeException;
 import com.dp.blackhole.common.Util;
 
 public class HDFSRecovery implements Runnable{
-    private static final Log LOG = LogFactory.getLog(HDFSWriter.class);
+    private static final Log LOG = LogFactory.getLog(HDFSUpload.class);
+    private Collectornode node;
     private FileSystem fs;
     private static final int DEFAULT_BUFSIZE = 8192;
     private Socket client;
@@ -24,9 +26,11 @@ public class HDFSRecovery implements Runnable{
     private String fileSuffix;
     private long position;
     private long length;
+    private boolean recoverySuccess;
     
-    public HDFSRecovery(FileSystem fs, Socket client, 
+    public HDFSRecovery(Collectornode node, FileSystem fs, Socket client, 
             String appName, String appHost, String fileSuffix) {
+        this.node = node;
         this.fs = fs;
         this.client = client;
         this.appName = appName;
@@ -34,9 +38,10 @@ public class HDFSRecovery implements Runnable{
         this.fileSuffix = fileSuffix;
     }
     
-    public HDFSRecovery(FileSystem fs, Socket client, 
+    public HDFSRecovery(Collectornode node, FileSystem fs, Socket client, 
             String appName, String appHost, String fileSuffix,
             long position, long length) {
+        this.node = node;
         this.fs = fs;
         this.client = client;
         this.appName = appName;
@@ -81,18 +86,23 @@ public class HDFSRecovery implements Runnable{
                     if (fs.rename(dst, old)) {
                         LOG.info("Finished to rename to " + old);
                     } else {
-                        LOG.error("Faild to rename to " + old);
+                        throw new BlackholeException("Faild to rename to " + old);
                     }
                 } else {
-                    LOG.warn("Faild to delete " + old + " before mv.");
+                    throw new BlackholeException("Faild to delete " + old + " before mv.");
                 }
-                
             } else {
-                LOG.error("Can not found the file in HDFS");
+                throw new BlackholeException("Can not found the file in HDFS");
             }
+            recoverySuccess = true;
         } catch (IOException e) {
+            recoverySuccess = false;
+            LOG.error("Oops, got an exception:", e);
+        } catch (Exception e) {
+            recoverySuccess = false;
             LOG.error("Oops, got an exception:", e);
         } finally {
+            node.recoveryResult(this, recoverySuccess);
             try {
                 if (gin != null) {
                     gin.close();
