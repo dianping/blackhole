@@ -1,9 +1,12 @@
 package com.dp.blackhole.common;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.dp.blackhole.common.MessagePB.Message;
 
@@ -13,12 +16,16 @@ public class Connection {
     private ByteBuffer length;
     private ByteBuffer data;
     private ByteBuffer writeBuffer;
-    private ConcurrentLinkedQueue<Message> queue; 
+    private ConcurrentLinkedQueue<Message> queue;
+    private AtomicLong lastHeartBeat;
+    private String host;
     
-    public Connection (SocketChannel channel) {
+    public Connection (SocketChannel channel) throws IOException {
+        this.host = ((InetSocketAddress) channel.getRemoteAddress()).getHostName();
         this.channel = channel;
         this.length = ByteBuffer.allocate(4);
         this.queue = new ConcurrentLinkedQueue<Message>();
+        lastHeartBeat = new AtomicLong(Util.getTS());
     }
     
     public void offer (Message msg) {
@@ -63,10 +70,6 @@ public class Connection {
     }
 
     public void close() {
-        data = null;
-        length = null;
-        queue = null;
-        writeBuffer = null;
         if (!channel.isOpen()) {
             return;
         }
@@ -94,5 +97,17 @@ public class Connection {
 
     public ByteBuffer getDataBuffer() {
         return data;
+    }
+    
+    public void updateHeartBeat() {
+        lastHeartBeat.getAndSet(Util.getTS());
+    }
+
+    public long getLastHeartBeat() {
+        return lastHeartBeat.get();
+    }
+    
+    public String getHost() {
+       return host;
     }
 }

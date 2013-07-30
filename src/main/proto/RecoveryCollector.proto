@@ -3,8 +3,8 @@ package blackhole;
 option java_package = "com.dp.blackhole.common";
 option java_outer_classname = "RecoveryCollectorPB";
 
-  message RecoveryCollector {
+message RecoveryCollector {
     required string app_name = 1;
     required string collector_server = 2;
     required int32 collector_port = 3;
-  }
+}
