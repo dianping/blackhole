@@ -21,89 +21,103 @@ public final class MessagePB {
      */
     com.dp.blackhole.common.MessagePB.Message.MessageType getType();
 
-    // optional .blackhole.AppReg appReg = 2;
+    // optional .blackhole.AppReg appReg = 4;
     /**
-     * <code>optional .blackhole.AppReg appReg = 2;</code>
+     * <code>optional .blackhole.AppReg appReg = 4;</code>
      */
     boolean hasAppReg();
     /**
-     * <code>optional .blackhole.AppReg appReg = 2;</code>
+     * <code>optional .blackhole.AppReg appReg = 4;</code>
      */
     com.dp.blackhole.common.AppRegPB.AppReg getAppReg();
     /**
-     * <code>optional .blackhole.AppReg appReg = 2;</code>
+     * <code>optional .blackhole.AppReg appReg = 4;</code>
      */
     com.dp.blackhole.common.AppRegPB.AppRegOrBuilder getAppRegOrBuilder();
 
-    // optional .blackhole.AssignCollector assignCollector = 3;
+    // optional .blackhole.AssignCollector assignCollector = 5;
     /**
-     * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+     * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
      */
     boolean hasAssignCollector();
     /**
-     * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+     * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
      */
     com.dp.blackhole.common.AssignCollectorPB.AssignCollector getAssignCollector();
     /**
-     * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+     * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
      */
     com.dp.blackhole.common.AssignCollectorPB.AssignCollectorOrBuilder getAssignCollectorOrBuilder();
 
-    // optional .blackhole.AppRoll appRoll = 4;
+    // optional .blackhole.AppRoll appRoll = 6;
     /**
-     * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+     * <code>optional .blackhole.AppRoll appRoll = 6;</code>
      */
     boolean hasAppRoll();
     /**
-     * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+     * <code>optional .blackhole.AppRoll appRoll = 6;</code>
      */
     com.dp.blackhole.common.AppRollPB.AppRoll getAppRoll();
     /**
-     * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+     * <code>optional .blackhole.AppRoll appRoll = 6;</code>
      */
     com.dp.blackhole.common.AppRollPB.AppRollOrBuilder getAppRollOrBuilder();
 
-    // optional .blackhole.RecoveryRoll recoveryRoll = 5;
+    // optional .blackhole.RecoveryRoll recoveryRoll = 7;
     /**
-     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
      */
     boolean hasRecoveryRoll();
     /**
-     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
      */
     com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll getRecoveryRoll();
     /**
-     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
      */
     com.dp.blackhole.common.RecoveryRollPB.RecoveryRollOrBuilder getRecoveryRollOrBuilder();
 
-    // optional .blackhole.RecoveryCollector recoveryCollector = 6;
+    // optional .blackhole.RecoveryCollector recoveryCollector = 8;
     /**
-     * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+     * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
      */
     boolean hasRecoveryCollector();
     /**
-     * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+     * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
      */
     com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector getRecoveryCollector();
     /**
-     * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+     * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
      */
     com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollectorOrBuilder getRecoveryCollectorOrBuilder();
 
-    // optional .blackhole.ReadyCollector readyCollector = 7;
+    // optional .blackhole.ReadyCollector readyCollector = 9;
     /**
-     * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+     * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
      */
     boolean hasReadyCollector();
     /**
-     * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+     * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
      */
     com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector getReadyCollector();
     /**
-     * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+     * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
      */
     com.dp.blackhole.common.ReadyCollectorPB.ReadyCollectorOrBuilder getReadyCollectorOrBuilder();
+
+    // optional .blackhole.RollID rollID = 10;
+    /**
+     * <code>optional .blackhole.RollID rollID = 10;</code>
+     */
+    boolean hasRollID();
+    /**
+     * <code>optional .blackhole.RollID rollID = 10;</code>
+     */
+    com.dp.blackhole.common.RollIDPB.RollID getRollID();
+    /**
+     * <code>optional .blackhole.RollID rollID = 10;</code>
+     */
+    com.dp.blackhole.common.RollIDPB.RollIDOrBuilder getRollIDOrBuilder();
   }
   /**
    * Protobuf type {@code blackhole.Message}
@@ -167,7 +181,7 @@ public final class MessagePB {
               }
               break;
             }
-            case 18: {
+            case 34: {
               com.dp.blackhole.common.AppRegPB.AppReg.Builder subBuilder = null;
               if (((bitField0_ & 0x00000002) == 0x00000002)) {
                 subBuilder = appReg_.toBuilder();
@@ -180,7 +194,7 @@ public final class MessagePB {
               bitField0_ |= 0x00000002;
               break;
             }
-            case 26: {
+            case 42: {
               com.dp.blackhole.common.AssignCollectorPB.AssignCollector.Builder subBuilder = null;
               if (((bitField0_ & 0x00000004) == 0x00000004)) {
                 subBuilder = assignCollector_.toBuilder();
@@ -193,7 +207,7 @@ public final class MessagePB {
               bitField0_ |= 0x00000004;
               break;
             }
-            case 34: {
+            case 50: {
               com.dp.blackhole.common.AppRollPB.AppRoll.Builder subBuilder = null;
               if (((bitField0_ & 0x00000008) == 0x00000008)) {
                 subBuilder = appRoll_.toBuilder();
@@ -206,7 +220,7 @@ public final class MessagePB {
               bitField0_ |= 0x00000008;
               break;
             }
-            case 42: {
+            case 58: {
               com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll.Builder subBuilder = null;
               if (((bitField0_ & 0x00000010) == 0x00000010)) {
                 subBuilder = recoveryRoll_.toBuilder();
@@ -219,7 +233,7 @@ public final class MessagePB {
               bitField0_ |= 0x00000010;
               break;
             }
-            case 50: {
+            case 66: {
               com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector.Builder subBuilder = null;
               if (((bitField0_ & 0x00000020) == 0x00000020)) {
                 subBuilder = recoveryCollector_.toBuilder();
@@ -232,7 +246,7 @@ public final class MessagePB {
               bitField0_ |= 0x00000020;
               break;
             }
-            case 58: {
+            case 74: {
               com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.Builder subBuilder = null;
               if (((bitField0_ & 0x00000040) == 0x00000040)) {
                 subBuilder = readyCollector_.toBuilder();
@@ -243,6 +257,19 @@ public final class MessagePB {
                 readyCollector_ = subBuilder.buildPartial();
               }
               bitField0_ |= 0x00000040;
+              break;
+            }
+            case 82: {
+              com.dp.blackhole.common.RollIDPB.RollID.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000080) == 0x00000080)) {
+                subBuilder = rollID_.toBuilder();
+              }
+              rollID_ = input.readMessage(com.dp.blackhole.common.RollIDPB.RollID.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(rollID_);
+                rollID_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000080;
               break;
             }
           }
@@ -290,94 +317,130 @@ public final class MessagePB {
     public enum MessageType
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
-       * <code>APP_REG = 1;</code>
+       * <code>HEARTBEART = 1;</code>
        */
-      APP_REG(0, 1),
+      HEARTBEART(0, 1),
       /**
-       * <code>COLLECTOR_REG = 2;</code>
+       * <code>APP_REG = 3;</code>
        */
-      COLLECTOR_REG(1, 2),
+      APP_REG(1, 3),
       /**
-       * <code>READY_COLLECTOR = 3;</code>
+       * <code>COLLECTOR_REG = 4;</code>
        */
-      READY_COLLECTOR(2, 3),
+      COLLECTOR_REG(2, 4),
       /**
-       * <code>ASSIGN_COLLECTOR = 4;</code>
+       * <code>READY_COLLECTOR = 5;</code>
        */
-      ASSIGN_COLLECTOR(3, 4),
+      READY_COLLECTOR(3, 5),
       /**
-       * <code>RECOVERY_COLLECTOR = 5;</code>
+       * <code>ASSIGN_COLLECTOR = 6;</code>
        */
-      RECOVERY_COLLECTOR(4, 5),
+      ASSIGN_COLLECTOR(4, 6),
       /**
-       * <code>RECOVERY_ROLL = 6;</code>
+       * <code>RECOVERY_COLLECTOR = 7;</code>
        */
-      RECOVERY_ROLL(5, 6),
+      RECOVERY_COLLECTOR(5, 7),
       /**
-       * <code>HDFS_UPLOAD = 7;</code>
+       * <code>UPLOAD_ROLL = 9;</code>
        */
-      HDFS_UPLOAD(6, 7),
+      UPLOAD_ROLL(6, 9),
       /**
-       * <code>HDFS_RECOVERY = 8;</code>
+       * <code>UPLOAD_SUCCESS = 10;</code>
        */
-      HDFS_RECOVERY(7, 8),
+      UPLOAD_SUCCESS(7, 10),
       /**
-       * <code>APP_ROLL = 9;</code>
+       * <code>UPLOAD_FAIL = 11;</code>
        */
-      APP_ROLL(8, 9),
+      UPLOAD_FAIL(8, 11),
+      /**
+       * <code>RECOVERY_ROLL = 12;</code>
+       */
+      RECOVERY_ROLL(9, 12),
+      /**
+       * <code>RECOVERY_SUCCESS = 13;</code>
+       */
+      RECOVERY_SUCCESS(10, 13),
+      /**
+       * <code>RECOVERY_FAIL = 14;</code>
+       */
+      RECOVERY_FAIL(11, 14),
+      /**
+       * <code>APP_ROLL = 15;</code>
+       */
+      APP_ROLL(12, 15),
       ;
 
       /**
-       * <code>APP_REG = 1;</code>
+       * <code>HEARTBEART = 1;</code>
        */
-      public static final int APP_REG_VALUE = 1;
+      public static final int HEARTBEART_VALUE = 1;
       /**
-       * <code>COLLECTOR_REG = 2;</code>
+       * <code>APP_REG = 3;</code>
        */
-      public static final int COLLECTOR_REG_VALUE = 2;
+      public static final int APP_REG_VALUE = 3;
       /**
-       * <code>READY_COLLECTOR = 3;</code>
+       * <code>COLLECTOR_REG = 4;</code>
        */
-      public static final int READY_COLLECTOR_VALUE = 3;
+      public static final int COLLECTOR_REG_VALUE = 4;
       /**
-       * <code>ASSIGN_COLLECTOR = 4;</code>
+       * <code>READY_COLLECTOR = 5;</code>
        */
-      public static final int ASSIGN_COLLECTOR_VALUE = 4;
+      public static final int READY_COLLECTOR_VALUE = 5;
       /**
-       * <code>RECOVERY_COLLECTOR = 5;</code>
+       * <code>ASSIGN_COLLECTOR = 6;</code>
        */
-      public static final int RECOVERY_COLLECTOR_VALUE = 5;
+      public static final int ASSIGN_COLLECTOR_VALUE = 6;
       /**
-       * <code>RECOVERY_ROLL = 6;</code>
+       * <code>RECOVERY_COLLECTOR = 7;</code>
        */
-      public static final int RECOVERY_ROLL_VALUE = 6;
+      public static final int RECOVERY_COLLECTOR_VALUE = 7;
       /**
-       * <code>HDFS_UPLOAD = 7;</code>
+       * <code>UPLOAD_ROLL = 9;</code>
        */
-      public static final int HDFS_UPLOAD_VALUE = 7;
+      public static final int UPLOAD_ROLL_VALUE = 9;
       /**
-       * <code>HDFS_RECOVERY = 8;</code>
+       * <code>UPLOAD_SUCCESS = 10;</code>
        */
-      public static final int HDFS_RECOVERY_VALUE = 8;
+      public static final int UPLOAD_SUCCESS_VALUE = 10;
       /**
-       * <code>APP_ROLL = 9;</code>
+       * <code>UPLOAD_FAIL = 11;</code>
        */
-      public static final int APP_ROLL_VALUE = 9;
+      public static final int UPLOAD_FAIL_VALUE = 11;
+      /**
+       * <code>RECOVERY_ROLL = 12;</code>
+       */
+      public static final int RECOVERY_ROLL_VALUE = 12;
+      /**
+       * <code>RECOVERY_SUCCESS = 13;</code>
+       */
+      public static final int RECOVERY_SUCCESS_VALUE = 13;
+      /**
+       * <code>RECOVERY_FAIL = 14;</code>
+       */
+      public static final int RECOVERY_FAIL_VALUE = 14;
+      /**
+       * <code>APP_ROLL = 15;</code>
+       */
+      public static final int APP_ROLL_VALUE = 15;
 
 
       public final int getNumber() { return value; }
 
       public static MessageType valueOf(int value) {
         switch (value) {
-          case 1: return APP_REG;
-          case 2: return COLLECTOR_REG;
-          case 3: return READY_COLLECTOR;
-          case 4: return ASSIGN_COLLECTOR;
-          case 5: return RECOVERY_COLLECTOR;
-          case 6: return RECOVERY_ROLL;
-          case 7: return HDFS_UPLOAD;
-          case 8: return HDFS_RECOVERY;
-          case 9: return APP_ROLL;
+          case 1: return HEARTBEART;
+          case 3: return APP_REG;
+          case 4: return COLLECTOR_REG;
+          case 5: return READY_COLLECTOR;
+          case 6: return ASSIGN_COLLECTOR;
+          case 7: return RECOVERY_COLLECTOR;
+          case 9: return UPLOAD_ROLL;
+          case 10: return UPLOAD_SUCCESS;
+          case 11: return UPLOAD_FAIL;
+          case 12: return RECOVERY_ROLL;
+          case 13: return RECOVERY_SUCCESS;
+          case 14: return RECOVERY_FAIL;
+          case 15: return APP_ROLL;
           default: return null;
         }
       }
@@ -446,146 +509,169 @@ public final class MessagePB {
       return type_;
     }
 
-    // optional .blackhole.AppReg appReg = 2;
-    public static final int APPREG_FIELD_NUMBER = 2;
+    // optional .blackhole.AppReg appReg = 4;
+    public static final int APPREG_FIELD_NUMBER = 4;
     private com.dp.blackhole.common.AppRegPB.AppReg appReg_;
     /**
-     * <code>optional .blackhole.AppReg appReg = 2;</code>
+     * <code>optional .blackhole.AppReg appReg = 4;</code>
      */
     public boolean hasAppReg() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional .blackhole.AppReg appReg = 2;</code>
+     * <code>optional .blackhole.AppReg appReg = 4;</code>
      */
     public com.dp.blackhole.common.AppRegPB.AppReg getAppReg() {
       return appReg_;
     }
     /**
-     * <code>optional .blackhole.AppReg appReg = 2;</code>
+     * <code>optional .blackhole.AppReg appReg = 4;</code>
      */
     public com.dp.blackhole.common.AppRegPB.AppRegOrBuilder getAppRegOrBuilder() {
       return appReg_;
     }
 
-    // optional .blackhole.AssignCollector assignCollector = 3;
-    public static final int ASSIGNCOLLECTOR_FIELD_NUMBER = 3;
+    // optional .blackhole.AssignCollector assignCollector = 5;
+    public static final int ASSIGNCOLLECTOR_FIELD_NUMBER = 5;
     private com.dp.blackhole.common.AssignCollectorPB.AssignCollector assignCollector_;
     /**
-     * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+     * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
      */
     public boolean hasAssignCollector() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+     * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
      */
     public com.dp.blackhole.common.AssignCollectorPB.AssignCollector getAssignCollector() {
       return assignCollector_;
     }
     /**
-     * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+     * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
      */
     public com.dp.blackhole.common.AssignCollectorPB.AssignCollectorOrBuilder getAssignCollectorOrBuilder() {
       return assignCollector_;
     }
 
-    // optional .blackhole.AppRoll appRoll = 4;
-    public static final int APPROLL_FIELD_NUMBER = 4;
+    // optional .blackhole.AppRoll appRoll = 6;
+    public static final int APPROLL_FIELD_NUMBER = 6;
     private com.dp.blackhole.common.AppRollPB.AppRoll appRoll_;
     /**
-     * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+     * <code>optional .blackhole.AppRoll appRoll = 6;</code>
      */
     public boolean hasAppRoll() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+     * <code>optional .blackhole.AppRoll appRoll = 6;</code>
      */
     public com.dp.blackhole.common.AppRollPB.AppRoll getAppRoll() {
       return appRoll_;
     }
     /**
-     * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+     * <code>optional .blackhole.AppRoll appRoll = 6;</code>
      */
     public com.dp.blackhole.common.AppRollPB.AppRollOrBuilder getAppRollOrBuilder() {
       return appRoll_;
     }
 
-    // optional .blackhole.RecoveryRoll recoveryRoll = 5;
-    public static final int RECOVERYROLL_FIELD_NUMBER = 5;
+    // optional .blackhole.RecoveryRoll recoveryRoll = 7;
+    public static final int RECOVERYROLL_FIELD_NUMBER = 7;
     private com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll recoveryRoll_;
     /**
-     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
      */
     public boolean hasRecoveryRoll() {
       return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
-     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
      */
     public com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll getRecoveryRoll() {
       return recoveryRoll_;
     }
     /**
-     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
      */
     public com.dp.blackhole.common.RecoveryRollPB.RecoveryRollOrBuilder getRecoveryRollOrBuilder() {
       return recoveryRoll_;
     }
 
-    // optional .blackhole.RecoveryCollector recoveryCollector = 6;
-    public static final int RECOVERYCOLLECTOR_FIELD_NUMBER = 6;
+    // optional .blackhole.RecoveryCollector recoveryCollector = 8;
+    public static final int RECOVERYCOLLECTOR_FIELD_NUMBER = 8;
     private com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector recoveryCollector_;
     /**
-     * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+     * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
      */
     public boolean hasRecoveryCollector() {
       return ((bitField0_ & 0x00000020) == 0x00000020);
     }
     /**
-     * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+     * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
      */
     public com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector getRecoveryCollector() {
       return recoveryCollector_;
     }
     /**
-     * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+     * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
      */
     public com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollectorOrBuilder getRecoveryCollectorOrBuilder() {
       return recoveryCollector_;
     }
 
-    // optional .blackhole.ReadyCollector readyCollector = 7;
-    public static final int READYCOLLECTOR_FIELD_NUMBER = 7;
+    // optional .blackhole.ReadyCollector readyCollector = 9;
+    public static final int READYCOLLECTOR_FIELD_NUMBER = 9;
     private com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector readyCollector_;
     /**
-     * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+     * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
      */
     public boolean hasReadyCollector() {
       return ((bitField0_ & 0x00000040) == 0x00000040);
     }
     /**
-     * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+     * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
      */
     public com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector getReadyCollector() {
       return readyCollector_;
     }
     /**
-     * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+     * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
      */
     public com.dp.blackhole.common.ReadyCollectorPB.ReadyCollectorOrBuilder getReadyCollectorOrBuilder() {
       return readyCollector_;
     }
 
+    // optional .blackhole.RollID rollID = 10;
+    public static final int ROLLID_FIELD_NUMBER = 10;
+    private com.dp.blackhole.common.RollIDPB.RollID rollID_;
+    /**
+     * <code>optional .blackhole.RollID rollID = 10;</code>
+     */
+    public boolean hasRollID() {
+      return ((bitField0_ & 0x00000080) == 0x00000080);
+    }
+    /**
+     * <code>optional .blackhole.RollID rollID = 10;</code>
+     */
+    public com.dp.blackhole.common.RollIDPB.RollID getRollID() {
+      return rollID_;
+    }
+    /**
+     * <code>optional .blackhole.RollID rollID = 10;</code>
+     */
+    public com.dp.blackhole.common.RollIDPB.RollIDOrBuilder getRollIDOrBuilder() {
+      return rollID_;
+    }
+
     private void initFields() {
-      type_ = com.dp.blackhole.common.MessagePB.Message.MessageType.APP_REG;
+      type_ = com.dp.blackhole.common.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.common.AppRegPB.AppReg.getDefaultInstance();
       assignCollector_ = com.dp.blackhole.common.AssignCollectorPB.AssignCollector.getDefaultInstance();
       appRoll_ = com.dp.blackhole.common.AppRollPB.AppRoll.getDefaultInstance();
       recoveryRoll_ = com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll.getDefaultInstance();
       recoveryCollector_ = com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector.getDefaultInstance();
       readyCollector_ = com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.getDefaultInstance();
+      rollID_ = com.dp.blackhole.common.RollIDPB.RollID.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -632,6 +718,12 @@ public final class MessagePB {
           return false;
         }
       }
+      if (hasRollID()) {
+        if (!getRollID().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -643,22 +735,25 @@ public final class MessagePB {
         output.writeEnum(1, type_.getNumber());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeMessage(2, appReg_);
+        output.writeMessage(4, appReg_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeMessage(3, assignCollector_);
+        output.writeMessage(5, assignCollector_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeMessage(4, appRoll_);
+        output.writeMessage(6, appRoll_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeMessage(5, recoveryRoll_);
+        output.writeMessage(7, recoveryRoll_);
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        output.writeMessage(6, recoveryCollector_);
+        output.writeMessage(8, recoveryCollector_);
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
-        output.writeMessage(7, readyCollector_);
+        output.writeMessage(9, readyCollector_);
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        output.writeMessage(10, rollID_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -675,27 +770,31 @@ public final class MessagePB {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, appReg_);
+          .computeMessageSize(4, appReg_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, assignCollector_);
+          .computeMessageSize(5, assignCollector_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, appRoll_);
+          .computeMessageSize(6, appRoll_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, recoveryRoll_);
+          .computeMessageSize(7, recoveryRoll_);
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(6, recoveryCollector_);
+          .computeMessageSize(8, recoveryCollector_);
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(7, readyCollector_);
+          .computeMessageSize(9, readyCollector_);
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(10, rollID_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -811,6 +910,7 @@ public final class MessagePB {
           getRecoveryRollFieldBuilder();
           getRecoveryCollectorFieldBuilder();
           getReadyCollectorFieldBuilder();
+          getRollIDFieldBuilder();
         }
       }
       private static Builder create() {
@@ -819,7 +919,7 @@ public final class MessagePB {
 
       public Builder clear() {
         super.clear();
-        type_ = com.dp.blackhole.common.MessagePB.Message.MessageType.APP_REG;
+        type_ = com.dp.blackhole.common.MessagePB.Message.MessageType.HEARTBEART;
         bitField0_ = (bitField0_ & ~0x00000001);
         if (appRegBuilder_ == null) {
           appReg_ = com.dp.blackhole.common.AppRegPB.AppReg.getDefaultInstance();
@@ -857,6 +957,12 @@ public final class MessagePB {
           readyCollectorBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000040);
+        if (rollIDBuilder_ == null) {
+          rollID_ = com.dp.blackhole.common.RollIDPB.RollID.getDefaultInstance();
+        } else {
+          rollIDBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -937,6 +1043,14 @@ public final class MessagePB {
         } else {
           result.readyCollector_ = readyCollectorBuilder_.build();
         }
+        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+          to_bitField0_ |= 0x00000080;
+        }
+        if (rollIDBuilder_ == null) {
+          result.rollID_ = rollID_;
+        } else {
+          result.rollID_ = rollIDBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -973,6 +1087,9 @@ public final class MessagePB {
         }
         if (other.hasReadyCollector()) {
           mergeReadyCollector(other.getReadyCollector());
+        }
+        if (other.hasRollID()) {
+          mergeRollID(other.getRollID());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1019,6 +1136,12 @@ public final class MessagePB {
             return false;
           }
         }
+        if (hasRollID()) {
+          if (!getRollID().isInitialized()) {
+            
+            return false;
+          }
+        }
         return true;
       }
 
@@ -1042,7 +1165,7 @@ public final class MessagePB {
       private int bitField0_;
 
       // required .blackhole.Message.MessageType type = 1;
-      private com.dp.blackhole.common.MessagePB.Message.MessageType type_ = com.dp.blackhole.common.MessagePB.Message.MessageType.APP_REG;
+      private com.dp.blackhole.common.MessagePB.Message.MessageType type_ = com.dp.blackhole.common.MessagePB.Message.MessageType.HEARTBEART;
       /**
        * <code>required .blackhole.Message.MessageType type = 1;</code>
        */
@@ -1072,23 +1195,23 @@ public final class MessagePB {
        */
       public Builder clearType() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        type_ = com.dp.blackhole.common.MessagePB.Message.MessageType.APP_REG;
+        type_ = com.dp.blackhole.common.MessagePB.Message.MessageType.HEARTBEART;
         onChanged();
         return this;
       }
 
-      // optional .blackhole.AppReg appReg = 2;
+      // optional .blackhole.AppReg appReg = 4;
       private com.dp.blackhole.common.AppRegPB.AppReg appReg_ = com.dp.blackhole.common.AppRegPB.AppReg.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           com.dp.blackhole.common.AppRegPB.AppReg, com.dp.blackhole.common.AppRegPB.AppReg.Builder, com.dp.blackhole.common.AppRegPB.AppRegOrBuilder> appRegBuilder_;
       /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
+       * <code>optional .blackhole.AppReg appReg = 4;</code>
        */
       public boolean hasAppReg() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
+       * <code>optional .blackhole.AppReg appReg = 4;</code>
        */
       public com.dp.blackhole.common.AppRegPB.AppReg getAppReg() {
         if (appRegBuilder_ == null) {
@@ -1098,7 +1221,7 @@ public final class MessagePB {
         }
       }
       /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
+       * <code>optional .blackhole.AppReg appReg = 4;</code>
        */
       public Builder setAppReg(com.dp.blackhole.common.AppRegPB.AppReg value) {
         if (appRegBuilder_ == null) {
@@ -1114,7 +1237,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
+       * <code>optional .blackhole.AppReg appReg = 4;</code>
        */
       public Builder setAppReg(
           com.dp.blackhole.common.AppRegPB.AppReg.Builder builderForValue) {
@@ -1128,7 +1251,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
+       * <code>optional .blackhole.AppReg appReg = 4;</code>
        */
       public Builder mergeAppReg(com.dp.blackhole.common.AppRegPB.AppReg value) {
         if (appRegBuilder_ == null) {
@@ -1147,7 +1270,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
+       * <code>optional .blackhole.AppReg appReg = 4;</code>
        */
       public Builder clearAppReg() {
         if (appRegBuilder_ == null) {
@@ -1160,7 +1283,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
+       * <code>optional .blackhole.AppReg appReg = 4;</code>
        */
       public com.dp.blackhole.common.AppRegPB.AppReg.Builder getAppRegBuilder() {
         bitField0_ |= 0x00000002;
@@ -1168,7 +1291,7 @@ public final class MessagePB {
         return getAppRegFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
+       * <code>optional .blackhole.AppReg appReg = 4;</code>
        */
       public com.dp.blackhole.common.AppRegPB.AppRegOrBuilder getAppRegOrBuilder() {
         if (appRegBuilder_ != null) {
@@ -1178,7 +1301,7 @@ public final class MessagePB {
         }
       }
       /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
+       * <code>optional .blackhole.AppReg appReg = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           com.dp.blackhole.common.AppRegPB.AppReg, com.dp.blackhole.common.AppRegPB.AppReg.Builder, com.dp.blackhole.common.AppRegPB.AppRegOrBuilder> 
@@ -1194,18 +1317,18 @@ public final class MessagePB {
         return appRegBuilder_;
       }
 
-      // optional .blackhole.AssignCollector assignCollector = 3;
+      // optional .blackhole.AssignCollector assignCollector = 5;
       private com.dp.blackhole.common.AssignCollectorPB.AssignCollector assignCollector_ = com.dp.blackhole.common.AssignCollectorPB.AssignCollector.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           com.dp.blackhole.common.AssignCollectorPB.AssignCollector, com.dp.blackhole.common.AssignCollectorPB.AssignCollector.Builder, com.dp.blackhole.common.AssignCollectorPB.AssignCollectorOrBuilder> assignCollectorBuilder_;
       /**
-       * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+       * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
        */
       public boolean hasAssignCollector() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+       * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
        */
       public com.dp.blackhole.common.AssignCollectorPB.AssignCollector getAssignCollector() {
         if (assignCollectorBuilder_ == null) {
@@ -1215,7 +1338,7 @@ public final class MessagePB {
         }
       }
       /**
-       * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+       * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
        */
       public Builder setAssignCollector(com.dp.blackhole.common.AssignCollectorPB.AssignCollector value) {
         if (assignCollectorBuilder_ == null) {
@@ -1231,7 +1354,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+       * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
        */
       public Builder setAssignCollector(
           com.dp.blackhole.common.AssignCollectorPB.AssignCollector.Builder builderForValue) {
@@ -1245,7 +1368,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+       * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
        */
       public Builder mergeAssignCollector(com.dp.blackhole.common.AssignCollectorPB.AssignCollector value) {
         if (assignCollectorBuilder_ == null) {
@@ -1264,7 +1387,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+       * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
        */
       public Builder clearAssignCollector() {
         if (assignCollectorBuilder_ == null) {
@@ -1277,7 +1400,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+       * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
        */
       public com.dp.blackhole.common.AssignCollectorPB.AssignCollector.Builder getAssignCollectorBuilder() {
         bitField0_ |= 0x00000004;
@@ -1285,7 +1408,7 @@ public final class MessagePB {
         return getAssignCollectorFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+       * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
        */
       public com.dp.blackhole.common.AssignCollectorPB.AssignCollectorOrBuilder getAssignCollectorOrBuilder() {
         if (assignCollectorBuilder_ != null) {
@@ -1295,7 +1418,7 @@ public final class MessagePB {
         }
       }
       /**
-       * <code>optional .blackhole.AssignCollector assignCollector = 3;</code>
+       * <code>optional .blackhole.AssignCollector assignCollector = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           com.dp.blackhole.common.AssignCollectorPB.AssignCollector, com.dp.blackhole.common.AssignCollectorPB.AssignCollector.Builder, com.dp.blackhole.common.AssignCollectorPB.AssignCollectorOrBuilder> 
@@ -1311,18 +1434,18 @@ public final class MessagePB {
         return assignCollectorBuilder_;
       }
 
-      // optional .blackhole.AppRoll appRoll = 4;
+      // optional .blackhole.AppRoll appRoll = 6;
       private com.dp.blackhole.common.AppRollPB.AppRoll appRoll_ = com.dp.blackhole.common.AppRollPB.AppRoll.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           com.dp.blackhole.common.AppRollPB.AppRoll, com.dp.blackhole.common.AppRollPB.AppRoll.Builder, com.dp.blackhole.common.AppRollPB.AppRollOrBuilder> appRollBuilder_;
       /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+       * <code>optional .blackhole.AppRoll appRoll = 6;</code>
        */
       public boolean hasAppRoll() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+       * <code>optional .blackhole.AppRoll appRoll = 6;</code>
        */
       public com.dp.blackhole.common.AppRollPB.AppRoll getAppRoll() {
         if (appRollBuilder_ == null) {
@@ -1332,7 +1455,7 @@ public final class MessagePB {
         }
       }
       /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+       * <code>optional .blackhole.AppRoll appRoll = 6;</code>
        */
       public Builder setAppRoll(com.dp.blackhole.common.AppRollPB.AppRoll value) {
         if (appRollBuilder_ == null) {
@@ -1348,7 +1471,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+       * <code>optional .blackhole.AppRoll appRoll = 6;</code>
        */
       public Builder setAppRoll(
           com.dp.blackhole.common.AppRollPB.AppRoll.Builder builderForValue) {
@@ -1362,7 +1485,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+       * <code>optional .blackhole.AppRoll appRoll = 6;</code>
        */
       public Builder mergeAppRoll(com.dp.blackhole.common.AppRollPB.AppRoll value) {
         if (appRollBuilder_ == null) {
@@ -1381,7 +1504,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+       * <code>optional .blackhole.AppRoll appRoll = 6;</code>
        */
       public Builder clearAppRoll() {
         if (appRollBuilder_ == null) {
@@ -1394,7 +1517,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+       * <code>optional .blackhole.AppRoll appRoll = 6;</code>
        */
       public com.dp.blackhole.common.AppRollPB.AppRoll.Builder getAppRollBuilder() {
         bitField0_ |= 0x00000008;
@@ -1402,7 +1525,7 @@ public final class MessagePB {
         return getAppRollFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+       * <code>optional .blackhole.AppRoll appRoll = 6;</code>
        */
       public com.dp.blackhole.common.AppRollPB.AppRollOrBuilder getAppRollOrBuilder() {
         if (appRollBuilder_ != null) {
@@ -1412,7 +1535,7 @@ public final class MessagePB {
         }
       }
       /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
+       * <code>optional .blackhole.AppRoll appRoll = 6;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           com.dp.blackhole.common.AppRollPB.AppRoll, com.dp.blackhole.common.AppRollPB.AppRoll.Builder, com.dp.blackhole.common.AppRollPB.AppRollOrBuilder> 
@@ -1428,18 +1551,18 @@ public final class MessagePB {
         return appRollBuilder_;
       }
 
-      // optional .blackhole.RecoveryRoll recoveryRoll = 5;
+      // optional .blackhole.RecoveryRoll recoveryRoll = 7;
       private com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll recoveryRoll_ = com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll, com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll.Builder, com.dp.blackhole.common.RecoveryRollPB.RecoveryRollOrBuilder> recoveryRollBuilder_;
       /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
        */
       public boolean hasRecoveryRoll() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
        */
       public com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll getRecoveryRoll() {
         if (recoveryRollBuilder_ == null) {
@@ -1449,7 +1572,7 @@ public final class MessagePB {
         }
       }
       /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
        */
       public Builder setRecoveryRoll(com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll value) {
         if (recoveryRollBuilder_ == null) {
@@ -1465,7 +1588,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
        */
       public Builder setRecoveryRoll(
           com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll.Builder builderForValue) {
@@ -1479,7 +1602,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
        */
       public Builder mergeRecoveryRoll(com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll value) {
         if (recoveryRollBuilder_ == null) {
@@ -1498,7 +1621,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
        */
       public Builder clearRecoveryRoll() {
         if (recoveryRollBuilder_ == null) {
@@ -1511,7 +1634,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
        */
       public com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll.Builder getRecoveryRollBuilder() {
         bitField0_ |= 0x00000010;
@@ -1519,7 +1642,7 @@ public final class MessagePB {
         return getRecoveryRollFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
        */
       public com.dp.blackhole.common.RecoveryRollPB.RecoveryRollOrBuilder getRecoveryRollOrBuilder() {
         if (recoveryRollBuilder_ != null) {
@@ -1529,7 +1652,7 @@ public final class MessagePB {
         }
       }
       /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
+       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 7;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll, com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll.Builder, com.dp.blackhole.common.RecoveryRollPB.RecoveryRollOrBuilder> 
@@ -1545,18 +1668,18 @@ public final class MessagePB {
         return recoveryRollBuilder_;
       }
 
-      // optional .blackhole.RecoveryCollector recoveryCollector = 6;
+      // optional .blackhole.RecoveryCollector recoveryCollector = 8;
       private com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector recoveryCollector_ = com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector, com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector.Builder, com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollectorOrBuilder> recoveryCollectorBuilder_;
       /**
-       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
        */
       public boolean hasRecoveryCollector() {
         return ((bitField0_ & 0x00000020) == 0x00000020);
       }
       /**
-       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
        */
       public com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector getRecoveryCollector() {
         if (recoveryCollectorBuilder_ == null) {
@@ -1566,7 +1689,7 @@ public final class MessagePB {
         }
       }
       /**
-       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
        */
       public Builder setRecoveryCollector(com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector value) {
         if (recoveryCollectorBuilder_ == null) {
@@ -1582,7 +1705,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
        */
       public Builder setRecoveryCollector(
           com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector.Builder builderForValue) {
@@ -1596,7 +1719,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
        */
       public Builder mergeRecoveryCollector(com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector value) {
         if (recoveryCollectorBuilder_ == null) {
@@ -1615,7 +1738,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
        */
       public Builder clearRecoveryCollector() {
         if (recoveryCollectorBuilder_ == null) {
@@ -1628,7 +1751,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
        */
       public com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector.Builder getRecoveryCollectorBuilder() {
         bitField0_ |= 0x00000020;
@@ -1636,7 +1759,7 @@ public final class MessagePB {
         return getRecoveryCollectorFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
        */
       public com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollectorOrBuilder getRecoveryCollectorOrBuilder() {
         if (recoveryCollectorBuilder_ != null) {
@@ -1646,7 +1769,7 @@ public final class MessagePB {
         }
       }
       /**
-       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 6;</code>
+       * <code>optional .blackhole.RecoveryCollector recoveryCollector = 8;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector, com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector.Builder, com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollectorOrBuilder> 
@@ -1662,18 +1785,18 @@ public final class MessagePB {
         return recoveryCollectorBuilder_;
       }
 
-      // optional .blackhole.ReadyCollector readyCollector = 7;
+      // optional .blackhole.ReadyCollector readyCollector = 9;
       private com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector readyCollector_ = com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector, com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.Builder, com.dp.blackhole.common.ReadyCollectorPB.ReadyCollectorOrBuilder> readyCollectorBuilder_;
       /**
-       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
        */
       public boolean hasReadyCollector() {
         return ((bitField0_ & 0x00000040) == 0x00000040);
       }
       /**
-       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
        */
       public com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector getReadyCollector() {
         if (readyCollectorBuilder_ == null) {
@@ -1683,7 +1806,7 @@ public final class MessagePB {
         }
       }
       /**
-       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
        */
       public Builder setReadyCollector(com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector value) {
         if (readyCollectorBuilder_ == null) {
@@ -1699,7 +1822,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
        */
       public Builder setReadyCollector(
           com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.Builder builderForValue) {
@@ -1713,7 +1836,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
        */
       public Builder mergeReadyCollector(com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector value) {
         if (readyCollectorBuilder_ == null) {
@@ -1732,7 +1855,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
        */
       public Builder clearReadyCollector() {
         if (readyCollectorBuilder_ == null) {
@@ -1745,7 +1868,7 @@ public final class MessagePB {
         return this;
       }
       /**
-       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
        */
       public com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.Builder getReadyCollectorBuilder() {
         bitField0_ |= 0x00000040;
@@ -1753,7 +1876,7 @@ public final class MessagePB {
         return getReadyCollectorFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
        */
       public com.dp.blackhole.common.ReadyCollectorPB.ReadyCollectorOrBuilder getReadyCollectorOrBuilder() {
         if (readyCollectorBuilder_ != null) {
@@ -1763,7 +1886,7 @@ public final class MessagePB {
         }
       }
       /**
-       * <code>optional .blackhole.ReadyCollector readyCollector = 7;</code>
+       * <code>optional .blackhole.ReadyCollector readyCollector = 9;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector, com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector.Builder, com.dp.blackhole.common.ReadyCollectorPB.ReadyCollectorOrBuilder> 
@@ -1777,6 +1900,123 @@ public final class MessagePB {
           readyCollector_ = null;
         }
         return readyCollectorBuilder_;
+      }
+
+      // optional .blackhole.RollID rollID = 10;
+      private com.dp.blackhole.common.RollIDPB.RollID rollID_ = com.dp.blackhole.common.RollIDPB.RollID.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.RollIDPB.RollID, com.dp.blackhole.common.RollIDPB.RollID.Builder, com.dp.blackhole.common.RollIDPB.RollIDOrBuilder> rollIDBuilder_;
+      /**
+       * <code>optional .blackhole.RollID rollID = 10;</code>
+       */
+      public boolean hasRollID() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>optional .blackhole.RollID rollID = 10;</code>
+       */
+      public com.dp.blackhole.common.RollIDPB.RollID getRollID() {
+        if (rollIDBuilder_ == null) {
+          return rollID_;
+        } else {
+          return rollIDBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.RollID rollID = 10;</code>
+       */
+      public Builder setRollID(com.dp.blackhole.common.RollIDPB.RollID value) {
+        if (rollIDBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          rollID_ = value;
+          onChanged();
+        } else {
+          rollIDBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000080;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.RollID rollID = 10;</code>
+       */
+      public Builder setRollID(
+          com.dp.blackhole.common.RollIDPB.RollID.Builder builderForValue) {
+        if (rollIDBuilder_ == null) {
+          rollID_ = builderForValue.build();
+          onChanged();
+        } else {
+          rollIDBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000080;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.RollID rollID = 10;</code>
+       */
+      public Builder mergeRollID(com.dp.blackhole.common.RollIDPB.RollID value) {
+        if (rollIDBuilder_ == null) {
+          if (((bitField0_ & 0x00000080) == 0x00000080) &&
+              rollID_ != com.dp.blackhole.common.RollIDPB.RollID.getDefaultInstance()) {
+            rollID_ =
+              com.dp.blackhole.common.RollIDPB.RollID.newBuilder(rollID_).mergeFrom(value).buildPartial();
+          } else {
+            rollID_ = value;
+          }
+          onChanged();
+        } else {
+          rollIDBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000080;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.RollID rollID = 10;</code>
+       */
+      public Builder clearRollID() {
+        if (rollIDBuilder_ == null) {
+          rollID_ = com.dp.blackhole.common.RollIDPB.RollID.getDefaultInstance();
+          onChanged();
+        } else {
+          rollIDBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000080);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.RollID rollID = 10;</code>
+       */
+      public com.dp.blackhole.common.RollIDPB.RollID.Builder getRollIDBuilder() {
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return getRollIDFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.RollID rollID = 10;</code>
+       */
+      public com.dp.blackhole.common.RollIDPB.RollIDOrBuilder getRollIDOrBuilder() {
+        if (rollIDBuilder_ != null) {
+          return rollIDBuilder_.getMessageOrBuilder();
+        } else {
+          return rollID_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.RollID rollID = 10;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.RollIDPB.RollID, com.dp.blackhole.common.RollIDPB.RollID.Builder, com.dp.blackhole.common.RollIDPB.RollIDOrBuilder> 
+          getRollIDFieldBuilder() {
+        if (rollIDBuilder_ == null) {
+          rollIDBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.common.RollIDPB.RollID, com.dp.blackhole.common.RollIDPB.RollID.Builder, com.dp.blackhole.common.RollIDPB.RollIDOrBuilder>(
+                  rollID_,
+                  getParentForChildren(),
+                  isClean());
+          rollID_ = null;
+        }
+        return rollIDBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
@@ -1807,22 +2047,24 @@ public final class MessagePB {
       "\n\rMessage.proto\022\tblackhole\032\014AppReg.proto" +
       "\032\025AssignCollector.proto\032\rAppRoll.proto\032\027" +
       "RecoveryCollector.proto\032\022RecoveryRoll.pr" +
-      "oto\032\024ReadyCollector.proto\032\022CollectorReg." +
-      "proto\"\207\004\n\007Message\022,\n\004type\030\001 \002(\0162\036.blackh" +
-      "ole.Message.MessageType\022!\n\006appReg\030\002 \001(\0132" +
-      "\021.blackhole.AppReg\0223\n\017assignCollector\030\003 " +
-      "\001(\0132\032.blackhole.AssignCollector\022#\n\007appRo" +
-      "ll\030\004 \001(\0132\022.blackhole.AppRoll\022-\n\014recovery" +
-      "Roll\030\005 \001(\0132\027.blackhole.RecoveryRoll\0227\n\021r",
-      "ecoveryCollector\030\006 \001(\0132\034.blackhole.Recov" +
-      "eryCollector\0221\n\016readyCollector\030\007 \001(\0132\031.b" +
-      "lackhole.ReadyCollector\"\265\001\n\013MessageType\022" +
-      "\013\n\007APP_REG\020\001\022\021\n\rCOLLECTOR_REG\020\002\022\023\n\017READY" +
-      "_COLLECTOR\020\003\022\024\n\020ASSIGN_COLLECTOR\020\004\022\026\n\022RE" +
-      "COVERY_COLLECTOR\020\005\022\021\n\rRECOVERY_ROLL\020\006\022\017\n" +
-      "\013HDFS_UPLOAD\020\007\022\021\n\rHDFS_RECOVERY\020\010\022\014\n\010APP" +
-      "_ROLL\020\tB$\n\027com.dp.blackhole.commonB\tMess" +
-      "agePB"
+      "oto\032\024ReadyCollector.proto\032\014RollID.proto\"" +
+      "\365\004\n\007Message\022,\n\004type\030\001 \002(\0162\036.blackhole.Me" +
+      "ssage.MessageType\022!\n\006appReg\030\004 \001(\0132\021.blac" +
+      "khole.AppReg\0223\n\017assignCollector\030\005 \001(\0132\032." +
+      "blackhole.AssignCollector\022#\n\007appRoll\030\006 \001" +
+      "(\0132\022.blackhole.AppRoll\022-\n\014recoveryRoll\030\007" +
+      " \001(\0132\027.blackhole.RecoveryRoll\0227\n\021recover",
+      "yCollector\030\010 \001(\0132\034.blackhole.RecoveryCol" +
+      "lector\0221\n\016readyCollector\030\t \001(\0132\031.blackho" +
+      "le.ReadyCollector\022!\n\006rollID\030\n \001(\0132\021.blac" +
+      "khole.RollID\"\200\002\n\013MessageType\022\016\n\nHEARTBEA" +
+      "RT\020\001\022\013\n\007APP_REG\020\003\022\021\n\rCOLLECTOR_REG\020\004\022\023\n\017" +
+      "READY_COLLECTOR\020\005\022\024\n\020ASSIGN_COLLECTOR\020\006\022" +
+      "\026\n\022RECOVERY_COLLECTOR\020\007\022\017\n\013UPLOAD_ROLL\020\t" +
+      "\022\022\n\016UPLOAD_SUCCESS\020\n\022\017\n\013UPLOAD_FAIL\020\013\022\021\n" +
+      "\rRECOVERY_ROLL\020\014\022\024\n\020RECOVERY_SUCCESS\020\r\022\021" +
+      "\n\rRECOVERY_FAIL\020\016\022\014\n\010APP_ROLL\020\017B$\n\027com.d",
+      "p.blackhole.commonB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1834,7 +2076,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "RecoveryCollector", "ReadyCollector", });
+              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "RecoveryCollector", "ReadyCollector", "RollID", });
           return null;
         }
       };
@@ -1847,7 +2089,7 @@ public final class MessagePB {
           com.dp.blackhole.common.RecoveryCollectorPB.getDescriptor(),
           com.dp.blackhole.common.RecoveryRollPB.getDescriptor(),
           com.dp.blackhole.common.ReadyCollectorPB.getDescriptor(),
-          com.dp.blackhole.common.CollectorRegPB.getDescriptor(),
+          com.dp.blackhole.common.RollIDPB.getDescriptor(),
         }, assigner);
   }
 
