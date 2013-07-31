@@ -6,7 +6,6 @@ option java_outer_classname = "MessagePB";
 import "AppReg.proto";
 import "AssignCollector.proto";
 import "AppRoll.proto";
-import "RecoveryCollector.proto";
 import "RecoveryRoll.proto";
 import "ReadyCollector.proto";
 import "RollID.proto";
@@ -32,7 +31,6 @@ message Message {
     optional AssignCollector assignCollector = 3;
     optional AppRoll appRoll = 4;
     optional RecoveryRoll recoveryRoll = 5;
-    optional RecoveryCollector recoveryCollector = 6;
-    optional ReadyCollector readyCollector = 7;
-    optional RollID rollID = 8;
+    optional ReadyCollector readyCollector = 6;
+    optional RollID rollID = 7;
 }
