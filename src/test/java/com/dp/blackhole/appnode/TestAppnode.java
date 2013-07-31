@@ -3,10 +3,8 @@ package com.dp.blackhole.appnode;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -23,7 +21,7 @@ import org.junit.Test;
 import com.dp.blackhole.common.AssignCollectorPB.AssignCollector;
 import com.dp.blackhole.common.MessagePB.Message;
 import com.dp.blackhole.common.MessagePB.Message.MessageType;
-import com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector;
+import com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.conf.AppConfigurationConstants;
 import com.dp.blackhole.conf.ConfigKeeper;
@@ -61,7 +59,6 @@ public class TestAppnode {
         //she zhe yige applog fang dao applogs zhong
         Appnode appnode = new Appnode(client);
         Message message = getMessageOfAssignCollector();
-        Message message2 = getMessageOfRecoveryCollector();
         Message message3 = getMessageOfRecoveryRoll();
         appnode.process(message);
 //        appnode.process(message2);
@@ -72,7 +69,6 @@ public class TestAppnode {
         AssignCollector.Builder assignCollectorBuilder = AssignCollector.newBuilder();
         assignCollectorBuilder.setAppName("testApp");
         assignCollectorBuilder.setCollectorServer("localhost");
-        assignCollectorBuilder.setCollectorPort(40000);
         AssignCollector assignCollector = assignCollectorBuilder.build();
         Message.Builder messageBuilder = Message.newBuilder();
         messageBuilder.setType(MessageType.ASSIGN_COLLECTOR);
@@ -81,25 +77,11 @@ public class TestAppnode {
         return message;
     }
     
-    private Message getMessageOfRecoveryCollector() {
-        RecoveryCollector.Builder recoveryCollectorBuilder = RecoveryCollector.newBuilder();
-        recoveryCollectorBuilder.setAppName("testApp");
-        recoveryCollectorBuilder.setCollectorServer("localhost");
-        recoveryCollectorBuilder.setCollectorPort(40001);
-        RecoveryCollector recoveryCollector = recoveryCollectorBuilder.build();
-        Message.Builder messageBuilder = Message.newBuilder();
-        messageBuilder.setType(MessageType.RECOVERY_COLLECTOR);
-        messageBuilder.setRecoveryCollector(recoveryCollector);
-        Message message = messageBuilder.build();
-        return message;
-    }
-    
     private Message getMessageOfRecoveryRoll() {
         RecoveryRoll.Builder recoveryRollBuilder = RecoveryRoll.newBuilder();
         recoveryRollBuilder.setAppName("testApp");
         recoveryRollBuilder.setCollectorServer("localhost");
-        recoveryRollBuilder.setCollectorPort(40000);
-        recoveryRollBuilder.setRollTS(Util.rollTS);
+        recoveryRollBuilder.setRollTs(Util.rollTS);
         RecoveryRoll recoveryRoll = recoveryRollBuilder.build();
         Message.Builder messageBuilder = Message.newBuilder();
         messageBuilder.setType(MessageType.RECOVERY_ROLL);
@@ -108,18 +90,20 @@ public class TestAppnode {
         return message;
     }
 
-    private Message getMessageOfUnknow() {
-        RecoveryCollector.Builder recoveryCollectorBuilder = RecoveryCollector.newBuilder();
-        recoveryCollectorBuilder.setAppName("testApp");
-        recoveryCollectorBuilder.setCollectorServer("localhost");
-        recoveryCollectorBuilder.setCollectorPort(40001);
-        RecoveryCollector recoveryCollector = recoveryCollectorBuilder.build();
+    private Message getUnknowMessage() {
+        ReadyCollector.Builder readyCollectorBuilder = ReadyCollector.newBuilder();
+        readyCollectorBuilder.setAppName("tsetApp");
+        readyCollectorBuilder.setAppServer("testServer");
+        readyCollectorBuilder.setCollectorServer("testServer");
+        readyCollectorBuilder.setConnectedTs(1l);
+        ReadyCollector readyCollector = readyCollectorBuilder.build();
         Message.Builder messageBuilder = Message.newBuilder();
         messageBuilder.setType(MessageType.READY_COLLECTOR);
-        messageBuilder.setRecoveryCollector(recoveryCollector);
+        messageBuilder.setReadyCollector(readyCollector);
         Message message = messageBuilder.build();
         return message;
     }
+    
     @Test
     public void testLoadLocalConfig() throws ParseException, IOException {
         File confFile = File.createTempFile("app.conf", null);
@@ -144,6 +128,6 @@ public class TestAppnode {
         String second = ConfigKeeper.configMap.get("testApp")
                 .getString("second");
         assertEquals(second, "sencond preperty");
-        confFile.deleteOnExit();
+        confFile.delete();
     }
 }

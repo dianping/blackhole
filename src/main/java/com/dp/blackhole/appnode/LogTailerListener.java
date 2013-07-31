@@ -10,14 +10,18 @@ import org.apache.commons.io.input.TailerListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.conf.AppConfigurationConstants;
+import com.dp.blackhole.conf.ConfigKeeper;
+
 public class LogTailerListener implements TailerListener {
     public static final Log LOG = LogFactory.getLog(LogTailerListener.class);
-
+    private String collectorServer;
     private AppLog appLog;
     private Socket server;
     private Tailer tailer;
     private OutputStreamWriter writer;
-    public LogTailerListener(AppLog appLog) {
+    public LogTailerListener(String collectorServer, AppLog appLog) {
+        this.collectorServer = collectorServer;
         this.appLog = appLog;
     }
 
@@ -29,13 +33,15 @@ public class LogTailerListener implements TailerListener {
     public void init(Tailer tailer) {
         this.tailer = tailer;
         LOG.debug("listening the applog: " + appLog.getAppName());
+        int port = ConfigKeeper.configMap.get(appLog.getAppName())
+                .getInteger(AppConfigurationConstants.PORT);
         try {
-            server = new Socket(appLog.getServer(), appLog.getPort());
+            server = new Socket(collectorServer, port);
             writer = new OutputStreamWriter(server.getOutputStream());
         } catch (UnknownHostException e) {
             tailer.stop();
             LOG.error("Faild to build a socket with host:" 
-                    + appLog.getServer() + " port:" + appLog.getPort()
+                    + collectorServer + " port:" + port
             		+ "This tailer thread stop! ", e);
         } catch (IOException e) {
             tailer.stop();

@@ -30,18 +30,19 @@ public class TestRollRecovery {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
     //build a tmp file
+        ConfigKeeper confKeeper = new ConfigKeeper();
+        confKeeper.addRawProperty(MAGIC+".port", "40000");
         file = Util.createTmpFile(MAGIC + Util.FILE_SUFFIX, Util.expected);
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        LOG.info("delete tmp file for test RollRecovery " + file);
         Util.deleteTmpFile(MAGIC);
     }
 
     @Before
     public void setUp() throws Exception {
-        appLog = new AppLog(MAGIC, file.getAbsolutePath(), System.currentTimeMillis(), "localhost", Util.PORT);
+        appLog = new AppLog(MAGIC, file.getAbsolutePath(), System.currentTimeMillis());
         server = new SimRecoveryServer(Util.PORT, header, receives);
         serverThread = new Thread(server);
         serverThread.start();
@@ -56,7 +57,7 @@ public class TestRollRecovery {
 
     @Test
     public void test() {
-        RollRecovery recovery = new RollRecovery(appLog, Util.rollTS);
+        RollRecovery recovery = new RollRecovery(Util.HOSTNAME, appLog, Util.rollTS);
         Thread thread = new Thread(recovery);
         thread.start();
         try {

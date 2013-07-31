@@ -6,11 +6,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -29,7 +28,6 @@ import com.dp.blackhole.common.AppRollPB.AppRoll;
 import com.dp.blackhole.common.AssignCollectorPB.AssignCollector;
 import com.dp.blackhole.common.MessagePB.Message;
 import com.dp.blackhole.common.MessagePB.Message.MessageType;
-import com.dp.blackhole.common.RecoveryCollectorPB.RecoveryCollector;
 import com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.conf.AppConfigurationConstants;
 import com.dp.blackhole.conf.ConfigKeeper;
@@ -41,44 +39,26 @@ public class Appnode extends Node {
     private File configFile = null;
     private ExecutorService exec;
     private String appClient;
-    private static Map<String, AppLog> appLogs = Collections.synchronizedMap(new HashMap<String, AppLog>());
-    private static Map<String, LogReader> appReaders = Collections.synchronizedMap(new HashMap<String, LogReader>());
+    private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
+    private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
     public Appnode(String appClient) {
         this.appClient = appClient;
     }
 
-
     public void process(Message msg) {
-	      String tmpAppName;
-  	    AppLog tmpAppLog;
+	    String appName = "";
+	    String collectorServer = "";
+  	    AppLog appLog = null;
+  	    LogReader logReader = null;
   	    MessageType type = msg.getType();
   	    switch (type) {
-        case RECOVERY_COLLECTOR:
-            RecoveryCollector recoveryCollector = msg.getRecoveryCollector();
-            tmpAppName = recoveryCollector.getAppName();
-            if (appReaders.containsKey(tmpAppName)) {
-                LogReader reader = appReaders.get(tmpAppName);
-                reader.stop();
-                reader = null;
-                tmpAppLog = appLogs.get(tmpAppName);
-                tmpAppLog.setServer(recoveryCollector.getCollectorServer());
-                tmpAppLog.setPort(recoveryCollector.getCollectorPort());
-                reader = new LogReader(this, tmpAppLog, true);
-                exec.execute(reader);
-            } else {
-                LOG.error("AppName [" + recoveryCollector.getAppName()
-                        + "] from supervisor message not match with local");
-            }
-            break;
         case RECOVERY_ROLL:
             RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
-            tmpAppName = recoveryRoll.getAppName();
-            if (appReaders.containsKey(tmpAppName)) {
-                long rollIdent = recoveryRoll.getRollIdent();//rollIdent is the same meaning roll timestamp
-                tmpAppLog = appLogs.get(tmpAppName);
-                tmpAppLog.setServer(recoveryRoll.getCollectorServer());
-                tmpAppLog.setPort(recoveryRoll.getCollectorPort());
-                RollRecovery recovery = new RollRecovery(tmpAppLog, rollIdent);
+            appName = recoveryRoll.getAppName();
+            if (appLogs.containsKey(appName)) {
+                long rollTs = recoveryRoll.getRollTs();
+                collectorServer = recoveryRoll.getCollectorServer();
+                RollRecovery recovery = new RollRecovery(collectorServer, appLog, rollTs);
                 exec.execute(recovery);
             } else {
                 LOG.error("AppName [" + recoveryRoll.getAppName()
@@ -87,14 +67,15 @@ public class Appnode extends Node {
             break;
         case ASSIGN_COLLECTOR:
             AssignCollector assignCollector = msg.getAssignCollector();
-            tmpAppName = assignCollector.getAppName();
-            if (appLogs.containsKey(tmpAppName)) {
-                tmpAppLog = appLogs.get(tmpAppName);
-                tmpAppLog.setServer(assignCollector.getCollectorServer());
-                tmpAppLog.setPort(assignCollector.getCollectorPort());
-                
-                LogReader logReader = new LogReader(this, tmpAppLog, false);
-                appReaders.put(tmpAppLog.getAppName(), logReader);
+            appName = assignCollector.getAppName();
+            if ((appLog = appLogs.get(appName)) != null) {
+                if ((logReader = appReaders.get(appLog)) != null) {
+                    logReader.stop();   //stop the old read thread (old stream).
+                    appReaders.remove(logReader);
+                }
+                collectorServer = assignCollector.getCollectorServer();
+                logReader = new LogReader(collectorServer, appLog, true);
+                appReaders.put(appLog, logReader);
                 exec.execute(logReader);
             } else {
                 LOG.error("AppName [" + assignCollector.getAppName()
