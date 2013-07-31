@@ -6,6 +6,8 @@ public final class AppConfigurationConstants {
         public static final String COMMOM_CONFIG_PREFIX = COMMOM_CONFIG + ".";
         public static final String APPS = "apps";
         
+        public static final String PORT = "port";
+        
         public static final String HOSTNAME = "hostname";
         public static final String WATCH_FILE = "watchFile";
         public static final String TRANSFER_PERIOD_VALUE = "transferPeriodValue";

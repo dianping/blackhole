@@ -21,10 +21,12 @@ import com.dp.blackhole.conf.ConfigKeeper;
 
 public class RollRecoveryZero implements Runnable{
     private static final Log LOG = LogFactory.getLog(RollRecoveryZero.class);
+    private String collectorServer;
     private AppLog appLog;
     private long rollTimestamp;
     private Socket server;
-    public RollRecoveryZero(AppLog appLog, long rollTimestamp) {
+    public RollRecoveryZero(String collectorServer, AppLog appLog, long rollTimestamp) {
+        this.collectorServer = collectorServer;
         this.appLog = appLog;
         this.rollTimestamp = rollTimestamp;
     }
@@ -44,26 +46,27 @@ public class RollRecoveryZero implements Runnable{
         DataOutputStream out = null;
         DataInputStream in = null;
         long offset = 0;
+        int port = 0;
         try {
             //Unblocking IO zero copy
-            SocketAddress address = new InetSocketAddress(appLog.getServer(), appLog.getPort());
+            port = ConfigKeeper.configMap.get(appLog.getAppName())
+                    .getInteger(AppConfigurationConstants.PORT);
+            SocketAddress address = new InetSocketAddress(collectorServer, port);
             socketChannel = SocketChannel.open();
             socketChannel.connect(address);
             socketChannel.configureBlocking(true);//TODO to be review
-            
             
             //Blocking IO
             server = socketChannel.socket();
             out = sendHeaderReq();
             offset = receiveHeaderRes(in);
             LOG.info("Seek to the position " + offset + " ok. Begin to transfer...");
-            
 
             FileChannel fc = new FileInputStream(rolledFile).getChannel();
             long curnset =    fc.transferTo(offset, rolledFile.length(), socketChannel);
             System.out.println(curnset);
             LOG.info("Roll file " + rolledFile + " has been transfered, ");
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error("Oops, got an exception:", e);
         } finally {
             try {

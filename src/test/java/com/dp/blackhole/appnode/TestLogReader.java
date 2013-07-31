@@ -22,13 +22,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.simutil.SimTailServer;
 
 public class TestLogReader {
     private static final Log LOG = LogFactory.getLog(TestLogReader.class);
 
     private static AppLog appLog;
-    private static Appnode appnode;
     private static final String MAGIC = "sdfjiojwe";
     private static List<String> receives = new ArrayList<String>();
     private static int before = 0;
@@ -54,6 +54,8 @@ public class TestLogReader {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        ConfigKeeper confKeeper = new ConfigKeeper();
+        confKeeper.addRawProperty(MAGIC+".port", "40000");
     }
 
     @AfterClass
@@ -74,23 +76,12 @@ public class TestLogReader {
         Thread t = new Thread(new Writer(fileAbsolutePath));
         t.setDaemon(false);
         t.start();
-        appLog = new AppLog(MAGIC, fileAbsolutePath, System.currentTimeMillis(), 
-                "localhost", com.dp.blackhole.simutil.Util.PORT);
-
-        //build a app node
-        String appClient = "127.0.0.1";
-        appnode = new Appnode(appClient);
+        appLog = new AppLog(MAGIC, fileAbsolutePath, System.currentTimeMillis());
     }
 
     @After
     public void tearDown() throws Exception {
-//        List<File> candidateFiles = Arrays.asList(new File("/tmp").listFiles());
-//        for (File file : candidateFiles) {
-//            if (file.getName().startsWith(MAGIC)) {
-//                LOG.info("delete tmp file for test LogReader " + file);
-//                file.deleteOnExit();
-//            }
-//        }
+        com.dp.blackhole.simutil.Util.deleteTmpFile(MAGIC);
     }
 
     static class Writer implements Runnable{
@@ -196,7 +187,7 @@ public class TestLogReader {
     @Test
     public void test() {
 //        System.out.println(System.getProperty("java.class.path"));
-        LogReader reader = new LogReader(appnode, appLog, true);
+        LogReader reader = new LogReader(com.dp.blackhole.simutil.Util.HOSTNAME, appLog, true);
         ExecutorService exec = Executors.newCachedThreadPool();
         exec.execute(reader);
         try {
@@ -209,7 +200,7 @@ public class TestLogReader {
     
     @Test
     public void testFileNotFoundAndFileRotated() {
-        LogReader reader = new LogReader(appnode, appLog, true);
+        LogReader reader = new LogReader(com.dp.blackhole.simutil.Util.HOSTNAME, appLog, true);
         ExecutorService exec = Executors.newCachedThreadPool();
         exec.execute(reader);
         ExecutorService exec2 = Executors.newSingleThreadExecutor();

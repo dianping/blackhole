@@ -16,10 +16,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.collectornode.RollIdent;
-import com.dp.blackhole.common.AppRegPB.AppReg;
-import com.dp.blackhole.common.AppRollPB.AppRoll;
-import com.dp.blackhole.common.MessagePB.Message;
 import com.dp.blackhole.conf.CollectorConfigurationConstants;
 import com.dp.blackhole.conf.ConfigKeeper;
 

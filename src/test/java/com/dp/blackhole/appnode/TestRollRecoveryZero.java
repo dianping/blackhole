@@ -30,6 +30,8 @@ public class TestRollRecoveryZero {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
     //build a tmp file
+        ConfigKeeper confKeeper = new ConfigKeeper();
+        confKeeper.addRawProperty(MAGIC+".port", "40000");
         file = Util.createTmpFile(MAGIC + Util.FILE_SUFFIX, Util.expected);
     }
 
@@ -41,7 +43,7 @@ public class TestRollRecoveryZero {
 
     @Before
     public void setUp() throws Exception {
-        appLog = new AppLog(MAGIC, file.getAbsolutePath(), System.currentTimeMillis(), "localhost", Util.PORT);
+        appLog = new AppLog(MAGIC, file.getAbsolutePath(), System.currentTimeMillis());
         server = new SimRecoveryServer(Util.PORT, header, receives);
         serverThread = new Thread(server);
         serverThread.start();
@@ -56,7 +58,7 @@ public class TestRollRecoveryZero {
 
     @Test
     public void test() {
-        RollRecoveryZero recoveryZ = new RollRecoveryZero(appLog, Util.rollTS);
+        RollRecoveryZero recoveryZ = new RollRecoveryZero(Util.HOSTNAME, appLog, Util.rollTS);
         Thread thread = new Thread(recoveryZ);
         thread.start();
         try {

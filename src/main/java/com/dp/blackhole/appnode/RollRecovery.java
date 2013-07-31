@@ -21,13 +21,13 @@ public class RollRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(RollRecovery.class);
     private static final String RAF_MODE = "r";
     private static final int DEFAULT_BUFSIZE = 8192;
+    private String collectorServer;
     private AppLog appLog;
-//    private Appnode appnode;    //to persist it for next version
     private long rollTimestamp;
     private Socket server;
     private byte[] inbuf;
-    public RollRecovery(AppLog appLog, long rollTimestamp) {
-//        this.appnode = appnode;
+    public RollRecovery(String collectorServer, AppLog appLog, long rollTimestamp) {
+        this.collectorServer = collectorServer;
         this.appLog = appLog;
         this.rollTimestamp = rollTimestamp;
         this.inbuf = new byte[DEFAULT_BUFSIZE];
@@ -44,8 +44,11 @@ public class RollRecovery implements Runnable{
         DataOutputStream out = null;
         DataInputStream in = null;
         long offset = 0;
+        int port = 0;
         try {
-            server = new Socket(appLog.getServer(), appLog.getPort());
+            port = ConfigKeeper.configMap.get(appLog.getAppName())
+                    .getInteger(AppConfigurationConstants.PORT);
+            server = new Socket(collectorServer, port);
             out = sendHeaderReq();
             
             offset = receiveHeaderRes(in);
@@ -67,9 +70,11 @@ public class RollRecovery implements Runnable{
             LOG.error("Oops, got an exception:", e);
         } catch (UnknownHostException e) {
             LOG.error("Faild to build a socket with host:" 
-                    + appLog.getServer() + " port:" + appLog.getPort(), e);
+                    + collectorServer + " port:" + port, e);
         } catch (IOException e) {
             LOG.error("Faild to build Input/Output stream. ", e);
+        } catch (Exception e) {
+            LOG.error("Oops, got an exception:", e);
         } finally {
             try {
                 if (in != null) {
