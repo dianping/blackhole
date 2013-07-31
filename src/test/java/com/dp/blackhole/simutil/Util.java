@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
-    
+    public static final String HOSTNAME = "localhost";
     public static final String SCHEMA = "file://";
     public static final String BASE_PATH = "/tmp/";
     public static final String FILE_SUFFIX = "2013-01-01.03";

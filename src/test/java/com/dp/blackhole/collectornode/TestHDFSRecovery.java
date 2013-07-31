@@ -65,6 +65,7 @@ public class TestHDFSRecovery {
         confKeeper.addRawProperty(MAGIC+".transferPeriodUnit", "hour");
         //base_hdfs_path
         confKeeper.addRawProperty(MAGIC+".base_hdfs_path", "file:///tmp");
+        confKeeper.addRawProperty(MAGIC+".port", "40000");
     }
 
     @AfterClass
@@ -88,8 +89,8 @@ public class TestHDFSRecovery {
                 new SimCollectornode("recovery", Util.PORT, fs, MAGIC, APP_HOST, Util.FILE_SUFFIX, 0, 0));
         serverThread.start();
         
-        AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), new Date().getTime(), "localhost", Util.PORT);
-        RollRecovery clientTask = new RollRecovery(appLog, Util.rollTS);
+        AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), new Date().getTime());
+        RollRecovery clientTask = new RollRecovery(Util.HOSTNAME, appLog, Util.rollTS);
         Thread clientThread = new Thread(clientTask);
         clientThread.start();
         

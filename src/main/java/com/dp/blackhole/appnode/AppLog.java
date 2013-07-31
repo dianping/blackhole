@@ -4,23 +4,15 @@ public class AppLog {
     private String appName;
     private String tailFile;
     private long createTime;
-    private String server;
-    private int port;
     
     public AppLog(String appName, String tailFile) {
         this(appName, tailFile, System.currentTimeMillis());
     }
     
     public AppLog(String appName, String tailFile, long createTime) {
-        this(appName, tailFile, createTime, null, 0);
-    }
-    
-    public AppLog(String appName, String tailFile, long createTime, String server, int port) {
         this.appName = appName;
         this.tailFile = tailFile;
         this.createTime = createTime;
-        this.server = server;
-        this.port = port;
     }
 
     public String getAppName() {
@@ -43,19 +35,27 @@ public class AppLog {
         return createTime;
     }
 
-    public String getServer() {
-        return server;
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((appName == null) ? 0 : appName.hashCode());
+        return result;
     }
-
-    public void setServer(String server) {
-        this.server = server;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AppLog other = (AppLog) obj;
+        if (appName == null) {
+            if (other.appName != null)
+                return false;
+        } else if (!appName.equals(other.appName))
+            return false;
+        return true;
     }
 }
