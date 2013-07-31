@@ -21,7 +21,7 @@ public class Connection {
     private String host;
     
     public Connection (SocketChannel channel) throws IOException {
-        this.host = ((InetSocketAddress) channel.getRemoteAddress()).getHostName();
+        this.host = ((InetSocketAddress)channel.socket().getRemoteSocketAddress()).getHostName();
         this.channel = channel;
         this.length = ByteBuffer.allocate(4);
         this.queue = new ConcurrentLinkedQueue<Message>();
