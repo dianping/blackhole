@@ -22,7 +22,6 @@ import com.dp.blackhole.common.NodeRegPB.NodeReg;
 
 public abstract class Node {
     public static final Log LOG = LogFactory.getLog(Node.class);
-    private String host;
     private Selector selector;
     private SocketChannel socketChannel;
     volatile private boolean running = true;
@@ -178,7 +177,6 @@ public abstract class Node {
     }
 
     private void init() throws IOException, ClosedChannelException {
-        host = InetAddress.getLocalHost().getHostName();
         socketChannel = SocketChannel.open();
         socketChannel.configureBlocking(false);
         SocketAddress supervisor = new InetSocketAddress("localhost", 8080);    
