@@ -40,16 +40,6 @@ public final class RecoveryCollectorPB {
      */
     com.google.protobuf.ByteString
         getCollectorServerBytes();
-
-    // required int32 collector_port = 3;
-    /**
-     * <code>required int32 collector_port = 3;</code>
-     */
-    boolean hasCollectorPort();
-    /**
-     * <code>required int32 collector_port = 3;</code>
-     */
-    int getCollectorPort();
   }
   /**
    * Protobuf type {@code blackhole.RecoveryCollector}
@@ -110,11 +100,6 @@ public final class RecoveryCollectorPB {
             case 18: {
               bitField0_ |= 0x00000002;
               collectorServer_ = input.readBytes();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000004;
-              collectorPort_ = input.readInt32();
               break;
             }
           }
@@ -243,26 +228,9 @@ public final class RecoveryCollectorPB {
       }
     }
 
-    // required int32 collector_port = 3;
-    public static final int COLLECTOR_PORT_FIELD_NUMBER = 3;
-    private int collectorPort_;
-    /**
-     * <code>required int32 collector_port = 3;</code>
-     */
-    public boolean hasCollectorPort() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    /**
-     * <code>required int32 collector_port = 3;</code>
-     */
-    public int getCollectorPort() {
-      return collectorPort_;
-    }
-
     private void initFields() {
       appName_ = "";
       collectorServer_ = "";
-      collectorPort_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -274,10 +242,6 @@ public final class RecoveryCollectorPB {
         return false;
       }
       if (!hasCollectorServer()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasCollectorPort()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -293,9 +257,6 @@ public final class RecoveryCollectorPB {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeBytes(2, getCollectorServerBytes());
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeInt32(3, collectorPort_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -313,10 +274,6 @@ public final class RecoveryCollectorPB {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, getCollectorServerBytes());
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(3, collectorPort_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -438,8 +395,6 @@ public final class RecoveryCollectorPB {
         bitField0_ = (bitField0_ & ~0x00000001);
         collectorServer_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
-        collectorPort_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -476,10 +431,6 @@ public final class RecoveryCollectorPB {
           to_bitField0_ |= 0x00000002;
         }
         result.collectorServer_ = collectorServer_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        result.collectorPort_ = collectorPort_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -506,9 +457,6 @@ public final class RecoveryCollectorPB {
           collectorServer_ = other.collectorServer_;
           onChanged();
         }
-        if (other.hasCollectorPort()) {
-          setCollectorPort(other.getCollectorPort());
-        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -519,10 +467,6 @@ public final class RecoveryCollectorPB {
           return false;
         }
         if (!hasCollectorServer()) {
-          
-          return false;
-        }
-        if (!hasCollectorPort()) {
           
           return false;
         }
@@ -696,39 +640,6 @@ public final class RecoveryCollectorPB {
         return this;
       }
 
-      // required int32 collector_port = 3;
-      private int collectorPort_ ;
-      /**
-       * <code>required int32 collector_port = 3;</code>
-       */
-      public boolean hasCollectorPort() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      /**
-       * <code>required int32 collector_port = 3;</code>
-       */
-      public int getCollectorPort() {
-        return collectorPort_;
-      }
-      /**
-       * <code>required int32 collector_port = 3;</code>
-       */
-      public Builder setCollectorPort(int value) {
-        bitField0_ |= 0x00000004;
-        collectorPort_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required int32 collector_port = 3;</code>
-       */
-      public Builder clearCollectorPort() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        collectorPort_ = 0;
-        onChanged();
-        return this;
-      }
-
       // @@protoc_insertion_point(builder_scope:blackhole.RecoveryCollector)
     }
 
@@ -754,11 +665,10 @@ public final class RecoveryCollectorPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\027RecoveryCollector.proto\022\tblackhole\"W\n\021" +
+      "\n\027RecoveryCollector.proto\022\tblackhole\"?\n\021" +
       "RecoveryCollector\022\020\n\010app_name\030\001 \002(\t\022\030\n\020c" +
-      "ollector_server\030\002 \002(\t\022\026\n\016collector_port\030" +
-      "\003 \002(\005B.\n\027com.dp.blackhole.commonB\023Recove" +
-      "ryCollectorPB"
+      "ollector_server\030\002 \002(\tB.\n\027com.dp.blackhol" +
+      "e.commonB\023RecoveryCollectorPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -770,7 +680,7 @@ public final class RecoveryCollectorPB {
           internal_static_blackhole_RecoveryCollector_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RecoveryCollector_descriptor,
-              new java.lang.String[] { "AppName", "CollectorServer", "CollectorPort", });
+              new java.lang.String[] { "AppName", "CollectorServer", });
           return null;
         }
       };
