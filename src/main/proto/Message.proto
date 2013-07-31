@@ -13,27 +13,26 @@ import "RollID.proto";
 
 message Message {
     enum MessageType {
-      HEARTBEART = 1;
-        APP_REG = 3;
-        COLLECTOR_REG = 4;
+        HEARTBEART = 1;
+        APP_REG = 2;
+        COLLECTOR_REG = 3;
+        ASSIGN_COLLECTOR = 4;
         READY_COLLECTOR = 5;
-        ASSIGN_COLLECTOR = 6;
-        RECOVERY_COLLECTOR = 7;
-        UPLOAD_ROLL = 9;
-        UPLOAD_SUCCESS = 10;
-        UPLOAD_FAIL = 11;
-        RECOVERY_ROLL = 12;
-        RECOVERY_SUCCESS = 13;
-        RECOVERY_FAIL = 14;
-        APP_ROLL = 15;
+        APP_ROLL = 6;
+        UPLOAD_ROLL = 7;
+        UPLOAD_SUCCESS = 8;
+        UPLOAD_FAIL = 9;
+        RECOVERY_ROLL = 10;
+        RECOVERY_SUCCESS = 11;
+        RECOVERY_FAIL = 12;
     }
 
     required MessageType type = 1;
-    optional AppReg appReg = 4;
-    optional AssignCollector assignCollector = 5;
-    optional AppRoll appRoll = 6;
-    optional RecoveryRoll recoveryRoll = 7;
-    optional RecoveryCollector recoveryCollector = 8;
-    optional ReadyCollector readyCollector = 9;
-    optional RollID rollID = 10;
+    optional AppReg appReg = 2;
+    optional AssignCollector assignCollector = 3;
+    optional AppRoll appRoll = 4;
+    optional RecoveryRoll recoveryRoll = 5;
+    optional RecoveryCollector recoveryCollector = 6;
+    optional ReadyCollector readyCollector = 7;
+    optional RollID rollID = 8;
 }
