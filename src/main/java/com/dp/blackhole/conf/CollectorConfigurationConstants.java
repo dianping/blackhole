@@ -6,6 +6,7 @@ public final class CollectorConfigurationConstants {
         public static final String COMMOM_CONFIG_PREFIX = COMMOM_CONFIG + ".";
         
         public static final String BASE_HDFS_PATH = "base_hdfs_path";
+        public static final String PORT = "port";
         private CollectorConfigurationConstants() {
             // disable explicit object creation
         }
