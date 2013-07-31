@@ -6,5 +6,4 @@ option java_outer_classname = "AssignCollectorPB";
 message AssignCollector {
     required string app_name = 1;
     required string collector_server = 2;
-    required int32 collector_port = 3;
 }
