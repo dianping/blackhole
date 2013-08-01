@@ -59,11 +59,6 @@ public class TestUtil {
     }
 
     @Test
-    public void testGetRollIdentByTime() {
-        fail("Not yet implemented");
-    }
-
-    @Test
     public void testGetOneHoursAgoTime() {
         Date setDate = new Date(2013, MONTH.JULY.ordinal(), 15, 18, 30, 24);
         Date expectedDate = new Date(2013, MONTH.JULY.ordinal(), 15, 17, 30, 24);

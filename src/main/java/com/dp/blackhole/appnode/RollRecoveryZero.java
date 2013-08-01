@@ -22,11 +22,13 @@ import com.dp.blackhole.conf.ConfigKeeper;
 public class RollRecoveryZero implements Runnable{
     private static final Log LOG = LogFactory.getLog(RollRecoveryZero.class);
     private String collectorServer;
+    private int port;
     private AppLog appLog;
     private long rollTimestamp;
     private Socket server;
-    public RollRecoveryZero(String collectorServer, AppLog appLog, long rollTimestamp) {
+    public RollRecoveryZero(String collectorServer, int port, AppLog appLog, long rollTimestamp) {
         this.collectorServer = collectorServer;
+        this.port = port;
         this.appLog = appLog;
         this.rollTimestamp = rollTimestamp;
     }
@@ -46,11 +48,8 @@ public class RollRecoveryZero implements Runnable{
         DataOutputStream out = null;
         DataInputStream in = null;
         long offset = 0;
-        int port = 0;
         try {
             //Unblocking IO zero copy
-            port = ConfigKeeper.configMap.get(appLog.getAppName())
-                    .getInteger(AppConfigurationConstants.PORT);
             SocketAddress address = new InetSocketAddress(collectorServer, port);
             socketChannel = SocketChannel.open();
             socketChannel.connect(address);
