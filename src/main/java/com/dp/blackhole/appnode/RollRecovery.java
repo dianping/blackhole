@@ -22,12 +22,14 @@ public class RollRecovery implements Runnable{
     private static final String RAF_MODE = "r";
     private static final int DEFAULT_BUFSIZE = 8192;
     private String collectorServer;
+    private int port;
     private AppLog appLog;
     private long rollTimestamp;
     private Socket server;
     private byte[] inbuf;
-    public RollRecovery(String collectorServer, AppLog appLog, long rollTimestamp) {
+    public RollRecovery(String collectorServer, int port, AppLog appLog, long rollTimestamp) {
         this.collectorServer = collectorServer;
+        this.port = port;
         this.appLog = appLog;
         this.rollTimestamp = rollTimestamp;
         this.inbuf = new byte[DEFAULT_BUFSIZE];
@@ -44,10 +46,7 @@ public class RollRecovery implements Runnable{
         DataOutputStream out = null;
         DataInputStream in = null;
         long offset = 0;
-        int port = 0;
         try {
-            port = ConfigKeeper.configMap.get(appLog.getAppName())
-                    .getInteger(AppConfigurationConstants.PORT);
             server = new Socket(collectorServer, port);
             out = sendHeaderReq();
             

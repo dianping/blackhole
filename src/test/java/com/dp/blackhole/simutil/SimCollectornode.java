@@ -25,7 +25,6 @@ public class SimCollectornode extends Collectornode implements Runnable{
     private ServerSocket ss;
     private String appName;
     private String appHost;
-    private String fileSuffix;
     private long position;
     private long length;
     private Socket client;
@@ -35,7 +34,6 @@ public class SimCollectornode extends Collectornode implements Runnable{
         this.simType = simType;
         this.appName = appName;
         this.appHost = "localhost";
-        this.fileSuffix = com.dp.blackhole.simutil.Util.FILE_SUFFIX;
         this.position = 0;
         this.length = 0;
     }
@@ -45,12 +43,11 @@ public class SimCollectornode extends Collectornode implements Runnable{
     }
     
     public SimCollectornode(String simType, int port, FileSystem fs, String appName, String appHost, 
-            String fileSuffix, long position, long length) throws IOException {
+            long position, long length) throws IOException {
         this.fs = fs;
         this.simType = simType;
         this.appName = appName;
         this.appHost = appHost;
-        this.fileSuffix = fileSuffix;
         this.position = position;
         this.length = length;
         ss = new ServerSocket(port);
@@ -81,8 +78,9 @@ public class SimCollectornode extends Collectornode implements Runnable{
                 long period = Util.getPeriodInSeconds(value, unit);
                 assertEquals(period, din.readLong());
                 assertEquals(Util.getFormatByUnit(unit), Util.readString(din));
-                HDFSRecovery recovery = new HDFSRecovery(getSimpleInstance(simType, fs, appName), fs, client, appName, appHost, 
-                        fileSuffix, position, length);
+                HDFSRecovery recovery = new HDFSRecovery(getSimpleInstance(simType, fs, appName), 
+                        fs, com.dp.blackhole.simutil.Util.BASE_HDFS_PATH, client, appName, appHost, 
+                        com.dp.blackhole.simutil.Util.FILE_SUFFIX, position, length);
                 recovery.run();
             }
         } catch (IOException e) {

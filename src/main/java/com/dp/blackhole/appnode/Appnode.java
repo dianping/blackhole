@@ -2,6 +2,7 @@ package com.dp.blackhole.appnode;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -39,6 +40,8 @@ public class Appnode extends Node {
     private File configFile = null;
     private ExecutorService exec;
     private String appClient;
+    private long delayMillis;
+    private int port;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
 
@@ -48,8 +51,8 @@ public class Appnode extends Node {
     }
 
     public boolean process(Message msg) {
-	    String appName = "";
-	    String collectorServer = "";
+	    String appName;
+	    String collectorServer;
   	    AppLog appLog = null;
   	    LogReader logReader = null;
   	    MessageType type = msg.getType();
@@ -60,7 +63,7 @@ public class Appnode extends Node {
             if ((appLog = appLogs.get(appName)) != null) {
                 long rollTs = recoveryRoll.getRollTs();
                 collectorServer = recoveryRoll.getCollectorServer();
-                RollRecovery recovery = new RollRecovery(collectorServer, appLog, rollTs);
+                RollRecovery recovery = new RollRecovery(collectorServer, port, appLog, rollTs);
                 exec.execute(recovery);
                 return true;
             } else {
@@ -77,7 +80,7 @@ public class Appnode extends Node {
                     appReaders.remove(logReader);
                 }
                 collectorServer = assignCollector.getCollectorServer();
-                logReader = new LogReader(collectorServer, appLog, true);
+                logReader = new LogReader(collectorServer, port, appLog, delayMillis);
                 appReaders.put(appLog, logReader);
                 exec.execute(logReader);
                 return true;
@@ -193,12 +196,16 @@ public class Appnode extends Node {
         }
     }
 
-    public void loadConfig() {
+    public void loadConfig() throws FileNotFoundException, IOException {
         if (configFile != null) {
             loadLocalConfig();
         } else {
             loadLionConfig();
         }
+        Properties prop = new Properties();
+        prop.load(new FileReader(new File("config.properties")));
+        delayMillis = Long.parseLong(prop.getProperty("delayMillis"));
+        port = Integer.parseInt(prop.getProperty("collectornode.port"));
     }
 
     public boolean parseOptions() throws ParseException {
@@ -246,6 +253,8 @@ public class Appnode extends Node {
             }
         } catch (ParseException e) {
             LOG.error("Oops, got an exception:", e);
+        } catch (IOException e) {
+            LOG.error("Can not load file \"config.properties\"", e);
         } catch (Exception e) {
             LOG.error("A fatal error occurred while running. Exception follows.", e);
         }
