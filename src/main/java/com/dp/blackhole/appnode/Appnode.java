@@ -41,11 +41,13 @@ public class Appnode extends Node {
     private String appClient;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
+
     public Appnode(String appClient) {
         this.appClient = appClient;
+        exec = Executors.newCachedThreadPool();
     }
 
-    public void process(Message msg) {
+    public boolean process(Message msg) {
 	    String appName = "";
 	    String collectorServer = "";
   	    AppLog appLog = null;
@@ -55,11 +57,12 @@ public class Appnode extends Node {
         case RECOVERY_ROLL:
             RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
             appName = recoveryRoll.getAppName();
-            if (appLogs.containsKey(appName)) {
+            if ((appLog = appLogs.get(appName)) != null) {
                 long rollTs = recoveryRoll.getRollTs();
                 collectorServer = recoveryRoll.getCollectorServer();
                 RollRecovery recovery = new RollRecovery(collectorServer, appLog, rollTs);
                 exec.execute(recovery);
+                return true;
             } else {
                 LOG.error("AppName [" + recoveryRoll.getAppName()
                         + "] from supervisor message not match with local");
@@ -77,6 +80,7 @@ public class Appnode extends Node {
                 logReader = new LogReader(collectorServer, appLog, true);
                 appReaders.put(appLog, logReader);
                 exec.execute(logReader);
+                return true;
             } else {
                 LOG.error("AppName [" + assignCollector.getAppName()
                         + "] from supervisor message not match with local");
@@ -85,6 +89,7 @@ public class Appnode extends Node {
         default:
             LOG.error("Illegal message type " + msg.getType());
         }
+  	    return false;
     }
 
     /**
@@ -131,20 +136,25 @@ public class Appnode extends Node {
     }
 
     public void run() {
-        exec = Executors.newCachedThreadPool();
         if (!checkAllFilesExist()) {
             return;
         }
+        fillUpAppLogsFromConfig();
+        //register the app to supervisor
+        for (AppLog appLog : appLogs.values()) {
+            register(appLog.getAppName(), appLog.getCreateTime());
+        }
+        //wait for receiving message from supervisor
+        super.loop();
+    }
+
+    public void fillUpAppLogsFromConfig() {
         for (String appName : ConfigKeeper.configMap.keySet()) {
             String path = ConfigKeeper.configMap.get(appName)
                     .getString(AppConfigurationConstants.WATCH_FILE);
             AppLog appLog = new AppLog(appName, path);
             appLogs.put(appName, appLog);
-            //register the app to supervisor
-            register(appName, appLog.getCreateTime());
-            //wait for receiving message from supervisor
         }
-        super.loop();
     }
 
 	public void loadLionConfig() {
