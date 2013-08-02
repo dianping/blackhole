@@ -19,6 +19,7 @@ public class HDFSRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(HDFSUpload.class);
     private Collectornode node;
     private FileSystem fs;
+    private String baseHDFSPath;
     private static final int DEFAULT_BUFSIZE = 8192;
     private Socket client;
     private String appName;
@@ -28,21 +29,23 @@ public class HDFSRecovery implements Runnable{
     private long length;
     private boolean recoverySuccess;
     
-    public HDFSRecovery(Collectornode node, FileSystem fs, Socket client, 
-            String appName, String appHost, String fileSuffix) {
+    public HDFSRecovery(Collectornode node, FileSystem fs, String baseHDFSPath, 
+            Socket client, String appName, String appHost, String fileSuffix) {
         this.node = node;
         this.fs = fs;
+        this.baseHDFSPath = baseHDFSPath;
         this.client = client;
         this.appName = appName;
         this.appHost = appHost;
         this.fileSuffix = fileSuffix;
     }
     
-    public HDFSRecovery(Collectornode node, FileSystem fs, Socket client, 
-            String appName, String appHost, String fileSuffix,
+    public HDFSRecovery(Collectornode node, FileSystem fs, String baseHDFSPath, 
+            Socket client, String appName, String appHost, String fileSuffix,
             long position, long length) {
         this.node = node;
         this.fs = fs;
+        this.baseHDFSPath = baseHDFSPath;
         this.client = client;
         this.appName = appName;
         this.appHost = appHost;
@@ -56,7 +59,7 @@ public class HDFSRecovery implements Runnable{
         GZIPOutputStream gout = null;
         GZIPInputStream gin = null;
         try {
-            String oldPathStr = Util.getHDFSPathByIdent(appName, appHost, fileSuffix);
+            String oldPathStr = Util.getHDFSPathByIdent(baseHDFSPath, appName, appHost, fileSuffix);
             Path old = new Path(oldPathStr);
             long offset = 0;
             if (fs.exists(old) && fs.isFile(old)) {

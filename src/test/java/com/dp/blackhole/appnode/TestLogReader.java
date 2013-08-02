@@ -187,7 +187,8 @@ public class TestLogReader {
     @Test
     public void test() {
 //        System.out.println(System.getProperty("java.class.path"));
-        LogReader reader = new LogReader(com.dp.blackhole.simutil.Util.HOSTNAME, appLog, true);
+        LogReader reader = new LogReader(com.dp.blackhole.simutil.Util.HOSTNAME, 
+                com.dp.blackhole.simutil.Util.PORT, appLog, 100);
         ExecutorService exec = Executors.newCachedThreadPool();
         exec.execute(reader);
         try {
@@ -200,7 +201,8 @@ public class TestLogReader {
     
     @Test
     public void testFileNotFoundAndFileRotated() {
-        LogReader reader = new LogReader(com.dp.blackhole.simutil.Util.HOSTNAME, appLog, true);
+        LogReader reader = new LogReader(com.dp.blackhole.simutil.Util.HOSTNAME, 
+                com.dp.blackhole.simutil.Util.PORT, appLog, 100);
         ExecutorService exec = Executors.newCachedThreadPool();
         exec.execute(reader);
         ExecutorService exec2 = Executors.newSingleThreadExecutor();

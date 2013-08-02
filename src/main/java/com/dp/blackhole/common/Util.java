@@ -16,22 +16,17 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.conf.CollectorConfigurationConstants;
-import com.dp.blackhole.conf.ConfigKeeper;
-
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
 
     //-----------------------------collecotr------------------------------------//
-    public static String getHDFSPathByIdent(String appName, String appHost, final String fileSuffix) {
+    public static String getHDFSPathByIdent(String baseHDFSPath, String appName, String appHost, final String fileSuffix) {
         // HDFS file: basePath / appName / filePerfix[0] / filePerfix[1] / appHost_appName_fileSuffix
         // HDFS file: ..base.. / access  / 2013-07-11    /        12     / hostname_access_2013-07-11.12
         // HDFS file: ..base.. / access  / 2013-07-11    /                 hostname_access_2013-07-11
         // filePerfix: 2013-07-11.12
         // filePerfix: 2013-07-11
-        String basePath = ConfigKeeper.configMap.get(appName)
-                .getString(CollectorConfigurationConstants.BASE_HDFS_PATH);
-        String path = basePath + "/" + appName;
+        String path = baseHDFSPath + "/" + appName;
         String[] fileSuffixs = fileSuffix.split("\\.");
         switch (fileSuffixs.length) {
         case 2: //2013-07-11.12 

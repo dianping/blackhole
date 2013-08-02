@@ -20,6 +20,7 @@ public class Util {
     public static final String HOSTNAME = "localhost";
     public static final String SCHEMA = "file://";
     public static final String BASE_PATH = "/tmp/";
+    public static final String BASE_HDFS_PATH = SCHEMA + BASE_PATH;
     public static final String FILE_SUFFIX = "2013-01-01.03";
     public static long rollTS = 1357023691855l;
     public static final int PORT = 40000;

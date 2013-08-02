@@ -57,7 +57,7 @@ public class TestRollRecovery {
 
     @Test
     public void test() {
-        RollRecovery recovery = new RollRecovery(Util.HOSTNAME, appLog, Util.rollTS);
+        RollRecovery recovery = new RollRecovery(Util.HOSTNAME, Util.PORT, appLog, Util.rollTS);
         Thread thread = new Thread(recovery);
         thread.start();
         try {
