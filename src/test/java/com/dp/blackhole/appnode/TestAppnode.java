@@ -18,12 +18,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.AssignCollectorPB.AssignCollector;
 import com.dp.blackhole.common.MessagePB.Message;
 import com.dp.blackhole.common.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll;
-import com.dp.blackhole.conf.AppConfigurationConstants;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.simutil.Util;
 public class TestAppnode {
@@ -41,10 +41,10 @@ public class TestAppnode {
         }
         appnode = new Appnode(client);
         ConfigKeeper conf = new ConfigKeeper();
-        conf.addRawProperty(MAGIC+".watchFile", "/tmp/" + MAGIC + ".log");
-        conf.addRawProperty(MAGIC+".port", "40000");
-        conf.addRawProperty(MAGIC+".transferPeriodValue", "1");
-        conf.addRawProperty(MAGIC+".transferPeriodUnit", "hour");
+        conf.addRawProperty(MAGIC+".WATCH_FILE", "/tmp/" + MAGIC + ".log");
+        conf.addRawProperty(MAGIC+".port", "40000");//TODO
+        conf.addRawProperty(MAGIC+".TRANSFER_PERIOD_VALUE", "1");
+        conf.addRawProperty(MAGIC+".TRANSFER_PERIOD_UNIT", "hour");
         appnode.fillUpAppLogsFromConfig();
     }
 
@@ -126,7 +126,7 @@ public class TestAppnode {
     public void testLoadLocalConfig() throws ParseException, IOException {
         File confFile = File.createTempFile("app.conf", null);
         OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(confFile, true));
-        writer.write("testApp.watchFile = /tmp/testApp.log\n");
+        writer.write("testApp.WATCH_FILE = /tmp/testApp.log\n");
         writer.write("testApp.second = sencond preperty\n");
         writer.flush();
         writer.close();
@@ -140,7 +140,7 @@ public class TestAppnode {
         appnode.loadLocalConfig();
         assertTrue(ConfigKeeper.configMap.containsKey("testApp"));
         String path = ConfigKeeper.configMap.get("testApp")
-                .getString(AppConfigurationConstants.WATCH_FILE);
+                .getString(ParamsKey.Appconf.WATCH_FILE);
         assertEquals(path, "/tmp/testApp.log");
         assertTrue(ConfigKeeper.configMap.containsKey("testApp"));
         String second = ConfigKeeper.configMap.get("testApp")

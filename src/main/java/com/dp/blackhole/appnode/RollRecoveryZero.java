@@ -15,8 +15,8 @@ import java.text.SimpleDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.conf.AppConfigurationConstants;
 import com.dp.blackhole.conf.ConfigKeeper;
 
 public class RollRecoveryZero implements Runnable{
@@ -36,7 +36,7 @@ public class RollRecoveryZero implements Runnable{
     @Override
     public void run() {
         String unit = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getString(AppConfigurationConstants.TRANSFER_PERIOD_UNIT, "hour");
+                .getString(ParamsKey.Appconf.TRANSFER_PERIOD_UNIT, "hour");
         SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatByUnit(unit));
         String rollIdent = unitFormat.format(rollTimestamp);
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
@@ -103,9 +103,9 @@ public class RollRecoveryZero implements Runnable{
         Util.writeString(appname, out);
         
         String unit = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getString(AppConfigurationConstants.TRANSFER_PERIOD_UNIT, "hour");
+                .getString(ParamsKey.Appconf.TRANSFER_PERIOD_UNIT, "hour");
         int value = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getInteger(AppConfigurationConstants.TRANSFER_PERIOD_VALUE, 1);
+                .getInteger(ParamsKey.Appconf.TRANSFER_PERIOD_VALUE, 1);
         long period = Util.getPeriodInSeconds(value, unit);
         LOG.info("Writing... period:" + period);
         out.writeLong(period);

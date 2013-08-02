@@ -15,10 +15,12 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
-
+    private static final int REPEATE = 3;
     //-----------------------------collecotr------------------------------------//
     public static String getHDFSPathByIdent(String baseHDFSPath, String appName, String appHost, final String fileSuffix) {
         // HDFS file: basePath / appName / filePerfix[0] / filePerfix[1] / appHost_appName_fileSuffix
@@ -44,6 +46,44 @@ public class Util {
         return path;    //    ..base../appName/2013-07-11/12/appName.2013-07-11.12
     }
 
+    public static boolean multipleDelete(FileSystem fs, Path path) {
+        for (int i = 0; i < REPEATE; i++) {
+            try {
+                if (fs.delete(path, false)) {
+                    return true;
+                } else {
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {}
+                }
+            } catch (IOException e) {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException ex) {}
+            }
+        }
+        return false;
+    }
+    
+    public static boolean multipleRename(FileSystem fs, Path src, Path dst) {
+        for (int i = 0; i < REPEATE; i++) {
+            try {
+                if (fs.rename(src, dst)) {
+                    return true;
+                } else {
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {}
+                }
+            } catch (IOException e) {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException ex) {}
+            }
+        }
+        return false;
+    }
+    
     //---------------------------app--------------------------------------//
     public static String getRollIdentByTime(Date date, int interval) {
         //first version, we use 60 min (1 hour) as fixed interval

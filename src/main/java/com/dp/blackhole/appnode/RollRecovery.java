@@ -13,8 +13,8 @@ import java.text.SimpleDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.conf.AppConfigurationConstants;
 import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 
 public class RollRecovery implements Runnable{
@@ -38,7 +38,7 @@ public class RollRecovery implements Runnable{
     @Override
     public void run() {
         String unit = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getString(AppConfigurationConstants.TRANSFER_PERIOD_UNIT, "hour");
+                .getString(ParamsKey.Appconf.TRANSFER_PERIOD_UNIT, "hour");
         SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatByUnit(unit));
         String rollIdent = unitFormat.format(rollTimestamp);
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
@@ -64,6 +64,7 @@ public class RollRecovery implements Runnable{
                 out.write(inbuf, 0, len);
                 transferBytes += len;
             }
+            out.flush();
             LOG.info("Roll file transfered, including [" + transferBytes + "] bytes.");
         } catch (FileNotFoundException e) {
             LOG.error("Oops, got an exception:", e);
@@ -110,9 +111,9 @@ public class RollRecovery implements Runnable{
         Util.writeString(appname, out);
         
         String unit = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getString(AppConfigurationConstants.TRANSFER_PERIOD_UNIT, "hour");
+                .getString(ParamsKey.Appconf.TRANSFER_PERIOD_UNIT, "hour");
         int value = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getInteger(AppConfigurationConstants.TRANSFER_PERIOD_VALUE, 1);
+                .getInteger(ParamsKey.Appconf.TRANSFER_PERIOD_VALUE, 1);
         long period = Util.getPeriodInSeconds(value, unit);
         LOG.info("Writing... period:" + period);
         out.writeLong(period);
