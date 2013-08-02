@@ -2,6 +2,7 @@ package com.dp.blackhole.appnode;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -23,13 +24,13 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.AppRegPB.AppReg;
 import com.dp.blackhole.common.AppRollPB.AppRoll;
 import com.dp.blackhole.common.AssignCollectorPB.AssignCollector;
 import com.dp.blackhole.common.MessagePB.Message;
 import com.dp.blackhole.common.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll;
-import com.dp.blackhole.conf.AppConfigurationConstants;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.node.Node;
 
@@ -39,15 +40,19 @@ public class Appnode extends Node {
     private File configFile = null;
     private ExecutorService exec;
     private String appClient;
+    private long delayMillis;
+    private int port;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
+
     public Appnode(String appClient) {
         this.appClient = appClient;
+        exec = Executors.newCachedThreadPool();
     }
 
-    public void process(Message msg) {
-	    String appName = "";
-	    String collectorServer = "";
+    public boolean process(Message msg) {
+	    String appName;
+	    String collectorServer;
   	    AppLog appLog = null;
   	    LogReader logReader = null;
   	    MessageType type = msg.getType();
@@ -55,11 +60,12 @@ public class Appnode extends Node {
         case RECOVERY_ROLL:
             RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
             appName = recoveryRoll.getAppName();
-            if (appLogs.containsKey(appName)) {
+            if ((appLog = appLogs.get(appName)) != null) {
                 long rollTs = recoveryRoll.getRollTs();
                 collectorServer = recoveryRoll.getCollectorServer();
-                RollRecovery recovery = new RollRecovery(collectorServer, appLog, rollTs);
+                RollRecovery recovery = new RollRecovery(collectorServer, port, appLog, rollTs);
                 exec.execute(recovery);
+                return true;
             } else {
                 LOG.error("AppName [" + recoveryRoll.getAppName()
                         + "] from supervisor message not match with local");
@@ -74,9 +80,10 @@ public class Appnode extends Node {
                     appReaders.remove(logReader);
                 }
                 collectorServer = assignCollector.getCollectorServer();
-                logReader = new LogReader(collectorServer, appLog, true);
+                logReader = new LogReader(collectorServer, port, appLog, delayMillis);
                 appReaders.put(appLog, logReader);
                 exec.execute(logReader);
+                return true;
             } else {
                 LOG.error("AppName [" + assignCollector.getAppName()
                         + "] from supervisor message not match with local");
@@ -85,6 +92,7 @@ public class Appnode extends Node {
         default:
             LOG.error("Illegal message type " + msg.getType());
         }
+  	    return false;
     }
 
     /**
@@ -118,7 +126,7 @@ public class Appnode extends Node {
         boolean res = true;
         for (String appName : ConfigKeeper.configMap.keySet()) {
             String path = ConfigKeeper.configMap.get(appName)
-                    .getString(AppConfigurationConstants.WATCH_FILE);
+                    .getString(ParamsKey.Appconf.WATCH_FILE);
             File fileForTest = new File(path);
             if (!fileForTest.exists()) {
                 LOG.error("Appnode process start faild, because file " + path + " not found.");
@@ -131,20 +139,25 @@ public class Appnode extends Node {
     }
 
     public void run() {
-        exec = Executors.newCachedThreadPool();
         if (!checkAllFilesExist()) {
             return;
         }
+        fillUpAppLogsFromConfig();
+        //register the app to supervisor
+        for (AppLog appLog : appLogs.values()) {
+            register(appLog.getAppName(), appLog.getCreateTime());
+        }
+        //wait for receiving message from supervisor
+        super.loop();
+    }
+
+    public void fillUpAppLogsFromConfig() {
         for (String appName : ConfigKeeper.configMap.keySet()) {
             String path = ConfigKeeper.configMap.get(appName)
-                    .getString(AppConfigurationConstants.WATCH_FILE);
+                    .getString(ParamsKey.Appconf.WATCH_FILE);
             AppLog appLog = new AppLog(appName, path);
             appLogs.put(appName, appLog);
-            //register the app to supervisor
-            register(appName, appLog.getCreateTime());
-            //wait for receiving message from supervisor
         }
-        super.loop();
     }
 
 	public void loadLionConfig() {
@@ -183,12 +196,16 @@ public class Appnode extends Node {
         }
     }
 
-    public void loadConfig() {
+    public void loadConfig() throws FileNotFoundException, IOException {
         if (configFile != null) {
             loadLocalConfig();
         } else {
             loadLionConfig();
         }
+        Properties prop = new Properties();
+        prop.load(new FileReader(new File("config.properties")));
+        delayMillis = Long.parseLong(prop.getProperty("delayMillis"));
+        port = Integer.parseInt(prop.getProperty("collectornode.port"));
     }
 
     public boolean parseOptions() throws ParseException {
@@ -236,6 +253,8 @@ public class Appnode extends Node {
             }
         } catch (ParseException e) {
             LOG.error("Oops, got an exception:", e);
+        } catch (IOException e) {
+            LOG.error("Can not load file \"config.properties\"", e);
         } catch (Exception e) {
             LOG.error("A fatal error occurred while running. Exception follows.", e);
         }

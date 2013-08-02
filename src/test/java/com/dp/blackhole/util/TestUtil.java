@@ -17,7 +17,6 @@ import com.dp.blackhole.common.Util;
 
 public class TestUtil {
     private static String[] unitStr;
-    private static final String ROLL_IDENT = "2013-01-01.03";
     static {
         unitStr = new String[4];
         unitStr[0] = "hour";
@@ -55,12 +54,8 @@ public class TestUtil {
 
     @After
     public void tearDown() throws Exception {
-        com.dp.blackhole.simutil.Util.deleteTmpFile(ROLL_IDENT);
-    }
-
-    @Test
-    public void testGetRollIdentByTime() {
-        fail("Not yet implemented");
+        com.dp.blackhole.simutil.Util.deleteTmpFile(
+                com.dp.blackhole.simutil.Util.FILE_SUFFIX);
     }
 
     @Test
@@ -93,10 +88,15 @@ public class TestUtil {
 
     @Test
     public void testFindRealFileByIdent() throws FileNotFoundException, IOException {
-        File file = com.dp.blackhole.simutil.Util.createTmpFile(ROLL_IDENT, "ok");
-        assertNotNull(Util.findRealFileByIdent(file.getAbsolutePath(), ROLL_IDENT));
-        com.dp.blackhole.simutil.Util.createTmpFile(ROLL_IDENT, "ok");
-        assertNull(Util.findRealFileByIdent(file.getAbsolutePath(), ROLL_IDENT));
-        com.dp.blackhole.simutil.Util.deleteTmpFile(ROLL_IDENT);
+        File file = com.dp.blackhole.simutil.Util.createTmpFile(
+                com.dp.blackhole.simutil.Util.FILE_SUFFIX, "ok");
+        assertNotNull(Util.findRealFileByIdent(
+                file.getAbsolutePath(), com.dp.blackhole.simutil.Util.FILE_SUFFIX));
+        com.dp.blackhole.simutil.Util.createTmpFile(
+                com.dp.blackhole.simutil.Util.FILE_SUFFIX, "ok");
+        assertNull(Util.findRealFileByIdent(
+                file.getAbsolutePath(), com.dp.blackhole.simutil.Util.FILE_SUFFIX));
+        com.dp.blackhole.simutil.Util.deleteTmpFile(
+                com.dp.blackhole.simutil.Util.FILE_SUFFIX);
     }
 }

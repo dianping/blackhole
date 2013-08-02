@@ -18,22 +18,34 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.AssignCollectorPB.AssignCollector;
 import com.dp.blackhole.common.MessagePB.Message;
 import com.dp.blackhole.common.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll;
-import com.dp.blackhole.conf.AppConfigurationConstants;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.simutil.Util;
-
 public class TestAppnode {
     private static final Log LOG = LogFactory.getLog(TestAppnode.class);
-
-    private String client;
+    private static final String MAGIC = "9vjrder3";
+    private static Appnode appnode;
+    private static String client;
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-
+        try {
+            client = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e1) {
+            LOG.error("Oops, got an exception:", e1);
+            return;
+        }
+        appnode = new Appnode(client);
+        ConfigKeeper conf = new ConfigKeeper();
+        conf.addRawProperty(MAGIC+".WATCH_FILE", "/tmp/" + MAGIC + ".log");
+        conf.addRawProperty(MAGIC+".port", "40000");//TODO
+        conf.addRawProperty(MAGIC+".TRANSFER_PERIOD_VALUE", "1");
+        conf.addRawProperty(MAGIC+".TRANSFER_PERIOD_UNIT", "hour");
+        appnode.fillUpAppLogsFromConfig();
     }
 
     @AfterClass
@@ -42,12 +54,6 @@ public class TestAppnode {
 
     @Before
     public void setUp() throws Exception {
-        try {
-            client = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e1) {
-            LOG.error("Oops, got an exception:", e1);
-            return;
-        }
     }
 
     @After
@@ -55,20 +61,31 @@ public class TestAppnode {
     }
 
     @Test
-    public void testProcess() {
-        //she zhe yige applog fang dao applogs zhong
-        Appnode appnode = new Appnode(client);
-        Message message = getMessageOfAssignCollector();
-        Message message3 = getMessageOfRecoveryRoll();
-        appnode.process(message);
-//        appnode.process(message2);
-//        appnode.process(message3);
+    public void testAssignCollectorProcess() {
+        Message bad = getMessageOfAssignCollector(MAGIC + MAGIC);
+        assertFalse(appnode.process(bad));
+        Message good = getMessageOfAssignCollector(MAGIC);
+        assertTrue(appnode.process(good));
+    }
+    
+    @Test
+    public void testRecoveryRollProcess() {
+        Message bad = getMessageOfRecoveryRoll(MAGIC + MAGIC);
+        assertFalse(appnode.process(bad));
+        Message good = getMessageOfRecoveryRoll(MAGIC);
+        assertTrue(appnode.process(good));
+    }
+    
+    @Test
+    public void testUnknowMessageProcess() {
+        Message unknow = getUnknowMessage();
+        assertFalse(appnode.process(unknow));
     }
 
-    private Message getMessageOfAssignCollector() {
+    private Message getMessageOfAssignCollector(String appName) {
         AssignCollector.Builder assignCollectorBuilder = AssignCollector.newBuilder();
-        assignCollectorBuilder.setAppName("testApp");
-        assignCollectorBuilder.setCollectorServer("localhost");
+        assignCollectorBuilder.setAppName(appName);
+        assignCollectorBuilder.setCollectorServer(Util.HOSTNAME);
         AssignCollector assignCollector = assignCollectorBuilder.build();
         Message.Builder messageBuilder = Message.newBuilder();
         messageBuilder.setType(MessageType.ASSIGN_COLLECTOR);
@@ -77,11 +94,12 @@ public class TestAppnode {
         return message;
     }
     
-    private Message getMessageOfRecoveryRoll() {
+    private Message getMessageOfRecoveryRoll(String appName) {
         RecoveryRoll.Builder recoveryRollBuilder = RecoveryRoll.newBuilder();
-        recoveryRollBuilder.setAppName("testApp");
-        recoveryRollBuilder.setCollectorServer("localhost");
+        recoveryRollBuilder.setAppName(appName);
+        recoveryRollBuilder.setCollectorServer(Util.HOSTNAME);
         recoveryRollBuilder.setRollTs(Util.rollTS);
+        recoveryRollBuilder.setOffset(0l);
         RecoveryRoll recoveryRoll = recoveryRollBuilder.build();
         Message.Builder messageBuilder = Message.newBuilder();
         messageBuilder.setType(MessageType.RECOVERY_ROLL);
@@ -92,9 +110,9 @@ public class TestAppnode {
 
     private Message getUnknowMessage() {
         ReadyCollector.Builder readyCollectorBuilder = ReadyCollector.newBuilder();
-        readyCollectorBuilder.setAppName("tsetApp");
-        readyCollectorBuilder.setAppServer("testServer");
-        readyCollectorBuilder.setCollectorServer("testServer");
+        readyCollectorBuilder.setAppName(MAGIC);
+        readyCollectorBuilder.setAppServer(Util.HOSTNAME);
+        readyCollectorBuilder.setCollectorServer(Util.HOSTNAME);
         readyCollectorBuilder.setConnectedTs(1l);
         ReadyCollector readyCollector = readyCollectorBuilder.build();
         Message.Builder messageBuilder = Message.newBuilder();
@@ -108,7 +126,7 @@ public class TestAppnode {
     public void testLoadLocalConfig() throws ParseException, IOException {
         File confFile = File.createTempFile("app.conf", null);
         OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(confFile, true));
-        writer.write("testApp.watchFile = /tmp/testApp.log\n");
+        writer.write("testApp.WATCH_FILE = /tmp/testApp.log\n");
         writer.write("testApp.second = sencond preperty\n");
         writer.flush();
         writer.close();
@@ -122,7 +140,7 @@ public class TestAppnode {
         appnode.loadLocalConfig();
         assertTrue(ConfigKeeper.configMap.containsKey("testApp"));
         String path = ConfigKeeper.configMap.get("testApp")
-                .getString(AppConfigurationConstants.WATCH_FILE);
+                .getString(ParamsKey.Appconf.WATCH_FILE);
         assertEquals(path, "/tmp/testApp.log");
         assertTrue(ConfigKeeper.configMap.containsKey("testApp"));
         String second = ConfigKeeper.configMap.get("testApp")

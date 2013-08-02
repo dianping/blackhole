@@ -12,8 +12,8 @@ import org.apache.hadoop.fs.FileSystem;
 import com.dp.blackhole.collectornode.Collectornode;
 import com.dp.blackhole.collectornode.HDFSRecovery;
 import com.dp.blackhole.collectornode.HDFSUpload;
+import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.conf.AppConfigurationConstants;
 import com.dp.blackhole.conf.ConfigKeeper;
 
 import static org.junit.Assert.*;
@@ -25,9 +25,6 @@ public class SimCollectornode extends Collectornode implements Runnable{
     private ServerSocket ss;
     private String appName;
     private String appHost;
-    private String fileSuffix;
-    private long position;
-    private long length;
     private Socket client;
     
     private SimCollectornode(String simType, FileSystem fs, String appName) throws IOException {
@@ -35,9 +32,6 @@ public class SimCollectornode extends Collectornode implements Runnable{
         this.simType = simType;
         this.appName = appName;
         this.appHost = "localhost";
-        this.fileSuffix = com.dp.blackhole.simutil.Util.FILE_SUFFIX;
-        this.position = 0;
-        this.length = 0;
     }
     
     public static SimCollectornode getSimpleInstance(String simType, FileSystem fs, String appName) throws IOException {
@@ -45,14 +39,11 @@ public class SimCollectornode extends Collectornode implements Runnable{
     }
     
     public SimCollectornode(String simType, int port, FileSystem fs, String appName, String appHost, 
-            String fileSuffix, long position, long length) throws IOException {
+            long position, long length) throws IOException {
         this.fs = fs;
         this.simType = simType;
         this.appName = appName;
         this.appHost = appHost;
-        this.fileSuffix = fileSuffix;
-        this.position = position;
-        this.length = length;
         ss = new ServerSocket(port);
     }
     
@@ -75,14 +66,15 @@ public class SimCollectornode extends Collectornode implements Runnable{
                 assertEquals(simType, Util.readString(din));
                 assertEquals(appName, Util.readString(din));
                 String unit = ConfigKeeper.configMap.get(appName)
-                        .getString(AppConfigurationConstants.TRANSFER_PERIOD_UNIT, "hour");
+                        .getString(ParamsKey.Appconf.TRANSFER_PERIOD_UNIT, "hour");
                 int value = ConfigKeeper.configMap.get(appName)
-                        .getInteger(AppConfigurationConstants.TRANSFER_PERIOD_VALUE, 1);
+                        .getInteger(ParamsKey.Appconf.TRANSFER_PERIOD_VALUE, 1);
                 long period = Util.getPeriodInSeconds(value, unit);
                 assertEquals(period, din.readLong());
                 assertEquals(Util.getFormatByUnit(unit), Util.readString(din));
-                HDFSRecovery recovery = new HDFSRecovery(getSimpleInstance(simType, fs, appName), fs, client, appName, appHost, 
-                        fileSuffix, position, length);
+                HDFSRecovery recovery = new HDFSRecovery(getSimpleInstance(simType, fs, appName), 
+                        fs, com.dp.blackhole.simutil.Util.BASE_HDFS_PATH, client, appName, appHost, 
+                        com.dp.blackhole.simutil.Util.FILE_SUFFIX);
                 recovery.run();
             }
         } catch (IOException e) {

@@ -12,66 +12,59 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.dp.blackhole.common.BlackholeException;
 import com.dp.blackhole.common.Util;
 
 public class HDFSRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(HDFSUpload.class);
+    private static final String TMP_SUFFIX = ".tmp";
+    private static final String R_SUFFIX = ".r";
+
     private Collectornode node;
     private FileSystem fs;
+    private String baseHDFSPath;
     private static final int DEFAULT_BUFSIZE = 8192;
     private Socket client;
     private String appName;
     private String appHost;
     private String fileSuffix;
-    private long position;
-    private long length;
     private boolean recoverySuccess;
     
-    public HDFSRecovery(Collectornode node, FileSystem fs, Socket client, 
-            String appName, String appHost, String fileSuffix) {
+    public HDFSRecovery(Collectornode node, FileSystem fs, String baseHDFSPath, 
+            Socket client, String appName, String appHost, String fileSuffix) {
         this.node = node;
         this.fs = fs;
+        this.baseHDFSPath = baseHDFSPath;
         this.client = client;
         this.appName = appName;
         this.appHost = appHost;
         this.fileSuffix = fileSuffix;
+        this.recoverySuccess = false;
     }
-    
-    public HDFSRecovery(Collectornode node, FileSystem fs, Socket client, 
-            String appName, String appHost, String fileSuffix,
-            long position, long length) {
-        this.node = node;
-        this.fs = fs;
-        this.client = client;
-        this.appName = appName;
-        this.appHost = appHost;
-        this.fileSuffix = fileSuffix;
-        this.position = position;
-        this.length = length;
-    }
-    
+
     @Override
     public void run() {
         GZIPOutputStream gout = null;
         GZIPInputStream gin = null;
         try {
-            String oldPathStr = Util.getHDFSPathByIdent(appName, appHost, fileSuffix);
-            Path old = new Path(oldPathStr);
-            long offset = 0;
-            if (fs.exists(old) && fs.isFile(old)) {
-                Path dst = new Path(old.getParent(), old.getName() + ".r");
-                gout = new GZIPOutputStream(fs.create(dst));//TODO need buffer?
-                
-                gin = new GZIPInputStream(fs.open(old));
+            String normalPathname = Util.getHDFSPathByIdent(baseHDFSPath, appName, appHost, fileSuffix);
+            String tmpPathname = normalPathname + TMP_SUFFIX;
+            String recoveryPathname = normalPathname + R_SUFFIX;
+            Path normalPath = new Path(normalPathname);
+            Path tmpPath = new Path(tmpPathname);
+            Path recoveryPath = new Path(recoveryPathname);
+            if (!fs.exists(normalPath)) {   //When normal path not exists then do recovery.
+                long offset = 0;
                 int len = 0;
                 byte[] buf = new byte[DEFAULT_BUFSIZE];
-                while((len = gin.read(buf)) != -1) {
-                    gout.write(buf, 0, len);
-                    offset += len;
+                gout = new GZIPOutputStream(fs.create(recoveryPath));
+                if (fs.exists(tmpPath)) {   //When tmp path exists then extract some data from tmp file
+                    gin = new GZIPInputStream(fs.open(tmpPath));
+                    while((len = gin.read(buf)) != -1) {
+                        gout.write(buf, 0, len);
+                        offset += len;
+                    }
+                    LOG.info("Reloaded the hdfs file " + tmpPath);
                 }
-                LOG.info("Reloaded the hdfs file " + old);
-
                 DataOutputStream out = new DataOutputStream(client.getOutputStream());
                 out.writeLong(offset);
                 LOG.info("Send an offset [" + offset + "] to client");
@@ -80,26 +73,24 @@ public class HDFSRecovery implements Runnable{
                 while((len = in.read(buf)) != -1) {
                     gout.write(buf, 0, len);
                 }
-                LOG.info("Finished to write " + dst);
+                LOG.info("Finished to write " + recoveryPath);
                 
-                if (fs.delete(old, false)) {
-                    if (fs.rename(dst, old)) {
-                        LOG.info("Finished to rename to " + old);
-                    } else {
-                        throw new BlackholeException("Faild to rename to " + old);
-                    }
+                if (Util.retryRename(fs, recoveryPath, normalPath)) {
+                    LOG.info("Finished to rename to " + normalPathname);
                 } else {
-                    throw new BlackholeException("Faild to delete " + old + " before mv.");
+                    throw new Exception("Faild to rename to " + normalPathname);
                 }
-            } else {
-                throw new BlackholeException("Can not found the file in HDFS");
+                
+                if (fs.exists(tmpPath) && !Util.retryDelete(fs, tmpPath)) {   //delete .tmp if exists
+                    throw new Exception("Faild to delete recovery file " + tmpPathname);
+                }
+            } else {    //When normal path exists then just delete .tmp if they exist.
+                if (fs.exists(tmpPath) && !Util.retryDelete(fs, tmpPath)) {
+                    throw new Exception("Faild to delete recovery file " + tmpPathname);
+                }
             }
             recoverySuccess = true;
-        } catch (IOException e) {
-            recoverySuccess = false;
-            LOG.error("Oops, got an exception:", e);
         } catch (Exception e) {
-            recoverySuccess = false;
             LOG.error("Oops, got an exception:", e);
         } finally {
             node.recoveryResult(this, recoverySuccess);
@@ -113,7 +104,6 @@ public class HDFSRecovery implements Runnable{
             } catch (IOException e) {
                 LOG.warn("Cound not close the gzip output stream", e);
             }
-            //TODO should I close the fs?
         }
     }
 }

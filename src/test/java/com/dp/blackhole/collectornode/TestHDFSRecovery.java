@@ -49,7 +49,7 @@ public class TestHDFSRecovery {
         //file:///tmp/e9wjd83h/2013-01-01/03/localhost_e9wjd83h_2013-01-01.03  e9wjd83h is appname
         oldPath = new Path(Util.SCHEMA + Util.BASE_PATH 
                 + MAGIC + "/2013-01-01/03/" + APP_HOST + "_"
-                + MAGIC + "_2013-01-01.03");
+                + MAGIC + "_2013-01-01.03.tmp");
         LOG.info("old path in hdfs is " + oldPath);
         fs.copyFromLocalFile(false, true, new Path(fileBrokenGzip.toURI()), oldPath);
         
@@ -61,10 +61,9 @@ public class TestHDFSRecovery {
         
         //deploy some condition
         ConfigKeeper confKeeper = new ConfigKeeper();
-        confKeeper.addRawProperty(MAGIC+".transferPeriodValue", "1");
-        confKeeper.addRawProperty(MAGIC+".transferPeriodUnit", "hour");
+        confKeeper.addRawProperty(MAGIC+".TRANSFER_PERIOD_VALUE", "1");
+        confKeeper.addRawProperty(MAGIC+".TRANSFER_PERIOD_UNIT", "hour");
         //base_hdfs_path
-        confKeeper.addRawProperty(MAGIC+".base_hdfs_path", "file:///tmp");
         confKeeper.addRawProperty(MAGIC+".port", "40000");
     }
 
@@ -86,11 +85,11 @@ public class TestHDFSRecovery {
     @Test
     public void test() throws IOException, InterruptedException {
         Thread serverThread = new Thread(
-                new SimCollectornode("recovery", Util.PORT, fs, MAGIC, APP_HOST, Util.FILE_SUFFIX, 0, 0));
+                new SimCollectornode("recovery", Util.PORT, fs, MAGIC, APP_HOST, 0, 0));
         serverThread.start();
         
         AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), new Date().getTime());
-        RollRecovery clientTask = new RollRecovery(Util.HOSTNAME, appLog, Util.rollTS);
+        RollRecovery clientTask = new RollRecovery(Util.HOSTNAME, Util.PORT, appLog, Util.rollTS);
         Thread clientThread = new Thread(clientTask);
         clientThread.start();
         
@@ -100,7 +99,10 @@ public class TestHDFSRecovery {
         String expectedMD5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(new FileInputStream(file));
         
 //        LOG.info("expected md5 is " + expectedMD5);
-        File fileGzip = new File(oldPath.toUri());
+        Path newPath = new Path(Util.SCHEMA + Util.BASE_PATH 
+                + MAGIC + "/2013-01-01/03/" + APP_HOST + "_"
+                + MAGIC + "_2013-01-01.03");
+        File fileGzip = new File(newPath.toUri());
 //        fileGzip = Util.convertToNomal(fileGzip);
         String actualMD5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(new FileInputStream(fileGzip));
 //        LOG.info("actual md5 is " + actualMD5);

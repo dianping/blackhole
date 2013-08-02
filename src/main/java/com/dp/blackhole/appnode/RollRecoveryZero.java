@@ -15,18 +15,20 @@ import java.text.SimpleDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.conf.AppConfigurationConstants;
 import com.dp.blackhole.conf.ConfigKeeper;
 
 public class RollRecoveryZero implements Runnable{
     private static final Log LOG = LogFactory.getLog(RollRecoveryZero.class);
     private String collectorServer;
+    private int port;
     private AppLog appLog;
     private long rollTimestamp;
     private Socket server;
-    public RollRecoveryZero(String collectorServer, AppLog appLog, long rollTimestamp) {
+    public RollRecoveryZero(String collectorServer, int port, AppLog appLog, long rollTimestamp) {
         this.collectorServer = collectorServer;
+        this.port = port;
         this.appLog = appLog;
         this.rollTimestamp = rollTimestamp;
     }
@@ -34,7 +36,7 @@ public class RollRecoveryZero implements Runnable{
     @Override
     public void run() {
         String unit = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getString(AppConfigurationConstants.TRANSFER_PERIOD_UNIT, "hour");
+                .getString(ParamsKey.Appconf.TRANSFER_PERIOD_UNIT, "hour");
         SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatByUnit(unit));
         String rollIdent = unitFormat.format(rollTimestamp);
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
@@ -46,11 +48,8 @@ public class RollRecoveryZero implements Runnable{
         DataOutputStream out = null;
         DataInputStream in = null;
         long offset = 0;
-        int port = 0;
         try {
             //Unblocking IO zero copy
-            port = ConfigKeeper.configMap.get(appLog.getAppName())
-                    .getInteger(AppConfigurationConstants.PORT);
             SocketAddress address = new InetSocketAddress(collectorServer, port);
             socketChannel = SocketChannel.open();
             socketChannel.connect(address);
@@ -104,9 +103,9 @@ public class RollRecoveryZero implements Runnable{
         Util.writeString(appname, out);
         
         String unit = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getString(AppConfigurationConstants.TRANSFER_PERIOD_UNIT, "hour");
+                .getString(ParamsKey.Appconf.TRANSFER_PERIOD_UNIT, "hour");
         int value = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getInteger(AppConfigurationConstants.TRANSFER_PERIOD_VALUE, 1);
+                .getInteger(ParamsKey.Appconf.TRANSFER_PERIOD_VALUE, 1);
         long period = Util.getPeriodInSeconds(value, unit);
         LOG.info("Writing... period:" + period);
         out.writeLong(period);

@@ -29,9 +29,11 @@ public class TestRollRecovery {
     private Thread serverThread;
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-    //build a tmp file
         ConfigKeeper confKeeper = new ConfigKeeper();
         confKeeper.addRawProperty(MAGIC+".port", "40000");
+        confKeeper.addRawProperty(MAGIC+".TRANSFER_PERIOD_VALUE", "1");
+        confKeeper.addRawProperty(MAGIC+".TRANSFER_PERIOD_UNIT", "hour");
+        //build a tmp file
         file = Util.createTmpFile(MAGIC + Util.FILE_SUFFIX, Util.expected);
     }
 
@@ -46,9 +48,7 @@ public class TestRollRecovery {
         server = new SimRecoveryServer(Util.PORT, header, receives);
         serverThread = new Thread(server);
         serverThread.start();
-        ConfigKeeper conf = new ConfigKeeper();
-        conf.addRawProperty(MAGIC+".transferPeriodValue", "1");
-        conf.addRawProperty(MAGIC+".transferPeriodUnit", "hour");
+
     }
 
     @After
@@ -57,7 +57,7 @@ public class TestRollRecovery {
 
     @Test
     public void test() {
-        RollRecovery recovery = new RollRecovery(Util.HOSTNAME, appLog, Util.rollTS);
+        RollRecovery recovery = new RollRecovery(Util.HOSTNAME, Util.PORT, appLog, Util.rollTS);
         Thread thread = new Thread(recovery);
         thread.start();
         try {
