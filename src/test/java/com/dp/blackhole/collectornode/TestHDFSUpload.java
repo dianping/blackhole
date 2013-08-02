@@ -73,23 +73,4 @@ public class TestHDFSUpload {
         fis.close();
         fs.deleteOnExit(actualFile);
     }
-
-    @Test
-    public void testUploadPortion() throws InterruptedException, IOException {
-        HDFSUpload writer = new HDFSUpload(SimCollectornode.getSimpleInstance("upload", fs, MAGIC), fs, file, HADOOP_PERFIX + file.getName(), false, 
-                100, file.length() - 100);
-        Thread thread = new Thread(writer);
-        thread.start();
-        thread.join();
-        FileInputStream fis = new FileInputStream(file);
-        String expectedMD5 = "4148bc964782b92b9410b75de54417c7";
-        Path actualFile = new Path(Util.SCHEMA + HADOOP_PERFIX + file.getName());
-        String actualMD5 = "";
-        if (fs.exists(actualFile)) {
-            actualMD5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fs.open(actualFile));
-        }
-        assertEquals("md5sum not equals", expectedMD5, actualMD5);
-        fis.close();
-        fs.deleteOnExit(actualFile);
-    }
 }

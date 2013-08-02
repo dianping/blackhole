@@ -31,8 +31,8 @@ public class TestRollRecoveryZero {
     public static void setUpBeforeClass() throws Exception {
         ConfigKeeper confKeeper = new ConfigKeeper();
         confKeeper.addRawProperty(MAGIC+".port", "40000");
-        confKeeper.addRawProperty(MAGIC+".transferPeriodValue", "1");
-        confKeeper.addRawProperty(MAGIC+".transferPeriodUnit", "hour");
+        confKeeper.addRawProperty(MAGIC+".TRANSFER_PERIOD_VALUE", "1");
+        confKeeper.addRawProperty(MAGIC+".TRANSFER_PERIOD_UNIT", "hour");
         //build a tmp file
         file = Util.createTmpFile(MAGIC + Util.FILE_SUFFIX, Util.expected);
     }
