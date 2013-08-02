@@ -24,13 +24,13 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.AppRegPB.AppReg;
 import com.dp.blackhole.common.AppRollPB.AppRoll;
 import com.dp.blackhole.common.AssignCollectorPB.AssignCollector;
 import com.dp.blackhole.common.MessagePB.Message;
 import com.dp.blackhole.common.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll;
-import com.dp.blackhole.conf.AppConfigurationConstants;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.node.Node;
 
@@ -126,7 +126,7 @@ public class Appnode extends Node {
         boolean res = true;
         for (String appName : ConfigKeeper.configMap.keySet()) {
             String path = ConfigKeeper.configMap.get(appName)
-                    .getString(AppConfigurationConstants.WATCH_FILE);
+                    .getString(ParamsKey.Appconf.WATCH_FILE);
             File fileForTest = new File(path);
             if (!fileForTest.exists()) {
                 LOG.error("Appnode process start faild, because file " + path + " not found.");
@@ -154,7 +154,7 @@ public class Appnode extends Node {
     public void fillUpAppLogsFromConfig() {
         for (String appName : ConfigKeeper.configMap.keySet()) {
             String path = ConfigKeeper.configMap.get(appName)
-                    .getString(AppConfigurationConstants.WATCH_FILE);
+                    .getString(ParamsKey.Appconf.WATCH_FILE);
             AppLog appLog = new AppLog(appName, path);
             appLogs.put(appName, appLog);
         }
