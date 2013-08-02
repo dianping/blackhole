@@ -47,7 +47,7 @@ public class HDFSUpload implements Runnable{
                 		"Has deleted it? "+ delsrc);
             //rename
             Path dst = new Path(dfsPath);
-            if (!Util.multipleRename(fs, tmp, dst)) {
+            if (!Util.retryRename(fs, tmp, dst)) {
                 throw new Exception("Faild to rename tmp to " + dst);
             }
             uploadSuccess = true;

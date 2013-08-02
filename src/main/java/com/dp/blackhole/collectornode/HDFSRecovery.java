@@ -75,17 +75,17 @@ public class HDFSRecovery implements Runnable{
                 }
                 LOG.info("Finished to write " + recoveryPath);
                 
-                if (Util.multipleRename(fs, recoveryPath, normalPath)) {
+                if (Util.retryRename(fs, recoveryPath, normalPath)) {
                     LOG.info("Finished to rename to " + normalPathname);
                 } else {
                     throw new Exception("Faild to rename to " + normalPathname);
                 }
                 
-                if (fs.exists(tmpPath) && !Util.multipleDelete(fs, tmpPath)) {   //delete .tmp if exists
+                if (fs.exists(tmpPath) && !Util.retryDelete(fs, tmpPath)) {   //delete .tmp if exists
                     throw new Exception("Faild to delete recovery file " + tmpPathname);
                 }
-            } else {    //When normal path exists then just delete .tmp and .r file if they exist.
-                if (fs.exists(tmpPath) && !Util.multipleDelete(fs, tmpPath)) {
+            } else {    //When normal path exists then just delete .tmp if they exist.
+                if (fs.exists(tmpPath) && !Util.retryDelete(fs, tmpPath)) {
                     throw new Exception("Faild to delete recovery file " + tmpPathname);
                 }
             }

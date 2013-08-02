@@ -21,6 +21,7 @@ import org.apache.hadoop.fs.Path;
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
     private static final int REPEATE = 3;
+    private static final int RETRY_SLEEP_TIME = 3000;
     //-----------------------------collecotr------------------------------------//
     public static String getHDFSPathByIdent(String baseHDFSPath, String appName, String appHost, final String fileSuffix) {
         // HDFS file: basePath / appName / filePerfix[0] / filePerfix[1] / appHost_appName_fileSuffix
@@ -46,39 +47,35 @@ public class Util {
         return path;    //    ..base../appName/2013-07-11/12/appName.2013-07-11.12
     }
 
-    public static boolean multipleDelete(FileSystem fs, Path path) {
+    public static boolean retryDelete(FileSystem fs, Path path) {
         for (int i = 0; i < REPEATE; i++) {
             try {
                 if (fs.delete(path, false)) {
                     return true;
-                } else {
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {}
                 }
             } catch (IOException e) {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException ex) {}
+            }
+            try {
+                Thread.sleep(RETRY_SLEEP_TIME);
+            } catch (InterruptedException ex) {
+                return false;
             }
         }
         return false;
     }
     
-    public static boolean multipleRename(FileSystem fs, Path src, Path dst) {
+    public static boolean retryRename(FileSystem fs, Path src, Path dst) {
         for (int i = 0; i < REPEATE; i++) {
             try {
                 if (fs.rename(src, dst)) {
                     return true;
-                } else {
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {}
                 }
             } catch (IOException e) {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException ex) {}
+            }
+            try {
+                Thread.sleep(RETRY_SLEEP_TIME);
+            } catch (InterruptedException ex) {
+                return false;
             }
         }
         return false;
