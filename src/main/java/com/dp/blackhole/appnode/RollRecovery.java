@@ -14,8 +14,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.common.AgentProtocol.AgentHead;
 
 public class RollRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(RollRecovery.class);
@@ -37,9 +39,9 @@ public class RollRecovery implements Runnable{
     
     @Override
     public void run() {
-        String unit = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getString(ParamsKey.Appconf.TRANSFER_PERIOD_UNIT, "hour");
-        SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatByUnit(unit));
+        long period = ConfigKeeper.configMap.get(appLog.getAppName())
+                .getLong(ParamsKey.Appconf.ROLL_PERIOD, 3600l);
+        SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         String rollIdent = unitFormat.format(rollTimestamp);
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
         RandomAccessFile reader = null;
@@ -48,13 +50,21 @@ public class RollRecovery implements Runnable{
         long offset = 0;
         try {
             server = new Socket(collectorServer, port);
-            out = sendHeaderReq();
+            out = new DataOutputStream(server.getOutputStream());
+            in = new DataInputStream(server.getInputStream());
             
-            offset = receiveHeaderRes(in);
+            AgentProtocol protocol = new AgentProtocol();
+            AgentHead head = protocol.new AgentHead();
+            head.type = AgentProtocol.RECOVERY;
+            head.app = appLog.getAppName();
+            head.peroid = ConfigKeeper.configMap.get(appLog.getAppName()).getLong(ParamsKey.Appconf.ROLL_PERIOD);
+            head.ts = rollTimestamp;
+            protocol.sendHead(out, head);
+            offset = protocol.receiveOffset(in);
             LOG.info("Received offset [" + offset + "] in header response.");
             
             reader = new RandomAccessFile(rolledFile, RAF_MODE);
-//            long length = rolledFile.length();
+
             reader.seek(offset);
             LOG.info("Seeked to the position " + offset + ". Begin to transfer...");
             int len = 0;
@@ -90,44 +100,5 @@ public class RollRecovery implements Runnable{
                 LOG.warn("Oops, got an exception:", e);
             }
         }
-    }
-
-    /**
-     * 1.specify a message type
-     * 2.specify app name to collector
-     * 3.specify a peroid
-     * 4.specify a format
-     * @return
-     * @throws IOException
-     */
-    private DataOutputStream sendHeaderReq() throws IOException {
-        DataOutputStream out;
-        out = new DataOutputStream(server.getOutputStream());
-        LOG.info("Writing... type:recovery");
-        Util.writeString("recovery", out);
-        
-        String appname = appLog.getAppName();
-        LOG.info("Writing... appname:" + appname);
-        Util.writeString(appname, out);
-        
-        String unit = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getString(ParamsKey.Appconf.TRANSFER_PERIOD_UNIT, "hour");
-        int value = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getInteger(ParamsKey.Appconf.TRANSFER_PERIOD_VALUE, 1);
-        long period = Util.getPeriodInSeconds(value, unit);
-        LOG.info("Writing... period:" + period);
-        out.writeLong(period);
-        
-        String format = Util.getFormatByUnit(unit);
-        LOG.info("Writing... format:" + format);
-        Util.writeString(format, out);
-        out.flush();
-        return out;
-    }
-
-    private long receiveHeaderRes(DataInputStream in) throws IOException {
-        in = new DataInputStream(server.getInputStream());
-        long offset = in.readLong();
-        return offset;
     }
 }

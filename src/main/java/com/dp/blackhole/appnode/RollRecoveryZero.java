@@ -8,15 +8,16 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
 import java.text.SimpleDateFormat;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.common.AgentProtocol.AgentHead;
 import com.dp.blackhole.conf.ConfigKeeper;
 
 public class RollRecoveryZero implements Runnable{
@@ -35,9 +36,9 @@ public class RollRecoveryZero implements Runnable{
     
     @Override
     public void run() {
-        String unit = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getString(ParamsKey.Appconf.TRANSFER_PERIOD_UNIT, "hour");
-        SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatByUnit(unit));
+        long period = ConfigKeeper.configMap.get(appLog.getAppName())
+                .getLong(ParamsKey.Appconf.ROLL_PERIOD, 3600l);
+        SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         String rollIdent = unitFormat.format(rollTimestamp);
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
         if (rolledFile == null) {
@@ -48,22 +49,31 @@ public class RollRecoveryZero implements Runnable{
         DataOutputStream out = null;
         DataInputStream in = null;
         long offset = 0;
+        FileInputStream fileStream = null;
         try {
-            //Unblocking IO zero copy
+            //blocking IO zero copy
             SocketAddress address = new InetSocketAddress(collectorServer, port);
             socketChannel = SocketChannel.open();
             socketChannel.connect(address);
-            socketChannel.configureBlocking(true);//TODO to be review
+            socketChannel.configureBlocking(true);
             
             //Blocking IO
             server = socketChannel.socket();
-            out = sendHeaderReq();
-            offset = receiveHeaderRes(in);
+            out = new DataOutputStream(server.getOutputStream());
+            in = new DataInputStream(server.getInputStream());
+            
+            AgentProtocol protocol = new AgentProtocol();
+            AgentHead head = protocol.new AgentHead();
+            head.type = AgentProtocol.RECOVERY;
+            head.app = appLog.getAppName();
+            head.peroid = ConfigKeeper.configMap.get(appLog.getAppName()).getLong(ParamsKey.Appconf.ROLL_PERIOD);
+            head.ts = rollTimestamp;
+            protocol.sendHead(out, head);
+            offset = protocol.receiveOffset(in);
             LOG.info("Seek to the position " + offset + " ok. Begin to transfer...");
 
-            FileChannel fc = new FileInputStream(rolledFile).getChannel();
-            long curnset =    fc.transferTo(offset, rolledFile.length(), socketChannel);
-            System.out.println(curnset);
+            fileStream = new FileInputStream(rolledFile);
+            fileStream.getChannel().transferTo(offset, rolledFile.length(), socketChannel);
             LOG.info("Roll file " + rolledFile + " has been transfered, ");
         } catch (Exception e) {
             LOG.error("Oops, got an exception:", e);
@@ -75,6 +85,9 @@ public class RollRecoveryZero implements Runnable{
                 if (out != null) {
                     out.close();
                 }
+                if (fileStream != null) {
+                    fileStream.close();
+                }
                 if (socketChannel != null) {
                     socketChannel.close();
                 }
@@ -83,44 +96,4 @@ public class RollRecoveryZero implements Runnable{
             }
         }
     }
-
-    /**
-     * 1.specify a message type
-     * 2.specify app name to collector
-     * 3.specify a peroid
-     * 4.specify a format
-     * @return
-     * @throws IOException
-     */
-    private DataOutputStream sendHeaderReq() throws IOException {
-        DataOutputStream out;
-        out = new DataOutputStream(server.getOutputStream());
-        LOG.info("Writing... type]:recovery");
-        Util.writeString("recovery", out);
-        
-        String appname = appLog.getAppName();
-        LOG.info("Writing... appname:" + appname);
-        Util.writeString(appname, out);
-        
-        String unit = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getString(ParamsKey.Appconf.TRANSFER_PERIOD_UNIT, "hour");
-        int value = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getInteger(ParamsKey.Appconf.TRANSFER_PERIOD_VALUE, 1);
-        long period = Util.getPeriodInSeconds(value, unit);
-        LOG.info("Writing... period:" + period);
-        out.writeLong(period);
-        
-        String format = Util.getFormatByUnit(unit);
-        LOG.info("Writing... format:" + format);
-        Util.writeString(format, out);
-        out.flush();
-        return out;
-    }
-
-    private long receiveHeaderRes(DataInputStream in) throws IOException {
-        in = new DataInputStream(server.getInputStream());
-        long offset = in.readLong();
-        return offset;
-    }
-
 }
