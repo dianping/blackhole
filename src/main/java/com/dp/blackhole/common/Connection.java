@@ -8,7 +8,7 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.dp.blackhole.common.MessagePB.Message;
+import com.dp.blackhole.common.gen.MessagePB.Message;
 
 public class Connection {
     SocketChannel channel;

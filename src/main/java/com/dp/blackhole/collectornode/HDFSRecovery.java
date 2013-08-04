@@ -21,32 +21,33 @@ public class HDFSRecovery implements Runnable{
 
     private Collectornode node;
     private FileSystem fs;
-    private String baseHDFSPath;
     private static final int DEFAULT_BUFSIZE = 8192;
     private Socket client;
-    private String appName;
-    private String appHost;
-    private String fileSuffix;
     private boolean recoverySuccess;
+    private RollIdent ident;
     
-    public HDFSRecovery(Collectornode node, FileSystem fs, String baseHDFSPath, 
-            Socket client, String appName, String appHost, String fileSuffix) {
+//    public HDFSRecovery(Collectornode node, FileSystem fs, String baseHDFSPath, 
+//            Socket client, String appName, String appHost, String fileSuffix) {
+//        this.node = node;
+//        this.fs = fs;
+//        this.client = client;
+//        this.recoverySuccess = false;
+//    }
+
+    public HDFSRecovery(Collectornode node, FileSystem fs, Socket socket, RollIdent roll) {
         this.node = node;
         this.fs = fs;
-        this.baseHDFSPath = baseHDFSPath;
-        this.client = client;
-        this.appName = appName;
-        this.appHost = appHost;
-        this.fileSuffix = fileSuffix;
+        this.ident = roll;
         this.recoverySuccess = false;
+        this.client = socket;
     }
-
+    
     @Override
     public void run() {
         GZIPOutputStream gout = null;
         GZIPInputStream gin = null;
         try {
-            String normalPathname = Util.getHDFSPathByIdent(baseHDFSPath, appName, appHost, fileSuffix);
+            String normalPathname = node.getRollHdfsPath(ident) + ".gz";
             String tmpPathname = normalPathname + TMP_SUFFIX;
             String recoveryPathname = normalPathname + R_SUFFIX;
             Path normalPath = new Path(normalPathname);
@@ -93,7 +94,7 @@ public class HDFSRecovery implements Runnable{
         } catch (Exception e) {
             LOG.error("Oops, got an exception:", e);
         } finally {
-            node.recoveryResult(this, recoverySuccess);
+            node.recoveryResult(ident, recoverySuccess);
             try {
                 if (gin != null) {
                     gin.close();

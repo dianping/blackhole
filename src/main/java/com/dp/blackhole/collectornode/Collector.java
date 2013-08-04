@@ -13,11 +13,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.dp.blackhole.common.Util;
 
 public class Collector implements Runnable {
 
-    String identifier;
+    private final static Log LOG = LogFactory.getLog(Collector.class);
     Socket socket;
     final String remoteAddress;
     final String app;
@@ -29,15 +32,16 @@ public class Collector implements Runnable {
     long rollPeriod;
     SimpleDateFormat format;
     
-    public Collector(String ident, Collectornode server, Socket s, String home, String appname, long Period, String rollFormat) {
-        identifier = ident;
+    public Collector(Collectornode server, Socket s, String home, String appname, long period) throws IOException {
         node = server;
         socket = s;
         remoteAddress = socket.getRemoteSocketAddress().toString();
         app = appname;
-        rollPeriod = Period;
-        format = new SimpleDateFormat(rollFormat);
+        rollPeriod = period;
+        format = new SimpleDateFormat(node.getFormatFromPeroid(period));
         storagedir = home+"/"+ app + "/" + remoteAddress;
+        
+        init();
     }
     
     public void init() throws IOException, IOException {
@@ -51,6 +55,7 @@ public class Collector implements Runnable {
         String event;
         try {
             while ((event = streamIn.readLine()) != null) {
+                LOG.debug("received event: " + event);
                 if (event.length() != 0) {
                     writetofile(event);
                     emit(event);
@@ -88,6 +93,9 @@ public class Collector implements Runnable {
         
         RollIdent rollIdent = getRollIdent();
         File rollFile = getRollFile(rollIdent);
+        
+        LOG.info("complete file: " + rollFile + ", roll " + rollIdent);
+        
         appending.renameTo(rollFile);
         node.registerfile(rollIdent, rollFile);
         
@@ -99,6 +107,7 @@ public class Collector implements Runnable {
         Date time = new Date(Util.getRollTs(rollPeriod));
         RollIdent roll = new RollIdent();
         roll.app = app;
+        roll.period = rollPeriod;
         roll.source = remoteAddress;
         roll.ts = time.getTime();
         return roll;
@@ -111,15 +120,5 @@ public class Collector implements Runnable {
     
     private void emit(String line) {
         // TODO send to realtime data comsumer
-    }
-
-    public static void main(String args[]) throws IOException, IOException {
-        
-//        ServerSocket sc = new ServerSocket(8081);
-//        Socket client = sc.accept();
-//        Collector c = new Collector(client);
-//        c.run();
-//        System.out.println("done");
-
     }
 }

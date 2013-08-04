@@ -1,7 +1,6 @@
 package com.dp.blackhole.node;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -15,10 +14,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.common.MessagePB.Message.MessageType;
-import com.dp.blackhole.common.Util;
-import com.dp.blackhole.common.MessagePB.Message;
-import com.dp.blackhole.common.NodeRegPB.NodeReg;
+import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.gen.MessagePB.Message;
 
 public abstract class Node {
     public static final Log LOG = LogFactory.getLog(Node.class);
@@ -35,9 +32,7 @@ public abstract class Node {
     class HeartBeat extends Thread {
         @Override
         public void run() {
-            Message.Builder builder = Message.newBuilder();
-            builder.setType(MessageType.HEARTBEART);
-            Message heartbeat = builder.build();
+            Message heartbeat = PBwrap.wrapHeartBeat();
             while (true) {
                 try {
                     sleep(1000);
@@ -86,8 +81,6 @@ public abstract class Node {
                             }
                             int num = -1;
                             for (int i = 0; i < 16; i++) {
-                                System.out.println(i);
-                                System.out.println(writebuffer);
                                 num = channel.write(writebuffer);
                                 if (num != 0) {
                                     break;
@@ -126,6 +119,7 @@ public abstract class Node {
                         if (readbuffer.remaining() == 0) {
                             readbuffer.flip();
                             Message msg = Message.parseFrom(readbuffer.array());
+                            LOG.debug("message enqueue: " + msg);
                             process(msg);
                             readbuffer = null;
                             readLength.clear();
@@ -141,6 +135,7 @@ public abstract class Node {
     private void closeconnection(SelectionKey key) {
         if (key != null) {
             SocketChannel channel = (SocketChannel) key.channel();
+            LOG.debug("close connection: " + channel);
             key.cancel();
             readLength = null;
             readbuffer = null;
@@ -167,9 +162,10 @@ public abstract class Node {
         }
     }
 
-    protected abstract void process(Message msg);
+    protected abstract boolean process(Message msg);
 
     protected void send(Message msg) {
+        LOG.debug("send message: " + msg);
         queue.offer(msg);
         SelectionKey key = socketChannel.keyFor(selector);
         key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
@@ -189,6 +185,14 @@ public abstract class Node {
         HeartBeat heartBeatThread = new HeartBeat();
         heartBeatThread.setDaemon(true);
         heartBeatThread.start();
+    }
+    
+    public Node() {
+        try {
+            init();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

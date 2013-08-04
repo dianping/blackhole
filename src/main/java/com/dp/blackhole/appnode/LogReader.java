@@ -1,5 +1,6 @@
 package com.dp.blackhole.appnode;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,7 +11,12 @@ import java.net.UnknownHostException;
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-//TODO CAN NOT SET THIS TO LISTENER
+
+import com.dp.blackhole.common.AgentProtocol;
+import com.dp.blackhole.common.AgentProtocol.AgentHead;
+import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.conf.ConfigKeeper;
+
 public class LogReader implements Runnable{
     private static final Log LOG = LogFactory.getLog(LogReader.class);
     private final boolean isTailFromEnd = true;
@@ -59,7 +65,18 @@ public class LogReader implements Runnable{
         try {
             initialize();
             Socket server = new Socket(collectorServer, port);
-            writer = new OutputStreamWriter(server.getOutputStream());
+            DataOutputStream out = new DataOutputStream(server.getOutputStream());
+
+            AgentProtocol protocol = new AgentProtocol();
+            AgentHead head = protocol.new AgentHead();
+            
+            head.type = AgentProtocol.STREAM;
+            head.app = appLog.getAppName();
+            head.peroid = ConfigKeeper.configMap.get(appLog.getAppName()).getLong(ParamsKey.Appconf.ROLL_PERIOD);
+  
+            protocol.sendHead(out, head);
+            
+            writer = new OutputStreamWriter(out);
             tailer.run();
         } catch (FileNotFoundException e) {
             LOG.error("Got an exception", e);
