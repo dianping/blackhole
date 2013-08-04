@@ -24,13 +24,12 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
-import com.dp.blackhole.common.AppRegPB.AppReg;
-import com.dp.blackhole.common.AppRollPB.AppRoll;
-import com.dp.blackhole.common.AssignCollectorPB.AssignCollector;
-import com.dp.blackhole.common.MessagePB.Message;
-import com.dp.blackhole.common.MessagePB.Message.MessageType;
-import com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll;
+import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.common.gen.MessagePB.Message;
+import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
+import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.node.Node;
 
@@ -95,31 +94,9 @@ public class Appnode extends Node {
   	    return false;
     }
 
-    /**
-     * Wrap all kinds of event to a common message to transfer.
-     * @param object
-     * @return
-     */
-    private Message wrapMessage(Object object) {
-        Message.Builder messageBuilder = Message.newBuilder();
-        if (object instanceof AppReg) {
-            messageBuilder.setType(MessageType.APP_REG);
-            messageBuilder.setAppReg((AppReg)object);
-        } else {
-            messageBuilder.setType(MessageType.APP_ROLL);
-            messageBuilder.setAppRoll((AppRoll)object);
-        }
-        Message message = messageBuilder.build();
-        return message;
-    }
-
     private void register(String appName, long regTimestamp) {
-        AppReg.Builder appRegBuilder = AppReg.newBuilder();
-        appRegBuilder.setAppName(appName);
-        appRegBuilder.setAppServer(appClient);
-        appRegBuilder.setRegTs(regTimestamp);
-        AppReg appReg = appRegBuilder.build();
-        super.send(wrapMessage(appReg));
+        Message msg = PBwrap.wrapAppReg(appName, appClient, regTimestamp);
+        super.send(msg);
     }
 
     private boolean checkAllFilesExist() {

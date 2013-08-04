@@ -2,6 +2,7 @@ package com.dp.blackhole.collectornode;
 
 public class RollIdent {
     public String app;
+    public long period;
     public String source;
     public long ts;
     @Override
@@ -9,6 +10,7 @@ public class RollIdent {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((app == null) ? 0 : app.hashCode());
+        result = prime * result + (int) (period ^ (period >>> 32));
         result = prime * result + ((source == null) ? 0 : source.hashCode());
         result = prime * result + (int) (ts ^ (ts >>> 32));
         return result;
@@ -27,6 +29,8 @@ public class RollIdent {
                 return false;
         } else if (!app.equals(other.app))
             return false;
+        if (period != other.period)
+            return false;
         if (source == null) {
             if (other.source != null)
                 return false;
@@ -36,5 +40,5 @@ public class RollIdent {
             return false;
         return true;
     }
-    
+
 }
