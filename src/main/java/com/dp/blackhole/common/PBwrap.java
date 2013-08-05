@@ -30,10 +30,12 @@ public class PBwrap {
         case APP_ROLL:
             msg.setAppRoll((AppRoll) message);
             break;
+        case RECOVERY_ROLL:
+            msg.setRecoveryRoll((RecoveryRoll) message);
+            break;
         case UPLOAD_ROLL:
         case UPLOAD_SUCCESS:
         case UPLOAD_FAIL:
-        case RECOVERY_ROLL:
         case RECOVERY_SUCCESS:
         case RECOVERY_FAIL:
             msg.setRollID((RollID) message);
