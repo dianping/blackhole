@@ -9,7 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -26,11 +25,6 @@ public class Util {
     public static final String BASE_HDFS_PATH = SCHEMA + BASE_PATH;
     public static final String FILE_SUFFIX = "2013-01-01.15";
     public static long rollTS = 1357023691855l;
-    public static void main(String[] args) {
-        long ts = com.dp.blackhole.common.Util.getRollTs(rollTS, 3600l);
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd.HH");
-        System.out.println(format.format(ts));
-    }
     public static final int PORT = 40000;
     public static final String expected = " 0f j2390jr092jf2f02jf02qjdf2-3j0 fiopwqejfjwffhg5_p    <end";
     public static final int offset = 100;
