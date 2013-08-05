@@ -7,5 +7,6 @@ message ReadyCollector {
     required string app_name = 1;
     required string app_server = 2;
     required string collector_server = 3;
-    required int64 connectedTs = 4;
+    required int64 period = 4;
+    required int64 connectedTs = 5;
 }
