@@ -68,10 +68,11 @@ public class PBwrap {
         return wrapMessage(MessageType.ASSIGN_COLLECTOR, builder.build());
     }
     
-    public static Message wrapReadyCollector(String app_name, String app_server, String collector_server, long connectedTs) {
+    public static Message wrapReadyCollector(String app_name, String app_server, long peroid, String collector_server, long connectedTs) {
         ReadyCollector.Builder builder = ReadyCollector.newBuilder();
         builder.setAppName(app_name);
         builder.setAppServer(app_server);
+        builder.setPeriod(peroid);
         builder.setCollectorServer(collector_server);
         builder.setConnectedTs(connectedTs);
         return wrapMessage(MessageType.READY_COLLECTOR, builder.build());

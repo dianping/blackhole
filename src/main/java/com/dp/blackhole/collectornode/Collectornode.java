@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -32,6 +33,7 @@ public class Collectornode extends Node {
     private String basedir;
     private String hdfsbasedir;
     private String suffix;
+    private String localhost;
     private int port;
     private FileSystem fs;
 
@@ -59,7 +61,7 @@ public class Collectornode extends Node {
                         LOG.debug("logreader connected: " + head.app);
                         Collector collector = new Collector(Collectornode.this, socket, basedir, head.app, head.peroid);
                         pool.execute(collector);
-                        Message msg = PBwrap.wrapReadyCollector(head.app, remote, ((InetSocketAddress)socket.getLocalSocketAddress()).getHostName(), Util.getTS());
+                        Message msg = PBwrap.wrapReadyCollector(head.app, remote, head.peroid, localhost, Util.getTS());
                         send(msg);
                     } else if (AgentProtocol.RECOVERY == head.type) {
                         
@@ -132,6 +134,7 @@ public class Collectornode extends Node {
     }
     
     private void start() throws FileNotFoundException, IOException {
+        localhost = InetAddress.getLocalHost().getHostName();
         
         Properties prop = new Properties();
         prop.load(new FileReader(new File("config.properties")));
