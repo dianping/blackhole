@@ -60,12 +60,13 @@ public class Collectornode extends Node {
                         Collector collector = new Collector(Collectornode.this, socket, basedir, head.app, head.peroid);
                         pool.execute(collector);
                         Message msg = PBwrap.wrapReadyCollector(head.app, remote, ((InetSocketAddress)socket.getLocalSocketAddress()).getHostName(), Util.getTS());
-                        send(msg);;
+                        send(msg);
                     } else if (AgentProtocol.RECOVERY == head.type) {
                         
                         RollIdent roll = new RollIdent();
                         roll.app = head.app;
                         roll.source = remote;
+                        roll.period = head.peroid;
                         roll.ts = head.ts;
                         
                         HDFSRecovery recovery = new HDFSRecovery(Collectornode.this, fs, socket, roll);
@@ -105,7 +106,7 @@ public class Collectornode extends Node {
     }
 
     public String getDatepathbyFormat (String format) {
-        StringBuffer dirs = null;
+        StringBuffer dirs = new StringBuffer();
         for (String dir: format.split("\\.")) {
             dirs.append(dir);
             dirs.append('/');
@@ -222,6 +223,10 @@ public class Collectornode extends Node {
         } else {
             LOG.fatal("update a exists file roll");
         }
+    }
+    
+    public String getSuffix() {
+        return suffix;
     }
     
     public void recoveryResult(RollIdent ident, boolean recoverySuccess) {

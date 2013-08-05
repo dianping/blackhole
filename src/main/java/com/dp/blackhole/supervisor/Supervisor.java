@@ -389,16 +389,17 @@ public class Supervisor {
         // new stream
         if (stages == null) {
             stages = new ArrayList<Stage>();
-            Streams.put(stream, stages);
             Stage current = new Stage();
             current.apphost = stream.appHost;
             current.collectorhost = message.getCollectorServer();
             current.cleanstart = false;
             current.issuelist = new ArrayList<Issue>();
             current.status = Stage.APPEND;
+            // TODO get period from message
             current.rollTs = Util.getRollTs(3600) + 3600;
             current.isCurrent = true;
             stages.add(current);
+            Streams.put(stream, stages);
         } else {
             // old stream with collector fail
             Stage current = stages.get(stages.size() -1);
@@ -419,7 +420,6 @@ public class Supervisor {
                 stages.add(next);
             }
         }
-
     }
 
     private void registerApp(Message m, Connection from) throws InterruptedException {

@@ -109,11 +109,11 @@ public class Util {
     public static String getFormatFromPeroid (long period) {
         String format;
         if (period < 60) {
-            format = "yyyy-MM-dd.hh.mm.ss";
+            format = "yyyy-MM-dd.HH.mm.ss";
         } else if (period < 3600) {
-            format = "yyyy-MM-dd.hh.mm";
+            format = "yyyy-MM-dd.HH.mm";
         } else if (period < 86400) {
-            format = "yyyy-MM-dd.hh";
+            format = "yyyy-MM-dd.HH";
         } else {
             format = "yyyy-MM-dd";
         }
@@ -158,13 +158,19 @@ public class Util {
         return now.getTime();
     }
     
+    /*
+     * get the closest roll timestamp, for example
+     * now is 16:02, and rollPeroid is 1 hour, then
+     * return st of 15:00
+     */
     public static long getRollTs(long rollPeriod) {
         long ts = Util.getTS();
+        rollPeriod = rollPeriod * 1000;
         
         if ((ts % rollPeriod) < (rollPeriod/2)) {
-            ts = (ts / rollPeriod) * rollPeriod * 1000;
+            ts = (ts / rollPeriod -1) * rollPeriod;
         } else {
-            ts = (ts / rollPeriod + 1) * rollPeriod *1000;
+            ts = (ts / rollPeriod) * rollPeriod;
         }
         return ts;
     }
