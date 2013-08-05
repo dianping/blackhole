@@ -1,8 +1,9 @@
 package com.dp.blackhole.simutil;
 
+import static org.junit.Assert.*;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,6 +11,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.dp.blackhole.common.AgentProtocol;
+import com.dp.blackhole.common.AgentProtocol.AgentHead;
 
 public class SimTailServer implements Runnable {
     private static final Log LOG = LogFactory.getLog(SimTailServer.class);
@@ -38,15 +42,24 @@ public class SimTailServer implements Runnable {
     
     public void run() {
         Socket socket = null;
-        InputStream in = null;
+        DataInputStream din = null;
         System.out.println(Thread.currentThread());
         try {
             String line = null;
             socket = ss.accept();
-            in = socket.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            din = new DataInputStream(socket.getInputStream());
+            //check header
+            AgentProtocol protocol = new AgentProtocol();
+            AgentHead head = protocol.new AgentHead();
+            protocol.recieveHead(din, head);
+            assertEquals(1, head.type);
+            String appname = head.app;
+            LOG.info("Receive... " + appname);
+            String periodStr = String.valueOf(head.peroid);
+            LOG.info("Receive... " + periodStr);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(din));
             while (!shouldStop && (line = reader.readLine()) != null) {
-                LOG.debug("server>" + line);
+                LOG.info("server>" + line);
                 receives.add(line);
                 if (receives.size() == MAX_SIZE) {
                     break;
@@ -56,7 +69,10 @@ public class SimTailServer implements Runnable {
             e.printStackTrace();
         } finally {
             try {
-                in.close();
+                if (din != null) {
+                    din.close();
+                }
+                ss.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -16,14 +16,6 @@ import org.junit.Test;
 import com.dp.blackhole.common.Util;
 
 public class TestUtil {
-    private static String[] unitStr;
-    static {
-        unitStr = new String[4];
-        unitStr[0] = "hour";
-        unitStr[1] = "day";
-        unitStr[2] = "minute";
-        unitStr[3] = "unknow";
-    }
     
     enum MONTH {
         JAN,
@@ -72,18 +64,6 @@ public class TestUtil {
         setDate = new Date(2013, MONTH.JAN.ordinal(), 1, 00, 30, 24);
         expectedDate = new Date(2012, MONTH.DEC.ordinal(), 31, 23, 30, 24);
         assertEquals(expectedDate, Util.getOneHoursAgoTime(setDate));
-    }
-
-    @Test
-    public void testGetFormatByUnit() {
-        String[] expecteds = new String[4];
-        expecteds[0] = "yyyy-MM-dd.hh";
-        expecteds[1] = "yyyy-MM-dd";
-        expecteds[2] = "yyyy-MM-dd.hh:mm";
-        expecteds[3] = "yyyy-MM-dd.hh";
-        for(int i = 0; i<unitStr.length; i++) {
-            assertEquals(expecteds[i], Util.getFormatByUnit(unitStr[i]));
-        }
     }
 
     @Test

@@ -14,6 +14,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.dp.blackhole.appnode.AppLog;
+import com.dp.blackhole.appnode.RollRecoveryZero;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.simutil.SimRecoveryServer;
 import com.dp.blackhole.simutil.Util;
@@ -31,8 +33,7 @@ public class TestRollRecoveryZero {
     public static void setUpBeforeClass() throws Exception {
         ConfigKeeper confKeeper = new ConfigKeeper();
         confKeeper.addRawProperty(MAGIC+".port", "40000");
-        confKeeper.addRawProperty(MAGIC+".TRANSFER_PERIOD_VALUE", "1");
-        confKeeper.addRawProperty(MAGIC+".TRANSFER_PERIOD_UNIT", "hour");
+        confKeeper.addRawProperty(MAGIC + ".ROLL_PERIOD", "3600");
         //build a tmp file
         file = Util.createTmpFile(MAGIC + Util.FILE_SUFFIX, Util.expected);
     }
@@ -66,10 +67,10 @@ public class TestRollRecoveryZero {
             e.printStackTrace();
         }
         String[] expectedHeader = new String[4];
-        expectedHeader[0] = "recovery";
+        expectedHeader[0] = "2";
         expectedHeader[1] = MAGIC;
         expectedHeader[2] = "3600";
-        expectedHeader[3] = "yyyy-MM-dd.hh";
+        expectedHeader[3] = String.valueOf(Util.rollTS);
         assertArrayEquals("head not match", expectedHeader, header.toArray());
         assertEquals("loader function fail.", Util.expected, receives.get(receives.size()-1));
     }
