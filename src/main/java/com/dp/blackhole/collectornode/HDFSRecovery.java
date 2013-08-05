@@ -25,14 +25,6 @@ public class HDFSRecovery implements Runnable{
     private Socket client;
     private boolean recoverySuccess;
     private RollIdent ident;
-    
-//    public HDFSRecovery(Collectornode node, FileSystem fs, String baseHDFSPath, 
-//            Socket client, String appName, String appHost, String fileSuffix) {
-//        this.node = node;
-//        this.fs = fs;
-//        this.client = client;
-//        this.recoverySuccess = false;
-//    }
 
     public HDFSRecovery(Collectornode node, FileSystem fs, Socket socket, RollIdent roll) {
         this.node = node;
@@ -47,7 +39,7 @@ public class HDFSRecovery implements Runnable{
         GZIPOutputStream gout = null;
         GZIPInputStream gin = null;
         try {
-            String normalPathname = node.getRollHdfsPath(ident) + ".gz";
+            String normalPathname = node.getRollHdfsPath(ident);
             String tmpPathname = normalPathname + TMP_SUFFIX;
             String recoveryPathname = normalPathname + R_SUFFIX;
             Path normalPath = new Path(normalPathname);
