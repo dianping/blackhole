@@ -18,12 +18,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.dp.blackhole.appnode.Appnode;
+import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
-import com.dp.blackhole.common.AssignCollectorPB.AssignCollector;
-import com.dp.blackhole.common.MessagePB.Message;
-import com.dp.blackhole.common.MessagePB.Message.MessageType;
-import com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector;
-import com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll;
+import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.simutil.Util;
 public class TestAppnode {
@@ -83,43 +81,15 @@ public class TestAppnode {
     }
 
     private Message getMessageOfAssignCollector(String appName) {
-        AssignCollector.Builder assignCollectorBuilder = AssignCollector.newBuilder();
-        assignCollectorBuilder.setAppName(appName);
-        assignCollectorBuilder.setCollectorServer(Util.HOSTNAME);
-        AssignCollector assignCollector = assignCollectorBuilder.build();
-        Message.Builder messageBuilder = Message.newBuilder();
-        messageBuilder.setType(MessageType.ASSIGN_COLLECTOR);
-        messageBuilder.setAssignCollector(assignCollector);
-        Message message = messageBuilder.build();
-        return message;
+        return PBwrap.wrapAssignCollector(appName, Util.HOSTNAME);
     }
     
     private Message getMessageOfRecoveryRoll(String appName) {
-        RecoveryRoll.Builder recoveryRollBuilder = RecoveryRoll.newBuilder();
-        recoveryRollBuilder.setAppName(appName);
-        recoveryRollBuilder.setCollectorServer(Util.HOSTNAME);
-        recoveryRollBuilder.setRollTs(Util.rollTS);
-        recoveryRollBuilder.setOffset(0l);
-        RecoveryRoll recoveryRoll = recoveryRollBuilder.build();
-        Message.Builder messageBuilder = Message.newBuilder();
-        messageBuilder.setType(MessageType.RECOVERY_ROLL);
-        messageBuilder.setRecoveryRoll(recoveryRoll);
-        Message message = messageBuilder.build();
-        return message;
+        return PBwrap.wrapRecoveryRoll(appName, Util.HOSTNAME, Util.rollTS);
     }
 
     private Message getUnknowMessage() {
-        ReadyCollector.Builder readyCollectorBuilder = ReadyCollector.newBuilder();
-        readyCollectorBuilder.setAppName(MAGIC);
-        readyCollectorBuilder.setAppServer(Util.HOSTNAME);
-        readyCollectorBuilder.setCollectorServer(Util.HOSTNAME);
-        readyCollectorBuilder.setConnectedTs(1l);
-        ReadyCollector readyCollector = readyCollectorBuilder.build();
-        Message.Builder messageBuilder = Message.newBuilder();
-        messageBuilder.setType(MessageType.READY_COLLECTOR);
-        messageBuilder.setReadyCollector(readyCollector);
-        Message message = messageBuilder.build();
-        return message;
+        return PBwrap.wrapReadyCollector(MAGIC, Util.HOSTNAME, Util.HOSTNAME, 1l);
     }
     
     @Test
