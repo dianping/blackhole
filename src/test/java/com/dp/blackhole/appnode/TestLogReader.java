@@ -21,6 +21,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.dp.blackhole.appnode.AppLog;
+import com.dp.blackhole.appnode.LogReader;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.simutil.SimTailServer;
@@ -56,6 +58,7 @@ public class TestLogReader {
     public static void setUpBeforeClass() throws Exception {
         ConfigKeeper confKeeper = new ConfigKeeper();
         confKeeper.addRawProperty(MAGIC+".port", "40000");
+        confKeeper.addRawProperty(MAGIC + ".ROLL_PERIOD", "3600");
     }
 
     @AfterClass
@@ -182,21 +185,6 @@ public class TestLogReader {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Test
-    public void test() {
-//        System.out.println(System.getProperty("java.class.path"));
-        LogReader reader = new LogReader(com.dp.blackhole.simutil.Util.HOSTNAME, 
-                com.dp.blackhole.simutil.Util.PORT, appLog, 100);
-        ExecutorService exec = Executors.newCachedThreadPool();
-        exec.execute(reader);
-        try {
-            serverThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        assertNotNull("tailer function fail.", receives.toArray());
     }
     
     @Test

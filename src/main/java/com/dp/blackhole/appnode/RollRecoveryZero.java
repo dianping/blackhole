@@ -66,7 +66,7 @@ public class RollRecoveryZero implements Runnable{
             AgentHead head = protocol.new AgentHead();
             head.type = AgentProtocol.RECOVERY;
             head.app = appLog.getAppName();
-            head.peroid = ConfigKeeper.configMap.get(appLog.getAppName()).getLong(ParamsKey.Appconf.ROLL_PERIOD);
+            head.peroid = period;
             head.ts = rollTimestamp;
             protocol.sendHead(out, head);
             offset = protocol.receiveOffset(in);

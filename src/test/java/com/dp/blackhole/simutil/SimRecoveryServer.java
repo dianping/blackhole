@@ -13,6 +13,9 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.common.AgentProtocol;
+import com.dp.blackhole.common.AgentProtocol.AgentHead;
+
 public class SimRecoveryServer implements Runnable {
     private static final Log LOG = LogFactory.getLog(SimRecoveryServer.class);
     
@@ -51,18 +54,22 @@ public class SimRecoveryServer implements Runnable {
             in = socket.getInputStream();
             //check header
             din = new DataInputStream(in);
-            String type = com.dp.blackhole.common.Util.readString(din);
+            AgentProtocol protocol = new AgentProtocol();
+            AgentHead head = protocol.new AgentHead();
+            
+            protocol.recieveHead(din, head);
+            String type = String.valueOf(head.type);
             LOG.info("Receive... " + type);
             header.add(type);
-            String appname = com.dp.blackhole.common.Util.readString(din);
+            String appname = head.app;
             LOG.info("Receive... " + appname);
             header.add(appname);
-            String periodStr = din.readLong() + "";
+            String periodStr = String.valueOf(head.peroid);
             LOG.info("Receive... " + periodStr);
             header.add(periodStr);
-            String format = com.dp.blackhole.common.Util.readString(din);
-            LOG.info("Receive... " + format);
-            header.add(format); 
+            String ts = String.valueOf(head.ts);
+            LOG.info("Receive... " + ts);
+            header.add(ts); 
             
             //similar get offset from hdfs file
             long offset = getOffsetFromHDFSFile();
@@ -81,9 +88,12 @@ public class SimRecoveryServer implements Runnable {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
+        }finally {
             try {
-                in.close();
+                if (in != null) {
+                    in.close();
+                }
+                ss.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

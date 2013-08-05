@@ -3,7 +3,6 @@ package com.dp.blackhole.collectornode;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +38,6 @@ public class HDFSUpload implements Runnable{
         Path src = new Path(file.getPath());
         String dfsPath = node.getRollHdfsPath(ident);
         Path tmp = new Path(dfsPath + TMP_SUFFIX);
-        RandomAccessFile reader = null;
         
         try {
             fs.copyFromLocalFile(false, true, src, tmp);
@@ -57,9 +55,6 @@ public class HDFSUpload implements Runnable{
             try {
                 if (out != null) {
                     out.close();
-                }
-                if (reader != null) {
-                    reader.close();
                 }
             } catch (IOException e) {
                 LOG.warn("Faild to close Outputstream or RandomAccessFile ", e);
