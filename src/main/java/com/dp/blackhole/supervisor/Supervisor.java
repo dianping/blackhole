@@ -10,11 +10,9 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -23,16 +21,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-import com.dp.blackhole.common.AppRegPB.AppReg;
-import com.dp.blackhole.common.AppRollPB.AppRoll;
+import com.dp.blackhole.common.gen.AppRegPB.AppReg;
+import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.Connection;
-import com.dp.blackhole.common.MessagePB;
-import com.dp.blackhole.common.AssignCollectorPB.AssignCollector;
-import com.dp.blackhole.common.MessagePB.Message;
-import com.dp.blackhole.common.MessagePB.Message.MessageType;
-import com.dp.blackhole.common.ReadyCollectorPB.ReadyCollector;
-import com.dp.blackhole.common.RecoveryRollPB.RecoveryRoll;
-import com.dp.blackhole.common.RollIDPB.RollID;
+import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.gen.MessagePB.Message;
+import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
+import com.dp.blackhole.common.gen.RollIDPB.RollID;
 import com.dp.blackhole.common.Util;
 
 
@@ -60,6 +55,7 @@ public class Supervisor {
         SelectionKey key = channel.keyFor(selector);
         key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
         connection.offer(msg);
+        LOG.debug("send message: "+msg);
         selector.wakeup();
     }
     
@@ -93,6 +89,7 @@ public class Supervisor {
                         String remote = connection.getHost();
                         if (hostMap.get(remote) == null) {
                             hostMap.put(remote, connection);
+                            LOG.debug("client node "+remote+" connected");
                         }
                         
                     } else if (key.isWritable()) {
@@ -166,7 +163,7 @@ public class Supervisor {
                             event.c = connection;
                             event.msg = msg;
                             messageQueue.put(event);
-                            
+                            LOG.debug("message enqueue: " + msg);
                             lengthBuf.clear();
                         }
                     }
@@ -234,6 +231,7 @@ public class Supervisor {
         selector = Selector.open();
         ssc.register(selector, SelectionKey.OP_ACCEPT);
         connectionMap = new ConcurrentHashMap<Connection, ArrayList<StreamId>>();
+        hostMap = new ConcurrentHashMap<String, Connection>();
         CollectorNodes = new ArrayList<Connection>();
         messageQueue = new LinkedBlockingQueue<Msg>();
         Handler handler = new Handler();
@@ -298,16 +296,10 @@ public class Supervisor {
 
     private String doRecovery(StreamId id, Stage stage) {
         String collector = getCollector();
-
         Connection c = hostMap.get(id.appHost);
-        RecoveryRoll.Builder recovery = RecoveryRoll.newBuilder();
-        recovery.setAppName(id.app)
-            .setCollectorServer(collector)
-            .setRollTs(stage.rollTs);
-        Message.Builder message = Message.newBuilder();
-        message.setType(MessageType.RECOVERY_ROLL)
-            .setRecoveryRoll(recovery.build());
-        send(c, message.build());
+        
+        Message message = PBwrap.wrapRecoveryRoll(id.app, collector, stage.rollTs);
+        send(c, message);
         return collector;
     }
 
@@ -375,14 +367,8 @@ public class Supervisor {
     }
 
     private String doUpload(Stage current, Connection from) {
-        RollID.Builder roll = RollID.newBuilder();
-        roll.setAppName(current.app)
-            .setAppServer(current.apphost)
-            .setRollTs(current.rollTs);
-        Message.Builder message = Message.newBuilder();
-        message.setType(MessageType.UPLOAD_ROLL)
-            .setRollID(roll.build());
-        send(from, message.build());
+        Message message = PBwrap.wrapUploadRoll(current.app, current.apphost, current.rollTs);
+        send(from, message);
         return from.getHost();
     }
 
@@ -453,13 +439,8 @@ public class Supervisor {
             return -1;
         }
         String collector = getCollector();
-        AssignCollector.Builder assign = AssignCollector.newBuilder();
-        assign.setAppName(app);
-        assign.setCollectorServer(collector);
-        Message.Builder message = Message.newBuilder();
-        message.setType(MessageType.ASSIGN_COLLECTOR)
-            .setAssignCollector(assign.build());
-        send(from, message.build());
+        Message message = PBwrap.wrapAssignCollector(app, collector);
+        send(from, message);
         return 0;
     }
 

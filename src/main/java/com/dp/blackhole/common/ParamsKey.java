@@ -3,8 +3,7 @@ package com.dp.blackhole.common;
 public abstract class ParamsKey {
     public static class Appconf {
         public static final String WATCH_FILE = "WATCH_FILE";
-        public static final String TRANSFER_PERIOD_VALUE = "TRANSFER_PERIOD_VALUE";
-        public static final String TRANSFER_PERIOD_UNIT = "TRANSFER_PERIOD_UNIT";
+        public static final String ROLL_PERIOD = "ROLL_PERIOD";
     }
     
     public static class ZKServer {

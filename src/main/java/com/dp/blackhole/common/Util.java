@@ -7,7 +7,6 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -22,30 +21,6 @@ public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
     private static final int REPEATE = 3;
     private static final int RETRY_SLEEP_TIME = 3000;
-    //-----------------------------collecotr------------------------------------//
-    public static String getHDFSPathByIdent(String baseHDFSPath, String appName, String appHost, final String fileSuffix) {
-        // HDFS file: basePath / appName / filePerfix[0] / filePerfix[1] / appHost_appName_fileSuffix
-        // HDFS file: ..base.. / access  / 2013-07-11    /        12     / hostname_access_2013-07-11.12
-        // HDFS file: ..base.. / access  / 2013-07-11    /                 hostname_access_2013-07-11
-        // filePerfix: 2013-07-11.12
-        // filePerfix: 2013-07-11
-        String path = baseHDFSPath + "/" + appName;
-        String[] fileSuffixs = fileSuffix.split("\\.");
-        switch (fileSuffixs.length) {
-        case 2: //2013-07-11.12 
-            path += ("/" + fileSuffixs[0] + "/" + fileSuffixs[1]);
-            break;
-        case 1: //appName.2013-07-11
-            path += ("/" + fileSuffixs[0]);
-            break;
-
-        default:
-            LOG.warn("fileSuffix " + fileSuffix + " is illegal");
-            break;
-        }
-        path += ("/" + appHost + "_" + appName + "_" + fileSuffix);
-        return path;    //    ..base../appName/2013-07-11/12/appName.2013-07-11.12
-    }
 
     public static boolean retryDelete(FileSystem fs, Path path) {
         for (int i = 0; i < REPEATE; i++) {
@@ -79,13 +54,6 @@ public class Util {
             }
         }
         return false;
-    }
-    
-    //---------------------------app--------------------------------------//
-    public static String getRollIdentByTime(Date date, int interval) {
-        //first version, we use 60 min (1 hour) as fixed interval
-        SimpleDateFormat dayFormat = new SimpleDateFormat("yyyy-MM-dd.hh:00:00");
-        return dayFormat.format(getOneHoursAgoTime(date));
     }
 
     public static Date getOneHoursAgoTime(Date date) {
@@ -124,6 +92,7 @@ public class Util {
         }
     }
 
+    @Deprecated
     public static long getPeriodInSeconds(int value, String unit) {
         if (unit.equalsIgnoreCase("hour")) {
             return 3600 * value;
@@ -137,17 +106,18 @@ public class Util {
         }
     }
 
-    public static String getFormatByUnit(String unit) {
-        if (unit.equalsIgnoreCase("hour")) {
-            return "yyyy-MM-dd.hh";
-        } else if (unit.equalsIgnoreCase("day")) {
-            return "yyyy-MM-dd";
-        } else if (unit.equalsIgnoreCase("minute")) {
-            return "yyyy-MM-dd.hh:mm";
+    public static String getFormatFromPeroid (long period) {
+        String format;
+        if (period < 60) {
+            format = "yyyy-MM-dd.hh:mm:ss";
+        } else if (period < 3600) {
+            format = "yyyy-MM-dd.hh:mm";
+        } else if (period < 86400) {
+            format = "yyyy-MM-dd.hh";
         } else {
-            LOG.warn("Period unit is not valid, use hour for default.");
-            return "yyyy-MM-dd.hh";
+            format = "yyyy-MM-dd";
         }
+        return format;
     }
 
     public static void writeString(String str, SocketChannel channel) throws IOException {

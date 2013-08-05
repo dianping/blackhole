@@ -17,34 +17,33 @@ public class HDFSUpload implements Runnable{
     private static final String TMP_SUFFIX = ".tmp";
     private Collectornode node;
     private FileSystem fs;
-    private boolean delsrc;
     private File file;
-    private String dfsPath;
     private DataOutputStream out;
+    private RollIdent ident;
     private boolean uploadSuccess;
     
-    public HDFSUpload(Collectornode node, FileSystem fs, File file, String dfsPath, boolean delsrc) {
+    public HDFSUpload(Collectornode node, FileSystem fs, File file, RollIdent roll) {
         this.node = node;
         this.fs = fs;
         this.file = file;
-        this.dfsPath = dfsPath;
-        this.delsrc = delsrc;
+        this.ident = roll;
         this.uploadSuccess = false;
     }
     @Override
     public void run() {
         if (!file.isFile()) {
-            LOG.warn(file + "is not a FILE. Quite.");
+            LOG.error(file + "is not a FILE. Quite.");
+            node.uploadResult(ident, uploadSuccess);
             return;
         }
         Path src = new Path(file.getPath());
+        String dfsPath = node.getRollHdfsPath(ident);
         Path tmp = new Path(dfsPath + TMP_SUFFIX);
         RandomAccessFile reader = null;
         
         try {
-            fs.copyFromLocalFile(delsrc, true, src, tmp);
-            LOG.info("Collector file " + file + " has been uploaded. " +
-                		"Has deleted it? "+ delsrc);
+            fs.copyFromLocalFile(false, true, src, tmp);
+            LOG.info("Collector file " + file + " has been uploaded.");
             //rename
             Path dst = new Path(dfsPath);
             if (!Util.retryRename(fs, tmp, dst)) {
@@ -54,7 +53,7 @@ public class HDFSUpload implements Runnable{
         } catch (Exception e) {
             LOG.error("Oops, got an exception:", e);
         } finally {
-            node.uploadResult(this, uploadSuccess);
+            node.uploadResult(ident, uploadSuccess);
             try {
                 if (out != null) {
                     out.close();
