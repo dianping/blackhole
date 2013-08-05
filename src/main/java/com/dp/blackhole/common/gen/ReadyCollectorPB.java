@@ -56,13 +56,23 @@ public final class ReadyCollectorPB {
     com.google.protobuf.ByteString
         getCollectorServerBytes();
 
-    // required int64 connectedTs = 4;
+    // required int64 period = 4;
     /**
-     * <code>required int64 connectedTs = 4;</code>
+     * <code>required int64 period = 4;</code>
+     */
+    boolean hasPeriod();
+    /**
+     * <code>required int64 period = 4;</code>
+     */
+    long getPeriod();
+
+    // required int64 connectedTs = 5;
+    /**
+     * <code>required int64 connectedTs = 5;</code>
      */
     boolean hasConnectedTs();
     /**
-     * <code>required int64 connectedTs = 4;</code>
+     * <code>required int64 connectedTs = 5;</code>
      */
     long getConnectedTs();
   }
@@ -134,6 +144,11 @@ public final class ReadyCollectorPB {
             }
             case 32: {
               bitField0_ |= 0x00000008;
+              period_ = input.readInt64();
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000010;
               connectedTs_ = input.readInt64();
               break;
             }
@@ -306,17 +321,33 @@ public final class ReadyCollectorPB {
       }
     }
 
-    // required int64 connectedTs = 4;
-    public static final int CONNECTEDTS_FIELD_NUMBER = 4;
-    private long connectedTs_;
+    // required int64 period = 4;
+    public static final int PERIOD_FIELD_NUMBER = 4;
+    private long period_;
     /**
-     * <code>required int64 connectedTs = 4;</code>
+     * <code>required int64 period = 4;</code>
      */
-    public boolean hasConnectedTs() {
+    public boolean hasPeriod() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>required int64 connectedTs = 4;</code>
+     * <code>required int64 period = 4;</code>
+     */
+    public long getPeriod() {
+      return period_;
+    }
+
+    // required int64 connectedTs = 5;
+    public static final int CONNECTEDTS_FIELD_NUMBER = 5;
+    private long connectedTs_;
+    /**
+     * <code>required int64 connectedTs = 5;</code>
+     */
+    public boolean hasConnectedTs() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>required int64 connectedTs = 5;</code>
      */
     public long getConnectedTs() {
       return connectedTs_;
@@ -326,6 +357,7 @@ public final class ReadyCollectorPB {
       appName_ = "";
       appServer_ = "";
       collectorServer_ = "";
+      period_ = 0L;
       connectedTs_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
@@ -342,6 +374,10 @@ public final class ReadyCollectorPB {
         return false;
       }
       if (!hasCollectorServer()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasPeriod()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -366,7 +402,10 @@ public final class ReadyCollectorPB {
         output.writeBytes(3, getCollectorServerBytes());
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeInt64(4, connectedTs_);
+        output.writeInt64(4, period_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeInt64(5, connectedTs_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -391,7 +430,11 @@ public final class ReadyCollectorPB {
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(4, connectedTs_);
+          .computeInt64Size(4, period_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, connectedTs_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -515,8 +558,10 @@ public final class ReadyCollectorPB {
         bitField0_ = (bitField0_ & ~0x00000002);
         collectorServer_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
-        connectedTs_ = 0L;
+        period_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000008);
+        connectedTs_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -560,6 +605,10 @@ public final class ReadyCollectorPB {
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
         }
+        result.period_ = period_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
         result.connectedTs_ = connectedTs_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -592,6 +641,9 @@ public final class ReadyCollectorPB {
           collectorServer_ = other.collectorServer_;
           onChanged();
         }
+        if (other.hasPeriod()) {
+          setPeriod(other.getPeriod());
+        }
         if (other.hasConnectedTs()) {
           setConnectedTs(other.getConnectedTs());
         }
@@ -609,6 +661,10 @@ public final class ReadyCollectorPB {
           return false;
         }
         if (!hasCollectorServer()) {
+          
+          return false;
+        }
+        if (!hasPeriod()) {
           
           return false;
         }
@@ -860,34 +916,67 @@ public final class ReadyCollectorPB {
         return this;
       }
 
-      // required int64 connectedTs = 4;
-      private long connectedTs_ ;
+      // required int64 period = 4;
+      private long period_ ;
       /**
-       * <code>required int64 connectedTs = 4;</code>
+       * <code>required int64 period = 4;</code>
        */
-      public boolean hasConnectedTs() {
+      public boolean hasPeriod() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>required int64 connectedTs = 4;</code>
+       * <code>required int64 period = 4;</code>
+       */
+      public long getPeriod() {
+        return period_;
+      }
+      /**
+       * <code>required int64 period = 4;</code>
+       */
+      public Builder setPeriod(long value) {
+        bitField0_ |= 0x00000008;
+        period_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int64 period = 4;</code>
+       */
+      public Builder clearPeriod() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        period_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // required int64 connectedTs = 5;
+      private long connectedTs_ ;
+      /**
+       * <code>required int64 connectedTs = 5;</code>
+       */
+      public boolean hasConnectedTs() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>required int64 connectedTs = 5;</code>
        */
       public long getConnectedTs() {
         return connectedTs_;
       }
       /**
-       * <code>required int64 connectedTs = 4;</code>
+       * <code>required int64 connectedTs = 5;</code>
        */
       public Builder setConnectedTs(long value) {
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000010;
         connectedTs_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required int64 connectedTs = 4;</code>
+       * <code>required int64 connectedTs = 5;</code>
        */
       public Builder clearConnectedTs() {
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000010);
         connectedTs_ = 0L;
         onChanged();
         return this;
@@ -918,11 +1007,12 @@ public final class ReadyCollectorPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\024ReadyCollector.proto\022\tblackhole\"e\n\016Rea" +
+      "\n\024ReadyCollector.proto\022\tblackhole\"u\n\016Rea" +
       "dyCollector\022\020\n\010app_name\030\001 \002(\t\022\022\n\napp_ser" +
-      "ver\030\002 \002(\t\022\030\n\020collector_server\030\003 \002(\t\022\023\n\013c" +
-      "onnectedTs\030\004 \002(\003B/\n\033com.dp.blackhole.com" +
-      "mon.genB\020ReadyCollectorPB"
+      "ver\030\002 \002(\t\022\030\n\020collector_server\030\003 \002(\t\022\016\n\006p" +
+      "eriod\030\004 \002(\003\022\023\n\013connectedTs\030\005 \002(\003B/\n\033com." +
+      "dp.blackhole.common.genB\020ReadyCollectorP" +
+      "B"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -934,7 +1024,7 @@ public final class ReadyCollectorPB {
           internal_static_blackhole_ReadyCollector_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ReadyCollector_descriptor,
-              new java.lang.String[] { "AppName", "AppServer", "CollectorServer", "ConnectedTs", });
+              new java.lang.String[] { "AppName", "AppServer", "CollectorServer", "Period", "ConnectedTs", });
           return null;
         }
       };

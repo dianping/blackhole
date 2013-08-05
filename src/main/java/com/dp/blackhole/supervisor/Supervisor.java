@@ -352,7 +352,7 @@ public class Supervisor {
                 next.apphost = stream.appHost;
                 next.collectorhost = current.collectorhost;
                 next.cleanstart = true;
-                next.rollTs = getNextTs(stream, current.rollTs);
+                next.rollTs = current.rollTs + stream.period * 1000;
                 next.status = Stage.APPEND;
                 next.isCurrent = true;
                 next.issuelist = new ArrayList<Issue>();
@@ -378,6 +378,7 @@ public class Supervisor {
         StreamId stream = new StreamId();
         stream.app = message.getAppName();
         stream.appHost = message.getAppName();
+        stream.period = message.getPeriod();
         stream.startTs = now;
         
         List<StreamId> streams = connectionMap.get(from);
@@ -395,8 +396,7 @@ public class Supervisor {
             current.cleanstart = false;
             current.issuelist = new ArrayList<Issue>();
             current.status = Stage.APPEND;
-            // TODO get period from message
-            current.rollTs = Util.getRollTs(3600) + 3600;
+            current.rollTs = Util.getRollTs(stream.period) + stream.period * 1000;
             current.isCurrent = true;
             stages.add(current);
             Streams.put(stream, stages);
@@ -415,7 +415,7 @@ public class Supervisor {
                 next.cleanstart = false;
                 next.issuelist = new ArrayList<Issue>();
                 next.status = Stage.APPEND;
-                next.rollTs = Util.getRollTs(3600) + 3600;
+                next.rollTs = Util.getRollTs(stream.period) + stream.period * 1000;
                 next.isCurrent = true;
                 stages.add(next);
             }
@@ -460,17 +460,18 @@ public class Supervisor {
     }
     
     private class Handler extends Thread {
+        private boolean running= true;
 
         @Override
         public void run() {
-            while (true) {
+            while (running) {
                 Msg e;
                 try {
                     e = messageQueue.take();
                     process(e.msg, e.c);
-                } catch (InterruptedException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
+                } catch (InterruptedException ie) {
+                    LOG.info("handler thread interrupted");
+                    running = false;
                 }
             }
         }
@@ -511,10 +512,12 @@ public class Supervisor {
     }
     
     private class LiveChecker extends Thread {
+        boolean running = true;
+        
         @Override
         public void run() {
             int THRESHOLD = 15 * 1000 * 1000;
-            while (true) {
+            while (running) {
                 try {
                     Thread.sleep(5000);
                     long now = Util.getTS();
@@ -524,8 +527,8 @@ public class Supervisor {
                         }
                     }
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.info("LiveChecker thread interrupted");
+                    running =false;
                 }
             }
         }
