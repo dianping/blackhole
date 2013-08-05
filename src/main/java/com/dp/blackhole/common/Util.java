@@ -163,8 +163,7 @@ public class Util {
      * now is 16:02, and rollPeroid is 1 hour, then
      * return st of 15:00
      */
-    public static long getRollTs(long rollPeriod) {
-        long ts = Util.getTS();
+    public static long getRollTs(long ts, long rollPeriod) {
         rollPeriod = rollPeriod * 1000;
         
         if ((ts % rollPeriod) < (rollPeriod/2)) {

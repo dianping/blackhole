@@ -116,14 +116,15 @@ public class Collectornode extends Node {
     
     /*
      * Path format:
-     * hdfsbasedir/appname/2013-11-01/14/08/machine01@2013-11-01.14.08
+     * hdfsbasedir/appname/2013-11-01/14/08/machine01@appname_2013-11-01.14.08.gz.tmp
      */
     public String getRollHdfsPathPrefix (RollIdent ident) {
         String format;
         format = Util.getFormatFromPeroid(ident.period);
         Date roll = new Date(ident.ts);
         SimpleDateFormat dm= new SimpleDateFormat(format);
-        return hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(format) + ident.source + '@' + dm.format(roll);
+        return hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) + 
+                ident.source + '@' + ident.app + "_" + dm.format(roll);
     }
     
     public String getRollHdfsPath (RollIdent ident) {

@@ -57,14 +57,14 @@ public class RollRecovery implements Runnable{
             AgentHead head = protocol.new AgentHead();
             head.type = AgentProtocol.RECOVERY;
             head.app = appLog.getAppName();
-            head.peroid = ConfigKeeper.configMap.get(appLog.getAppName()).getLong(ParamsKey.Appconf.ROLL_PERIOD);
+            head.peroid = period;
             head.ts = rollTimestamp;
             protocol.sendHead(out, head);
             offset = protocol.receiveOffset(in);
             LOG.info("Received offset [" + offset + "] in header response.");
-            
+            LOG.debug("roll file is " + rolledFile);
             reader = new RandomAccessFile(rolledFile, RAF_MODE);
-
+            
             reader.seek(offset);
             LOG.info("Seeked to the position " + offset + ". Begin to transfer...");
             int len = 0;

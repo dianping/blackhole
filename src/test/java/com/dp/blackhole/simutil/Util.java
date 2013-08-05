@@ -9,11 +9,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.dp.blackhole.collectornode.RollIdent;
 
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
@@ -21,13 +24,30 @@ public class Util {
     public static final String SCHEMA = "file://";
     public static final String BASE_PATH = "/tmp/";
     public static final String BASE_HDFS_PATH = SCHEMA + BASE_PATH;
-    public static final String FILE_SUFFIX = "2013-01-01.03";
+    public static final String FILE_SUFFIX = "2013-01-01.15";
     public static long rollTS = 1357023691855l;
+    public static void main(String[] args) {
+        long ts = com.dp.blackhole.common.Util.getRollTs(rollTS, 3600l);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd.HH");
+        System.out.println(format.format(ts));
+    }
     public static final int PORT = 40000;
     public static final String expected = " 0f j2390jr092jf2f02jf02qjdf2-3j0 fiopwqejfjwffhg5_p    <end";
     public static final int offset = 100;
     public static final int MAX_LINE = 9;
     
+    public static void initEnv() {
+        
+    }
+    
+    public static RollIdent getRollIdent(String appName) {
+        RollIdent rollIdent = new RollIdent();
+        rollIdent.app = appName;
+        rollIdent.period = 3600;
+        rollIdent.source = HOSTNAME;
+        rollIdent.ts = rollTS;
+        return rollIdent;
+    }
     
     public static File createTmpFile(String MAGIC, String expected) 
             throws IOException, FileNotFoundException {
@@ -81,21 +101,20 @@ public class Util {
         }
     }
     
-    public static File convertToGZIP(File file) 
+    public static void convertToGZIP(File file) 
             throws FileNotFoundException, IOException {
         byte[] buf = new byte[8196];
         BufferedInputStream bin= new BufferedInputStream(new FileInputStream(file));
-        File gzFile = new File(file.getAbsoluteFile() + ".gz");
-        GZIPOutputStream gout = new GZIPOutputStream(new FileOutputStream(new File(file.getAbsoluteFile() + ".gz")));
+        File gzFile = new File(file.getAbsoluteFile() + ".tmp");
+        GZIPOutputStream gout = new GZIPOutputStream(new FileOutputStream(gzFile));
         int len;
         while ((len = bin.read(buf)) != -1) {
             gout.write(buf, 0, len);
         }
         gout.close();
         bin.close();
-        file.delete();
+        gzFile.renameTo(file.getAbsoluteFile());
         file = gzFile;
-        return file;
     }
     
     public static File convertToNomal(File file) 
