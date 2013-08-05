@@ -38,7 +38,7 @@ public class Collector implements Runnable {
         remoteAddress = socket.getRemoteSocketAddress().toString();
         app = appname;
         rollPeriod = period;
-        format = new SimpleDateFormat(node.getFormatFromPeroid(period));
+        format = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         storagedir = home+"/"+ app + "/" + remoteAddress;
         
         init();

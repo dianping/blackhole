@@ -109,9 +109,9 @@ public class Util {
     public static String getFormatFromPeroid (long period) {
         String format;
         if (period < 60) {
-            format = "yyyy-MM-dd.hh:mm:ss";
+            format = "yyyy-MM-dd.hh.mm.ss";
         } else if (period < 3600) {
-            format = "yyyy-MM-dd.hh:mm";
+            format = "yyyy-MM-dd.hh.mm";
         } else if (period < 86400) {
             format = "yyyy-MM-dd.hh";
         } else {

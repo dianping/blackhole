@@ -17,8 +17,8 @@ import java.util.concurrent.Executors;
 
 import org.apache.hadoop.fs.FileSystem;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
-import com.dp.blackhole.common.MessagePB.Message;
-import com.dp.blackhole.common.RollIDPB.RollID;
+import com.dp.blackhole.common.gen.MessagePB.Message;
+import com.dp.blackhole.common.gen.RollIDPB.RollID;
 import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
@@ -31,6 +31,7 @@ public class Collectornode extends Node {
     private ConcurrentHashMap<RollIdent, File> fileRolls;
     private String basedir;
     private String hdfsbasedir;
+    private String suffix;
     private int port;
     private FileSystem fs;
 
@@ -103,18 +104,29 @@ public class Collectornode extends Node {
         return true;
     }
 
-
+    public String getDatepathbyFormat (String format) {
+        StringBuffer dirs = null;
+        for (String dir: format.split("\\.")) {
+            dirs.append(dir);
+            dirs.append('/');
+        }
+        return dirs.toString();
+    }
     
+    /*
+     * Path format:
+     * hdfsbasedir/appname/2013-11-01/14/08/machine01@2013-11-01.14.08
+     */
     public String getRollHdfsPathPrefix (RollIdent ident) {
         String format;
         format = Util.getFormatFromPeroid(ident.period);
         Date roll = new Date(ident.ts);
         SimpleDateFormat dm= new SimpleDateFormat(format);
-        return hdfsbasedir + '/' + ident.app + '/' + ident.source + '.' + dm.format(roll);
+        return hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(format) + ident.source + '@' + dm.format(roll);
     }
     
     public String getRollHdfsPath (RollIdent ident) {
-        return getRollHdfsPathPrefix(ident) + ".gz";
+        return getRollHdfsPathPrefix(ident) + suffix;
     }
     
     private void start() throws FileNotFoundException, IOException {
@@ -124,6 +136,12 @@ public class Collectornode extends Node {
         
         basedir = prop.getProperty("collectornode.basedir");
         port = Integer.parseInt(prop.getProperty("collectornode.port"));
+        hdfsbasedir = prop.getProperty("hdfs.basedir");
+        suffix = prop.getProperty("hdfs.file.suffix");
+        
+        if (basedir == null || hdfsbasedir == null || suffix == null) {
+            throw new IOException("config in config.properties missed");
+        }
         
         server = new ServerSocket(port);
         
