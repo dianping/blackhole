@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,7 +25,7 @@ public class Collector implements Runnable {
     Socket socket;
     final String remoteAddress;
     final String app;
-    BufferedWriter writer;
+    OutputStreamWriter writer;
     BufferedReader streamIn;
     Collectornode node;
     String storagedir;
@@ -35,7 +36,7 @@ public class Collector implements Runnable {
     public Collector(Collectornode server, Socket s, String home, String appname, long period) throws IOException {
         node = server;
         socket = s;
-        remoteAddress = socket.getRemoteSocketAddress().toString();
+        remoteAddress = ((InetSocketAddress)socket.getRemoteSocketAddress()).getHostName();
         app = appname;
         rollPeriod = period;
         format = new SimpleDateFormat(Util.getFormatFromPeroid(period));
@@ -46,7 +47,7 @@ public class Collector implements Runnable {
     
     public void init() throws IOException, IOException {
         appending = node.getappendingFile(storagedir);
-        writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(appending))));
+        writer = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(appending)));
         streamIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
     
@@ -85,7 +86,7 @@ public class Collector implements Runnable {
 
     private void writetofile(String line) throws IOException {
         writer.write(line);
-        writer.newLine();
+        writer.write('\n');
     }
 
     private void completefile() throws IOException {
@@ -100,7 +101,7 @@ public class Collector implements Runnable {
         node.registerfile(rollIdent, rollFile);
         
         appending = node.getappendingFile(storagedir);
-        writer = new BufferedWriter(new FileWriter(appending));
+        writer = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(appending)));
     }
 
     private RollIdent getRollIdent() {
@@ -114,7 +115,7 @@ public class Collector implements Runnable {
     }
 
     private File getRollFile(RollIdent rollIdent) {
-        String filename = rollIdent.app + rollIdent.source + format.format(rollIdent.ts);
+        String filename = rollIdent.app + '.' + rollIdent.source + '.' + format.format(rollIdent.ts) + node.getSuffix();
         return new File(storagedir, filename);
     }
     
