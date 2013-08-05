@@ -3,6 +3,7 @@ package com.dp.blackhole.supervisor;
 public class StreamId {
     String app;
     String appHost;
+    long period;
     long startTs;
     long lastSuccessTs;
     @Override
