@@ -89,7 +89,7 @@ public class TestAppnode {
     }
 
     private Message getUnknowMessage() {
-        return PBwrap.wrapReadyCollector(MAGIC, Util.HOSTNAME, Util.HOSTNAME, 1l);
+        return PBwrap.wrapReadyCollector(MAGIC, Util.HOSTNAME, 3600l, Util.HOSTNAME, 1l);
     }
     
     @Test
