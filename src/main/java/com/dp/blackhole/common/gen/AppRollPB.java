@@ -41,13 +41,23 @@ public final class AppRollPB {
     com.google.protobuf.ByteString
         getAppServerBytes();
 
-    // required int64 roll_ts = 3;
+    // required int64 period = 3;
     /**
-     * <code>required int64 roll_ts = 3;</code>
+     * <code>required int64 period = 3;</code>
+     */
+    boolean hasPeriod();
+    /**
+     * <code>required int64 period = 3;</code>
+     */
+    long getPeriod();
+
+    // required int64 roll_ts = 4;
+    /**
+     * <code>required int64 roll_ts = 4;</code>
      */
     boolean hasRollTs();
     /**
-     * <code>required int64 roll_ts = 3;</code>
+     * <code>required int64 roll_ts = 4;</code>
      */
     long getRollTs();
   }
@@ -114,6 +124,11 @@ public final class AppRollPB {
             }
             case 24: {
               bitField0_ |= 0x00000004;
+              period_ = input.readInt64();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
               rollTs_ = input.readInt64();
               break;
             }
@@ -243,17 +258,33 @@ public final class AppRollPB {
       }
     }
 
-    // required int64 roll_ts = 3;
-    public static final int ROLL_TS_FIELD_NUMBER = 3;
-    private long rollTs_;
+    // required int64 period = 3;
+    public static final int PERIOD_FIELD_NUMBER = 3;
+    private long period_;
     /**
-     * <code>required int64 roll_ts = 3;</code>
+     * <code>required int64 period = 3;</code>
      */
-    public boolean hasRollTs() {
+    public boolean hasPeriod() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>required int64 roll_ts = 3;</code>
+     * <code>required int64 period = 3;</code>
+     */
+    public long getPeriod() {
+      return period_;
+    }
+
+    // required int64 roll_ts = 4;
+    public static final int ROLL_TS_FIELD_NUMBER = 4;
+    private long rollTs_;
+    /**
+     * <code>required int64 roll_ts = 4;</code>
+     */
+    public boolean hasRollTs() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required int64 roll_ts = 4;</code>
      */
     public long getRollTs() {
       return rollTs_;
@@ -262,6 +293,7 @@ public final class AppRollPB {
     private void initFields() {
       appName_ = "";
       appServer_ = "";
+      period_ = 0L;
       rollTs_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
@@ -274,6 +306,10 @@ public final class AppRollPB {
         return false;
       }
       if (!hasAppServer()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasPeriod()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -295,7 +331,10 @@ public final class AppRollPB {
         output.writeBytes(2, getAppServerBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeInt64(3, rollTs_);
+        output.writeInt64(3, period_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt64(4, rollTs_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -316,7 +355,11 @@ public final class AppRollPB {
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, rollTs_);
+          .computeInt64Size(3, period_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(4, rollTs_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -438,8 +481,10 @@ public final class AppRollPB {
         bitField0_ = (bitField0_ & ~0x00000001);
         appServer_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
-        rollTs_ = 0L;
+        period_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000004);
+        rollTs_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -479,6 +524,10 @@ public final class AppRollPB {
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
+        result.period_ = period_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
         result.rollTs_ = rollTs_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -506,6 +555,9 @@ public final class AppRollPB {
           appServer_ = other.appServer_;
           onChanged();
         }
+        if (other.hasPeriod()) {
+          setPeriod(other.getPeriod());
+        }
         if (other.hasRollTs()) {
           setRollTs(other.getRollTs());
         }
@@ -519,6 +571,10 @@ public final class AppRollPB {
           return false;
         }
         if (!hasAppServer()) {
+          
+          return false;
+        }
+        if (!hasPeriod()) {
           
           return false;
         }
@@ -696,34 +752,67 @@ public final class AppRollPB {
         return this;
       }
 
-      // required int64 roll_ts = 3;
-      private long rollTs_ ;
+      // required int64 period = 3;
+      private long period_ ;
       /**
-       * <code>required int64 roll_ts = 3;</code>
+       * <code>required int64 period = 3;</code>
        */
-      public boolean hasRollTs() {
+      public boolean hasPeriod() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>required int64 roll_ts = 3;</code>
+       * <code>required int64 period = 3;</code>
+       */
+      public long getPeriod() {
+        return period_;
+      }
+      /**
+       * <code>required int64 period = 3;</code>
+       */
+      public Builder setPeriod(long value) {
+        bitField0_ |= 0x00000004;
+        period_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int64 period = 3;</code>
+       */
+      public Builder clearPeriod() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        period_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // required int64 roll_ts = 4;
+      private long rollTs_ ;
+      /**
+       * <code>required int64 roll_ts = 4;</code>
+       */
+      public boolean hasRollTs() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required int64 roll_ts = 4;</code>
        */
       public long getRollTs() {
         return rollTs_;
       }
       /**
-       * <code>required int64 roll_ts = 3;</code>
+       * <code>required int64 roll_ts = 4;</code>
        */
       public Builder setRollTs(long value) {
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000008;
         rollTs_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required int64 roll_ts = 3;</code>
+       * <code>required int64 roll_ts = 4;</code>
        */
       public Builder clearRollTs() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000008);
         rollTs_ = 0L;
         onChanged();
         return this;
@@ -754,10 +843,10 @@ public final class AppRollPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rAppRoll.proto\022\tblackhole\"@\n\007AppRoll\022\020\n" +
-      "\010app_name\030\001 \002(\t\022\022\n\napp_server\030\002 \002(\t\022\017\n\007r" +
-      "oll_ts\030\003 \002(\003B(\n\033com.dp.blackhole.common." +
-      "genB\tAppRollPB"
+      "\n\rAppRoll.proto\022\tblackhole\"P\n\007AppRoll\022\020\n" +
+      "\010app_name\030\001 \002(\t\022\022\n\napp_server\030\002 \002(\t\022\016\n\006p" +
+      "eriod\030\003 \002(\003\022\017\n\007roll_ts\030\004 \002(\003B(\n\033com.dp.b" +
+      "lackhole.common.genB\tAppRollPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -769,7 +858,7 @@ public final class AppRollPB {
           internal_static_blackhole_AppRoll_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_AppRoll_descriptor,
-              new java.lang.String[] { "AppName", "AppServer", "RollTs", });
+              new java.lang.String[] { "AppName", "AppServer", "Period", "RollTs", });
           return null;
         }
       };

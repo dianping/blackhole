@@ -16,7 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
@@ -33,7 +36,6 @@ public class Collectornode extends Node {
     private String basedir;
     private String hdfsbasedir;
     private String suffix;
-    private String localhost;
     private int port;
     private FileSystem fs;
 
@@ -48,7 +50,6 @@ public class Collectornode extends Node {
             while (true) {
                 try {
                     Socket socket = server.accept();
-                    String remote = ((InetSocketAddress)socket.getRemoteSocketAddress()).getHostName();
                     
                     DataInputStream in = new DataInputStream(socket.getInputStream());
                     
@@ -59,15 +60,15 @@ public class Collectornode extends Node {
                                  
                     if (AgentProtocol.STREAM == head.type) {
                         LOG.debug("logreader connected: " + head.app);
-                        Collector collector = new Collector(Collectornode.this, socket, basedir, head.app, head.peroid);
+                        Collector collector = new Collector(Collectornode.this, socket, basedir, head.app, getHost(), head.peroid);
                         pool.execute(collector);
-                        Message msg = PBwrap.wrapReadyCollector(head.app, remote, head.peroid, localhost, Util.getTS());
+                        Message msg = PBwrap.wrapReadyCollector(head.app, getHost(), head.peroid, getHost(), Util.getTS());
                         send(msg);
                     } else if (AgentProtocol.RECOVERY == head.type) {
                         
                         RollIdent roll = new RollIdent();
                         roll.app = head.app;
-                        roll.source = remote;
+                        roll.source = getHost();
                         roll.period = head.peroid;
                         roll.ts = head.ts;
                         
@@ -98,6 +99,7 @@ public class Collectornode extends Node {
         RollIdent ident = new RollIdent();
         ident.app = rollID.getAppName();
         ident.source = rollID.getAppServer();
+        ident.period = rollID.getPeriod();
         ident.ts = rollID.getRollTs();
         
         File roll = fileRolls.get(ident);
@@ -133,9 +135,7 @@ public class Collectornode extends Node {
         return getRollHdfsPathPrefix(ident) + suffix;
     }
     
-    private void start() throws FileNotFoundException, IOException {
-        localhost = InetAddress.getLocalHost().getHostName();
-        
+    private void start() throws FileNotFoundException, IOException {        
         Properties prop = new Properties();
         prop.load(new FileReader(new File("config.properties")));
         
@@ -149,6 +149,7 @@ public class Collectornode extends Node {
         }
         
         server = new ServerSocket(port);
+        fs = (new Path(hdfsbasedir)).getFileSystem(new Configuration());
         
         cleanupLocalStorage();
         
@@ -207,7 +208,8 @@ public class Collectornode extends Node {
         Collectornode node = new Collectornode();
         node.start();
         } catch (Throwable e) {
-            LOG.error("fatal eroor" + e);
+            LOG.error("fatal error " + e);
+            e.printStackTrace();
             System.exit(-1);
         }
     }
@@ -222,7 +224,7 @@ public class Collectornode extends Node {
     public void registerfile(RollIdent rollIdent, File rollFile) {
         if (fileRolls.get(rollIdent) == null) {
             fileRolls.put(rollIdent, rollFile);
-            Message message = PBwrap.wrapAppRoll(rollIdent.app, rollIdent.source, rollIdent.ts);
+            Message message = PBwrap.wrapAppRoll(rollIdent.app, rollIdent.source, rollIdent.period, rollIdent.ts);
             send(message);
         } else {
             LOG.fatal("update a exists file roll");
@@ -234,23 +236,25 @@ public class Collectornode extends Node {
     }
     
     public void recoveryResult(RollIdent ident, boolean recoverySuccess) {
+        Message message;
         if (recoverySuccess == true) {
-            PBwrap.wrapRecoverySuccess(ident.app, ident.source, ident.ts);
+            message = PBwrap.wrapRecoverySuccess(ident.app, ident.source, ident.period, ident.ts);
         } else {
-            PBwrap.wrapRecoveryFail(ident.app, ident.source, ident.ts);
+            message = PBwrap.wrapRecoveryFail(ident.app, ident.source, ident.period, ident.ts);
         }
+        send(message);
     }
 
     public void uploadResult(RollIdent ident, boolean uploadSuccess) {        
         if (uploadSuccess == true) {
-            Message message = PBwrap.wrapUploadSuccess(ident.app, ident.source, ident.ts);
+            Message message = PBwrap.wrapUploadSuccess(ident.app, ident.source, ident.period, ident.ts);
             send(message);
             File f = fileRolls.get(ident);
             if (!f.delete()) {
                 LOG.error("delete file " + f + " failed");
             }
         } else {
-            Message message = PBwrap.wrapUploadFail(ident.app, ident.source, ident.ts);
+            Message message = PBwrap.wrapUploadFail(ident.app, ident.source, ident.period, ident.ts);
             send(message);
         }
     }
