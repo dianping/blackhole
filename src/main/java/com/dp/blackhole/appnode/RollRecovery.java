@@ -44,11 +44,18 @@ public class RollRecovery implements Runnable{
         SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         String rollIdent = unitFormat.format(rollTimestamp);
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
+        
+        if (!rolledFile.exists()) {
+            LOG.error("file " + rolledFile + "is not existed");
+            return;
+        }
+        
         RandomAccessFile reader = null;
         DataOutputStream out = null;
         DataInputStream in = null;
         long offset = 0;
         try {
+            
             server = new Socket(collectorServer, port);
             out = new DataOutputStream(server.getOutputStream());
             in = new DataInputStream(server.getInputStream());
@@ -59,8 +66,10 @@ public class RollRecovery implements Runnable{
             head.app = appLog.getAppName();
             head.peroid = period;
             head.ts = rollTimestamp;
+            
             protocol.sendHead(out, head);
             offset = protocol.receiveOffset(in);
+            
             LOG.info("Received offset [" + offset + "] in header response.");
             LOG.debug("roll file is " + rolledFile);
             reader = new RandomAccessFile(rolledFile, RAF_MODE);

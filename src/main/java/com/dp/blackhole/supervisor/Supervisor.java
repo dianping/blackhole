@@ -39,9 +39,9 @@ public class Supervisor {
     volatile private boolean running = true;
     
     private BlockingQueue<Msg> messageQueue;
-    private ConcurrentHashMap<String, Connection> hostMap;
     private ConcurrentHashMap<Connection, ArrayList<StreamId>> connectionMap;
-    private ArrayList<Connection> CollectorNodes;
+    private ConcurrentHashMap<String, Connection> collectorNodes;
+    private ConcurrentHashMap<String, Connection> appNodes;
     private ConcurrentHashMap<StreamId, ArrayList<Stage>> Streams;
     private int index;
     
@@ -87,10 +87,8 @@ public class Supervisor {
                             connectionMap.put(connection, streams);
                         }
                         String remote = connection.getHost();
-                        if (hostMap.get(remote) == null) {
-                            hostMap.put(remote, connection);
-                            LOG.debug("client node "+remote+" connected");
-                        }
+                        LOG.debug("client node "+remote+" connected");
+
                         
                     } else if (key.isWritable()) {
                         key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
@@ -129,7 +127,6 @@ public class Supervisor {
                             }
                         }
                     } else if (key.isReadable()) {
-                        LOG.debug("receive message");
                         int count;
                         Connection connection = (Connection) key.attachment();
                         SocketChannel channel = (SocketChannel) key.channel();
@@ -163,7 +160,7 @@ public class Supervisor {
                             event.c = connection;
                             event.msg = msg;
                             messageQueue.put(event);
-                            LOG.debug("message enqueue: " + msg);
+                            LOG.debug("receive message:" + msg);
                             lengthBuf.clear();
                         }
                     }
@@ -184,10 +181,8 @@ public class Supervisor {
         
         long now = Util.getTS();
         String host = connection.getHost();
-        synchronized (CollectorNodes) {
-            CollectorNodes.remove(connection);
-        }
-        hostMap.remove(host);
+        appNodes.remove(host);
+        collectorNodes.remove(host);
         ArrayList<StreamId> streams = connectionMap.get(connection);
         synchronized (streams) {
             for (StreamId stream : streams) {
@@ -207,7 +202,7 @@ public class Supervisor {
                             stage.issuelist.add(e);
                             e.ts = now;
                             if (stage.isCurrent()) {
-                                assignCollector(stage.app, hostMap.get(stage.apphost));
+                                assignCollector(stage.app, appNodes.get(stage.apphost));
                             } else {
                                 String newCollector = doRecovery(stream, stage);
                                 stage.collectorhost = newCollector;
@@ -222,28 +217,12 @@ public class Supervisor {
             connection.close();
         }
     }
-    
-    private void init() throws IOException, ClosedChannelException {
-        ServerSocketChannel ssc = ServerSocketChannel.open();
-        ssc.configureBlocking(false);
-        ServerSocket ss = ssc.socket();
-        ss.bind(new InetSocketAddress(8080));
-        selector = Selector.open();
-        ssc.register(selector, SelectionKey.OP_ACCEPT);
-        connectionMap = new ConcurrentHashMap<Connection, ArrayList<StreamId>>();
-        hostMap = new ConcurrentHashMap<String, Connection>();
-        CollectorNodes = new ArrayList<Connection>();
-        messageQueue = new LinkedBlockingQueue<Msg>();
-        Handler handler = new Handler();
-        handler.start();
-        LiveChecker checker = new LiveChecker();
-        checker.start();
-    }
 
     private void handleRecoveryFail(RollID rollID) {
         StreamId id = new StreamId();
         id.app = rollID.getAppName();
         id.appHost = rollID.getAppServer();
+        id.period = rollID.getPeriod();
         ArrayList<Stage> stages = Streams.get(id);
         synchronized (stages) {
             for (Stage stage : stages) {
@@ -260,6 +239,7 @@ public class Supervisor {
         StreamId id = new StreamId();
         id.app = rollID.getAppName();
         id.appHost = rollID.getAppServer();
+        id.period = rollID.getPeriod();
         ArrayList<Stage> stages = Streams.get(id);
         synchronized (stages) {
             for (Stage stage : stages) {
@@ -278,6 +258,7 @@ public class Supervisor {
         StreamId id = new StreamId();
         id.app = rollID.getAppName();
         id.appHost = rollID.getAppServer();
+        id.period = rollID.getPeriod();
         ArrayList<Stage> stages = Streams.get(id);
         Issue e = new Issue();
         e.desc = "upload failed";
@@ -294,19 +275,11 @@ public class Supervisor {
         }
     }
 
-    private String doRecovery(StreamId id, Stage stage) {
-        String collector = getCollector();
-        Connection c = hostMap.get(id.appHost);
-        
-        Message message = PBwrap.wrapRecoveryRoll(id.app, collector, stage.rollTs);
-        send(c, message);
-        return collector;
-    }
-
     private void handleUploadSuccess(RollID rollID, Connection from) {
        StreamId id = new StreamId();
        id.app = rollID.getAppName();
        id.appHost = rollID.getAppServer();
+       id.period = rollID.getPeriod();
        for (Entry<StreamId, ArrayList<Stage>> entry : Streams.entrySet()) {
            StreamId stream = entry.getKey();
            if (stream.equals(id)) {
@@ -327,11 +300,12 @@ public class Supervisor {
            }
        }
     }
-
+    
     private void handleRolling(AppRoll msg, Connection from) {
         StreamId stream = new StreamId();
         stream.app = msg.getAppName();
         stream.appHost = msg.getAppServer();
+        stream.period = msg.getPeriod();
         ArrayList<Stage> stages = Streams.get(stream);
         if (stages != null) {
             synchronized (stages) {
@@ -344,7 +318,7 @@ public class Supervisor {
                 } else {
                     current.status = Stage.UPLOADING;
                     current.isCurrent = false;
-                    String uploadHost = doUpload(current, from);
+                    String uploadHost = doUpload(stream, current, from);
                     current.collectorhost = uploadHost;
                 }
                 Stage next = new Stage();
@@ -361,25 +335,29 @@ public class Supervisor {
         }
     }
 
-    private long getNextTs(StreamId stream, long rollTs) {
-        // TODO Auto-generated method stub
-        return rollTs + 3600 * 1000;
-    }
-
-    private String doUpload(Stage current, Connection from) {
-        Message message = PBwrap.wrapUploadRoll(current.app, current.apphost, current.rollTs);
+    private String doUpload(StreamId stream, Stage current, Connection from) {
+        Message message = PBwrap.wrapUploadRoll(current.app, current.apphost, stream.period, current.rollTs);
         send(from, message);
         return from.getHost();
     }
 
-    private void registerCollector(ReadyCollector message, Connection from) {
-        long now = Util.getTS();
+    private String doRecovery(StreamId id, Stage stage) {
+        String collector = getCollector();
+        Connection c = appNodes.get(id.appHost);
+        
+        Message message = PBwrap.wrapRecoveryRoll(id.app, collector, stage.rollTs);
+        send(c, message);
+        return collector;
+    }
+    
+    private void registerStream(ReadyCollector message, Connection from) {
+        long connectedTs = message.getConnectedTs();
         
         StreamId stream = new StreamId();
         stream.app = message.getAppName();
-        stream.appHost = message.getAppName();
+        stream.appHost = message.getAppServer();
         stream.period = message.getPeriod();
-        stream.startTs = now;
+        stream.startTs = connectedTs;
         
         List<StreamId> streams = connectionMap.get(from);
         synchronized (streams) {
@@ -391,12 +369,14 @@ public class Supervisor {
         if (stages == null) {
             stages = new ArrayList<Stage>();
             Stage current = new Stage();
+            current.app = stream.app;
             current.apphost = stream.appHost;
             current.collectorhost = message.getCollectorServer();
             current.cleanstart = false;
             current.issuelist = new ArrayList<Issue>();
             current.status = Stage.APPEND;
-            current.rollTs = Util.getRollTs(stream.period) + stream.period * 1000;
+            //TODO check
+            current.rollTs = Util.getRollTs(connectedTs, stream.period);
             current.isCurrent = true;
             stages.add(current);
             Streams.put(stream, stages);
@@ -415,7 +395,7 @@ public class Supervisor {
                 next.cleanstart = false;
                 next.issuelist = new ArrayList<Issue>();
                 next.status = Stage.APPEND;
-                next.rollTs = Util.getRollTs(stream.period) + stream.period * 1000;
+                next.rollTs = Util.getRollTs(connectedTs, stream.period) + stream.period * 1000;
                 next.isCurrent = true;
                 stages.add(next);
             }
@@ -423,6 +403,10 @@ public class Supervisor {
     }
 
     private void registerApp(Message m, Connection from) throws InterruptedException {
+        if (appNodes.get(from.getHost()) == null) {
+            appNodes.put(from.getHost(), from);
+            LOG.info("AppNode " + from.getHost() + " registered");
+        }
         AppReg message = m.getAppReg();
         int ret;
         ret = assignCollector(message.getAppName(), from);
@@ -435,7 +419,7 @@ public class Supervisor {
     }
 
     private int assignCollector(String app, Connection from) {
-        if (CollectorNodes.isEmpty()) {
+        if (collectorNodes.isEmpty()) {
             return -1;
         }
         String collector = getCollector();
@@ -445,16 +429,18 @@ public class Supervisor {
     }
 
     private void registerCollectorNode(Connection from) {
-        if (connectionMap.get(from) != null) {
-            CollectorNodes.add(from);
-        }
+            collectorNodes.put(from.getHost(), from);
     }
 
     private String getCollector() {
-        String collector;
-        synchronized (CollectorNodes) {
-            index = (++index) % CollectorNodes.size();
-            collector = CollectorNodes.get(index).getHost();
+        String collector = null;
+        index = (++index) % collectorNodes.size();
+        int count = 0;
+        for (String c : collectorNodes.keySet()) {
+            if (count == index) {
+                collector = c;
+                break;
+            }
         }
         return collector;
     }
@@ -489,7 +475,7 @@ public class Supervisor {
                 registerApp(msg, from);
                 break;
             case READY_COLLECTOR:
-                registerCollector(msg.getReadyCollector(), from);
+                registerStream(msg.getReadyCollector(), from);
                 break;
             case APP_ROLL:
                 handleRolling(msg.getAppRoll(), from);
@@ -532,6 +518,24 @@ public class Supervisor {
                 }
             }
         }
+    }
+       
+    private void init() throws IOException, ClosedChannelException {
+        ServerSocketChannel ssc = ServerSocketChannel.open();
+        ssc.configureBlocking(false);
+        ServerSocket ss = ssc.socket();
+        ss.bind(new InetSocketAddress(8080));
+        selector = Selector.open();
+        ssc.register(selector, SelectionKey.OP_ACCEPT);
+        connectionMap = new ConcurrentHashMap<Connection, ArrayList<StreamId>>();
+        collectorNodes = new ConcurrentHashMap<String, Connection>();
+        appNodes =  new ConcurrentHashMap<String, Connection>();
+        messageQueue = new LinkedBlockingQueue<Msg>();
+        Streams = new ConcurrentHashMap<StreamId, ArrayList<Stage>>();
+        Handler handler = new Handler();
+        handler.start();
+        LiveChecker checker = new LiveChecker();
+        checker.start();
     }
     
     /**

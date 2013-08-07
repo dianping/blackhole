@@ -33,10 +33,10 @@ public class Collector implements Runnable {
     long rollPeriod;
     SimpleDateFormat format;
     
-    public Collector(Collectornode server, Socket s, String home, String appname, long period) throws IOException {
+    public Collector(Collectornode server, Socket s, String home, String appname, String host, long period) throws IOException {
         node = server;
         socket = s;
-        remoteAddress = ((InetSocketAddress)socket.getRemoteSocketAddress()).getHostName();
+        remoteAddress = host;
         app = appname;
         rollPeriod = period;
         format = new SimpleDateFormat(Util.getFormatFromPeroid(period));
@@ -56,7 +56,6 @@ public class Collector implements Runnable {
         String event;
         try {
             while ((event = streamIn.readLine()) != null) {
-                LOG.debug("received event: " + event);
                 if (event.length() != 0) {
                     writetofile(event);
                     emit(event);
@@ -105,7 +104,7 @@ public class Collector implements Runnable {
     }
 
     private RollIdent getRollIdent() {
-        Date time = new Date(Util.getRollTs(rollPeriod));
+        Date time = new Date(Util.getClosestRollTs(Util.getTS(), rollPeriod));
         RollIdent roll = new RollIdent();
         roll.app = app;
         roll.period = rollPeriod;

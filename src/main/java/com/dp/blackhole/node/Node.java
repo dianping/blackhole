@@ -2,6 +2,7 @@ package com.dp.blackhole.node;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -15,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 
 public abstract class Node {
@@ -22,7 +24,8 @@ public abstract class Node {
     private Selector selector;
     private SocketChannel socketChannel;
     volatile private boolean running = true;
-
+    private String host;
+    
     ByteBuffer readLength;
     ByteBuffer readbuffer;
     ByteBuffer writebuffer;
@@ -59,6 +62,7 @@ public abstract class Node {
                         SocketChannel channel = (SocketChannel) key.channel();
                         key.interestOps(key.interestOps() | SelectionKey.OP_READ);
                         channel.finishConnect();
+                        onConnected();
                     } else if (key.isWritable()) {
                         key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
                         SocketChannel channel = (SocketChannel) key.channel();
@@ -132,6 +136,9 @@ public abstract class Node {
         }
     }
 
+    protected void onConnected() {        
+    }
+
     private void closeconnection(SelectionKey key) {
         if (key != null) {
             SocketChannel channel = (SocketChannel) key.channel();
@@ -181,10 +188,15 @@ public abstract class Node {
         socketChannel.register(selector, SelectionKey.OP_CONNECT);
         readLength = ByteBuffer.allocate(4);
         this.queue = new ConcurrentLinkedQueue<Message>();
+        host = Util.getLocalHost();
         
         HeartBeat heartBeatThread = new HeartBeat();
         heartBeatThread.setDaemon(true);
         heartBeatThread.start();
+    }
+    
+    public String getHost() {
+        return host;
     }
     
     public Node() {

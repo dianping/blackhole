@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
@@ -38,14 +39,12 @@ public class Appnode extends Node {
     private String[] args;
     private File configFile = null;
     private ExecutorService exec;
-    private String appClient;
     private long delayMillis;
     private int port;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
-
+    
     public Appnode(String appClient) {
-        this.appClient = appClient;
         exec = Executors.newCachedThreadPool();
     }
 
@@ -95,7 +94,7 @@ public class Appnode extends Node {
     }
 
     private void register(String appName, long regTimestamp) {
-        Message msg = PBwrap.wrapAppReg(appName, appClient, regTimestamp);
+        Message msg = PBwrap.wrapAppReg(appName, getHost(), regTimestamp);
         super.send(msg);
     }
 
@@ -120,10 +119,7 @@ public class Appnode extends Node {
             return;
         }
         fillUpAppLogsFromConfig();
-        //register the app to supervisor
-        for (AppLog appLog : appLogs.values()) {
-            register(appLog.getAppName(), appLog.getCreateTime());
-        }
+
         //wait for receiving message from supervisor
         super.loop();
     }
@@ -137,6 +133,14 @@ public class Appnode extends Node {
         }
     }
 
+    @Override
+    protected void onConnected() {
+        //register the app to supervisor
+        for (AppLog appLog : appLogs.values()) {
+            register(appLog.getAppName(), appLog.getCreateTime());
+        }
+    }
+    
 	public void loadLionConfig() {
         // TODO Auto-generated method stub
     }
@@ -213,14 +217,14 @@ public class Appnode extends Node {
     }
 
     public static void main(String[] args) {
-        String client;
+        String hostname;
         try {
-            client = InetAddress.getLocalHost().getHostName();
+            hostname = Util.getLocalHost();
         } catch (UnknownHostException e1) {
             LOG.error("Oops, got an exception:", e1);
             return;
         }
-        Appnode appnode = new Appnode(client);
+        Appnode appnode = new Appnode(hostname);
         appnode.setArgs(args);
 
         try {
