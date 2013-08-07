@@ -5,6 +5,10 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
@@ -22,6 +26,15 @@ public class Util {
     private static final int REPEATE = 3;
     private static final int RETRY_SLEEP_TIME = 3000;
 
+    public static String getRemoteHost(Socket socket) {
+      InetSocketAddress remoteAddr= ((InetSocketAddress)socket.getRemoteSocketAddress());
+      return remoteAddr.getHostName();
+    }
+    
+    public static String getLocalHost() throws UnknownHostException {
+      return InetAddress.getLocalHost().getHostName();
+    }
+    
     public static boolean retryDelete(FileSystem fs, Path path) {
         for (int i = 0; i < REPEATE; i++) {
             try {
@@ -72,7 +85,6 @@ public class Util {
         FileFilter filter = new FileFilter() {
             public boolean accept(File pathName) {
                 CharSequence rollIdentSequence = rollIdent;
-                LOG.debug("rollIdent sequence is " + rollIdentSequence);
                 if ((pathName.getName().contains(rollIdentSequence))) {
                     return true;
                 }
@@ -159,12 +171,21 @@ public class Util {
     }
     
     /*
+     * get roll timestamp, for example
+     * now is 16:02, and rollPeroid is 1 hour, then
+     * return st of 16:00
+     */
+    public static long getRollTs(long ts, long rollPeriod) {
+        rollPeriod = rollPeriod * 1000;
+        return (ts / rollPeriod) * rollPeriod;
+    }
+    
+    /*
      * get the closest roll timestamp, for example
      * now is 16:02, and rollPeroid is 1 hour, then
-     * return st of 15:00
+     * return ts of 16:00
      */
-    public static long getRollTs(long rollPeriod) {
-        long ts = Util.getTS();
+    public static long getClosestRollTs(long ts, long rollPeriod) {
         rollPeriod = rollPeriod * 1000;
         
         if ((ts % rollPeriod) < (rollPeriod/2)) {

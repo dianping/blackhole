@@ -78,32 +78,34 @@ public class PBwrap {
         return wrapMessage(MessageType.READY_COLLECTOR, builder.build());
     }
     
-    public static Message wrapAppRoll(String appName, String appServer, long rollTs) {
+    public static Message wrapAppRoll(String appName, String appServer,long period, long rollTs) {
         AppRoll.Builder builder = AppRoll.newBuilder();
         builder.setAppName(appName);
         builder.setAppServer(appServer);
+        builder.setPeriod(period);
         builder.setRollTs(rollTs);
         return wrapMessage(MessageType.APP_ROLL, builder.build());
     }
     
-    public static RollID wrapRollID(String appName, String appServer, long rollTs) {
-        RollID.Builder buidler = RollID.newBuilder();
-        buidler.setAppName(appName);
-        buidler.setAppServer(appServer);
-        buidler.setRollTs(rollTs);
-        return buidler.build();
+    public static RollID wrapRollID(String appName, String appServer, long period, long rollTs) {
+        RollID.Builder builder = RollID.newBuilder();
+        builder.setAppName(appName);
+        builder.setAppServer(appServer);
+        builder.setPeriod(period);
+        builder.setRollTs(rollTs);
+        return builder.build();
     }
     
-    public static Message wrapUploadRoll(String appName, String appServer, long rollTs) {
-        return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(appName, appServer, rollTs));
+    public static Message wrapUploadRoll(String appName, String appServer, long period, long rollTs) {
+        return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(appName, appServer, period, rollTs));
     }
     
-    public static Message wrapUploadSuccess(String appName, String appServer, long rollTs) {
-        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(appName, appServer, rollTs));
+    public static Message wrapUploadSuccess(String appName, String appServer, long period, long rollTs) {
+        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(appName, appServer, period, rollTs));
     }
     
-    public static Message wrapUploadFail(String appName, String appServer, long rollTs) {
-        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, appServer, rollTs));
+    public static Message wrapUploadFail(String appName, String appServer, long period, long rollTs) {
+        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, appServer, period, rollTs));
     }
     
     public static Message wrapRecoveryRoll(String appName, String collectorServer, long rollTs) {
@@ -114,11 +116,11 @@ public class PBwrap {
         return wrapMessage(MessageType.RECOVERY_ROLL, builder.build());
     }
     
-    public static Message wrapRecoverySuccess(String appName, String appServer, long rollTs) {
-        return wrapMessage(MessageType.RECOVERY_SUCCESS, wrapRollID(appName, appServer, rollTs));
+    public static Message wrapRecoverySuccess(String appName, String appServer, long period, long rollTs) {
+        return wrapMessage(MessageType.RECOVERY_SUCCESS, wrapRollID(appName, appServer, period, rollTs));
     }
     
-    public static Message wrapRecoveryFail(String appName, String appServer, long rollTs) {
-        return wrapMessage(MessageType.RECOVERY_FAIL, wrapRollID(appName, appServer, rollTs));
+    public static Message wrapRecoveryFail(String appName, String appServer, long period, long rollTs) {
+        return wrapMessage(MessageType.RECOVERY_FAIL, wrapRollID(appName, appServer, period, rollTs));
     }
 }

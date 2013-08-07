@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.AgentProtocol;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.conf.ConfigKeeper;
@@ -28,6 +29,7 @@ public class LogReader implements Runnable{
     private File tailFile;
     private LogTailerListener listener;
     private OutputStreamWriter writer;
+    
     public LogReader(String collectorServer, int port, AppLog appLog, long delayMillis) {
         this.collectorServer = collectorServer;
         this.port = port;
@@ -49,7 +51,6 @@ public class LogReader implements Runnable{
             writer.write(line);
             writer.write('\n'); //make server easy to handle
             writer.flush();
-            LOG.debug("client>" + line);
         } catch (IOException e) {
             //TODO retry app reg
             LOG.error("Oops, got an exception:", e);

@@ -12,6 +12,7 @@ public class StreamId {
         int result = 1;
         result = prime * result + ((app == null) ? 0 : app.hashCode());
         result = prime * result + ((appHost == null) ? 0 : appHost.hashCode());
+        result = prime * result + (int) (period ^ (period >>> 32));
         return result;
     }
     @Override
@@ -32,6 +33,8 @@ public class StreamId {
             if (other.appHost != null)
                 return false;
         } else if (!appHost.equals(other.appHost))
+            return false;
+        if (period != other.period)
             return false;
         return true;
     }
