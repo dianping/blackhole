@@ -1,12 +1,17 @@
 package com.dp.blackhole.supervisor;
 
+import java.util.Date;
 import java.util.List;
 
 public class Stage {
-    public static final int APPEND = 1;
-    public static final int UPLOADING = 3;
-    public static final int UPLOAEDED = 4;
-    public static final int RECOVERYING = 5;
+    public static final int APPENDING = 1;
+    public static final int UPLOADING = 2;
+    public static final int UPLOADED = 3;
+    public static final int RECOVERYING = 4;
+//    public static final int APPFAIL = 5;
+    public static final int COLLECTORFAIL = 6;
+//    public static final int NOCOLLECTOR = 7;
+    public static final int PENDING = 5;
     
     List<Issue> issuelist;
     
@@ -18,11 +23,73 @@ public class Stage {
     long rollTs;
     boolean isCurrent;
     
-    public String getSummary() {
-        return null;
+    private String getStatusString(int status) {
+        switch (status) {
+        case Stage.APPENDING:
+            return "APPENDING";
+        case Stage.UPLOADING:
+            return "UPLOADING";
+        case Stage.UPLOADED:
+            return "UPLOADED";
+        case Stage.RECOVERYING:
+            return "RECOVERYING";
+        case Stage.COLLECTORFAIL:
+            return "COLLECTORFAIL";
+        case Stage.PENDING:
+            return "PENDING";
+        default:
+            return "UNKNOWN";
+        }
+    }
+    
+    public String toString() {
+        String summary = "stage:" + new Date(rollTs) + " stream ["+app+"@"+apphost+"] " + getStatusString(status) + " \n";
+        if (!cleanstart) {
+            summary = summary + "is not cleanstart \n";
+        }
+        if (issuelist.size() != 0) {
+            for(Issue i : issuelist) {
+                summary = summary + i.toString();
+            }
+        }
+        return summary;
     }
 
     public boolean isCurrent() {
         return isCurrent;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((app == null) ? 0 : app.hashCode());
+        result = prime * result + ((apphost == null) ? 0 : apphost.hashCode());
+        result = prime * result + (int) (rollTs ^ (rollTs >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Stage other = (Stage) obj;
+        if (app == null) {
+            if (other.app != null)
+                return false;
+        } else if (!app.equals(other.app))
+            return false;
+        if (apphost == null) {
+            if (other.apphost != null)
+                return false;
+        } else if (!apphost.equals(other.apphost))
+            return false;
+        if (rollTs != other.rollTs)
+            return false;
+        return true;
     }
 }

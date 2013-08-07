@@ -55,6 +55,14 @@ public class Appnode extends Node {
   	    LogReader logReader = null;
   	    MessageType type = msg.getType();
   	    switch (type) {
+  	    case NOAVAILABLENODE:
+  	        try {
+                Thread.sleep(5 * 1000);
+            } catch (InterruptedException e) {
+                LOG.info("thead interrupted");
+            }
+  	        registerApps();
+  	        break;
         case RECOVERY_ROLL:
             RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
             appName = recoveryRoll.getAppName();
@@ -73,12 +81,12 @@ public class Appnode extends Node {
             AssignCollector assignCollector = msg.getAssignCollector();
             appName = assignCollector.getAppName();
             if ((appLog = appLogs.get(appName)) != null) {
-                if ((logReader = appReaders.get(appLog)) != null) {
-                    logReader.stop();   //stop the old read thread (old stream).
-                    appReaders.remove(logReader);
-                }
+//                if ((logReader = appReaders.get(appLog)) != null) {
+//                    logReader.stop();   //stop the old read thread (old stream).
+//                    appReaders.remove(logReader);
+//                }
                 collectorServer = assignCollector.getCollectorServer();
-                logReader = new LogReader(collectorServer, port, appLog, delayMillis);
+                logReader = new LogReader(this, collectorServer, port, appLog, delayMillis);
                 appReaders.put(appLog, logReader);
                 exec.execute(logReader);
                 return true;
@@ -135,9 +143,14 @@ public class Appnode extends Node {
 
     @Override
     protected void onConnected() {
+        registerApps();
+    }
+
+    private void registerApps() {
         //register the app to supervisor
         for (AppLog appLog : appLogs.values()) {
-            register(appLog.getAppName(), appLog.getCreateTime());
+//            register(appLog.getAppName(), appLog.getCreateTime());
+            register(appLog.getAppName(), Util.getTS());
         }
     }
     
@@ -187,6 +200,10 @@ public class Appnode extends Node {
         prop.load(new FileReader(new File("config.properties")));
         delayMillis = Long.parseLong(prop.getProperty("delayMillis"));
         port = Integer.parseInt(prop.getProperty("collectornode.port"));
+        
+        String serverhost = prop.getProperty("supervisor.host");
+        int serverport = Integer.parseInt(prop.getProperty("supervisor.port"));
+        init(serverhost, serverport);    
     }
 
     public boolean parseOptions() throws ParseException {
@@ -216,6 +233,22 @@ public class Appnode extends Node {
         return true;
     }
 
+    public String[] getArgs() {
+        return args;
+    }
+
+    public void setArgs(String[] args) {
+        this.args = args;
+    }
+    
+    public void reportFailure(String app, String appHost, long ts) {
+        Message message = PBwrap.wrapAppFailure(app, appHost, ts);
+        send(message);
+        AppLog applog = appLogs.get(app); 
+        register(app, applog.getCreateTime());
+    }
+    
+
     public static void main(String[] args) {
         String hostname;
         try {
@@ -239,13 +272,5 @@ public class Appnode extends Node {
         } catch (Exception e) {
             LOG.error("A fatal error occurred while running. Exception follows.", e);
         }
-    }
-
-    public String[] getArgs() {
-        return args;
-    }
-
-    public void setArgs(String[] args) {
-        this.args = args;
     }
 }

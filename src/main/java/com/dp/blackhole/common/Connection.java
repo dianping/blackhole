@@ -1,8 +1,6 @@
 package com.dp.blackhole.common;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -11,6 +9,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 
 public class Connection {
+    public static final int APPNODE = 1;
+    public static final int COLLECTORNODE = 2;
+    
     SocketChannel channel;
     
     private ByteBuffer length;
@@ -19,6 +20,7 @@ public class Connection {
     private ConcurrentLinkedQueue<Message> queue;
     private AtomicLong lastHeartBeat;
     private String host;
+    private int NodeType;
     
     public Connection (SocketChannel channel) throws IOException {
         this.host = Util.getRemoteHost(channel.socket());
@@ -109,5 +111,13 @@ public class Connection {
     
     public String getHost() {
        return host;
+    }
+    
+    public void setNodeType(int type) {
+        NodeType = type;  
+    }
+    
+    public int getNodeType( ) {
+        return NodeType;  
     }
 }
