@@ -36,7 +36,7 @@ public class Collector implements Runnable {
     public Collector(Collectornode server, Socket s, String home, String appname, String host, long period) throws IOException {
         node = server;
         socket = s;
-        remoteAddress = host;
+        remoteAddress = Util.getRemoteHost(s);
         app = appname;
         rollPeriod = period;
         format = new SimpleDateFormat(Util.getFormatFromPeroid(period));
@@ -63,12 +63,14 @@ public class Collector implements Runnable {
                     completefile();
                 }
             }
+            handleIOException();
         } catch (IOException e) {
             handleIOException();
         }
     }
     
     private void handleIOException() {
+        node.reportFailure(app, remoteAddress, Util.getTS());
         close();
     }
     

@@ -1,18 +1,19 @@
 package com.dp.blackhole.supervisor;
 
 public class StreamId {
-    String app;
-    String appHost;
-    long period;
-    long startTs;
-    long lastSuccessTs;
+    private String app;
+    private String appHost;
+    
+    public StreamId(String app, String appHost) {
+        this.app = app;
+        this.appHost = appHost;
+    }
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((app == null) ? 0 : app.hashCode());
         result = prime * result + ((appHost == null) ? 0 : appHost.hashCode());
-        result = prime * result + (int) (period ^ (period >>> 32));
         return result;
     }
     @Override
@@ -34,8 +35,12 @@ public class StreamId {
                 return false;
         } else if (!appHost.equals(other.appHost))
             return false;
-        if (period != other.period)
-            return false;
         return true;
     }
+    
+    @Override
+    public String toString() {
+        return app + "@" + appHost;
+    }
+    
 }

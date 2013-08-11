@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.security.SecurityUtil;
 
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
 import com.dp.blackhole.common.gen.MessagePB.Message;
@@ -45,9 +46,11 @@ public class Collectornode extends Node {
     }
 
     private class Acceptor extends Thread {
+        boolean running = true;
+        
         @Override
         public void run() {
-            while (true) {
+            while (running) {
                 try {
                     Socket socket = server.accept();
                     
@@ -62,13 +65,13 @@ public class Collectornode extends Node {
                         LOG.debug("logreader connected: " + head.app);
                         Collector collector = new Collector(Collectornode.this, socket, basedir, head.app, getHost(), head.peroid);
                         pool.execute(collector);
-                        Message msg = PBwrap.wrapReadyCollector(head.app, getHost(), head.peroid, getHost(), Util.getTS());
+                        Message msg = PBwrap.wrapReadyCollector(head.app, Util.getRemoteHost(socket), head.peroid, getHost(), Util.getTS());
                         send(msg);
                     } else if (AgentProtocol.RECOVERY == head.type) {
                         
                         RollIdent roll = new RollIdent();
                         roll.app = head.app;
-                        roll.source = getHost();
+                        roll.source = Util.getRemoteHost(socket);
                         roll.period = head.peroid;
                         roll.ts = head.ts;
                         
@@ -76,6 +79,7 @@ public class Collectornode extends Node {
                         pool.execute(recovery);
                     }
                 } catch (IOException e) {
+                    running = false;
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
@@ -143,15 +147,27 @@ public class Collectornode extends Node {
         port = Integer.parseInt(prop.getProperty("collectornode.port"));
         hdfsbasedir = prop.getProperty("hdfs.basedir");
         suffix = prop.getProperty("hdfs.file.suffix");
+        String keytab = prop.getProperty("blackhole.keytab");
+        String principal = prop.getProperty("blackhole.principal");
         
+        String serverhost = prop.getProperty("supervisor.host");
+        int serverport = Integer.parseInt(prop.getProperty("supervisor.port"));
+              
         if (basedir == null || hdfsbasedir == null || suffix == null) {
             throw new IOException("config in config.properties missed");
         }
+        
+        Configuration conf = new Configuration();
+        conf.set("blackhole.keytab", keytab);
+        conf.set("blackhole.principal", principal);
+        HDFSLogin(conf, "blackhole.keytab", "blackhole.principal");
         
         server = new ServerSocket(port);
         fs = (new Path(hdfsbasedir)).getFileSystem(new Configuration());
         
         cleanupLocalStorage();
+
+        init(serverhost, serverport);
         
         // start to accept connection
         Acceptor acceptor = new Acceptor();
@@ -199,11 +215,17 @@ public class Collectornode extends Node {
         }
     }
 
+    private void HDFSLogin(Configuration conf, String keytab, String principle) throws IOException {        
+        SecurityUtil.login(conf, keytab, principle);
+    }
+    
     /**
      * @param args
      * @throws IOException 
      */
     public static void main(String[] args) throws IOException {
+        
+        
         try {
         Collectornode node = new Collectornode();
         node.start();
@@ -238,24 +260,29 @@ public class Collectornode extends Node {
     public void recoveryResult(RollIdent ident, boolean recoverySuccess) {
         Message message;
         if (recoverySuccess == true) {
-            message = PBwrap.wrapRecoverySuccess(ident.app, ident.source, ident.period, ident.ts);
+            message = PBwrap.wrapRecoverySuccess(ident.app, ident.source, ident.ts);
         } else {
-            message = PBwrap.wrapRecoveryFail(ident.app, ident.source, ident.period, ident.ts);
+            message = PBwrap.wrapRecoveryFail(ident.app, ident.source, ident.ts);
         }
         send(message);
     }
 
     public void uploadResult(RollIdent ident, boolean uploadSuccess) {        
         if (uploadSuccess == true) {
-            Message message = PBwrap.wrapUploadSuccess(ident.app, ident.source, ident.period, ident.ts);
+            Message message = PBwrap.wrapUploadSuccess(ident.app, ident.source, ident.ts);
             send(message);
             File f = fileRolls.get(ident);
             if (!f.delete()) {
                 LOG.error("delete file " + f + " failed");
             }
         } else {
-            Message message = PBwrap.wrapUploadFail(ident.app, ident.source, ident.period, ident.ts);
+            Message message = PBwrap.wrapUploadFail(ident.app, ident.source, ident.ts);
             send(message);
         }
+    }
+
+    public void reportFailure(String app, String appHost, long ts) {
+        Message message = PBwrap.wrapcollectorFailure(app, appHost, ts);
+        send(message);
     }
 }

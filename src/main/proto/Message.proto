@@ -9,6 +9,7 @@ import "AppRoll.proto";
 import "RecoveryRoll.proto";
 import "ReadyCollector.proto";
 import "RollID.proto";
+import "Failure.proto";
 
 message Message {
     enum MessageType {
@@ -24,6 +25,8 @@ message Message {
         RECOVERY_ROLL = 10;
         RECOVERY_SUCCESS = 11;
         RECOVERY_FAIL = 12;
+        FAILURE = 13;
+        NOAVAILABLENODE = 14;
     }
 
     required MessageType type = 1;
@@ -33,4 +36,5 @@ message Message {
     optional RecoveryRoll recoveryRoll = 5;
     optional ReadyCollector readyCollector = 6;
     optional RollID rollID = 7;
+    optional Failure failure = 8;
 }

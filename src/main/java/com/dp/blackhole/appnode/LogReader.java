@@ -29,8 +29,10 @@ public class LogReader implements Runnable{
     private File tailFile;
     private LogTailerListener listener;
     private OutputStreamWriter writer;
+    private Appnode node;
     
-    public LogReader(String collectorServer, int port, AppLog appLog, long delayMillis) {
+    public LogReader(Appnode node, String collectorServer, int port, AppLog appLog, long delayMillis) {
+        this.node = node;
         this.collectorServer = collectorServer;
         this.port = port;
         this.appLog =appLog;
@@ -54,11 +56,19 @@ public class LogReader implements Runnable{
         } catch (IOException e) {
             //TODO retry app reg
             LOG.error("Oops, got an exception:", e);
+            node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+            stop();
         }
     }
 
     public void stop() {
         tailer.stop();
+        try {
+            writer.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -81,16 +91,17 @@ public class LogReader implements Runnable{
             tailer.run();
         } catch (FileNotFoundException e) {
             LOG.error("Got an exception", e);
-        } catch (UnknownHostException e) {
-            //TODO retry app reg
-            LOG.error("Faild to build a socket with host:" 
-                    + collectorServer + " port:" + port
-                    + "This tailer thread stop! ", e);
+            node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+            stop();
         } catch (IOException e) {
             LOG.error("Faild to build a socket. " +
                     "This tailer thread stop! ", e);
+            node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+            stop();
         } catch (Exception e) {
             LOG.error("Oops, got an exception:" + e);
+            node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+            stop();
         }
     }
 }

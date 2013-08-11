@@ -189,7 +189,7 @@ public class TestLogReader {
     
     @Test
     public void testFileNotFoundAndFileRotated() {
-        LogReader reader = new LogReader(com.dp.blackhole.simutil.Util.HOSTNAME, 
+        LogReader reader = new LogReader(null, com.dp.blackhole.simutil.Util.HOSTNAME, 
                 com.dp.blackhole.simutil.Util.PORT, appLog, 100);
         ExecutorService exec = Executors.newCachedThreadPool();
         exec.execute(reader);
