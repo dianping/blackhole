@@ -3,6 +3,8 @@ package com.dp.blackhole.common;
 import com.dp.blackhole.common.gen.AppRegPB.AppReg;
 import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.common.gen.FailurePB.Failure;
+import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
@@ -15,6 +17,7 @@ public class PBwrap {
         msg.setType(type);
         switch (type) {
         case HEARTBEART:
+        case NOAVAILABLENODE:
             break;
         case APP_REG:
             msg.setAppReg((AppReg) message);
@@ -33,6 +36,9 @@ public class PBwrap {
         case RECOVERY_ROLL:
             msg.setRecoveryRoll((RecoveryRoll) message);
             break;
+        case FAILURE:
+            msg.setFailure((Failure) message);
+            break;
         case UPLOAD_ROLL:
         case UPLOAD_SUCCESS:
         case UPLOAD_FAIL:
@@ -47,6 +53,10 @@ public class PBwrap {
     
     public static Message wrapHeartBeat() {
         return wrapMessage(MessageType.HEARTBEART, null);
+    }
+    
+    public static Message wrapNoAvailableNode() {
+        return wrapMessage(MessageType.NOAVAILABLENODE, null);
     }
     
     public static Message wrapAppReg(String appName, String appServer, long regTs) {
@@ -91,7 +101,9 @@ public class PBwrap {
         RollID.Builder builder = RollID.newBuilder();
         builder.setAppName(appName);
         builder.setAppServer(appServer);
-        builder.setPeriod(period);
+        if (period != 0) {
+            builder.setPeriod(period);
+        }
         builder.setRollTs(rollTs);
         return builder.build();
     }
@@ -100,12 +112,12 @@ public class PBwrap {
         return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(appName, appServer, period, rollTs));
     }
     
-    public static Message wrapUploadSuccess(String appName, String appServer, long period, long rollTs) {
-        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(appName, appServer, period, rollTs));
+    public static Message wrapUploadSuccess(String appName, String appServer, long rollTs) {
+        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(appName, appServer, 0, rollTs));
     }
     
-    public static Message wrapUploadFail(String appName, String appServer, long period, long rollTs) {
-        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, appServer, period, rollTs));
+    public static Message wrapUploadFail(String appName, String appServer, long rollTs) {
+        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, appServer, 0, rollTs));
     }
     
     public static Message wrapRecoveryRoll(String appName, String collectorServer, long rollTs) {
@@ -116,11 +128,28 @@ public class PBwrap {
         return wrapMessage(MessageType.RECOVERY_ROLL, builder.build());
     }
     
-    public static Message wrapRecoverySuccess(String appName, String appServer, long period, long rollTs) {
-        return wrapMessage(MessageType.RECOVERY_SUCCESS, wrapRollID(appName, appServer, period, rollTs));
+    public static Message wrapRecoverySuccess(String appName, String appServer, long rollTs) {
+        return wrapMessage(MessageType.RECOVERY_SUCCESS, wrapRollID(appName, appServer, 0, rollTs));
     }
     
-    public static Message wrapRecoveryFail(String appName, String appServer, long period, long rollTs) {
-        return wrapMessage(MessageType.RECOVERY_FAIL, wrapRollID(appName, appServer, period, rollTs));
+    public static Message wrapRecoveryFail(String appName, String appServer, long rollTs) {
+        return wrapMessage(MessageType.RECOVERY_FAIL, wrapRollID(appName, appServer, 0, rollTs));
+    }
+    
+    public static Message wrapFailure (String app, String appHost, NodeType type, long failTs) {
+        Failure.Builder builder = Failure.newBuilder();
+        builder.setApp(app);
+        builder.setType(type);
+        builder.setAppServer(appHost);
+        builder.setFailTs(failTs);
+        return wrapMessage(MessageType.FAILURE, builder.build());
+    }
+    
+    public static Message wrapAppFailure (String app, String appHost, long failTs) {
+       return wrapFailure(app, appHost, NodeType.APP_NODE, failTs);
+    }
+    
+    public static Message wrapcollectorFailure (String app, String appHost, long failTs) {
+        return wrapFailure(app, appHost, NodeType.COLLECTOR_NODE, failTs);
     }
 }
