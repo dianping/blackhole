@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.gen.MessagePB.Message;
+import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 
 public abstract class Node {
     public static final Log LOG = LogFactory.getLog(Node.class);
@@ -25,6 +26,9 @@ public abstract class Node {
     private SocketChannel socketChannel;
     volatile private boolean running = true;
     private String host;
+    
+    private String supervisorhost;
+    private int supervisorport;
     
     ByteBuffer readLength;
     ByteBuffer readbuffer;
@@ -52,7 +56,7 @@ public abstract class Node {
         SelectionKey key = null;
         while (running) {
             try {
-                selector.select(500);
+                selector.select();
                 Iterator<SelectionKey> iter = selector.selectedKeys()
                         .iterator();
                 while (iter.hasNext()) {
@@ -95,7 +99,6 @@ public abstract class Node {
                             }
                         }
                     } else if (key.isReadable()) {
-                        LOG.debug("read data");
                         SocketChannel channel = (SocketChannel) key.channel();
 
                         int count;
@@ -123,7 +126,7 @@ public abstract class Node {
                         if (readbuffer.remaining() == 0) {
                             readbuffer.flip();
                             Message msg = Message.parseFrom(readbuffer.array());
-                            LOG.debug("message enqueue: " + msg);
+                            LOG.debug("message received: " + msg);
                             process(msg);
                             readbuffer = null;
                             readLength.clear();
@@ -172,23 +175,27 @@ public abstract class Node {
     protected abstract boolean process(Message msg);
 
     protected void send(Message msg) {
-        LOG.debug("send message: " + msg);
+        if (msg.getType() != MessageType.HEARTBEART) {
+            LOG.debug("send message: " + msg);
+        }
         queue.offer(msg);
         SelectionKey key = socketChannel.keyFor(selector);
         key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
         selector.wakeup();
     }
 
-    private void init() throws IOException, ClosedChannelException {
+    protected void init(String host, int port) throws IOException, ClosedChannelException {
+        this.supervisorhost = host;
+        this.supervisorport = port; 
         socketChannel = SocketChannel.open();
         socketChannel.configureBlocking(false);
-        SocketAddress supervisor = new InetSocketAddress("localhost", 8080);    
+        SocketAddress supervisor = new InetSocketAddress(supervisorhost, supervisorport);
         socketChannel.connect(supervisor);
         selector = Selector.open();
         socketChannel.register(selector, SelectionKey.OP_CONNECT);
         readLength = ByteBuffer.allocate(4);
         this.queue = new ConcurrentLinkedQueue<Message>();
-        host = Util.getLocalHost();
+        this.host = Util.getLocalHost();
         
         HeartBeat heartBeatThread = new HeartBeat();
         heartBeatThread.setDaemon(true);
@@ -200,11 +207,7 @@ public abstract class Node {
     }
     
     public Node() {
-        try {
-            init();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 }
 

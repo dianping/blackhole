@@ -35,6 +35,10 @@ public class Util {
       return InetAddress.getLocalHost().getHostName();
     }
     
+    public static String ts2String(long ts) {
+        return (new Date(ts)).toString();
+    }
+    
     public static boolean retryDelete(FileSystem fs, Path path) {
         for (int i = 0; i < REPEATE; i++) {
             try {
@@ -80,12 +84,12 @@ public class Util {
         // real file: trace.log.2013-07-11.12
         // rollIdent is "2013-07-11.12" as long as time unit is "hour"
         String directoryStr = appTailFile.substring(0, appTailFile.lastIndexOf('/'));
-        LOG.debug("DIR IS " + directoryStr);
         
         FileFilter filter = new FileFilter() {
             public boolean accept(File pathName) {
                 CharSequence rollIdentSequence = rollIdent;
                 if ((pathName.getName().contains(rollIdentSequence))) {
+                    LOG.debug("found: " + pathName);
                     return true;
                 }
                 return false;

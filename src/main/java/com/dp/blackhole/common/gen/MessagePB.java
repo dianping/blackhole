@@ -104,6 +104,20 @@ public final class MessagePB {
      * <code>optional .blackhole.RollID rollID = 7;</code>
      */
     com.dp.blackhole.common.gen.RollIDPB.RollIDOrBuilder getRollIDOrBuilder();
+
+    // optional .blackhole.Failure failure = 8;
+    /**
+     * <code>optional .blackhole.Failure failure = 8;</code>
+     */
+    boolean hasFailure();
+    /**
+     * <code>optional .blackhole.Failure failure = 8;</code>
+     */
+    com.dp.blackhole.common.gen.FailurePB.Failure getFailure();
+    /**
+     * <code>optional .blackhole.Failure failure = 8;</code>
+     */
+    com.dp.blackhole.common.gen.FailurePB.FailureOrBuilder getFailureOrBuilder();
   }
   /**
    * Protobuf type {@code blackhole.Message}
@@ -245,6 +259,19 @@ public final class MessagePB {
               bitField0_ |= 0x00000040;
               break;
             }
+            case 66: {
+              com.dp.blackhole.common.gen.FailurePB.Failure.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000080) == 0x00000080)) {
+                subBuilder = failure_.toBuilder();
+              }
+              failure_ = input.readMessage(com.dp.blackhole.common.gen.FailurePB.Failure.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(failure_);
+                failure_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000080;
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -337,6 +364,14 @@ public final class MessagePB {
        * <code>RECOVERY_FAIL = 12;</code>
        */
       RECOVERY_FAIL(11, 12),
+      /**
+       * <code>FAILURE = 13;</code>
+       */
+      FAILURE(12, 13),
+      /**
+       * <code>NOAVAILABLENODE = 14;</code>
+       */
+      NOAVAILABLENODE(13, 14),
       ;
 
       /**
@@ -387,6 +422,14 @@ public final class MessagePB {
        * <code>RECOVERY_FAIL = 12;</code>
        */
       public static final int RECOVERY_FAIL_VALUE = 12;
+      /**
+       * <code>FAILURE = 13;</code>
+       */
+      public static final int FAILURE_VALUE = 13;
+      /**
+       * <code>NOAVAILABLENODE = 14;</code>
+       */
+      public static final int NOAVAILABLENODE_VALUE = 14;
 
 
       public final int getNumber() { return value; }
@@ -405,6 +448,8 @@ public final class MessagePB {
           case 10: return RECOVERY_ROLL;
           case 11: return RECOVERY_SUCCESS;
           case 12: return RECOVERY_FAIL;
+          case 13: return FAILURE;
+          case 14: return NOAVAILABLENODE;
           default: return null;
         }
       }
@@ -605,6 +650,28 @@ public final class MessagePB {
       return rollID_;
     }
 
+    // optional .blackhole.Failure failure = 8;
+    public static final int FAILURE_FIELD_NUMBER = 8;
+    private com.dp.blackhole.common.gen.FailurePB.Failure failure_;
+    /**
+     * <code>optional .blackhole.Failure failure = 8;</code>
+     */
+    public boolean hasFailure() {
+      return ((bitField0_ & 0x00000080) == 0x00000080);
+    }
+    /**
+     * <code>optional .blackhole.Failure failure = 8;</code>
+     */
+    public com.dp.blackhole.common.gen.FailurePB.Failure getFailure() {
+      return failure_;
+    }
+    /**
+     * <code>optional .blackhole.Failure failure = 8;</code>
+     */
+    public com.dp.blackhole.common.gen.FailurePB.FailureOrBuilder getFailureOrBuilder() {
+      return failure_;
+    }
+
     private void initFields() {
       type_ = com.dp.blackhole.common.gen.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.common.gen.AppRegPB.AppReg.getDefaultInstance();
@@ -613,6 +680,7 @@ public final class MessagePB {
       recoveryRoll_ = com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll.getDefaultInstance();
       readyCollector_ = com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector.getDefaultInstance();
       rollID_ = com.dp.blackhole.common.gen.RollIDPB.RollID.getDefaultInstance();
+      failure_ = com.dp.blackhole.common.gen.FailurePB.Failure.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -659,6 +727,12 @@ public final class MessagePB {
           return false;
         }
       }
+      if (hasFailure()) {
+        if (!getFailure().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -686,6 +760,9 @@ public final class MessagePB {
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         output.writeMessage(7, rollID_);
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        output.writeMessage(8, failure_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -723,6 +800,10 @@ public final class MessagePB {
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(7, rollID_);
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(8, failure_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -838,6 +919,7 @@ public final class MessagePB {
           getRecoveryRollFieldBuilder();
           getReadyCollectorFieldBuilder();
           getRollIDFieldBuilder();
+          getFailureFieldBuilder();
         }
       }
       private static Builder create() {
@@ -884,6 +966,12 @@ public final class MessagePB {
           rollIDBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000040);
+        if (failureBuilder_ == null) {
+          failure_ = com.dp.blackhole.common.gen.FailurePB.Failure.getDefaultInstance();
+        } else {
+          failureBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -964,6 +1052,14 @@ public final class MessagePB {
         } else {
           result.rollID_ = rollIDBuilder_.build();
         }
+        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+          to_bitField0_ |= 0x00000080;
+        }
+        if (failureBuilder_ == null) {
+          result.failure_ = failure_;
+        } else {
+          result.failure_ = failureBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1000,6 +1096,9 @@ public final class MessagePB {
         }
         if (other.hasRollID()) {
           mergeRollID(other.getRollID());
+        }
+        if (other.hasFailure()) {
+          mergeFailure(other.getFailure());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1042,6 +1141,12 @@ public final class MessagePB {
         }
         if (hasRollID()) {
           if (!getRollID().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasFailure()) {
+          if (!getFailure().isInitialized()) {
             
             return false;
           }
@@ -1806,6 +1911,123 @@ public final class MessagePB {
         return rollIDBuilder_;
       }
 
+      // optional .blackhole.Failure failure = 8;
+      private com.dp.blackhole.common.gen.FailurePB.Failure failure_ = com.dp.blackhole.common.gen.FailurePB.Failure.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.gen.FailurePB.Failure, com.dp.blackhole.common.gen.FailurePB.Failure.Builder, com.dp.blackhole.common.gen.FailurePB.FailureOrBuilder> failureBuilder_;
+      /**
+       * <code>optional .blackhole.Failure failure = 8;</code>
+       */
+      public boolean hasFailure() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>optional .blackhole.Failure failure = 8;</code>
+       */
+      public com.dp.blackhole.common.gen.FailurePB.Failure getFailure() {
+        if (failureBuilder_ == null) {
+          return failure_;
+        } else {
+          return failureBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.Failure failure = 8;</code>
+       */
+      public Builder setFailure(com.dp.blackhole.common.gen.FailurePB.Failure value) {
+        if (failureBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          failure_ = value;
+          onChanged();
+        } else {
+          failureBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000080;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.Failure failure = 8;</code>
+       */
+      public Builder setFailure(
+          com.dp.blackhole.common.gen.FailurePB.Failure.Builder builderForValue) {
+        if (failureBuilder_ == null) {
+          failure_ = builderForValue.build();
+          onChanged();
+        } else {
+          failureBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000080;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.Failure failure = 8;</code>
+       */
+      public Builder mergeFailure(com.dp.blackhole.common.gen.FailurePB.Failure value) {
+        if (failureBuilder_ == null) {
+          if (((bitField0_ & 0x00000080) == 0x00000080) &&
+              failure_ != com.dp.blackhole.common.gen.FailurePB.Failure.getDefaultInstance()) {
+            failure_ =
+              com.dp.blackhole.common.gen.FailurePB.Failure.newBuilder(failure_).mergeFrom(value).buildPartial();
+          } else {
+            failure_ = value;
+          }
+          onChanged();
+        } else {
+          failureBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000080;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.Failure failure = 8;</code>
+       */
+      public Builder clearFailure() {
+        if (failureBuilder_ == null) {
+          failure_ = com.dp.blackhole.common.gen.FailurePB.Failure.getDefaultInstance();
+          onChanged();
+        } else {
+          failureBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000080);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.Failure failure = 8;</code>
+       */
+      public com.dp.blackhole.common.gen.FailurePB.Failure.Builder getFailureBuilder() {
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return getFailureFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.Failure failure = 8;</code>
+       */
+      public com.dp.blackhole.common.gen.FailurePB.FailureOrBuilder getFailureOrBuilder() {
+        if (failureBuilder_ != null) {
+          return failureBuilder_.getMessageOrBuilder();
+        } else {
+          return failure_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.Failure failure = 8;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.gen.FailurePB.Failure, com.dp.blackhole.common.gen.FailurePB.Failure.Builder, com.dp.blackhole.common.gen.FailurePB.FailureOrBuilder> 
+          getFailureFieldBuilder() {
+        if (failureBuilder_ == null) {
+          failureBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.common.gen.FailurePB.Failure, com.dp.blackhole.common.gen.FailurePB.Failure.Builder, com.dp.blackhole.common.gen.FailurePB.FailureOrBuilder>(
+                  failure_,
+                  getParentForChildren(),
+                  isClean());
+          failure_ = null;
+        }
+        return failureBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
 
@@ -1834,22 +2056,24 @@ public final class MessagePB {
       "\n\rMessage.proto\022\tblackhole\032\014AppReg.proto" +
       "\032\025AssignCollector.proto\032\rAppRoll.proto\032\022" +
       "RecoveryRoll.proto\032\024ReadyCollector.proto" +
-      "\032\014RollID.proto\"\244\004\n\007Message\022,\n\004type\030\001 \002(\016" +
-      "2\036.blackhole.Message.MessageType\022!\n\006appR" +
-      "eg\030\002 \001(\0132\021.blackhole.AppReg\0223\n\017assignCol" +
-      "lector\030\003 \001(\0132\032.blackhole.AssignCollector" +
-      "\022#\n\007appRoll\030\004 \001(\0132\022.blackhole.AppRoll\022-\n" +
-      "\014recoveryRoll\030\005 \001(\0132\027.blackhole.Recovery" +
-      "Roll\0221\n\016readyCollector\030\006 \001(\0132\031.blackhole",
-      ".ReadyCollector\022!\n\006rollID\030\007 \001(\0132\021.blackh" +
-      "ole.RollID\"\350\001\n\013MessageType\022\016\n\nHEARTBEART" +
-      "\020\001\022\013\n\007APP_REG\020\002\022\021\n\rCOLLECTOR_REG\020\003\022\024\n\020AS" +
-      "SIGN_COLLECTOR\020\004\022\023\n\017READY_COLLECTOR\020\005\022\014\n" +
-      "\010APP_ROLL\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_S" +
-      "UCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_RO" +
-      "LL\020\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOVERY_F" +
-      "AIL\020\014B(\n\033com.dp.blackhole.common.genB\tMe" +
-      "ssagePB"
+      "\032\014RollID.proto\032\rFailure.proto\"\353\004\n\007Messag" +
+      "e\022,\n\004type\030\001 \002(\0162\036.blackhole.Message.Mess" +
+      "ageType\022!\n\006appReg\030\002 \001(\0132\021.blackhole.AppR" +
+      "eg\0223\n\017assignCollector\030\003 \001(\0132\032.blackhole." +
+      "AssignCollector\022#\n\007appRoll\030\004 \001(\0132\022.black" +
+      "hole.AppRoll\022-\n\014recoveryRoll\030\005 \001(\0132\027.bla" +
+      "ckhole.RecoveryRoll\0221\n\016readyCollector\030\006 ",
+      "\001(\0132\031.blackhole.ReadyCollector\022!\n\006rollID" +
+      "\030\007 \001(\0132\021.blackhole.RollID\022#\n\007failure\030\010 \001" +
+      "(\0132\022.blackhole.Failure\"\212\002\n\013MessageType\022\016" +
+      "\n\nHEARTBEART\020\001\022\013\n\007APP_REG\020\002\022\021\n\rCOLLECTOR" +
+      "_REG\020\003\022\024\n\020ASSIGN_COLLECTOR\020\004\022\023\n\017READY_CO" +
+      "LLECTOR\020\005\022\014\n\010APP_ROLL\020\006\022\017\n\013UPLOAD_ROLL\020\007" +
+      "\022\022\n\016UPLOAD_SUCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n" +
+      "\rRECOVERY_ROLL\020\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021" +
+      "\n\rRECOVERY_FAIL\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAI" +
+      "LABLENODE\020\016B(\n\033com.dp.blackhole.common.g",
+      "enB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1861,7 +2085,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "ReadyCollector", "RollID", });
+              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "ReadyCollector", "RollID", "Failure", });
           return null;
         }
       };
@@ -1874,6 +2098,7 @@ public final class MessagePB {
           com.dp.blackhole.common.gen.RecoveryRollPB.getDescriptor(),
           com.dp.blackhole.common.gen.ReadyCollectorPB.getDescriptor(),
           com.dp.blackhole.common.gen.RollIDPB.getDescriptor(),
+          com.dp.blackhole.common.gen.FailurePB.getDescriptor(),
         }, assigner);
   }
 
