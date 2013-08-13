@@ -85,7 +85,6 @@ public class Supervisor {
                         Connection connection = new Connection(channel);
                         channel.register(selector, SelectionKey.OP_READ, connection);
                    
-                        // TODO handle not null
                         if (connectionMap.get(connection) == null) {
                             ArrayList<Stream> streams = new ArrayList<Stream>();
                             connectionMap.put(connection, streams);
@@ -129,6 +128,7 @@ public class Supervisor {
                             // socket buffer is full, register OP_WRITE, wait for next write
                             if (num == 0) {
                                 key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+                                break;
                             }
                         }
                     } else if (key.isReadable()) {
@@ -141,7 +141,7 @@ public class Supervisor {
                             count = channel.read(lengthBuf);
                             if (count < 0) {
                                 closeConnection((Connection) key.attachment());
-                                break;
+                                continue;
                             } else if (lengthBuf.hasRemaining()) {
                                 continue;
                             } else {
@@ -156,7 +156,7 @@ public class Supervisor {
                         count = channel.read(data);
                         if (count < 0) {
                             closeConnection((Connection) key.attachment());
-                            break;
+                            continue;
                         }
                         if (data.remaining() == 0) {
                             data.flip();
@@ -168,10 +168,8 @@ public class Supervisor {
                             if (msg.getType() != MessageType.HEARTBEART) {
                                 LOG.debug("receive message from " + connection.getHost() +" :" + msg);
                             }
-                            lengthBuf.clear();
                         }
                     }
-                    key = null;
                 }
             } catch (InterruptedException ie) {
                 LOG.info("got InterruptedException", ie);
