@@ -6,12 +6,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -21,28 +19,19 @@ import org.junit.Test;
 import com.dp.blackhole.appnode.Appnode;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.simutil.Util;
 public class TestAppnode {
-    private static final Log LOG = LogFactory.getLog(TestAppnode.class);
     private static final String MAGIC = "9vjrder3";
     private static Appnode appnode;
     private static String client;
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        try {
-            client = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e1) {
-            LOG.error("Oops, got an exception:", e1);
-            return;
-        }
-        appnode = new Appnode(client);
+        appnode = new Appnode("localhost");
         ConfigKeeper conf = new ConfigKeeper();
         conf.addRawProperty(MAGIC+".WATCH_FILE", "/tmp/" + MAGIC + ".log");
-        conf.addRawProperty(MAGIC+".port", "40000");//TODO
-        conf.addRawProperty(MAGIC+".TRANSFER_PERIOD_VALUE", "1");
-        conf.addRawProperty(MAGIC+".TRANSFER_PERIOD_UNIT", "hour");
         appnode.fillUpAppLogsFromConfig();
     }
 
@@ -75,6 +64,26 @@ public class TestAppnode {
     }
     
     @Test
+    public void testConfResProcess() throws IOException {
+        ConfigKeeper.configMap.clear();
+        File file1 = new File("/tmp/testApp1.log");
+        File file2 = new File("/tmp/testApp2.log");
+        file1.createNewFile();
+        file2.createNewFile();
+        AppConfRes appConfRes1 = getAppConfRes(MAGIC, "/tmp/testApp1.log", "60");
+        AppConfRes appConfRes2 = getAppConfRes(MAGIC+MAGIC, "/tmp/testApp2.log", "600");
+        List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
+        appConfResList.add(appConfRes1);
+        appConfResList.add(appConfRes2);
+        Message message = getMessageOfConfRes(appConfResList);
+        assertTrue(appnode.process(message));
+        ConfigKeeper.configMap.clear();
+        file1.delete();
+        file2.delete();
+        assertFalse(appnode.process(message));
+    }
+    
+    @Test
     public void testUnknowMessageProcess() {
         Message unknow = getUnknowMessage();
         assertFalse(appnode.process(unknow));
@@ -88,6 +97,14 @@ public class TestAppnode {
         return PBwrap.wrapRecoveryRoll(appName, Util.HOSTNAME, Util.rollTS);
     }
 
+    private AppConfRes getAppConfRes(String appName, String watchFile, String period) {
+        return PBwrap.wrapAppConfRes(appName, watchFile, period);
+    }
+    
+    private Message getMessageOfConfRes(List<AppConfRes> appConfResList) {
+        return PBwrap.wrapConfRes(appConfResList);
+    }
+    
     private Message getUnknowMessage() {
         return PBwrap.wrapReadyCollector(MAGIC, Util.HOSTNAME, 3600l, Util.HOSTNAME, 1l);
     }
@@ -106,8 +123,7 @@ public class TestAppnode {
         args[1] = confFile.getAbsolutePath();
         Appnode appnode = new Appnode(client);
         appnode.setArgs(args);
-        assertTrue(appnode.parseOptions());
-        appnode.loadLocalConfig();
+        assertTrue(appnode.loadAppConfFromLocal());
         assertTrue(ConfigKeeper.configMap.containsKey("testApp"));
         String path = ConfigKeeper.configMap.get("testApp")
                 .getString(ParamsKey.Appconf.WATCH_FILE);

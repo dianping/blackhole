@@ -1,8 +1,13 @@
 package com.dp.blackhole.common;
 
+import java.util.List;
+
 import com.dp.blackhole.common.gen.AppRegPB.AppReg;
 import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.common.gen.ConfReqPB.ConfReq;
+import com.dp.blackhole.common.gen.ConfResPB.ConfRes;
+import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
@@ -18,6 +23,12 @@ public class PBwrap {
         switch (type) {
         case HEARTBEART:
         case NOAVAILABLENODE:
+            break;
+        case CONF_REQ:
+            msg.setConfReq((ConfReq) message);
+            break;
+        case CONF_RES:
+            msg.setConfRes((ConfRes) message);
             break;
         case APP_REG:
             msg.setAppReg((AppReg) message);
@@ -151,5 +162,25 @@ public class PBwrap {
     
     public static Message wrapcollectorFailure (String app, String appHost, long failTs) {
         return wrapFailure(app, appHost, NodeType.COLLECTOR_NODE, failTs);
+    }
+    
+    public static Message wrapConfReq (String appHost) {
+        ConfReq.Builder builder = ConfReq.newBuilder();
+        builder.setAppServer(appHost);
+        return wrapMessage(MessageType.CONF_REQ, builder.build());
+    }
+    
+    public static AppConfRes wrapAppConfRes (String appName, String watchFile, String period) {
+        AppConfRes.Builder builder = AppConfRes.newBuilder();
+        builder.setAppName(appName);
+        builder.setWatchFile(watchFile);
+        builder.setPeriod(period);
+        return builder.build();
+    }
+    
+    public static Message wrapConfRes (List<AppConfRes> appConfResList) {
+        ConfRes.Builder builder = ConfRes.newBuilder();
+        builder.addAllAppConfRes(appConfResList);
+        return wrapMessage(MessageType.CONF_RES, builder.build());
     }
 }

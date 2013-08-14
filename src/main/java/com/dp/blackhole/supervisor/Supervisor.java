@@ -26,6 +26,8 @@ import com.dp.blackhole.common.gen.AppRegPB.AppReg;
 import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.Connection;
 import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
@@ -33,6 +35,8 @@ import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.conf.Context;
 
 
 public class Supervisor {
@@ -48,6 +52,8 @@ public class Supervisor {
     private ConcurrentHashMap<String, Connection> appNodes;
     private ConcurrentHashMap<Stream, ArrayList<Stage>> Streams;
     private ConcurrentHashMap<StreamId, Stream> streamIdMap;
+    private ConcurrentHashMap<String, ArrayList<String>> appNameToAppHosts;
+    private ConcurrentHashMap<String, ArrayList<String>> appHostToAppNames;
     
     private class Msg {
         Message msg;
@@ -791,6 +797,9 @@ public class Supervisor {
             case HEARTBEART:
                 from.updateHeartBeat();
                 break;
+            case CONF_REQ:
+                emitConf(msg, from);
+                break;
             case COLLECTOR_REG:
                 registerCollectorNode(from);
                 break;
@@ -873,7 +882,30 @@ public class Supervisor {
     public static void main(String[] args) throws IOException {
         Supervisor supervisor = new Supervisor();
         supervisor.init();
+        supervisor.loadConfFromZK();
         supervisor.loop();
     }
 
+    private void loadConfFromZK() {
+        // TODO Auto-generated method stub
+        ConfigKeeper configKeeper = new ConfigKeeper();
+        //load form zk and fill configMap, key is hostname
+        //configKeeper.configMap
+    }
+
+    private void emitConf(Message m, Connection from) {
+        from.setNodeType(Connection.APPNODE);
+        List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
+        // Or "List<String> appNames = appHostToAppNames.get(m.getConfReq().getAppServer());" is ok!
+        List<String> appNames = appHostToAppNames.get(from.getHost());//TODO get from zk (now in some memory structure)
+        for (String appName : appNames) {
+            Context context = ConfigKeeper.configMap.get(appName);
+            String watchFile = context.getString(ParamsKey.Appconf.WATCH_FILE);
+            String period = context.getString(ParamsKey.Appconf.ROLL_PERIOD);
+            AppConfRes appConfRes = PBwrap.wrapAppConfRes(appName, watchFile, period);
+            appConfResList.add(appConfRes);
+        }
+        Message message = PBwrap.wrapConfRes(appConfResList);
+        send(from, message);
+    }
 }

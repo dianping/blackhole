@@ -5,9 +5,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +28,8 @@ import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.common.gen.ConfResPB.ConfRes;
+import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
@@ -37,7 +39,7 @@ import com.dp.blackhole.node.Node;
 public class Appnode extends Node {
     private static final Log LOG = LogFactory.getLog(Appnode.class);
     private String[] args;
-    private File configFile = null;
+    private static String hostname;
     private ExecutorService exec;
     private long delayMillis;
     private int port;
@@ -48,7 +50,9 @@ public class Appnode extends Node {
         exec = Executors.newCachedThreadPool();
     }
 
+    //TODO if return false, some fatal error occurred.
     public boolean process(Message msg) {
+        boolean ret = true;
 	    String appName;
 	    String collectorServer;
   	    AppLog appLog = null;
@@ -63,6 +67,21 @@ public class Appnode extends Node {
             }
   	        registerApps();
   	        break;
+        case CONF_RES:
+            ConfigKeeper confKeeper = new ConfigKeeper();
+            ConfRes confRes = msg.getConfRes();
+            List<AppConfRes> appConfResList = confRes.getAppConfResList();
+            for (AppConfRes appConfRes : appConfResList) {
+                confKeeper.addRawProperty(appConfRes.getAppName() + "." 
+                        + ParamsKey.Appconf.WATCH_FILE, appConfRes.getWatchFile());
+                confKeeper.addRawProperty(appConfRes.getAppName() + "." 
+                        + ParamsKey.Appconf.ROLL_PERIOD, appConfRes.getPeriod());
+            }
+            if (!checkAllFilesExist()) {
+                return false;
+            }
+            fillUpAppLogsFromConfig();
+            break;
         case RECOVERY_ROLL:
             RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
             appName = recoveryRoll.getAppName();
@@ -71,10 +90,10 @@ public class Appnode extends Node {
                 collectorServer = recoveryRoll.getCollectorServer();
                 RollRecovery recovery = new RollRecovery(collectorServer, port, appLog, rollTs);
                 exec.execute(recovery);
-                return true;
             } else {
                 LOG.error("AppName [" + recoveryRoll.getAppName()
                         + "] from supervisor message not match with local");
+                ret = false;
             }
             break;
         case ASSIGN_COLLECTOR:
@@ -89,23 +108,24 @@ public class Appnode extends Node {
                 logReader = new LogReader(this, collectorServer, port, appLog, delayMillis);
                 appReaders.put(appLog, logReader);
                 exec.execute(logReader);
-                return true;
             } else {
                 LOG.error("AppName [" + assignCollector.getAppName()
                         + "] from supervisor message not match with local");
+                ret = false;
             }
             break;
         default:
             LOG.error("Illegal message type " + msg.getType());
+            ret = false;
         }
-  	    return false;
+  	    return ret;
     }
 
     private void register(String appName, long regTimestamp) {
         Message msg = PBwrap.wrapAppReg(appName, getHost(), regTimestamp);
         super.send(msg);
     }
-
+    
     private boolean checkAllFilesExist() {
         boolean res = true;
         for (String appName : ConfigKeeper.configMap.keySet()) {
@@ -121,17 +141,7 @@ public class Appnode extends Node {
         }
         return res;
     }
-
-    public void run() {
-        if (!checkAllFilesExist()) {
-            return;
-        }
-        fillUpAppLogsFromConfig();
-
-        //wait for receiving message from supervisor
-        super.loop();
-    }
-
+    
     public void fillUpAppLogsFromConfig() {
         for (String appName : ConfigKeeper.configMap.keySet()) {
             String path = ConfigKeeper.configMap.get(appName)
@@ -154,48 +164,12 @@ public class Appnode extends Node {
         }
     }
     
-	public void loadLionConfig() {
-        // TODO Auto-generated method stub
+    public void requireConfigFromSupersivor() {
+        Message msg = PBwrap.wrapConfReq(hostname);
+        super.send(msg);
     }
-
-    public void loadLocalConfig() {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(configFile));
-            Properties properties = new Properties();
-            properties.load(reader);
-            ConfigKeeper conf = new ConfigKeeper();
-            Enumeration<?> propertyNames = properties.propertyNames();
-            while (propertyNames.hasMoreElements()) {
-                String name = (String) propertyNames.nextElement();
-                String value = properties.getProperty(name);
-            
-                if (!conf.addRawProperty(name, value)) {
-                    LOG.warn("Configuration property ignored: " + name + " = " + value);
-                    continue;
-                }
-            }
-        } catch (IOException e) {
-                 LOG.error("Unable to load file:" + configFile
-                                     + " (I/O failure) - Exception follows.", e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ex) {
-                    LOG.warn(
-                            "Unable to close file reader for file: " + configFile, ex);
-                }
-            }
-        }
-    }
-
-    public void loadConfig() throws FileNotFoundException, IOException {
-        if (configFile != null) {
-            loadLocalConfig();
-        } else {
-            loadLionConfig();
-        }
+    
+    public void init() throws FileNotFoundException, IOException {
         Properties prop = new Properties();
         prop.load(new FileReader(new File("config.properties")));
         delayMillis = Long.parseLong(prop.getProperty("delayMillis"));
@@ -203,10 +177,10 @@ public class Appnode extends Node {
         
         String serverhost = prop.getProperty("supervisor.host");
         int serverport = Integer.parseInt(prop.getProperty("supervisor.port"));
-        init(serverhost, serverport);    
+        super.init(serverhost, serverport);
     }
 
-    public boolean parseOptions() throws ParseException {
+    public boolean loadAppConfFromLocal() throws ParseException, IOException {
         Options options = new Options();
     
         Option option = new Option("f", "conf", true, "specify a conf file");
@@ -216,21 +190,41 @@ public class Appnode extends Node {
         CommandLine commandLine = parser.parse(options, args);
     
         if (commandLine.hasOption('f')) {
-            configFile = new File(commandLine.getOptionValue('f'));
-    
+            File configFile = new File(commandLine.getOptionValue('f'));
             if (!configFile.exists()) {
                 String path = configFile.getPath();
-                try {
-                    path = configFile.getCanonicalPath();
-                } catch (IOException ex) {
-                    LOG.error("Failed to read canonical path for file: " + path, ex);
-                }
-                throw new ParseException(
-                        "The specified configuration file does not exist: " + path);
+                LOG.info("The specified configuration file does not exist: " + path);
+                return false;
             }
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new FileReader(configFile));
+                Properties properties = new Properties();
+                properties.load(reader);
+                ConfigKeeper conf = new ConfigKeeper();
+                Enumeration<?> propertyNames = properties.propertyNames();
+                while (propertyNames.hasMoreElements()) {
+                    String name = (String) propertyNames.nextElement();
+                    String value = properties.getProperty(name);
+                
+                    if (!conf.addRawProperty(name, value)) {
+                        LOG.warn("Configuration property ignored: " + name + " = " + value);
+                        continue;
+                    }
+                }
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException ex) {
+                        LOG.warn("Unable to close file reader for file: " + configFile, ex);
+                    }
+                }
+            }
+            return true;
+        } else {
+            return false;
         }
-    
-        return true;
     }
 
     public String[] getArgs() {
@@ -248,9 +242,14 @@ public class Appnode extends Node {
         register(app, applog.getCreateTime());
     }
     
-
+    /**
+     * just wait for receiving message from supervisor
+     */
+    public void start() {
+        super.loop();
+    }
+    
     public static void main(String[] args) {
-        String hostname;
         try {
             hostname = Util.getLocalHost();
         } catch (UnknownHostException e1) {
@@ -259,12 +258,12 @@ public class Appnode extends Node {
         }
         Appnode appnode = new Appnode(hostname);
         appnode.setArgs(args);
-
         try {
-            if (appnode.parseOptions()) {
-                appnode.loadConfig();
-                appnode.run();
+            appnode.init();
+            if (!appnode.loadAppConfFromLocal()) {
+                appnode.requireConfigFromSupersivor();
             }
+            appnode.start();
         } catch (ParseException e) {
             LOG.error("Oops, got an exception:", e);
         } catch (IOException e) {
