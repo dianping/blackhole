@@ -50,10 +50,10 @@ public class ConfigKeeper {
                 return false;
         }
 
-        if (!configMap.containsKey(appName)) {
-            configMap.put(appName, new Context(configKey, value));
-        } else {
+        if (configMap.containsKey(appName)) {
             configMap.get(appName).put(configKey, value);
+        } else {
+            configMap.put(appName, new Context(configKey, value));
         }
 
         return true;
