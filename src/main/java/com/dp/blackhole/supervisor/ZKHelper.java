@@ -164,7 +164,6 @@ public class ZKHelper implements Watcher{
                     if (stat.getNumChildren() > appNumber) {    //add a new appconf node
                         List<String> children = listZNodes(path);
                         loadZKData(children);
-                        
                     } else {    //delete a appconf node
                         //TODO what should we do? send a message to shutdown associated logReader thread?
                     }
