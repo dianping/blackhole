@@ -64,7 +64,7 @@ public abstract class Node {
                     iter.remove();
                     if (key.isConnectable()) {
                         SocketChannel channel = (SocketChannel) key.channel();
-                        key.interestOps(key.interestOps() | SelectionKey.OP_READ);
+                        key.interestOps(SelectionKey.OP_READ);
                         channel.finishConnect();
                         onConnected();
                     } else if (key.isWritable()) {
@@ -96,6 +96,7 @@ public abstract class Node {
                             }
                             if (num == 0) {
                                 key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+                                break;
                             }
                         }
                     } else if (key.isReadable()) {
@@ -108,7 +109,7 @@ public abstract class Node {
                             if (count < 0) {
                                 closeconnection(key);
                                 running = false;
-                                break;
+                                continue;
                             } else if (readLength.hasRemaining()) {
                                 continue;
                             } else {
@@ -121,7 +122,7 @@ public abstract class Node {
                         count = channel.read(readbuffer);
                         if (count < 0) {
                             closeconnection(key);
-                            break;
+                            continue;
                         }
                         if (readbuffer.remaining() == 0) {
                             readbuffer.flip();
