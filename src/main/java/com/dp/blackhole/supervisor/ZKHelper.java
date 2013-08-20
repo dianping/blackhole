@@ -30,10 +30,11 @@ import com.dp.blackhole.conf.Context;
 public class ZKHelper implements Watcher{
     private static final Log LOG = LogFactory.getLog(ZKHelper.class);
     private ZooKeeper zkClient;
+    private Supervisor supervisor;
     private String connectString;
     private int sessionTimeout;
     private int appNumber;
-    private Set<String> appSet;
+    Set<String> appSet;
     ConcurrentHashMap<String, ArrayList<String>> appHostToAppNames;
     private ZKHelper() {
     }
@@ -46,10 +47,12 @@ public class ZKHelper implements Watcher{
         return SingletonHolder.instance;
     }
 
-    public void createConnection(String connectString, int sessionTimeout) throws IOException {
+    public void createConnection(Supervisor supervisor, String connectString, int sessionTimeout) throws IOException {
         zkClient = new ZooKeeper(connectString, sessionTimeout, this);
+        this.supervisor = supervisor;
         this.connectString = connectString;
         this.sessionTimeout = sessionTimeout;
+        this.appNumber = 0;
     }
     public void reConnect() throws IOException {
         if (zkClient != null && zkClient.getState().isAlive()) {
@@ -115,8 +118,8 @@ public class ZKHelper implements Watcher{
         return (zkClient.exists(path, watcher) == null) ? false : true;
     }
     
-    public void leftChildrenWatcher(String path, Watcher watcher, Stat stat) throws KeeperException, InterruptedException {
-        zkClient.getChildren(path, watcher, stat);
+    public void leftChildrenWatcher(String path, Stat stat) throws KeeperException, InterruptedException {
+        zkClient.getChildren(path, true, stat);
     }
     
     public boolean notExist(String path) {
@@ -132,7 +135,6 @@ public class ZKHelper implements Watcher{
     
     @Override
     public void process(WatchedEvent event) {
-        //TODO
         String path = event.getPath();
         LOG.info("watcher triggered by " + path + ", event type:" + event.getType().name());
         if (event.getType() == Event.EventType.None) {
@@ -158,14 +160,16 @@ public class ZKHelper implements Watcher{
             }
         } else if (event.getType() == Event.EventType.NodeChildrenChanged) {
             try {
-                if (path.substring(0, path.lastIndexOf('/')).equals(ParamsKey.ZNode.CONFS)) {//is appconf
+                if (path.equals(ParamsKey.ZNode.CONFS)) {//is appconf
                     Stat stat = new Stat();
-                    leftChildrenWatcher(path, this, stat);  //re-left a watcher on appconf node
+                    leftChildrenWatcher(path, stat);  //re-left a watcher on appconf node
                     if (stat.getNumChildren() > appNumber) {    //add a new appconf node
                         List<String> children = listZNodes(path);
                         loadZKData(children);
+                        supervisor.emitConfToAll();
                     } else {    //delete a appconf node
                         //TODO what should we do? send a message to shutdown associated logReader thread?
+                        appNumber--;
                     }
                 }
             } catch (KeeperException e) {
@@ -206,7 +210,7 @@ public class ZKHelper implements Watcher{
              * throw an IOException we define here.
              * If left watcher on confs node failed, 
              * the supervisor will catch exception in initializeZK(). */
-            leftChildrenWatcher(ParamsKey.ZNode.CONFS, this, null);
+            leftChildrenWatcher(ParamsKey.ZNode.CONFS, null);
         } catch (Exception e) {
             throw new IOException("There is no confs node \"/blackhole/confs\" in zookeeper tree");
         }
@@ -216,10 +220,11 @@ public class ZKHelper implements Watcher{
         }
         appNumber = children.size();
         appSet = new HashSet<String>();
+        appHostToAppNames = new ConcurrentHashMap<String, ArrayList<String>>();
         loadZKData(children);
     }
 
-    public void loadZKData(List<String> children) throws KeeperException,
+    private void loadZKData(List<String> children) throws KeeperException,
             InterruptedException {
         for (String appName : children) {
             if (appSet.contains(appName)) {
@@ -237,6 +242,9 @@ public class ZKHelper implements Watcher{
                 if (key.equals(ParamsKey.Appconf.APP_HOSTS)) {
                     String[] hosts = value.split(";");
                     for (int i = 0; i < hosts.length; i++) {
+                        if (hosts[i].trim().length() == 0) {
+                            continue;
+                        }
                         if (appHostToAppNames.get(hosts[i].trim()) == null) {
                             ArrayList<String> appNamesInOneHost = new ArrayList<String>();
                             appNamesInOneHost.add(appName);

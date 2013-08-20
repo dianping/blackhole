@@ -867,7 +867,7 @@ public class Supervisor {
         String connectString = prop.getProperty(ParamsKey.ZKServer.ZK_HOST_LIST);
         int sessionTimeout = Integer.parseInt(prop.getProperty(ParamsKey.ZKServer.ZK_CONNECT_TIMEOUT));
         zkHelper = ZKHelper.getInstance();
-        zkHelper.createConnection(connectString, sessionTimeout);
+        zkHelper.createConnection(this, connectString, sessionTimeout);
         if (zkHelper.notExist(ParamsKey.ZNode.ROOT))
             throw new IOException("There is no root node \"/blackhole\" in zookeeper tree");
         if (zkHelper.notExist(ParamsKey.ZNode.STREAMS))
