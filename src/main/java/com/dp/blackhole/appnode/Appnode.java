@@ -81,10 +81,10 @@ public class Appnode extends Node {
             AssignCollector assignCollector = msg.getAssignCollector();
             appName = assignCollector.getAppName();
             if ((appLog = appLogs.get(appName)) != null) {
-//                if ((logReader = appReaders.get(appLog)) != null) {
-//                    logReader.stop();   //stop the old read thread (old stream).
-//                    appReaders.remove(logReader);
-//                }
+                if ((logReader = appReaders.get(appLog)) != null) {
+                    logReader.stop();   //stop the old read thread (old stream).
+                    appReaders.remove(logReader);
+                }
                 collectorServer = assignCollector.getCollectorServer();
                 logReader = new LogReader(this, collectorServer, port, appLog, delayMillis);
                 appReaders.put(appLog, logReader);
@@ -143,6 +143,7 @@ public class Appnode extends Node {
 
     @Override
     protected void onConnected() {
+        clearMessageQueue();
         registerApps();
     }
 
