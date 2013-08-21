@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.zookeeper.KeeperException;
 import org.junit.After;
@@ -15,6 +16,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.dp.blackhole.common.Connection;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
@@ -28,11 +30,12 @@ public class TestZKHelper {
     private static ZKHelper helper = ZKHelper.getInstance();
     private static Stream stream = new Stream();
     private static Stage stage = new Stage();
-    private static final String STREAM_DATA_EXPECTEDexpected = "app=testapp" + "\n" +
+    private static final String STREAM_DATA_EXPECTED = "app=testapp" + "\n" +
             "apphost=testapphost" + "\n" + 
             "period=3600" + "\n" +
             "startTs=1370100000" + "\n" + 
-            "lastSuccessTs=1370200000";
+            "lastSuccessTs=1370200000" + "\n" +
+            "active=true";
     private static final String STAGE_DATA_EXPECTED = "app=testapp" + "\n" +
             "apphost=testapphost" + "\n" + 
             "collectorhost=testcollectorhost" + "\n" +
@@ -46,6 +49,7 @@ public class TestZKHelper {
         stream.period = 3600l;
         stream.startTs = 1370100000;
         stream.setlastSuccessTs(1370200000l);
+        stream.active = new AtomicBoolean(true);
         
         stage.app = "testapp";
         stage.apphost = "testapphost";
@@ -58,19 +62,17 @@ public class TestZKHelper {
     
     static class MockSupervisor extends Supervisor{
         @Override
-        public void emitConfToAll() {
+        public void emitConf(Connection from) {
             List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
-            for (String host : helper.appHostToAppNames.keySet()) {
-                List<String> appNames = helper.appHostToAppNames.get(host);
-                for (String appName : appNames) {
-                    Context context = ConfigKeeper.configMap.get(appName);
-                    String watchFile = context.getString(ParamsKey.Appconf.WATCH_FILE);
-                    String period = context.getString(ParamsKey.Appconf.ROLL_PERIOD);
-                    AppConfRes appConfRes = PBwrap.wrapAppConfRes(appName, watchFile, period);
-                    appConfResList.add(appConfRes);
-                }
-                Message message = PBwrap.wrapConfRes(appConfResList);
+            List<String> appNames = helper.appHostToAppNames.get(from.getHost());
+            for (String appName : appNames) {
+                Context context = ConfigKeeper.configMap.get(appName);
+                String watchFile = context.getString(ParamsKey.Appconf.WATCH_FILE);
+                String period = context.getString(ParamsKey.Appconf.ROLL_PERIOD);
+                AppConfRes appConfRes = PBwrap.wrapAppConfRes(appName, watchFile, period);
+                appConfResList.add(appConfRes);
             }
+            Message message = PBwrap.wrapConfRes(appConfResList);
             System.out.println(appConfResList);
         }
     }
@@ -81,12 +83,13 @@ public class TestZKHelper {
         helper.rawAddZNode(ParamsKey.ZNode.ROOT, "");
         helper.rawAddZNode(ParamsKey.ZNode.STREAMS, "");
         helper.rawAddZNode(ParamsKey.ZNode.CONFS, "");
-//        helper.addStreamIDNode(stream);
+        assertFalse(helper.notExist(ParamsKey.ZNode.ROOT));
+        assertFalse(helper.notExist(ParamsKey.ZNode.STREAMS));
+        assertFalse(helper.notExist(ParamsKey.ZNode.CONFS));
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-//        helper.delStreamIDNode(stream);
         helper.delZNode(ParamsKey.ZNode.CONFS);
         helper.delZNode(ParamsKey.ZNode.STREAMS);
         helper.delZNode(ParamsKey.ZNode.ROOT);
@@ -102,7 +105,7 @@ public class TestZKHelper {
     }
 
     @Test
-    public void testGetValueByKey() {
+    public void testGetValue() {
         String key = "app=testapp";
         assertEquals("testapp", helper.getValue(key));
         key = "app=testapp";

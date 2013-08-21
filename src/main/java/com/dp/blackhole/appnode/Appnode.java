@@ -81,6 +81,7 @@ public class Appnode extends Node {
                 return false;
             }
             fillUpAppLogsFromConfig();
+            registerApps();
             break;
         case RECOVERY_ROLL:
             RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
@@ -152,8 +153,10 @@ public class Appnode extends Node {
     }
 
     @Override
-    protected void onConnected() {
-        registerApps();
+    protected void onConnected() throws IOException {
+        if (!loadAppConfFromLocal()) {
+            requireConfigFromSupersivor();
+        }
     }
 
     private void registerApps() {
@@ -180,14 +183,19 @@ public class Appnode extends Node {
         super.init(serverhost, serverport);
     }
 
-    public boolean loadAppConfFromLocal() throws ParseException, IOException {
+    public boolean loadAppConfFromLocal() throws IOException {
         Options options = new Options();
     
         Option option = new Option("f", "conf", true, "specify a conf file");
         options.addOption(option);
     
         CommandLineParser parser = new GnuParser();
-        CommandLine commandLine = parser.parse(options, args);
+        CommandLine commandLine;
+        try {
+            commandLine = parser.parse(options, args);
+        } catch (ParseException e) {
+            throw new IOException("This is a ParseException wraped with IOExecption", e);
+        }
     
         if (commandLine.hasOption('f')) {
             File configFile = new File(commandLine.getOptionValue('f'));
@@ -260,12 +268,7 @@ public class Appnode extends Node {
         appnode.setArgs(args);
         try {
             appnode.init();
-            if (!appnode.loadAppConfFromLocal()) {
-                appnode.requireConfigFromSupersivor();
-            }
             appnode.start();
-        } catch (ParseException e) {
-            LOG.error("Oops, got an exception:", e);
         } catch (IOException e) {
             LOG.error("Can not load file \"config.properties\"", e);
         } catch (Exception e) {

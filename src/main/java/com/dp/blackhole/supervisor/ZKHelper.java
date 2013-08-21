@@ -75,28 +75,22 @@ public class ZKHelper implements Watcher{
             throws KeeperException, InterruptedException {
         zkClient.create(path, data.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, createMode);
     }
-    
-    private void addSequentialZNode(String path, String data) 
-            throws KeeperException, InterruptedException {
-        zkClient.create(path, data.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE,
-            CreateMode.PERSISTENT_SEQUENTIAL);
-    }
 
     public void delZNode(String path) 
             throws InterruptedException, KeeperException{
          zkClient.delete(path, -1);
     }
 
-    public List listZNodes(String path) 
+    public List<String> listZNodes(String path) 
             throws KeeperException, InterruptedException {
-        List children = null;
+        List<String> children = null;
         children = zkClient.getChildren(path, false);
         return children;
     }
  
     private void setZNodeData(String path, String data) 
             throws KeeperException, InterruptedException {
-        Stat stat = zkClient.setData(path, data.getBytes(), -1);
+        zkClient.setData(path, data.getBytes(), -1);
     }
     
     public String getZNodeData(String path) 
@@ -114,7 +108,7 @@ public class ZKHelper implements Watcher{
      * @throws InterruptedException 
      * @throws KeeperException 
      */
-    public boolean leftWatcher(String path, Watcher watcher) throws KeeperException, InterruptedException {
+    public boolean leftExistsWatcher(String path, Watcher watcher) throws KeeperException, InterruptedException {
         return (zkClient.exists(path, watcher) == null) ? false : true;
     }
     
@@ -122,9 +116,13 @@ public class ZKHelper implements Watcher{
         zkClient.getChildren(path, true, stat);
     }
     
+    public byte[] leftDataWatcher(String path, Stat stat) throws KeeperException, InterruptedException {
+        return zkClient.getData(path, true, stat);
+    }
+    
     public boolean notExist(String path) {
         try {
-            return !leftWatcher(path, null);
+            return !leftExistsWatcher(path, null);
         } catch (KeeperException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -132,7 +130,7 @@ public class ZKHelper implements Watcher{
         }
         return true;
     }
-    
+
     @Override
     public void process(WatchedEvent event) {
         String path = event.getPath();
@@ -165,8 +163,17 @@ public class ZKHelper implements Watcher{
                     leftChildrenWatcher(path, stat);  //re-left a watcher on appconf node
                     if (stat.getNumChildren() > appNumber) {    //add a new appconf node
                         List<String> children = listZNodes(path);
-                        loadZKData(children);
-                        supervisor.emitConfToAll();
+                        for (String appName : children) {
+                            if (appSet.contains(appName)) {
+                                continue;
+                            }
+                            appSet.add(appName);
+                            String appConfPath = ParamsKey.ZNode.CONFS + "/" + appName;
+                            /* Add a new appconf node, just update memory data structure.
+                             * The associated appnodes will send a confreq message 
+                             * to fetch it when they start. */
+                            fillConfMap(appName, appConfPath);
+                        }
                     } else {    //delete a appconf node
                         //TODO what should we do? send a message to shutdown associated logReader thread?
                         appNumber--;
@@ -182,6 +189,25 @@ public class ZKHelper implements Watcher{
         } else if (event.getType() == Event.EventType.NodeDeleted) {
             //we don't left a watcher on any appconf node, so their change will not get here.
             LOG.warn("Watch out! Detect a NodeDelete event of " + path);
+        } else if (event.getType() == Event.EventType.NodeDataChanged) {
+            try {
+                Stat stat = new Stat();
+                leftDataWatcher(path, stat);  //re-left a watcher on appconf node
+                String appName = path.substring(path.lastIndexOf('/') + 1);
+                /* First version, we just update memory data struture, and
+                 * send an kill message to associated appnodes, then it will restart
+                 * to re-fetch it. */
+                fillConfMap(appName, path);
+                String targetAppHosts = ConfigKeeper.configMap.get(appName)
+                        .getString(ParamsKey.Appconf.APP_HOSTS);
+                supervisor.stopAppnodes(targetAppHosts);
+            } catch (KeeperException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         } else {
             // Something has changed on the node, let's find out
             LOG.warn("We not handle this event, please check!");
@@ -203,6 +229,8 @@ public class ZKHelper implements Watcher{
         return content.substring(content.indexOf('=') + 1);
     }
     
+    /*for appconf*/
+    
     public void loadAllConfs() throws KeeperException, InterruptedException, IOException {
         List<String> children;
         try {
@@ -221,45 +249,46 @@ public class ZKHelper implements Watcher{
         appNumber = children.size();
         appSet = new HashSet<String>();
         appHostToAppNames = new ConcurrentHashMap<String, ArrayList<String>>();
-        loadZKData(children);
-    }
-
-    private void loadZKData(List<String> children) throws KeeperException,
-            InterruptedException {
         for (String appName : children) {
             if (appSet.contains(appName)) {
                 continue;
             }
             appSet.add(appName);
             String appConfPath = ParamsKey.ZNode.CONFS + "/" + appName;
-            String[] confLines = getZNodeData(appConfPath).split("\n");
-            for (String confLine : confLines) {
-                if (confLine.length() == 0) {
-                    continue;   //deal with empty line
-                }
-                String key = getKey(confLine).trim();
-                String value = getValue(confLine).trim();
-                if (key.equals(ParamsKey.Appconf.APP_HOSTS)) {
-                    String[] hosts = value.split(";");
-                    for (int i = 0; i < hosts.length; i++) {
-                        if (hosts[i].trim().length() == 0) {
-                            continue;
-                        }
-                        if (appHostToAppNames.get(hosts[i].trim()) == null) {
-                            ArrayList<String> appNamesInOneHost = new ArrayList<String>();
-                            appNamesInOneHost.add(appName);
-                            appHostToAppNames.put(hosts[i].trim(), appNamesInOneHost);
-                        } else {
-                            appHostToAppNames.get(hosts[i].trim()).add(appName);
-                        }
+            fillConfMap(appName, appConfPath);
+        }
+    }
+
+    public void fillConfMap(String appName, String appConfPath)
+            throws KeeperException, InterruptedException {
+        String[] confLines = getZNodeData(appConfPath).split("\n");
+        for (String confLine : confLines) {
+            if (confLine.length() == 0) {
+                continue;   //deal with empty line
+            }
+            String key = getKey(confLine).trim();
+            String value = getValue(confLine).trim();
+            if (key.equals(ParamsKey.Appconf.APP_HOSTS)) {
+                String[] hosts = value.split(";");
+                for (int i = 0; i < hosts.length; i++) {
+                    if (hosts[i].trim().length() == 0) {
+                        continue;
+                    }
+                    //TODO how to update old host2apps
+                    if (appHostToAppNames.get(hosts[i].trim()) == null) {
+                        ArrayList<String> appNamesInOneHost = new ArrayList<String>();
+                        appNamesInOneHost.add(appName);
+                        appHostToAppNames.put(hosts[i].trim(), appNamesInOneHost);
+                    } else {
+                        appHostToAppNames.get(hosts[i].trim()).add(appName);
                     }
                 }
-                LOG.info("appName:" + appName + " K:" + key + " V:" + value);
-                if (ConfigKeeper.configMap.containsKey(appName)) {
-                    ConfigKeeper.configMap.get(appName).put(key, value);
-                } else {
-                    ConfigKeeper.configMap.put(appName, new Context(key, value));
-                }
+            }
+            LOG.info("appName:" + appName + " K:" + key + " V:" + value);
+            if (ConfigKeeper.configMap.containsKey(appName)) {
+                ConfigKeeper.configMap.get(appName).put(key, value);
+            } else {
+                ConfigKeeper.configMap.put(appName, new Context(key, value));
             }
         }
     }

@@ -2,7 +2,6 @@ package com.dp.blackhole.node;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -139,7 +138,7 @@ public abstract class Node {
         }
     }
 
-    protected void onConnected() {        
+    protected void onConnected() throws IOException {        
     }
 
     private void closeconnection(SelectionKey key) {

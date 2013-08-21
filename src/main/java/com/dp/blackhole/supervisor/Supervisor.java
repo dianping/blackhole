@@ -906,7 +906,7 @@ public class Supervisor {
         supervisor.loop();
     }
 
-    private void emitConf(Connection from) {
+    public void emitConf(Connection from) {
         List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
         List<String> appNames = zkHelper.appHostToAppNames.get(from.getHost());
         for (String appName : appNames) {
@@ -917,22 +917,11 @@ public class Supervisor {
             appConfResList.add(appConfRes);
         }
         Message message = PBwrap.wrapConfRes(appConfResList);
-        send(from, message);
+        send(from, message);  
     }
-    
-    public void emitConfToAll() {
-        List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
-        for (String host : zkHelper.appHostToAppNames.keySet()) {
-            List<String> appNames = zkHelper.appHostToAppNames.get(host);
-            for (String appName : appNames) {
-                Context context = ConfigKeeper.configMap.get(appName);
-                String watchFile = context.getString(ParamsKey.Appconf.WATCH_FILE);
-                String period = context.getString(ParamsKey.Appconf.ROLL_PERIOD);
-                AppConfRes appConfRes = PBwrap.wrapAppConfRes(appName, watchFile, period);
-                appConfResList.add(appConfRes);
-            }
-            Message message = PBwrap.wrapConfRes(appConfResList);
-            send(appNodes.get(host), message);
-        }
+
+    public void stopAppnodes(String targetAppHosts) {
+        // TODO Auto-generated method stub
+        
     }
 }
