@@ -1,5 +1,8 @@
 package com.dp.blackhole.supervisor;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -13,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,12 +24,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.zookeeper.KeeperException;
 
 
 import com.dp.blackhole.common.gen.AppRegPB.AppReg;
 import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.Connection;
 import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
@@ -33,6 +40,8 @@ import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.conf.Context;
 
 
 public class Supervisor {
@@ -48,6 +57,7 @@ public class Supervisor {
     private ConcurrentHashMap<String, Connection> appNodes;
     private ConcurrentHashMap<Stream, ArrayList<Stage>> Streams;
     private ConcurrentHashMap<StreamId, Stream> streamIdMap;
+    private ZKHelper zkHelper;
     
     private class Msg {
         Message msg;
@@ -791,6 +801,9 @@ public class Supervisor {
             case HEARTBEART:
                 from.updateHeartBeat();
                 break;
+            case CONF_REQ:
+                emitConf(from);
+                break;
             case COLLECTOR_REG:
                 registerCollectorNode(from);
                 break;
@@ -846,8 +859,25 @@ public class Supervisor {
             }
         }
     }
-       
-    private void init() throws IOException, ClosedChannelException {
+    
+    private void initializeZK() throws FileNotFoundException, IOException, 
+            KeeperException, InterruptedException {
+        Properties prop = new Properties();
+        prop.load(new FileReader(new File("config.properties")));
+        String connectString = prop.getProperty(ParamsKey.ZKServer.ZK_HOST_LIST);
+        int sessionTimeout = Integer.parseInt(prop.getProperty(ParamsKey.ZKServer.ZK_CONNECT_TIMEOUT));
+        zkHelper = ZKHelper.getInstance();
+        zkHelper.createConnection(this, connectString, sessionTimeout);
+        if (zkHelper.notExist(ParamsKey.ZNode.ROOT))
+            throw new IOException("There is no root node \"/blackhole\" in zookeeper tree");
+        if (zkHelper.notExist(ParamsKey.ZNode.STREAMS))
+            throw new IOException("There is no stream node \"/blackhole/steams\" in zookeeper tree");
+        zkHelper.loadAllConfs();
+    }
+    
+    private void init() throws IOException, ClosedChannelException, 
+            KeeperException, InterruptedException {
+        initializeZK();
         ServerSocketChannel ssc = ServerSocketChannel.open();
         ssc.configureBlocking(false);
         ServerSocket ss = ssc.socket();
@@ -870,10 +900,28 @@ public class Supervisor {
      * @param args
      * @throws IOException 
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         Supervisor supervisor = new Supervisor();
         supervisor.init();
         supervisor.loop();
     }
 
+    public void emitConf(Connection from) {
+        List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
+        List<String> appNames = zkHelper.appHostToAppNames.get(from.getHost());
+        for (String appName : appNames) {
+            Context context = ConfigKeeper.configMap.get(appName);
+            String watchFile = context.getString(ParamsKey.Appconf.WATCH_FILE);
+            String period = context.getString(ParamsKey.Appconf.ROLL_PERIOD);
+            AppConfRes appConfRes = PBwrap.wrapAppConfRes(appName, watchFile, period);
+            appConfResList.add(appConfRes);
+        }
+        Message message = PBwrap.wrapConfRes(appConfResList);
+        send(from, message);  
+    }
+
+    public void stopAppnodes(String targetAppHosts) {
+        // TODO Auto-generated method stub
+        
+    }
 }
