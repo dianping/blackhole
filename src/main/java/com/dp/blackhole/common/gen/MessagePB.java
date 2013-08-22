@@ -118,6 +118,20 @@ public final class MessagePB {
      * <code>optional .blackhole.Failure failure = 8;</code>
      */
     com.dp.blackhole.common.gen.FailurePB.FailureOrBuilder getFailureOrBuilder();
+
+    // optional .blackhole.NoAvailableNode noAvailableNode = 9;
+    /**
+     * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+     */
+    boolean hasNoAvailableNode();
+    /**
+     * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+     */
+    com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode getNoAvailableNode();
+    /**
+     * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+     */
+    com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNodeOrBuilder getNoAvailableNodeOrBuilder();
   }
   /**
    * Protobuf type {@code blackhole.Message}
@@ -270,6 +284,19 @@ public final class MessagePB {
                 failure_ = subBuilder.buildPartial();
               }
               bitField0_ |= 0x00000080;
+              break;
+            }
+            case 74: {
+              com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000100) == 0x00000100)) {
+                subBuilder = noAvailableNode_.toBuilder();
+              }
+              noAvailableNode_ = input.readMessage(com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(noAvailableNode_);
+                noAvailableNode_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000100;
               break;
             }
           }
@@ -672,6 +699,28 @@ public final class MessagePB {
       return failure_;
     }
 
+    // optional .blackhole.NoAvailableNode noAvailableNode = 9;
+    public static final int NOAVAILABLENODE_FIELD_NUMBER = 9;
+    private com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode noAvailableNode_;
+    /**
+     * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+     */
+    public boolean hasNoAvailableNode() {
+      return ((bitField0_ & 0x00000100) == 0x00000100);
+    }
+    /**
+     * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+     */
+    public com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode getNoAvailableNode() {
+      return noAvailableNode_;
+    }
+    /**
+     * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+     */
+    public com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNodeOrBuilder getNoAvailableNodeOrBuilder() {
+      return noAvailableNode_;
+    }
+
     private void initFields() {
       type_ = com.dp.blackhole.common.gen.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.common.gen.AppRegPB.AppReg.getDefaultInstance();
@@ -681,6 +730,7 @@ public final class MessagePB {
       readyCollector_ = com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector.getDefaultInstance();
       rollID_ = com.dp.blackhole.common.gen.RollIDPB.RollID.getDefaultInstance();
       failure_ = com.dp.blackhole.common.gen.FailurePB.Failure.getDefaultInstance();
+      noAvailableNode_ = com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -733,6 +783,12 @@ public final class MessagePB {
           return false;
         }
       }
+      if (hasNoAvailableNode()) {
+        if (!getNoAvailableNode().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -763,6 +819,9 @@ public final class MessagePB {
       }
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
         output.writeMessage(8, failure_);
+      }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        output.writeMessage(9, noAvailableNode_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -804,6 +863,10 @@ public final class MessagePB {
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(8, failure_);
+      }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(9, noAvailableNode_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -920,6 +983,7 @@ public final class MessagePB {
           getReadyCollectorFieldBuilder();
           getRollIDFieldBuilder();
           getFailureFieldBuilder();
+          getNoAvailableNodeFieldBuilder();
         }
       }
       private static Builder create() {
@@ -972,6 +1036,12 @@ public final class MessagePB {
           failureBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000080);
+        if (noAvailableNodeBuilder_ == null) {
+          noAvailableNode_ = com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.getDefaultInstance();
+        } else {
+          noAvailableNodeBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000100);
         return this;
       }
 
@@ -1060,6 +1130,14 @@ public final class MessagePB {
         } else {
           result.failure_ = failureBuilder_.build();
         }
+        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
+          to_bitField0_ |= 0x00000100;
+        }
+        if (noAvailableNodeBuilder_ == null) {
+          result.noAvailableNode_ = noAvailableNode_;
+        } else {
+          result.noAvailableNode_ = noAvailableNodeBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1099,6 +1177,9 @@ public final class MessagePB {
         }
         if (other.hasFailure()) {
           mergeFailure(other.getFailure());
+        }
+        if (other.hasNoAvailableNode()) {
+          mergeNoAvailableNode(other.getNoAvailableNode());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1147,6 +1228,12 @@ public final class MessagePB {
         }
         if (hasFailure()) {
           if (!getFailure().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasNoAvailableNode()) {
+          if (!getNoAvailableNode().isInitialized()) {
             
             return false;
           }
@@ -2028,6 +2115,123 @@ public final class MessagePB {
         return failureBuilder_;
       }
 
+      // optional .blackhole.NoAvailableNode noAvailableNode = 9;
+      private com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode noAvailableNode_ = com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode, com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.Builder, com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNodeOrBuilder> noAvailableNodeBuilder_;
+      /**
+       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+       */
+      public boolean hasNoAvailableNode() {
+        return ((bitField0_ & 0x00000100) == 0x00000100);
+      }
+      /**
+       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+       */
+      public com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode getNoAvailableNode() {
+        if (noAvailableNodeBuilder_ == null) {
+          return noAvailableNode_;
+        } else {
+          return noAvailableNodeBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+       */
+      public Builder setNoAvailableNode(com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode value) {
+        if (noAvailableNodeBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          noAvailableNode_ = value;
+          onChanged();
+        } else {
+          noAvailableNodeBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000100;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+       */
+      public Builder setNoAvailableNode(
+          com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.Builder builderForValue) {
+        if (noAvailableNodeBuilder_ == null) {
+          noAvailableNode_ = builderForValue.build();
+          onChanged();
+        } else {
+          noAvailableNodeBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000100;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+       */
+      public Builder mergeNoAvailableNode(com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode value) {
+        if (noAvailableNodeBuilder_ == null) {
+          if (((bitField0_ & 0x00000100) == 0x00000100) &&
+              noAvailableNode_ != com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.getDefaultInstance()) {
+            noAvailableNode_ =
+              com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.newBuilder(noAvailableNode_).mergeFrom(value).buildPartial();
+          } else {
+            noAvailableNode_ = value;
+          }
+          onChanged();
+        } else {
+          noAvailableNodeBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000100;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+       */
+      public Builder clearNoAvailableNode() {
+        if (noAvailableNodeBuilder_ == null) {
+          noAvailableNode_ = com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.getDefaultInstance();
+          onChanged();
+        } else {
+          noAvailableNodeBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000100);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+       */
+      public com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.Builder getNoAvailableNodeBuilder() {
+        bitField0_ |= 0x00000100;
+        onChanged();
+        return getNoAvailableNodeFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+       */
+      public com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNodeOrBuilder getNoAvailableNodeOrBuilder() {
+        if (noAvailableNodeBuilder_ != null) {
+          return noAvailableNodeBuilder_.getMessageOrBuilder();
+        } else {
+          return noAvailableNode_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode, com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.Builder, com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNodeOrBuilder> 
+          getNoAvailableNodeFieldBuilder() {
+        if (noAvailableNodeBuilder_ == null) {
+          noAvailableNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode, com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.Builder, com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNodeOrBuilder>(
+                  noAvailableNode_,
+                  getParentForChildren(),
+                  isClean());
+          noAvailableNode_ = null;
+        }
+        return noAvailableNodeBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
 
@@ -2056,24 +2260,26 @@ public final class MessagePB {
       "\n\rMessage.proto\022\tblackhole\032\014AppReg.proto" +
       "\032\025AssignCollector.proto\032\rAppRoll.proto\032\022" +
       "RecoveryRoll.proto\032\024ReadyCollector.proto" +
-      "\032\014RollID.proto\032\rFailure.proto\"\353\004\n\007Messag" +
-      "e\022,\n\004type\030\001 \002(\0162\036.blackhole.Message.Mess" +
-      "ageType\022!\n\006appReg\030\002 \001(\0132\021.blackhole.AppR" +
-      "eg\0223\n\017assignCollector\030\003 \001(\0132\032.blackhole." +
-      "AssignCollector\022#\n\007appRoll\030\004 \001(\0132\022.black" +
-      "hole.AppRoll\022-\n\014recoveryRoll\030\005 \001(\0132\027.bla" +
-      "ckhole.RecoveryRoll\0221\n\016readyCollector\030\006 ",
-      "\001(\0132\031.blackhole.ReadyCollector\022!\n\006rollID" +
-      "\030\007 \001(\0132\021.blackhole.RollID\022#\n\007failure\030\010 \001" +
-      "(\0132\022.blackhole.Failure\"\212\002\n\013MessageType\022\016" +
-      "\n\nHEARTBEART\020\001\022\013\n\007APP_REG\020\002\022\021\n\rCOLLECTOR" +
-      "_REG\020\003\022\024\n\020ASSIGN_COLLECTOR\020\004\022\023\n\017READY_CO" +
-      "LLECTOR\020\005\022\014\n\010APP_ROLL\020\006\022\017\n\013UPLOAD_ROLL\020\007" +
-      "\022\022\n\016UPLOAD_SUCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n" +
-      "\rRECOVERY_ROLL\020\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021" +
-      "\n\rRECOVERY_FAIL\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAI" +
-      "LABLENODE\020\016B(\n\033com.dp.blackhole.common.g",
-      "enB\tMessagePB"
+      "\032\014RollID.proto\032\rFailure.proto\032\025NoAvailab" +
+      "leNode.proto\"\240\005\n\007Message\022,\n\004type\030\001 \002(\0162\036" +
+      ".blackhole.Message.MessageType\022!\n\006appReg" +
+      "\030\002 \001(\0132\021.blackhole.AppReg\0223\n\017assignColle" +
+      "ctor\030\003 \001(\0132\032.blackhole.AssignCollector\022#" +
+      "\n\007appRoll\030\004 \001(\0132\022.blackhole.AppRoll\022-\n\014r" +
+      "ecoveryRoll\030\005 \001(\0132\027.blackhole.RecoveryRo",
+      "ll\0221\n\016readyCollector\030\006 \001(\0132\031.blackhole.R" +
+      "eadyCollector\022!\n\006rollID\030\007 \001(\0132\021.blackhol" +
+      "e.RollID\022#\n\007failure\030\010 \001(\0132\022.blackhole.Fa" +
+      "ilure\0223\n\017noAvailableNode\030\t \001(\0132\032.blackho" +
+      "le.NoAvailableNode\"\212\002\n\013MessageType\022\016\n\nHE" +
+      "ARTBEART\020\001\022\013\n\007APP_REG\020\002\022\021\n\rCOLLECTOR_REG" +
+      "\020\003\022\024\n\020ASSIGN_COLLECTOR\020\004\022\023\n\017READY_COLLEC" +
+      "TOR\020\005\022\014\n\010APP_ROLL\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016" +
+      "UPLOAD_SUCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rREC" +
+      "OVERY_ROLL\020\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRE",
+      "COVERY_FAIL\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAILABL" +
+      "ENODE\020\016B(\n\033com.dp.blackhole.common.genB\t" +
+      "MessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2085,7 +2291,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "ReadyCollector", "RollID", "Failure", });
+              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "ReadyCollector", "RollID", "Failure", "NoAvailableNode", });
           return null;
         }
       };
@@ -2099,6 +2305,7 @@ public final class MessagePB {
           com.dp.blackhole.common.gen.ReadyCollectorPB.getDescriptor(),
           com.dp.blackhole.common.gen.RollIDPB.getDescriptor(),
           com.dp.blackhole.common.gen.FailurePB.getDescriptor(),
+          com.dp.blackhole.common.gen.NoAvailableNodePB.getDescriptor(),
         }, assigner);
   }
 

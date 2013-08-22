@@ -61,7 +61,9 @@ public class Appnode extends Node {
             } catch (InterruptedException e) {
                 LOG.info("thead interrupted");
             }
-  	        registerApps();
+  	        String app = msg.getNoAvailableNode().getAppName();
+  	        AppLog applog = appLogs.get(app); 
+  	        register(app, applog.getCreateTime());
   	        break;
         case RECOVERY_ROLL:
             RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
