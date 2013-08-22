@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
@@ -79,8 +77,6 @@ public class Collectornode extends Node {
                         pool.execute(recovery);
                     }
                 } catch (IOException e) {
-                    running = false;
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -107,6 +103,12 @@ public class Collectornode extends Node {
         ident.ts = rollID.getRollTs();
         
         File roll = fileRolls.get(ident);
+        
+        if (roll == null) {
+            LOG.error("can not find roll by rollident " + ident);
+            uploadResult(ident, false);
+            return false;
+        }
         
         HDFSUpload upload = new HDFSUpload(this, fs, roll, ident);
         pool.execute(upload);
@@ -147,20 +149,23 @@ public class Collectornode extends Node {
         port = Integer.parseInt(prop.getProperty("collectornode.port"));
         hdfsbasedir = prop.getProperty("hdfs.basedir");
         suffix = prop.getProperty("hdfs.file.suffix");
-        String keytab = prop.getProperty("blackhole.keytab");
-        String principal = prop.getProperty("blackhole.principal");
+        boolean enableSecurity = Boolean.parseBoolean(prop.getProperty("hdfs.security.enable", "true"));
         
         String serverhost = prop.getProperty("supervisor.host");
         int serverport = Integer.parseInt(prop.getProperty("supervisor.port"));
               
-        if (basedir == null || hdfsbasedir == null || suffix == null) {
+        if (basedir == null || hdfsbasedir == null || suffix == null || serverhost == null) {
             throw new IOException("config in config.properties missed");
         }
         
-        Configuration conf = new Configuration();
-        conf.set("blackhole.keytab", keytab);
-        conf.set("blackhole.principal", principal);
-        HDFSLogin(conf, "blackhole.keytab", "blackhole.principal");
+        if (enableSecurity) {
+            String keytab = prop.getProperty("blackhole.keytab");
+            String principal = prop.getProperty("blackhole.principal");
+            Configuration conf = new Configuration();
+            conf.set("blackhole.keytab", keytab);
+            conf.set("blackhole.principal", principal);
+            HDFSLogin(conf, "blackhole.keytab", "blackhole.principal");
+        }
         
         server = new ServerSocket(port);
         fs = (new Path(hdfsbasedir)).getFileSystem(new Configuration());
@@ -174,15 +179,24 @@ public class Collectornode extends Node {
         acceptor.setDaemon(true);
         acceptor.start();
         
-        registerNode();
-        
         loop();
         close();
     }
     
-    private void delete(File file) {
+    @Override
+    protected void onConnected() {
+        clearMessageQueue();
+        registerNode();
+    }
+    
+    private void delete(File file) throws IOException {
         if (file.isDirectory()) {
             File[] children = file.listFiles();
+            
+            if (children == null) {
+                throw new IOException("error listing directory " + file);
+            }
+            
             for (File f : children) {
                 delete(f);
             }
@@ -192,7 +206,7 @@ public class Collectornode extends Node {
         }
     }
     
-    private void cleanupLocalStorage() {
+    private void cleanupLocalStorage() throws IOException {
         File base = new File(basedir);
         if (base.exists()) {
             delete(base);
@@ -224,21 +238,23 @@ public class Collectornode extends Node {
      * @throws IOException 
      */
     public static void main(String[] args) throws IOException {
-        
-        
-        try {
+    try {
         Collectornode node = new Collectornode();
         node.start();
-        } catch (Throwable e) {
+    } catch (Throwable e) {
             LOG.error("fatal error " + e);
             e.printStackTrace();
             System.exit(-1);
         }
     }
 
-    public File getappendingFile(String storagedir) {
+    public File getappendingFile(String storagedir) throws IOException {
         File parent = new File(storagedir);
-        parent.mkdirs();
+        if (!parent.mkdirs()) {
+            if (!parent.exists()) {
+                throw new IOException("mkdir " + parent + " failed!");
+            }
+        }
         File file = new File(parent, "appending." + Util.getTS() + ".gz");
         return file;
     }
@@ -275,6 +291,7 @@ public class Collectornode extends Node {
             if (!f.delete()) {
                 LOG.error("delete file " + f + " failed");
             }
+            fileRolls.remove(f);
         } else {
             Message message = PBwrap.wrapUploadFail(ident.app, ident.source, ident.ts);
             send(message);
