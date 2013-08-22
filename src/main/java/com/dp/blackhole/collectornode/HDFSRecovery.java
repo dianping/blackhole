@@ -57,6 +57,9 @@ public class HDFSRecovery implements Runnable{
                         offset += len;
                     }
                     LOG.info("Reloaded the hdfs file " + tmpPath);
+                    
+                    gin.close();
+                    gin = null;
                 }
                 DataOutputStream out = new DataOutputStream(client.getOutputStream());
                 out.writeLong(offset);
@@ -67,6 +70,9 @@ public class HDFSRecovery implements Runnable{
                     gout.write(buf, 0, len);
                 }
                 LOG.info("Finished to write " + recoveryPath);
+                
+                gout.close();
+                gout = null;
                 
                 if (Util.retryRename(fs, recoveryPath, normalPath)) {
                     LOG.info("Finished to rename to " + normalPathname);
