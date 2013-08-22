@@ -694,7 +694,7 @@ public class Supervisor {
         if (collector != null) {
             message = PBwrap.wrapAssignCollector(app, collector);
         } else {
-            message = PBwrap.wrapNoAvailableNode();
+            message = PBwrap.wrapNoAvailableNode(app);
         }
 
         send(from, message);
@@ -906,6 +906,8 @@ public class Supervisor {
         LiveChecker checker = new LiveChecker();
         checker.setDaemon(true);
         checker.start();
+        
+        LOG.info("supervisor started");
     }
     
     /**
