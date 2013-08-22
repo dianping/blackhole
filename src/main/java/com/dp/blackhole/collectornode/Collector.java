@@ -1,14 +1,11 @@
 package com.dp.blackhole.collectornode;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,7 +30,7 @@ public class Collector implements Runnable {
     long rollPeriod;
     SimpleDateFormat format;
     
-    public Collector(Collectornode server, Socket s, String home, String appname, String host, long period) throws IOException {
+    public Collector(Collectornode server, Socket s, String home, String appname, String host, long period) {
         node = server;
         socket = s;
         remoteAddress = Util.getRemoteHost(s);
@@ -45,10 +42,15 @@ public class Collector implements Runnable {
         init();
     }
     
-    public void init() throws IOException, IOException {
-        appending = node.getappendingFile(storagedir);
-        writer = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(appending)));
-        streamIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    public void init() {
+        try {
+            appending = node.getappendingFile(storagedir);
+            writer = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(appending)));
+            streamIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        } catch (IOException e) {
+            e.printStackTrace();
+            handleIOException() ;
+        }
     }
     
     @Override
@@ -76,13 +78,16 @@ public class Collector implements Runnable {
     
     private void close() {
         try {
-        streamIn.close();
-        socket.close();
-        writer.close();
+            if (streamIn != null) {
+                streamIn.close();
+            }
+            if (writer != null) {
+                writer.close();
+            }
+            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        appending.renameTo(new File(appending.toString()+ "." +  (new Date()).toString()));
     }
 
     private void writetofile(String line) throws IOException {
