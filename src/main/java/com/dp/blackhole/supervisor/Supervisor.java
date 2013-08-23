@@ -58,6 +58,10 @@ public class Supervisor {
     }
     
     private void send(Connection connection, Message msg) {
+        if (connection == null || !connection.isActive()) {
+            LOG.error("connection is null or closed, message sending abort: " + msg);
+            return;
+        }
         SocketChannel channel = connection.getChannel();
         SelectionKey key = channel.keyFor(selector);
         key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);

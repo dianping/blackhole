@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dp.blackhole.common.gen.MessagePB.Message;
@@ -19,6 +20,7 @@ public class Connection {
     private ByteBuffer writeBuffer;
     private ConcurrentLinkedQueue<Message> queue;
     private AtomicLong lastHeartBeat;
+    private AtomicBoolean active;
     private String host;
     private int NodeType;
     
@@ -28,6 +30,7 @@ public class Connection {
         this.length = ByteBuffer.allocate(4);
         this.queue = new ConcurrentLinkedQueue<Message>();
         lastHeartBeat = new AtomicLong(Util.getTS());
+        active = new AtomicBoolean(true);
     }
     
     public void offer (Message msg) {
@@ -72,6 +75,7 @@ public class Connection {
     }
 
     public void close() {
+        active.getAndSet(false);
         if (!channel.isOpen()) {
             return;
         }
@@ -119,5 +123,9 @@ public class Connection {
     
     public int getNodeType( ) {
         return NodeType;  
+    }
+    
+    public boolean isActive() {
+        return active.get();
     }
 }
