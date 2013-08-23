@@ -62,9 +62,13 @@ public class LogReader implements Runnable{
     }
 
     public void stop() {
-        tailer.stop();
+        if (tailer != null) {
+            tailer.stop();
+        }
         try {
-            writer.close();
+            if (writer != null) {
+                writer.close();
+            }
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
