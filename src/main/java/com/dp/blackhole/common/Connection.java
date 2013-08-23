@@ -53,14 +53,6 @@ public class Connection {
         writeBuffer = ByteBuffer.allocate(size);
         return writeBuffer;
     }
-    
-    public void writeMessage(Message reply) {
-//        SelectionKey key = channel.keyFor(selector);
-//        Connection connection = (Connection) key.attachment();
-//        key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
-//        connection.offer(msg);
-//        selector.wakeup();    
-    }
 
     public SocketChannel getChannel() {
         return channel;
@@ -127,5 +119,19 @@ public class Connection {
     
     public boolean isActive() {
         return active.get();
+    }
+    
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append(" host:" +host);
+        if (NodeType == APPNODE) {
+            sb.append(" type: APPNODE");
+        } else if (NodeType == COLLECTORNODE) {
+            sb.append(" type: COLLECTORNODE");
+        } else {
+            sb.append(" type: unknown");
+        }
+        return sb.toString();
     }
 }

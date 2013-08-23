@@ -62,7 +62,9 @@ public class LogReader implements Runnable{
     }
 
     public void stop() {
-        tailer.stop();
+        if (tailer != null) {
+            tailer.stop();
+        }
         try {
             if (writer != null) {
                 writer.close();
