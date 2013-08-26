@@ -10,6 +10,7 @@ import "RecoveryRoll.proto";
 import "ReadyCollector.proto";
 import "RollID.proto";
 import "Failure.proto";
+import "NoAvailableNode.proto";
 
 message Message {
     enum MessageType {
@@ -37,4 +38,5 @@ message Message {
     optional ReadyCollector readyCollector = 6;
     optional RollID rollID = 7;
     optional Failure failure = 8;
+    optional NoAvailableNode noAvailableNode = 9;
 }

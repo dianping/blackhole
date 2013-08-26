@@ -7,6 +7,7 @@ import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
+import com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode;
 import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
@@ -16,8 +17,10 @@ public class PBwrap {
         Message.Builder msg = Message.newBuilder();
         msg.setType(type);
         switch (type) {
-        case HEARTBEART:
         case NOAVAILABLENODE:
+            msg.setNoAvailableNode((NoAvailableNode) message);
+            break;
+        case HEARTBEART:
             break;
         case APP_REG:
             msg.setAppReg((AppReg) message);
@@ -55,8 +58,10 @@ public class PBwrap {
         return wrapMessage(MessageType.HEARTBEART, null);
     }
     
-    public static Message wrapNoAvailableNode() {
-        return wrapMessage(MessageType.NOAVAILABLENODE, null);
+    public static Message wrapNoAvailableNode(String app) {
+        NoAvailableNode.Builder builder = NoAvailableNode.newBuilder();
+        builder.setAppName(app);
+        return wrapMessage(MessageType.NOAVAILABLENODE, builder.build());
     }
     
     public static Message wrapAppReg(String appName, String appServer, long regTs) {

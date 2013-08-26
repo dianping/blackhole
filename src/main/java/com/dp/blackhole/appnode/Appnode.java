@@ -61,7 +61,9 @@ public class Appnode extends Node {
             } catch (InterruptedException e) {
                 LOG.info("thead interrupted");
             }
-  	        registerApps();
+  	        String app = msg.getNoAvailableNode().getAppName();
+  	        AppLog applog = appLogs.get(app); 
+  	        register(app, applog.getCreateTime());
   	        break;
         case RECOVERY_ROLL:
             RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
@@ -81,15 +83,15 @@ public class Appnode extends Node {
             AssignCollector assignCollector = msg.getAssignCollector();
             appName = assignCollector.getAppName();
             if ((appLog = appLogs.get(appName)) != null) {
-                if ((logReader = appReaders.get(appLog)) != null) {
-                    logReader.stop();   //stop the old read thread (old stream).
-                    appReaders.remove(logReader);
+                if ((logReader = appReaders.get(appLog)) == null) {
+                    collectorServer = assignCollector.getCollectorServer();
+                    logReader = new LogReader(this, collectorServer, port, appLog, delayMillis);
+                    appReaders.put(appLog, logReader);
+                    exec.execute(logReader);
+                    return true;
+                } else {
+                    LOG.info("duplicated assign collector message: " + assignCollector);
                 }
-                collectorServer = assignCollector.getCollectorServer();
-                logReader = new LogReader(this, collectorServer, port, appLog, delayMillis);
-                appReaders.put(appLog, logReader);
-                exec.execute(logReader);
-                return true;
             } else {
                 LOG.error("AppName [" + assignCollector.getAppName()
                         + "] from supervisor message not match with local");
@@ -245,7 +247,8 @@ public class Appnode extends Node {
     public void reportFailure(String app, String appHost, long ts) {
         Message message = PBwrap.wrapAppFailure(app, appHost, ts);
         send(message);
-        AppLog applog = appLogs.get(app); 
+        AppLog applog = appLogs.get(app);
+        appReaders.remove(applog);
         register(app, applog.getCreateTime());
     }
     

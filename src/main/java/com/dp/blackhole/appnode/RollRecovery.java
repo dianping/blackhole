@@ -45,8 +45,9 @@ public class RollRecovery implements Runnable{
         String rollIdent = unitFormat.format(rollTimestamp);
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
         
-        if (!rolledFile.exists()) {
-            LOG.error("file " + rolledFile + "is not existed");
+        // TODO some rollIdent may be unrecoverable, need to address this
+        if (rolledFile == null || !rolledFile.exists()) {
+            LOG.error("app " + appLog.getAppName() + " rollIdent " + rollIdent + " can not be found");
             return;
         }
         

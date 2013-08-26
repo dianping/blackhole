@@ -58,6 +58,10 @@ public class Supervisor {
     }
     
     private void send(Connection connection, Message msg) {
+        if (connection == null || !connection.isActive()) {
+            LOG.error("connection is null or closed, message sending abort: " + msg);
+            return;
+        }
         SocketChannel channel = connection.getChannel();
         SelectionKey key = channel.keyFor(selector);
         key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
@@ -190,25 +194,30 @@ public class Supervisor {
      */
     private void closeConnection(Connection connection) {
         SelectionKey key = connection.getChannel().keyFor(selector);
-        LOG.info(key + "is closed, socketChannel is " + connection.getChannel());
+        LOG.info("close collection: " + connection);
         key.cancel();
         
         long now = Util.getTS();
         String host = connection.getHost();
         if (connection.getNodeType() == Connection.APPNODE) {
             appNodes.remove(host);
+            LOG.info("close APPNODE: " + host);
         } else if (connection.getNodeType() == Connection.COLLECTORNODE) {
             collectorNodes.remove(host);
+            LOG.info("close COLLECTORNODE: " + host);
         }
         ArrayList<Stream> streams = connectionMap.get(connection);
         synchronized (streams) {
             for (Stream stream : streams) {
+                LOG.debug("checking stream: " + stream);
                 if (connection.getNodeType() == Connection.APPNODE) {
+                    LOG.debug("mark stream inactive :" + stream);
                     stream.updateActive(false);
                 }
                 ArrayList<Stage> stages = Streams.get(stream);
                 synchronized (stages) {
                     for (Stage stage : stages) {
+                        LOG.debug("checking stage: " + stage);
                         if (connection.getNodeType() == Connection.APPNODE && stage.status != Stage.UPLOADING) {
                             Issue e = new Issue();
                             e.desc = "logreader failed";
@@ -224,10 +233,9 @@ public class Supervisor {
                             if (stage.isCurrent()) {
                                 // do not reassign collector here, since logreader will find collector fail,
                                 // and do appReg again; otherwise two appReg for the same stream will send 
-                                // String newCollector = assignCollector(stage.app, appNodes.get(stage.apphost));
-                                // if (newCollector == null) {
-                                //    stage.status = Stage.PENDING;
-                                // }
+                                if (collectorNodes.size() == 0) {
+                                    stage.status = Stage.PENDING;
+                                }
                             } else {
                                 String newCollector = doRecovery(stream, stage);
                                 if (newCollector != null) {
@@ -236,6 +244,7 @@ public class Supervisor {
                                 }
                             }
                         }
+                        LOG.debug("after check: " + stage);
                     }
                 }
             }
@@ -368,7 +377,11 @@ public class Supervisor {
             synchronized (stages) {
                 for (Stage stage : stages) {
                     if (stage.rollTs == rollID.getRollTs()) {
-                        stage.status = Stage.RECOVERYING;
+                        if (stream.isActive()) {
+                            stage.status = Stage.RECOVERYING;
+                        } else {
+                            stage.status = Stage.PENDING;
+                        }
                         stage.issuelist.add(e);
                         String newCollector = doRecovery(stream, stage);
                         stage.collectorhost = newCollector;
@@ -571,6 +584,28 @@ public class Supervisor {
                 stream.updateActive(true);
             }
             
+            // record the stream with appHost connection
+            Connection appc = appNodes.get(stream.appHost); 
+            List<Stream> streamsWithinAppHost = connectionMap.get(appc);
+            if (streamsWithinAppHost != null) {
+                synchronized (streamsWithinAppHost) {
+                    streamsWithinAppHost.add(stream);
+                }
+            } else {
+                LOG.fatal("unregistered appHost connection: " + appc.getHost());
+                return;
+            }
+            // record the stream with collectorHost connection
+            List<Stream> streamsWithinCollectorHost = connectionMap.get(from);
+            if (streamsWithinCollectorHost != null) {
+                synchronized (streamsWithinCollectorHost) {
+                    streamsWithinCollectorHost.add(stream);
+                }
+            } else {
+                LOG.fatal("unregistered collectorHost connection: " + appc.getHost());
+                return;
+            }
+            
             // old stream with app fail
             Issue issue = new Issue();
             issue.ts = connectedTs;
@@ -618,7 +653,7 @@ public class Supervisor {
                         LOG.info("processing missed pending stages: " + stage);
                         // check whether it is missed
                         if (!stages.contains(stage)) {
-                            LOG.info("process missed stage: " + stage +" ("+Util.ts2String(stage.rollTs)+")");
+                            LOG.info("process missed stage: " + stage);
                             // do not recovery current stage
                             if (stage.rollTs != currentTs) {
                                 stage.status = Stage.RECOVERYING;
@@ -630,7 +665,7 @@ public class Supervisor {
                             }
                             stages.add(stage);
                         } else {
-                            LOG.info("process not really missed stage: " + stage +" ("+Util.ts2String(stage.rollTs)+")");
+                            LOG.info("process not really missed stage: " + stage);
                             int index = stages.indexOf(stage);
                             Stage nmStage = stages.get(index);
                             
@@ -694,7 +729,7 @@ public class Supervisor {
         if (collector != null) {
             message = PBwrap.wrapAssignCollector(app, collector);
         } else {
-            message = PBwrap.wrapNoAvailableNode();
+            message = PBwrap.wrapNoAvailableNode(app);
         }
 
         send(from, message);
@@ -753,7 +788,7 @@ public class Supervisor {
                                 LOG.info("missed pending stages: " + stage);
                                 // check whether it is missed
                                 if (!stages.contains(stage)) {
-                                    LOG.info("process missed stage: " + stage.rollTs + " ("+Util.ts2String(stage.rollTs)+")");
+                                    LOG.info("process missed stage: " + stage);
                                     // do not recovery current stage
                                     if (stage.rollTs != currentTs) {
                                         String newCollector = doRecovery(stream, stage);
@@ -761,7 +796,7 @@ public class Supervisor {
                                     }
                                     stages.add(stage);
                                 } else {
-                                    LOG.info("process not really missed stage: " + stage+ " ("+Util.ts2String(stage.rollTs)+")");
+                                    LOG.info("process not really missed stage: " + stage);
                                     int index = stages.indexOf(stage);
                                     Stage nmStage = stages.get(index);
                                     if (nmStage.rollTs != currentTs) {
@@ -906,6 +941,8 @@ public class Supervisor {
         LiveChecker checker = new LiveChecker();
         checker.setDaemon(true);
         checker.start();
+        
+        LOG.info("supervisor started");
     }
     
     /**
