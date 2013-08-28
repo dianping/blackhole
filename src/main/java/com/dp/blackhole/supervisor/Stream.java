@@ -10,10 +10,19 @@ import com.dp.blackhole.common.Util;
 public class Stream {
     String app;
     String appHost;
+    private String collectorHost;
     long period;
     long startTs;
     AtomicLong lastSuccessTs = new AtomicLong();
     AtomicBoolean active = new AtomicBoolean(true);
+    
+    synchronized void setCollectorHost(String newCollectorHost) {
+        collectorHost = newCollectorHost;
+    }
+    
+    synchronized String getCollectorHost() {
+        return collectorHost;
+    }
     
     void setlastSuccessTs(long ts) {
         lastSuccessTs.getAndSet(ts);
