@@ -46,7 +46,8 @@ public class Supervisor {
     private int handlerCount = 1;
     
     private BlockingQueue<Msg> messageQueue;
-    private ConcurrentHashMap<Connection, ArrayList<Stream>> connectionMap;
+    private ConcurrentHashMap<Connection, ArrayList<Stream>> connectionStreamMap;
+    private ConcurrentHashMap<Stage, Connection> stageConnectionMap;
     private ConcurrentHashMap<String, Connection> collectorNodes;
     private ConcurrentHashMap<String, Connection> appNodes;
     private ConcurrentHashMap<Stream, ArrayList<Stage>> Streams;
@@ -92,9 +93,9 @@ public class Supervisor {
                         Connection connection = new Connection(channel);
                         channel.register(selector, SelectionKey.OP_READ, connection);
                    
-                        if (connectionMap.get(connection) == null) {
+                        if (connectionStreamMap.get(connection) == null) {
                             ArrayList<Stream> streams = new ArrayList<Stream>();
-                            connectionMap.put(connection, streams);
+                            connectionStreamMap.put(connection, streams);
                             String remote = connection.getHost();
                             LOG.debug("client node "+remote+" connected");
                         } else {
@@ -168,13 +169,13 @@ public class Supervisor {
                         if (data.remaining() == 0) {
                             data.flip();
                             Message msg = Message.parseFrom(data.array());
+                            if (msg.getType() != MessageType.HEARTBEART) {
+                                LOG.debug("receive message from " + connection.getHost() +" :" + msg);
+                            }
                             Msg event = new Msg();
                             event.c = connection;
                             event.msg = msg;
                             messageQueue.put(event);
-                            if (msg.getType() != MessageType.HEARTBEART) {
-                                LOG.debug("receive message from " + connection.getHost() +" :" + msg);
-                            }
                         }
                     }
                 }
@@ -185,7 +186,130 @@ public class Supervisor {
             }
         }
     }
+    
+    /*
+     * mark the stream as inactive, mark all the stages as pending unless the uploading stage
+     * remove the relationship of the corresponding collectorNode and streams
+     */
+    void handleAppNodeFail(Connection connection, long now) {
+        ArrayList<Stream> streams = connectionStreamMap.get(connection);
+        if (streams != null) {
+            for (Stream stream : streams) {
+                LOG.info("mark stream as inactive: " + stream);
+                stream.updateActive(false);
+                ArrayList<Stage> stages = Streams.get(stream);
+                if (stages != null) {
+                    synchronized (stages) {
+                        for (Stage stage : stages) {
+                            LOG.info("checking stage: " + stage);
+                            if (stage.status != Stage.UPLOADING) {
+                                Issue e = new Issue();
+                                e.desc = "logreader failed";
+                                e.ts = now;
+                                stage.issuelist.add(e);
+                                stage.status = Stage.PENDING;
+                            }
+                        }
+                    }
+                }
+                
+                // remove corresponding collectorNodes's relationship with the stream
+                String collectorHost = stream.getCollectorHost();
+                Connection collectorConnection = collectorNodes.get(collectorHost);
+                if (collectorConnection != null) {
+                    ArrayList<Stream> associatedStreams = connectionStreamMap.get(collectorConnection);
+                    if (associatedStreams != null) {
+                        synchronized (associatedStreams) {
+                            associatedStreams.remove(stream);
+                            if (associatedStreams.size() == 0) {
+                                connectionStreamMap.remove(collectorConnection);
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            LOG.info("no stream associate with " + connection);
+        }
+    }
+    
+    /*
+     * 1. process current stage on associated streams
+     * 2. remove the relationship of the corresponding appNode and streams
+     * 3. processing uploading and recovery stages
+     */
+    void handleCollectorNodeFail(Connection connection, long now) {
+        ArrayList<Stream> streams = connectionStreamMap.get(connection);
+        // processing current stage on streams
+        synchronized (streams) {
+            for (Stream stream : streams) {
+                ArrayList<Stage> stages = Streams.get(stream);
+                synchronized (stages) {
+                    Stage current = stages.get(stages.size() -1);
+                    if (!current.isCurrent()) {
+                        LOG.error("stage " + current + "should be current stage");
+                        continue;
+                    }
+                    LOG.debug("checking current stage: " + current);
+                    
+                    Issue e = new Issue();
+                    e.desc = "collector failed";
+                    e.ts = now;
+                    current.issuelist.add(e);
 
+                    // do not reassign collector here, since logreader will find collector fail,
+                    // and do appReg again; otherwise two appReg for the same stream will send 
+                    if (collectorNodes.size() == 0) {
+                        current.status = Stage.PENDING;
+                    } else {
+                        current.status = Stage.COLLECTORFAIL;
+                    }
+                    LOG.debug("after checking current stage: " + current);
+                }
+                   
+                // remove corresponding appNodes's relationship with the stream
+                String appHost = stream.appHost;
+                Connection appConnection = appNodes.get(appHost);
+                if (appConnection != null) {
+                    ArrayList<Stream> associatedStreams = connectionStreamMap.get(appConnection);
+                    if (associatedStreams != null) {
+                        synchronized (associatedStreams) {
+                            associatedStreams.remove(stream);
+                            if (associatedStreams.size() == 0) {
+                                connectionStreamMap.remove(appConnection);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // processing uploading and recovery stages
+        for (Entry<Stage, Connection> entry : stageConnectionMap.entrySet()) {
+            if (connection.equals(entry.getValue())) {
+                LOG.info("processing entry: "+ entry);
+                Stage stage = entry.getKey();
+                if (stage.status == Stage.PENDING) {
+                    continue;
+                }
+                StreamId id = new StreamId(stage.app, stage.apphost);
+                Stream stream = streamIdMap.get(id);
+                if (stream == null) {
+                    LOG.error("can not find stream by streamid: " + id);
+                    continue;
+                }
+                ArrayList<Stage> stages = Streams.get(stream);
+                if (stages != null) {
+                    synchronized (stages) {
+                        if (stream != null) {
+                            doRecovery(stream, stage);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     /*
      * cancel the key, remove it from appNodes or collectorNodes, then revisit streams
      * 1. appNode fail, mark the stream as inactive, mark all the stages as pending unless the uploading stage
@@ -193,8 +317,13 @@ public class Supervisor {
      *  do recovery if the stage is not current stage, mark the stage as pending when no available collector
      */
     private void closeConnection(Connection connection) {
+        if (!connection.isActive()) {
+            LOG.info("connection " + connection + "already closed" );
+            return;
+        }
+        
         SelectionKey key = connection.getChannel().keyFor(selector);
-        LOG.info("close collection: " + connection);
+        LOG.info("close connection: " + connection);
         key.cancel();
         
         long now = Util.getTS();
@@ -202,54 +331,14 @@ public class Supervisor {
         if (connection.getNodeType() == Connection.APPNODE) {
             appNodes.remove(host);
             LOG.info("close APPNODE: " + host);
+            handleAppNodeFail(connection, now);
         } else if (connection.getNodeType() == Connection.COLLECTORNODE) {
             collectorNodes.remove(host);
             LOG.info("close COLLECTORNODE: " + host);
+            handleCollectorNodeFail(connection, now);
         }
-        ArrayList<Stream> streams = connectionMap.get(connection);
-        synchronized (streams) {
-            for (Stream stream : streams) {
-                LOG.debug("checking stream: " + stream);
-                if (connection.getNodeType() == Connection.APPNODE) {
-                    LOG.debug("mark stream inactive :" + stream);
-                    stream.updateActive(false);
-                }
-                ArrayList<Stage> stages = Streams.get(stream);
-                synchronized (stages) {
-                    for (Stage stage : stages) {
-                        LOG.debug("checking stage: " + stage);
-                        if (connection.getNodeType() == Connection.APPNODE && stage.status != Stage.UPLOADING) {
-                            Issue e = new Issue();
-                            e.desc = "logreader failed";
-                            e.ts = now;
-                            stage.issuelist.add(e);
-                            stage.status = Stage.PENDING;
-                        } else if (connection.getNodeType() == Connection.COLLECTORNODE) {
-                            Issue e = new Issue();
-                            e.desc = "collector failed";
-                            e.ts = now;
-                            stage.issuelist.add(e);
-                            stage.status = Stage.COLLECTORFAIL;
-                            if (stage.isCurrent()) {
-                                // do not reassign collector here, since logreader will find collector fail,
-                                // and do appReg again; otherwise two appReg for the same stream will send 
-                                if (collectorNodes.size() == 0) {
-                                    stage.status = Stage.PENDING;
-                                }
-                            } else {
-                                String newCollector = doRecovery(stream, stage);
-                                if (newCollector != null) {
-                                    stage.status = Stage.RECOVERYING;
-                                    stage.collectorhost = newCollector;
-                                }
-                            }
-                        }
-                        LOG.debug("after check: " + stage);
-                    }
-                }
-            }
-        }
-        connectionMap.remove(connection);
+        
+        connectionStreamMap.remove(connection);
         if (connection != null) {
             connection.close();
         }
@@ -310,12 +399,13 @@ public class Supervisor {
         
         if (stream != null) {
             ArrayList<Stage> stages = Streams.get(stream);
-            synchronized (stages) {
-                for (Stage stage : stages) {
-                    if (stage.rollTs == rollID.getRollTs()) {
-                        String newCollector = doRecovery(stream, stage);
-                        stage.collectorhost = newCollector;
-                        break;
+            if (stages != null) {
+                synchronized (stages) {
+                    for (Stage stage : stages) {
+                        if (stage.rollTs == rollID.getRollTs()) {
+                            doRecovery(stream, stage);
+                            break;
+                        }
                     }
                 }
             }
@@ -340,13 +430,16 @@ public class Supervisor {
         if (stream != null) {
             stream.setGreatlastSuccessTs(rollID.getRollTs());
             ArrayList<Stage> stages = Streams.get(stream);
-            synchronized (stages) {
-                for (Stage stage : stages) {
-                    if (stage.rollTs == rollID.getRollTs()) {
-                        stage.status = Stage.UPLOADED;
-                        LOG.info(stage.toString());
-                        stages.remove(stage);
-                        break;
+            if (stages != null) {
+                synchronized (stages) {
+                    for (Stage stage : stages) {
+                        if (stage.rollTs == rollID.getRollTs()) {
+                            stage.status = Stage.UPLOADED;
+                            LOG.info(stage.toString());
+                            stages.remove(stage);
+                            stageConnectionMap.remove(stage);
+                            break;
+                        }
                     }
                 }
             }
@@ -371,21 +464,17 @@ public class Supervisor {
 
         if (stream != null) {
             ArrayList<Stage> stages = Streams.get(stream);
-            Issue e = new Issue();
-            e.desc = "upload failed";
-            e.ts = Util.getTS();
-            synchronized (stages) {
-                for (Stage stage : stages) {
-                    if (stage.rollTs == rollID.getRollTs()) {
-                        if (stream.isActive()) {
-                            stage.status = Stage.RECOVERYING;
-                        } else {
-                            stage.status = Stage.PENDING;
+            if (stages != null) {
+                Issue e = new Issue();
+                e.desc = "upload failed";
+                e.ts = Util.getTS();
+                synchronized (stages) {
+                    for (Stage stage : stages) {
+                        if (stage.rollTs == rollID.getRollTs()) {
+                            stage.issuelist.add(e);
+                            doRecovery(stream, stage);
+                            break;
                         }
-                        stage.issuelist.add(e);
-                        String newCollector = doRecovery(stream, stage);
-                        stage.collectorhost = newCollector;
-                        break;
                     }
                 }
             }
@@ -419,6 +508,7 @@ public class Supervisor {
                             stage.status = Stage.UPLOADED;
                             LOG.info(stage.toString());
                             stages.remove(stage);
+                            stageConnectionMap.remove(stage);
                             break;
                         }
                     }
@@ -460,28 +550,28 @@ public class Supervisor {
                         return;
                     } else {
                         if (current.cleanstart == false || current.issuelist.size() != 0) {
-                            current.status = Stage.RECOVERYING;
                             current.isCurrent = false;
-                            String newCollector = doRecovery(stream, current);
-                            current.collectorhost = newCollector;
+                            doRecovery(stream, current);
                         } else {
                             current.status = Stage.UPLOADING;
                             current.isCurrent = false;
                             doUpload(stream, current, from);
                         }
                     }
-                    // create next stage
-                    Stage next = new Stage();
-                    next.app = stream.app;
-                    next.apphost = stream.appHost;
-                    next.collectorhost = current.collectorhost;
-                    next.cleanstart = true;
-                    next.rollTs = current.rollTs + stream.period * 1000;
-                    next.status = Stage.APPENDING;
-                    next.issuelist = new ArrayList<Issue>();
-                    next.isCurrent = true;
-                    
-                    stages.add(next);
+                    // create next stage if stream is connected
+                    if (current.status != Stage.PENDING && current.status != Stage.COLLECTORFAIL) {
+                        Stage next = new Stage();
+                        next.app = stream.app;
+                        next.apphost = stream.appHost;
+                        next.collectorhost = current.collectorhost;
+                        next.cleanstart = true;
+                        next.rollTs = current.rollTs + stream.period * 1000;
+                        next.status = Stage.APPENDING;
+                        next.issuelist = new ArrayList<Issue>();
+                        next.isCurrent = true;
+                        
+                        stages.add(next);
+                    }
                 }
             }
         } else {
@@ -498,6 +588,7 @@ public class Supervisor {
     private String doUpload(Stream stream, Stage current, Connection from) {
         Message message = PBwrap.wrapUploadRoll(current.app, current.apphost, stream.period, current.rollTs);
         send(from, message);
+        stageConnectionMap.put(current, from);
         return from.getHost();
     }
 
@@ -513,10 +604,17 @@ public class Supervisor {
 
         if (collector == null || !stream.isActive()) {
             stage.status = Stage.PENDING;
+            stageConnectionMap.remove(stage);
         } else {
             Connection c = appNodes.get(stream.appHost);
             Message message = PBwrap.wrapRecoveryRoll(stream.app, collector, stage.rollTs);
             send(c, message);
+            
+            stage.status = Stage.RECOVERYING;
+            stage.collectorhost = collector;
+            
+            Connection collectorConnection = collectorNodes.get(collector);
+            stageConnectionMap.put(stage, collectorConnection);
         }
 
         return collector;
@@ -525,9 +623,6 @@ public class Supervisor {
     /*
      * record the stream if it is a new stream;
      * do recovery if it is a old stream
-     *  1. recovery appfail stages (include current stage, but do no recovery)
-     *  2. recovery missed appfail stages (include current stage, but do no recovery)
-     *  3. recovery current stage with collector fail
      */
     private void registerStream(ReadyCollector message, Connection from) {
         long connectedTs = message.getConnectedTs();
@@ -541,6 +636,7 @@ public class Supervisor {
             stream = new Stream();
             stream.app = message.getAppName();
             stream.appHost = message.getAppServer();
+            stream.setCollectorHost(message.getCollectorServer());
             stream.startTs = connectedTs;
             stream.period = message.getPeriod();
             stream.setlastSuccessTs(currentTs - stream.period * 1000);
@@ -558,125 +654,115 @@ public class Supervisor {
             stages.add(current);
             Streams.put(stream, stages);
             streamIdMap.put(id, stream);
-            // record the stream with appHost connection
-            Connection appc = appNodes.get(stream.appHost); 
-            List<Stream> streamsWithinAppHost = connectionMap.get(appc);
-            if (streamsWithinAppHost != null) {
-                synchronized (streamsWithinAppHost) {
-                    streamsWithinAppHost.add(stream);
-                }
-            } else {
-                LOG.fatal("unregistered appHost connection: " + appc.getHost());
-                return;
-            }
-            // record the stream with collectorHost connection
-            List<Stream> streamsWithinCollectorHost = connectionMap.get(from);
-            if (streamsWithinCollectorHost != null) {
-                synchronized (streamsWithinCollectorHost) {
-                    streamsWithinCollectorHost.add(stream);
-                }
-            } else {
-                LOG.fatal("unregistered collectorHost connection: " + appc.getHost());
-                return;
-            }
         } else {
+            // old stream reconnected
             if (!stream.isActive()) {
                 stream.updateActive(true);
             }
             
-            // record the stream with appHost connection
-            Connection appc = appNodes.get(stream.appHost); 
-            List<Stream> streamsWithinAppHost = connectionMap.get(appc);
-            if (streamsWithinAppHost != null) {
-                synchronized (streamsWithinAppHost) {
-                    streamsWithinAppHost.add(stream);
-                }
-            } else {
-                LOG.fatal("unregistered appHost connection: " + appc.getHost());
-                return;
-            }
-            // record the stream with collectorHost connection
-            List<Stream> streamsWithinCollectorHost = connectionMap.get(from);
-            if (streamsWithinCollectorHost != null) {
-                synchronized (streamsWithinCollectorHost) {
-                    streamsWithinCollectorHost.add(stream);
-                }
-            } else {
-                LOG.fatal("unregistered collectorHost connection: " + appc.getHost());
-                return;
-            }
-            
-            // old stream with app fail
-            Issue issue = new Issue();
-            issue.ts = connectedTs;
-            issue.desc = "stream reconnected";
+            // update collectorHost on stream
+            stream.setCollectorHost(message.getCollectorServer());
 
             ArrayList<Stage> stages = Streams.get(stream);
-            
-            if (stages == null) {
+            if (stages != null) {
+                synchronized (stages) {
+                    recoveryStages(stream, stages, connectedTs, currentTs, message.getCollectorServer());
+                }
+            } else {
                 LOG.error("can not find stages of stream: "+stream);
-                return;
             }
-            
-            synchronized (stages) {
-             // recovery Pending stages
-                for (int i=0 ; i < stages.size(); i++) {
-                    Stage stage = stages.get(i);
-                    LOG.info("processing pending stage: " + stage);
-                    if (stage.status == Stage.PENDING || stage.status == Stage.COLLECTORFAIL) {
-                        stage.issuelist.add(issue);
-                        // do not recovery current stage
-                        if (stage.rollTs != currentTs) {
-                            stage.status = Stage.RECOVERYING;
-                            String newCollector = doRecovery(stream, stage);
-                            stage.collectorhost = newCollector;
-                        } else {
-                            // fix current stage status
-                            stage.status = Stage.APPENDING;
-                            stage.collectorhost = message.getCollectorServer();
-                        }
-                    }
-                }
+        }
+        
+        // register connection with appNode and collectorNode
+        recordConnectionStreamMapping(from, stream);
+        Connection appConnection = appNodes.get(stream.appHost);
+        recordConnectionStreamMapping(appConnection, stream);
+    }
 
-                // recovery missed Pending stages
-                int missedStageCount = getMissedStageCount(stream, connectedTs);
-                if (missedStageCount != 0) {
-                    if (stages.size() != 0) {
-                        Stage current = stages.get(stages.size() - 1);
-                        current.isCurrent = false;
-                    } else {
-                        LOG.error("no stages found on stream: " + stream);
-                        return;
-                    }
-                    ArrayList<Stage> missedStages = getMissedStages(stream, missedStageCount, issue);
-                    for (Stage stage : missedStages) {
-                        LOG.info("processing missed pending stages: " + stage);
-                        // check whether it is missed
-                        if (!stages.contains(stage)) {
-                            LOG.info("process missed stage: " + stage);
-                            // do not recovery current stage
-                            if (stage.rollTs != currentTs) {
-                                stage.status = Stage.RECOVERYING;
-                                String newCollector = doRecovery(stream, stage);
-                                stage.collectorhost = newCollector;
-                            } else {
-                                stage.status = Stage.APPENDING;
-                                stage.collectorhost = message.getCollectorServer();
-                            }
-                            stages.add(stage);
-                        } else {
-                            LOG.info("process not really missed stage: " + stage);
-                            int index = stages.indexOf(stage);
-                            Stage nmStage = stages.get(index);
-                            
-                            if (nmStage.rollTs != currentTs) {
-                                nmStage.isCurrent = false;
-                            } else {
-                                nmStage.issuelist.add(issue);
-                            }
-                        }
+    /*
+     * 1. recovery appFail or collectFail stages (include current stage, but do no recovery)
+     * 2. recovery missed stages (include current stage, but do no recovery)
+     * 3. recovery current stage (realtime stream)with collector fail
+     */
+    private void recoveryStages(Stream stream, ArrayList<Stage> stages, long connectedTs, long currentTs, String newCollectorhost) {
+        Issue issue = new Issue();
+        issue.ts = connectedTs;
+        issue.desc = "stream reconnected";
+        
+        // recovery Pending and COLLECTORFAIL stages
+        for (int i=0 ; i < stages.size(); i++) {
+            Stage stage = stages.get(i);
+            LOG.info("processing pending stage: " + stage);
+            if (stage.status == Stage.PENDING || stage.status == Stage.COLLECTORFAIL) {
+                stage.issuelist.add(issue);
+                // do not recovery current stage
+                if (stage.rollTs != currentTs) {
+                    doRecovery(stream, stage);
+                } else {
+                    // fix current stage status
+                    stage.status = Stage.APPENDING;
+                    stage.collectorhost = newCollectorhost;
+                }
+            }
+        }
+
+        // recovery missed stages
+        int missedStageCount = getMissedStageCount(stream, connectedTs);
+        LOG.info("need recovery possible missed stages: " + missedStageCount);
+
+        if (stages.size() != 0) {
+            Stage oldcurrent = stages.get(stages.size() - 1);
+            if (oldcurrent.rollTs != currentTs) {
+                oldcurrent.isCurrent = false;
+            }
+        } else {
+            LOG.error("no stages found on stream: " + stream);
+            return;
+        }
+        ArrayList<Stage> missedStages = getMissedStages(stream, missedStageCount, issue);
+        for (Stage stage : missedStages) {
+            LOG.info("processing possible missed stages: " + stage);
+            // check whether it is missed
+            if (!stages.contains(stage)) {
+                LOG.info("process really missed stage: " + stage);
+                // do not recovery current stage
+                if (stage.rollTs != currentTs) {
+                    doRecovery(stream, stage);
+                } else {
+                    stage.status = Stage.APPENDING;
+                    stage.collectorhost = newCollectorhost;
+                }
+                stages.add(stage);
+            } else {
+                LOG.info("process not really missed stage: " + stage);
+                int index = stages.indexOf(stage);
+                Stage nmStage = stages.get(index);
+                LOG.info("the not missed stage is " + nmStage);
+                if (nmStage.rollTs != currentTs) {
+                    nmStage.isCurrent = false;
+                } else {
+                    if (!nmStage.issuelist.contains(issue)) {
+                        nmStage.issuelist.add(issue);
                     }
                 }
+            }
+        }
+    }
+   
+    private void recordConnectionStreamMapping(Connection connection, Stream stream) {
+        if (connection == null) {
+            LOG.fatal("Connection is null");
+            return;
+        }
+        
+        ArrayList<Stream> streams = connectionStreamMap.get(connection);
+        if (streams == null) {
+            streams = new ArrayList<Stream>();
+            connectionStreamMap.put(connection, streams);
+        }
+        synchronized (streams) {
+            if (!streams.contains(stream)) {
+                streams.add(stream);
             }
         }
     }
@@ -736,80 +822,9 @@ public class Supervisor {
         return collector;
     }
     
-    /*
-     * 1. record the connection in collectorNodes
-     * 2. recovery Pending stages (include current stage, but do no recovery)
-     * 3. recovery missed Pending stages (include current stage, but do no recovery)
-     */
     private void registerCollectorNode(Connection from) {
         from.setNodeType(Connection.COLLECTORNODE);
         collectorNodes.put(from.getHost(), from);
-        
-        long now = Util.getTS();
-        Issue issue = new Issue();
-        issue.ts = now;
-        issue.desc = "avialable collector restored";
-        
-        if (collectorNodes.size() == 1) {
-            for (Entry<Stream, ArrayList<Stage>> e : Streams.entrySet()) {
-                Stream stream = e.getKey();
-                if (stream.isActive()) {
-                    // recovery Pending stages
-                    LOG.info("process Pending stages");
-                    long currentTs = Util.getRollTs(now, stream.period);
-                    ArrayList<Stage> stages = e.getValue();
-                    synchronized (stages) {
-                        for (int i=0 ; i < stages.size(); i++) {
-                            Stage stage = stages.get(i);
-                            LOG.info("processing pending stage: " + stage);
-                            if (stage.status == Stage.PENDING) {
-                                stage.status = Stage.RECOVERYING;
-                                stage.issuelist.add(issue);
-                                // do not recovery current stage
-                                if (stage.rollTs != currentTs) {
-                                    String newCollector = doRecovery(stream, stage);
-                                    stage.collectorhost = newCollector;
-                                }
-                            }
-                        }
-                        // recovery missed Pending stages
-                        int missedStageCount = getMissedStageCount(stream, now);
-                        LOG.info("need recovery missed Pending stages: " + missedStageCount);
-                        if (missedStageCount != 0) {
-                            if (stages.size() != 0) {
-                                Stage current = stages.get(stages.size() - 1);
-                                current.isCurrent = false;
-                            } else {
-                                LOG.error("no stages found on stream: " + stream);
-                                continue;
-                            }
-                            ArrayList<Stage> missedStages = getMissedStages(stream, missedStageCount, issue);
-                            for (Stage stage : missedStages) {
-                                LOG.info("missed pending stages: " + stage);
-                                // check whether it is missed
-                                if (!stages.contains(stage)) {
-                                    LOG.info("process missed stage: " + stage);
-                                    // do not recovery current stage
-                                    if (stage.rollTs != currentTs) {
-                                        String newCollector = doRecovery(stream, stage);
-                                        stage.collectorhost = newCollector;
-                                    }
-                                    stages.add(stage);
-                                } else {
-                                    LOG.info("process not really missed stage: " + stage);
-                                    int index = stages.indexOf(stage);
-                                    Stage nmStage = stages.get(index);
-                                    if (nmStage.rollTs != currentTs) {
-                                        nmStage.isCurrent = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
     }
 
     /* 
@@ -897,7 +912,7 @@ public class Supervisor {
                 try {
                     Thread.sleep(5000);
                     long now = Util.getTS();
-                    for (Connection c : connectionMap.keySet()) {
+                    for (Connection c : connectionStreamMap.keySet()) {
                         if (now - c.getLastHeartBeat() > THRESHOLD) {
                             closeConnection(c);
                         }
@@ -923,7 +938,8 @@ public class Supervisor {
         ss.bind(new InetSocketAddress(port));
         selector = Selector.open();
         ssc.register(selector, SelectionKey.OP_ACCEPT);
-        connectionMap = new ConcurrentHashMap<Connection, ArrayList<Stream>>();
+        connectionStreamMap = new ConcurrentHashMap<Connection, ArrayList<Stream>>();
+        stageConnectionMap = new ConcurrentHashMap<Stage, Connection>();
         collectorNodes = new ConcurrentHashMap<String, Connection>();
         appNodes =  new ConcurrentHashMap<String, Connection>();
         messageQueue = new LinkedBlockingQueue<Msg>();
