@@ -77,7 +77,14 @@ public class HDFSRecovery implements Runnable{
                 if (Util.retryRename(fs, recoveryPath, normalPath)) {
                     LOG.info("Finished to rename to " + normalPathname);
                 } else {
-                    throw new Exception("Faild to rename to " + normalPathname);
+                    if (fs.exists(normalPath)) {
+                        LOG.warn("failed to rename to " + normalPathname + ", it exists, delete " + recoveryPath);
+                        if (!Util.retryDelete(fs, recoveryPath)) {
+                            LOG.error("delete " + recoveryPath + " failed");
+                        }
+                    } else {
+                        throw new Exception("Faild to rename to " + normalPathname);
+                    }
                 }
                 
                 if (fs.exists(tmpPath) && !Util.retryDelete(fs, tmpPath)) {   //delete .tmp if exists
