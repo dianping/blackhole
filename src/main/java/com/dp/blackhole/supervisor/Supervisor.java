@@ -229,7 +229,7 @@ public class Supervisor {
                 }
             }
         } else {
-            LOG.info("no stream associate with " + connection);
+            LOG.warn("can not get associate streams from connectionStreamMap by connection: " + connection);
         }
     }
     
@@ -241,7 +241,7 @@ public class Supervisor {
     void handleCollectorNodeFail(Connection connection, long now) {
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         // processing current stage on streams
-        synchronized (streams) {
+        if (streams != null) {
             for (Stream stream : streams) {
                 ArrayList<Stage> stages = Streams.get(stream);
                 synchronized (stages) {
@@ -282,6 +282,8 @@ public class Supervisor {
                     }
                 }
             }
+        } else {
+            LOG.warn("can not get associate streams from connectionStreamMap by connection: " + connection);
         }
         
         // processing uploading and recovery stages
