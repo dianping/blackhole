@@ -144,6 +144,16 @@ public class Appnode extends Node {
     }
 
     @Override
+    protected void onDisconnected() {
+        // close connected streams
+        for (java.util.Map.Entry<AppLog, LogReader> e : appReaders.entrySet()) {
+            LogReader reader = e.getValue();
+            reader.stop();
+            appReaders.remove(e.getKey());
+        }
+    }
+    
+    @Override
     protected void onConnected() {
         clearMessageQueue();
         registerApps();
