@@ -3,6 +3,8 @@ package com.dp.blackhole.appnode;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,7 @@ import org.junit.Test;
 import com.dp.blackhole.appnode.AppLog;
 import com.dp.blackhole.appnode.RollRecovery;
 import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.simutil.SimAppnode;
 import com.dp.blackhole.simutil.SimRecoveryServer;
 import com.dp.blackhole.simutil.Util;
 
@@ -29,13 +32,23 @@ public class TestRollRecovery {
     private static List<String> receives = new ArrayList<String>();
     private SimRecoveryServer server;
     private Thread serverThread;
+    private static SimAppnode appnode;
+    private static String client;
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        try {
+            client = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e1) {
+            LOG.error("Oops, got an exception:", e1);
+            return;
+        }
+        appnode = new SimAppnode(client);
         ConfigKeeper confKeeper = new ConfigKeeper();
         confKeeper.addRawProperty(MAGIC+".port", "40000");
         confKeeper.addRawProperty(MAGIC + ".ROLL_PERIOD", "3600");
         //build a tmp file
-        file = Util.createTmpFile(MAGIC + Util.FILE_SUFFIX, Util.expected);
+        file = Util.createTmpFile(MAGIC + "." + Util.FILE_SUFFIX, Util.expected);
+        file = Util.createTmpFile(MAGIC, Util.expected);
     }
 
     @AfterClass
@@ -57,7 +70,7 @@ public class TestRollRecovery {
 
     @Test
     public void test() {
-        RollRecovery recovery = new RollRecovery(Util.HOSTNAME, Util.PORT, appLog, Util.rollTS);
+        RollRecovery recovery = new RollRecovery(appnode, Util.HOSTNAME, Util.PORT, appLog, Util.rollTS);
         Thread thread = new Thread(recovery);
         thread.start();
         try {

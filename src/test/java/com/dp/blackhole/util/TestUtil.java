@@ -16,7 +16,8 @@ import org.junit.Test;
 import com.dp.blackhole.common.Util;
 
 public class TestUtil {
-    
+    private static final String filepathname = "/tmp/893jfc842.log.2013-01-01.15";
+    private static File file;
     enum MONTH {
         JAN,
         FEB,
@@ -34,10 +35,13 @@ public class TestUtil {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+       file = new File(filepathname);
+       file.createNewFile();
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
+       file.delete();
     }
 
     @Before
@@ -68,15 +72,7 @@ public class TestUtil {
 
     @Test
     public void testFindRealFileByIdent() throws FileNotFoundException, IOException {
-        File file = com.dp.blackhole.simutil.Util.createTmpFile(
-                com.dp.blackhole.simutil.Util.FILE_SUFFIX, "ok");
-        assertNotNull(Util.findRealFileByIdent(
-                file.getAbsolutePath(), com.dp.blackhole.simutil.Util.FILE_SUFFIX));
-        com.dp.blackhole.simutil.Util.createTmpFile(
-                com.dp.blackhole.simutil.Util.FILE_SUFFIX, "ok");
-        assertNull(Util.findRealFileByIdent(
-                file.getAbsolutePath(), com.dp.blackhole.simutil.Util.FILE_SUFFIX));
-        com.dp.blackhole.simutil.Util.deleteTmpFile(
-                com.dp.blackhole.simutil.Util.FILE_SUFFIX);
+        File file = Util.findRealFileByIdent("/tmp/893jfc842.log", com.dp.blackhole.simutil.Util.FILE_SUFFIX);
+        assertNotNull(file);
     }
 }
