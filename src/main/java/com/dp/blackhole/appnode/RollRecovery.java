@@ -29,7 +29,9 @@ public class RollRecovery implements Runnable{
     private long rollTimestamp;
     private Socket server;
     private byte[] inbuf;
-    public RollRecovery(String collectorServer, int port, AppLog appLog, long rollTimestamp) {
+    private Appnode node;
+    public RollRecovery(Appnode node, String collectorServer, int port, AppLog appLog, long rollTimestamp) {
+        this.node = node;
         this.collectorServer = collectorServer;
         this.port = port;
         this.appLog = appLog;
@@ -45,9 +47,9 @@ public class RollRecovery implements Runnable{
         String rollIdent = unitFormat.format(rollTimestamp);
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
         
-        // TODO some rollIdent may be unrecoverable, need to address this
         if (rolledFile == null || !rolledFile.exists()) {
             LOG.error("app " + appLog.getAppName() + " rollIdent " + rollIdent + " can not be found");
+            node.reportUnrecoverable(appLog.getAppName(), node.getHost(), rollTimestamp);
             return;
         }
         

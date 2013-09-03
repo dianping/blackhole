@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
@@ -16,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dp.blackhole.appnode.AppLog;
+import com.dp.blackhole.appnode.Appnode;
 import com.dp.blackhole.appnode.RollRecovery;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.simutil.SimCollectornode;
@@ -30,6 +33,8 @@ public class TestHDFSRecovery {
     private File fileBroken;
     private FileSystem fs;
     private Path oldPath;
+    private Appnode appnode;
+    private String client;
 
     @Before
     public void setUp() throws Exception {
@@ -57,6 +62,14 @@ public class TestHDFSRecovery {
         file.renameTo(renameFile);
         file = renameFile;
         
+        try {
+            client = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e1) {
+            LOG.error("Oops, got an exception:", e1);
+            return;
+        }
+        appnode = new Appnode(client);
+        
         //deploy some condition
         ConfigKeeper confKeeper = new ConfigKeeper();
         confKeeper.addRawProperty(MAGIC+".ROLL_PERIOD", "3600");
@@ -76,7 +89,7 @@ public class TestHDFSRecovery {
         serverThread.start();
         
         AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), new Date().getTime());
-        RollRecovery clientTask = new RollRecovery(Util.HOSTNAME, Util.PORT, appLog, Util.rollTS);
+        RollRecovery clientTask = new RollRecovery(appnode, Util.HOSTNAME, Util.PORT, appLog, Util.rollTS);
         Thread clientThread = new Thread(clientTask);
         clientThread.start();
         
