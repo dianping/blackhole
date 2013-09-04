@@ -124,13 +124,13 @@ public class Connection {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append(" host:" +host);
+        sb.append("host:" +host);
         if (NodeType == APPNODE) {
-            sb.append(" type: APPNODE");
+            sb.append(",type:APPNODE");
         } else if (NodeType == COLLECTORNODE) {
-            sb.append(" type: COLLECTORNODE");
+            sb.append(",type:COLLECTORNODE");
         } else {
-            sb.append(" type: unknown");
+            sb.append(",type:UNKNOWN");
         }
         return sb.toString();
     }

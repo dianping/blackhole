@@ -180,6 +180,8 @@ public class Collectornode extends Node {
 
         init(serverhost, serverport);
         
+        collectors = new ArrayList<Collector>();
+        
         // start to accept connection
         Acceptor acceptor = new Acceptor();
         acceptor.setDaemon(true);

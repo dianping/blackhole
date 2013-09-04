@@ -263,7 +263,7 @@ public class Appnode extends Node {
     }
     
     public void reportUnrecoverable(String appName, String appHost, long ts) {
-        Message message = PBwrap.warpUnrecoverable(appName, appHost, ts);
+        Message message = PBwrap.wrapUnrecoverable(appName, appHost, ts);
         send(message);
     }
 

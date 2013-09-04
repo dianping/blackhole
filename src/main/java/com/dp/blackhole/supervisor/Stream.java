@@ -91,6 +91,6 @@ public class Stream {
     
     @Override
     public String toString() {
-        return app+"@"+appHost+" period " + period+ " starttime "+Util.ts2String(startTs)+" lastSuccessTs "+lastSuccessTs.get()+" isActive "+isActive();
+        return app+"@"+appHost+",period:" + period+ ",starttime:"+Util.formatTs(startTs)+",lastSuccessTs:"+lastSuccessTs.get()+",isActive:"+isActive();
     } 
 }

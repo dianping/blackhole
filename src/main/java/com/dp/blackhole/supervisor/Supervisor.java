@@ -13,7 +13,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -34,6 +33,7 @@ import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
+import com.dp.blackhole.common.gen.StreamIDPB.StreamID;
 import com.dp.blackhole.common.Util;
 
 public class Supervisor {
@@ -180,7 +180,7 @@ public class Supervisor {
                     }
                 }
             } catch (InterruptedException ie) {
-                LOG.info("got InterruptedException", ie);
+                LOG.warn("got InterruptedException", ie);
             } catch (IOException e) {
                 closeConnection((Connection) key.attachment());
             }
@@ -191,7 +191,7 @@ public class Supervisor {
      * mark the stream as inactive, mark all the stages as pending unless the uploading stage
      * remove the relationship of the corresponding collectorNode and streams
      */
-    void handleAppNodeFail(Connection connection, long now) {
+    private void handleAppNodeFail(Connection connection, long now) {
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         if (streams != null) {
             for (Stream stream : streams) {
@@ -238,7 +238,7 @@ public class Supervisor {
      * 2. remove the relationship of the corresponding appNode and streams
      * 3. processing uploading and recovery stages
      */
-    void handleCollectorNodeFail(Connection connection, long now) {
+    private void handleCollectorNodeFail(Connection connection, long now) {
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         // processing current stage on streams
         if (streams != null) {
@@ -250,7 +250,7 @@ public class Supervisor {
                         LOG.error("stage " + current + "should be current stage");
                         continue;
                     }
-                    LOG.debug("checking current stage: " + current);
+                    LOG.info("checking current stage: " + current);
                     
                     Issue e = new Issue();
                     e.desc = "collector failed";
@@ -264,7 +264,7 @@ public class Supervisor {
                     } else {
                         current.status = Stage.COLLECTORFAIL;
                     }
-                    LOG.debug("after checking current stage: " + current);
+                    LOG.info("after checking current stage: " + current);
                 }
                    
                 // remove corresponding appNodes's relationship with the stream
@@ -346,6 +346,216 @@ public class Supervisor {
         }
     }
 
+    private void dumpstat() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("dumpstat:\n");
+        sb.append("############################## dump ##############################\n");
+        
+        sb.append("print Streams:\n");
+        for (Entry<Stream, ArrayList<Stage>> entry : Streams.entrySet()) {
+            Stream stream = entry.getKey();
+            sb.append("[stream]\n")
+            .append(stream)
+            .append("\n")
+            .append("[stages]\n");
+            ArrayList<Stage> stages = entry.getValue();
+            synchronized (stages) {
+                for (Stage stage : stages) {
+                    sb.append(stage)
+                    .append("\n");
+                }
+            }
+        }
+        sb.append("\n");
+        
+        sb.append("print streamIdMap:\n");
+        for (Entry<StreamId, Stream> entry : streamIdMap.entrySet()) {
+            sb.append("<")
+            .append(entry.getKey())
+            .append(", ")
+            .append(entry.getValue())
+            .append(">")
+            .append("\n");
+        }
+        sb.append("\n");
+        
+        sb.append("print stageConnectionMap:\n");
+        for(Entry<Stage, Connection> entry : stageConnectionMap.entrySet()) {
+            sb.append("<")
+            .append(entry.getKey())
+            .append(", ")
+            .append(entry.getValue())
+            .append(">")
+            .append("\n");
+        }
+        sb.append("\n");
+        
+        sb.append("print appNodes:\n");
+        for(Entry<String, Connection> entry : appNodes.entrySet()) {
+            sb.append("<")
+            .append(entry.getKey())
+            .append(", ")
+            .append(entry.getValue())
+            .append(">")
+            .append("\n");
+        }
+        sb.append("\n");
+        
+        sb.append("print collectorNodes:\n");
+        for(Entry<String, Connection> entry : collectorNodes.entrySet()) {
+            sb.append("<")
+            .append(entry.getKey())
+            .append(", ")
+            .append(entry.getValue())
+            .append(">")
+            .append("\n");
+        }
+        sb.append("\n");
+        
+        sb.append("print connectionStreamMap:\n");
+        for(Entry<Connection, ArrayList<Stream>> entry : connectionStreamMap.entrySet()) {
+            Connection conn = entry.getKey();
+            sb.append(conn)
+            .append("\n");
+            ArrayList<Stream> streams = entry.getValue();
+            synchronized (streams) {
+                for (Stream stream : streams) {
+                    sb.append(stream)
+                    .append("\n");
+                }
+            }
+            sb.append("\n");
+        }
+        
+        sb.append("##################################################################");
+        
+        LOG.info(sb.toString());
+    }
+
+    private void handleRetireStream(StreamID streamId) {
+        StreamId id = new StreamId(streamId.getAppName(), streamId.getAppServer());
+        Stream stream = streamIdMap.get(id);
+        
+        if (stream == null) {
+            LOG.error("can't find stream by streamid: " + id);
+            return;
+        }
+        
+        if (stream.isActive()) {
+            LOG.error("only inactive stream can be retired");
+            return;
+        } else {
+            if (collectorNodes.isEmpty()) {
+                LOG.error("only inactive app can be retired");
+                return;
+            }
+            
+            LOG.info("retire stream: " + stream);
+            
+            // remove from streamIdMap
+            streamIdMap.remove(id);
+            
+            // remove the stages from stageConnectionMap
+            ArrayList<Stage> stages = Streams.get(stream);
+            if (stages != null) {
+                synchronized (stages) {
+                    for (Stage stage : stages) {
+                        stageConnectionMap.remove(stage);
+                    }
+                }
+            } else  {
+                LOG.error("can not find stages of stream: " + stream);
+            }
+            
+            // remove stream from connectionStreamMap
+            for (Entry<Connection, ArrayList<Stream>> e : connectionStreamMap.entrySet()) {
+                ArrayList<Stream> associatedStreams = e.getValue();
+                synchronized (associatedStreams) {
+                    associatedStreams.remove(stream);
+                    if (associatedStreams.isEmpty()) {
+                        connectionStreamMap.remove(e.getKey());
+                    }
+                }
+            }
+            
+            // remove stream from Streams
+            Streams.remove(stream);
+        }
+    }
+    
+    private void handleManualRecoveryRoll(RollID rollID) {
+        StreamId id = new StreamId(rollID.getAppName(), rollID.getAppServer());
+        Stream stream = streamIdMap.get(id);
+
+        if (stream != null) {
+            // check the stream is active
+            if (!stream.isActive()) {
+                LOG.error("the manual recovery stage must belong to an active stream");
+                return;
+            }
+            ArrayList<Stage> stages = Streams.get(stream);
+            if (stages != null) {
+                synchronized (stages) {
+                    // do not process exist stage
+                    for (Stage stage : stages) {
+                        if (stage.rollTs == rollID.getRollTs()) {
+                            LOG.error("the manual recovery stage must not exist");
+                            return;
+                        }
+                    }
+                    // create the stage
+                    Stage manualRecoveryStage = new Stage();
+                    manualRecoveryStage.app = rollID.getAppName();
+                    manualRecoveryStage.apphost = rollID.getAppServer();
+                    manualRecoveryStage.collectorhost = null;
+                    manualRecoveryStage.cleanstart = false;
+                    manualRecoveryStage.issuelist = new ArrayList<Issue>();
+                    manualRecoveryStage.status = Stage.RECOVERYING;
+                    manualRecoveryStage.rollTs = rollID.getRollTs();
+                    manualRecoveryStage.isCurrent = false;
+                    // put the stage to head of the stages
+                    ArrayList<Stage> newStages = new ArrayList<Stage>();
+                    newStages.add(manualRecoveryStage);
+                    newStages.addAll(newStages);
+                    Streams.put(stream, newStages);
+                    
+                    // do recovery
+                    doRecovery(stream, manualRecoveryStage);
+                }
+            } else {
+                LOG.error("can not find stages of stream: " + stream);
+            }
+        } else {
+            LOG.error("can't find stream by streamid: " + id);
+        }   
+    }
+
+    private void handleUnrecoverable(RollID rollID) {
+        StreamId id = new StreamId(rollID.getAppName(), rollID.getAppServer());
+        Stream stream = streamIdMap.get(id);
+
+        if (stream != null) {
+            ArrayList<Stage> stages = Streams.get(stream);
+            if (stages != null) {
+                synchronized (stages) {
+                    for (Stage stage : stages) {
+                        if (stage.rollTs == rollID.getRollTs()) {
+                            LOG.error("stage " + stage + " cannot be recovered");
+                            stages.remove(stage);
+                            stageConnectionMap.remove(stage);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                LOG.error("can not find stages of stream: " + stream);
+            }
+        } else {
+            LOG.error("can't find stream by streamid: " + id);
+        }
+        
+    }
+    
     /*
      * failure happened only on stream
      * just log it in a issue, because:
@@ -353,7 +563,7 @@ public class Supervisor {
      * and ask for a new collector; if it is a appnode fail, the appNode will
      * register the app again 
      */
-    private void handlerFailure(Failure failure) {
+    private void handleFailure(Failure failure) {
         StreamId id = new StreamId(failure.getApp(), failure.getAppServer());
         Stream stream = streamIdMap.get(id);
         
@@ -363,6 +573,11 @@ public class Supervisor {
         }
         
         ArrayList<Stage> stages = Streams.get(stream);
+        if (stages == null) {
+            LOG.error("can not find stages of stream: " + stream);
+            return;
+        }
+        
         synchronized (stages) {
             long failRollTs = Util.getRollTs(failure.getFailTs(), stream.period);
             Stage failstage = null;
@@ -410,15 +625,11 @@ public class Supervisor {
                         }
                     }
                 }
+            } else {
+                LOG.error("can not find stages of stream: " + stream);
             }
         } else {
             LOG.error("can't find stream by streamid: " + id);
-            if (LOG.isDebugEnabled()) {
-                for(Entry<StreamId, Stream> e : streamIdMap.entrySet()) {
-                    LOG.debug("key: " + e.getKey());
-                    LOG.debug("value: " + e.getValue());
-                }
-            }
         }
     }
 
@@ -437,22 +648,18 @@ public class Supervisor {
                     for (Stage stage : stages) {
                         if (stage.rollTs == rollID.getRollTs()) {
                             stage.status = Stage.UPLOADED;
-                            LOG.info(stage.toString());
+                            LOG.info(stage);
                             stages.remove(stage);
                             stageConnectionMap.remove(stage);
                             break;
                         }
                     }
                 }
+            } else {
+                LOG.error("can not find stages of stream: " + stream);
             }
         } else {
             LOG.error("can't find stream by streamid: " + id);
-            if (LOG.isDebugEnabled()) {
-                for(Entry<StreamId, Stream> e : streamIdMap.entrySet()) {
-                    LOG.debug("key: " + e.getKey());
-                    LOG.debug("value: " + e.getValue());
-                }
-            }
         }
     }
 
@@ -479,15 +686,11 @@ public class Supervisor {
                         }
                     }
                 }
+            } else {
+                LOG.error("can not find stages of stream: " + stream);
             }
         } else {
             LOG.error("can't find stream by streamid: " + id);
-            if (LOG.isDebugEnabled()) {
-                for(Entry<StreamId, Stream> e : streamIdMap.entrySet()) {
-                    LOG.debug("key: " + e.getKey());
-                    LOG.debug("value: " + e.getValue());
-                }
-            }
         }
     }
 
@@ -515,15 +718,11 @@ public class Supervisor {
                         }
                     }
                 }
+            } else {
+                LOG.error("can not find stages of stream: " + stream);
             }
         } else {
             LOG.error("can't find stream by streamid: " + id);
-            if (LOG.isDebugEnabled()) {
-                for(Entry<StreamId, Stream> e : streamIdMap.entrySet()) {
-                    LOG.debug("key: " + e.getKey());
-                    LOG.debug("value: " + e.getValue());
-                }
-            }
         }
     }
     
@@ -575,15 +774,11 @@ public class Supervisor {
                         stages.add(next);
                     }
                 }
+            } else {
+                LOG.error("can not find stages of stream: " + stream);
             }
         } else {
             LOG.error("can't find stream by streamid: " + id);
-            if (LOG.isDebugEnabled()) {
-                for(Entry<StreamId, Stream> e : streamIdMap.entrySet()) {
-                    LOG.debug("key: " + e.getKey());
-                    LOG.debug("value: " + e.getValue());
-                }
-            }
         }
     }
 
@@ -658,6 +853,7 @@ public class Supervisor {
             streamIdMap.put(id, stream);
         } else {
             // old stream reconnected
+            LOG.info("stream reconnected: " + stream);
             if (!stream.isActive()) {
                 stream.updateActive(true);
             }
@@ -671,7 +867,7 @@ public class Supervisor {
                     recoveryStages(stream, stages, connectedTs, currentTs, message.getCollectorServer());
                 }
             } else {
-                LOG.error("can not find stages of stream: "+stream);
+                LOG.error("can not find stages of stream: " + stream);
             }
         }
         
@@ -896,7 +1092,19 @@ public class Supervisor {
                 handleRecoveryFail(msg.getRollID());
                 break;
             case FAILURE:
-                handlerFailure(msg.getFailure());
+                handleFailure(msg.getFailure());
+                break;
+            case UNRECOVERABLE:
+                handleUnrecoverable(msg.getRollID());
+                break;
+            case MANUAL_RECOVERY_ROLL:
+                handleManualRecoveryRoll(msg.getRollID());
+                break;
+            case DUMPSTAT:
+                dumpstat();
+                break;
+            case RETIRESTREAM:
+                handleRetireStream(msg.getStreamId());
                 break;
             default:
                 LOG.warn("unknown message: " + msg.toString());

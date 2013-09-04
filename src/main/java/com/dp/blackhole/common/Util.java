@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -22,6 +23,8 @@ public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
     private static final int REPEATE = 3;
     private static final int RETRY_SLEEP_TIME = 3000;
+    private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    
 
     public static String getRemoteHost(Socket socket) {
       InetSocketAddress remoteAddr= ((InetSocketAddress)socket.getRemoteSocketAddress());
@@ -177,5 +180,9 @@ public class Util {
             ts = (ts / rollPeriod) * rollPeriod;
         }
         return ts;
+    }
+    
+    public static String formatTs(long ts) {
+        return format.format(new Date(ts));
     }
 }
