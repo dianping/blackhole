@@ -3,7 +3,6 @@ package com.dp.blackhole.common;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -11,10 +10,9 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +23,8 @@ public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
     private static final int REPEATE = 3;
     private static final int RETRY_SLEEP_TIME = 3000;
+    private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    
 
     public static String getRemoteHost(Socket socket) {
       InetSocketAddress remoteAddr= ((InetSocketAddress)socket.getRemoteSocketAddress());
@@ -83,31 +83,13 @@ public class Util {
     public static File findRealFileByIdent(String appTailFile, final String rollIdent) {
         // real file: trace.log.2013-07-11.12
         // rollIdent is "2013-07-11.12" as long as time unit is "hour"
-        String directoryStr = appTailFile.substring(0, appTailFile.lastIndexOf('/'));
-        
-        FileFilter filter = new FileFilter() {
-            public boolean accept(File pathName) {
-                CharSequence rollIdentSequence = rollIdent;
-                if ((pathName.getName().contains(rollIdentSequence))) {
-                    LOG.debug("found: " + pathName);
-                    return true;
-                }
-                return false;
-            }
-        };
-        List<File> candidateFiles = Arrays.asList(new File(directoryStr).listFiles(filter));
-        if (candidateFiles.isEmpty()) {
-            LOG.error("Can not find any candidate file for rollIdent " + rollIdent);
-            return null;
-        } else if (candidateFiles.size() > 1) {
-            LOG.error("CandidateFile number is more then one. It isn't an expected result." +
-                    "CandidateFiles are " +    Arrays.toString(candidateFiles.toArray()));
-            return null;
+        File realFile = new File(appTailFile + "." + rollIdent);
+        if (realFile.isFile() && realFile.exists()) {
+            return realFile;
         } else {
-            return candidateFiles.get(0);
+            return null;
         }
     }
-
     @Deprecated
     public static long getPeriodInSeconds(int value, String unit) {
         if (unit.equalsIgnoreCase("hour")) {
@@ -198,5 +180,9 @@ public class Util {
             ts = (ts / rollPeriod) * rollPeriod;
         }
         return ts;
+    }
+    
+    public static String formatTs(long ts) {
+        return format.format(new Date(ts));
     }
 }
