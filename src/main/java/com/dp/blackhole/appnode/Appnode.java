@@ -71,7 +71,7 @@ public class Appnode extends Node {
             if ((appLog = appLogs.get(appName)) != null) {
                 long rollTs = recoveryRoll.getRollTs();
                 collectorServer = recoveryRoll.getCollectorServer();
-                RollRecovery recovery = new RollRecovery(collectorServer, port, appLog, rollTs);
+                RollRecovery recovery = new RollRecovery(this, collectorServer, port, appLog, rollTs);
                 exec.execute(recovery);
                 return true;
             } else {
@@ -143,6 +143,16 @@ public class Appnode extends Node {
         }
     }
 
+    @Override
+    protected void onDisconnected() {
+        // close connected streams
+        for (java.util.Map.Entry<AppLog, LogReader> e : appReaders.entrySet()) {
+            LogReader reader = e.getValue();
+            reader.stop();
+            appReaders.remove(e.getKey());
+        }
+    }
+    
     @Override
     protected void onConnected() {
         clearMessageQueue();
@@ -252,6 +262,10 @@ public class Appnode extends Node {
         register(app, applog.getCreateTime());
     }
     
+    public void reportUnrecoverable(String appName, String appHost, long ts) {
+        Message message = PBwrap.wrapUnrecoverable(appName, appHost, ts);
+        send(message);
+    }
 
     public static void main(String[] args) {
         String hostname;

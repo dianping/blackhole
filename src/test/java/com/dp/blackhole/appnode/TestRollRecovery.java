@@ -3,6 +3,8 @@ package com.dp.blackhole.appnode;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,8 +31,17 @@ public class TestRollRecovery {
     private static List<String> receives = new ArrayList<String>();
     private SimRecoveryServer server;
     private Thread serverThread;
+    private static Appnode appnode;
+    private static String client;
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        try {
+            client = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e1) {
+            LOG.error("Oops, got an exception:", e1);
+            return;
+        }
+        appnode = new Appnode(client);
         ConfigKeeper confKeeper = new ConfigKeeper();
         confKeeper.addRawProperty(MAGIC+".port", "40000");
         confKeeper.addRawProperty(MAGIC + ".ROLL_PERIOD", "3600");
@@ -57,7 +68,7 @@ public class TestRollRecovery {
 
     @Test
     public void test() {
-        RollRecovery recovery = new RollRecovery(Util.HOSTNAME, Util.PORT, appLog, Util.rollTS);
+        RollRecovery recovery = new RollRecovery(appnode, Util.HOSTNAME, Util.PORT, appLog, Util.rollTS);
         Thread thread = new Thread(recovery);
         thread.start();
         try {

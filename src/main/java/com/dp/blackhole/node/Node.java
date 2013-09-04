@@ -157,6 +157,7 @@ public abstract class Node {
                     }
                 }
             } catch (IOException e) {
+                LOG.warn("IOException catched: ", e);
                 closeconnection(key);
             }
         }
