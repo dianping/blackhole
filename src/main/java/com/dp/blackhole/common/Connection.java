@@ -123,7 +123,7 @@ public class Connection {
     
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("host:" +host);
         if (NodeType == APPNODE) {
             sb.append(",type:APPNODE");

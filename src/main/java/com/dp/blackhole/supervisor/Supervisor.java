@@ -347,7 +347,7 @@ public class Supervisor {
     }
 
     private void dumpstat() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("dumpstat:\n");
         sb.append("############################## dump ##############################\n");
         
