@@ -21,7 +21,7 @@ public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
     public static final String HOSTNAME = "localhost";
     public static final String SCHEMA = "file://";
-    public static final String BASE_PATH = "/tmp/";
+    public static final String BASE_PATH = "/tmp/hdfs/";
     public static final String BASE_HDFS_PATH = SCHEMA + BASE_PATH;
     public static final String FILE_SUFFIX = "2013-01-01.15";
     public static long rollTS = 1357023691855l;
@@ -57,7 +57,8 @@ public class Util {
                 " f90fj 9034u j90 jgioqpwejf iopwe jfopqwefj opewji fopq934\n" +
                 expected + "\n";
         //build a app log
-        File file = File.createTempFile(MAGIC, null);
+        File file = new File("/tmp/" + MAGIC);
+        file.createNewFile();
         LOG.info("create tmp file " + file);
         BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(file)));
