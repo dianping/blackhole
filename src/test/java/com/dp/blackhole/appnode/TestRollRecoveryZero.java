@@ -35,7 +35,8 @@ public class TestRollRecoveryZero {
         confKeeper.addRawProperty(MAGIC+".port", "40000");
         confKeeper.addRawProperty(MAGIC + ".ROLL_PERIOD", "3600");
         //build a tmp file
-        file = Util.createTmpFile(MAGIC + Util.FILE_SUFFIX, Util.expected);
+        file = Util.createTmpFile(MAGIC + "." + Util.FILE_SUFFIX, Util.expected);
+        file = Util.createTmpFile(MAGIC, Util.expected);
     }
 
     @AfterClass

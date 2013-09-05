@@ -18,9 +18,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dp.blackhole.appnode.AppLog;
-import com.dp.blackhole.appnode.Appnode;
 import com.dp.blackhole.appnode.RollRecovery;
 import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.simutil.SimAppnode;
 import com.dp.blackhole.simutil.SimCollectornode;
 import com.dp.blackhole.simutil.Util;
 
@@ -33,7 +33,7 @@ public class TestHDFSRecovery {
     private File fileBroken;
     private FileSystem fs;
     private Path oldPath;
-    private Appnode appnode;
+    private SimAppnode appnode;
     private String client;
 
     @Before
@@ -58,9 +58,8 @@ public class TestHDFSRecovery {
         
         //create a good file and rename it for client
         file = Util.createTmpFile(MAGIC, Util.expected);
-        File renameFile = new File(file.getParent(), APP_HOST + "@" + MAGIC + "_" + Util.FILE_SUFFIX);
-        file.renameTo(renameFile);
-        file = renameFile;
+        Util.createTmpFile(MAGIC + "." + Util.FILE_SUFFIX, Util.expected);
+        Util.createTmpFile(APP_HOST + "@" + MAGIC + "_" + Util.FILE_SUFFIX, Util.expected);
         
         try {
             client = InetAddress.getLocalHost().getHostName();
@@ -68,7 +67,15 @@ public class TestHDFSRecovery {
             LOG.error("Oops, got an exception:", e1);
             return;
         }
-        appnode = new Appnode(client);
+        appnode = new SimAppnode(client);
+        
+        try {
+            client = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e1) {
+            LOG.error("Oops, got an exception:", e1);
+            return;
+        }
+        appnode = new SimAppnode(client);
         
         //deploy some condition
         ConfigKeeper confKeeper = new ConfigKeeper();
@@ -77,9 +84,10 @@ public class TestHDFSRecovery {
 
     @After
     public void tearDown() throws Exception {
-        fs.delete(new Path(Util.SCHEMA + Util.BASE_PATH + MAGIC), true);
+        fs.delete(new Path(Util.SCHEMA + Util.BASE_PATH), true);
         fileBroken.delete();
         file.delete();
+        Util.deleteTmpFile(MAGIC);
     }
 
     @Test
