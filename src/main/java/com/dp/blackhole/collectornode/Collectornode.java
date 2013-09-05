@@ -122,7 +122,7 @@ public class Collectornode extends Node {
     }
 
     public String getDatepathbyFormat (String format) {
-        StringBuffer dirs = new StringBuffer();
+        StringBuilder dirs = new StringBuilder();
         for (String dir: format.split("\\.")) {
             dirs.append(dir);
             dirs.append('/');
