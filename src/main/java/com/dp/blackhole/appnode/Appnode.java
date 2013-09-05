@@ -144,6 +144,16 @@ public class Appnode extends Node {
     }
 
     @Override
+    protected void onDisconnected() {
+        // close connected streams
+        for (java.util.Map.Entry<AppLog, LogReader> e : appReaders.entrySet()) {
+            LogReader reader = e.getValue();
+            reader.stop();
+            appReaders.remove(e.getKey());
+        }
+    }
+    
+    @Override
     protected void onConnected() {
         clearMessageQueue();
         registerApps();
@@ -253,7 +263,7 @@ public class Appnode extends Node {
     }
     
     public void reportUnrecoverable(String appName, String appHost, long ts) {
-        Message message = PBwrap.warpUnrecoverable(appName, appHost, ts);
+        Message message = PBwrap.wrapUnrecoverable(appName, appHost, ts);
         send(message);
     }
 

@@ -69,6 +69,14 @@ public class TestHDFSRecovery {
         }
         appnode = new SimAppnode(client);
         
+        try {
+            client = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e1) {
+            LOG.error("Oops, got an exception:", e1);
+            return;
+        }
+        appnode = new SimAppnode(client);
+        
         //deploy some condition
         ConfigKeeper confKeeper = new ConfigKeeper();
         confKeeper.addRawProperty(MAGIC+".ROLL_PERIOD", "3600");

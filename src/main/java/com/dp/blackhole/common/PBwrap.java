@@ -11,6 +11,7 @@ import com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode;
 import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
+import com.dp.blackhole.common.gen.StreamIDPB.StreamID;
 
 public class PBwrap {
     public static Message wrapMessage(MessageType type, Object message) {
@@ -47,7 +48,14 @@ public class PBwrap {
         case UPLOAD_FAIL:
         case RECOVERY_SUCCESS:
         case RECOVERY_FAIL:
+        case UNRECOVERABLE:
+        case MANUAL_RECOVERY_ROLL:
             msg.setRollID((RollID) message);
+            break;
+        case RETIRESTREAM:
+            msg.setStreamId((StreamID) message);
+            break;
+        case DUMPSTAT:
             break;
         default:
         }
@@ -156,5 +164,24 @@ public class PBwrap {
     
     public static Message wrapcollectorFailure (String app, String appHost, long failTs) {
         return wrapFailure(app, appHost, NodeType.COLLECTOR_NODE, failTs);
+    }
+    
+    public static Message wrapUnrecoverable(String appName, String appServer, long rollTs) {
+        return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, appServer, 0, rollTs));
+    }
+    
+    public static Message wrapManualRecoveryRoll(String appName, String appServer, long rollTs) {
+        return wrapMessage(MessageType.MANUAL_RECOVERY_ROLL, wrapRollID(appName, appServer, 0, rollTs));
+    }
+    
+    public static Message wrapRetireStream(String appName, String appServer) {
+        StreamID.Builder builder = StreamID.newBuilder();
+        builder.setAppName(appName);
+        builder.setAppServer(appServer);
+        return wrapMessage(MessageType.RETIRESTREAM, builder.build());
+    }
+    
+    public static Message wrapDumpStat() {
+        return wrapMessage(MessageType.DUMPSTAT, null);
     }
 }

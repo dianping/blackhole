@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +27,7 @@ import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.node.Node;
+import com.dp.blackhole.supervisor.StreamId;
 
 public class Collectornode extends Node {
 
@@ -37,6 +39,7 @@ public class Collectornode extends Node {
     private String suffix;
     private int port;
     private FileSystem fs;
+    private ArrayList<Collector> collectors;
 
     public Collectornode() throws IOException {
         pool = Executors.newCachedThreadPool();
@@ -62,6 +65,9 @@ public class Collectornode extends Node {
                     if (AgentProtocol.STREAM == head.type) {
                         LOG.debug("logreader connected: " + head.app);
                         Collector collector = new Collector(Collectornode.this, socket, basedir, head.app, getHost(), head.peroid);
+                        synchronized (collectors) {
+                            collectors.add(collector);
+                        }
                         pool.execute(collector);
                         Message msg = PBwrap.wrapReadyCollector(head.app, Util.getRemoteHost(socket), head.peroid, getHost(), Util.getTS());
                         send(msg);
@@ -116,7 +122,7 @@ public class Collectornode extends Node {
     }
 
     public String getDatepathbyFormat (String format) {
-        StringBuffer dirs = new StringBuffer();
+        StringBuilder dirs = new StringBuilder();
         for (String dir: format.split("\\.")) {
             dirs.append(dir);
             dirs.append('/');
@@ -174,6 +180,8 @@ public class Collectornode extends Node {
 
         init(serverhost, serverport);
         
+        collectors = new ArrayList<Collector>();
+        
         // start to accept connection
         Acceptor acceptor = new Acceptor();
         acceptor.setDaemon(true);
@@ -181,6 +189,17 @@ public class Collectornode extends Node {
         
         loop();
         close();
+    }
+    
+    @Override
+    protected void onDisconnected() {
+        // close connected streams
+        synchronized (collectors) {
+         for (Collector collector : collectors) {
+             collector.close();
+         }
+         collectors.clear();
+        }
     }
     
     @Override
@@ -298,8 +317,11 @@ public class Collectornode extends Node {
         }
     }
 
-    public void reportFailure(String app, String appHost, long ts) {
+    public void reportFailure(Collector collector, String app, String appHost, long ts) {
         Message message = PBwrap.wrapcollectorFailure(app, appHost, ts);
         send(message);
+        synchronized (collectors) {
+            collectors.remove(collector);
+        }
     }
 }

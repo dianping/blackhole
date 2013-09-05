@@ -132,6 +132,20 @@ public final class MessagePB {
      * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
      */
     com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNodeOrBuilder getNoAvailableNodeOrBuilder();
+
+    // optional .blackhole.StreamID streamId = 10;
+    /**
+     * <code>optional .blackhole.StreamID streamId = 10;</code>
+     */
+    boolean hasStreamId();
+    /**
+     * <code>optional .blackhole.StreamID streamId = 10;</code>
+     */
+    com.dp.blackhole.common.gen.StreamIDPB.StreamID getStreamId();
+    /**
+     * <code>optional .blackhole.StreamID streamId = 10;</code>
+     */
+    com.dp.blackhole.common.gen.StreamIDPB.StreamIDOrBuilder getStreamIdOrBuilder();
   }
   /**
    * Protobuf type {@code blackhole.Message}
@@ -299,6 +313,19 @@ public final class MessagePB {
               bitField0_ |= 0x00000100;
               break;
             }
+            case 82: {
+              com.dp.blackhole.common.gen.StreamIDPB.StreamID.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000200) == 0x00000200)) {
+                subBuilder = streamId_.toBuilder();
+              }
+              streamId_ = input.readMessage(com.dp.blackhole.common.gen.StreamIDPB.StreamID.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(streamId_);
+                streamId_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000200;
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -399,6 +426,22 @@ public final class MessagePB {
        * <code>NOAVAILABLENODE = 14;</code>
        */
       NOAVAILABLENODE(13, 14),
+      /**
+       * <code>UNRECOVERABLE = 15;</code>
+       */
+      UNRECOVERABLE(14, 15),
+      /**
+       * <code>MANUAL_RECOVERY_ROLL = 16;</code>
+       */
+      MANUAL_RECOVERY_ROLL(15, 16),
+      /**
+       * <code>DUMPSTAT = 17;</code>
+       */
+      DUMPSTAT(16, 17),
+      /**
+       * <code>RETIRESTREAM = 18;</code>
+       */
+      RETIRESTREAM(17, 18),
       ;
 
       /**
@@ -457,6 +500,22 @@ public final class MessagePB {
        * <code>NOAVAILABLENODE = 14;</code>
        */
       public static final int NOAVAILABLENODE_VALUE = 14;
+      /**
+       * <code>UNRECOVERABLE = 15;</code>
+       */
+      public static final int UNRECOVERABLE_VALUE = 15;
+      /**
+       * <code>MANUAL_RECOVERY_ROLL = 16;</code>
+       */
+      public static final int MANUAL_RECOVERY_ROLL_VALUE = 16;
+      /**
+       * <code>DUMPSTAT = 17;</code>
+       */
+      public static final int DUMPSTAT_VALUE = 17;
+      /**
+       * <code>RETIRESTREAM = 18;</code>
+       */
+      public static final int RETIRESTREAM_VALUE = 18;
 
 
       public final int getNumber() { return value; }
@@ -477,6 +536,10 @@ public final class MessagePB {
           case 12: return RECOVERY_FAIL;
           case 13: return FAILURE;
           case 14: return NOAVAILABLENODE;
+          case 15: return UNRECOVERABLE;
+          case 16: return MANUAL_RECOVERY_ROLL;
+          case 17: return DUMPSTAT;
+          case 18: return RETIRESTREAM;
           default: return null;
         }
       }
@@ -721,6 +784,28 @@ public final class MessagePB {
       return noAvailableNode_;
     }
 
+    // optional .blackhole.StreamID streamId = 10;
+    public static final int STREAMID_FIELD_NUMBER = 10;
+    private com.dp.blackhole.common.gen.StreamIDPB.StreamID streamId_;
+    /**
+     * <code>optional .blackhole.StreamID streamId = 10;</code>
+     */
+    public boolean hasStreamId() {
+      return ((bitField0_ & 0x00000200) == 0x00000200);
+    }
+    /**
+     * <code>optional .blackhole.StreamID streamId = 10;</code>
+     */
+    public com.dp.blackhole.common.gen.StreamIDPB.StreamID getStreamId() {
+      return streamId_;
+    }
+    /**
+     * <code>optional .blackhole.StreamID streamId = 10;</code>
+     */
+    public com.dp.blackhole.common.gen.StreamIDPB.StreamIDOrBuilder getStreamIdOrBuilder() {
+      return streamId_;
+    }
+
     private void initFields() {
       type_ = com.dp.blackhole.common.gen.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.common.gen.AppRegPB.AppReg.getDefaultInstance();
@@ -731,6 +816,7 @@ public final class MessagePB {
       rollID_ = com.dp.blackhole.common.gen.RollIDPB.RollID.getDefaultInstance();
       failure_ = com.dp.blackhole.common.gen.FailurePB.Failure.getDefaultInstance();
       noAvailableNode_ = com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.getDefaultInstance();
+      streamId_ = com.dp.blackhole.common.gen.StreamIDPB.StreamID.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -789,6 +875,12 @@ public final class MessagePB {
           return false;
         }
       }
+      if (hasStreamId()) {
+        if (!getStreamId().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -822,6 +914,9 @@ public final class MessagePB {
       }
       if (((bitField0_ & 0x00000100) == 0x00000100)) {
         output.writeMessage(9, noAvailableNode_);
+      }
+      if (((bitField0_ & 0x00000200) == 0x00000200)) {
+        output.writeMessage(10, streamId_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -867,6 +962,10 @@ public final class MessagePB {
       if (((bitField0_ & 0x00000100) == 0x00000100)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(9, noAvailableNode_);
+      }
+      if (((bitField0_ & 0x00000200) == 0x00000200)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(10, streamId_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -984,6 +1083,7 @@ public final class MessagePB {
           getRollIDFieldBuilder();
           getFailureFieldBuilder();
           getNoAvailableNodeFieldBuilder();
+          getStreamIdFieldBuilder();
         }
       }
       private static Builder create() {
@@ -1042,6 +1142,12 @@ public final class MessagePB {
           noAvailableNodeBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000100);
+        if (streamIdBuilder_ == null) {
+          streamId_ = com.dp.blackhole.common.gen.StreamIDPB.StreamID.getDefaultInstance();
+        } else {
+          streamIdBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000200);
         return this;
       }
 
@@ -1138,6 +1244,14 @@ public final class MessagePB {
         } else {
           result.noAvailableNode_ = noAvailableNodeBuilder_.build();
         }
+        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
+          to_bitField0_ |= 0x00000200;
+        }
+        if (streamIdBuilder_ == null) {
+          result.streamId_ = streamId_;
+        } else {
+          result.streamId_ = streamIdBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1180,6 +1294,9 @@ public final class MessagePB {
         }
         if (other.hasNoAvailableNode()) {
           mergeNoAvailableNode(other.getNoAvailableNode());
+        }
+        if (other.hasStreamId()) {
+          mergeStreamId(other.getStreamId());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1234,6 +1351,12 @@ public final class MessagePB {
         }
         if (hasNoAvailableNode()) {
           if (!getNoAvailableNode().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasStreamId()) {
+          if (!getStreamId().isInitialized()) {
             
             return false;
           }
@@ -2232,6 +2355,123 @@ public final class MessagePB {
         return noAvailableNodeBuilder_;
       }
 
+      // optional .blackhole.StreamID streamId = 10;
+      private com.dp.blackhole.common.gen.StreamIDPB.StreamID streamId_ = com.dp.blackhole.common.gen.StreamIDPB.StreamID.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.gen.StreamIDPB.StreamID, com.dp.blackhole.common.gen.StreamIDPB.StreamID.Builder, com.dp.blackhole.common.gen.StreamIDPB.StreamIDOrBuilder> streamIdBuilder_;
+      /**
+       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       */
+      public boolean hasStreamId() {
+        return ((bitField0_ & 0x00000200) == 0x00000200);
+      }
+      /**
+       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       */
+      public com.dp.blackhole.common.gen.StreamIDPB.StreamID getStreamId() {
+        if (streamIdBuilder_ == null) {
+          return streamId_;
+        } else {
+          return streamIdBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       */
+      public Builder setStreamId(com.dp.blackhole.common.gen.StreamIDPB.StreamID value) {
+        if (streamIdBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          streamId_ = value;
+          onChanged();
+        } else {
+          streamIdBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000200;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       */
+      public Builder setStreamId(
+          com.dp.blackhole.common.gen.StreamIDPB.StreamID.Builder builderForValue) {
+        if (streamIdBuilder_ == null) {
+          streamId_ = builderForValue.build();
+          onChanged();
+        } else {
+          streamIdBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000200;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       */
+      public Builder mergeStreamId(com.dp.blackhole.common.gen.StreamIDPB.StreamID value) {
+        if (streamIdBuilder_ == null) {
+          if (((bitField0_ & 0x00000200) == 0x00000200) &&
+              streamId_ != com.dp.blackhole.common.gen.StreamIDPB.StreamID.getDefaultInstance()) {
+            streamId_ =
+              com.dp.blackhole.common.gen.StreamIDPB.StreamID.newBuilder(streamId_).mergeFrom(value).buildPartial();
+          } else {
+            streamId_ = value;
+          }
+          onChanged();
+        } else {
+          streamIdBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000200;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       */
+      public Builder clearStreamId() {
+        if (streamIdBuilder_ == null) {
+          streamId_ = com.dp.blackhole.common.gen.StreamIDPB.StreamID.getDefaultInstance();
+          onChanged();
+        } else {
+          streamIdBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000200);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       */
+      public com.dp.blackhole.common.gen.StreamIDPB.StreamID.Builder getStreamIdBuilder() {
+        bitField0_ |= 0x00000200;
+        onChanged();
+        return getStreamIdFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       */
+      public com.dp.blackhole.common.gen.StreamIDPB.StreamIDOrBuilder getStreamIdOrBuilder() {
+        if (streamIdBuilder_ != null) {
+          return streamIdBuilder_.getMessageOrBuilder();
+        } else {
+          return streamId_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.gen.StreamIDPB.StreamID, com.dp.blackhole.common.gen.StreamIDPB.StreamID.Builder, com.dp.blackhole.common.gen.StreamIDPB.StreamIDOrBuilder> 
+          getStreamIdFieldBuilder() {
+        if (streamIdBuilder_ == null) {
+          streamIdBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.common.gen.StreamIDPB.StreamID, com.dp.blackhole.common.gen.StreamIDPB.StreamID.Builder, com.dp.blackhole.common.gen.StreamIDPB.StreamIDOrBuilder>(
+                  streamId_,
+                  getParentForChildren(),
+                  isClean());
+          streamId_ = null;
+        }
+        return streamIdBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
 
@@ -2261,25 +2501,28 @@ public final class MessagePB {
       "\032\025AssignCollector.proto\032\rAppRoll.proto\032\022" +
       "RecoveryRoll.proto\032\024ReadyCollector.proto" +
       "\032\014RollID.proto\032\rFailure.proto\032\025NoAvailab" +
-      "leNode.proto\"\240\005\n\007Message\022,\n\004type\030\001 \002(\0162\036" +
-      ".blackhole.Message.MessageType\022!\n\006appReg" +
-      "\030\002 \001(\0132\021.blackhole.AppReg\0223\n\017assignColle" +
-      "ctor\030\003 \001(\0132\032.blackhole.AssignCollector\022#" +
-      "\n\007appRoll\030\004 \001(\0132\022.blackhole.AppRoll\022-\n\014r" +
-      "ecoveryRoll\030\005 \001(\0132\027.blackhole.RecoveryRo",
-      "ll\0221\n\016readyCollector\030\006 \001(\0132\031.blackhole.R" +
-      "eadyCollector\022!\n\006rollID\030\007 \001(\0132\021.blackhol" +
-      "e.RollID\022#\n\007failure\030\010 \001(\0132\022.blackhole.Fa" +
-      "ilure\0223\n\017noAvailableNode\030\t \001(\0132\032.blackho" +
-      "le.NoAvailableNode\"\212\002\n\013MessageType\022\016\n\nHE" +
-      "ARTBEART\020\001\022\013\n\007APP_REG\020\002\022\021\n\rCOLLECTOR_REG" +
-      "\020\003\022\024\n\020ASSIGN_COLLECTOR\020\004\022\023\n\017READY_COLLEC" +
-      "TOR\020\005\022\014\n\010APP_ROLL\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016" +
-      "UPLOAD_SUCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rREC" +
-      "OVERY_ROLL\020\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRE",
-      "COVERY_FAIL\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAILABL" +
-      "ENODE\020\016B(\n\033com.dp.blackhole.common.genB\t" +
-      "MessagePB"
+      "leNode.proto\032\016StreamID.proto\"\224\006\n\007Message" +
+      "\022,\n\004type\030\001 \002(\0162\036.blackhole.Message.Messa" +
+      "geType\022!\n\006appReg\030\002 \001(\0132\021.blackhole.AppRe" +
+      "g\0223\n\017assignCollector\030\003 \001(\0132\032.blackhole.A" +
+      "ssignCollector\022#\n\007appRoll\030\004 \001(\0132\022.blackh" +
+      "ole.AppRoll\022-\n\014recoveryRoll\030\005 \001(\0132\027.blac",
+      "khole.RecoveryRoll\0221\n\016readyCollector\030\006 \001" +
+      "(\0132\031.blackhole.ReadyCollector\022!\n\006rollID\030" +
+      "\007 \001(\0132\021.blackhole.RollID\022#\n\007failure\030\010 \001(" +
+      "\0132\022.blackhole.Failure\0223\n\017noAvailableNode" +
+      "\030\t \001(\0132\032.blackhole.NoAvailableNode\022%\n\010st" +
+      "reamId\030\n \001(\0132\023.blackhole.StreamID\"\327\002\n\013Me" +
+      "ssageType\022\016\n\nHEARTBEART\020\001\022\013\n\007APP_REG\020\002\022\021" +
+      "\n\rCOLLECTOR_REG\020\003\022\024\n\020ASSIGN_COLLECTOR\020\004\022" +
+      "\023\n\017READY_COLLECTOR\020\005\022\014\n\010APP_ROLL\020\006\022\017\n\013UP" +
+      "LOAD_ROLL\020\007\022\022\n\016UPLOAD_SUCCESS\020\010\022\017\n\013UPLOA",
+      "D_FAIL\020\t\022\021\n\rRECOVERY_ROLL\020\n\022\024\n\020RECOVERY_" +
+      "SUCCESS\020\013\022\021\n\rRECOVERY_FAIL\020\014\022\013\n\007FAILURE\020" +
+      "\r\022\023\n\017NOAVAILABLENODE\020\016\022\021\n\rUNRECOVERABLE\020" +
+      "\017\022\030\n\024MANUAL_RECOVERY_ROLL\020\020\022\014\n\010DUMPSTAT\020" +
+      "\021\022\020\n\014RETIRESTREAM\020\022B(\n\033com.dp.blackhole." +
+      "common.genB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2291,7 +2534,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "ReadyCollector", "RollID", "Failure", "NoAvailableNode", });
+              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "ReadyCollector", "RollID", "Failure", "NoAvailableNode", "StreamId", });
           return null;
         }
       };
@@ -2306,6 +2549,7 @@ public final class MessagePB {
           com.dp.blackhole.common.gen.RollIDPB.getDescriptor(),
           com.dp.blackhole.common.gen.FailurePB.getDescriptor(),
           com.dp.blackhole.common.gen.NoAvailableNodePB.getDescriptor(),
+          com.dp.blackhole.common.gen.StreamIDPB.getDescriptor(),
         }, assigner);
   }
 

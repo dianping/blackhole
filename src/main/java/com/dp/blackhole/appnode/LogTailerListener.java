@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class LogTailerListener implements TailerListener {
     public static final Log LOG = LogFactory.getLog(LogTailerListener.class);
-    private static final Charset charset = Charset.defaultCharset();//Charset.forName("UTF-8");
+    private static final Charset charset = Charset.defaultCharset();
     private LogReader logReader;
     private String tailFile;
     public LogTailerListener(String tailFile, LogReader logReader) {
@@ -56,7 +56,7 @@ public class LogTailerListener implements TailerListener {
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) chs[i];
         }
-        line = new String(data,charset);
+        line = new String(data, charset);
         logReader.process(line);
     }
 
