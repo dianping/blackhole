@@ -51,7 +51,6 @@ public class LogReader implements Runnable{
         try {
             writer.write(line);
             writer.write('\n'); //make server easy to handle
-            writer.flush();
         } catch (IOException e) {
             //TODO retry app reg
             LOG.error("Oops, got an exception:", e);
