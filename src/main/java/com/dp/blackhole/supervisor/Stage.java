@@ -3,6 +3,8 @@ package com.dp.blackhole.supervisor;
 import java.util.Date;
 import java.util.List;
 
+import com.dp.blackhole.common.Util;
+
 public class Stage {
     public static final int APPENDING = 1;
     public static final int UPLOADING = 2;
@@ -43,9 +45,9 @@ public class Stage {
     }
     
     public String toString() {
-        String summary = "stage:" + new Date(rollTs) + " stream ["+app+"@"+apphost+"] " + getStatusString(status) + " \n";
+        String summary = app + "1@" + apphost + "," + getStatusString(status) + "," + Util.formatTs(rollTs);
         if (!cleanstart) {
-            summary = summary + "is not cleanstart \n";
+            summary = summary + ",not cleanstart";
         }
         if (issuelist.size() != 0) {
             for(Issue i : issuelist) {

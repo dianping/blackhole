@@ -72,11 +72,11 @@ public class Collector implements Runnable {
     }
     
     private void handleIOException() {
-        node.reportFailure(app, remoteAddress, Util.getTS());
+        node.reportFailure(this, app, remoteAddress, Util.getTS());
         close();
     }
     
-    private void close() {
+    public void close() {
         try {
             if (streamIn != null) {
                 streamIn.close();

@@ -1,5 +1,6 @@
 package com.dp.blackhole.appnode;
 
+import java.nio.charset.Charset;
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
 import org.apache.commons.logging.Log;
@@ -7,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class LogTailerListener implements TailerListener {
     public static final Log LOG = LogFactory.getLog(LogTailerListener.class);
+    private static final Charset charset = Charset.defaultCharset();
     private LogReader logReader;
     private String tailFile;
     public LogTailerListener(String tailFile, LogReader logReader) {
@@ -49,6 +51,12 @@ public class LogTailerListener implements TailerListener {
      * @param line the line.
      */
     public void handle(String line) {
+        char[] chs = line.toCharArray();
+        byte[] data = new byte[chs.length];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (byte) chs[i];
+        }
+        line = new String(data, charset);
         logReader.process(line);
     }
 

@@ -11,6 +11,7 @@ import "ReadyCollector.proto";
 import "RollID.proto";
 import "Failure.proto";
 import "NoAvailableNode.proto";
+import "StreamID.proto";
 
 message Message {
     enum MessageType {
@@ -28,6 +29,10 @@ message Message {
         RECOVERY_FAIL = 12;
         FAILURE = 13;
         NOAVAILABLENODE = 14;
+        UNRECOVERABLE = 15;
+        MANUAL_RECOVERY_ROLL =16;
+        DUMPSTAT = 17;
+        RETIRESTREAM = 18;
     }
 
     required MessageType type = 1;
@@ -39,4 +44,5 @@ message Message {
     optional RollID rollID = 7;
     optional Failure failure = 8;
     optional NoAvailableNode noAvailableNode = 9;
+    optional StreamID streamId = 10;
 }
