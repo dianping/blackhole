@@ -187,6 +187,12 @@ public class Util {
         } else {
             ts = (ts / rollPeriod) * rollPeriod;
         }
+        
+        //TODO 1378443602000 will get wrong result
+        if (rollPeriod >= magic) {
+            ts = ts - magic;
+        }
+
         return ts;
     }
     
