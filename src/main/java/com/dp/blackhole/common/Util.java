@@ -13,6 +13,7 @@ import java.nio.channels.SocketChannel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,8 +25,9 @@ public class Util {
     private static final int REPEATE = 3;
     private static final int RETRY_SLEEP_TIME = 3000;
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static int timezoneOffset = TimeZone.getDefault().getRawOffset();
+    private static long magic = 8 * 3600 * 1000l;
     
-
     public static String getRemoteHost(Socket socket) {
       InetSocketAddress remoteAddr= ((InetSocketAddress)socket.getRemoteSocketAddress());
       return remoteAddr.getHostName();
@@ -163,13 +165,19 @@ public class Util {
      */
     public static long getRollTs(long ts, long rollPeriod) {
         rollPeriod = rollPeriod * 1000;
-        return (ts / rollPeriod) * rollPeriod;
+        long ret = (ts / rollPeriod) * rollPeriod;
+        if (rollPeriod >= magic) {
+            ret = ret - magic;
+        }
+        return ret;
     }
     
     /*
      * get the closest roll timestamp, for example
      * now is 16:02, and rollPeroid is 1 hour, then
-     * return ts of 16:00
+     * return ts of 15:00;
+     * now is 15:59, and rollPeroid is 1 hour, then
+     * return ts of 15:00
      */
     public static long getClosestRollTs(long ts, long rollPeriod) {
         rollPeriod = rollPeriod * 1000;

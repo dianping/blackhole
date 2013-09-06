@@ -45,10 +45,11 @@ public class Stage {
     }
     
     public String toString() {
-        String summary = app + "1@" + apphost + "," + getStatusString(status) + "," + Util.formatTs(rollTs);
+        String summary = app + "@" + apphost + "," + getStatusString(status) + "," + Util.formatTs(rollTs);
         if (!cleanstart) {
             summary = summary + ",not cleanstart";
         }
+        summary = summary + "\n";
         if (issuelist.size() != 0) {
             for(Issue i : issuelist) {
                 summary = summary + i.toString();
