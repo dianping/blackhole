@@ -516,7 +516,7 @@ public class Supervisor {
                     // put the stage to head of the stages
                     ArrayList<Stage> newStages = new ArrayList<Stage>();
                     newStages.add(manualRecoveryStage);
-                    newStages.addAll(newStages);
+                    newStages.addAll(stages);
                     Streams.put(stream, newStages);
                     
                     // do recovery
