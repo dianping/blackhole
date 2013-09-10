@@ -41,4 +41,8 @@ public class RollIdent {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return app + "@" + source + "," + period + "," + ts; 
+    }
 }
