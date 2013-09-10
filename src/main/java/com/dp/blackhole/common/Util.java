@@ -13,7 +13,6 @@ import java.nio.channels.SocketChannel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,7 +24,6 @@ public class Util {
     private static final int REPEATE = 3;
     private static final int RETRY_SLEEP_TIME = 3000;
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private static int timezoneOffset = TimeZone.getDefault().getRawOffset();
     private static long magic = 8 * 3600 * 1000l;
     
     public static String getRemoteHost(Socket socket) {
