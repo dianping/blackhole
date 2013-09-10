@@ -102,7 +102,7 @@ public class LogReader implements Runnable{
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
             stop();
         } catch (Exception e) {
-            LOG.error("Oops, got an exception:" + e);
+            LOG.error("Oops, got an exception:" , e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
             stop();
         }

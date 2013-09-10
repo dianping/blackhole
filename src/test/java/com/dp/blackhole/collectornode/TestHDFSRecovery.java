@@ -45,8 +45,7 @@ public class TestHDFSRecovery {
         try {
             fs = FileSystem.get(conf);
         } catch (IOException e) {
-            LOG.error("Failed to get FileSystem.");
-            e.printStackTrace();
+            LOG.error("Failed to get FileSystem.", e);
             throw e;
         }
         //file:///tmp/e9wjd83h/2013-01-01/15/localhost_e9wjd83h_2013-01-01.03  e9wjd83h is appname
