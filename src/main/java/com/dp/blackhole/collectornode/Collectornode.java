@@ -27,7 +27,6 @@ import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.node.Node;
-import com.dp.blackhole.supervisor.StreamId;
 
 public class Collectornode extends Node {
 
@@ -79,11 +78,13 @@ public class Collectornode extends Node {
                         roll.period = head.peroid;
                         roll.ts = head.ts;
                         
+                        removeRollFiles(roll, true);
+                        
                         HDFSRecovery recovery = new HDFSRecovery(Collectornode.this, fs, socket, roll);
                         pool.execute(recovery);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOG.error("error in acceptor: ", e);
                 }
             }
         }
@@ -244,27 +245,12 @@ public class Collectornode extends Node {
         try {
             server.close();
         } catch (IOException e) {
-            LOG.error("error close ServerSocket" + e);
+            LOG.error("error close ServerSocket", e);
         }
     }
 
     private void HDFSLogin(Configuration conf, String keytab, String principle) throws IOException {        
         SecurityUtil.login(conf, keytab, principle);
-    }
-    
-    /**
-     * @param args
-     * @throws IOException 
-     */
-    public static void main(String[] args) throws IOException {
-    try {
-        Collectornode node = new Collectornode();
-        node.start();
-    } catch (Throwable e) {
-            LOG.error("fatal error " + e);
-            e.printStackTrace();
-            System.exit(-1);
-        }
     }
 
     public File getappendingFile(String storagedir) throws IOException {
@@ -278,14 +264,18 @@ public class Collectornode extends Node {
         return file;
     }
 
-    public void registerfile(RollIdent rollIdent, File rollFile) {
+    public boolean registerfile(RollIdent rollIdent, File rollFile) {
+        boolean ret;
         if (fileRolls.get(rollIdent) == null) {
             fileRolls.put(rollIdent, rollFile);
             Message message = PBwrap.wrapAppRoll(rollIdent.app, rollIdent.source, rollIdent.period, rollIdent.ts);
             send(message);
+            ret = true;
         } else {
-            LOG.fatal("update a exists file roll");
+            LOG.fatal("register a exists file roll: " + rollFile + " ," + rollIdent);
+            ret = false;
         }
+        return ret;
     }
     
     public String getSuffix() {
@@ -306,14 +296,27 @@ public class Collectornode extends Node {
         if (uploadSuccess == true) {
             Message message = PBwrap.wrapUploadSuccess(ident.app, ident.source, ident.ts);
             send(message);
-            File f = fileRolls.get(ident);
-            if (!f.delete()) {
-                LOG.error("delete file " + f + " failed");
-            }
-            fileRolls.remove(f);
         } else {
             Message message = PBwrap.wrapUploadFail(ident.app, ident.source, ident.ts);
             send(message);
+        }
+        
+        removeRollFiles(ident, false);
+    }
+
+    private void removeRollFiles(RollIdent ident, boolean inAcceptor) {
+        File f = fileRolls.get(ident);
+        if (f!= null) {
+            if (!f.delete()) {
+                LOG.error("delete file " + f + " failed");
+            } else {
+                LOG.info("delete file " + f + " success");
+            }
+            fileRolls.remove(f);
+        } else {
+            if (!inAcceptor) {
+                LOG.error("can't find file by ident: " + ident);
+            }
         }
     }
 
@@ -322,6 +325,20 @@ public class Collectornode extends Node {
         send(message);
         synchronized (collectors) {
             collectors.remove(collector);
+        }
+    }
+    
+    /**
+     * @param args
+     * @throws IOException 
+     */
+    public static void main(String[] args) throws IOException {
+    try {
+        Collectornode node = new Collectornode();
+        node.start();
+    } catch (Exception e) {
+            LOG.error("fatal error ", e);
+            System.exit(-1);
         }
     }
 }
