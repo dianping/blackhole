@@ -11,9 +11,11 @@ public class LogTailerListener implements TailerListener {
     private static final Charset charset = Charset.defaultCharset();
     private LogReader logReader;
     private String tailFile;
+    private boolean fileExists;
     public LogTailerListener(String tailFile, LogReader logReader) {
         this.tailFile = tailFile;
         this.logReader = logReader;
+        this.fileExists = false;
     }
 
     /**
@@ -29,6 +31,7 @@ public class LogTailerListener implements TailerListener {
      */
     public void fileNotFound(){
         LOG.warn("File " + tailFile + " not found");
+        fileExists = false;
     }
 
     /**
@@ -42,8 +45,10 @@ public class LogTailerListener implements TailerListener {
      * be called if the new file has not yet been created.
      */
     public void fileRotated() {
-        handle("");
-        LOG.info("File " + tailFile+ " rotation is deteced.");
+        if (fileExists) {
+            handle("");
+            LOG.info("File " + tailFile+ " rotation is deteced.");
+        }
     }
 
     /**
@@ -51,6 +56,7 @@ public class LogTailerListener implements TailerListener {
      * @param line the line.
      */
     public void handle(String line) {
+        fileExists = true;
         char[] chs = line.toCharArray();
         byte[] data = new byte[chs.length];
         for (int i = 0; i < data.length; i++) {
