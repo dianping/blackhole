@@ -48,7 +48,7 @@ public class Collector implements Runnable {
             writer = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(appending)));
             streamIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("error in init: ", e);
             handleIOException() ;
         }
     }
@@ -86,7 +86,6 @@ public class Collector implements Runnable {
             }
             socket.close();
         } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -96,18 +95,18 @@ public class Collector implements Runnable {
     }
 
     private void completefile() throws IOException {
-        writer.close();
-        
         RollIdent rollIdent = getRollIdent();
         File rollFile = getRollFile(rollIdent);
+
+        boolean success = node.registerfile(rollIdent, rollFile);
         
-        LOG.info("complete file: " + rollFile + ", roll " + rollIdent);
-        
-        appending.renameTo(rollFile);
-        node.registerfile(rollIdent, rollFile);
-        
-        appending = node.getappendingFile(storagedir);
-        writer = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(appending)));
+        if (success) {
+            LOG.info("complete file: " + rollFile + ", roll " + rollIdent);
+            writer.close();
+            appending.renameTo(rollFile);
+            appending = node.getappendingFile(storagedir);
+            writer = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(appending)));
+        }
     }
 
     private RollIdent getRollIdent() {
