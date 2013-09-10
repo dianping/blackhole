@@ -72,6 +72,5 @@ public class LogTailerListener implements TailerListener {
      */
     public void handle(Exception ex) {
         LOG.error("Oops, got an exception:", ex);
-        fileExists = false;
     }
 }
