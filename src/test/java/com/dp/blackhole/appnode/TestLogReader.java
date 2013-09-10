@@ -25,6 +25,7 @@ import com.dp.blackhole.appnode.AppLog;
 import com.dp.blackhole.appnode.LogReader;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.simutil.SimAppnode;
 import com.dp.blackhole.simutil.SimTailServer;
 
 public class TestLogReader {
@@ -169,7 +170,7 @@ public class TestLogReader {
                 return;
             }
             try {
-                Thread.sleep(3000);
+                Thread.sleep(2000);
                 File des = new File(file.getParent(), MAGIC 
                         + new SimpleDateFormat("yyyy-MM-dd.hh").format(Util.getOneHoursAgoTime(new Date()))
                         + ".mv");
@@ -189,7 +190,7 @@ public class TestLogReader {
     
     @Test
     public void testFileNotFoundAndFileRotated() {
-        LogReader reader = new LogReader(null, com.dp.blackhole.simutil.Util.HOSTNAME, 
+        LogReader reader = new LogReader(new SimAppnode("locahost"), com.dp.blackhole.simutil.Util.HOSTNAME, 
                 com.dp.blackhole.simutil.Util.PORT, appLog, 100);
         ExecutorService exec = Executors.newCachedThreadPool();
         exec.execute(reader);
