@@ -37,8 +37,7 @@ public class TestHDFSUpload {
         try {
             fs = FileSystem.get(conf);
         } catch (IOException e) {
-            LOG.error("Failed to get FileSystem.");
-            e.printStackTrace();
+            LOG.error("Failed to get FileSystem.", e);
             throw e;
         }
     } 
