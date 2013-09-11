@@ -18,16 +18,16 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.dp.blackhole.appnode.Appnode;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.simutil.SimAppnode;
 import com.dp.blackhole.simutil.Util;
 public class TestAppnode {
     private static final Log LOG = LogFactory.getLog(TestAppnode.class);
     private static final String MAGIC = "9vjrder3";
-    private static Appnode appnode;
+    private static SimAppnode appnode;
     private static String client;
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -37,7 +37,7 @@ public class TestAppnode {
             LOG.error("Oops, got an exception:", e1);
             return;
         }
-        appnode = new Appnode(client);
+        appnode = new SimAppnode(client);
         ConfigKeeper conf = new ConfigKeeper();
         conf.addRawProperty(MAGIC+".WATCH_FILE", "/tmp/" + MAGIC + ".log");
         conf.addRawProperty(MAGIC+".port", "40000");//TODO
