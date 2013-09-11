@@ -1,21 +1,15 @@
 package com.dp.blackhole.appnode;
 
-import java.nio.charset.Charset;
-import org.apache.commons.io.input.Tailer;
-import org.apache.commons.io.input.TailerListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class LogTailerListener implements TailerListener {
+public class LogTailerListener {
     public static final Log LOG = LogFactory.getLog(LogTailerListener.class);
-    private static final Charset charset = Charset.defaultCharset();
     private LogReader logReader;
     private String tailFile;
-    private boolean fileExists;
     public LogTailerListener(String tailFile, LogReader logReader) {
         this.tailFile = tailFile;
         this.logReader = logReader;
-        this.fileExists = false;
     }
 
     /**
@@ -23,7 +17,7 @@ public class LogTailerListener implements TailerListener {
      * giving the listener a method of stopping the tailer.
      * @param tailer the tailer.
      */
-    public void init(Tailer tailer) {
+    public void init(TailerFuture tailer) {
     }
 
     /**
@@ -31,7 +25,6 @@ public class LogTailerListener implements TailerListener {
      */
     public void fileNotFound(){
         LOG.warn("File " + tailFile + " not found");
-        fileExists = false;
     }
 
     /**
@@ -45,10 +38,8 @@ public class LogTailerListener implements TailerListener {
      * be called if the new file has not yet been created.
      */
     public void fileRotated() {
-        if (fileExists) {
-            handle("");
-            LOG.info("File " + tailFile+ " rotation is deteced.");
-        }
+        handle("");
+        LOG.info("File " + tailFile+ " rotation is deteced.");
     }
 
     /**
@@ -56,13 +47,6 @@ public class LogTailerListener implements TailerListener {
      * @param line the line.
      */
     public void handle(String line) {
-        fileExists = true;
-        char[] chs = line.toCharArray();
-        byte[] data = new byte[chs.length];
-        for (int i = 0; i < data.length; i++) {
-            data[i] = (byte) chs[i];
-        }
-        line = new String(data, charset);
         logReader.process(line);
     }
 
