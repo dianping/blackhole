@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
-import org.apache.commons.io.input.Tailer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -20,7 +19,7 @@ import com.dp.blackhole.conf.ConfigKeeper;
 public class LogReader implements Runnable{
     private static final Log LOG = LogFactory.getLog(LogReader.class);
     private final boolean isTailFromEnd = true;
-    private Tailer tailer;
+    private TailerFuture tailer;
     private String  collectorServer;
     private int port;
     private AppLog appLog;
@@ -44,7 +43,7 @@ public class LogReader implements Runnable{
             throw new FileNotFoundException("tail file not found");
         }
         listener = new LogTailerListener(tailFile.getAbsolutePath(), this);
-        tailer = new Tailer(tailFile, listener, delayMillis, isTailFromEnd);
+        tailer = new TailerFuture(tailFile, listener, delayMillis, isTailFromEnd);
     }
 
     public void process(String line) {
@@ -102,7 +101,7 @@ public class LogReader implements Runnable{
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
             stop();
         } catch (Exception e) {
-            LOG.error("Oops, got an exception:" + e);
+            LOG.error("Oops, got an exception:" , e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
             stop();
         }
