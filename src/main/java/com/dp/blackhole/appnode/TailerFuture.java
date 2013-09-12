@@ -24,6 +24,9 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Simple implementation of the unix "tail -f" functionality.
  * <p>
@@ -112,6 +115,8 @@ import java.nio.charset.Charset;
  */
 public class TailerFuture implements Runnable {
 
+    private static final Log LOG = LogFactory.getLog(TailerFuture.class);
+    
     private static final int DEFAULT_DELAY_MILLIS = 1000;
 
     private static final String RAF_MODE = "r";
@@ -446,15 +451,7 @@ public class TailerFuture implements Runnable {
                         position = readLines(reader);
                         last = file.lastModified();
                     } else if (newer) {
-                        /*
-                         * This can happen if the file is truncated or overwritten with the exact same length of
-                         * information. In cases like this, the file position needs to be reset
-                         */
-                        position = 0;
-                        reader.seek(position); // cannot be null here
-
-                        // Now we can read new lines
-                        position = readLines(reader);
+                        LOG.debug("Not reposition again, current timestamp is " + System.currentTimeMillis());
                         last = file.lastModified();
                     }
                 }
