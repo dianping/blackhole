@@ -1,11 +1,19 @@
 package com.dp.blackhole.appnode;
 
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.net.Socket;
+import java.nio.charset.Charset;
+
+import net.contentobjects.jnotify.IJNotify;
+import net.contentobjects.jnotify.JNotifyException;
+import net.contentobjects.jnotify.JNotifyListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,92 +26,295 @@ import com.dp.blackhole.conf.ConfigKeeper;
 
 public class LogReader implements Runnable{
     private static final Log LOG = LogFactory.getLog(LogReader.class);
-    private final boolean isTailFromEnd = true;
-    private TailerFuture tailer;
+    
+    public static final int FILE_CREATED    = 0x1;
+    public static final int FILE_DELETED    = 0x2;
+    public static final int FILE_MODIFIED   = 0x4;
+    public static final int FILE_RENAMED    = 0x8;
+    public static final int FILE_ANY        = FILE_CREATED | FILE_DELETED | FILE_MODIFIED | FILE_RENAMED;
+    private static IJNotify instance;
+    
+    static {
+        String overrideClass = System.getProperty("jnotify.impl.override");
+        if (overrideClass != null) {
+            try {
+                instance = (IJNotify) Class.forName(overrideClass).newInstance();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else {
+            String osName = System.getProperty("os.name").toLowerCase();
+            if (osName.equals("linux")) {
+                try {
+                    instance = (IJNotify) Class.forName("net.contentobjects.jnotify.linux.JNotifyAdapterLinux").newInstance();
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else
+            if (osName.startsWith("windows")) {
+                try {
+                    instance = (IJNotify) Class.forName("net.contentobjects.jnotify.win32.JNotifyAdapterWin32").newInstance();
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else
+            if (osName.startsWith("mac os x")) {
+                try {
+                    instance = (IJNotify) Class.forName("net.contentobjects.jnotify.macosx.JNotifyAdapterMacOSX").newInstance();
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else {
+                throw new RuntimeException("Unsupported OS : " + osName);
+            }
+        }
+    }
+    
+    private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
     private String  collectorServer;
     private int port;
     private AppLog appLog;
-    private long delayMillis;
     private File tailFile;
-    private LogTailerListener listener;
-    private OutputStreamWriter writer;
     private Appnode node;
-    
-    public LogReader(Appnode node, String collectorServer, int port, AppLog appLog, long delayMillis) {
+    private int bufSize;
+    private Socket socket;
+    private DataOutputStream out;
+    private int parentWatchID, watchId;
+    private volatile boolean run = true;
+
+    public LogReader(Appnode node, String collectorServer, int port, AppLog appLog) {
         this.node = node;
         this.collectorServer = collectorServer;
         this.port = port;
         this.appLog =appLog;
-        this.delayMillis = delayMillis;
+        this.bufSize = ConfigKeeper.configMap.get(appLog.getAppName()).getInteger(ParamsKey.Appconf.BUFFER_SIZE);
     }
 
-    public void initialize() throws FileNotFoundException {
-        tailFile = new File(appLog.getTailFile());
+    public void initialize() throws IOException {
+        tailFile = new File(appLog.getTailFile()).getCanonicalFile();
         if (tailFile == null) {
             throw new FileNotFoundException("tail file not found");
         }
-        listener = new LogTailerListener(tailFile.getAbsolutePath(), this);
-        tailer = new TailerFuture(tailFile, listener, delayMillis, isTailFromEnd);
-    }
+        socket = new Socket(collectorServer, port);
+        out = new DataOutputStream(socket.getOutputStream());
 
-    public void process(String line) {
-        try {
-            writer.write(line);
-            writer.write('\n'); //make server easy to handle
-            writer.flush();
-        } catch (IOException e) {
-            //TODO retry app reg
-            LOG.error("Oops, got an exception:", e);
-            node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
-            stop();
-        }
+        AgentProtocol protocol = new AgentProtocol();
+        AgentHead head = protocol.new AgentHead();
+        
+        head.type = AgentProtocol.STREAM;
+        head.app = appLog.getAppName();
+        head.peroid = ConfigKeeper.configMap.get(appLog.getAppName()).getLong(ParamsKey.Appconf.ROLL_PERIOD);
+        protocol.sendHead(out, head);
     }
 
     public void stop() {
-        if (tailer != null) {
-            tailer.stop();
-        }
+        this.run = false;
         try {
-            if (writer != null) {
-                writer.close();
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+                socket = null;
             }
+            instance.removeWatch(watchId);
+            instance.removeWatch(parentWatchID);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warn("Warnning, clean fail:", e);
         }
     }
 
+    private boolean getRun() {
+        return run;
+    }
     @Override
     public void run() {
+        RandomAccessFile reader = null;
         try {
             initialize();
-            Socket server = new Socket(collectorServer, port);
-            DataOutputStream out = new DataOutputStream(server.getOutputStream());
-
-            AgentProtocol protocol = new AgentProtocol();
-            AgentHead head = protocol.new AgentHead();
+            String watchPath = tailFile.getCanonicalPath();
+            String parentWatchPath = tailFile.getParentFile().getCanonicalPath();
+            reader = new RandomAccessFile(tailFile, "r");
+            EventWriter eventWriter = new EventWriter(reader, tailFile, bufSize);
+            Listener listener = new Listener(watchPath, eventWriter);
+            parentWatchID = instance.addWatch(parentWatchPath, FILE_CREATED, false, listener);
+//            listener.receiveWatchId(wd);
             
-            head.type = AgentProtocol.STREAM;
-            head.app = appLog.getAppName();
-            head.peroid = ConfigKeeper.configMap.get(appLog.getAppName()).getLong(ParamsKey.Appconf.ROLL_PERIOD);
-  
-            protocol.sendHead(out, head);
-            
-            writer = new OutputStreamWriter(out);
-            tailer.run();
+            LOG.info("Monitoring parent path " + parentWatchPath + " \"FILE_CREATE\" for rotate.");
+            while (getRun()) {
+                Thread.sleep(100000);
+            }
+        } catch (final InterruptedException e) {
+            LOG.info(e);
+            Thread.currentThread().interrupt();
         } catch (FileNotFoundException e) {
             LOG.error("Got an exception", e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
-            stop();
         } catch (IOException e) {
-            LOG.error("Faild to build a socket. " +
-                    "This tailer thread stop! ", e);
+            LOG.error("This thread stop! ", e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
-            stop();
         } catch (Exception e) {
             LOG.error("Oops, got an exception:" , e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+        } finally {
             stop();
+        }
+    }
+    
+    class Listener implements JNotifyListener {
+//        private int wd;
+        private String watchPath;
+        private EventWriter eventWriter;
+        Listener(String watchPath, EventWriter eventWriter) {
+            this.watchPath = watchPath;
+            this.eventWriter = eventWriter;
+        }
+        
+//        void receiveWatchId(int wd) {
+//            this.wd = wd;
+//        }
+        
+        @Override
+        public void fileCreated(int wd, String rootPath, String name) {
+            if (name.equals(watchPath)) {
+                LOG.info("rotate detected" + rootPath + " : " + name);
+                eventWriter.processRotate();
+                try {
+                    instance.removeWatch(watchId);//TODO review
+                    watchId = instance.addWatch(watchPath, FILE_MODIFIED, false, this);
+                    LOG.info("Remonitoring "+ watchPath + " \"FILE_CREATE\" for rotate.");
+                } catch (JNotifyException e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+                System.out.println("created " + rootPath + " : " + name);
+            }
+        }
+
+        @Override
+        public void fileDeleted(int wd, String rootPath, String name) {
+        }
+
+        @Override
+        public void fileModified(int wd, String rootPath, String name) {
+            eventWriter.process();
+        }
+
+        @Override
+        public void fileRenamed(int wd, String rootPath, String oldName,
+                String newName) {
+        }
+    }
+    
+    class EventWriter {
+        private final Charset cset;
+        private final File file;
+        private final byte inbuf[];
+        private OutputStreamWriter writer;
+        private RandomAccessFile reader;
+        
+        public EventWriter(final RandomAccessFile reader, final File file, final int bufSize) {
+            this(reader, file, bufSize, DEFAULT_CHARSET);
+        }
+        public EventWriter(final RandomAccessFile reader, final File file, final int bufSize, Charset cset) {
+            this.reader = reader;
+            this.file = file;
+            this.inbuf = new byte[bufSize];
+            this.cset = cset;
+            writer = new OutputStreamWriter(out);
+        }
+        
+        public void processRotate() {
+            try {
+                writer.write('\n'); //make server easy to handle
+                writer.flush();
+                
+                final RandomAccessFile save = reader;
+                reader = new RandomAccessFile(file, "r");
+                // At this point, we're sure that the old file is rotated
+                // Finish scanning the old file and then we'll start with the new one
+                readLines(save);
+                closeQuietly(save);
+            } catch (IOException e) {
+                LOG.error("Oops, got an exception:", e);
+                closeQuietly(reader);
+                closeQuietly(writer);
+                stop();
+                node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+            }
+        }
+        
+        public void process() {
+            try {
+                readLines(reader);
+            } catch (IOException e) {
+                LOG.error("Oops, got an exception:", e);
+                closeQuietly(reader);
+                closeQuietly(writer);
+                stop();
+                node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+            }
+        }
+        
+        private long readLines(RandomAccessFile reader) throws IOException {
+            ByteArrayOutputStream lineBuf = new ByteArrayOutputStream(64);
+            long pos = reader.getFilePointer();
+            long rePos = pos; // position to re-read
+            int num;
+            while ((num = reader.read(inbuf)) != -1) {
+                for (int i = 0; i < num; i++) {
+                    final byte ch = inbuf[i];
+                    switch (ch) {
+                    case '\n':
+                        handleLine(new String(lineBuf.toByteArray(), cset));
+                        lineBuf.reset();
+                        rePos = pos + i + 1;
+                        break;
+                    default:
+                        lineBuf.write(ch);
+                    }
+                }
+                pos = reader.getFilePointer();
+            }
+            closeQuietly(lineBuf); // not strictly necessary
+            reader.seek(rePos); // Ensure we can re-read if necessary
+            return rePos;
+        }
+        
+        private void handleLine(String line) {
+            try {
+                writer.write(line);
+                writer.write('\n'); //make server easy to handle
+//                writer.flush();
+            } catch (IOException e) {
+                LOG.error("Oops, got an exception:", e);
+                closeQuietly(reader);
+                closeQuietly(writer);
+                stop();
+                node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+                
+            }
+        }
+        
+        /**
+         * Unconditionally close a Closeable.
+         * Equivalent to close(), except any exceptions will be ignored.
+         * This is typically used in finally blocks.
+         */
+        private void closeQuietly(Closeable closeable) {
+            try {
+                if (closeable != null) {
+                    closeable.close();
+                }
+            } catch (IOException ioe) {
+                // ignore
+            }
         }
     }
 }

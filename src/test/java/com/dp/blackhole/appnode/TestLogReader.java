@@ -191,7 +191,7 @@ public class TestLogReader {
     @Test
     public void testFileNotFoundAndFileRotated() {
         LogReader reader = new LogReader(new SimAppnode("locahost"), com.dp.blackhole.simutil.Util.HOSTNAME, 
-                com.dp.blackhole.simutil.Util.PORT, appLog, 100);
+                com.dp.blackhole.simutil.Util.PORT, appLog);
         ExecutorService exec = Executors.newCachedThreadPool();
         exec.execute(reader);
         ExecutorService exec2 = Executors.newSingleThreadExecutor();

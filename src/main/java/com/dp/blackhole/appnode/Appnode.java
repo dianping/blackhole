@@ -38,7 +38,6 @@ public class Appnode extends Node {
     private String[] args;
     private File configFile = null;
     private ExecutorService exec;
-    private long delayMillis;
     private int port;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
@@ -84,7 +83,7 @@ public class Appnode extends Node {
             if ((appLog = appLogs.get(appName)) != null) {
                 if ((logReader = appReaders.get(appLog)) == null) {
                     collectorServer = assignCollector.getCollectorServer();
-                    logReader = new LogReader(this, collectorServer, port, appLog, delayMillis);
+                    logReader = new LogReader(this, collectorServer, port, appLog);
                     appReaders.put(appLog, logReader);
                     exec.execute(logReader);
                     return true;
@@ -210,7 +209,6 @@ public class Appnode extends Node {
         }
         Properties prop = new Properties();
         prop.load(new FileReader(new File("config.properties")));
-        delayMillis = Long.parseLong(prop.getProperty("delayMillis"));
         port = Integer.parseInt(prop.getProperty("collectornode.port"));
         
         String serverhost = prop.getProperty("supervisor.host");
