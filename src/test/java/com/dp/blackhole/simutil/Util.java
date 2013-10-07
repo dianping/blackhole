@@ -29,6 +29,7 @@ public class Util {
     public static final String expected = " 0f j2390jr092jf2f02jf02qjdf2-3j0 fiopwqejfjwffhg5_p    <end";
     public static final int offset = 100;
     public static final int MAX_LINE = 9;
+    public static final String TEST_ROLL_FILE = "/tmp/rollfile";
     
     public static void initEnv() {
         

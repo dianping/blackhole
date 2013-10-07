@@ -13,7 +13,6 @@ import org.apache.commons.logging.LogFactory;
 
 public class SimLogger implements Runnable {
 	private static final Log LOG = LogFactory.getLog(SimLogger.class);
-	private static final String FILE_NAME = "/tmp/rollfile";
 	private long delay;
 	private OutputStreamWriter writer;
 	private static final int WORD_COUNT_PER_LINE = 10;
@@ -24,7 +23,7 @@ public class SimLogger implements Runnable {
 
 	@Override
     public void run() {
-		File file = new File(FILE_NAME);
+		File file = new File(Util.TEST_ROLL_FILE);
 		File target;
 		boolean renameSucceeded = true;
 		try {
@@ -33,7 +32,7 @@ public class SimLogger implements Runnable {
 	        while (true) {
 	        	if (i%10 == 0) {
 	        		if (file.exists()) {
-	        			target = new File(FILE_NAME + '.' + (j++));
+	        			target = new File(Util.TEST_ROLL_FILE + '.' + (j++));
 	        			LOG.info("Renaming file " + file + " to " + target);
 	        			renameSucceeded = file.renameTo(target);
 	        			writer.close();

@@ -142,16 +142,15 @@ public class LogReader implements Runnable{
             reader = new RandomAccessFile(tailFile, "r");
             EventWriter eventWriter = new EventWriter(reader, tailFile, bufSize);
             Listener listener = new Listener(watchPath, eventWriter);
+            watchId = instance.addWatch(watchPath, FILE_MODIFIED, false, listener);
+            LOG.info("Monitoring tail file " + watchPath + " \"FILE_MODIFIED\" first.");
             parentWatchID = instance.addWatch(parentWatchPath, FILE_CREATED, false, listener);
-//            listener.receiveWatchId(wd);
-            
             LOG.info("Monitoring parent path " + parentWatchPath + " \"FILE_CREATE\" for rotate.");
             while (getRun()) {
                 Thread.sleep(100000);
             }
         } catch (final InterruptedException e) {
-            LOG.info(e);
-            Thread.currentThread().interrupt();
+            LOG.info("Interrputed.", e);
         } catch (FileNotFoundException e) {
             LOG.error("Got an exception", e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
@@ -181,19 +180,20 @@ public class LogReader implements Runnable{
         
         @Override
         public void fileCreated(int wd, String rootPath, String name) {
-            if (name.equals(watchPath)) {
-                LOG.info("rotate detected" + rootPath + " : " + name);
+            if (name.equals(watchPath.substring(watchPath.lastIndexOf('/') + 1))) {
+                LOG.info("rotate detected " + rootPath + "/" + name);
                 eventWriter.processRotate();
                 try {
                     instance.removeWatch(watchId);//TODO review
                     watchId = instance.addWatch(watchPath, FILE_MODIFIED, false, this);
-                    LOG.info("Remonitoring "+ watchPath + " \"FILE_CREATE\" for rotate.");
+                    LOG.info("Re-monitoring "+ watchPath + " \"FILE_MODIFIED\" for rotate.");
                 } catch (JNotifyException e) {
-                    e.printStackTrace();
+                    LOG.error("Add watch exception", e);
                 }
             }
             else {
-                System.out.println("created " + rootPath + " : " + name);
+                LOG.warn("created " + rootPath + "/" + name +
+                		" not equals watch file" + watchPath);
             }
         }
 
@@ -254,7 +254,7 @@ public class LogReader implements Runnable{
             try {
                 readLines(reader);
             } catch (IOException e) {
-                LOG.error("Oops, got an exception:", e);
+                LOG.error("Oops, process read lines fail:", e);
                 closeQuietly(reader);
                 closeQuietly(writer);
                 stop();

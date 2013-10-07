@@ -26,18 +26,18 @@ import com.dp.blackhole.appnode.LogReader;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.simutil.SimAppnode;
+import com.dp.blackhole.simutil.SimLogger;
 import com.dp.blackhole.simutil.SimTailServer;
 
 public class TestLogReader {
     private static final Log LOG = LogFactory.getLog(TestLogReader.class);
-
-    private static AppLog appLog;
     private static final String MAGIC = "sdfjiojwe";
     private static List<String> receives = new ArrayList<String>();
     private static int before = 0;
     private static int after = 0;
     private SimTailServer server;
     private Thread serverThread;
+    private Thread loggerThread;
     
     public static int getBefore() {
         return before;
@@ -60,6 +60,7 @@ public class TestLogReader {
         ConfigKeeper confKeeper = new ConfigKeeper();
         confKeeper.addRawProperty(MAGIC+".port", "40000");
         confKeeper.addRawProperty(MAGIC + ".ROLL_PERIOD", "3600");
+        confKeeper.addRawProperty(MAGIC + ".BUFFER_SIZE", "100");
     }
 
     @AfterClass
@@ -74,134 +75,33 @@ public class TestLogReader {
         serverThread.start();
 
         //build a app log
-        File file = File.createTempFile(MAGIC, null);
-        String fileAbsolutePath = file.getAbsolutePath();
-        LOG.info("create tmp file for test LogReader " + file);
-        Thread t = new Thread(new Writer(fileAbsolutePath));
-        t.setDaemon(false);
-        t.start();
-        appLog = new AppLog(MAGIC, fileAbsolutePath, System.currentTimeMillis());
+        SimLogger logger = new SimLogger(100);
+        loggerThread = new Thread(logger);
     }
 
     @After
     public void tearDown() throws Exception {
+    	serverThread.interrupt();
+    	loggerThread.interrupt();
         com.dp.blackhole.simutil.Util.deleteTmpFile(MAGIC);
     }
 
-    static class Writer implements Runnable{
-        private String path;
-        private volatile boolean shouldBreak;
-        public Writer(String path) {
-            this.path = path;
-            this.shouldBreak = false;
-        }
-
-        public boolean shouldBreakOrNot() {
-            return shouldBreak;
-        }
-        public void breakIt() {
-            shouldBreak = true;
-        }
-
-        @Override
-        public void run() {
-            Runtime runtime = Runtime.getRuntime();
-            String [] cmd= new String[3];
-            cmd[0] = "/bin/sh";
-            cmd[1] = "-c";
-            cmd[2] = "echo `date` >> " + path;
-            System.out.println(cmd[2]);
-            try {
-                while(true) {
-                    Process process = runtime.exec(cmd);
-                    StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR");
-                    StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT");
-                    errorGobbler.start();
-                    outputGobbler.start();
-                    int exitValue = process.waitFor();
-//                    System.out.println("ExitValue:" + exitValue);
-                    Thread.sleep(500);
-                    if (shouldBreak) {
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("The command is incorrect!");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-        
-    static class StreamGobbler extends Thread {
-        InputStream is;
-        String type;
-        StreamGobbler(InputStream is, String type) {
-            this.is = is;
-            this.type = type;
-        }
-        
-        @Override
-        public void run() {
-            try {
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr);
-                String line=null;
-                while ( (line = br.readLine()) != null)
-                System.out.println(type + ">" + line);
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
-            }
-        }
-    }
-
-    static class MVandRollCommand implements Runnable {
-        private SimTailServer server;
-        private File file;
-        public MVandRollCommand(File file, SimTailServer server) {
-            this.file = file;
-            this.server = server;
-        }
-        public void run() {
-            assertNotNull(file);
-            if (!file.exists()) {
-                LOG.debug(file + " not found.");
-                return;
-            }
-            try {
-                Thread.sleep(2000);
-                File des = new File(file.getParent(), MAGIC 
-                        + new SimpleDateFormat("yyyy-MM-dd.hh").format(Util.getOneHoursAgoTime(new Date()))
-                        + ".mv");
-                file.renameTo(des);
-                setBefore();
-                Thread.sleep(3000);
-                if (!server.shouldStopOrNot()) {
-                    LOG.info("time is up, shutdown the server");
-                    server.stopIt();
-                }
-                setAfter();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
     @Test
     public void testFileNotFoundAndFileRotated() {
+        AppLog appLog = new AppLog(MAGIC, com.dp.blackhole.simutil.Util.TEST_ROLL_FILE,
+        		System.currentTimeMillis());
         LogReader reader = new LogReader(new SimAppnode("locahost"), com.dp.blackhole.simutil.Util.HOSTNAME, 
                 com.dp.blackhole.simutil.Util.PORT, appLog);
-        ExecutorService exec = Executors.newCachedThreadPool();
-        exec.execute(reader);
-        ExecutorService exec2 = Executors.newSingleThreadExecutor();
-        MVandRollCommand mvCommand = new MVandRollCommand(new File(appLog.getTailFile()), server);
-        exec2.execute(mvCommand);
+        Thread readerThread = new Thread(reader);
+        loggerThread.start();
         try {
-            serverThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        	Thread.sleep(1000);//ignore file first create
+        	readerThread.start();
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+        readerThread.interrupt();
         assertNotNull("testFileNotFound function fail.", receives.toArray());
         assertNotSame(getBefore(), getAfter());
     }
