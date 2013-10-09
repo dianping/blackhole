@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,16 +38,25 @@ public class Appnode extends Node {
     private static final Log LOG = LogFactory.getLog(Appnode.class);
     private String[] args;
     private File configFile = null;
-    private ExecutorService exec;
-    private long delayMillis;
-    private int port;
+    private ExecutorService pool;
+    protected int port;   //protected for test case SimAppnode
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
     
     public Appnode(String appClient) {
-        exec = Executors.newCachedThreadPool();
+        pool = Executors.newCachedThreadPool();
     }
 
+    public void close() {
+        LOG.info("shutdown app node");
+        Iterator<LogReader> it = appReaders.values().iterator();
+        while (it.hasNext()) {
+            LogReader logReader = it.next();
+            logReader.stop();
+            appReaders.remove(logReader);
+        }
+    }
+    
     public boolean process(Message msg) {
 	    String appName;
 	    String collectorServer;
@@ -71,7 +81,7 @@ public class Appnode extends Node {
                 long rollTs = recoveryRoll.getRollTs();
                 collectorServer = recoveryRoll.getCollectorServer();
                 RollRecovery recovery = new RollRecovery(this, collectorServer, port, appLog, rollTs);
-                exec.execute(recovery);
+                pool.execute(recovery);
                 return true;
             } else {
                 LOG.error("AppName [" + recoveryRoll.getAppName()
@@ -84,9 +94,9 @@ public class Appnode extends Node {
             if ((appLog = appLogs.get(appName)) != null) {
                 if ((logReader = appReaders.get(appLog)) == null) {
                     collectorServer = assignCollector.getCollectorServer();
-                    logReader = new LogReader(this, collectorServer, port, appLog, delayMillis);
+                    logReader = new LogReader(this, collectorServer, port, appLog);
                     appReaders.put(appLog, logReader);
-                    exec.execute(logReader);
+                    pool.execute(logReader);
                     return true;
                 } else {
                     LOG.info("duplicated assign collector message: " + assignCollector);
@@ -210,7 +220,6 @@ public class Appnode extends Node {
         }
         Properties prop = new Properties();
         prop.load(new FileReader(new File("config.properties")));
-        delayMillis = Long.parseLong(prop.getProperty("delayMillis"));
         port = Integer.parseInt(prop.getProperty("collectornode.port"));
         
         String serverhost = prop.getProperty("supervisor.host");

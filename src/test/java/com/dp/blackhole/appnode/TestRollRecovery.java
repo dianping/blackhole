@@ -26,11 +26,11 @@ import com.dp.blackhole.simutil.Util;
 public class TestRollRecovery {
     private static final Log LOG = LogFactory.getLog(TestRollRecovery.class);
     private static final String MAGIC = "ctg4ewd";
+    private static final int port = 40002;
     private static File file;
     private static AppLog appLog;
     private static List<String> header = new ArrayList<String>();
     private static List<String> receives = new ArrayList<String>();
-    private SimRecoveryServer server;
     private Thread serverThread;
     private static SimAppnode appnode;
     private static String client;
@@ -39,13 +39,13 @@ public class TestRollRecovery {
         try {
             client = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e1) {
-            LOG.error("Oops, got an exception:", e1);
+            LOG.debug("Oops, got an exception:", e1);
             return;
         }
-        appnode = new SimAppnode(client);
+        appnode = new SimAppnode(client, port);
         ConfigKeeper confKeeper = new ConfigKeeper();
-        confKeeper.addRawProperty(MAGIC+".port", "40000");
         confKeeper.addRawProperty(MAGIC + ".ROLL_PERIOD", "3600");
+        confKeeper.addRawProperty(MAGIC + ".BUFFER_SIZE", "4096");
         //build a tmp file
         file = Util.createTmpFile(MAGIC + "." + Util.FILE_SUFFIX, Util.expected);
         file = Util.createTmpFile(MAGIC, Util.expected);
@@ -59,18 +59,19 @@ public class TestRollRecovery {
     @Before
     public void setUp() throws Exception {
         appLog = new AppLog(MAGIC, file.getAbsolutePath(), System.currentTimeMillis());
-        server = new SimRecoveryServer(Util.PORT, header, receives);
+        SimRecoveryServer server = new SimRecoveryServer(port, header, receives);
         serverThread = new Thread(server);
         serverThread.start();
     }
 
     @After
     public void tearDown() throws Exception {
+//        serverThread.interrupt();
     }
 
     @Test
     public void test() {
-        RollRecovery recovery = new RollRecovery(appnode, Util.HOSTNAME, Util.PORT, appLog, Util.rollTS);
+        RollRecovery recovery = new RollRecovery(appnode, Util.HOSTNAME, port, appLog, Util.rollTS);
         Thread thread = new Thread(recovery);
         thread.start();
         try {

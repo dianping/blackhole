@@ -7,9 +7,15 @@ import com.dp.blackhole.appnode.Appnode;
 
 public class SimAppnode extends Appnode{
     private static final Log LOG = LogFactory.getLog(SimAppnode.class);
-    public SimAppnode(String appClient) {
+    public SimAppnode(String appClient, int port) {
         super(appClient);
+        setPort(port);
     }
+
+    private void setPort(int port) {
+        super.port = port;
+    }
+
     @Override
     public void reportFailure(String app, String appHost, long ts) {
         LOG.debug("APP: " + app + ", APP HOST: " + appHost + "ts: " + ts);

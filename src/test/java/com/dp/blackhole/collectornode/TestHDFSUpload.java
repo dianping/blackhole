@@ -37,7 +37,7 @@ public class TestHDFSUpload {
         try {
             fs = FileSystem.get(conf);
         } catch (IOException e) {
-            LOG.error("Failed to get FileSystem.", e);
+            LOG.debug("Failed to get FileSystem.", e);
             throw e;
         }
     } 
@@ -51,7 +51,7 @@ public class TestHDFSUpload {
     @Test
     public void testUploadWhole() throws InterruptedException, IOException {
         //TODO check how to upload hdfs base dir
-        HDFSUpload writer = new HDFSUpload(SimCollectornode.getSimpleInstance("upload", fs, MAGIC), 
+        HDFSUpload writer = new HDFSUpload(SimCollectornode.getSimpleInstance("upload", MAGIC, fs), 
                 fs, file, Util.getRollIdent(MAGIC));
         Thread thread = new Thread(writer);
         thread.start();
