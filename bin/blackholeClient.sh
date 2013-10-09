@@ -34,5 +34,5 @@ for j in `ls $BLACKHOLE_HOME/libs/*.jar`; do
 done
 
 echo "starting $name"
-nohup java -Xmx128m -cp $libs $class -Djava.library.path=$native -f $BLACKHOLE_HOME/conf/app.conf > $out 2>&1 &
+nohup java -Xmx128m -Djava.library.path=$native -cp $libs $class -f $BLACKHOLE_HOME/conf/app.conf > $out 2>&1 &
 echo $! > $pid
