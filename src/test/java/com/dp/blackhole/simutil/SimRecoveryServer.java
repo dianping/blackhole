@@ -40,6 +40,13 @@ public class SimRecoveryServer implements Runnable {
     }
     public void stopIt() {
         shouldStop = true;
+        try {
+            if (!ss.isClosed()) {
+                ss.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public void run() {
@@ -59,16 +66,16 @@ public class SimRecoveryServer implements Runnable {
             
             protocol.recieveHead(din, head);
             String type = String.valueOf(head.type);
-            LOG.info("Receive... " + type);
+            LOG.debug("Receive... " + type);
             header.add(type);
             String appname = head.app;
-            LOG.info("Receive... " + appname);
+            LOG.debug("Receive... " + appname);
             header.add(appname);
             String periodStr = String.valueOf(head.peroid);
-            LOG.info("Receive... " + periodStr);
+            LOG.debug("Receive... " + periodStr);
             header.add(periodStr);
             String ts = String.valueOf(head.ts);
-            LOG.info("Receive... " + ts);
+            LOG.debug("Receive... " + ts);
             header.add(ts); 
             
             //similar get offset from hdfs file
@@ -79,8 +86,8 @@ public class SimRecoveryServer implements Runnable {
             System.out.println("server "+socket.isClosed());
             System.out.println("server "+socket.isConnected());
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            while (!shouldStop && (line = reader.readLine()) != null) {
-                LOG.info("server>" + line);
+            while (!Thread.interrupted() && !shouldStop && (line = reader.readLine()) != null) {
+                LOG.debug("server>" + line);
                 receives.add(line);
                 if (receives.size() == Util.MAX_LINE) {
                     break;
@@ -93,7 +100,9 @@ public class SimRecoveryServer implements Runnable {
                 if (in != null) {
                     in.close();
                 }
-                ss.close();
+                if (!ss.isClosed()) {
+                    ss.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -50,8 +50,6 @@ public class TestUtil {
 
     @After
     public void tearDown() throws Exception {
-        com.dp.blackhole.simutil.Util.deleteTmpFile(
-                com.dp.blackhole.simutil.Util.FILE_SUFFIX);
     }
 
     @Test
