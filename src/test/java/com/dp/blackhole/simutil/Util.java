@@ -14,6 +14,8 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 
 import com.dp.blackhole.collectornode.RollIdent;
 
@@ -25,13 +27,20 @@ public class Util {
     public static final String BASE_HDFS_PATH = SCHEMA + BASE_PATH;
     public static final String FILE_SUFFIX = "2013-01-01.15";
     public static long rollTS = 1357023691855l;
-    public static final int PORT = 40000;
     public static final String expected = " 0f j2390jr092jf2f02jf02qjdf2-3j0 fiopwqejfjwffhg5_p    <end";
     public static final int offset = 100;
     public static final int MAX_LINE = 9;
+    public static final String TEST_ROLL_FILE = "/tmp/rollfile";
     
-    public static void initEnv() {
-        
+    public static FileSystem getFS() {
+        Configuration conf = new Configuration();
+        FileSystem fs = null;
+        try {
+            fs = FileSystem.get(conf);
+        } catch (IOException e) {
+            LOG.debug("Failed to get FileSystem.", e);
+        }
+        return fs;
     }
     
     public static RollIdent getRollIdent(String appName) {
@@ -59,7 +68,7 @@ public class Util {
         //build a app log
         File file = new File("/tmp/" + MAGIC);
         file.createNewFile();
-        LOG.info("create tmp file " + file);
+        LOG.debug("create tmp file " + file);
         BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(file)));
         writer.write(string);
@@ -78,7 +87,7 @@ public class Util {
                 "j faiosjf opwqejo fjopwej faeopsf jopawefj opsjf opsafj ao\n" ;
         //build a app log
         File file = File.createTempFile(MAGIC, null);
-        LOG.info("create tmp broken file " + file);
+        LOG.debug("create tmp broken file " + file);
         BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(file)));
         writer.write(string);
@@ -89,8 +98,8 @@ public class Util {
     public static void deleteTmpFile(String MAGIC) {
         File dir = new File("/tmp");
         for (File file : dir.listFiles()) {
-            if (file.getName().startsWith(MAGIC)) {
-                LOG.info("delete tmp file " + file);
+            if (file.getName().contains(MAGIC)) {
+                LOG.debug("delete tmp file " + file);
                 file.delete();
             }
         }

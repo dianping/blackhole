@@ -27,23 +27,23 @@ import com.dp.blackhole.simutil.Util;
 public class TestAppnode {
     private static final Log LOG = LogFactory.getLog(TestAppnode.class);
     private static final String MAGIC = "9vjrder3";
-    private static SimAppnode appnode;
+    private static final int port = 40000;
+    private SimAppnode appnode;
     private static String client;
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         try {
             client = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e1) {
-            LOG.error("Oops, got an exception:", e1);
+            LOG.debug("Oops, got an exception:", e1);
             return;
         }
-        appnode = new SimAppnode(client);
+        
         ConfigKeeper conf = new ConfigKeeper();
         conf.addRawProperty(MAGIC+".WATCH_FILE", "/tmp/" + MAGIC + ".log");
-        conf.addRawProperty(MAGIC+".port", "40000");//TODO
-        conf.addRawProperty(MAGIC+".TRANSFER_PERIOD_VALUE", "1");
-        conf.addRawProperty(MAGIC+".TRANSFER_PERIOD_UNIT", "hour");
-        appnode.fillUpAppLogsFromConfig();
+        conf.addRawProperty(MAGIC+".ROLL_PERIOD", "3600");
+        conf.addRawProperty(MAGIC+".BUFFER_SIZE", "4096");
+        
     }
 
     @AfterClass
@@ -52,10 +52,13 @@ public class TestAppnode {
 
     @Before
     public void setUp() throws Exception {
+        appnode = new SimAppnode(client, port);
+        appnode.fillUpAppLogsFromConfig();
     }
 
     @After
     public void tearDown() throws Exception {
+        appnode.close();
     }
 
     @Test
