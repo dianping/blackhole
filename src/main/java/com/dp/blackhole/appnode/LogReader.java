@@ -62,7 +62,7 @@ public class LogReader implements Runnable{
         this.collectorServer = collectorServer;
         this.port = port;
         this.appLog =appLog;
-        this.bufSize = ConfigKeeper.configMap.get(appLog.getAppName()).getInteger(ParamsKey.Appconf.BUFFER_SIZE);
+        this.bufSize = ConfigKeeper.configMap.get(appLog.getAppName()).getInteger(ParamsKey.Appconf.BUFFER_SIZE, 4096);
     }
 
     public void initialize() throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
