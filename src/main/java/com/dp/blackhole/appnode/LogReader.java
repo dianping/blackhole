@@ -115,7 +115,7 @@ public class LogReader implements Runnable{
             parentWatchID = instance.addWatch(parentWatchPath, FILE_CREATED, false, listener);
             LOG.info("Monitoring parent path " + parentWatchPath + " \"FILE_CREATE\" for rotate.");
             while (getRun()) {
-                Thread.sleep(100000);
+                Thread.sleep(5000);
             }
         } catch (final InterruptedException e) {
 //            LOG.info("Interrputed.", e);

@@ -79,10 +79,10 @@ public class SimLogger implements Runnable {
 	
 	public String create() {
         String str = null;
-        int hightPos, lowPos; // 定义高低位
+        int hightPos, lowPos;
         Random random = new Random();
-        hightPos = (176 + Math.abs(random.nextInt(39)));//获取高位值
-        lowPos = (161 + Math.abs(random.nextInt(93)));//获取低位值
+        hightPos = (176 + Math.abs(random.nextInt(39)));
+        lowPos = (161 + Math.abs(random.nextInt(93)));
         byte[] b = new byte[2];
         b[0] = (new Integer(hightPos).byteValue());
         b[1] = (new Integer(lowPos).byteValue());
@@ -90,19 +90,7 @@ public class SimLogger implements Runnable {
             str = new String(b, "gbk");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-        }//转成中文
+        }
         return str;
 	}
-	
-//	public static void main(String[] args) {
-//		SimLogger simLogger = new SimLogger(100);
-//		Thread thread = new Thread(simLogger);
-//		thread.start();
-//		try {
-//			Thread.sleep(3000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//		thread.interrupt();
-//	}
 }

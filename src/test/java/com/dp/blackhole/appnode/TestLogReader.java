@@ -55,7 +55,7 @@ public class TestLogReader {
     }
 
     @Test
-    public void testFileNotFoundAndFileRotated() {
+    public void testFileRotated() {
         AppLog appLog = new AppLog(MAGIC, com.dp.blackhole.simutil.Util.TEST_ROLL_FILE,
         		System.currentTimeMillis());
         LogReader reader = new LogReader(new SimAppnode("locahost", port), com.dp.blackhole.simutil.Util.HOSTNAME, 
