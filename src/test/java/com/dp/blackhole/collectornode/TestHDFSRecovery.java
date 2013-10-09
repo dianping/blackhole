@@ -46,14 +46,14 @@ public class TestHDFSRecovery {
         try {
             fs = FileSystem.get(conf);
         } catch (IOException e) {
-            LOG.error("Failed to get FileSystem.", e);
+            LOG.debug("Failed to get FileSystem.", e);
             throw e;
         }
         //file:///tmp/e9wjd83h/2013-01-01/15/localhost_e9wjd83h_2013-01-01.03  e9wjd83h is appname
         oldPath = new Path(Util.SCHEMA + Util.BASE_PATH 
                 + MAGIC + "/2013-01-01/15/" + APP_HOST + "@"
                 + MAGIC + "_2013-01-01.15.gz.tmp");
-        LOG.info("old path in hdfs is " + oldPath);
+        LOG.debug("old path in hdfs is " + oldPath);
         fs.copyFromLocalFile(false, true, new Path(fileBroken.toURI()), oldPath);
         
         //create a good file and rename it for client
@@ -65,7 +65,7 @@ public class TestHDFSRecovery {
             String client = InetAddress.getLocalHost().getHostName();
             appnode = new SimAppnode(client, port);
         } catch (UnknownHostException e1) {
-            LOG.error("Oops, got an exception:", e1);
+            LOG.debug("Oops, got an exception:", e1);
             return;
         }
         

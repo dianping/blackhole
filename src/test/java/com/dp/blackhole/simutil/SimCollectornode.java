@@ -117,11 +117,11 @@ public class SimCollectornode extends Collectornode implements Runnable{
     
     @Override
     public void recoveryResult(RollIdent ident, boolean recoverySuccess) {
-        LOG.info("send recovery result: " + recoverySuccess);
+        LOG.debug("send recovery result: " + recoverySuccess);
     }
     @Override
     public void uploadResult(RollIdent ident, boolean uploadSuccess) {
-        LOG.info("send upload result: " + uploadSuccess);
+        LOG.debug("send upload result: " + uploadSuccess);
     }
     @Override
     public String getRollHdfsPath (RollIdent ident) {
@@ -134,7 +134,7 @@ public class SimCollectornode extends Collectornode implements Runnable{
     }
     @Override
     public void run() {
-        LOG.info("server begin at " + port);
+        LOG.debug("server begin at " + port);
         try {
             while (!Thread.interrupted()) {
                 String line = null;
@@ -145,11 +145,11 @@ public class SimCollectornode extends Collectornode implements Runnable{
                     AgentHead head = protocol.new AgentHead();
                     protocol.recieveHead(din, head);
                     String appname = head.app;
-                    LOG.info("Receive... " + appname);
+                    LOG.debug("Receive... " + appname);
                     assertEquals(appName, head.app);
                     long period = ConfigKeeper.configMap.get(appName)
                             .getLong(ParamsKey.Appconf.ROLL_PERIOD, 3600l);
-                    LOG.info("Receive... " + period);
+                    LOG.debug("Receive... " + period);
                     assertEquals(period, head.peroid);
                     assertEquals(com.dp.blackhole.simutil.Util.rollTS, head.ts);
                     RollIdent roll = new RollIdent();
@@ -163,7 +163,7 @@ public class SimCollectornode extends Collectornode implements Runnable{
                 } else if (simType.equals("stream")) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(din));
                     while (!Thread.interrupted() && !shouldStop && (line = reader.readLine()) != null) {
-                        LOG.info("server>" + line);
+                        LOG.debug("server>" + line);
                         receives.add(line);
                     }
                     if (din != null) {

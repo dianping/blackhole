@@ -39,7 +39,7 @@ public class TestRollRecovery {
         try {
             client = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e1) {
-            LOG.error("Oops, got an exception:", e1);
+            LOG.debug("Oops, got an exception:", e1);
             return;
         }
         appnode = new SimAppnode(client, port);

@@ -33,7 +33,7 @@ public class SimLogger implements Runnable {
 	        	if (i%10 == 0) {
 	        		if (file.exists()) {
 	        			target = new File(Util.TEST_ROLL_FILE + '.' + (j++));
-	        			LOG.info("Renaming file " + file + " to " + target);
+	        			LOG.debug("Renaming file " + file + " to " + target);
 	        			renameSucceeded = file.renameTo(target);
 	        			writer.close();
 					}
@@ -58,14 +58,14 @@ public class SimLogger implements Runnable {
 			File dir = new File("/tmp");
 	        for (File del : dir.listFiles()) {
 	            if (del.getName().startsWith("rollfile")) {
-	                LOG.info("delete tmp file " + del);
+	                LOG.debug("delete tmp file " + del);
 	                del.delete();
 	            }
 	        }
 		} catch (FileNotFoundException e) {
-			LOG.info("OOPS", e);
+			LOG.debug("OOPS", e);
 		} catch (IOException e) {
-			LOG.info("OOPS", e);
+			LOG.debug("OOPS", e);
 		} finally {
 			if (writer != null) {
 				try {

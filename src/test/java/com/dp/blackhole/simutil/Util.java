@@ -38,7 +38,7 @@ public class Util {
         try {
             fs = FileSystem.get(conf);
         } catch (IOException e) {
-            LOG.error("Failed to get FileSystem.", e);
+            LOG.debug("Failed to get FileSystem.", e);
         }
         return fs;
     }
@@ -68,7 +68,7 @@ public class Util {
         //build a app log
         File file = new File("/tmp/" + MAGIC);
         file.createNewFile();
-        LOG.info("create tmp file " + file);
+        LOG.debug("create tmp file " + file);
         BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(file)));
         writer.write(string);
@@ -87,7 +87,7 @@ public class Util {
                 "j faiosjf opwqejo fjopwej faeopsf jopawefj opsjf opsafj ao\n" ;
         //build a app log
         File file = File.createTempFile(MAGIC, null);
-        LOG.info("create tmp broken file " + file);
+        LOG.debug("create tmp broken file " + file);
         BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(file)));
         writer.write(string);
@@ -99,7 +99,7 @@ public class Util {
         File dir = new File("/tmp");
         for (File file : dir.listFiles()) {
             if (file.getName().contains(MAGIC)) {
-                LOG.info("delete tmp file " + file);
+                LOG.debug("delete tmp file " + file);
                 file.delete();
             }
         }

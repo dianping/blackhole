@@ -166,7 +166,6 @@ public class LogReader implements Runnable{
 
         @Override
         public void fileModified(int wd, String rootPath, String name) {
-            LOG.info("modify detected " + rootPath + "/" + name);
             eventWriter.process();
         }
 

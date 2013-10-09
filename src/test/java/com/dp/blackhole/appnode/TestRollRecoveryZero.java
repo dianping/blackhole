@@ -41,7 +41,7 @@ public class TestRollRecoveryZero {
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        LOG.info("delete tmp file for test RollRecoveryZero " + file);
+        LOG.debug("delete tmp file for test RollRecoveryZero " + file);
         Util.deleteTmpFile(MAGIC);
     }
 
