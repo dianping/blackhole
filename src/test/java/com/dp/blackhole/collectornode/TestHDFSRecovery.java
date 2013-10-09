@@ -29,12 +29,13 @@ public class TestHDFSRecovery {
     private static final Log LOG = LogFactory.getLog(TestHDFSRecovery.class);
     private final String MAGIC = "e9wjd83h";
     private final String APP_HOST = "localhost";
+    private static final int port = 40004;
     private File file;
     private File fileBroken;
     private FileSystem fs;
     private Path oldPath;
     private SimAppnode appnode;
-    private String client;
+    private Thread serverThread;
 
     @Before
     public void setUp() throws Exception {
@@ -61,28 +62,26 @@ public class TestHDFSRecovery {
         Util.createTmpFile(APP_HOST + "@" + MAGIC + "_" + Util.FILE_SUFFIX, Util.expected);
         
         try {
-            client = InetAddress.getLocalHost().getHostName();
+            String client = InetAddress.getLocalHost().getHostName();
+            appnode = new SimAppnode(client, port);
         } catch (UnknownHostException e1) {
             LOG.error("Oops, got an exception:", e1);
             return;
         }
-        appnode = new SimAppnode(client);
-        
-        try {
-            client = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e1) {
-            LOG.error("Oops, got an exception:", e1);
-            return;
-        }
-        appnode = new SimAppnode(client);
         
         //deploy some condition
         ConfigKeeper confKeeper = new ConfigKeeper();
         confKeeper.addRawProperty(MAGIC+".ROLL_PERIOD", "3600");
+        confKeeper.addRawProperty(MAGIC + ".BUFFER_SIZE", "100");
+        
+        serverThread = new Thread(
+                new SimCollectornode("recovery", MAGIC, port, fs));
+        serverThread.start();
     }
 
     @After
     public void tearDown() throws Exception {
+//        serverThread.interrupt();
         fs.delete(new Path(Util.SCHEMA + Util.BASE_PATH), true);
         fileBroken.delete();
         file.delete();
@@ -91,17 +90,10 @@ public class TestHDFSRecovery {
 
     @Test
     public void test() throws IOException, InterruptedException {
-        Thread serverThread = new Thread(
-                new SimCollectornode("recovery", Util.PORT, fs, MAGIC));
-        serverThread.start();
-        
         AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), new Date().getTime());
-        RollRecovery clientTask = new RollRecovery(appnode, Util.HOSTNAME, Util.PORT, appLog, Util.rollTS);
+        RollRecovery clientTask = new RollRecovery(appnode, Util.HOSTNAME, port, appLog, Util.rollTS);
         Thread clientThread = new Thread(clientTask);
-        clientThread.start();
-        
-        serverThread.join();
-        clientThread.join();
+        clientThread.run();
         Util.convertToGZIP(file);
         String expectedMD5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(new FileInputStream(file));
         

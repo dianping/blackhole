@@ -32,52 +32,6 @@ public class LogReader implements Runnable{
     public static final int FILE_MODIFIED   = 0x4;
     public static final int FILE_RENAMED    = 0x8;
     public static final int FILE_ANY        = FILE_CREATED | FILE_DELETED | FILE_MODIFIED | FILE_RENAMED;
-    private static IJNotify instance;
-    
-    static {
-        String overrideClass = System.getProperty("jnotify.impl.override");
-        if (overrideClass != null) {
-            try {
-                instance = (IJNotify) Class.forName(overrideClass).newInstance();
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        else {
-            String osName = System.getProperty("os.name").toLowerCase();
-            if (osName.equals("linux")) {
-                try {
-                    instance = (IJNotify) Class.forName("net.contentobjects.jnotify.linux.JNotifyAdapterLinux").newInstance();
-                }
-                catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            else
-            if (osName.startsWith("windows")) {
-                try {
-                    instance = (IJNotify) Class.forName("net.contentobjects.jnotify.win32.JNotifyAdapterWin32").newInstance();
-                }
-                catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            else
-            if (osName.startsWith("mac os x")) {
-                try {
-                    instance = (IJNotify) Class.forName("net.contentobjects.jnotify.macosx.JNotifyAdapterMacOSX").newInstance();
-                }
-                catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            else {
-                throw new RuntimeException("Unsupported OS : " + osName);
-            }
-        }
-    }
-    
     private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
     private String  collectorServer;
     private int port;
@@ -87,8 +41,21 @@ public class LogReader implements Runnable{
     private int bufSize;
     private Socket socket;
     private DataOutputStream out;
+    private static IJNotify instance;
     private int parentWatchID, watchId;
     private volatile boolean run = true;
+    
+    static {
+        try {
+            instance = (IJNotify) Class.forName("net.contentobjects.jnotify.linux.JNotifyAdapterLinux").newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
     public LogReader(Appnode node, String collectorServer, int port, AppLog appLog) {
         this.node = node;
@@ -98,7 +65,7 @@ public class LogReader implements Runnable{
         this.bufSize = ConfigKeeper.configMap.get(appLog.getAppName()).getInteger(ParamsKey.Appconf.BUFFER_SIZE);
     }
 
-    public void initialize() throws IOException {
+    public void initialize() throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
         tailFile = new File(appLog.getTailFile()).getCanonicalFile();
         if (tailFile == null) {
             throw new FileNotFoundException("tail file not found");
@@ -118,12 +85,13 @@ public class LogReader implements Runnable{
     public void stop() {
         this.run = false;
         try {
+            instance.removeWatch(watchId);
+            instance.removeWatch(parentWatchID);
+            Thread.currentThread().interrupt();
             if (socket != null && !socket.isClosed()) {
                 socket.close();
                 socket = null;
             }
-            instance.removeWatch(watchId);
-            instance.removeWatch(parentWatchID);
         } catch (IOException e) {
             LOG.warn("Warnning, clean fail:", e);
         }
@@ -150,7 +118,7 @@ public class LogReader implements Runnable{
                 Thread.sleep(100000);
             }
         } catch (final InterruptedException e) {
-            LOG.info("Interrputed.", e);
+//            LOG.info("Interrputed.", e);
         } catch (FileNotFoundException e) {
             LOG.error("Got an exception", e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
@@ -166,17 +134,12 @@ public class LogReader implements Runnable{
     }
     
     class Listener implements JNotifyListener {
-//        private int wd;
         private String watchPath;
         private EventWriter eventWriter;
         Listener(String watchPath, EventWriter eventWriter) {
             this.watchPath = watchPath;
             this.eventWriter = eventWriter;
         }
-        
-//        void receiveWatchId(int wd) {
-//            this.wd = wd;
-//        }
         
         @Override
         public void fileCreated(int wd, String rootPath, String name) {
@@ -203,6 +166,7 @@ public class LogReader implements Runnable{
 
         @Override
         public void fileModified(int wd, String rootPath, String name) {
+            LOG.info("modify detected " + rootPath + "/" + name);
             eventWriter.process();
         }
 

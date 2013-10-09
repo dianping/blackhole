@@ -40,6 +40,13 @@ public class SimRecoveryServer implements Runnable {
     }
     public void stopIt() {
         shouldStop = true;
+        try {
+            if (!ss.isClosed()) {
+                ss.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public void run() {
@@ -79,7 +86,7 @@ public class SimRecoveryServer implements Runnable {
             System.out.println("server "+socket.isClosed());
             System.out.println("server "+socket.isConnected());
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            while (!shouldStop && (line = reader.readLine()) != null) {
+            while (!Thread.interrupted() && !shouldStop && (line = reader.readLine()) != null) {
                 LOG.info("server>" + line);
                 receives.add(line);
                 if (receives.size() == Util.MAX_LINE) {
@@ -93,7 +100,9 @@ public class SimRecoveryServer implements Runnable {
                 if (in != null) {
                     in.close();
                 }
-                ss.close();
+                if (!ss.isClosed()) {
+                    ss.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

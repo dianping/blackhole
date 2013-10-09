@@ -29,7 +29,7 @@ public class SimLogger implements Runnable {
 		try {
 	        int i = 0;
 	        int j = 0;
-	        while (true) {
+	        while (!Thread.interrupted()) {
 	        	if (i%10 == 0) {
 	        		if (file.exists()) {
 	        			target = new File(Util.TEST_ROLL_FILE + '.' + (j++));
@@ -54,14 +54,14 @@ public class SimLogger implements Runnable {
 	        	Thread.sleep(delay);
 	        }
 		} catch (InterruptedException e) {
-			// stop
-//			File dir = new File("/tmp");
-//	        for (File del : dir.listFiles()) {
-//	            if (del.getName().startsWith("rollfile")) {
-//	                LOG.info("delete tmp file " + del);
-//	                del.delete();
-//	            }
-//	        }
+			//stop
+			File dir = new File("/tmp");
+	        for (File del : dir.listFiles()) {
+	            if (del.getName().startsWith("rollfile")) {
+	                LOG.info("delete tmp file " + del);
+	                del.delete();
+	            }
+	        }
 		} catch (FileNotFoundException e) {
 			LOG.info("OOPS", e);
 		} catch (IOException e) {
@@ -94,15 +94,15 @@ public class SimLogger implements Runnable {
         return str;
 	}
 	
-	public static void main(String[] args) {
-		SimLogger simLogger = new SimLogger(100);
-		Thread thread = new Thread(simLogger);
-		thread.start();
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		thread.interrupt();
-	}
+//	public static void main(String[] args) {
+//		SimLogger simLogger = new SimLogger(100);
+//		Thread thread = new Thread(simLogger);
+//		thread.start();
+//		try {
+//			Thread.sleep(3000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//		thread.interrupt();
+//	}
 }

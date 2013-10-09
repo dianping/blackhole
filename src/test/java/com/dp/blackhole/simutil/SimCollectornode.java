@@ -1,11 +1,15 @@
 package com.dp.blackhole.simutil;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,23 +32,87 @@ public class SimCollectornode extends Collectornode implements Runnable{
     private String simType;
     private ServerSocket ss;
     private String appName;
+    private int port;
     private Socket client;
+    private List<String> receives;
+    private volatile boolean shouldStop;
     
-    private SimCollectornode(String simType, FileSystem fs, String appName) throws IOException {
-        this.fs = fs;
+    /**
+     * not need port
+     * @param simType
+     * @param appName
+     * @param fs
+     * @throws IOException
+     */
+    private SimCollectornode(String simType, String appName, FileSystem fs) throws IOException {
         this.simType = simType;
         this.appName = appName;
+        this.fs = fs;
     }
 
-    public SimCollectornode(String simType, int port, FileSystem fs, String appName) throws IOException {
-        this.fs = fs;
-        this.simType = simType;
-        this.appName = appName;
-        ss = new ServerSocket(port);
+    /**
+     * not need receive list
+     * @param simType
+     * @param appName
+     * @param port
+     * @param fs
+     * @throws IOException
+     */
+    public SimCollectornode(String simType, String appName, int port, FileSystem fs) throws IOException {
+        this(simType, appName, port, fs, null);
     }
     
-    public static SimCollectornode getSimpleInstance(String simType, FileSystem fs, String appName) throws IOException {
-        return new SimCollectornode(simType, fs, appName);
+    /**
+     * not need to assign receive list
+     * @param simType
+     * @param appName
+     * @param port
+     * @throws IOException
+     */
+    public SimCollectornode(String simType, String appName, int port) throws IOException
+    {
+        this(simType, appName, port, null, new ArrayList<String>());
+    }
+    
+    /**
+     * not need FS
+     * @param simType
+     * @param appName
+     * @param port
+     * @param receives
+     * @throws IOException
+     */
+    public SimCollectornode(String simType, String appName, int port, List<String> receives) throws IOException {
+        this(simType, appName, port, null, receives);
+    }
+    
+    public SimCollectornode(String simType, String appName, int port, FileSystem fs, List<String> receives) throws IOException {
+        this.simType = simType;
+        this.appName = appName;
+        this.fs = fs;
+        this.receives = receives;
+        this.port = port;
+        ss = new ServerSocket(port);
+        this.shouldStop = false;
+    }
+    
+    public boolean shouldStopOrNot() {
+        return shouldStop;
+    }
+    
+    public void stopIt() {
+        shouldStop = true;
+        try {
+            if (!ss.isClosed()) {
+                ss.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static SimCollectornode getSimpleInstance(String simType, String appName, FileSystem fs) throws IOException {
+        return new SimCollectornode(simType, appName, fs);
     }
     
     @Override
@@ -66,33 +134,50 @@ public class SimCollectornode extends Collectornode implements Runnable{
     }
     @Override
     public void run() {
+        LOG.info("server begin at " + port);
         try {
-            client = ss.accept();
-            if (simType.equals("recovery")) {
+            while (!Thread.interrupted()) {
+                String line = null;
+                client = ss.accept();
                 DataInputStream din = new DataInputStream(client.getInputStream());
-                AgentProtocol protocol = new AgentProtocol();
-                AgentHead head = protocol.new AgentHead();
-                
-                protocol.recieveHead(din, head);
-                assertEquals(appName, head.app);
-                long period = ConfigKeeper.configMap.get(appName)
-                        .getLong(ParamsKey.Appconf.ROLL_PERIOD, 3600l);
-                assertEquals(period, head.peroid);
-                assertEquals(com.dp.blackhole.simutil.Util.rollTS, head.ts);
-                RollIdent roll = new RollIdent();
-                roll.app = head.app;
-                roll.source = com.dp.blackhole.simutil.Util.HOSTNAME;
-                roll.period = head.peroid;
-                roll.ts = head.ts;
-                HDFSRecovery recovery = new HDFSRecovery(getSimpleInstance(simType, fs, appName), 
-                        fs, client, roll);
-                recovery.run();
+                if (simType.equals("recovery")) {
+                    AgentProtocol protocol = new AgentProtocol();
+                    AgentHead head = protocol.new AgentHead();
+                    protocol.recieveHead(din, head);
+                    String appname = head.app;
+                    LOG.info("Receive... " + appname);
+                    assertEquals(appName, head.app);
+                    long period = ConfigKeeper.configMap.get(appName)
+                            .getLong(ParamsKey.Appconf.ROLL_PERIOD, 3600l);
+                    LOG.info("Receive... " + period);
+                    assertEquals(period, head.peroid);
+                    assertEquals(com.dp.blackhole.simutil.Util.rollTS, head.ts);
+                    RollIdent roll = new RollIdent();
+                    roll.app = head.app;
+                    roll.source = com.dp.blackhole.simutil.Util.HOSTNAME;
+                    roll.period = head.peroid;
+                    roll.ts = head.ts;
+                    HDFSRecovery recovery = new HDFSRecovery(getSimpleInstance(simType, appName, fs), 
+                            fs, client, roll);
+                    recovery.run();
+                } else if (simType.equals("stream")) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(din));
+                    while (!Thread.interrupted() && !shouldStop && (line = reader.readLine()) != null) {
+                        LOG.info("server>" + line);
+                        receives.add(line);
+                    }
+                    if (din != null) {
+                        din.close();
+                    }
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             try {
-                ss.close();
+                if (!ss.isClosed()) {
+                    ss.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
