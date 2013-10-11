@@ -194,6 +194,11 @@ public class Util {
         return ts;
     }
     
+    public static String getParentAbsolutePath(String absolutePath) {
+        return absolutePath.substring(0, absolutePath.lastIndexOf(
+                System.getProperty("file.separator")));
+    }
+    
     public static String formatTs(long ts) {
         return format.format(new Date(ts));
     }

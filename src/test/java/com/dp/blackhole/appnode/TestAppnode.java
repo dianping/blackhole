@@ -38,12 +38,13 @@ public class TestAppnode {
             LOG.debug("Oops, got an exception:", e1);
             return;
         }
-        
         ConfigKeeper conf = new ConfigKeeper();
         conf.addRawProperty(MAGIC+".WATCH_FILE", "/tmp/" + MAGIC + ".log");
         conf.addRawProperty(MAGIC+".ROLL_PERIOD", "3600");
         conf.addRawProperty(MAGIC+".BUFFER_SIZE", "4096");
-        
+        File tailFile = new File("/tmp/" + MAGIC + ".log");
+        tailFile.createNewFile();
+        tailFile.deleteOnExit();
     }
 
     @AfterClass
@@ -58,7 +59,7 @@ public class TestAppnode {
 
     @After
     public void tearDown() throws Exception {
-        appnode.close();
+//        appnode.onDisconnected();
     }
 
     @Test

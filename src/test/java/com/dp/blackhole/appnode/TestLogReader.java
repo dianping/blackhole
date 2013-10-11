@@ -58,11 +58,13 @@ public class TestLogReader {
     public void testFileRotated() {
         AppLog appLog = new AppLog(MAGIC, com.dp.blackhole.simutil.Util.TEST_ROLL_FILE,
         		System.currentTimeMillis());
-        LogReader reader = new LogReader(new SimAppnode("locahost", port), com.dp.blackhole.simutil.Util.HOSTNAME, 
-                port, appLog);
-        Thread readerThread = new Thread(reader);
         loggerThread.start();
+        Thread readerThread = null;
         try {
+            Thread.sleep(500);
+            LogReader reader = new LogReader(new SimAppnode("locahost", port), com.dp.blackhole.simutil.Util.HOSTNAME, 
+                    port, appLog);
+            readerThread = new Thread(reader);
         	Thread.sleep(1000);//ignore file first create
         	readerThread.start();
 			Thread.sleep(3000);
@@ -71,6 +73,6 @@ public class TestLogReader {
 		}
         readerThread.interrupt();
         assertNotNull("testFileNotFound function fail.", receives.toArray());
-        assertEquals(true, receives.size()>10);
+        assertEquals(true, receives.size()>20);
     }
 }

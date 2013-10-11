@@ -15,7 +15,7 @@ public class SimLogger implements Runnable {
 	private static final Log LOG = LogFactory.getLog(SimLogger.class);
 	private long delay;
 	private OutputStreamWriter writer;
-	private static final int WORD_COUNT_PER_LINE = 10;
+	private static final int WORD_COUNT_PER_LINE = 3000;
 	
     public SimLogger(long delay) {
 		this.delay = delay;
