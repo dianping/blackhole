@@ -32,8 +32,6 @@ public class LogReader implements Runnable{
     EventWriter eventWriter;
     private volatile boolean run = true;
     
-    private static FileListener listener = FileListener.getInstance();
-
     public LogReader(Appnode node, String collectorServer, int port, AppLog appLog) {
         this.node = node;
         this.collectorServer = collectorServer;
@@ -52,7 +50,7 @@ public class LogReader implements Runnable{
         } catch (IOException e) {
             LOG.warn("Warnning, clean fail:", e);
         }
-        listener.unregisterLogReader(appLog.getTailFile());
+        node.getListener().unregisterLogReader(appLog.getTailFile());
     }
 
     @Override
@@ -70,7 +68,7 @@ public class LogReader implements Runnable{
             File tailFile = new File(appLog.getTailFile());
             this.eventWriter = new EventWriter(tailFile, bufSize);
             
-            if (!listener.registerLogReader(appLog.getTailFile(), this)) {
+            if (!node.getListener().registerLogReader(appLog.getTailFile(), this)) {
                 throw new Exception("Failed to register a log reader for " + appLog.getAppName() 
                         + " with " + appLog.getTailFile() + ", thread will not run.");
             }

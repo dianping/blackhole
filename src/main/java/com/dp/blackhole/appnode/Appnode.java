@@ -39,6 +39,7 @@ public class Appnode extends Node {
     private File configFile = null;
     private ExecutorService pool;
     protected int port;   //protected for test case SimAppnode
+    private FileListener listener;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
     
@@ -127,7 +128,12 @@ public class Appnode extends Node {
             return;
         }
         fillUpAppLogsFromConfig();
-
+        try {    
+            listener = new FileListener();
+        } catch (Exception e) {
+            LOG.error("Failed to create a file listener, node shutdown!");
+            return;
+        }
         //wait for receiving message from supervisor
         super.loop();
     }
@@ -252,6 +258,14 @@ public class Appnode extends Node {
         this.args = args;
     }
     
+    public FileListener getListener() {
+        return listener;
+    }
+
+    public void setListener(FileListener listener) {
+        this.listener = listener;
+    }
+
     public void reportFailure(String app, String appHost, long ts) {
         Message message = PBwrap.wrapAppFailure(app, appHost, ts);
         send(message);
