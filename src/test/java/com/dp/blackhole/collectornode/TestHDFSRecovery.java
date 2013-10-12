@@ -103,6 +103,7 @@ public class TestHDFSRecovery {
                 + MAGIC + "_2013-01-01.15.gz");
         File fileGzip = new File(newPath.toUri());
 //        fileGzip = Util.convertToNomal(fileGzip);
+        Thread.sleep(1000); //wait for file convert to zip accomplished
         String actualMD5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(new FileInputStream(fileGzip));
 //        LOG.info("actual md5 is " + actualMD5);
         assertEquals("recovery file is not correct.", expectedMD5, actualMD5);

@@ -262,6 +262,9 @@ public class Appnode extends Node {
         return listener;
     }
 
+    /**
+     * Just for unit test
+     **/
     public void setListener(FileListener listener) {
         this.listener = listener;
     }

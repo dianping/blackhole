@@ -21,20 +21,18 @@ public class FileListener implements JNotifyListener{
     public static final int FILE_RENAMED    = 0x8;
     public static final int FILE_ANY        = FILE_CREATED | FILE_DELETED | FILE_MODIFIED | FILE_RENAMED;
     private IJNotify iJNotifyInstance;
-//    private static FileListener fileListenerInstance;
     private HashMap<String, LogReader> readerMap;
     private Set<String> parentWathchPathSet;
     private HashMap<String, Integer> path2wd;
 
     public FileListener() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         iJNotifyInstance = (IJNotify) Class.forName("net.contentobjects.jnotify.linux.JNotifyAdapterLinux").newInstance();
+        readerMap = new HashMap<String, LogReader>();
+        parentWathchPathSet = new HashSet<String>();
+        path2wd = new HashMap<String, Integer>();
     }
 
     public synchronized boolean registerLogReader(final String watchPath, final LogReader reader) {
-        if (readerMap == null) {
-            readerMap = new HashMap<String, LogReader>();
-            parentWathchPathSet = new HashSet<String>();
-        }
         if (!readerMap.containsKey(watchPath)) {
             readerMap.put(watchPath, reader);
             String parentPath = Util.getParentAbsolutePath(watchPath);
@@ -43,9 +41,6 @@ public class FileListener implements JNotifyListener{
                 parentWathchPathSet.add(parentPath);
                 try {
                     fwd = iJNotifyInstance.addWatch(parentPath, FILE_CREATED, false, this);
-                    if (path2wd == null) {
-                        path2wd = new HashMap<String, Integer>();
-                    }
                     path2wd.put(parentPath, fwd);
                 } catch (JNotifyException e) {
                     LOG.error("Failed to add watch for " + parentPath, e);
@@ -67,9 +62,6 @@ public class FileListener implements JNotifyListener{
             }
             LOG.info("Registerring and monitoring tail file " + watchPath + " \"FILE_MODIFIED\"");
 
-            if (path2wd == null) {
-                path2wd = new HashMap<String, Integer>();
-            }
             path2wd.put(watchPath, wd);
         } else {
             LOG.info("Watch path " + watchPath + " has already exist in the Map");
@@ -78,7 +70,7 @@ public class FileListener implements JNotifyListener{
     }
     
     public synchronized boolean unregisterLogReader(String watchPath) {
-        if (path2wd == null || !path2wd.containsKey(watchPath)) {
+        if (!path2wd.containsKey(watchPath)) {
             return false;
         }
         int wd = path2wd.get(watchPath);
@@ -138,9 +130,7 @@ public class FileListener implements JNotifyListener{
 
     @Override
     public void fileModified(int wd, String rootPath, String name) {
-        if (name.length() != 0) {
-            readerMap.get(rootPath).eventWriter.process();
-        }
+        readerMap.get(rootPath).eventWriter.process();
     }
 
     @Override

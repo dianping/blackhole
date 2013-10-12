@@ -111,15 +111,14 @@ public class LogReader implements Runnable{
         
         public void processRotate() {
             try {
-                writer.write('\n'); //make server easy to handle
-                writer.flush();
-                
                 final RandomAccessFile save = reader;
                 reader = new RandomAccessFile(file, "r");
                 // At this point, we're sure that the old file is rotated
                 // Finish scanning the old file and then we'll start with the new one
                 readLines(save);
                 closeQuietly(save);
+                writer.write('\n'); //make server easy to handle
+                writer.flush();
             } catch (IOException e) {
                 LOG.error("Oops, got an exception:", e);
                 closeQuietly(reader);
@@ -170,7 +169,6 @@ public class LogReader implements Runnable{
             try {
                 writer.write(line);
                 writer.write('\n'); //make server easy to handle
-//                writer.flush();
             } catch (IOException e) {
                 LOG.error("Oops, got an exception:", e);
                 closeQuietly(reader);
