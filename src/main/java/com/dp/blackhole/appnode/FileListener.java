@@ -1,7 +1,9 @@
 package com.dp.blackhole.appnode;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -21,18 +23,18 @@ public class FileListener implements JNotifyListener{
     public static final int FILE_RENAMED    = 0x8;
     public static final int FILE_ANY        = FILE_CREATED | FILE_DELETED | FILE_MODIFIED | FILE_RENAMED;
     private IJNotify iJNotifyInstance;
-    private HashMap<String, LogReader> readerMap;
+    private Map<String, LogReader> readerMap;
     private Set<String> parentWathchPathSet;
-    private HashMap<String, Integer> path2wd;
+    private Map<String, Integer> path2wd;
 
     public FileListener() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         iJNotifyInstance = (IJNotify) Class.forName("net.contentobjects.jnotify.linux.JNotifyAdapterLinux").newInstance();
-        readerMap = new HashMap<String, LogReader>();
-        parentWathchPathSet = new HashSet<String>();
-        path2wd = new HashMap<String, Integer>();
+        readerMap = Collections.synchronizedMap(new HashMap<String, LogReader>());
+        parentWathchPathSet = Collections.synchronizedSet(new HashSet<String>());
+        path2wd = Collections.synchronizedMap(new HashMap<String, Integer>());
     }
 
-    public synchronized boolean registerLogReader(final String watchPath, final LogReader reader) {
+    public boolean registerLogReader(final String watchPath, final LogReader reader) {
         if (!readerMap.containsKey(watchPath)) {
             readerMap.put(watchPath, reader);
             String parentPath = Util.getParentAbsolutePath(watchPath);
@@ -69,7 +71,7 @@ public class FileListener implements JNotifyListener{
         return true;
     }
     
-    public synchronized boolean unregisterLogReader(String watchPath) {
+    public boolean unregisterLogReader(String watchPath) {
         if (!path2wd.containsKey(watchPath)) {
             return false;
         }
@@ -107,6 +109,8 @@ public class FileListener implements JNotifyListener{
                 if ((oldWd = path2wd.get(createdFilePath)) != null) {
                     iJNotifyInstance.removeWatch(oldWd);//TODO review
                     path2wd.remove(createdFilePath);
+                } else {
+                    LOG.fatal("Failed to get wd by file " + createdFilePath);
                 }
             } catch (JNotifyException e) {
                 LOG.warn("Failed to remove wd " + wd + " for " + createdFilePath, e);
