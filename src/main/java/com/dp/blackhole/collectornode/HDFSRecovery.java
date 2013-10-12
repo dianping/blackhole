@@ -83,20 +83,20 @@ public class HDFSRecovery implements Runnable{
                             LOG.error("delete " + recoveryPath + " failed");
                         }
                     } else {
-                        throw new Exception("Faild to rename to " + normalPathname);
+                        throw new IOException("Faild to rename to " + normalPathname);
                     }
                 }
                 
                 if (fs.exists(tmpPath) && !Util.retryDelete(fs, tmpPath)) {   //delete .tmp if exists
-                    throw new Exception("Faild to delete recovery file " + tmpPathname);
+                    throw new IOException("Faild to delete recovery file " + tmpPathname);
                 }
             } else {    //When normal path exists then just delete .tmp if they exist.
                 if (fs.exists(tmpPath) && !Util.retryDelete(fs, tmpPath)) {
-                    throw new Exception("Faild to delete recovery file " + tmpPathname);
+                    throw new IOException("Faild to delete recovery file " + tmpPathname);
                 }
             }
             recoverySuccess = true;
-        } catch (Exception e) {
+        } catch (IOException e) {
             LOG.error("Oops, got an exception:", e);
         } finally {
             node.recoveryResult(ident, recoverySuccess);

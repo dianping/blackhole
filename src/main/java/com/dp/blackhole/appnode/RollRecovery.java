@@ -95,8 +95,6 @@ public class RollRecovery implements Runnable{
                     + collectorServer + " port:" + port, e);
         } catch (IOException e) {
             LOG.error("Faild to build Input/Output stream. ", e);
-        } catch (Exception e) {
-            LOG.error("Oops, got an exception:", e);
         } finally {
             try {
                 if (in != null) {

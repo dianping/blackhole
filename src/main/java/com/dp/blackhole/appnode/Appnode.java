@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,21 +39,12 @@ public class Appnode extends Node {
     private File configFile = null;
     private ExecutorService pool;
     protected int port;   //protected for test case SimAppnode
+    private FileListener listener;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
     
     public Appnode(String appClient) {
         pool = Executors.newCachedThreadPool();
-    }
-
-    public void close() {
-        LOG.info("shutdown app node");
-        Iterator<LogReader> it = appReaders.values().iterator();
-        while (it.hasNext()) {
-            LogReader logReader = it.next();
-            logReader.stop();
-            appReaders.remove(logReader);
-        }
     }
     
     public boolean process(Message msg) {
@@ -138,7 +128,12 @@ public class Appnode extends Node {
             return;
         }
         fillUpAppLogsFromConfig();
-
+        try {    
+            listener = new FileListener();
+        } catch (Exception e) {
+            LOG.error("Failed to create a file listener, node shutdown!", e);
+            return;
+        }
         //wait for receiving message from supervisor
         super.loop();
     }
@@ -155,6 +150,7 @@ public class Appnode extends Node {
     @Override
     protected void onDisconnected() {
         // close connected streams
+        LOG.info("shutdown app node");
         for (java.util.Map.Entry<AppLog, LogReader> e : appReaders.entrySet()) {
             LogReader reader = e.getValue();
             reader.stop();
@@ -262,6 +258,17 @@ public class Appnode extends Node {
         this.args = args;
     }
     
+    public FileListener getListener() {
+        return listener;
+    }
+
+    /**
+     * Just for unit test
+     **/
+    public void setListener(FileListener listener) {
+        this.listener = listener;
+    }
+
     public void reportFailure(String app, String appHost, long ts) {
         Message message = PBwrap.wrapAppFailure(app, appHost, ts);
         send(message);
