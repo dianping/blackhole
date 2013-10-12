@@ -39,7 +39,8 @@ public class FileListener implements JNotifyListener{
 
     public boolean registerLogReader(final String watchPath, final LogReader reader) {
         int fwd, wd;
-        if (!readerMap.containsKey(watchPath) && lock.tryLock()) {
+        if (!readerMap.containsKey(watchPath)) {
+            lock.lock();
             try {
                 readerMap.put(watchPath, reader);
                 String parentPath = Util.getParentAbsolutePath(watchPath);
