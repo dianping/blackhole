@@ -69,7 +69,7 @@ public class LogReader implements Runnable{
             this.eventWriter = new EventWriter(tailFile, bufSize);
             
             if (!node.getListener().registerLogReader(appLog.getTailFile(), this)) {
-                throw new Exception("Failed to register a log reader for " + appLog.getAppName() 
+                throw new IOException("Failed to register a log reader for " + appLog.getAppName() 
                         + " with " + appLog.getTailFile() + ", thread will not run.");
             }
             while (run) {
@@ -83,8 +83,8 @@ public class LogReader implements Runnable{
         } catch (IOException e) {
             LOG.error("Oops, got an exception", e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
-        } catch (Exception e) {
-            LOG.error("Oops, got an exception:" , e);
+        } catch (RuntimeException e) {
+            LOG.error("Oops, got an RuntimException:" , e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
         } finally {
             stop();

@@ -63,7 +63,7 @@ public class TestLogReader {
         try {
             listener = new FileListener();
         } catch (Exception e) {
-            System.out.println(e);
+            System.err.println(e);
             return;
         }
         appnode.setListener(listener);

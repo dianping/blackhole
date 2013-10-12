@@ -131,7 +131,7 @@ public class Appnode extends Node {
         try {    
             listener = new FileListener();
         } catch (Exception e) {
-            LOG.error("Failed to create a file listener, node shutdown!");
+            LOG.error("Failed to create a file listener, node shutdown!", e);
             return;
         }
         //wait for receiving message from supervisor
