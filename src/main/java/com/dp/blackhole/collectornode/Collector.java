@@ -98,14 +98,16 @@ public class Collector implements Runnable {
         RollIdent rollIdent = getRollIdent();
         File rollFile = getRollFile(rollIdent);
 
-        boolean success = node.registerfile(rollIdent, rollFile);
+        writer.close();
+        if(!appending.renameTo(rollFile)) {
+            LOG.error("rename to " + rollFile + " failed");
+        }
+        appending = node.getappendingFile(storagedir);
+        writer = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(appending)));
         
+        boolean success = node.registerfile(rollIdent, rollFile);
         if (success) {
             LOG.info("complete file: " + rollFile + ", roll " + rollIdent);
-            writer.close();
-            appending.renameTo(rollFile);
-            appending = node.getappendingFile(storagedir);
-            writer = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(appending)));
         }
     }
 
