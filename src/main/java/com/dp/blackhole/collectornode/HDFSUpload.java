@@ -31,7 +31,7 @@ public class HDFSUpload implements Runnable{
     @Override
     public void run() {
         if (!file.isFile()) {
-            LOG.error(file + "is not a FILE. Quite.");
+            LOG.error(file + " is not a FILE. Quite.");
             node.uploadResult(ident, uploadSuccess);
             return;
         }

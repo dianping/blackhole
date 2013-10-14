@@ -99,7 +99,9 @@ public class Collector implements Runnable {
         File rollFile = getRollFile(rollIdent);
 
         writer.close();
-        appending.renameTo(rollFile);
+        if(!appending.renameTo(rollFile)) {
+            LOG.error("rename to " + rollFile + " failed");
+        }
         appending = node.getappendingFile(storagedir);
         writer = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(appending)));
         
