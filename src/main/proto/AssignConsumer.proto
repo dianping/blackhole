@@ -1,0 +1,25 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.common.gen";
+option java_outer_classname = "AssignConsumerPB";
+
+message AssignConsumer {
+    message Broker {
+        required int32 brokerId = 1;
+        required string host = 2;
+        required int32 port = 3;
+    }
+    message PartitionOffset {
+        required Broker ownerBroker = 1;
+        required string brokerPartition = 2;
+        required int64 offset = 3;
+    }    
+    message Pair {
+        required string consumerIdString = 1;
+        repeated PartitionOffset partitionOffsets = 2;
+    }
+
+    required string topic = 1;
+    repeated Pair pairs = 2;
+}
+
