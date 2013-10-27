@@ -36,8 +36,7 @@ public class FetcherRunnable extends Thread {
                            List<PartitionTopicInfo> partitionTopicInfos) {
         this.broker = broker;
         this.partitionTopicInfos = partitionTopicInfos;
-        this.simpleConsumer = new SimpleConsumer(broker.getHost(), broker.getPort(), config.getSocketTimeoutMs(),
-                config.getSocketBufferSize());
+        this.simpleConsumer = new SimpleConsumer(broker.getHost(), broker.getPort());
     }
 
     public void shutdown() throws InterruptedException {
@@ -54,22 +53,13 @@ public class FetcherRunnable extends Thread {
             buf.append(format("%s-%d-%d,", pti.topic, pti.partition.brokerId, pti.partition.partId));
         }
         buf.append(']');
-        logger.info(String.format("%s comsume at %s:%d with %s", getName(), broker.host, broker.port, buf.toString()));
+        logger.info(String.format("%s comsume at %s:%d with %s", getName(), broker.getHost(), broker.getPort(), buf.toString()));
         //
         try {
-            final long maxFetchBackoffMs = config.getMaxFetchBackoffMs();
-            long fetchBackoffMs = config.getFetchBackoffMs();
             while (!stopped) {
                 if (fetchOnce() == 0) {//read empty bytes
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("backing off " + fetchBackoffMs + " ms");
-                    }
-                    Thread.sleep(fetchBackoffMs);
-                    if (fetchBackoffMs < maxFetchBackoffMs) {
-                        fetchBackoffMs += fetchBackoffMs / 10;
-                    }
-                } else {
-                    fetchBackoffMs = config.getFetchBackoffMs();
+                    logger.debug("backing off 1s");
+                    Thread.sleep(1000);
                 }
             }
         } catch (Exception e) {
@@ -88,8 +78,7 @@ public class FetcherRunnable extends Thread {
     private long fetchOnce() throws IOException, InterruptedException {
         List<FetchRequest> fetches = new ArrayList<FetchRequest>();
         for (PartitionTopicInfo info : partitionTopicInfos) {
-            fetches.add(new FetchRequest(info.topic, info.partition.partId, info.getFetchedOffset(), config
-                    .getFetchSize()));
+            fetches.add(new FetchRequest(info.topic, info.partition.partId, info.getFetchedOffset(),1024 * 1024));//1MB
         }
         MultiFetchResponse response = simpleConsumer.multifetch(fetches);
         int index = 0;
