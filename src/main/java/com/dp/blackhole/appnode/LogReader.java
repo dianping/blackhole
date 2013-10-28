@@ -50,6 +50,7 @@ public class LogReader implements Runnable{
         } catch (IOException e) {
             LOG.warn("Warnning, clean fail:", e);
         }
+        LOG.debug("Perpare to unregister LogReader: " + this.toString() + ", with " + appLog.getTailFile());
         node.getListener().unregisterLogReader(appLog.getTailFile());
     }
 
@@ -86,8 +87,6 @@ public class LogReader implements Runnable{
         } catch (RuntimeException e) {
             LOG.error("Oops, got an RuntimException:" , e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
-        } finally {
-            stop();
         }
     }
 
@@ -123,6 +122,7 @@ public class LogReader implements Runnable{
                 LOG.error("Oops, got an exception:", e);
                 closeQuietly(reader);
                 closeQuietly(writer);
+                LOG.debug("process rotate failed, stop.");
                 stop();
                 node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
             }
@@ -135,6 +135,7 @@ public class LogReader implements Runnable{
                 LOG.error("Oops, process read lines fail:", e);
                 closeQuietly(reader);
                 closeQuietly(writer);
+                LOG.debug("process failed, stop.");
                 stop();
                 node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
             }
