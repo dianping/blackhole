@@ -165,18 +165,9 @@ public class LogReader implements Runnable{
             return rePos;
         }
         
-        private void handleLine(String line) {
-            try {
-                writer.write(line);
-                writer.write('\n'); //make server easy to handle
-            } catch (IOException e) {
-                LOG.error("Oops, got an exception:", e);
-                closeQuietly(reader);
-                closeQuietly(writer);
-                stop();
-                node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
-                
-            }
+        private void handleLine(String line) throws IOException {
+            writer.write(line);
+            writer.write('\n'); //make server easy to handle
         }
         
         /**
