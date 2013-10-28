@@ -2,6 +2,10 @@ package com.dp.blackhole.consumer;
 
 import static java.lang.String.format;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,6 +13,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -51,7 +56,22 @@ public class ConsumerConnector extends Node implements Runnable {
         fetcherThreads = new HashMap<String, FetcherRunnable>();
         topicConsumersMap = new HashMap<String, Set<String>>();
         queues = new HashMap<String, BlockingQueue<FetchedDataChunk>>();
+        try {
+            start();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         super.loop();
+    }
+
+    private void start() throws FileNotFoundException, IOException {
+        Properties prop = new Properties();
+        prop.load(new FileReader(new File("consumer.properties")));
+        String serverhost = prop.getProperty("supervisor.host");
+        int serverport = Integer.parseInt(prop.getProperty("supervisor.port"));
+        init(serverhost, serverport);
     }
 
     public synchronized void register(String consumerIdString, FetcherRunnable fetchThread) {
