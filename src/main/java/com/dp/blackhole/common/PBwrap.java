@@ -3,6 +3,7 @@ package com.dp.blackhole.common;
 import com.dp.blackhole.common.gen.AppRegPB.AppReg;
 import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
@@ -56,6 +57,9 @@ public class PBwrap {
             msg.setStreamId((StreamID) message);
             break;
         case DUMPSTAT:
+            break;
+        case CONSUMER_REG:
+            msg.setConsumerReg((ConsumerReg) message);
             break;
         default:
         }
@@ -183,5 +187,17 @@ public class PBwrap {
     
     public static Message wrapDumpStat() {
         return wrapMessage(MessageType.DUMPSTAT, null);
+    }
+
+    /**
+     * register consumer data to supervisor
+     */
+    public static Message wrapConsumerReg(final String consumerIdString, final String topic, 
+            final int minConsumersInGroup) {
+        ConsumerReg.Builder builder = ConsumerReg.newBuilder();
+        builder.setConsumerIdString(consumerIdString);
+        builder.setTopic(topic);
+        builder.setMinConsumersInGroup(minConsumersInGroup);
+        return wrapMessage(MessageType.CONSUMER_REG, builder.build());
     }
 }

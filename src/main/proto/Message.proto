@@ -12,6 +12,8 @@ import "RollID.proto";
 import "Failure.proto";
 import "NoAvailableNode.proto";
 import "StreamID.proto";
+import "ConsumerReg.proto";
+import "AssignConsumer.proto";
 
 message Message {
     enum MessageType {
@@ -33,6 +35,8 @@ message Message {
         MANUAL_RECOVERY_ROLL =16;
         DUMPSTAT = 17;
         RETIRESTREAM = 18;
+        CONSUMER_REG = 19;
+        ASSIGN_CONSUMER = 20;
     }
 
     required MessageType type = 1;
@@ -45,4 +49,6 @@ message Message {
     optional Failure failure = 8;
     optional NoAvailableNode noAvailableNode = 9;
     optional StreamID streamId = 10;
+    optional ConsumerReg consumerReg = 11;
+    optional AssignConsumer assignConsumer = 12;
 }
