@@ -1,6 +1,4 @@
-
-<!-- saved from url=(0077)https://raw.github.com/dianping/blackhole/master/src/main/proto/Message.proto -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style type="text/css"></style></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">package blackhole;
+package blackhole;
 
 option java_package = "com.dp.blackhole.common.gen";
 option java_outer_classname = "MessagePB";
@@ -47,4 +45,4 @@ message Message {
     optional Failure failure = 8;
     optional NoAvailableNode noAvailableNode = 9;
     optional StreamID streamId = 10;
-}</pre></body></html>
+}
