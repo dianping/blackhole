@@ -3,8 +3,6 @@ package com.dp.blackhole.supervisor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import sun.misc.GC.LatencyRequest;
-
 import com.dp.blackhole.common.Util;
 
 public class Stream {
