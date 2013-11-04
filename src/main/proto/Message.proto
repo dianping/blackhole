@@ -1,4 +1,6 @@
-package blackhole;
+
+<!-- saved from url=(0077)https://raw.github.com/dianping/blackhole/master/src/main/proto/Message.proto -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style type="text/css"></style></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">package blackhole;
 
 option java_package = "com.dp.blackhole.common.gen";
 option java_outer_classname = "MessagePB";
@@ -12,8 +14,6 @@ import "RollID.proto";
 import "Failure.proto";
 import "NoAvailableNode.proto";
 import "StreamID.proto";
-import "ConsumerReg.proto";
-import "AssignConsumer.proto";
 
 message Message {
     enum MessageType {
@@ -35,8 +35,6 @@ message Message {
         MANUAL_RECOVERY_ROLL =16;
         DUMPSTAT = 17;
         RETIRESTREAM = 18;
-        CONSUMER_REG = 19;
-        ASSIGN_CONSUMER = 20;
     }
 
     required MessageType type = 1;
@@ -49,6 +47,4 @@ message Message {
     optional Failure failure = 8;
     optional NoAvailableNode noAvailableNode = 9;
     optional StreamID streamId = 10;
-    optional ConsumerReg consumerReg = 11;
-    optional AssignConsumer assignConsumer = 12;
-}
+}</pre></body></html>

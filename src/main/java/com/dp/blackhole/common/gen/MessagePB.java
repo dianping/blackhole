@@ -146,34 +146,6 @@ public final class MessagePB {
      * <code>optional .blackhole.StreamID streamId = 10;</code>
      */
     com.dp.blackhole.common.gen.StreamIDPB.StreamIDOrBuilder getStreamIdOrBuilder();
-
-    // optional .blackhole.ConsumerReg consumerReg = 11;
-    /**
-     * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-     */
-    boolean hasConsumerReg();
-    /**
-     * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-     */
-    com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg getConsumerReg();
-    /**
-     * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-     */
-    com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerRegOrBuilder getConsumerRegOrBuilder();
-
-    // optional .blackhole.AssignConsumer assignConsumer = 12;
-    /**
-     * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-     */
-    boolean hasAssignConsumer();
-    /**
-     * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-     */
-    com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer getAssignConsumer();
-    /**
-     * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-     */
-    com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumerOrBuilder getAssignConsumerOrBuilder();
   }
   /**
    * Protobuf type {@code blackhole.Message}
@@ -354,32 +326,6 @@ public final class MessagePB {
               bitField0_ |= 0x00000200;
               break;
             }
-            case 90: {
-              com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000400) == 0x00000400)) {
-                subBuilder = consumerReg_.toBuilder();
-              }
-              consumerReg_ = input.readMessage(com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(consumerReg_);
-                consumerReg_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000400;
-              break;
-            }
-            case 98: {
-              com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000800) == 0x00000800)) {
-                subBuilder = assignConsumer_.toBuilder();
-              }
-              assignConsumer_ = input.readMessage(com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(assignConsumer_);
-                assignConsumer_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000800;
-              break;
-            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -496,14 +442,6 @@ public final class MessagePB {
        * <code>RETIRESTREAM = 18;</code>
        */
       RETIRESTREAM(17, 18),
-      /**
-       * <code>CONSUMER_REG = 19;</code>
-       */
-      CONSUMER_REG(18, 19),
-      /**
-       * <code>ASSIGN_CONSUMER = 20;</code>
-       */
-      ASSIGN_CONSUMER(19, 20),
       ;
 
       /**
@@ -578,14 +516,6 @@ public final class MessagePB {
        * <code>RETIRESTREAM = 18;</code>
        */
       public static final int RETIRESTREAM_VALUE = 18;
-      /**
-       * <code>CONSUMER_REG = 19;</code>
-       */
-      public static final int CONSUMER_REG_VALUE = 19;
-      /**
-       * <code>ASSIGN_CONSUMER = 20;</code>
-       */
-      public static final int ASSIGN_CONSUMER_VALUE = 20;
 
 
       public final int getNumber() { return value; }
@@ -610,8 +540,6 @@ public final class MessagePB {
           case 16: return MANUAL_RECOVERY_ROLL;
           case 17: return DUMPSTAT;
           case 18: return RETIRESTREAM;
-          case 19: return CONSUMER_REG;
-          case 20: return ASSIGN_CONSUMER;
           default: return null;
         }
       }
@@ -878,50 +806,6 @@ public final class MessagePB {
       return streamId_;
     }
 
-    // optional .blackhole.ConsumerReg consumerReg = 11;
-    public static final int CONSUMERREG_FIELD_NUMBER = 11;
-    private com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg consumerReg_;
-    /**
-     * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-     */
-    public boolean hasConsumerReg() {
-      return ((bitField0_ & 0x00000400) == 0x00000400);
-    }
-    /**
-     * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-     */
-    public com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg getConsumerReg() {
-      return consumerReg_;
-    }
-    /**
-     * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-     */
-    public com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerRegOrBuilder getConsumerRegOrBuilder() {
-      return consumerReg_;
-    }
-
-    // optional .blackhole.AssignConsumer assignConsumer = 12;
-    public static final int ASSIGNCONSUMER_FIELD_NUMBER = 12;
-    private com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer assignConsumer_;
-    /**
-     * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-     */
-    public boolean hasAssignConsumer() {
-      return ((bitField0_ & 0x00000800) == 0x00000800);
-    }
-    /**
-     * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-     */
-    public com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer getAssignConsumer() {
-      return assignConsumer_;
-    }
-    /**
-     * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-     */
-    public com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumerOrBuilder getAssignConsumerOrBuilder() {
-      return assignConsumer_;
-    }
-
     private void initFields() {
       type_ = com.dp.blackhole.common.gen.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.common.gen.AppRegPB.AppReg.getDefaultInstance();
@@ -933,8 +817,6 @@ public final class MessagePB {
       failure_ = com.dp.blackhole.common.gen.FailurePB.Failure.getDefaultInstance();
       noAvailableNode_ = com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode.getDefaultInstance();
       streamId_ = com.dp.blackhole.common.gen.StreamIDPB.StreamID.getDefaultInstance();
-      consumerReg_ = com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.getDefaultInstance();
-      assignConsumer_ = com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -999,18 +881,6 @@ public final class MessagePB {
           return false;
         }
       }
-      if (hasConsumerReg()) {
-        if (!getConsumerReg().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-      }
-      if (hasAssignConsumer()) {
-        if (!getAssignConsumer().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -1047,12 +917,6 @@ public final class MessagePB {
       }
       if (((bitField0_ & 0x00000200) == 0x00000200)) {
         output.writeMessage(10, streamId_);
-      }
-      if (((bitField0_ & 0x00000400) == 0x00000400)) {
-        output.writeMessage(11, consumerReg_);
-      }
-      if (((bitField0_ & 0x00000800) == 0x00000800)) {
-        output.writeMessage(12, assignConsumer_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1102,14 +966,6 @@ public final class MessagePB {
       if (((bitField0_ & 0x00000200) == 0x00000200)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(10, streamId_);
-      }
-      if (((bitField0_ & 0x00000400) == 0x00000400)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(11, consumerReg_);
-      }
-      if (((bitField0_ & 0x00000800) == 0x00000800)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(12, assignConsumer_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1228,8 +1084,6 @@ public final class MessagePB {
           getFailureFieldBuilder();
           getNoAvailableNodeFieldBuilder();
           getStreamIdFieldBuilder();
-          getConsumerRegFieldBuilder();
-          getAssignConsumerFieldBuilder();
         }
       }
       private static Builder create() {
@@ -1294,18 +1148,6 @@ public final class MessagePB {
           streamIdBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000200);
-        if (consumerRegBuilder_ == null) {
-          consumerReg_ = com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.getDefaultInstance();
-        } else {
-          consumerRegBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000400);
-        if (assignConsumerBuilder_ == null) {
-          assignConsumer_ = com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.getDefaultInstance();
-        } else {
-          assignConsumerBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000800);
         return this;
       }
 
@@ -1410,22 +1252,6 @@ public final class MessagePB {
         } else {
           result.streamId_ = streamIdBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000400) == 0x00000400)) {
-          to_bitField0_ |= 0x00000400;
-        }
-        if (consumerRegBuilder_ == null) {
-          result.consumerReg_ = consumerReg_;
-        } else {
-          result.consumerReg_ = consumerRegBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000800) == 0x00000800)) {
-          to_bitField0_ |= 0x00000800;
-        }
-        if (assignConsumerBuilder_ == null) {
-          result.assignConsumer_ = assignConsumer_;
-        } else {
-          result.assignConsumer_ = assignConsumerBuilder_.build();
-        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1471,12 +1297,6 @@ public final class MessagePB {
         }
         if (other.hasStreamId()) {
           mergeStreamId(other.getStreamId());
-        }
-        if (other.hasConsumerReg()) {
-          mergeConsumerReg(other.getConsumerReg());
-        }
-        if (other.hasAssignConsumer()) {
-          mergeAssignConsumer(other.getAssignConsumer());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1537,18 +1357,6 @@ public final class MessagePB {
         }
         if (hasStreamId()) {
           if (!getStreamId().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasConsumerReg()) {
-          if (!getConsumerReg().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasAssignConsumer()) {
-          if (!getAssignConsumer().isInitialized()) {
             
             return false;
           }
@@ -2664,240 +2472,6 @@ public final class MessagePB {
         return streamIdBuilder_;
       }
 
-      // optional .blackhole.ConsumerReg consumerReg = 11;
-      private com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg consumerReg_ = com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg, com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.Builder, com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerRegOrBuilder> consumerRegBuilder_;
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-       */
-      public boolean hasConsumerReg() {
-        return ((bitField0_ & 0x00000400) == 0x00000400);
-      }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-       */
-      public com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg getConsumerReg() {
-        if (consumerRegBuilder_ == null) {
-          return consumerReg_;
-        } else {
-          return consumerRegBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-       */
-      public Builder setConsumerReg(com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg value) {
-        if (consumerRegBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          consumerReg_ = value;
-          onChanged();
-        } else {
-          consumerRegBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000400;
-        return this;
-      }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-       */
-      public Builder setConsumerReg(
-          com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.Builder builderForValue) {
-        if (consumerRegBuilder_ == null) {
-          consumerReg_ = builderForValue.build();
-          onChanged();
-        } else {
-          consumerRegBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000400;
-        return this;
-      }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-       */
-      public Builder mergeConsumerReg(com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg value) {
-        if (consumerRegBuilder_ == null) {
-          if (((bitField0_ & 0x00000400) == 0x00000400) &&
-              consumerReg_ != com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.getDefaultInstance()) {
-            consumerReg_ =
-              com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.newBuilder(consumerReg_).mergeFrom(value).buildPartial();
-          } else {
-            consumerReg_ = value;
-          }
-          onChanged();
-        } else {
-          consumerRegBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000400;
-        return this;
-      }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-       */
-      public Builder clearConsumerReg() {
-        if (consumerRegBuilder_ == null) {
-          consumerReg_ = com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.getDefaultInstance();
-          onChanged();
-        } else {
-          consumerRegBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000400);
-        return this;
-      }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-       */
-      public com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.Builder getConsumerRegBuilder() {
-        bitField0_ |= 0x00000400;
-        onChanged();
-        return getConsumerRegFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-       */
-      public com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerRegOrBuilder getConsumerRegOrBuilder() {
-        if (consumerRegBuilder_ != null) {
-          return consumerRegBuilder_.getMessageOrBuilder();
-        } else {
-          return consumerReg_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 11;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg, com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.Builder, com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerRegOrBuilder> 
-          getConsumerRegFieldBuilder() {
-        if (consumerRegBuilder_ == null) {
-          consumerRegBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg, com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.Builder, com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerRegOrBuilder>(
-                  consumerReg_,
-                  getParentForChildren(),
-                  isClean());
-          consumerReg_ = null;
-        }
-        return consumerRegBuilder_;
-      }
-
-      // optional .blackhole.AssignConsumer assignConsumer = 12;
-      private com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer assignConsumer_ = com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.Builder, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumerOrBuilder> assignConsumerBuilder_;
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-       */
-      public boolean hasAssignConsumer() {
-        return ((bitField0_ & 0x00000800) == 0x00000800);
-      }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-       */
-      public com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer getAssignConsumer() {
-        if (assignConsumerBuilder_ == null) {
-          return assignConsumer_;
-        } else {
-          return assignConsumerBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-       */
-      public Builder setAssignConsumer(com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer value) {
-        if (assignConsumerBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          assignConsumer_ = value;
-          onChanged();
-        } else {
-          assignConsumerBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000800;
-        return this;
-      }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-       */
-      public Builder setAssignConsumer(
-          com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.Builder builderForValue) {
-        if (assignConsumerBuilder_ == null) {
-          assignConsumer_ = builderForValue.build();
-          onChanged();
-        } else {
-          assignConsumerBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000800;
-        return this;
-      }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-       */
-      public Builder mergeAssignConsumer(com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer value) {
-        if (assignConsumerBuilder_ == null) {
-          if (((bitField0_ & 0x00000800) == 0x00000800) &&
-              assignConsumer_ != com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.getDefaultInstance()) {
-            assignConsumer_ =
-              com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.newBuilder(assignConsumer_).mergeFrom(value).buildPartial();
-          } else {
-            assignConsumer_ = value;
-          }
-          onChanged();
-        } else {
-          assignConsumerBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000800;
-        return this;
-      }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-       */
-      public Builder clearAssignConsumer() {
-        if (assignConsumerBuilder_ == null) {
-          assignConsumer_ = com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.getDefaultInstance();
-          onChanged();
-        } else {
-          assignConsumerBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000800);
-        return this;
-      }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-       */
-      public com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.Builder getAssignConsumerBuilder() {
-        bitField0_ |= 0x00000800;
-        onChanged();
-        return getAssignConsumerFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-       */
-      public com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumerOrBuilder getAssignConsumerOrBuilder() {
-        if (assignConsumerBuilder_ != null) {
-          return assignConsumerBuilder_.getMessageOrBuilder();
-        } else {
-          return assignConsumer_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 12;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.Builder, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumerOrBuilder> 
-          getAssignConsumerFieldBuilder() {
-        if (assignConsumerBuilder_ == null) {
-          assignConsumerBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.Builder, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumerOrBuilder>(
-                  assignConsumer_,
-                  getParentForChildren(),
-                  isClean());
-          assignConsumer_ = null;
-        }
-        return assignConsumerBuilder_;
-      }
-
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
 
@@ -2927,32 +2501,28 @@ public final class MessagePB {
       "\032\025AssignCollector.proto\032\rAppRoll.proto\032\022" +
       "RecoveryRoll.proto\032\024ReadyCollector.proto" +
       "\032\014RollID.proto\032\rFailure.proto\032\025NoAvailab" +
-      "leNode.proto\032\016StreamID.proto\032\021ConsumerRe" +
-      "g.proto\032\024AssignConsumer.proto\"\233\007\n\007Messag" +
-      "e\022,\n\004type\030\001 \002(\0162\036.blackhole.Message.Mess" +
-      "ageType\022!\n\006appReg\030\002 \001(\0132\021.blackhole.AppR" +
-      "eg\0223\n\017assignCollector\030\003 \001(\0132\032.blackhole." +
-      "AssignCollector\022#\n\007appRoll\030\004 \001(\0132\022.black",
-      "hole.AppRoll\022-\n\014recoveryRoll\030\005 \001(\0132\027.bla" +
-      "ckhole.RecoveryRoll\0221\n\016readyCollector\030\006 " +
-      "\001(\0132\031.blackhole.ReadyCollector\022!\n\006rollID" +
-      "\030\007 \001(\0132\021.blackhole.RollID\022#\n\007failure\030\010 \001" +
-      "(\0132\022.blackhole.Failure\0223\n\017noAvailableNod" +
-      "e\030\t \001(\0132\032.blackhole.NoAvailableNode\022%\n\010s" +
-      "treamId\030\n \001(\0132\023.blackhole.StreamID\022+\n\013co" +
-      "nsumerReg\030\013 \001(\0132\026.blackhole.ConsumerReg\022" +
-      "1\n\016assignConsumer\030\014 \001(\0132\031.blackhole.Assi" +
-      "gnConsumer\"\376\002\n\013MessageType\022\016\n\nHEARTBEART",
-      "\020\001\022\013\n\007APP_REG\020\002\022\021\n\rCOLLECTOR_REG\020\003\022\024\n\020AS" +
-      "SIGN_COLLECTOR\020\004\022\023\n\017READY_COLLECTOR\020\005\022\014\n" +
-      "\010APP_ROLL\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_S" +
-      "UCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_RO" +
-      "LL\020\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOVERY_F" +
-      "AIL\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAILABLENODE\020\016\022" +
-      "\021\n\rUNRECOVERABLE\020\017\022\030\n\024MANUAL_RECOVERY_RO" +
-      "LL\020\020\022\014\n\010DUMPSTAT\020\021\022\020\n\014RETIRESTREAM\020\022\022\020\n\014" +
-      "CONSUMER_REG\020\023\022\023\n\017ASSIGN_CONSUMER\020\024B(\n\033c" +
-      "om.dp.blackhole.common.genB\tMessagePB"
+      "leNode.proto\032\016StreamID.proto\"\224\006\n\007Message" +
+      "\022,\n\004type\030\001 \002(\0162\036.blackhole.Message.Messa" +
+      "geType\022!\n\006appReg\030\002 \001(\0132\021.blackhole.AppRe" +
+      "g\0223\n\017assignCollector\030\003 \001(\0132\032.blackhole.A" +
+      "ssignCollector\022#\n\007appRoll\030\004 \001(\0132\022.blackh" +
+      "ole.AppRoll\022-\n\014recoveryRoll\030\005 \001(\0132\027.blac",
+      "khole.RecoveryRoll\0221\n\016readyCollector\030\006 \001" +
+      "(\0132\031.blackhole.ReadyCollector\022!\n\006rollID\030" +
+      "\007 \001(\0132\021.blackhole.RollID\022#\n\007failure\030\010 \001(" +
+      "\0132\022.blackhole.Failure\0223\n\017noAvailableNode" +
+      "\030\t \001(\0132\032.blackhole.NoAvailableNode\022%\n\010st" +
+      "reamId\030\n \001(\0132\023.blackhole.StreamID\"\327\002\n\013Me" +
+      "ssageType\022\016\n\nHEARTBEART\020\001\022\013\n\007APP_REG\020\002\022\021" +
+      "\n\rCOLLECTOR_REG\020\003\022\024\n\020ASSIGN_COLLECTOR\020\004\022" +
+      "\023\n\017READY_COLLECTOR\020\005\022\014\n\010APP_ROLL\020\006\022\017\n\013UP" +
+      "LOAD_ROLL\020\007\022\022\n\016UPLOAD_SUCCESS\020\010\022\017\n\013UPLOA",
+      "D_FAIL\020\t\022\021\n\rRECOVERY_ROLL\020\n\022\024\n\020RECOVERY_" +
+      "SUCCESS\020\013\022\021\n\rRECOVERY_FAIL\020\014\022\013\n\007FAILURE\020" +
+      "\r\022\023\n\017NOAVAILABLENODE\020\016\022\021\n\rUNRECOVERABLE\020" +
+      "\017\022\030\n\024MANUAL_RECOVERY_ROLL\020\020\022\014\n\010DUMPSTAT\020" +
+      "\021\022\020\n\014RETIRESTREAM\020\022B(\n\033com.dp.blackhole." +
+      "common.genB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2964,7 +2534,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "ReadyCollector", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConsumerReg", "AssignConsumer", });
+              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "ReadyCollector", "RollID", "Failure", "NoAvailableNode", "StreamId", });
           return null;
         }
       };
@@ -2980,8 +2550,6 @@ public final class MessagePB {
           com.dp.blackhole.common.gen.FailurePB.getDescriptor(),
           com.dp.blackhole.common.gen.NoAvailableNodePB.getDescriptor(),
           com.dp.blackhole.common.gen.StreamIDPB.getDescriptor(),
-          com.dp.blackhole.common.gen.ConsumerRegPB.getDescriptor(),
-          com.dp.blackhole.common.gen.AssignConsumerPB.getDescriptor(),
         }, assigner);
   }
 
