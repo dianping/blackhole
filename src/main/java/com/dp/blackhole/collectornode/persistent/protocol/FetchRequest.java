@@ -23,7 +23,7 @@ public class FetchRequest extends NonDelegationTypedWrappable {
 
     @Override
     public int getSize() {
-        return GenUtil.getStringSize(topic) + GenUtil.getStringSize(partitionId) + Long.SIZE + Integer.SIZE;
+        return GenUtil.getStringSize(topic) + GenUtil.getStringSize(partitionId) + Long.SIZE/8 + Integer.SIZE/8;
     }
 
     @Override
