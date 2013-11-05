@@ -1,0 +1,144 @@
+package com.dp.blackhole.collectornode.persistent;
+
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.concurrent.atomic.AtomicLong;
+
+public class Segment {
+    FileChannel channel;
+    private long startOffset;
+    private AtomicLong endOffset;
+    private long unflushSize;
+    
+    @SuppressWarnings("resource")
+    public Segment(String parent, long offset, boolean verify, boolean readonly) throws IOException {
+        if (!readonly) {
+            channel = new RandomAccessFile(getFilePath(parent, offset), "rw").getChannel();
+        } else {
+            channel = new RandomAccessFile(getFilePath(parent, offset), "r").getChannel();
+        }
+        startOffset = offset;
+        if (!verify) {
+            endOffset = new AtomicLong(startOffset + channel.size());
+        } else {
+            long effectiveLength = verifySegment();
+            channel.position(effectiveLength);
+            endOffset.set(startOffset + effectiveLength);
+        }
+    }
+    
+    public void close() {
+        try {
+            channel.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
+    private long verifySegment() throws IOException {
+        long effectiveLength = 0;
+        long remaining = channel.size();
+        ByteBuffer sizeBuf = ByteBuffer.allocate(Integer.SIZE/8);
+        while (remaining > 0) {
+            if (remaining < Integer.SIZE/8) {
+                break;
+            }
+            int read = 0;
+            while (sizeBuf.hasRemaining()) {
+                int num = channel.read(sizeBuf);
+                if (num == -1) {
+                    break;
+                }
+                read += num;
+            }
+            if (sizeBuf.hasRemaining()) {
+                break;
+            }
+            sizeBuf.flip();
+            int messageSize = sizeBuf.getInt();
+            sizeBuf.rewind();
+            if (remaining < messageSize) {
+                break;
+            }
+            ByteBuffer messageBuf = ByteBuffer.allocate(messageSize);
+            while (messageBuf.hasRemaining()) {
+                int num = channel.read(messageBuf);
+                if (num == -1) {
+                    break;
+                }
+                read += num;
+            }
+            if (messageBuf.hasRemaining()) {
+                break;
+            }
+            messageBuf.flip();
+            Message message = new Message(messageBuf);
+            if (!message.valid()) {
+                break;
+            }
+            effectiveLength += read;
+            remaining -= read;
+        }
+        if (effectiveLength < channel.size()) {
+            channel.truncate(effectiveLength);
+        }
+        return effectiveLength;
+    }
+    
+    public long getStartOffset() {
+        return startOffset;
+    }
+    
+    public long getEndOffset() {
+        return endOffset.get();
+    }
+
+    private String getFilePath(String parent, long start_offset) {
+        return parent + '/' + start_offset + ".blackhole";
+    }
+
+    long append(MessageSet messages) throws IOException {
+        int written = (int) messages.write(channel, 0 ,messages.getSize());
+        unflushSize += written;
+        if (unflushSize > PersistentManager.getFlushThreshold()) {
+            flush();
+        }
+        long length = endOffset.get() - startOffset + unflushSize;
+        System.out.println(length);
+        System.out.println(PersistentManager.getSplitThreshold());
+        if (length > PersistentManager.getSplitThreshold()) {
+            return startOffset + length;
+        }
+        return 0;
+    }
+    
+    public void flush() throws IOException {
+        if (unflushSize == 0) {
+            return;
+        }
+
+        channel.force(true);
+        endOffset.addAndGet(unflushSize);
+        unflushSize = 0;
+    }
+
+    public boolean contains(long offset) {
+        if (offset >= startOffset || offset <= getEndOffset()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public FileMessageSet read(long offset, int length) {
+        long endOffset = getEndOffset();
+        if (offset + length > endOffset) {
+            length = (int) (endOffset - offset);
+        }
+        return new FileMessageSet(channel, offset, length);
+    }
+    
+}
