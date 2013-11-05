@@ -31,6 +31,6 @@ public class GenUtil {
     }
     
     public static int getStringSize(String str) {
-        return Integer.SIZE + str.getBytes().length;
+        return Integer.SIZE/8 + str.getBytes().length;
     }
 }
