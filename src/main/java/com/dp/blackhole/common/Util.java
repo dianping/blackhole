@@ -9,10 +9,12 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.SocketChannel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.zip.CRC32;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -118,7 +120,20 @@ public class Util {
         return format;
     }
 
-    public static void writeString(String str, SocketChannel channel) throws IOException {
+    public static void writeString(String str, ByteBuffer buffer) {
+        byte[] data = str.getBytes();
+        buffer.putInt(data.length);
+        buffer.put(data);
+    }
+    
+    public static String readString(ByteBuffer buffer) {
+        int len = buffer.getInt();
+        byte[] data = new byte[len];
+        buffer.get(data);
+        return new String(data);
+    }
+    
+    public static void writeString(String str, GatheringByteChannel channel) throws IOException {
         byte[] data = str.getBytes();
         ByteBuffer writeBuffer = ByteBuffer.allocate(4 + data.length);
         writeBuffer.putInt(data.length);
@@ -201,5 +216,25 @@ public class Util {
     
     public static String formatTs(long ts) {
         return format.format(new Date(ts));
+    }
+    
+    public static long getCRC32(byte[] data) {
+        return getCRC32(data, 0 ,data.length);
+    }
+    
+    public static long getCRC32(byte[] data, int offset, int length) {
+        CRC32 crc = new CRC32();
+        crc.update(data, offset, length);
+        return crc.getValue();
+    }
+    
+    public static void checkDir(File dir) throws IOException {
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        if (!dir.isDirectory()) {
+            throw new IOException("file " + dir
+                    + " exists, it should be directory");
+        }
     }
 }
