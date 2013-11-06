@@ -12,8 +12,10 @@ public class Segment {
     private AtomicLong endOffset;
     private long unflushSize;
     
-    @SuppressWarnings("resource")
-    public Segment(String parent, long offset, boolean verify, boolean readonly) throws IOException {
+    int splitThreshold;
+    int flushThreshold;
+    
+    public Segment(String parent, long offset, boolean verify, boolean readonly, int flushThreshold, int splitThreshold) throws IOException {
         if (!readonly) {
             channel = new RandomAccessFile(getFilePath(parent, offset), "rw").getChannel();
         } else {
@@ -25,8 +27,10 @@ public class Segment {
         } else {
             long effectiveLength = verifySegment();
             channel.position(effectiveLength);
-            endOffset.set(startOffset + effectiveLength);
+            endOffset = new AtomicLong(startOffset + effectiveLength);
         }
+        this.flushThreshold = flushThreshold;
+        this.splitThreshold = splitThreshold;
     }
     
     public void close() {
@@ -103,13 +107,11 @@ public class Segment {
     long append(MessageSet messages) throws IOException {
         int written = (int) messages.write(channel, 0 ,messages.getSize());
         unflushSize += written;
-        if (unflushSize > PersistentManager.getFlushThreshold()) {
+        if (unflushSize > flushThreshold) {
             flush();
         }
         long length = endOffset.get() - startOffset + unflushSize;
-        System.out.println(length);
-        System.out.println(PersistentManager.getSplitThreshold());
-        if (length > PersistentManager.getSplitThreshold()) {
+        if (length > splitThreshold) {
             return startOffset + length;
         }
         return 0;

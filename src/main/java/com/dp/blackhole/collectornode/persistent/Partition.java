@@ -59,13 +59,13 @@ public class Partition {
                 verify = false;
                 readonly = true;
             }
-            Segment segment = new Segment(dir.getAbsolutePath(), getFileOffset(segmentFiles[i]), verify, readonly);
+            Segment segment = new Segment(dir.getAbsolutePath(), getFileOffset(segmentFiles[i]), verify, readonly, PersistentManager.getFlushThreshold(), PersistentManager.getSplitThreshold());
             segments.add(segment);
         }
     }
     
     private Segment addSegment(long offset) throws IOException {
-        Segment segment = new Segment(dir.getAbsolutePath(), offset, false, false);
+        Segment segment = new Segment(dir.getAbsolutePath(), offset, false, false, PersistentManager.getFlushThreshold(), PersistentManager.getSplitThreshold());
         segments.add(segment);
         return segment;
     }
