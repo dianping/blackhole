@@ -46,6 +46,6 @@ public class Message {
     }
     
     public boolean valid() {
-        return checksum() == Util.getCRC32(buffer.array(), headSize(), payloadSize()); 
+        return checksum() == Util.getCRC32(buffer.array(), buffer.arrayOffset() + headSize(), payloadSize()); 
     }
 }

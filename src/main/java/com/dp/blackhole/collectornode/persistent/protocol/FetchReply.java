@@ -16,6 +16,8 @@ public class FetchReply extends DelegationTypedWrappable {
     private ByteBuffer messagesBuf;
     
     private MessageSet messages;
+    private long offset;
+    
     private int size;
     private int sent;
     
@@ -25,16 +27,18 @@ public class FetchReply extends DelegationTypedWrappable {
         head = allocateHead();
     }
     
-    public FetchReply(MessageSet messages) {
+    public FetchReply(MessageSet messages, long offset) {
         this.head = allocateHead();
+        this.offset = offset;
         this.messages = messages;
         this.size = messages.getSize();
         this.head.putInt(size);
+        this.head.putLong(this.offset);
         this.head.flip();
     }
 
     private ByteBuffer allocateHead() {
-        return ByteBuffer.allocate(Integer.SIZE/8);
+        return ByteBuffer.allocate((Integer.SIZE + Long.SIZE)/8);
     }
     
     public MessageSet getMessageSet() {
@@ -86,6 +90,7 @@ public class FetchReply extends DelegationTypedWrappable {
             } else {
                 head.flip();
                 size = head.getInt();
+                offset = head.getLong();
                 messagesBuf = ByteBuffer.allocate(size);                
             }
         }
@@ -98,7 +103,7 @@ public class FetchReply extends DelegationTypedWrappable {
             read += num;
             if (!messagesBuf.hasRemaining()) {
                 messagesBuf.flip();
-                messages = new ByteBufferMessageSet(messagesBuf);
+                messages = new ByteBufferMessageSet(messagesBuf, offset);
                 complete = true;
             }
         }
