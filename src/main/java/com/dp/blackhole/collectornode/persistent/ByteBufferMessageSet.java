@@ -9,6 +9,15 @@ import java.util.NoSuchElementException;
 public class ByteBufferMessageSet implements MessageSet{
     ByteBuffer buffer;
     
+    long startOffset;
+    int validSize;
+    
+    public ByteBufferMessageSet(ByteBuffer buffer, long startOffset) {
+        this.buffer = buffer;
+        this.startOffset = startOffset;
+        this.validSize = calcValidSize();
+    }
+    
     public ByteBufferMessageSet(ByteBuffer buffer) {
         this.buffer = buffer;
     }
@@ -17,16 +26,20 @@ public class ByteBufferMessageSet implements MessageSet{
         buffer.put(this.buffer);
     }
     
-    public Iterator<Message> getItertor() {
+    public Iterator<MessageAndOffset> getItertor() {
         return new Iter();
     }
     
-    public class Iter implements Iterator<Message> {
+    public class Iter implements Iterator<MessageAndOffset> {
         private boolean hasNext;
         private int nextLength;
+        private long currentOffset;
+        private ByteBuffer viewBuf;
         
         public Iter() {
-            if (buffer.remaining() < 4) {
+            currentOffset = startOffset;
+            viewBuf = buffer.duplicate();
+            if (viewBuf.remaining() < 4) {
                 hasNext = false;
             } else {
                 hasNext = true;
@@ -36,11 +49,11 @@ public class ByteBufferMessageSet implements MessageSet{
         @Override
         public boolean hasNext() {
             if (hasNext) {
-                if (buffer.remaining() < 4) {
+                if (viewBuf.remaining() < 4) {
                     return false;
                 }
-                nextLength = buffer.getInt();
-                if (buffer.remaining() < nextLength) {
+                nextLength = viewBuf.getInt();
+                if (viewBuf.remaining() < nextLength) {
                     hasNext = false;
                 }
             }
@@ -48,15 +61,15 @@ public class ByteBufferMessageSet implements MessageSet{
         }
 
         @Override
-        public Message next() {
+        public MessageAndOffset next() {
             if (!hasNext) {
                 throw new NoSuchElementException();
             }
-            int originLimit = buffer.limit();
-            buffer.limit(buffer.position() + nextLength);
-            ByteBuffer buf = buffer.slice();
-            buffer.limit(originLimit);
-            return new Message(buf);
+            viewBuf.limit(viewBuf.position() + nextLength);
+            ByteBuffer buf = viewBuf.slice();
+            viewBuf.limit(viewBuf.capacity());
+            currentOffset += nextLength;
+            return new MessageAndOffset(new Message(buf), currentOffset);
         }
         
         @Override
@@ -81,5 +94,18 @@ public class ByteBufferMessageSet implements MessageSet{
     public int getSize() {
         // TODO Auto-generated method stub
         return buffer.capacity();
+    }
+    
+    private int calcValidSize() {
+        Iterator<MessageAndOffset> iter = getItertor();
+        MessageAndOffset last = null;
+        while (iter.hasNext()) {
+            last = iter.next();
+        }
+        return (int) (last.offset - startOffset);
+    }
+    
+    public int getValidSize() {
+        return validSize;
     }
 }
