@@ -119,5 +119,16 @@ public class FetchReply extends DelegationTypedWrappable {
     public boolean complete() {
         return complete;
     }
+    
+    public void expectComplete() {
+        if (!complete()) {
+            throw new IllegalStateException("This operation cannot be completed on an incomplete request.");
+        }
+    }
+
+    public ByteBuffer buffer() {
+        expectComplete();
+        return messagesBuf;
+    }
 
 }

@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -236,5 +237,26 @@ public class Util {
             throw new IOException("file " + dir
                     + " exists, it should be directory");
         }
+    }
+    
+    public static String fromBytes(byte[] b) {
+        return fromBytes(b, "UTF-8");
+    }
+
+    public static String fromBytes(byte[] b, String encoding) {
+        if (b == null) return null;
+        try {
+            return new String(b, encoding);
+        } catch (UnsupportedEncodingException e) {
+            return new String(b);
+        }
+    }
+
+    public static String getHostFromBroker(String brokerString) {
+        return brokerString.substring(0, brokerString.lastIndexOf(':'));
+    }
+    
+    public static int getPortFromBroker(String brokerString) {
+        return Integer.parseInt(brokerString.substring(brokerString.lastIndexOf(':') + 1));
     }
 }
