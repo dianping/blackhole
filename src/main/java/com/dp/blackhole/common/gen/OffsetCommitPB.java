@@ -41,13 +41,28 @@ public final class OffsetCommitPB {
     com.google.protobuf.ByteString
         getPartitionBytes();
 
-    // required int64 offset = 3;
+    // required string consumerIdString = 3;
     /**
-     * <code>required int64 offset = 3;</code>
+     * <code>required string consumerIdString = 3;</code>
+     */
+    boolean hasConsumerIdString();
+    /**
+     * <code>required string consumerIdString = 3;</code>
+     */
+    java.lang.String getConsumerIdString();
+    /**
+     * <code>required string consumerIdString = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getConsumerIdStringBytes();
+
+    // required int64 offset = 4;
+    /**
+     * <code>required int64 offset = 4;</code>
      */
     boolean hasOffset();
     /**
-     * <code>required int64 offset = 3;</code>
+     * <code>required int64 offset = 4;</code>
      */
     long getOffset();
   }
@@ -112,8 +127,13 @@ public final class OffsetCommitPB {
               partition_ = input.readBytes();
               break;
             }
-            case 24: {
+            case 26: {
               bitField0_ |= 0x00000004;
+              consumerIdString_ = input.readBytes();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
               offset_ = input.readInt64();
               break;
             }
@@ -243,17 +263,60 @@ public final class OffsetCommitPB {
       }
     }
 
-    // required int64 offset = 3;
-    public static final int OFFSET_FIELD_NUMBER = 3;
-    private long offset_;
+    // required string consumerIdString = 3;
+    public static final int CONSUMERIDSTRING_FIELD_NUMBER = 3;
+    private java.lang.Object consumerIdString_;
     /**
-     * <code>required int64 offset = 3;</code>
+     * <code>required string consumerIdString = 3;</code>
      */
-    public boolean hasOffset() {
+    public boolean hasConsumerIdString() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>required int64 offset = 3;</code>
+     * <code>required string consumerIdString = 3;</code>
+     */
+    public java.lang.String getConsumerIdString() {
+      java.lang.Object ref = consumerIdString_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          consumerIdString_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string consumerIdString = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getConsumerIdStringBytes() {
+      java.lang.Object ref = consumerIdString_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        consumerIdString_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // required int64 offset = 4;
+    public static final int OFFSET_FIELD_NUMBER = 4;
+    private long offset_;
+    /**
+     * <code>required int64 offset = 4;</code>
+     */
+    public boolean hasOffset() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required int64 offset = 4;</code>
      */
     public long getOffset() {
       return offset_;
@@ -262,6 +325,7 @@ public final class OffsetCommitPB {
     private void initFields() {
       topic_ = "";
       partition_ = "";
+      consumerIdString_ = "";
       offset_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
@@ -274,6 +338,10 @@ public final class OffsetCommitPB {
         return false;
       }
       if (!hasPartition()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasConsumerIdString()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -295,7 +363,10 @@ public final class OffsetCommitPB {
         output.writeBytes(2, getPartitionBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeInt64(3, offset_);
+        output.writeBytes(3, getConsumerIdStringBytes());
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt64(4, offset_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -316,7 +387,11 @@ public final class OffsetCommitPB {
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, offset_);
+          .computeBytesSize(3, getConsumerIdStringBytes());
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(4, offset_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -438,8 +513,10 @@ public final class OffsetCommitPB {
         bitField0_ = (bitField0_ & ~0x00000001);
         partition_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
-        offset_ = 0L;
+        consumerIdString_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
+        offset_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -479,6 +556,10 @@ public final class OffsetCommitPB {
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
+        result.consumerIdString_ = consumerIdString_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
         result.offset_ = offset_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -506,6 +587,11 @@ public final class OffsetCommitPB {
           partition_ = other.partition_;
           onChanged();
         }
+        if (other.hasConsumerIdString()) {
+          bitField0_ |= 0x00000004;
+          consumerIdString_ = other.consumerIdString_;
+          onChanged();
+        }
         if (other.hasOffset()) {
           setOffset(other.getOffset());
         }
@@ -519,6 +605,10 @@ public final class OffsetCommitPB {
           return false;
         }
         if (!hasPartition()) {
+          
+          return false;
+        }
+        if (!hasConsumerIdString()) {
           
           return false;
         }
@@ -696,34 +786,108 @@ public final class OffsetCommitPB {
         return this;
       }
 
-      // required int64 offset = 3;
-      private long offset_ ;
+      // required string consumerIdString = 3;
+      private java.lang.Object consumerIdString_ = "";
       /**
-       * <code>required int64 offset = 3;</code>
+       * <code>required string consumerIdString = 3;</code>
        */
-      public boolean hasOffset() {
+      public boolean hasConsumerIdString() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>required int64 offset = 3;</code>
+       * <code>required string consumerIdString = 3;</code>
+       */
+      public java.lang.String getConsumerIdString() {
+        java.lang.Object ref = consumerIdString_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          consumerIdString_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string consumerIdString = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getConsumerIdStringBytes() {
+        java.lang.Object ref = consumerIdString_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          consumerIdString_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string consumerIdString = 3;</code>
+       */
+      public Builder setConsumerIdString(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        consumerIdString_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string consumerIdString = 3;</code>
+       */
+      public Builder clearConsumerIdString() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        consumerIdString_ = getDefaultInstance().getConsumerIdString();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string consumerIdString = 3;</code>
+       */
+      public Builder setConsumerIdStringBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        consumerIdString_ = value;
+        onChanged();
+        return this;
+      }
+
+      // required int64 offset = 4;
+      private long offset_ ;
+      /**
+       * <code>required int64 offset = 4;</code>
+       */
+      public boolean hasOffset() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required int64 offset = 4;</code>
        */
       public long getOffset() {
         return offset_;
       }
       /**
-       * <code>required int64 offset = 3;</code>
+       * <code>required int64 offset = 4;</code>
        */
       public Builder setOffset(long value) {
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000008;
         offset_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required int64 offset = 3;</code>
+       * <code>required int64 offset = 4;</code>
        */
       public Builder clearOffset() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000008);
         offset_ = 0L;
         onChanged();
         return this;
@@ -754,10 +918,11 @@ public final class OffsetCommitPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022OffsetCommit.proto\022\tblackhole\"@\n\014Offse" +
+      "\n\022OffsetCommit.proto\022\tblackhole\"Z\n\014Offse" +
       "tCommit\022\r\n\005topic\030\001 \002(\t\022\021\n\tpartition\030\002 \002(" +
-      "\t\022\016\n\006offset\030\003 \002(\003B-\n\033com.dp.blackhole.co" +
-      "mmon.genB\016OffsetCommitPB"
+      "\t\022\030\n\020consumerIdString\030\003 \002(\t\022\016\n\006offset\030\004 " +
+      "\002(\003B-\n\033com.dp.blackhole.common.genB\016Offs" +
+      "etCommitPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -769,7 +934,7 @@ public final class OffsetCommitPB {
           internal_static_blackhole_OffsetCommit_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_OffsetCommit_descriptor,
-              new java.lang.String[] { "Topic", "Partition", "Offset", });
+              new java.lang.String[] { "Topic", "Partition", "ConsumerIdString", "Offset", });
           return null;
         }
       };

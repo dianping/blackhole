@@ -10,7 +10,7 @@ public class ByteBufferMessageSet implements MessageSet{
     ByteBuffer buffer;
     
     long startOffset;
-    int validSize;
+    long validSize;
     
     public ByteBufferMessageSet(ByteBuffer buffer, long startOffset) {
         this.buffer = buffer;
@@ -96,16 +96,16 @@ public class ByteBufferMessageSet implements MessageSet{
         return buffer.capacity();
     }
     
-    private int calcValidSize() {
+    private long calcValidSize() {
         Iterator<MessageAndOffset> iter = getItertor();
         MessageAndOffset last = null;
         while (iter.hasNext()) {
             last = iter.next();
         }
-        return (int) (last.offset - startOffset);
+        return last.offset - startOffset;
     }
     
-    public int getValidSize() {
+    public long getValidSize() {
         return validSize;
     }
 }
