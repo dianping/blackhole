@@ -5,7 +5,7 @@
 	<groupId>com.dp</groupId>
 	<artifactId>blackhole</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<name>blackhole</name>
 	<build>
 		<plugins>
@@ -17,18 +17,15 @@
 					<forkCount>1</forkCount>
 					<reuseForks>false</reuseForks>
 					<workingDirectory>target</workingDirectory>
-					<argLine>-Djava.library.path=${project.basedir}/lib/64-bit</argLine>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>net.sourceforge</groupId>
+			<groupId>net.contentobjects.jnotify</groupId>
 			<artifactId>jnotify</artifactId>
-			<version>0.94</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/jnotify-0.94.jar</systemPath>
+			<version>0.94-dp</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
