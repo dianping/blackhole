@@ -10,7 +10,7 @@ public abstract class DelegationTypedWrappable implements TypedWrappable {
     }
 
     @Override
-    public final int getSize() {
+    public int getSize() {
         return 0;
     }
     

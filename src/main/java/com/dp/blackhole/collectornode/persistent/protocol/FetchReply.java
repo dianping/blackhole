@@ -41,6 +41,11 @@ public class FetchReply extends DelegationTypedWrappable {
         return ByteBuffer.allocate((Integer.SIZE + Long.SIZE)/8);
     }
     
+    @Override
+    public final int getSize() {
+        return size;
+    }
+
     public MessageSet getMessageSet() {
         return messages;
     }
