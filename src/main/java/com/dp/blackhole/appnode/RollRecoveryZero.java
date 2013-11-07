@@ -75,7 +75,7 @@ public class RollRecoveryZero implements Runnable{
             fileStream = new FileInputStream(rolledFile);
             fileStream.getChannel().transferTo(offset, rolledFile.length(), socketChannel);
             LOG.info("Roll file " + rolledFile + " has been transfered, ");
-        } catch (Exception e) {
+        } catch (IOException e) {
             LOG.error("Oops, got an exception:", e);
         } finally {
             try {

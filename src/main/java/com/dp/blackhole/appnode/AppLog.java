@@ -58,4 +58,10 @@ public class AppLog {
             return false;
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "AppLog [appName=" + appName + ", tailFile=" + tailFile
+                + ", createTime=" + createTime + "]";
+    }
 }

@@ -31,7 +31,7 @@ public class HDFSUpload implements Runnable{
     @Override
     public void run() {
         if (!file.isFile()) {
-            LOG.error(file + "is not a FILE. Quite.");
+            LOG.error(file + " is not a FILE. Quite.");
             node.uploadResult(ident, uploadSuccess);
             return;
         }
@@ -45,10 +45,10 @@ public class HDFSUpload implements Runnable{
             //rename
             Path dst = new Path(dfsPath);
             if (!Util.retryRename(fs, tmp, dst)) {
-                throw new Exception("Faild to rename tmp to " + dst);
+                throw new IOException("Faild to rename tmp to " + dst);
             }
             uploadSuccess = true;
-        } catch (Exception e) {
+        } catch (IOException e) {
             LOG.error("Oops, got an exception:", e);
         } finally {
             node.uploadResult(ident, uploadSuccess);
