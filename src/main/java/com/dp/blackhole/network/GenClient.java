@@ -2,34 +2,39 @@ package com.dp.blackhole.network;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
+import java.net.SocketAddress;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class GenServer<Entity, Connection extends NonblockingConnection<Entity>, Processor extends EntityProcessor<Entity, Connection>> {
-
-    public static final Log LOG = LogFactory.getLog(GenServer.class);
+public class GenClient<Entity, Connection extends NonblockingConnection<Entity>, Processor extends EntityProcessor<Entity, Connection>> {
+    
+    public static final Log LOG = LogFactory.getLog(GenClient.class);
     
     private ConnectionFactory<Connection> factory;
     private TypedFactory wrappedFactory;
     private Processor processor;
     
     private Selector selector;
+    private SocketChannel socketChannel;
     volatile private boolean running = true;
     private ArrayList<Handler> handlers = null;
-    private int handlerCount = 1;
-    
+    private int handlerCount;
+    private AtomicBoolean connected = new AtomicBoolean(false);
     private BlockingQueue<EntityEvent> entityQueue;
+
+    private String serverHost;
+    private int serverPort;
     
     private class EntityEvent {
         static final int CONNECTED = 1;
@@ -45,7 +50,7 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
     
-    public GenServer(Processor processor, ConnectionFactory<Connection> factory, TypedFactory wrappedFactory) {
+    public GenClient(Processor processor, ConnectionFactory<Connection> factory, TypedFactory wrappedFactory) {
         this.processor = processor;
         this.factory = factory;
         this.wrappedFactory = wrappedFactory;
@@ -53,21 +58,41 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
     
     protected void loop() {
         while (running) {
-            SelectionKey key = null;
+            try {
+                connect();
+                loopInternal();
+            } catch (ClosedChannelException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (running) {
+                      Thread.sleep(3000);
+                      LOG.info("reconnect in 3 second...");
+                    }
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+    }
+    
+    protected void loopInternal() {
+        SelectionKey key = null;
+        while (running && socketChannel.isOpen()) {
             try {
                 selector.select();
             } catch (IOException e) {
                 LOG.error("IOException in select()", e);
-                running = false;
-                continue;
+                return;
             }
             Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
             while (iter.hasNext()) {
                 key = iter.next();
                 iter.remove();
                 try {
-                    if (key.isAcceptable()) {
-                        doAccept(key);
+                    if (key.isConnectable()) {
+                        doConnect(key);
                     } else if (key.isWritable()) {
                         doWrite(key);
                     } else if (key.isReadable()) {
@@ -77,7 +102,6 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
                     closeConnection((Connection) key.attachment());
                 }
             }
-
         }
     }
 
@@ -102,20 +126,20 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
             key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
         }
     }
-    
-    private void doAccept(SelectionKey key) throws IOException {
-        ServerSocketChannel server = (ServerSocketChannel) key.channel();
-        SocketChannel channel = server.accept();
-        if (channel == null) {
-            throw new IOException("no connection is available to be accepted");
-        }
-        channel.configureBlocking(false);
+
+    private void doConnect(SelectionKey key) throws IOException {
+        SocketChannel channel = (SocketChannel) key.channel();
+        key.interestOps(SelectionKey.OP_READ);
+        channel.finishConnect();
+        
+        connected.getAndSet(true);
         Connection connection = factory.makeConnection(channel, selector, wrappedFactory);
+        key.attach(connection);
         entityQueue.add(new EntityEvent(EntityEvent.CONNECTED, null, connection));
-        channel.register(selector, SelectionKey.OP_READ, connection);
     }
     
     private void closeConnection(Connection connection) {
+        connected.getAndSet(false);
         if (!connection.isActive()) {
             LOG.info("connection " + connection + "already closed" );
             return;
@@ -131,11 +155,11 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         if (connection != null) {
             connection.close();
         }
-        
     }
 
     public void shutdown() {
-        running = false;  
+        running = false;
+        selector.wakeup();
     }
     
     private class Handler extends Thread {
@@ -167,25 +191,20 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
 
                 } catch (InterruptedException ie) {
                     LOG.info("handler thread interrupted");
+                    //TODO need check
                     running = false;
                 }
             }
         }
     }
-       
-    public void init(Properties prop, String name) throws IOException {
-        handlerCount = Integer.parseInt(prop.getProperty("GenServer.handlercount", "3"));
-        int port = Integer.parseInt(prop.getProperty("GenServer.port"));
+    
+    protected void init(Properties prop, String name) throws IOException, ClosedChannelException {  
+        serverHost = prop.getProperty("Server.host");
+        serverPort = Integer.parseInt(prop.getProperty("Server.port"));;
+        handlerCount = Integer.parseInt(prop.getProperty("GenClient.handlercount", "1"));
         
-        ServerSocketChannel ssc = ServerSocketChannel.open();
-        ssc.configureBlocking(false);
-        ServerSocket ss = ssc.socket();
-        ss.bind(new InetSocketAddress(port));
-        selector = Selector.open();
-        ssc.register(selector, SelectionKey.OP_ACCEPT);
-
         entityQueue = new LinkedBlockingQueue<EntityEvent>();
-
+        
         // start message handler thread
         handlers = new ArrayList<Handler>(handlerCount);
         for (int i=0; i < handlerCount; i++) {
@@ -194,8 +213,17 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
             handler.start();
         }
         
-        LOG.info(name + " Server started");
+        LOG.info(name + " client started");
         
         loop();
+    }
+
+    private void connect() throws IOException, ClosedChannelException {
+        socketChannel = SocketChannel.open();
+        socketChannel.configureBlocking(false);
+        SocketAddress server = new InetSocketAddress(serverHost, serverPort);
+        socketChannel.connect(server);
+        selector = Selector.open();
+        socketChannel.register(selector, SelectionKey.OP_CONNECT);
     }
 }

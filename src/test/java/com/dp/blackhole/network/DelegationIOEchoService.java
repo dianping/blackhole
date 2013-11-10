@@ -1,13 +1,9 @@
 package com.dp.blackhole.network;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
 import java.util.Properties;
 
 public class DelegationIOEchoService {
@@ -76,7 +72,7 @@ public class DelegationIOEchoService {
 
             @Override
             public void process(TransferWrap request, DelegationIOConnection from) {
-                System.out.println("received "+((wappedObject)request.unwrap()).data);
+                System.out.println("server received request: "+((wappedObject)request.unwrap()).data);
                 TransferWrap replay = new TransferWrap((wappedObject)request.unwrap());
                 from.send(replay);
             }
@@ -89,8 +85,8 @@ public class DelegationIOEchoService {
                     new DelegationIOConnection.DelegationIOConnectionFactory(),
                     new wappedObjectType());
             Properties prop = new Properties();
-            prop.setProperty("supervisor.handlercount", "1");
-            prop.setProperty("supervisor.port", "2222");
+            prop.setProperty("GenServer.handlercount", "1");
+            prop.setProperty("GenServer.port", "2222");
             try {
                 server.init(prop, "echo");
             } catch (IOException e) {
@@ -104,6 +100,64 @@ public class DelegationIOEchoService {
             startService();
         }
 
+    }
+    
+    class Client extends Thread {
+        GenClient<TransferWrap, DelegationIOConnection, echoClientProcessor> client;
+        private int echotimes;
+        
+        class echoClientProcessor implements EntityProcessor<TransferWrap, DelegationIOConnection> {
+
+            @Override
+            public void OnConnected(DelegationIOConnection connection) {
+                DelegationIOEchoService echo1 = new DelegationIOEchoService();
+                connection.send(new TransferWrap(echo1.new wappedObject("message123")));
+                echotimes++;
+            }
+
+            @Override
+            public void OnDisconnected(DelegationIOConnection connection) {
+                
+            }
+
+            @Override
+            public void process(TransferWrap request,
+                    DelegationIOConnection from) {
+                wappedObject a = (wappedObject) request.unwrap();
+                System.out.println("client get reply: "+a.data);
+
+                if (echotimes == 3) {
+                    client.shutdown();
+                    System.out.println();
+                    System.out.println("total echo times: "+echotimes);
+                } else {
+                    TransferWrap echoRequest = new TransferWrap(a);
+                    from.send(echoRequest);
+                    echotimes++;
+                }
+            }
+            
+        }
+        
+        @Override
+        public void run() {
+            client = new GenClient(
+                            new echoClientProcessor(),
+                            new DelegationIOConnection.DelegationIOConnectionFactory(),
+                            new wappedObjectType());
+            Properties prop = new Properties();
+            prop.setProperty("Server.host", "localhost");
+            prop.setProperty("Server.port", "2222");
+            try {
+                client.init(prop, "echo client");
+            } catch (ClosedChannelException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
     
     private wappedObject sendAndReceive(SocketChannel channel, wappedObject buf)
@@ -132,15 +186,9 @@ public class DelegationIOEchoService {
         
         Thread.sleep(1000);
         
-        SocketAddress addr = new InetSocketAddress("localhost", 2222);
-        SocketChannel channel = SocketChannel.open();
-        channel.connect(addr);
-        
-        Charset charset = Charset.forName("UTF-8");
-        CharsetEncoder encoder = charset.newEncoder();
-        CharsetDecoder decoder = charset.newDecoder();
-        
-        wappedObject a = echo.sendAndReceive(channel, echo.new wappedObject("message123"));
-        System.out.println("get reply "+a.data);
+        Client c = echo.new Client();
+        c.setDaemon(true);
+        c.start();
+        c.join();
     }
 }

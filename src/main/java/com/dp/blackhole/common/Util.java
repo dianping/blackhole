@@ -238,7 +238,24 @@ public class Util {
                     + " exists, it should be directory");
         }
     }
-    
+
+    public static void rmr(File file) throws IOException {
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            
+            if (children == null) {
+                throw new IOException("error listing directory " + file);
+            }
+            
+            for (File f : children) {
+                rmr(f);
+            }
+            file.delete();
+        } else {
+            file.delete();
+        }
+    }
+
     public static String fromBytes(byte[] b) {
         return fromBytes(b, "UTF-8");
     }
