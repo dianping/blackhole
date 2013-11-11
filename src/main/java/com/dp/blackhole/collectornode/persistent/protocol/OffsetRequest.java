@@ -39,32 +39,26 @@ public class OffsetRequest extends NonDelegationTypedWrappable {
      */
     public long time;
 
-    /**
-     * number of offsets
-     */
-    public int maxNumOffsets;
-    
     public OffsetRequest() {}
     /**
      * create a offset request
      * time:the log file created time
      * maxNumOffsets:the number of offsets
      */
-    public OffsetRequest(String topic, String partition, long time, int maxNumOffsets) {
+    public OffsetRequest(String topic, String partition, long time) {
         this.topic = topic;
         this.partition = partition;
         this.time = time;
-        this.maxNumOffsets = maxNumOffsets;
     }
 
     @Override
     public String toString() {
-        return "OffsetRequest(topic:" + topic + ", part:" + partition + ", time:" + time + ", maxNumOffsets:" + maxNumOffsets + ")";
+        return "OffsetRequest(topic:" + topic + ", part:" + partition + ", time:" + time + ")";
     }
 
     @Override
     public int getSize() {
-        return GenUtil.getStringSize(topic) + GenUtil.getStringSize(partition) + 8 + 4;
+        return GenUtil.getStringSize(topic) + GenUtil.getStringSize(partition) + 8;
     }
 
     @Override
@@ -72,7 +66,6 @@ public class OffsetRequest extends NonDelegationTypedWrappable {
         topic = GenUtil.readString(buffer);
         partition = GenUtil.readString(buffer);
         time = buffer.getLong();
-        maxNumOffsets = buffer.getInt();
     }
 
     @Override
@@ -80,7 +73,6 @@ public class OffsetRequest extends NonDelegationTypedWrappable {
         GenUtil.writeString(topic, buffer);
         GenUtil.writeString(partition, buffer);
         buffer.putLong(time);
-        buffer.putInt(maxNumOffsets);
     }
 
     @Override

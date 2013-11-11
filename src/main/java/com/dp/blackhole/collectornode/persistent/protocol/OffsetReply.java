@@ -2,19 +2,31 @@ package com.dp.blackhole.collectornode.persistent.protocol;
 
 import java.nio.ByteBuffer;
 
+import com.dp.blackhole.network.GenUtil;
 import com.dp.blackhole.network.NonDelegationTypedWrappable;
 
 public class OffsetReply extends NonDelegationTypedWrappable {
     
-    private final ByteBuffer head = ByteBuffer.allocate(Integer.SIZE/8);
+    private ByteBuffer head;
     private long offset;
+    private String topic;
+    private String partition;
+    private int size;
     
     public OffsetReply() {}
     
-    public OffsetReply(long offset) {
+    public OffsetReply(String topic, String partition, long offset) {
+        this.head = allocateHead();
+        this.topic = topic;
+        this.partition = partition;
         this.offset = offset;
-        head.putInt(Long.SIZE/8);
-        head.flip();
+        this.size = getSize();
+        this.head.putInt(size);
+        this.head.flip();
+    }
+    
+    private ByteBuffer allocateHead() {
+        return ByteBuffer.allocate((Integer.SIZE)/8);
     }
     
     @Override
@@ -35,10 +47,18 @@ public class OffsetReply extends NonDelegationTypedWrappable {
 
     @Override
     public int getSize() {
-        return Long.SIZE/8;
+        return GenUtil.getStringSize(topic) + GenUtil.getStringSize(partition) + Long.SIZE/8;
     }
 
     public long getOffset() {
         return offset;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public String getPartition() {
+        return partition;
     }
 }

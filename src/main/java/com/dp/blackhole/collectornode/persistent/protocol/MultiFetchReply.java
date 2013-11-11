@@ -16,6 +16,7 @@ public class MultiFetchReply extends DelegationTypedWrappable {
 
     final ByteBuffer sizeBuffer = ByteBuffer.allocate(Integer.SIZE/8);
     private ByteBuffer contentBuffer = null;
+    private List<String> partitionList;
     private List<MessageSet> messagesList;
     private List<Long> offsetList;
     private int size;
@@ -25,7 +26,8 @@ public class MultiFetchReply extends DelegationTypedWrappable {
     
     public MultiFetchReply() {}
     
-    public MultiFetchReply(List<MessageSet> messagesList, List<Long> offsetList) {
+    public MultiFetchReply(List<String> partitionList, List<MessageSet> messagesList, List<Long> offsetList) {
+        this.partitionList = partitionList;
         this.messagesList = messagesList;
         this.offsetList = offsetList;
         for (MessageSet set : messagesList) {
@@ -45,6 +47,18 @@ public class MultiFetchReply extends DelegationTypedWrappable {
         return size;
     }
 
+    public List<String> getPartitionList() {
+        return partitionList;
+    }
+
+    public List<MessageSet> getMessagesList() {
+        return messagesList;
+    }
+
+    public List<Long> getOffsetList() {
+        return offsetList;
+    }
+
     @Override
     public int write(GatheringByteChannel channel) throws IOException {
         int written = 0;
@@ -59,7 +73,7 @@ public class MultiFetchReply extends DelegationTypedWrappable {
                 if (messagesList.size() == 0) {
                     throw new IOException("MessageSet list empty!");
                 }
-                currentReply = new FetchReply(messagesList.get(0), offsetList.get(0));
+                currentReply = new FetchReply(partitionList.get(0), messagesList.get(0), offsetList.get(0));
             }
             written += currentReply.write(channel);
             if (currentReply.complete()) {
@@ -67,7 +81,7 @@ public class MultiFetchReply extends DelegationTypedWrappable {
                 if (index == messagesList.size()) {
                     complete = true;
                 } else {
-                    currentReply = new FetchReply(messagesList.get(index), offsetList.get(index));
+                    currentReply = new FetchReply(partitionList.get(index), messagesList.get(index), offsetList.get(index));
                 }
             }
         }

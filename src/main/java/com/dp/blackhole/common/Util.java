@@ -273,7 +273,7 @@ public class Util {
         return brokerString.substring(0, brokerString.lastIndexOf(':'));
     }
     
-    public static int getPortFromBroker(String brokerString) {
-        return Integer.parseInt(brokerString.substring(brokerString.lastIndexOf(':') + 1));
+    public static String getPortFromBroker(String brokerString) {
+        return brokerString.substring(brokerString.lastIndexOf(':') + 1);
     }
 }

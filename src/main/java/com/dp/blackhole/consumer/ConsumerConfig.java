@@ -17,6 +17,8 @@ public class ConsumerConfig {
     private String autoOffsetReset;
 
     private int consumerTimeoutMs;
+    
+    private boolean betterOrdered;
 
     public ConsumerConfig(Properties props) {
         this.fetchSize = getInt(props, "fetch.size", 1024 * 1024);//1MB
@@ -24,6 +26,7 @@ public class ConsumerConfig {
         this.autoCommitIntervalMs = getInt(props, "autocommit.interval.ms", 1000);//1 seconds
         this.maxQueuedChunks = getInt(props, "queuedchunks.max", 10);
         this.autoOffsetReset = getString(props, "autooffset.reset", OffsetRequest.SMALLES_TIME_STRING);
+        this.betterOrdered = getBoolean(props, "messages.betterOrdered", false);
     }
 
     /** the number of byes of messages to attempt to fetch */
@@ -87,5 +90,17 @@ public class ConsumerConfig {
     
     public String getString(Properties props, String name, String defaultValue) {
         return props.containsKey(name) ? props.getProperty(name) : defaultValue;
+    }
+
+    public boolean isBetterOrdered() {
+        return betterOrdered;
+    }
+
+    /**
+     * @param betterOrdered if true, the latency of message receiving will be increase,
+     * but messages receiving form different partitions are synchronous and better time ordered.
+     */
+    public void setBetterOrdered(boolean betterOrdered) {
+        this.betterOrdered = betterOrdered;
     }
 }

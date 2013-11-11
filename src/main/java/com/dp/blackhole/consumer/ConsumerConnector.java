@@ -22,14 +22,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.collectornode.persistent.protocol.OffsetRequest;
 import com.dp.blackhole.common.PBwrap;
-import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer;
 import com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
-import com.dp.blackhole.consumer.exception.InvalidConfigException;
 import com.dp.blackhole.node.Node;
 
 public class ConsumerConnector extends Node implements Runnable {
@@ -185,19 +182,6 @@ public class ConsumerConnector extends Node implements Runnable {
                     String brokerString = partitionOffset.getBrokerString();
                     String partitionName = partitionOffset.getPartitionName();
                     long offset = partitionOffset.getOffset();
-                    //Offset from supervisor less than zero means that it should be correct first. That's a specification rule
-                    if (offset < 0) {
-                        if (OffsetRequest.SMALLES_TIME_STRING.equals(Consumer.config.getAutoOffsetReset())) {
-                            offset = earliestOrLatestOffset(assign.getTopic(), brokerString, partitionName,
-                                    OffsetRequest.EARLIES_TTIME);
-                        } else if (OffsetRequest.LARGEST_TIME_STRING.equals(Consumer.config.getAutoOffsetReset())) {
-                            offset = earliestOrLatestOffset(assign.getTopic(), brokerString, partitionName,
-                                    OffsetRequest.LATES_TTIME);
-                        } else {
-                            throw new InvalidConfigException("Wrong value in autoOffsetReset in ConsumerConfig");
-                        }
-
-                    }
                     LOG.info(assign.getTopic() + "  " + consumerIdString + " ==> " + brokerString + " > " + partitionName + " claimming");
                     AtomicLong consumedOffset = new AtomicLong(offset);
                     AtomicLong fetchedOffset = new AtomicLong(offset);
@@ -232,31 +216,6 @@ public class ConsumerConnector extends Node implements Runnable {
             LOG.error("Illegal message type " + msg.getType());
         }
         return false;
-    }
-
-    private long earliestOrLatestOffset(String topic, String brokerString,
-            String partitionName, long earliestOrLatest) {
-        SimpleConsumer simpleConsumer = null;
-        long producedOffset = -1;
-
-        try {
-            simpleConsumer = new SimpleConsumer(Util.getHostFromBroker(brokerString), Util.getPortFromBroker(brokerString));
-            long offset = simpleConsumer.getOffsetsBefore(topic, partitionName, earliestOrLatest, 1);
-            if (offset > 0) {
-                producedOffset = offset;
-            }
-        } catch (Exception e) {
-            LOG.error("error in earliestOrLatestOffset() ", e);
-        } finally {
-            if (simpleConsumer != null) {
-                try {
-                    simpleConsumer.close();
-                } catch (Exception e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-        }
-        return producedOffset;
     }
 
     /**
