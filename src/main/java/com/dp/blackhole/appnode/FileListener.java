@@ -78,29 +78,31 @@ public class FileListener implements JNotifyListener{
         return true;
     }
     
-    public boolean unregisterLogReader(String watchPath) {
+    public void unregisterLogReader(String watchPath) {
+        int wd;
         lock.lock();
         try {
             if (!path2wd.containsKey(watchPath)) {
-                return false;
-            }
-            int wd = path2wd.get(watchPath);
-            try {
-                if (iJNotifyInstance.removeWatch(wd)) {
-                    path2wd.remove(watchPath);
+                return;
+            } else {
+                wd = path2wd.get(watchPath);
+                path2wd.remove(watchPath);
+                readerMap.remove(watchPath);
+                if (readerMap.isEmpty()) {
+                    parentWathchPathSet.clear();
                 }
-            } catch (JNotifyException e) {
-                LOG.warn("Failed to remove wd " + wd + " for " + watchPath, e);
-                return false;
             }
-            readerMap.remove(watchPath);
-            if (readerMap.isEmpty()) {
-                parentWathchPathSet.clear();
-            }
-            return true;
-         } finally {
-             lock.unlock();
-         }
+        } finally {
+            lock.unlock();
+        }
+        try {
+            iJNotifyInstance.removeWatch(wd);
+        } catch (JNotifyException e) {
+            LOG.fatal("Failed to remove wd " + wd + " for " + watchPath + 
+                    ". Because the watch descriptor wd is not valid;" +
+                    " or fd is not an inotify file descriptor." +
+                    " See \"inotify_rm_watch\" for more detail", e);
+        }
     }
 
     /**
