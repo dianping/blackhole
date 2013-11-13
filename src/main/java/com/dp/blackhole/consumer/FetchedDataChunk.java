@@ -10,7 +10,6 @@ public class FetchedDataChunk {
     public final long fetchOffset;
 
     public FetchedDataChunk(ByteBufferMessageSet messages, PartitionTopicInfo topicInfo, long fetchOffset) {
-        super();
         this.messages = messages;
         this.topicInfo = topicInfo;
         this.fetchOffset = fetchOffset;

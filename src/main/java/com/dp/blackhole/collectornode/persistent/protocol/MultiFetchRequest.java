@@ -16,13 +16,6 @@ public class MultiFetchRequest extends NonDelegationTypedWrappable {
         this.fetches = fetches;
     }
 
-    /**
-     * @return the fetches
-     */
-    public List<FetchRequest> getFetches() {
-        return fetches;
-    }
-
     @Override
     public int getSize() {
         int size = 2;

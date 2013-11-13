@@ -22,6 +22,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.dp.blackhole.collectornode.persistent.Message;
+
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
     private static final int REPEATE = 3;
@@ -275,5 +277,12 @@ public class Util {
     
     public static String getPortFromBroker(String brokerString) {
         return brokerString.substring(brokerString.lastIndexOf(':') + 1);
+    }
+    
+    public static String toEvent(Message message) {
+        ByteBuffer buf = message.payload();
+        byte[] b = new byte[buf.remaining()];
+        buf.get(b);
+        return fromBytes(b);
     }
 }

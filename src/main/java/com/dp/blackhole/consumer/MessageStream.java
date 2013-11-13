@@ -3,29 +3,23 @@ package com.dp.blackhole.consumer;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 
-public class MessageStream<T> implements Iterable<T> {
+public class MessageStream implements Iterable<String> {
 
-    final String topic;
+    public final String topic;
 
-    final BlockingQueue<FetchedDataChunk> queue;
+    public final int consumerTimeoutMs;
 
-    final int consumerTimeoutMs;
+    private final ConsumerIterator consumerIterator;
 
-    final Decoder<T> decoder;
-
-    private final ConsumerIterator<T> consumerIterator;
-
-    public MessageStream(String topic, BlockingQueue<FetchedDataChunk> queue, int consumerTimeoutMs, Decoder<T> decoder) {
+    public MessageStream(String topic, BlockingQueue<FetchedDataChunk> queue, int consumerTimeoutMs) {
         super();
         this.topic = topic;
-        this.queue = queue;
         this.consumerTimeoutMs = consumerTimeoutMs;
-        this.decoder = decoder;
-        this.consumerIterator = new ConsumerIterator<T>(topic, queue, consumerTimeoutMs, decoder);
+        this.consumerIterator = new ConsumerIterator(topic, queue, consumerTimeoutMs);
     }
 
     @Override
-    public Iterator<T> iterator() {
+    public Iterator<String> iterator() {
         return consumerIterator;
     }
 

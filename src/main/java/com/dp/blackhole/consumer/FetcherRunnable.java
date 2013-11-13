@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,11 +14,7 @@ import com.dp.blackhole.network.DelegationIOConnection;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.TransferWrap;
 
-import static java.lang.String.format;
-
 public class FetcherRunnable extends Thread {
-
-    private final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
     private final String broker;
 
@@ -38,18 +32,20 @@ public class FetcherRunnable extends Thread {
 
     public void shutdown() throws InterruptedException {
         logger.debug("shutdown the fetcher " + getName());
-        interrupt();
-        shutdownLatch.await(5, TimeUnit.SECONDS);
+        client.shutdown();
     }
 
     @Override
     public void run() {
         StringBuilder buf = new StringBuilder("[");
         for (PartitionTopicInfo pti : partitionTopicInfos) {
-            buf.append(format("%s-%s-%s,", pti.topic, pti.brokerString, pti.partition));
+            buf.append(pti.topic).append("-").append(pti.brokerString).append("-").append(pti.partition);
         }
         buf.append(']');
-        logger.info(String.format("%s comsume at %s:%d with %s", getName(), Util.getHostFromBroker(broker), Util.getPortFromBroker(broker), buf.toString()));
+        logger.info(getName() + " comsume at " 
+                + Util.getHostFromBroker(broker) + ":" 
+                + Util.getPortFromBroker(broker) 
+                + " with " + buf.toString());
 
         client = new GenClient(
                 new ConsumerProcessor(partitionTopicInfos, Consumer.config.isBetterOrdered()),
@@ -68,6 +64,5 @@ public class FetcherRunnable extends Thread {
             e.printStackTrace();
         }
         logger.debug("stopping fetcher " + getName() + " to broker " + broker);
-        shutdownLatch.countDown();
     }
 }

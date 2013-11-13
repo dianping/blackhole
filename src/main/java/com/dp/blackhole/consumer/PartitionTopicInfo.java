@@ -1,7 +1,5 @@
 package com.dp.blackhole.consumer;
 
-import static java.lang.String.format;
-
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -27,19 +25,18 @@ public class PartitionTopicInfo {
 
     final String partition;
 
-    public PartitionTopicInfo(String topic, //
-            String partition,//
-            String brokerString,//
-            BlockingQueue<FetchedDataChunk> chunkQueue, //
-            AtomicLong consumedOffset, //
-            AtomicLong fetchedOffset) {
-        super();
+    public PartitionTopicInfo(String topic,
+            String partition,
+            String brokerString,
+            BlockingQueue<FetchedDataChunk> chunkQueue,
+            long consumedOffset,
+            long fetchedOffset) {
         this.topic = topic;
         this.partition = partition;
         this.brokerString = brokerString;
         this.chunkQueue = chunkQueue;
-        this.consumedOffset = consumedOffset;
-        this.fetchedOffset = fetchedOffset;
+        this.consumedOffset = new AtomicLong(consumedOffset);
+        this.fetchedOffset = new AtomicLong(fetchedOffset);
     }
 
     public long getConsumedOffset() {
@@ -70,16 +67,17 @@ public class PartitionTopicInfo {
     public long enqueue(ByteBufferMessageSet messages, long fetchOffset) throws InterruptedException {
         long size = messages.getValidSize();
         if (size > 0) {
-            final long oldOffset = fetchedOffset.get();
+            long oldOffset = fetchedOffset.get();
             chunkQueue.put(new FetchedDataChunk(messages, this, fetchOffset));
             long newOffset = fetchedOffset.addAndGet(size);
-            logger.debug(format("updated fetchset (origin+size=newOffset) => %d + %d = %d", oldOffset, size, newOffset));
+            logger.debug("updated fetchset (origin+size=newOffset) => "
+                    + oldOffset + " + " + size + " = " + newOffset);
         }
         return size;
     }
 
     @Override
     public String toString() {
-        return topic + "-" + partition + ", fetched/consumed offset: " + fetchedOffset.get() + "/" + consumedOffset.get();
+        return topic + "-" + partition + "-" + brokerString + ", fetched/consumed offset: " + fetchedOffset.get() + "/" + consumedOffset.get();
     }
 }

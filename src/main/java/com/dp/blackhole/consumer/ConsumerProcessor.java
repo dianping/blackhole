@@ -24,7 +24,6 @@ import com.dp.blackhole.network.TransferWrap;
 
 public class ConsumerProcessor implements EntityProcessor<TransferWrap, DelegationIOConnection> {
     private final Log LOG = LogFactory.getLog(ConsumerProcessor.class);
-    private final List<PartitionTopicInfo> partitionTopicInfos;
     private final Map<String, PartitionTopicInfo> partitionMap = new HashMap<String, PartitionTopicInfo>();
     private Map<PartitionTopicInfo, Boolean> partitionBlockMap = new HashMap<PartitionTopicInfo, Boolean>();
     private boolean betterOrdered;
@@ -35,7 +34,6 @@ public class ConsumerProcessor implements EntityProcessor<TransferWrap, Delegati
      * but messages receiving form different partitions are synchronous and better time ordered.
      */
     public ConsumerProcessor(List<PartitionTopicInfo> partitionTopicInfos, boolean betterOrdered) {
-        this.partitionTopicInfos = partitionTopicInfos;
         this.betterOrdered = betterOrdered;
         for (PartitionTopicInfo info : partitionTopicInfos) {
             partitionMap.put(info.partition, info);
@@ -48,18 +46,18 @@ public class ConsumerProcessor implements EntityProcessor<TransferWrap, Delegati
         //Offset from supervisor less than zero means that it should be correct first. 
         //That's a specification rule.
         boolean offsetNeedRecoveryBeforeWork = false;
-        for (PartitionTopicInfo info : partitionTopicInfos) {
+        for (PartitionTopicInfo info : partitionBlockMap.keySet()) {
             if (info.getFetchedOffset() < 0) {
                 offsetNeedRecoveryBeforeWork = true;
                 partitionBlockMap.put(info, true);
-                senOffsetRequest(connection, info);
+                sendOffsetRequest(connection, info);
             }
         }
         if (!offsetNeedRecoveryBeforeWork) {
             if (betterOrdered) {
                 sendMultiFetchRequest(connection);
             } else {
-                for (PartitionTopicInfo info : partitionTopicInfos) {
+                for (PartitionTopicInfo info : partitionBlockMap.keySet()) {
                     sendFetchRequest(connection, info);
                 }
             }
@@ -102,7 +100,7 @@ public class ConsumerProcessor implements EntityProcessor<TransferWrap, Delegati
             long offset = offsets.get(i);
             if (offset == MessageAndOffset.OFFSET_OUT_OF_RANGE) {
                 partitionBlockMap.put(info, true);
-                senOffsetRequest(from, info);
+                sendOffsetRequest(from, info);
             } else {
                 try {
                     info.enqueue((ByteBufferMessageSet)messageSets.get(i), info.getFetchedOffset());
@@ -132,7 +130,7 @@ public class ConsumerProcessor implements EntityProcessor<TransferWrap, Delegati
             partitionBlockMap.put(info, false);
         } else {
             LOG.warn("Reset offset incorrect! Retry!");
-            senOffsetRequest(from, info);
+            sendOffsetRequest(from, info);
             return;
         }
         
@@ -156,7 +154,7 @@ public class ConsumerProcessor implements EntityProcessor<TransferWrap, Delegati
         PartitionTopicInfo info = partitionMap.get(partition);
         long offset = fetchReply.getOffset();
         if (offset == MessageAndOffset.OFFSET_OUT_OF_RANGE) {
-            senOffsetRequest(from, info);
+            sendOffsetRequest(from, info);
         } else {
             try {
                 info.enqueue(messageSet, info.getFetchedOffset());
@@ -172,7 +170,7 @@ public class ConsumerProcessor implements EntityProcessor<TransferWrap, Delegati
 
     private void sendMultiFetchRequest(DelegationIOConnection connection) {
         List<FetchRequest> fetches = new ArrayList<FetchRequest>();
-        for (PartitionTopicInfo info : partitionTopicInfos) {
+        for (PartitionTopicInfo info : partitionBlockMap.keySet()) {
             fetches.add(
                 new FetchRequest(
                     info.topic, 
@@ -185,7 +183,7 @@ public class ConsumerProcessor implements EntityProcessor<TransferWrap, Delegati
         connection.send(new TransferWrap(new MultiFetchRequest(fetches)));
     }
 
-    private void senOffsetRequest(DelegationIOConnection from,
+    private void sendOffsetRequest(DelegationIOConnection from,
             PartitionTopicInfo info) {
         LOG.info("offset for " + info + " out of range, now we fix it");
         long offset;

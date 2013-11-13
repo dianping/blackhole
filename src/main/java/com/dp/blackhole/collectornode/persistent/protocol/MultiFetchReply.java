@@ -10,8 +10,6 @@ import com.dp.blackhole.collectornode.persistent.MessageSet;
 import com.dp.blackhole.network.DelegationTypedWrappable;
 import com.dp.blackhole.network.GenUtil;
 
-import static java.lang.String.format;
-
 public class MultiFetchReply extends DelegationTypedWrappable {
 
     final ByteBuffer sizeBuffer = ByteBuffer.allocate(Integer.SIZE/8);
@@ -26,6 +24,12 @@ public class MultiFetchReply extends DelegationTypedWrappable {
     
     public MultiFetchReply() {}
     
+    /**
+     * 
+     * @param partitionList
+     * @param messagesList The callers should guarantee messagesList not null themselves.
+     * @param offsetList
+     */
     public MultiFetchReply(List<String> partitionList, List<MessageSet> messagesList, List<Long> offsetList) {
         this.partitionList = partitionList;
         this.messagesList = messagesList;
@@ -90,26 +94,30 @@ public class MultiFetchReply extends DelegationTypedWrappable {
 
     @Override
     public int read(ScatteringByteChannel channel) throws IOException {
-        expectIncomplete();
         int read = 0;
-        if (sizeBuffer.remaining() > 0) {
-            read += channel.read(sizeBuffer);
-        }
-        //
-        if (contentBuffer == null && !sizeBuffer.hasRemaining()) {
-            sizeBuffer.rewind();
-            int size = sizeBuffer.getInt();
-            if (size <= 0) {
-                throw new IOException(format("%d is not a valid request size.", size));
+        if (sizeBuffer.hasRemaining()) {
+            int num = channel.read(sizeBuffer);
+            if (num < 0) {
+                throw new IOException("end-of-stream reached");
             }
-            contentBuffer = byteBufferAllocate(size);
+            read += num;
+            if (sizeBuffer.hasRemaining()) {
+                return read;
+            } else {
+                sizeBuffer.flip();
+                size = sizeBuffer.getInt();
+                contentBuffer = ByteBuffer.allocate(size);                
+            }
         }
-        //
-        if (contentBuffer != null) {
-            read = channel.read(contentBuffer);
-            //
+        
+        if (!sizeBuffer.hasRemaining()) {
+            int num = channel.read(contentBuffer);
+            if (num < 0) {
+                throw new IOException("end-of-stream reached");
+            }
+            read += num;
             if (!contentBuffer.hasRemaining()) {
-                contentBuffer.rewind();
+                contentBuffer.flip();
                 complete = true;
             }
         }
@@ -119,42 +127,5 @@ public class MultiFetchReply extends DelegationTypedWrappable {
     @Override
     public boolean complete() {
         return complete;
-    }
-    
-    public int readCompletely(ScatteringByteChannel channel) throws IOException {
-        int read = 0;
-        while (!complete()) {
-            read += read(channel);
-        }
-        return read;
-    }
-    
-    public void expectIncomplete() {
-        if (complete()) {
-            throw new IllegalStateException("This operation cannot be completed on a complete request.");
-        }
-    }
-    
-    public void expectComplete() {
-        if (!complete()) {
-            throw new IllegalStateException("This operation cannot be completed on an incomplete request.");
-        }
-    }
-    
-    public ByteBuffer buffer() {
-        expectComplete();
-        return contentBuffer;
-    }
-    
-    private ByteBuffer byteBufferAllocate(int size) {
-        ByteBuffer buffer = null;
-        try {
-            buffer = ByteBuffer.allocate(size);
-        } catch (OutOfMemoryError oome) {
-            throw new RuntimeException("OOME with size " + size, oome);
-        } catch (RuntimeException t) {
-            throw t;
-        }
-        return buffer;
     }
 }

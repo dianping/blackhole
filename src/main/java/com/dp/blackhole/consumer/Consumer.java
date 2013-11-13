@@ -1,10 +1,5 @@
 package com.dp.blackhole.consumer;
 
-import static java.lang.String.format;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
@@ -21,19 +16,13 @@ public class Consumer {
     
     static ConsumerConfig config;
     
-    public synchronized static void initEnv() {
-        Properties prop = new Properties();
-        try {
-            prop.load(new FileReader(new File("consumer.properties")));
-        } catch (IOException e) {
-            LOG.error("Failed to load&read consumer.properties");
-            return;
-        }
+    public synchronized static void initEnv(Properties prop) {
         config = new ConsumerConfig(prop);
         ConsumerConnector connector = ConsumerConnector.getInstance();
         if (!running) {
             running = true;
             Thread thread = new Thread(connector);
+            thread.setDaemon(true);
             thread.start();
         } else {
             LOG.info("Connector thread has already started");
@@ -43,8 +32,7 @@ public class Consumer {
     public static String createConsumer (final String topic, final String group, 
             final int minConsumersInGroup) {
         String consumerUuid = generateConsumerId();
-        LOG.info(format("create message stream by consumerid [%s] with groupid [%s]", consumerUuid,
-                group));
+        LOG.info("create message stream by consumerid " + consumerUuid + " with groupid " + group);
         //consumerIdString => groupid_consumerid
         final String consumerIdString = group + "_" + consumerUuid;
         ConsumerConnector connector = ConsumerConnector.getInstance();
@@ -52,8 +40,8 @@ public class Consumer {
         return consumerIdString;
     }
     
-    public static MessageStream<String> getStreamByConsumer(String topic, String consumerIdString) {
-        return getStreamByConsumer(topic, consumerIdString, -1, new StringDecoder());
+    public static MessageStream getStreamByConsumer(String topic, String consumerIdString) {
+        return getStreamByConsumer(topic, consumerIdString, -1);
     }
     
     /**
@@ -61,10 +49,10 @@ public class Consumer {
      * if no message is available for consumption after the specified interval
      * -1 never time out
      */
-    public static <T> MessageStream<T> getStreamByConsumer(String topic, String consumerIdString,
-            int consumerTimeoutMs, Decoder<T> decoder) {
+    public synchronized static MessageStream getStreamByConsumer(String topic, String consumerIdString,
+            int consumerTimeoutMs) {
         ConsumerConnector connector = ConsumerConnector.getInstance();
-        return new MessageStream<T>(topic, connector.queues.get(consumerIdString), consumerTimeoutMs, decoder);
+        return new MessageStream(topic, connector.queues.get(consumerIdString), consumerTimeoutMs);
     }
 
     /**
@@ -75,9 +63,9 @@ public class Consumer {
     private static String generateConsumerId() {
         UUID uuid = UUID.randomUUID();
         try {
-            return format("%s-%d-%s", InetAddress.getLocalHost().getHostName(), //
-                    System.currentTimeMillis(),//
-                    Long.toHexString(uuid.getMostSignificantBits()).substring(0, 8));
+            return InetAddress.getLocalHost().getHostName() + "-"
+                    + System.currentTimeMillis() + "-"
+                    + Long.toHexString(uuid.getMostSignificantBits()).substring(0, 8);
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException(
                     "can not generate consume id by auto, set the 'consumerid' parameter to fix this");
@@ -87,9 +75,11 @@ public class Consumer {
     public static void main(String[] args) {
         String topic = "topic1";
         String group = "g1";
-        Consumer.initEnv();
+        Properties properties = new Properties();
+        properties.setProperty("bla", "bla");
+        Consumer.initEnv(properties);
         String consumerIdString = Consumer.createConsumer(topic, group, 3);
-        MessageStream<String> stream = Consumer.getStreamByConsumer(topic, consumerIdString, 5000, new StringDecoder());
+        MessageStream stream = Consumer.getStreamByConsumer(topic, consumerIdString, 5000);
         for (String message : stream) {
             System.out.println(message);
         }

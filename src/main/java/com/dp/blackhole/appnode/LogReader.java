@@ -30,7 +30,6 @@ public class LogReader implements Runnable{
     private int bufSize;
     private Socket socket;
     EventWriter eventWriter;
-    private volatile boolean run = true;
     
     public LogReader(Appnode node, String collectorServer, int port, AppLog appLog) {
         this.node = node;
@@ -41,7 +40,6 @@ public class LogReader implements Runnable{
     }
 
     public void stop() {
-        this.run = false;
         try {
             if (socket != null && !socket.isClosed()) {
                 socket.close();
@@ -73,11 +71,6 @@ public class LogReader implements Runnable{
                 throw new IOException("Failed to register a log reader for " + appLog.getAppName() 
                         + " with " + appLog.getTailFile() + ", thread will not run.");
             }
-            while (run) {
-                Thread.sleep(5000);
-            }
-        } catch (final InterruptedException e) {
-            
         } catch (UnknownHostException e) {
             LOG.error("Socket fail!", e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());

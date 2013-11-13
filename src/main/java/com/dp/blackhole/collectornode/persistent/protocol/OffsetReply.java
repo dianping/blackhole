@@ -7,26 +7,16 @@ import com.dp.blackhole.network.NonDelegationTypedWrappable;
 
 public class OffsetReply extends NonDelegationTypedWrappable {
     
-    private ByteBuffer head;
     private long offset;
     private String topic;
     private String partition;
-    private int size;
     
     public OffsetReply() {}
     
     public OffsetReply(String topic, String partition, long offset) {
-        this.head = allocateHead();
         this.topic = topic;
         this.partition = partition;
         this.offset = offset;
-        this.size = getSize();
-        this.head.putInt(size);
-        this.head.flip();
-    }
-    
-    private ByteBuffer allocateHead() {
-        return ByteBuffer.allocate((Integer.SIZE)/8);
     }
     
     @Override
@@ -42,7 +32,6 @@ public class OffsetReply extends NonDelegationTypedWrappable {
     @Override
     public void write(ByteBuffer buffer) {
         buffer.putLong(offset);
-        buffer.rewind();
     }
 
     @Override

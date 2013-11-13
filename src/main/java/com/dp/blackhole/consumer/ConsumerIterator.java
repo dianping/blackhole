@@ -1,6 +1,7 @@
 package com.dp.blackhole.consumer;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -9,11 +10,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.collectornode.persistent.MessageAndOffset;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.consumer.exception.ConsumerTimeoutException;
 
-import static java.lang.String.format;
-
-public class ConsumerIterator<T> extends IteratorTemplate<T> {
+public class ConsumerIterator implements Iterator<String> {
     
     private final Log logger = LogFactory.getLog(ConsumerIterator.class);
     
@@ -22,8 +22,14 @@ public class ConsumerIterator<T> extends IteratorTemplate<T> {
     final BlockingQueue<FetchedDataChunk> queue;
 
     final int consumerTimeoutMs;
+    
+    enum State {
+        DONE, READY, NOT_READY, FAILED;
+    }
 
-    final Decoder<T> decoder;
+    private State state = State.NOT_READY;
+    
+    private String nextItem = null;
 
     private AtomicReference<Iterator<MessageAndOffset>> current = new AtomicReference<Iterator<MessageAndOffset>>(null);
 
@@ -31,35 +37,26 @@ public class ConsumerIterator<T> extends IteratorTemplate<T> {
 
     private long consumedOffset = -1L;
 
-    public ConsumerIterator(String topic, BlockingQueue<FetchedDataChunk> queue, int consumerTimeoutMs,
-                            Decoder<T> decoder) {
+    public ConsumerIterator(String topic, BlockingQueue<FetchedDataChunk> queue, int consumerTimeoutMs) {
         super();
         this.topic = topic;
         this.queue = queue;
         this.consumerTimeoutMs = consumerTimeoutMs;
-        this.decoder = decoder;
     }
 
     @Override
-    public T next() {
-        T decodedMessage = super.next();
+    public String next() {
+        if (!hasNext()) throw new NoSuchElementException();
+        state = State.NOT_READY;
+        String message = nextItem;
         if (consumedOffset < 0) {
             throw new IllegalStateException("Offset returned by the message set is invalid " + consumedOffset);
         }
         currentTopicInfo.resetConsumeOffset(consumedOffset);
-        return decodedMessage;
+        return message;
     }
 
-    @Override
-    protected T makeNext() {
-        try {
-            return makeNext0();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
-    protected T makeNext0() throws InterruptedException {
+    protected String makeNext() throws InterruptedException, ConsumerTimeoutException {
         FetchedDataChunk currentDataChunk = null;
         Iterator<MessageAndOffset> localCurrent = current.get();
         if (localCurrent == null || !localCurrent.hasNext()) {
@@ -68,20 +65,22 @@ public class ConsumerIterator<T> extends IteratorTemplate<T> {
             } else {
                 currentDataChunk = queue.poll(consumerTimeoutMs, TimeUnit.MILLISECONDS);
                 if (currentDataChunk == null) {
-                    resetState();
+                    state = State.NOT_READY;
                     throw new ConsumerTimeoutException("consumer timeout in " + consumerTimeoutMs + " ms");
                 }
             }
             if (currentDataChunk == ConsumerConnector.SHUTDOWN_COMMAND) {
                 logger.warn("Now closing the message stream");
                 queue.offer(currentDataChunk);
-                return allDone();
+                state = State.DONE;
+                return null;
             } else {
                 currentTopicInfo = currentDataChunk.topicInfo;
                 if (currentTopicInfo.getConsumedOffset() < currentDataChunk.fetchOffset) {
-                    logger.error(format(
-                            "consumed offset: %d doesn't match fetch offset: %d for %s;\n Consumer may lose data", //
-                            currentTopicInfo.getConsumedOffset(), currentDataChunk.fetchOffset, currentTopicInfo));
+                    logger.error("consumed offset: " + currentTopicInfo.getConsumedOffset() 
+                            + " doesn't match fetch offset: " 
+                            + currentDataChunk.fetchOffset + " for " 
+                            + currentTopicInfo + ";\n Consumer may lose data");
                     currentTopicInfo.resetConsumeOffset(currentDataChunk.fetchOffset);
                 }
                 localCurrent = currentDataChunk.messages.getItertor();
@@ -93,7 +92,7 @@ public class ConsumerIterator<T> extends IteratorTemplate<T> {
             item = localCurrent.next();
         }
         consumedOffset = item.offset;
-        return decoder.toEvent(item.message);
+        return Util.toEvent(item.message);
     }
 
     public void clearCurrentChunk() {
@@ -101,5 +100,34 @@ public class ConsumerIterator<T> extends IteratorTemplate<T> {
             logger.info("Clearing the current data chunk for this consumer iterator");
             current.set(null);
         }
+    }
+
+    @Override
+    public boolean hasNext() {
+        switch (state) {
+        case FAILED:
+            throw new IllegalStateException("Iterator is in failed state");
+        case DONE:
+            return false;
+        case READY:
+            return true;
+        case NOT_READY:
+            break;
+        }
+        state = State.FAILED;
+        try {
+            nextItem = makeNext();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } catch (ConsumerTimeoutException e) {
+            state = State.DONE;
+        }
+        if (state == State.DONE) return false;
+        state = State.READY;
+        return true;
+    }
+
+    @Override
+    public void remove() {
     }
 }

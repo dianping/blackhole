@@ -8,7 +8,6 @@ import java.util.NoSuchElementException;
 
 public class ByteBufferMessageSet implements MessageSet{
     ByteBuffer buffer;
-    private boolean offsetOutOfRange;
     long startOffset;
     long validSize;
     
@@ -20,14 +19,6 @@ public class ByteBufferMessageSet implements MessageSet{
     
     public ByteBufferMessageSet(ByteBuffer buffer) {
         this.buffer = buffer;
-    }
-    
-    public boolean isOffsetOutOfRange() {
-        return offsetOutOfRange;
-    }
-
-    public void setOffsetOutOfRange(boolean offsetOutOfRange) {
-        this.offsetOutOfRange = offsetOutOfRange;
     }
 
     public void write(ByteBuffer buffer) {
