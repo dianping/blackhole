@@ -5,6 +5,10 @@ import java.util.Properties;
 import com.dp.blackhole.collectornode.persistent.protocol.OffsetRequest;
 
 public class ConsumerConfig {
+    
+    private String supervisorHost;
+    
+    private int supervisorPort;
 
     private int fetchSize;
 
@@ -21,12 +25,30 @@ public class ConsumerConfig {
     private boolean betterOrdered;
 
     public ConsumerConfig(Properties props) {
+        this.supervisorHost = getString(props, "supervisor.host", "localhost");
+        this.supervisorPort = getInt(props, "supervisor.port", -1);
         this.fetchSize = getInt(props, "fetch.size", 1024 * 1024);//1MB
         this.autoCommit = getBoolean(props, "autocommit.enable", true);
         this.autoCommitIntervalMs = getInt(props, "autocommit.interval.ms", 1000);//1 seconds
         this.maxQueuedChunks = getInt(props, "queuedchunks.max", 10);
         this.autoOffsetReset = getString(props, "autooffset.reset", OffsetRequest.SMALLES_TIME_STRING);
         this.betterOrdered = getBoolean(props, "messages.betterOrdered", false);
+    }
+
+    public String getSupervisorHost() {
+        return supervisorHost;
+    }
+
+    public void setSupervisorHost(String supervisorHost) {
+        this.supervisorHost = supervisorHost;
+    }
+
+    public int getSupervisorPort() {
+        return supervisorPort;
+    }
+
+    public void setSupervisorPort(int supervisorPort) {
+        this.supervisorPort = supervisorPort;
     }
 
     /** the number of byes of messages to attempt to fetch */

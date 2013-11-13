@@ -18,6 +18,7 @@ public class Consumer {
     
     public synchronized static void initEnv(Properties prop) {
         config = new ConsumerConfig(prop);
+        //TODO check
         ConsumerConnector connector = ConsumerConnector.getInstance();
         if (!running) {
             running = true;
@@ -49,7 +50,7 @@ public class Consumer {
      * if no message is available for consumption after the specified interval
      * -1 never time out
      */
-    public synchronized static MessageStream getStreamByConsumer(String topic, String consumerIdString,
+    public static MessageStream getStreamByConsumer(String topic, String consumerIdString,
             int consumerTimeoutMs) {
         ConsumerConnector connector = ConsumerConnector.getInstance();
         return new MessageStream(topic, connector.queues.get(consumerIdString), consumerTimeoutMs);

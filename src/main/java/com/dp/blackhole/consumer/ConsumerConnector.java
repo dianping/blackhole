@@ -1,14 +1,12 @@
 package com.dp.blackhole.consumer;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -74,7 +72,6 @@ public class ConsumerConnector extends Node implements Runnable {
                     }
                 }
                 LOG.debug("Clear consumer=>fetcherthread map. KEY[" + entry.getKey() + "]");
-                entry.getValue().clear();
             }
             
             for (Map.Entry<String, BlockingQueue<FetchedDataChunk>> entry : queues.entrySet()) {
@@ -85,11 +82,6 @@ public class ConsumerConnector extends Node implements Runnable {
                 } catch (InterruptedException e) {
                     LOG.warn(e.getMessage(), e);
                 }
-            }
-            
-            for (Map.Entry<String, List<PartitionTopicInfo>> entry : allPartitions.entrySet()) {
-                LOG.debug("Clear consumer=>partitions. KEY[" + entry.getKey() + "]");
-                entry.getValue().clear();
             }
             
             consumerThreadsMap.clear();
@@ -104,15 +96,8 @@ public class ConsumerConnector extends Node implements Runnable {
     @Override
     public void run() {
         consumerThreadsMap = new HashMap<String, List<FetcherRunnable>>();
-        queues = new HashMap<String, BlockingQueue<FetchedDataChunk>>();
+        queues = new ConcurrentHashMap<String, BlockingQueue<FetchedDataChunk>>();
         allPartitions = new HashMap<String, List<PartitionTopicInfo>>();
-        Properties prop = new Properties();
-        try {
-            prop.load(new FileReader(new File("consumer.properties")));
-        } catch (IOException e) {
-            LOG.error("Oops, got an exception, thread start fail.", e);
-            return;
-        }
         if (Consumer.config.isAutoCommit()) {
             int autoCommitIntervalMs = Consumer.config.getAutoCommitIntervalMs();
             LOG.info("starting auto committer every " + autoCommitIntervalMs + " ms");
@@ -122,9 +107,9 @@ public class ConsumerConnector extends Node implements Runnable {
                     autoCommitIntervalMs, TimeUnit.MILLISECONDS);
         }
         try {
-            String serverhost = prop.getProperty("supervisor.host");
-            int serverport = Integer.parseInt(prop.getProperty("supervisor.port"));
-            init(serverhost, serverport);
+            String supervisorHost = Consumer.config.getSupervisorHost();
+            int supervisorPort = Consumer.config.getSupervisorPort();
+            init(supervisorHost, supervisorPort);
         } catch (IOException e) {
             LOG.error("Oops, got an exception, thread start fail.", e);
             return;
@@ -203,9 +188,7 @@ public class ConsumerConnector extends Node implements Runnable {
     void registerConsumer(final String consumerIdString, final String topic,
             final int minConsumersInGroup) {
         BlockingQueue<FetchedDataChunk> queue = new LinkedBlockingQueue<FetchedDataChunk>(Consumer.config.getMaxQueuedChunks());
-        synchronized (this) {
-            queues.put(consumerIdString, queue);
-        }
+        queues.put(consumerIdString, queue);
         Message message = PBwrap.wrapConsumerReg(consumerIdString, topic, minConsumersInGroup);
         LOG.info("register consumer to supervisor " + consumerIdString + " => " + topic);
         super.send(message);
