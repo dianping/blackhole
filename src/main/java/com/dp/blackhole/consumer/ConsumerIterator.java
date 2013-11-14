@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +30,7 @@ public class ConsumerIterator implements Iterator<String> {
     
     private String nextItem = null;
 
-    private AtomicReference<Iterator<MessageAndOffset>> current = new AtomicReference<Iterator<MessageAndOffset>>(null);
+    private Iterator<MessageAndOffset> current = null;
 
     private PartitionTopicInfo currentTopicInfo = null;
 
@@ -58,8 +57,7 @@ public class ConsumerIterator implements Iterator<String> {
 
     protected String makeNext() throws InterruptedException, ConsumerTimeoutException {
         FetchedDataChunk currentDataChunk = null;
-        Iterator<MessageAndOffset> localCurrent = current.get();
-        if (localCurrent == null || !localCurrent.hasNext()) {
+        if (current == null || !current.hasNext()) {
             if (consumerTimeoutMs < 0) {
                 currentDataChunk = queue.take();
             } else {
@@ -83,23 +81,20 @@ public class ConsumerIterator implements Iterator<String> {
                             + currentTopicInfo + ";\n Consumer may lose data");
                     currentTopicInfo.resetConsumeOffset(currentDataChunk.fetchOffset);
                 }
-                localCurrent = currentDataChunk.messages.getItertor();
-                current.set(localCurrent);
+                current = currentDataChunk.messages.getItertor();
             }
         }
-        MessageAndOffset item = localCurrent.next();
-        while (item.offset < currentTopicInfo.getConsumedOffset() && localCurrent.hasNext()) {
-            item = localCurrent.next();
+        MessageAndOffset item = current.next();
+        while (item.offset < currentTopicInfo.getConsumedOffset() && current.hasNext()) {
+            item = current.next();
         }
         consumedOffset = item.offset;
         return Util.toEvent(item.message);
     }
 
     public void clearCurrentChunk() {
-        if (current.get() != null) {
-            logger.info("Clearing the current data chunk for this consumer iterator");
-            current.set(null);
-        }
+        current = null;
+        logger.info("Clearing the current data chunk for this consumer iterator");
     }
 
     @Override
