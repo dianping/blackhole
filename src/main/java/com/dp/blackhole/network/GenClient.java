@@ -198,7 +198,7 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
     
-    protected void init(Properties prop, String name) throws IOException, ClosedChannelException {  
+    public void init(Properties prop, String name) throws IOException, ClosedChannelException {  
         serverHost = prop.getProperty("Server.host");
         serverPort = Integer.parseInt(prop.getProperty("Server.port"));;
         handlerCount = Integer.parseInt(prop.getProperty("GenClient.handlercount", "1"));

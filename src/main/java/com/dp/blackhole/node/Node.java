@@ -69,7 +69,7 @@ public abstract class Node {
                   Thread.sleep(3000);
                   LOG.info("reconnect in 3 second...");
                 } catch (InterruptedException e) {
-                    break;
+//                    break;    //TODO to check why it triggers an InterruptException abnormally
                 }
             }
         }
