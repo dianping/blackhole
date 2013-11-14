@@ -12,6 +12,8 @@ public class ProduceRequest extends NonDelegationTypedWrappable {
     public String partitionId;
     ByteBufferMessageSet messages;
     
+    public ProduceRequest() {}
+
     public ProduceRequest(String topic, String partitionId, ByteBufferMessageSet messages) {
         this.topic = topic;
         this.partitionId = partitionId;

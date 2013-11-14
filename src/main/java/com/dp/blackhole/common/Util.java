@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -20,6 +21,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+
+import com.dp.blackhole.collectornode.persistent.Message;
 
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
@@ -237,7 +240,7 @@ public class Util {
                     + " exists, it should be directory");
         }
     }
-    
+
     public static void rmr(File file) throws IOException {
         if (file.isDirectory()) {
             File[] children = file.listFiles();
@@ -253,5 +256,33 @@ public class Util {
         } else {
             file.delete();
         }
+    }
+
+    public static String fromBytes(byte[] b) {
+        return fromBytes(b, "UTF-8");
+    }
+
+    public static String fromBytes(byte[] b, String encoding) {
+        if (b == null) return null;
+        try {
+            return new String(b, encoding);
+        } catch (UnsupportedEncodingException e) {
+            return new String(b);
+        }
+    }
+
+    public static String getHostFromBroker(String brokerString) {
+        return brokerString.substring(0, brokerString.lastIndexOf(':'));
+    }
+    
+    public static String getPortFromBroker(String brokerString) {
+        return brokerString.substring(brokerString.lastIndexOf(':') + 1);
+    }
+    
+    public static String toEvent(Message message) {
+        ByteBuffer buf = message.payload();
+        byte[] b = new byte[buf.remaining()];
+        buf.get(b);
+        return fromBytes(b);
     }
 }

@@ -8,7 +8,6 @@ import java.util.NoSuchElementException;
 
 public class ByteBufferMessageSet implements MessageSet{
     ByteBuffer buffer;
-    
     long startOffset;
     long validSize;
     
@@ -21,7 +20,7 @@ public class ByteBufferMessageSet implements MessageSet{
     public ByteBufferMessageSet(ByteBuffer buffer) {
         this.buffer = buffer;
     }
-    
+
     public void write(ByteBuffer buffer) {
         buffer.put(this.buffer);
     }
