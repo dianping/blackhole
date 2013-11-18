@@ -57,8 +57,8 @@ public class TestLogReader {
     @Test
     public void testFileRotated() {
         AppLog appLog = new AppLog(MAGIC, com.dp.blackhole.simutil.Util.TEST_ROLL_FILE,
-        		System.currentTimeMillis());
-        SimAppnode appnode = new SimAppnode("locahost", port);
+        		System.currentTimeMillis(), 100);
+        SimAppnode appnode = new SimAppnode();
         FileListener listener;
         try {
             listener = new FileListener();

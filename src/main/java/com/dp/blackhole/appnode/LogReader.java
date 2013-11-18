@@ -27,7 +27,6 @@ public class LogReader implements Runnable{
     private Appnode node;
     private String collectorServer;
     private int port;
-    private int bufSize;
     private Socket socket;
     EventWriter eventWriter;
     
@@ -36,7 +35,6 @@ public class LogReader implements Runnable{
         this.collectorServer = collectorServer;
         this.port = port;
         this.appLog = appLog;
-        this.bufSize = ConfigKeeper.configMap.get(appLog.getAppName()).getInteger(ParamsKey.Appconf.BUFFER_SIZE, 4096);
     }
 
     public void stop() {
@@ -48,7 +46,6 @@ public class LogReader implements Runnable{
         } catch (IOException e) {
             LOG.warn("Warnning, clean fail:", e);
         }
-        LOG.debug("Perpare to unregister LogReader: " + this.toString() + ", with " + appLog.getTailFile());
         node.getListener().unregisterLogReader(appLog.getTailFile());
     }
 
@@ -65,7 +62,7 @@ public class LogReader implements Runnable{
             protocol.sendHead(new DataOutputStream(socket.getOutputStream()), head);
             
             File tailFile = new File(appLog.getTailFile());
-            this.eventWriter = new EventWriter(tailFile, bufSize);
+            this.eventWriter = new EventWriter(tailFile, appLog.getBufSize());
             
             if (!node.getListener().registerLogReader(appLog.getTailFile(), this)) {
                 throw new IOException("Failed to register a log reader for " + appLog.getAppName() 

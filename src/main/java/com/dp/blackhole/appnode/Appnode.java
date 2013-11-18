@@ -1,24 +1,12 @@
 package com.dp.blackhole.appnode;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,29 +15,29 @@ import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.common.gen.ConfResPB.ConfRes;
+import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.node.Node;
 
-public class Appnode extends Node {
+public class Appnode extends Node implements Runnable {
     private static final Log LOG = LogFactory.getLog(Appnode.class);
-    private String[] args;
-    private File configFile = null;
     private ExecutorService pool;
-    protected int port;   //protected for test case SimAppnode
     private FileListener listener;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
     
-    public Appnode(String appClient) {
+    public Appnode() {
         pool = Executors.newCachedThreadPool();
     }
     
-    public boolean process(Message msg) {
+    public boolean process(Message msg) throws InterruptedException {
 	    String appName;
 	    String collectorServer;
+	    int collectorPort;
   	    AppLog appLog = null;
   	    LogReader logReader = null;
   	    MessageType type = msg.getType();
@@ -59,6 +47,7 @@ public class Appnode extends Node {
                 Thread.sleep(5 * 1000);
             } catch (InterruptedException e) {
                 LOG.info("thead interrupted");
+                throw new InterruptedException();
             }
   	        String app = msg.getNoAvailableNode().getAppName();
   	        AppLog applog = appLogs.get(app); 
@@ -70,7 +59,8 @@ public class Appnode extends Node {
             if ((appLog = appLogs.get(appName)) != null) {
                 long rollTs = recoveryRoll.getRollTs();
                 collectorServer = recoveryRoll.getCollectorServer();
-                RollRecovery recovery = new RollRecovery(this, collectorServer, port, appLog, rollTs);
+                collectorPort =  recoveryRoll.getCollectorPort();
+                RollRecovery recovery = new RollRecovery(this, collectorServer, collectorPort, appLog, rollTs);
                 pool.execute(recovery);
                 return true;
             } else {
@@ -84,7 +74,8 @@ public class Appnode extends Node {
             if ((appLog = appLogs.get(appName)) != null) {
                 if ((logReader = appReaders.get(appLog)) == null) {
                     collectorServer = assignCollector.getCollectorServer();
-                    logReader = new LogReader(this, collectorServer, port, appLog);
+                    collectorPort = assignCollector.getCollectorPort();
+                    logReader = new LogReader(this, collectorServer, collectorPort, appLog);
                     appReaders.put(appLog, logReader);
                     pool.execute(logReader);
                     return true;
@@ -95,6 +86,34 @@ public class Appnode extends Node {
                 LOG.error("AppName [" + assignCollector.getAppName()
                         + "] from supervisor message not match with local");
             }
+            break;
+        case NOAVAILABLECONF:
+            LOG.info("Configurations not ready, sleep 5 seconds..");
+            try {
+                Thread.sleep(5 * 1000);
+            } catch (InterruptedException e) {
+                LOG.info("thead interrupted");
+                throw new InterruptedException();
+            }
+            requireConfigFromSupersivor();
+            break;
+        case CONF_RES:
+            ConfigKeeper confKeeper = new ConfigKeeper();
+            ConfRes confRes = msg.getConfRes();
+            List<AppConfRes> appConfResList = confRes.getAppConfResList();
+            for (AppConfRes appConfRes : appConfResList) {
+                confKeeper.addRawProperty(appConfRes.getAppName() + "."
+                        + ParamsKey.Appconf.WATCH_FILE, appConfRes.getWatchFile());
+                confKeeper.addRawProperty(appConfRes.getAppName() + "."
+                        + ParamsKey.Appconf.ROLL_PERIOD, appConfRes.getPeriod());
+                confKeeper.addRawProperty(appConfRes.getAppName() + "."
+                        + ParamsKey.Appconf.BUFFER_SIZE, appConfRes.getBufferSize());
+            }
+            if (!checkAllFilesExist()) {
+                return false;
+            }
+            fillUpAppLogsFromConfig();
+            registerApps();
             break;
         default:
             LOG.error("Illegal message type " + msg.getType());
@@ -123,11 +142,20 @@ public class Appnode extends Node {
         return res;
     }
 
+    @Override
     public void run() {
-        if (!checkAllFilesExist()) {
+        //hard code, please modify to real supervisor address before mvn package
+        String supervisorHost = "localhost";
+        String supervisorPort = "8080";
+        try {
+            init(supervisorHost, Integer.parseInt(supervisorPort));
+        } catch (NumberFormatException e) {
+            LOG.error(e.getMessage(), e);
+            return;
+        } catch (UnknownHostException e) {
+            LOG.error(e.getMessage(), e);
             return;
         }
-        fillUpAppLogsFromConfig();
         try {    
             listener = new FileListener();
         } catch (Exception e) {
@@ -142,9 +170,15 @@ public class Appnode extends Node {
         for (String appName : ConfigKeeper.configMap.keySet()) {
             String path = ConfigKeeper.configMap.get(appName)
                     .getString(ParamsKey.Appconf.WATCH_FILE);
-            AppLog appLog = new AppLog(appName, path);
+            int bufSize = Integer.parseInt(ConfigKeeper.configMap.get(appName)
+                    .getString(ParamsKey.Appconf.BUFFER_SIZE));
+            AppLog appLog = new AppLog(appName, path, bufSize);
             appLogs.put(appName, appLog);
         }
+    }
+
+    public void shutdown() {
+        Thread.currentThread().interrupt();
     }
 
     @Override
@@ -156,14 +190,21 @@ public class Appnode extends Node {
             reader.stop();
             appReaders.remove(e.getKey());
         }
+        appLogs.clear();
+        ConfigKeeper.configMap.clear();
     }
     
     @Override
     protected void onConnected() {
         clearMessageQueue();
-        registerApps();
+        requireConfigFromSupersivor();
     }
 
+    private void requireConfigFromSupersivor() {
+        Message msg = PBwrap.wrapConfReq();
+        super.send(msg);
+    }
+    
     private void registerApps() {
         //register the app to supervisor
         for (AppLog appLog : appLogs.values()) {
@@ -171,93 +212,7 @@ public class Appnode extends Node {
             register(appLog.getAppName(), Util.getTS());
         }
     }
-    
-	public void loadLionConfig() {
-        // TODO Auto-generated method stub
-    }
 
-    public void loadLocalConfig() {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(configFile));
-            Properties properties = new Properties();
-            properties.load(reader);
-            ConfigKeeper conf = new ConfigKeeper();
-            Enumeration<?> propertyNames = properties.propertyNames();
-            while (propertyNames.hasMoreElements()) {
-                String name = (String) propertyNames.nextElement();
-                String value = properties.getProperty(name);
-            
-                if (!conf.addRawProperty(name, value)) {
-                    LOG.warn("Configuration property ignored: " + name + " = " + value);
-                    continue;
-                }
-            }
-        } catch (IOException e) {
-                 LOG.error("Unable to load file:" + configFile
-                                     + " (I/O failure) - Exception follows.", e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ex) {
-                    LOG.warn(
-                            "Unable to close file reader for file: " + configFile, ex);
-                }
-            }
-        }
-    }
-
-    public void loadConfig() throws FileNotFoundException, IOException {
-        if (configFile != null) {
-            loadLocalConfig();
-        } else {
-            loadLionConfig();
-        }
-        Properties prop = new Properties();
-        prop.load(new FileReader(new File("config.properties")));
-        port = Integer.parseInt(prop.getProperty("collectornode.port"));
-        
-        String serverhost = prop.getProperty("supervisor.host");
-        int serverport = Integer.parseInt(prop.getProperty("supervisor.port"));
-        init(serverhost, serverport);    
-    }
-
-    public boolean parseOptions() throws ParseException {
-        Options options = new Options();
-    
-        Option option = new Option("f", "conf", true, "specify a conf file");
-        options.addOption(option);
-    
-        CommandLineParser parser = new GnuParser();
-        CommandLine commandLine = parser.parse(options, args);
-    
-        if (commandLine.hasOption('f')) {
-            configFile = new File(commandLine.getOptionValue('f'));
-    
-            if (!configFile.exists()) {
-                String path = configFile.getPath();
-                try {
-                    path = configFile.getCanonicalPath();
-                } catch (IOException ex) {
-                    LOG.error("Failed to read canonical path for file: " + path, ex);
-                }
-                throw new ParseException(
-                        "The specified configuration file does not exist: " + path);
-            }
-        }
-    
-        return true;
-    }
-
-    public String[] getArgs() {
-        return args;
-    }
-
-    public void setArgs(String[] args) {
-        this.args = args;
-    }
-    
     public FileListener getListener() {
         return listener;
     }
@@ -281,29 +236,11 @@ public class Appnode extends Node {
         Message message = PBwrap.wrapUnrecoverable(appName, appHost, ts);
         send(message);
     }
-
+    
+    //for test
     public static void main(String[] args) {
-        String hostname;
-        try {
-            hostname = Util.getLocalHost();
-        } catch (UnknownHostException e1) {
-            LOG.error("Oops, got an exception:", e1);
-            return;
-        }
-        Appnode appnode = new Appnode(hostname);
-        appnode.setArgs(args);
-
-        try {
-            if (appnode.parseOptions()) {
-                appnode.loadConfig();
-                appnode.run();
-            }
-        } catch (ParseException e) {
-            LOG.error("Oops, got an exception:", e);
-        } catch (IOException e) {
-            LOG.error("Can not load file \"config.properties\"", e);
-        } catch (Exception e) {
-            LOG.error("A fatal error occurred while running. Exception follows.", e);
-        }
+        Appnode appnode = new Appnode();
+        Thread thread = new Thread(appnode);
+        thread.start();
     }
 }

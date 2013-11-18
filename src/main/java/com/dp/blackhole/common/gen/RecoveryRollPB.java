@@ -41,13 +41,23 @@ public final class RecoveryRollPB {
     com.google.protobuf.ByteString
         getCollectorServerBytes();
 
-    // required int64 roll_ts = 3;
+    // required int32 collector_port = 3;
     /**
-     * <code>required int64 roll_ts = 3;</code>
+     * <code>required int32 collector_port = 3;</code>
+     */
+    boolean hasCollectorPort();
+    /**
+     * <code>required int32 collector_port = 3;</code>
+     */
+    int getCollectorPort();
+
+    // required int64 roll_ts = 4;
+    /**
+     * <code>required int64 roll_ts = 4;</code>
      */
     boolean hasRollTs();
     /**
-     * <code>required int64 roll_ts = 3;</code>
+     * <code>required int64 roll_ts = 4;</code>
      */
     long getRollTs();
   }
@@ -114,6 +124,11 @@ public final class RecoveryRollPB {
             }
             case 24: {
               bitField0_ |= 0x00000004;
+              collectorPort_ = input.readInt32();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
               rollTs_ = input.readInt64();
               break;
             }
@@ -243,17 +258,33 @@ public final class RecoveryRollPB {
       }
     }
 
-    // required int64 roll_ts = 3;
-    public static final int ROLL_TS_FIELD_NUMBER = 3;
-    private long rollTs_;
+    // required int32 collector_port = 3;
+    public static final int COLLECTOR_PORT_FIELD_NUMBER = 3;
+    private int collectorPort_;
     /**
-     * <code>required int64 roll_ts = 3;</code>
+     * <code>required int32 collector_port = 3;</code>
      */
-    public boolean hasRollTs() {
+    public boolean hasCollectorPort() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>required int64 roll_ts = 3;</code>
+     * <code>required int32 collector_port = 3;</code>
+     */
+    public int getCollectorPort() {
+      return collectorPort_;
+    }
+
+    // required int64 roll_ts = 4;
+    public static final int ROLL_TS_FIELD_NUMBER = 4;
+    private long rollTs_;
+    /**
+     * <code>required int64 roll_ts = 4;</code>
+     */
+    public boolean hasRollTs() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required int64 roll_ts = 4;</code>
      */
     public long getRollTs() {
       return rollTs_;
@@ -262,6 +293,7 @@ public final class RecoveryRollPB {
     private void initFields() {
       appName_ = "";
       collectorServer_ = "";
+      collectorPort_ = 0;
       rollTs_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
@@ -274,6 +306,10 @@ public final class RecoveryRollPB {
         return false;
       }
       if (!hasCollectorServer()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasCollectorPort()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -295,7 +331,10 @@ public final class RecoveryRollPB {
         output.writeBytes(2, getCollectorServerBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeInt64(3, rollTs_);
+        output.writeInt32(3, collectorPort_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt64(4, rollTs_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -316,7 +355,11 @@ public final class RecoveryRollPB {
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, rollTs_);
+          .computeInt32Size(3, collectorPort_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(4, rollTs_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -438,8 +481,10 @@ public final class RecoveryRollPB {
         bitField0_ = (bitField0_ & ~0x00000001);
         collectorServer_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
-        rollTs_ = 0L;
+        collectorPort_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
+        rollTs_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -479,6 +524,10 @@ public final class RecoveryRollPB {
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
+        result.collectorPort_ = collectorPort_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
         result.rollTs_ = rollTs_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -506,6 +555,9 @@ public final class RecoveryRollPB {
           collectorServer_ = other.collectorServer_;
           onChanged();
         }
+        if (other.hasCollectorPort()) {
+          setCollectorPort(other.getCollectorPort());
+        }
         if (other.hasRollTs()) {
           setRollTs(other.getRollTs());
         }
@@ -519,6 +571,10 @@ public final class RecoveryRollPB {
           return false;
         }
         if (!hasCollectorServer()) {
+          
+          return false;
+        }
+        if (!hasCollectorPort()) {
           
           return false;
         }
@@ -696,34 +752,67 @@ public final class RecoveryRollPB {
         return this;
       }
 
-      // required int64 roll_ts = 3;
-      private long rollTs_ ;
+      // required int32 collector_port = 3;
+      private int collectorPort_ ;
       /**
-       * <code>required int64 roll_ts = 3;</code>
+       * <code>required int32 collector_port = 3;</code>
        */
-      public boolean hasRollTs() {
+      public boolean hasCollectorPort() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>required int64 roll_ts = 3;</code>
+       * <code>required int32 collector_port = 3;</code>
+       */
+      public int getCollectorPort() {
+        return collectorPort_;
+      }
+      /**
+       * <code>required int32 collector_port = 3;</code>
+       */
+      public Builder setCollectorPort(int value) {
+        bitField0_ |= 0x00000004;
+        collectorPort_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 collector_port = 3;</code>
+       */
+      public Builder clearCollectorPort() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        collectorPort_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int64 roll_ts = 4;
+      private long rollTs_ ;
+      /**
+       * <code>required int64 roll_ts = 4;</code>
+       */
+      public boolean hasRollTs() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required int64 roll_ts = 4;</code>
        */
       public long getRollTs() {
         return rollTs_;
       }
       /**
-       * <code>required int64 roll_ts = 3;</code>
+       * <code>required int64 roll_ts = 4;</code>
        */
       public Builder setRollTs(long value) {
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000008;
         rollTs_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required int64 roll_ts = 3;</code>
+       * <code>required int64 roll_ts = 4;</code>
        */
       public Builder clearRollTs() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000008);
         rollTs_ = 0L;
         onChanged();
         return this;
@@ -754,10 +843,11 @@ public final class RecoveryRollPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022RecoveryRoll.proto\022\tblackhole\"K\n\014Recov" +
+      "\n\022RecoveryRoll.proto\022\tblackhole\"c\n\014Recov" +
       "eryRoll\022\020\n\010app_name\030\001 \002(\t\022\030\n\020collector_s" +
-      "erver\030\002 \002(\t\022\017\n\007roll_ts\030\003 \002(\003B-\n\033com.dp.b" +
-      "lackhole.common.genB\016RecoveryRollPB"
+      "erver\030\002 \002(\t\022\026\n\016collector_port\030\003 \002(\005\022\017\n\007r" +
+      "oll_ts\030\004 \002(\003B-\n\033com.dp.blackhole.common." +
+      "genB\016RecoveryRollPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -769,7 +859,7 @@ public final class RecoveryRollPB {
           internal_static_blackhole_RecoveryRoll_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RecoveryRoll_descriptor,
-              new java.lang.String[] { "AppName", "CollectorServer", "RollTs", });
+              new java.lang.String[] { "AppName", "CollectorServer", "CollectorPort", "RollTs", });
           return null;
         }
       };

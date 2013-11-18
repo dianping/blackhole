@@ -4,15 +4,17 @@ public class AppLog {
     private String appName;
     private String tailFile;
     private long createTime;
+    private int bufSize;
     
-    public AppLog(String appName, String tailFile) {
-        this(appName, tailFile, System.currentTimeMillis());
+    public AppLog(String appName, String tailFile, int bufSize) {
+        this(appName, tailFile, System.currentTimeMillis(), bufSize);
     }
     
-    public AppLog(String appName, String tailFile, long createTime) {
+    public AppLog(String appName, String tailFile, long createTime, int bufSize) {
         this.appName = appName;
         this.tailFile = tailFile;
         this.createTime = createTime;
+        this.bufSize = bufSize;
     }
 
     public String getAppName() {
@@ -33,6 +35,14 @@ public class AppLog {
 
     public long getCreateTime() {
         return createTime;
+    }
+
+    public int getBufSize() {
+        return bufSize;
+    }
+
+    public void setBufSize(int bufSize) {
+        this.bufSize = bufSize;
     }
 
     @Override

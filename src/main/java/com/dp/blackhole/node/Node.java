@@ -3,6 +3,7 @@ package com.dp.blackhole.node;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
@@ -64,6 +65,8 @@ public abstract class Node {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (InterruptedException e) {
+                running = false;
             } finally {
                 try {
                   Thread.sleep(3000);
@@ -75,7 +78,7 @@ public abstract class Node {
         }
     }
     
-    protected void loopInternal() {
+    protected void loopInternal() throws InterruptedException {
         SelectionKey key = null;
         while (socketChannel.isOpen()) {
             try {
@@ -159,6 +162,9 @@ public abstract class Node {
             } catch (IOException e) {
                 LOG.warn("IOException catched: ", e);
                 closeconnection(key);
+            } catch (InterruptedException e) {
+                closeconnection(key);
+                throw new InterruptedException();
             }
         }
     }
@@ -203,7 +209,7 @@ public abstract class Node {
         onDisconnected();
     }
 
-    protected abstract boolean process(Message msg);
+    protected abstract boolean process(Message msg) throws InterruptedException;
 
     protected void send(Message msg) {
         if (msg.getType() != MessageType.HEARTBEART) {
@@ -217,7 +223,7 @@ public abstract class Node {
         }
     }
 
-    protected void init(String host, int port) throws IOException, ClosedChannelException {
+    protected void init(String host, int port) throws UnknownHostException {
         this.supervisorhost = host;
         this.supervisorport = port;
         

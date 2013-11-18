@@ -5,7 +5,7 @@
 	<groupId>com.dp</groupId>
 	<artifactId>blackhole</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.3</version>
+	<version>1.1.0</version>
 	<name>blackhole</name>
 	<build>
 		<plugins>
@@ -21,7 +21,20 @@
 			</plugin>
 		</plugins>
 	</build>
+	<properties>
+		<env>dev</env>
+	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>com.dianping.lion</groupId>
+			<artifactId>lion-client</artifactId>
+			<version>0.2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.dianping.lion</groupId>
+			<artifactId>lion-${env}</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 		<dependency>
 			<groupId>net.contentobjects.jnotify</groupId>
 			<artifactId>jnotify</artifactId>

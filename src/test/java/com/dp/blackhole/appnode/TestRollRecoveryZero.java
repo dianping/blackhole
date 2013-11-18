@@ -47,7 +47,7 @@ public class TestRollRecoveryZero {
 
     @Before
     public void setUp() throws Exception {
-        appLog = new AppLog(MAGIC, file.getAbsolutePath(), System.currentTimeMillis());
+        appLog = new AppLog(MAGIC, file.getAbsolutePath(), System.currentTimeMillis(), 100);
         SimRecoveryServer server = new SimRecoveryServer(port, header, receives);
         serverThread = new Thread(server);
         serverThread.start();

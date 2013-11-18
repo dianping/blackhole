@@ -22,6 +22,7 @@ import com.dp.blackhole.collectornode.RollIdent;
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
     public static final String HOSTNAME = "localhost";
+    public static final int COLPORT = 11113;
     public static final String SCHEMA = "file://";
     public static final String BASE_PATH = "/tmp/hdfs/";
     public static final String BASE_HDFS_PATH = SCHEMA + BASE_PATH;

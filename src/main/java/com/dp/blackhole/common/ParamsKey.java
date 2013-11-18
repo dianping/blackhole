@@ -7,9 +7,10 @@ public abstract class ParamsKey {
         public static final String BUFFER_SIZE = "BUFFER_SIZE";
     }
     
-    public static class ZKServer {
-        public final static String ZK_HOST_LIST = "ZK_HOST_LIST";
-        public final static String ZK_TIMEOUT = "ZK_TIMEOUT";
+    public static class LionNode {
+        public final static String APPS = "blackhole.apps";
+        public final static String APP_HOSTS_PREFIX = "blackhole.hosts.";
+        public final static String APP_CONF_PREFIX = "blackhole.conf.";
     }
     
     public static class ZNode {

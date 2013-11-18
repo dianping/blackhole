@@ -85,6 +85,7 @@ public class FileListener implements JNotifyListener{
             if (!path2wd.containsKey(watchPath)) {
                 return;
             } else {
+                LOG.info("Unregister watch path " + watchPath);
                 wd = path2wd.get(watchPath);
                 path2wd.remove(watchPath);
                 readerMap.remove(watchPath);
