@@ -15,6 +15,7 @@ import "StreamID.proto";
 import "ConsumerReg.proto";
 import "AssignConsumer.proto";
 import "OffsetCommit.proto";
+import "TopicReport.proto";
 
 message Message {
     enum MessageType {
@@ -39,6 +40,7 @@ message Message {
         CONSUMER_REG = 19;
         ASSIGN_CONSUMER = 20;
         OFFSET_COMMIT = 21;
+        TOPICREPORT = 22;
     }
 
     required MessageType type = 1;
@@ -54,4 +56,5 @@ message Message {
     optional ConsumerReg consumerReg = 11;
     optional AssignConsumer assignConsumer = 12;
     optional OffsetCommit offsetCommit = 13;
+    optional TopicReport topicReport = 14;
 }

@@ -3,7 +3,7 @@ package com.dp.blackhole.common;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dp.blackhole.collectornode.persistent.PersistentManager.reporter.reportEntry;
+import com.dp.blackhole.collectornode.persistent.PersistentManager.reporter.ReportEntry;
 import com.dp.blackhole.common.gen.AppRegPB.AppReg;
 import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
@@ -244,9 +244,9 @@ public class PBwrap {
         return wrapMessage(MessageType.ASSIGN_CONSUMER, builder.build());
     }
     
-    public static Message wrapTopicReport(List<reportEntry> entryList) {
+    public static Message wrapTopicReport(List<ReportEntry> entryList) {
         TopicReport.Builder builder = TopicReport.newBuilder();
-        for (reportEntry entry : entryList) {
+        for (ReportEntry entry : entryList) {
             TopicReport.TopicEntry.Builder entryBuilder = TopicReport.TopicEntry.newBuilder();
             entryBuilder.setTopic(entry.topic);
             entryBuilder.setPartitionId(entry.partition);

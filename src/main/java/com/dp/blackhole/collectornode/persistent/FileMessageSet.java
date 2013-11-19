@@ -27,7 +27,10 @@ public class FileMessageSet implements MessageSet{
 
     @Override
     public int getSize() {
-        // TODO Auto-generated method stub
-        return 0;
+        return length;
     } 
+    
+    public long getOffset () {
+        return offset;
+    }
 }
