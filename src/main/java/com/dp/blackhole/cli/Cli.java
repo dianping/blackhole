@@ -93,6 +93,7 @@ public class Cli extends Node {
             PrintStream out = new PrintStream(System.out);
             out.println("receive reply: ");
             out.println(dumpReply.getReply());
+            out.print("blackhole.cli>");
             break;
         default:
             LOG.error("Illegal message type " + msg.getType());
