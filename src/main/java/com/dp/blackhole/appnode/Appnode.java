@@ -110,7 +110,7 @@ public class Appnode extends Node implements Runnable {
                         + ParamsKey.Appconf.BUFFER_SIZE, appConfRes.getBufferSize());
             }
             if (!checkAllFilesExist()) {
-                return false;
+                Thread.currentThread().interrupt();
             }
             fillUpAppLogsFromConfig();
             registerApps();
@@ -133,7 +133,7 @@ public class Appnode extends Node implements Runnable {
                     .getString(ParamsKey.Appconf.WATCH_FILE);
             File fileForTest = new File(path);
             if (!fileForTest.exists()) {
-                LOG.error("Appnode process start faild, because file " + path + " not found.");
+                LOG.error("Appnode process start faild, because file " + path + " not found. Thread interrupt!");
                 res = false;
             } else {
                 LOG.info("Check file " + path + " ok.");

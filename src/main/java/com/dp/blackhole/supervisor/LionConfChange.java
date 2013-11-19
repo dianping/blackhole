@@ -48,12 +48,12 @@ public class LionConfChange {
             appSet.add(appNames[i]);
             String confString = definitelyGetProperty(ParamsKey.LionNode.APP_CONF_PREFIX + appNames[i]);
             if (confString == null) {
-                LOG.warn("Lose configurations for " + appNames[i]);
+                LOG.error("Lose configurations for " + appNames[i]);
             }
             fillConfMap(appNames[i], confString);
             String hostsString = definitelyGetProperty(ParamsKey.LionNode.APP_HOSTS_PREFIX + appNames[i]);
             if (hostsString == null) {
-                LOG.warn("Lose hosts for " + appNames[i]);
+                LOG.error("Lose hosts for " + appNames[i]);
             }
             fillHostMap(appNames[i], hostsString);
         }
