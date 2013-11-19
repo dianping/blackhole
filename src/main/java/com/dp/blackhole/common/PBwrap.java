@@ -1,8 +1,13 @@
 package com.dp.blackhole.common;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.dp.blackhole.collectornode.persistent.PersistentManager.reporter.reportEntry;
 import com.dp.blackhole.common.gen.AppRegPB.AppReg;
 import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer;
 import com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
@@ -14,6 +19,8 @@ import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
 import com.dp.blackhole.common.gen.StreamIDPB.StreamID;
+import com.dp.blackhole.common.gen.TopicReportPB.TopicReport;
+import com.dp.blackhole.supervisor.PartitionInfo;
 
 public class PBwrap {
     public static Message wrapMessage(MessageType type, Object message) {
@@ -24,6 +31,9 @@ public class PBwrap {
             msg.setNoAvailableNode((NoAvailableNode) message);
             break;
         case HEARTBEART:
+            break;
+        case TOPICREPORT:
+            msg.setTopicReport((TopicReport) message);
             break;
         case APP_REG:
             msg.setAppReg((AppReg) message);
@@ -62,6 +72,11 @@ public class PBwrap {
         case CONSUMER_REG:
             msg.setConsumerReg((ConsumerReg) message);
             break;
+        case ASSIGN_CONSUMER:
+            msg.setAssignConsumer((AssignConsumer) message);
+            break;
+        case OFFSET_COMMIT:
+            msg.setOffsetCommit((OffsetCommit) message);
         default:
         }
         return msg.build();
@@ -212,5 +227,32 @@ public class PBwrap {
         builder.setPartition(partitionName);
         builder.setOffset(offset);
         return wrapMessage(MessageType.OFFSET_COMMIT, builder.build());
+    }
+    
+    public static Message wrapAssignConsumer(String consumerId, String topic, ArrayList<PartitionInfo> partitionInfos) {
+        AssignConsumer.Builder builder = AssignConsumer.newBuilder();
+        builder.setConsumerIdString(consumerId);
+        builder.setTopic(topic);
+        
+        for (PartitionInfo info : partitionInfos) {
+            AssignConsumer.PartitionOffset.Builder infoBuilder = AssignConsumer.PartitionOffset.newBuilder();
+            infoBuilder.setBrokerString(info.getConnection().getHost());
+            infoBuilder.setPartitionName(info.getId());
+            infoBuilder.setOffset(info.getEndOffset());
+            builder.addPartitionOffsets(infoBuilder.build());
+        }
+        return wrapMessage(MessageType.ASSIGN_CONSUMER, builder.build());
+    }
+    
+    public static Message wrapTopicReport(List<reportEntry> entryList) {
+        TopicReport.Builder builder = TopicReport.newBuilder();
+        for (reportEntry entry : entryList) {
+            TopicReport.TopicEntry.Builder entryBuilder = TopicReport.TopicEntry.newBuilder();
+            entryBuilder.setTopic(entry.topic);
+            entryBuilder.setPartitionId(entry.partition);
+            entryBuilder.setOffset(entry.offset);
+            builder.addEntries(entryBuilder.build());
+        }
+        return wrapMessage(MessageType.TOPICREPORT, builder.build());
     }
 }
