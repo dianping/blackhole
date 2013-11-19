@@ -1,0 +1,13 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.common.gen";
+option java_outer_classname = "TopicReportPB";
+
+message TopicReport {
+    message TopicEntry {
+      required string topic = 1;
+      required string partitionId = 2;
+      required int64 offset = 3;
+    }
+    repeated TopicEntry entries = 1;
+}

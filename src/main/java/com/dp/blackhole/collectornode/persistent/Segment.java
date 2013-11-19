@@ -15,7 +15,7 @@ public class Segment {
     int splitThreshold;
     int flushThreshold;
     
-    public Segment(String parent, long offset, boolean verify, boolean readonly, int flushThreshold, int splitThreshold) throws IOException {
+    public Segment(String parent, long offset, boolean verify, boolean readonly, int splitThreshold, int flushThreshold) throws IOException {
         if (!readonly) {
             channel = new RandomAccessFile(getFilePath(parent, offset), "rw").getChannel();
         } else {
@@ -64,7 +64,7 @@ public class Segment {
             sizeBuf.flip();
             int messageSize = sizeBuf.getInt();
             sizeBuf.rewind();
-            if (remaining < messageSize) {
+            if (remaining-4 < messageSize) {
                 break;
             }
             ByteBuffer messageBuf = ByteBuffer.allocate(messageSize);
@@ -128,7 +128,7 @@ public class Segment {
     }
 
     public boolean contains(long offset) {
-        if (offset >= startOffset || offset <= getEndOffset()) {
+        if (offset >= startOffset && offset < getEndOffset()) {
             return true;
         } else {
             return false;

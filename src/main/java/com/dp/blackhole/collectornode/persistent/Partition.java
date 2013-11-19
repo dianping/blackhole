@@ -11,17 +11,26 @@ import java.util.List;
 import com.dp.blackhole.common.Util;
 
 public class Partition {
-    String topic;
-    String id;
+    private String topic;
+    private String id;
     private List<Segment> segments;
-    File dir;
+    private File dir;
     
-    public Partition(String basedir, String _topic, String _id) throws IOException {
+    int splitThreshold;
+    int flushThreshold;
+    
+    public Partition(String basedir, String _topic, String _id, int splitThreshold, int flushThreshold) throws IOException {
         dir = new File(basedir + "/" + _topic + "/" + _id);
         topic = _topic;
         id = _id;
         segments = new ArrayList<Segment>();
+        this.splitThreshold = splitThreshold;
+        this.flushThreshold = flushThreshold;
         loadSegments();
+    }
+    
+    public String getId() {
+        return id;
     }
     
     long getFileOffset(File f) {
@@ -59,13 +68,13 @@ public class Partition {
                 verify = false;
                 readonly = true;
             }
-            Segment segment = new Segment(dir.getAbsolutePath(), getFileOffset(segmentFiles[i]), verify, readonly, PersistentManager.getFlushThreshold(), PersistentManager.getSplitThreshold());
+            Segment segment = new Segment(dir.getAbsolutePath(), getFileOffset(segmentFiles[i]), verify, readonly, splitThreshold, flushThreshold);
             segments.add(segment);
         }
     }
     
     private Segment addSegment(long offset) throws IOException {
-        Segment segment = new Segment(dir.getAbsolutePath(), offset, false, false, PersistentManager.getFlushThreshold(), PersistentManager.getSplitThreshold());
+        Segment segment = new Segment(dir.getAbsolutePath(), offset, false, false, splitThreshold, flushThreshold);
         segments.add(segment);
         return segment;
     }
@@ -89,7 +98,16 @@ public class Partition {
         }
     }
     
-    Segment findSegment(long offset) {
+    public long getEndOffset() {
+        Segment segment = getLastSegment();
+        if (segment == null) {
+            return 0;
+        } else {
+            return segment.getEndOffset();
+        }
+    }
+    
+    public Segment findSegment(long offset) {
         if (segments.size() == 0) {
             return null;
         }
@@ -129,5 +147,9 @@ public class Partition {
             return null;
         }
         return segment.read(offset, length);
+    }
+    
+    List<Segment> getSegments() {
+        return segments;
     }
 }

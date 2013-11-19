@@ -73,8 +73,7 @@ public class ByteBufferMessageSet implements MessageSet{
         
         @Override
         public void remove() {
-            // TODO Auto-generated method stub
-            
+            throw new UnsupportedOperationException();
         }
         
     }
