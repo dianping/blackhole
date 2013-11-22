@@ -74,6 +74,8 @@ public class PBwrap {
         case DUMPREPLY:
             msg.setDumpReply((DumpReply) message);
             break;
+        case LISTAPPS:
+            break;
         default:
         }
         return msg.build();
@@ -239,5 +241,9 @@ public class PBwrap {
         DumpReply.Builder builder = DumpReply.newBuilder();
         builder.setReply(dumpReply);
         return wrapMessage(MessageType.DUMPREPLY, builder.build());
+    }
+
+    public static Message wrapListApps() {
+        return wrapMessage(MessageType.LISTAPPS, null);
     }
 }

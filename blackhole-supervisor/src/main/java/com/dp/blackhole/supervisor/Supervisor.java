@@ -15,8 +15,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.SortedSet;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -381,8 +383,6 @@ public class Supervisor {
         sb.append("print streamIdMap:\n");
         for (Entry<StreamId, Stream> entry : streamIdMap.entrySet()) {
             sb.append("<")
-            .append(entry.getKey())
-            .append(", ")
             .append(entry.getValue())
             .append(">")
             .append("\n");
@@ -403,8 +403,6 @@ public class Supervisor {
         sb.append("print appNodes:\n");
         for(Entry<String, Connection> entry : appNodes.entrySet()) {
             sb.append("<")
-            .append(entry.getKey())
-            .append(", ")
             .append(entry.getValue())
             .append(">")
             .append("\n");
@@ -414,8 +412,6 @@ public class Supervisor {
         sb.append("print collectorNodes:\n");
         for(Entry<String, Connection> entry : collectorNodes.entrySet()) {
             sb.append("<")
-            .append(entry.getKey())
-            .append(", ")
             .append(entry.getValue())
             .append(">")
             .append("\n");
@@ -451,6 +447,38 @@ public class Supervisor {
         Message message = PBwrap.wrapDumpReply(dumpconf);
         send(from, message);
     }
+
+    public void listApps(Connection from) {
+        StringBuilder sb = new StringBuilder();
+        SortedSet<String> appNameSet = new TreeSet<String>();
+        sb.append("list apps:\n");
+        sb.append("############################## dump ##############################\n");
+        
+        for(Entry<StreamId, Stream> entry : streamIdMap.entrySet()) {
+            String streamIdString = entry.getKey().toString();
+            int endIndex = streamIdString.indexOf('@');
+            if (endIndex == -1) {
+                continue;
+            }
+            String appName = streamIdString.substring(0, endIndex);
+            appNameSet.add(appName);            
+        }
+        for (String appNameInOrder : appNameSet) {
+            sb.append("<")
+            .append(appNameInOrder)
+            .append(">")
+            .append("\n");
+        }
+        sb.append("\n");
+        sb.append("##################################################################");
+        
+        String listApps = sb.toString();
+        LOG.info(listApps);
+        Message message = PBwrap.wrapDumpReply(listApps);
+        send(from, message);
+    }
+    
+    
 
     private void handleRetireStream(StreamID streamId) {
         StreamId id = new StreamId(streamId.getAppName(), streamId.getAppServer());
@@ -599,7 +627,7 @@ public class Supervisor {
         }
         
         synchronized (stages) {
-            long failRollTs = Util.getRollTs(failure.getFailTs(), stream.period);
+            long failRollTs = Util.getCurrentRollTs(failure.getFailTs(), stream.period);
             Stage failstage = null;
             for (Stage s : stages) {
                 if (s.rollTs == failRollTs) {
@@ -766,9 +794,20 @@ public class Supervisor {
                             current = stage;
                         }
                     }
-                    if (current == null) {
-                        LOG.error("Stage not found: " + stream + " rollTs " + msg.getRollTs());
-                        return;
+                    if (current == null) {//TODO
+                        LOG.error("Stages may missed from stage:" + stages.get(stages.size() - 1) 
+                                + " to before stage:" + msg.getRollTs());
+                        current = new Stage();
+                        current.app = stream.app;
+                        current.apphost = stream.appHost;
+                        current.collectorhost = from.getHost();
+                        current.cleanstart = true;
+                        current.rollTs = msg.getRollTs();
+                        current.status = Stage.UPLOADING;
+                        current.issuelist = new ArrayList<Issue>();
+                        current.isCurrent = false;
+                        stages.add(current);
+                        doUpload(stream, current, from);
                     } else {
                         if (current.cleanstart == false || current.issuelist.size() != 0) {
                             current.isCurrent = false;
@@ -843,7 +882,7 @@ public class Supervisor {
      */
     private void registerStream(ReadyCollector message, Connection from) {
         long connectedTs = message.getConnectedTs();
-        long currentTs = Util.getRollTs(connectedTs, message.getPeriod());
+        long currentTs = Util.getCurrentRollTs(connectedTs, message.getPeriod());
         
         StreamId id = new StreamId(message.getAppName(), message.getAppServer());
         Stream stream = streamIdMap.get(id);
@@ -986,7 +1025,7 @@ public class Supervisor {
     }
     
     private int getMissedStageCount(Stream stream, long connectedTs) {
-        long rollts = Util.getRollTs(connectedTs, stream.period);
+        long rollts = Util.getCurrentRollTs(connectedTs, stream.period);
         return (int) ((rollts - stream.getlastSuccessTs()) / stream.period / 1000);
     }
     
@@ -1131,6 +1170,9 @@ public class Supervisor {
                 break;
             case DUMPCONF:
                 dumpconf(from);
+                break;
+            case LISTAPPS:
+                listApps(from);
                 break;
             default:
                 LOG.warn("unknown message: " + msg.toString());

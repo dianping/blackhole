@@ -112,7 +112,7 @@ public class Collector implements Runnable {
     }
 
     private RollIdent getRollIdent() {
-        Date time = new Date(Util.getClosestRollTs(Util.getTS(), rollPeriod));
+        Date time = new Date(Util.getLatestRotateRollTs(Util.getTS(), rollPeriod));
         RollIdent roll = new RollIdent();
         roll.app = app;
         roll.period = rollPeriod;

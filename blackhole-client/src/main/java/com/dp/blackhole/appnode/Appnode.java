@@ -144,8 +144,8 @@ public class Appnode extends Node implements Runnable {
     @Override
     public void run() {
         //hard code, please modify to real supervisor address before mvn package
-        String supervisorHost = "localhost";
-        String supervisorPort = "6999";
+        String supervisorHost = "test90.hadoop";
+        String supervisorPort = "6080";
         try {
             init(supervisorHost, Integer.parseInt(supervisorPort));
         } catch (NumberFormatException e) {

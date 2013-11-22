@@ -60,6 +60,10 @@ public class Cli extends Node {
                 Message msg = PBwrap.wrapDumpConf();
                 send(msg);
                 out.println("send message: " + msg);
+            } else if (cmd.equals("listapp")) {
+                Message msg = PBwrap.wrapListApps();
+                send(msg);
+                out.println("send message: " + msg);
             } else if (cmd.equals("quit")) {
                 System.exit(0);
             } else {
