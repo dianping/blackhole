@@ -30,8 +30,8 @@ public class TestRollRecovery {
     public static void setUpBeforeClass() throws Exception {
         appnode = new SimAppnode();
         ConfigKeeper confKeeper = new ConfigKeeper();
-        confKeeper.addRawProperty(MAGIC + ".ROLL_PERIOD", "3600");
-        confKeeper.addRawProperty(MAGIC + ".BUFFER_SIZE", "4096");
+        confKeeper.addRawProperty(MAGIC + ".rollPeriod", "3600");
+        confKeeper.addRawProperty(MAGIC + ".maxLineSize", "1024");
         //build a tmp file
         file = SimAppnode.createTmpFile(MAGIC + "." + SimAppnode.FILE_SUFFIX, SimAppnode.expected);
         file = SimAppnode.createTmpFile(MAGIC, SimAppnode.expected);
@@ -44,7 +44,7 @@ public class TestRollRecovery {
 
     @Before
     public void setUp() throws Exception {
-        appLog = new AppLog(MAGIC, file.getAbsolutePath(), System.currentTimeMillis(), 100);
+        appLog = new AppLog(MAGIC, file.getAbsolutePath(), System.currentTimeMillis(), 1024);
         SimRecoveryServer server = new SimRecoveryServer(port, header, receives);
         serverThread = new Thread(server);
         serverThread.start();

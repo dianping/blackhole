@@ -516,6 +516,10 @@ public final class MessagePB {
        * <code>DUMPREPLY = 23;</code>
        */
       DUMPREPLY(22, 23),
+      /**
+       * <code>LISTAPPS = 24;</code>
+       */
+      LISTAPPS(23, 24),
       ;
 
       /**
@@ -610,6 +614,10 @@ public final class MessagePB {
        * <code>DUMPREPLY = 23;</code>
        */
       public static final int DUMPREPLY_VALUE = 23;
+      /**
+       * <code>LISTAPPS = 24;</code>
+       */
+      public static final int LISTAPPS_VALUE = 24;
 
 
       public final int getNumber() { return value; }
@@ -639,6 +647,7 @@ public final class MessagePB {
           case 21: return NOAVAILABLECONF;
           case 22: return DUMPCONF;
           case 23: return DUMPREPLY;
+          case 24: return LISTAPPS;
           default: return null;
         }
       }
@@ -2955,7 +2964,7 @@ public final class MessagePB {
       "RecoveryRoll.proto\032\024ReadyCollector.proto" +
       "\032\014RollID.proto\032\rFailure.proto\032\025NoAvailab" +
       "leNode.proto\032\016StreamID.proto\032\rConfRes.pr" +
-      "oto\032\017DumpReply.proto\"\260\007\n\007Message\022,\n\004type" +
+      "oto\032\017DumpReply.proto\"\276\007\n\007Message\022,\n\004type" +
       "\030\001 \002(\0162\036.blackhole.Message.MessageType\022!" +
       "\n\006appReg\030\002 \001(\0132\021.blackhole.AppReg\0223\n\017ass" +
       "ignCollector\030\003 \001(\0132\032.blackhole.AssignCol" +
@@ -2968,7 +2977,7 @@ public final class MessagePB {
       ".blackhole.NoAvailableNode\022%\n\010streamId\030\n" +
       " \001(\0132\023.blackhole.StreamID\022#\n\007confRes\030\013 \001" +
       "(\0132\022.blackhole.ConfRes\022\'\n\tdumpReply\030\014 \001(" +
-      "\0132\024.blackhole.DumpReply\"\245\003\n\013MessageType\022" +
+      "\0132\024.blackhole.DumpReply\"\263\003\n\013MessageType\022" +
       "\016\n\nHEARTBEART\020\001\022\013\n\007APP_REG\020\002\022\021\n\rCOLLECTO",
       "R_REG\020\003\022\024\n\020ASSIGN_COLLECTOR\020\004\022\023\n\017READY_C" +
       "OLLECTOR\020\005\022\014\n\010APP_ROLL\020\006\022\017\n\013UPLOAD_ROLL\020" +
@@ -2979,8 +2988,8 @@ public final class MessagePB {
       "L_RECOVERY_ROLL\020\020\022\014\n\010DUMPSTAT\020\021\022\020\n\014RETIR" +
       "ESTREAM\020\022\022\014\n\010CONF_REQ\020\023\022\014\n\010CONF_RES\020\024\022\023\n" +
       "\017NOAVAILABLECONF\020\025\022\014\n\010DUMPCONF\020\026\022\r\n\tDUMP" +
-      "REPLY\020\027B(\n\033com.dp.blackhole.common.genB\t",
-      "MessagePB"
+      "REPLY\020\027\022\014\n\010LISTAPPS\020\030B(\n\033com.dp.blackhol",
+      "e.common.genB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

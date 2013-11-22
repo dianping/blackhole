@@ -23,6 +23,9 @@ import com.dp.blackhole.conf.ConfigKeeper;
 public class LogReader implements Runnable{
     private static final Log LOG = LogFactory.getLog(LogReader.class);
     private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
+    private static final int IN_BUF = 1024 * 8;
+    private static final int SYS_MAX_LINE_SIZE = 1024 * 512;
+
     private AppLog appLog;
     private Appnode node;
     private String collectorServer;
@@ -62,7 +65,7 @@ public class LogReader implements Runnable{
             protocol.sendHead(new DataOutputStream(socket.getOutputStream()), head);
             
             File tailFile = new File(appLog.getTailFile());
-            this.eventWriter = new EventWriter(tailFile, appLog.getBufSize());
+            this.eventWriter = new EventWriter(tailFile, appLog.getMaxLineSize());
             
             if (!node.getListener().registerLogReader(appLog.getTailFile(), this)) {
                 throw new IOException("Failed to register a log reader for " + appLog.getAppName() 
@@ -83,19 +86,27 @@ public class LogReader implements Runnable{
     class EventWriter {
         private final Charset cset;
         private final File file;
-        private final byte inbuf[];
-        private OutputStreamWriter writer;
+        private final byte inbuf[] = new byte[IN_BUF];
+        private final OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
         private RandomAccessFile reader;
+        private final int maxLineSize;
+        private final ByteArrayOutputStream lineBuf;
+        private boolean accept;
         
-        public EventWriter(final File file, final int bufSize) throws IOException {
-            this(file, bufSize, DEFAULT_CHARSET);
+        public EventWriter(final File file, int maxLineSize) throws IOException {
+            this(file, maxLineSize, DEFAULT_CHARSET);
         }
-        public EventWriter(final File file, final int bufSize, Charset cset) throws IOException {
+        public EventWriter(final File file, int maxLineSize, Charset cset) throws IOException {
             this.file = file;
-            this.inbuf = new byte[bufSize];
+            if (maxLineSize > SYS_MAX_LINE_SIZE) {
+                this.maxLineSize = SYS_MAX_LINE_SIZE;
+            } else {
+                this.maxLineSize = maxLineSize;
+            }
             this.cset = cset;
-            writer = new OutputStreamWriter(socket.getOutputStream());
             this.reader = new RandomAccessFile(file, "r");
+            this.lineBuf = new ByteArrayOutputStream(maxLineSize);
+            this.accept = true;
         }
         
         public void processRotate() {
@@ -132,7 +143,6 @@ public class LogReader implements Runnable{
         }
         
         private long readLines(RandomAccessFile reader) throws IOException {
-            ByteArrayOutputStream lineBuf = new ByteArrayOutputStream(64);
             long pos = reader.getFilePointer();
             long rePos = pos; // position to re-read
             int num;
@@ -141,17 +151,26 @@ public class LogReader implements Runnable{
                     final byte ch = inbuf[i];
                     switch (ch) {
                     case '\n':
-                        handleLine(new String(lineBuf.toByteArray(), cset));
+                        if (accept) {
+                            handleLine(new String(lineBuf.toByteArray(), cset));
+                        }
+                        accept = true;
                         lineBuf.reset();
                         rePos = pos + i + 1;
                         break;
                     default:
-                        lineBuf.write(ch);
+                        if (accept) {
+                            lineBuf.write(ch);
+                        }
+                    }
+                    if (accept && lineBuf.size() == maxLineSize) {
+                        LOG.warn("length of this line is longer than maxLineSize " + maxLineSize + ", discard.");
+                        accept = false;
                     }
                 }
                 pos = reader.getFilePointer();
             }
-            closeQuietly(lineBuf); // not strictly necessary
+            lineBuf.reset(); // not strictly necessary
             reader.seek(rePos); // Ensure we can re-read if necessary
             return rePos;
         }
