@@ -536,19 +536,16 @@ public class Supervisor {
         Stream stream = streamIdMap.get(id);
 
         if (stream != null) {
-            // check the stream is active
-            if (!stream.isActive()) {
-                LOG.error("the manual recovery stage must belong to an active stream");
-                return;
-            }
             ArrayList<Stage> stages = Streams.get(stream);
             if (stages != null) {
                 synchronized (stages) {
-                    // do not process exist stage
+                    // process stage missed only
                     for (Stage stage : stages) {
                         if (stage.rollTs == rollID.getRollTs()) {
-                            LOG.error("the manual recovery stage must not exist");
-                            return;
+                            if (stage.status == Stage.MISSED) {
+                                doRecovery(stream, stage);
+                                return;
+                            }
                         }
                     }
                     // create the stage
@@ -589,8 +586,7 @@ public class Supervisor {
                     for (Stage stage : stages) {
                         if (stage.rollTs == rollID.getRollTs()) {
                             LOG.error("stage " + stage + " cannot be recovered");
-                            stages.remove(stage);
-                            stageConnectionMap.remove(stage);
+                            stage.status = Stage.MISSED;
                             break;
                         }
                     }
@@ -794,20 +790,27 @@ public class Supervisor {
                             current = stage;
                         }
                     }
-                    if (current == null) {//TODO
+                    if (current == null) {
                         LOG.error("Stages may missed from stage:" + stages.get(stages.size() - 1) 
                                 + " to before stage:" + msg.getRollTs());
-                        current = new Stage();
-                        current.app = stream.app;
-                        current.apphost = stream.appHost;
-                        current.collectorhost = from.getHost();
-                        current.cleanstart = true;
-                        current.rollTs = msg.getRollTs();
-                        current.status = Stage.UPLOADING;
-                        current.issuelist = new ArrayList<Issue>();
-                        current.isCurrent = false;
-                        stages.add(current);
-                        doUpload(stream, current, from);
+                        int missedStageCount = getMissedStageCount(stream, msg.getRollTs());
+                        LOG.info("need recovery missed stages: " + missedStageCount);
+                        Stage oldcurrent = stages.get(stages.size() - 1);
+                        stages.remove(oldcurrent);
+                        oldcurrent.isCurrent = false;
+                        Issue issue = new Issue();
+                        issue.ts = oldcurrent.rollTs;
+                        issue.desc = "log discontinuous";
+                        ArrayList<Stage> missedStages = getMissedStages(stream, missedStageCount, issue);
+                        for (Stage stage : missedStages) {
+                            LOG.info("processing missed stages: " + stage);
+                            // check whether it is missed
+                            if (stage.isCurrent()) {
+                                current = stage;
+                            }
+                            doRecovery(stream, stage);
+                            stages.add(stage);
+                        }
                     } else {
                         if (current.cleanstart == false || current.issuelist.size() != 0) {
                             current.isCurrent = false;
@@ -1266,8 +1269,8 @@ public class Supervisor {
                 return;
             }
             String period = context.getString(ParamsKey.Appconf.ROLL_PERIOD);
-            String bufSize = context.getString(ParamsKey.Appconf.BUFFER_SIZE);
-            AppConfRes appConfRes = PBwrap.wrapAppConfRes(appName, watchFile, period, bufSize);
+            String maxLineSize = context.getString(ParamsKey.Appconf.MAX_LINE_SIZE);
+            AppConfRes appConfRes = PBwrap.wrapAppConfRes(appName, watchFile, period, maxLineSize);
             appConfResList.add(appConfRes);
         }
         message = PBwrap.wrapConfRes(appConfResList);

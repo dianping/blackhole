@@ -4,17 +4,17 @@ public class AppLog {
     private String appName;
     private String tailFile;
     private long createTime;
-    private int bufSize;
+    private int maxLineSize;
     
-    public AppLog(String appName, String tailFile, int bufSize) {
-        this(appName, tailFile, System.currentTimeMillis(), bufSize);
+    public AppLog(String appName, String tailFile, int maxLineSize) {
+        this(appName, tailFile, System.currentTimeMillis(), maxLineSize);
     }
     
-    public AppLog(String appName, String tailFile, long createTime, int bufSize) {
+    public AppLog(String appName, String tailFile, long createTime, int maxLineSize) {
         this.appName = appName;
         this.tailFile = tailFile;
         this.createTime = createTime;
-        this.bufSize = bufSize;
+        this.maxLineSize = maxLineSize;
     }
 
     public String getAppName() {
@@ -37,12 +37,12 @@ public class AppLog {
         return createTime;
     }
 
-    public int getBufSize() {
-        return bufSize;
+    public int getMaxLineSize() {
+        return maxLineSize;
     }
 
-    public void setBufSize(int bufSize) {
-        this.bufSize = bufSize;
+    public void setMaxLineSize(int maxLineSize) {
+        this.maxLineSize = maxLineSize;
     }
 
     @Override
@@ -72,6 +72,7 @@ public class AppLog {
     @Override
     public String toString() {
         return "AppLog [appName=" + appName + ", tailFile=" + tailFile
-                + ", createTime=" + createTime + "]";
+                + ", createTime=" + createTime + ", maxLineSize=" + maxLineSize
+                + "]";
     }
 }

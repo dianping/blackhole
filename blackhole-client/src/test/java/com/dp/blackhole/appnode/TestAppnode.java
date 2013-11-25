@@ -20,9 +20,9 @@ public class TestAppnode {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         ConfigKeeper conf = new ConfigKeeper();
-        conf.addRawProperty(MAGIC+".WATCH_FILE", "/tmp/" + MAGIC + ".log");
-        conf.addRawProperty(MAGIC+".ROLL_PERIOD", "3600");
-        conf.addRawProperty(MAGIC+".BUFFER_SIZE", "4096");
+        conf.addRawProperty(MAGIC+".watchLog", "/tmp/" + MAGIC + ".log");
+        conf.addRawProperty(MAGIC+".rollPeriod", "3600");
+        conf.addRawProperty(MAGIC+".maxLineSize", "1024");
         File tailFile = new File("/tmp/" + MAGIC + ".log");
         tailFile.createNewFile();
         tailFile.deleteOnExit();

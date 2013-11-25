@@ -210,15 +210,15 @@ public class PBwrap {
         return wrapMessage(MessageType.CONF_REQ, null);
     }
     
-    public static AppConfRes wrapAppConfRes (String appName, String watchFile, String period, String bufSize) {
+    public static AppConfRes wrapAppConfRes (String appName, String watchFile, String period, String maxLineSize) {
         AppConfRes.Builder builder = AppConfRes.newBuilder();
         builder.setAppName(appName);
         builder.setWatchFile(watchFile);
         if (period != null) {
             builder.setPeriod(period);
         }
-        if (bufSize != null) {
-            builder.setBufferSize(bufSize);
+        if (maxLineSize != null) {
+            builder.setMaxLineSize(maxLineSize);
         }
         return builder.build();
     }

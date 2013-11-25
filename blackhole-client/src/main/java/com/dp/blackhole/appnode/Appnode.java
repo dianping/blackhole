@@ -106,7 +106,7 @@ public class Appnode extends Node implements Runnable {
                 confKeeper.addRawProperty(appConfRes.getAppName() + "."
                         + ParamsKey.Appconf.ROLL_PERIOD, appConfRes.getPeriod());
                 confKeeper.addRawProperty(appConfRes.getAppName() + "."
-                        + ParamsKey.Appconf.BUFFER_SIZE, appConfRes.getBufferSize());
+                        + ParamsKey.Appconf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
             }
             if (!checkAllFilesExist()) {
                 Thread.currentThread().interrupt();
@@ -144,8 +144,8 @@ public class Appnode extends Node implements Runnable {
     @Override
     public void run() {
         //hard code, please modify to real supervisor address before mvn package
-        String supervisorHost = "test90.hadoop";
-        String supervisorPort = "6080";
+        String supervisorHost = "localhost";
+        String supervisorPort = "6999";
         try {
             init(supervisorHost, Integer.parseInt(supervisorPort));
         } catch (NumberFormatException e) {
@@ -169,9 +169,9 @@ public class Appnode extends Node implements Runnable {
         for (String appName : ConfigKeeper.configMap.keySet()) {
             String path = ConfigKeeper.configMap.get(appName)
                     .getString(ParamsKey.Appconf.WATCH_FILE);
-            int bufSize = Integer.parseInt(ConfigKeeper.configMap.get(appName)
-                    .getString(ParamsKey.Appconf.BUFFER_SIZE));
-            AppLog appLog = new AppLog(appName, path, bufSize);
+            int maxLineSize = Integer.parseInt(ConfigKeeper.configMap.get(appName)
+                    .getString(ParamsKey.Appconf.MAX_LINE_SIZE));
+            AppLog appLog = new AppLog(appName, path, maxLineSize);
             appLogs.put(appName, appLog);
         }
     }
