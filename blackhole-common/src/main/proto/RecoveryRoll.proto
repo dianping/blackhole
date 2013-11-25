@@ -1,0 +1,11 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.common.gen";
+option java_outer_classname = "RecoveryRollPB";
+
+message RecoveryRoll {
+    required string app_name = 1;
+    required string collector_server = 2;
+    required int32 collector_port = 3;
+    required int64 roll_ts = 4;
+}

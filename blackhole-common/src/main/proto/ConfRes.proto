@@ -1,0 +1,14 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.common.gen";
+option java_outer_classname = "ConfResPB";
+
+message ConfRes{
+    message AppConfRes {
+        required string app_name = 1;
+        required string watch_file = 2;
+        required string period = 3 [default = "3600"];
+        optional string max_line_size = 4 [default = "65536"];
+    }
+    repeated AppConfRes appConfRes = 1;
+}

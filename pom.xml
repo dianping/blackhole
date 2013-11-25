@@ -1,42 +1,85 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
-	<groupId>com.dp</groupId>
+	<groupId>com.dianping</groupId>
 	<artifactId>blackhole</artifactId>
-	<packaging>jar</packaging>
-	<version>1.0.3</version>
+	<packaging>pom</packaging>
+	<version>1.1.0-SNAPSHOT</version>
 	<name>blackhole</name>
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.16</version>
+				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<forkCount>1</forkCount>
-					<reuseForks>false</reuseForks>
-					<workingDirectory>target</workingDirectory>
+					<source>1.6</source>
+					<target>1.6</target>
+					<encoding>UTF-8</encoding>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
+	<modules>
+		<module>blackhole-client</module>
+		<module>blackhole-common</module>
+		<module>blackhole-supervisor</module>
+		<module>blackhole-cli</module>
+		<module>blackhole-collector</module>
+	</modules>
+	<distributionManagement>
+		<repository>
+			<id>dianping.repo</id>
+			<name>Dian Ping internal repository for released artifacts</name>
+			<url>http://mvn.dianpingoa.com/dianping-releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>dianping.repo.snapshots</id>
+			<name>mvn.dianpingoa.com-snapshots</name>
+			<url>http://mvn.dianpingoa.com/dianping-snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>lackhole-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>blackhole-common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>blackhole-supervisor</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>blackhole-cli</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>blackhole-collector</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
-		<dependency>
-			<groupId>net.contentobjects.jnotify</groupId>
-			<artifactId>jnotify</artifactId>
-			<version>0.94-dp</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.protobuf</groupId>
-			<artifactId>protobuf-java</artifactId>
-			<version>2.5.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.dp.cosmos</groupId>
-			<artifactId>hadoop-core</artifactId>
-			<version>1.0.3.0</version>
-		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
