@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -79,6 +80,15 @@ public class Cli extends Node {
                 Message msg = PBwrap.wrapListApps();
                 send(msg);
                 out.println("send message: " + msg);
+            } else if (cmd.startsWith("rmconf")) {
+                String[] tokens = getTokens(cmd);
+                String appName = tokens[1];
+                ArrayList<String> appServers = new ArrayList<String>();
+                for (int i = 2; i < tokens.length; i++) {
+                    appServers.add(tokens[i]);
+                }
+                Message msg = PBwrap.wrapRemoveConf(appName, appServers);
+                send(msg);
             } else if (cmd.equals("quit")) {
                 System.exit(0);
             } else {

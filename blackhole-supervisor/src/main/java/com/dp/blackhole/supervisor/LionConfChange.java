@@ -1,7 +1,6 @@
 package com.dp.blackhole.supervisor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -107,14 +106,18 @@ public class LionConfChange {
     private synchronized void fillHostMap(String appName, String hostsValue) {
         String[] hosts = Util.getStringListOfLionValue(hostsValue);
         if (hosts != null) {
-            appToHosts.put(appName, Arrays.asList(hosts));
+            LinkedList<String> list = new LinkedList<String>();
+            for (int i = 0; i < hosts.length; i++) {
+                list.add(hosts[i]);
+            }
+            appToHosts.put(appName, list);
             for (int i = 0; i < hosts.length; i++) {
                 if (hosts[i].trim().length() == 0) {
                     continue;
                 }
                 List<String> appNamesInOneHost;
                 if ((appNamesInOneHost = hostToAppNames.get(hosts[i].trim())) == null) {
-                    appNamesInOneHost = new ArrayList<String>();
+                    appNamesInOneHost = new LinkedList<String>();
                     hostToAppNames.put(hosts[i].trim(), appNamesInOneHost);
                 }
                 appNamesInOneHost.add(appName);
@@ -161,6 +164,55 @@ public class LionConfChange {
         return sb.toString();
     }
     
+    public void removeConf(String appName, List<String> appServers) {
+        if (appSet.contains(appName)) {
+            List<String> hostsOfOneApp = appToHosts.get(appName);
+            if (appServers.isEmpty()) {
+                appSet.remove(appName);
+                appToHosts.remove(appName);
+                ConfigKeeper.configMap.remove(appName);
+                for (String host : hostsOfOneApp) {
+                    List<String> appNamesInOneHost = hostToAppNames.get(host);
+                    int index = indexOf(appName, appNamesInOneHost);
+                    if (index != -1) {
+                        appNamesInOneHost.remove(index);
+                        LOG.info("remove "+ appName + " form hostToAppNames for " + host);
+                    } else {
+                        LOG.warn(appName + " in appNamesInOneHost had been removed before.");
+                    }
+                }
+            } else {
+                for (String server : appServers) {
+                    List<String> appNamesInOneHost = hostToAppNames.get(server);
+                    int index = indexOf(appName, appNamesInOneHost);
+                    if (index != -1) {
+                        appNamesInOneHost.remove(index);
+                        LOG.info("remove "+ appName + " form hostToAppNames for " + server);
+                    } else {
+                        LOG.error("Could not find app: " + appName + " in appNamesInOneHost. It should not happen.");
+                    }
+                    index = indexOf(server, hostsOfOneApp);
+                    if (index != -1) {
+                        hostsOfOneApp.remove(index);
+                        LOG.info("remove server " + server + " form appToHosts for " + appName);
+                    } else {
+                        LOG.error("Could not find server: " + server + " in hostsOfOneApp. It should not happen.");
+                    }
+                }
+            }
+        }
+    }
+    
+    private int indexOf(String needToRemove, List<String> list) {
+        int index = 0;
+        for (String element : list) {
+            if (needToRemove.equals(element))
+                return index;
+            index++;
+        }
+        return -1;
+    }
+
     class AppsChangeListener implements ConfigChange {
     
         @Override

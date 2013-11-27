@@ -26,12 +26,14 @@ import com.dp.blackhole.node.Node;
 public class Appnode extends Node implements Runnable {
     private static final Log LOG = LogFactory.getLog(Appnode.class);
     private ExecutorService pool;
+    private ExecutorService recoveryThreadPool;
     private FileListener listener;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
     
     public Appnode() {
         pool = Executors.newCachedThreadPool();
+        recoveryThreadPool = Executors.newFixedThreadPool(2);
     }
     
     @Override
@@ -61,7 +63,7 @@ public class Appnode extends Node implements Runnable {
                 collectorServer = recoveryRoll.getCollectorServer();
                 collectorPort =  recoveryRoll.getCollectorPort();
                 RollRecovery recovery = new RollRecovery(this, collectorServer, collectorPort, appLog, rollTs);
-                pool.execute(recovery);
+                recoveryThreadPool.execute(recovery);
                 return true;
             } else {
                 LOG.error("AppName [" + recoveryRoll.getAppName()
@@ -144,7 +146,7 @@ public class Appnode extends Node implements Runnable {
     @Override
     public void run() {
         //hard code, please modify to real supervisor address before mvn package
-        String supervisorHost = "localhost";
+        String supervisorHost = "test90.hadoop";
         String supervisorPort = "6999";
         try {
             init(supervisorHost, Integer.parseInt(supervisorPort));
@@ -169,8 +171,8 @@ public class Appnode extends Node implements Runnable {
         for (String appName : ConfigKeeper.configMap.keySet()) {
             String path = ConfigKeeper.configMap.get(appName)
                     .getString(ParamsKey.Appconf.WATCH_FILE);
-            int maxLineSize = Integer.parseInt(ConfigKeeper.configMap.get(appName)
-                    .getString(ParamsKey.Appconf.MAX_LINE_SIZE));
+            int maxLineSize = ConfigKeeper.configMap.get(appName)
+                    .getInteger(ParamsKey.Appconf.MAX_LINE_SIZE, 65536);
             AppLog appLog = new AppLog(appName, path, maxLineSize);
             appLogs.put(appName, appLog);
         }

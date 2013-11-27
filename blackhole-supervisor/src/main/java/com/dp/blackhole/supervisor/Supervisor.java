@@ -40,6 +40,7 @@ import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
+import com.dp.blackhole.common.gen.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
 import com.dp.blackhole.common.gen.StreamIDPB.StreamID;
 import com.dp.blackhole.common.Util;
@@ -477,8 +478,12 @@ public class Supervisor {
         Message message = PBwrap.wrapDumpReply(listApps);
         send(from, message);
     }
-    
-    
+
+    public void removeConf(RemoveConf removeConf, Connection from) {
+        String appName = removeConf.getAppName();
+        List<String> appServers = removeConf.getAppServersList();
+        lionConfChange.removeConf(appName, appServers);
+    }
 
     private void handleRetireStream(StreamID streamId) {
         StreamId id = new StreamId(streamId.getAppName(), streamId.getAppServer());
@@ -1176,6 +1181,9 @@ public class Supervisor {
                 break;
             case LISTAPPS:
                 listApps(from);
+                break;
+            case REMOVE_CONF:
+                removeConf(msg.getRemoveConf(), from);
                 break;
             default:
                 LOG.warn("unknown message: " + msg.toString());

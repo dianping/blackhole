@@ -14,6 +14,7 @@ public class StreamId {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((app == null) ? 0 : app.hashCode());
+        result = prime * result + ((appHost == null) ? 0 : appHost.hashCode());
         return result;
     }
 
@@ -30,6 +31,11 @@ public class StreamId {
             if (other.app != null)
                 return false;
         } else if (!app.equals(other.app))
+            return false;
+        if (appHost == null) {
+            if (other.appHost != null)
+                return false;
+        } else if (!appHost.equals(other.appHost))
             return false;
         return true;
     }

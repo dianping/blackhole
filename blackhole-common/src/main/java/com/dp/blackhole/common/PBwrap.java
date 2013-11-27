@@ -1,5 +1,6 @@
 package com.dp.blackhole.common;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.dp.blackhole.common.gen.AppRegPB.AppReg;
@@ -15,6 +16,7 @@ import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode;
 import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
+import com.dp.blackhole.common.gen.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
 import com.dp.blackhole.common.gen.StreamIDPB.StreamID;
 
@@ -75,6 +77,9 @@ public class PBwrap {
             msg.setDumpReply((DumpReply) message);
             break;
         case LISTAPPS:
+            break;
+        case REMOVE_CONF:
+            msg.setRemoveConf((RemoveConf) message);
             break;
         default:
         }
@@ -245,5 +250,12 @@ public class PBwrap {
 
     public static Message wrapListApps() {
         return wrapMessage(MessageType.LISTAPPS, null);
+    }
+
+    public static Message wrapRemoveConf(String appName, ArrayList<String> appServers) {
+        RemoveConf.Builder builder = RemoveConf.newBuilder();
+        builder.setAppName(appName);
+        builder.addAllAppServers(appServers);
+        return wrapMessage(MessageType.REMOVE_CONF, builder.build());
     }
 }
