@@ -20,11 +20,15 @@ public class Message {
         buffer.rewind();
     }
     
+    public int getSize() {
+        return 4 + buffer.capacity();
+    }
+    
     int headSize() {
         return (Byte.SIZE + Long.SIZE)/8;
     }
     
-    void write(ByteBuffer serBuffer) {
+    public void write(ByteBuffer serBuffer) {
         serBuffer.putInt(buffer.limit());
         serBuffer.put(buffer);
     }

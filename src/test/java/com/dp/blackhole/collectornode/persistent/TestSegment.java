@@ -19,7 +19,7 @@ public class TestSegment {
         }
         testdir.mkdirs();
         
-        Segment segment = new Segment(testdir.getAbsolutePath(), 0, false, false, 128, 1024);
+        Segment segment = new Segment(testdir.getAbsolutePath(), 0, false, false, 1024, 108);
         
         ByteBuffer messageBuffer = ByteBuffer.allocate(2048);
         
@@ -36,7 +36,7 @@ public class TestSegment {
         assertTrue(segment.contains(1024));
         assertFalse(segment.contains(1060));
         
-        Segment reloadedsegment = new Segment(testdir.getAbsolutePath(), 0, true, true, 128, 1024);
+        Segment reloadedsegment = new Segment(testdir.getAbsolutePath(), 0, true, true, 1024, 128);
         
         assertEquals(0, reloadedsegment.getStartOffset());
         assertEquals(1040, reloadedsegment.getEndOffset());
@@ -52,7 +52,7 @@ public class TestSegment {
         }
         testdir.mkdirs();
         
-        Segment segment = new Segment(testdir.getAbsolutePath(), 0, false, false, 128, 1024);
+        Segment segment = new Segment(testdir.getAbsolutePath(), 0, false, false, 1024, 128);
         
         ByteBuffer messageBuffer = ByteBuffer.allocate(2048);
         
@@ -70,7 +70,7 @@ public class TestSegment {
         assertTrue(segment.contains(1024));
         assertFalse(segment.contains(1060));
         
-        Segment reloadedsegment = new Segment(testdir.getAbsolutePath(), 0, true, false, 128, 1024);
+        Segment reloadedsegment = new Segment(testdir.getAbsolutePath(), 0, true, false, 1024, 128);
         
         assertEquals(0, reloadedsegment.getStartOffset());
         assertEquals(1024, reloadedsegment.getEndOffset());

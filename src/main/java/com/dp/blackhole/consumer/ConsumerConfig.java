@@ -26,7 +26,7 @@ public class ConsumerConfig {
 
     public ConsumerConfig(Properties props) {
         this.supervisorHost = getString(props, "supervisor.host", "localhost");
-        this.supervisorPort = getInt(props, "supervisor.port", -1);
+        this.supervisorPort = getInt(props, "supervisor.port", 8080);
         this.fetchSize = getInt(props, "fetch.size", 1024 * 1024);//1MB
         this.autoCommit = getBoolean(props, "autocommit.enable", true);
         this.autoCommitIntervalMs = getInt(props, "autocommit.interval.ms", 1000);//1 seconds
@@ -111,7 +111,7 @@ public class ConsumerConfig {
     }
     
     public String getString(Properties props, String name, String defaultValue) {
-        return props.containsKey(name) ? props.getProperty(name) : defaultValue;
+        return props.getProperty(name, defaultValue);
     }
 
     public boolean isBetterOrdered() {

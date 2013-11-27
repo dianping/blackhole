@@ -25,7 +25,7 @@ public class TestPartition {
             Message message = new Message("123".getBytes());
             message.write(messageBuffer);
         }
-        Partition partition = new Partition(testdir.getAbsolutePath(), "test", "localhost-1", 128, 1024);
+        Partition partition = new Partition(testdir.getAbsolutePath(), "test", "localhost-1", 1024, 128);
         
         messageBuffer.flip();
         ByteBufferMessageSet messages1 = new ByteBufferMessageSet(messageBuffer);       
@@ -47,7 +47,7 @@ public class TestPartition {
         assertTrue(new File("/tmp/testPartition/test/localhost-1/2080.blackhole").exists());
         assertEquals(150, new File("/tmp/testPartition/test/localhost-1/2080.blackhole").length());
         
-        Partition reloadedPartition = new Partition(testdir.getAbsolutePath(), "test", "localhost-1", 128, 1024);
+        Partition reloadedPartition = new Partition(testdir.getAbsolutePath(), "test", "localhost-1", 1024, 128);
         List<Segment> segments = reloadedPartition.getSegments();
         assertEquals(0, segments.get(0).getStartOffset());
         assertEquals(1040, segments.get(0).getEndOffset());

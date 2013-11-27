@@ -5,9 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -22,38 +21,40 @@ import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.node.Node;
 
 public class ConsumerConnector extends Node implements Runnable {
-    
-    private final Log LOG = LogFactory.getLog(ConsumerConnector.class);
-    
-    public static final FetchedDataChunk SHUTDOWN_COMMAND = new FetchedDataChunk(null, null, -1);
-    //consumerIdString->[fetcherrunable1, fetcherrunable2]
-    private Map<String, List<FetcherRunnable>> consumerThreadsMap;
-    //consumerIdString->[info1, info2]
-    private Map<String, List<PartitionTopicInfo>> allPartitions;
-    //consumerIdString->stream
-    Map<String, BlockingQueue<FetchedDataChunk>> queues;
-    
-    private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
-    
-    private ConsumerConnector() {}
-    
     private static ConsumerConnector instance = new ConsumerConnector();
     
     public static ConsumerConnector getInstance() {
         return instance;
     }
     
+    private final Log LOG = LogFactory.getLog(ConsumerConnector.class);
+    public volatile boolean initialized = false;
+    
+    // consumerIdString->[fetcherrunable1, fetcherrunable2]
+    private Map<String, List<FetcherRunnable>> consumerThreadsMap;
+    //registered consumers
+    private ConcurrentHashMap<String, Consumer> consumers;   
+    private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
+    
+    private ConsumerConnector() {
+        
+    }
+    
     public void commitOffsets() {
-        for (Map.Entry<String, List<PartitionTopicInfo>> e : allPartitions.entrySet()) {
-            for (PartitionTopicInfo info : e.getValue()) {
-                final long lastChanged = info.getConsumedOffsetChanged().get();
-                if (lastChanged == 0) {
-                    continue;
+        for (Entry<String, List<FetcherRunnable>> e : consumerThreadsMap.entrySet()) {
+            String id = e.getKey();
+            List<FetcherRunnable> fetches = e.getValue();
+            for (FetcherRunnable f : fetches) {
+                for (PartitionTopicInfo info : f.getpartitionInfos()) {
+                    long lastChanged = info.getConsumedOffsetChanged().get();
+                    if (lastChanged == 0) {
+                        continue;
+                    }
+                    long newOffset = info.getConsumedOffset();
+                    updateOffset(id , info.topic, info.partition, newOffset);
+                    info.resetComsumedOffsetChanged(lastChanged);
+                    LOG.debug("Committed " + info.partition + " for topic " + info.topic);
                 }
-                final long newOffset = info.getConsumedOffset();
-                updateOffset(info.topic, info.partition, newOffset);
-                info.resetComsumedOffsetChanged(lastChanged);
-                LOG.debug("Committed " + info.partition + " for topic " + info.topic);
             }
         }
     }
@@ -74,19 +75,15 @@ public class ConsumerConnector extends Node implements Runnable {
                 LOG.debug("Clear consumer=>fetcherthread map. KEY[" + entry.getKey() + "]");
             }
             
-            for (Map.Entry<String, BlockingQueue<FetchedDataChunk>> entry : queues.entrySet()) {
-                LOG.debug("Clear consumer=>queue map. KEY[" + entry.getKey() + "]");
-                entry.getValue().clear();
+            for (Consumer c : consumers.values()) {
+                c.clearQueue();
                 try {
-                    entry.getValue().put(SHUTDOWN_COMMAND);
+                    c.shutdown();
                 } catch (InterruptedException e) {
                     LOG.warn(e.getMessage(), e);
                 }
             }
-            
             consumerThreadsMap.clear();
-            queues.clear();
-            allPartitions.clear();
         } catch (Exception e) {
             LOG.error("error during consumer connector shutdown", e);
         }
@@ -95,9 +92,8 @@ public class ConsumerConnector extends Node implements Runnable {
     
     @Override
     public void run() {
-        consumerThreadsMap = new HashMap<String, List<FetcherRunnable>>();
-        queues = new ConcurrentHashMap<String, BlockingQueue<FetchedDataChunk>>();
-        allPartitions = new HashMap<String, List<PartitionTopicInfo>>();
+        consumerThreadsMap = new ConcurrentHashMap<String, List<FetcherRunnable>>();
+        consumers = new ConcurrentHashMap<String, Consumer>();
         if (Consumer.config.isAutoCommit()) {
             int autoCommitIntervalMs = Consumer.config.getAutoCommitIntervalMs();
             LOG.info("starting auto committer every " + autoCommitIntervalMs + " ms");
@@ -123,13 +119,10 @@ public class ConsumerConnector extends Node implements Runnable {
         switch (type) {
         case ASSIGN_CONSUMER:
             AssignConsumer assign = msg.getAssignConsumer();
-            String consumerIdString = assign.getConsumerIdString();
-            //First, shutdown thread and clear queue.
-            List<FetcherRunnable> threadList;
-            if ((threadList = consumerThreadsMap.get(consumerIdString)) == null) {
-                threadList = new ArrayList<FetcherRunnable>();
-                consumerThreadsMap.put(consumerIdString, threadList);
-            } else {
+            String consumerId = assign.getConsumerIdString();
+            //First, shutdown thread and clear consumer queue.
+            List<FetcherRunnable> threadList = consumerThreadsMap.get(consumerId);
+            if (threadList != null) {
                 for (FetcherRunnable fetcherThread : threadList) {
                     try {
                         fetcherThread.shutdown();
@@ -137,41 +130,41 @@ public class ConsumerConnector extends Node implements Runnable {
                         LOG.warn(e.getMessage(), e);
                     }
                 }
-                threadList.clear();
+                consumerThreadsMap.remove(consumerId);
             }
-            BlockingQueue<FetchedDataChunk> queue;
-            if ((queue = queues.get(consumerIdString)) == null) {
-                LOG.fatal("Queue has been removed unexcepted");
-                throw new RuntimeException("Queue has been removed unexcepted");
+            Consumer c = consumers.get(consumerId);
+            if (c != null) {
+                c.clearQueue();
+            } else {
+                LOG.fatal("unkown consumerId: " + consumerId);
+                return false;
             }
-            queue.clear();
-            allPartitions.remove(consumerIdString);
 
-            //Initialize PartitionTopicInfos and group by broker
-            List<PartitionTopicInfo> partitionListGroupByConsumer = new ArrayList<PartitionTopicInfo>();
-            //brokerString->[partition1, partition2]
-            Map<String, List<PartitionTopicInfo>> brokerPartitionInfoMap = new HashMap<String, List<PartitionTopicInfo>>();
-            List<PartitionTopicInfo> partitionListGroupByBroker;
-            List<PartitionOffset> offsets = assign.getPartitionOffsetsList();
-            for (PartitionOffset partitionOffset : offsets) {
+            //create PartitionTopicInfos and group them by broker and comsumerId
+            Map<String, List<PartitionTopicInfo>> brokerPartitionInfoMap = new HashMap<String, List<PartitionTopicInfo>>();     
+            for (PartitionOffset partitionOffset : assign.getPartitionOffsetsList()) {
+                String topic = assign.getTopic();
                 String brokerString = partitionOffset.getBrokerString();
                 String partitionName = partitionOffset.getPartitionName();
                 long offset = partitionOffset.getOffset();
-                LOG.info(assign.getTopic() + "  " + consumerIdString + " ==> " + brokerString + " -> " + partitionName + " claimming");
-                PartitionTopicInfo info = new PartitionTopicInfo(assign.getTopic(),partitionName, 
-                        brokerString, queue, offset, offset);
-                if ((partitionListGroupByBroker = brokerPartitionInfoMap.get(brokerString)) == null) {
-                    partitionListGroupByBroker = new ArrayList<PartitionTopicInfo>();
-                    brokerPartitionInfoMap.put(brokerString, partitionListGroupByBroker);
+                PartitionTopicInfo info = 
+                        new PartitionTopicInfo(topic, partitionName, brokerString, offset, offset);
+
+                List<PartitionTopicInfo> partitionList = brokerPartitionInfoMap.get(brokerString);
+                if (partitionList == null) {
+                    partitionList = new ArrayList<PartitionTopicInfo>();
+                    brokerPartitionInfoMap.put(brokerString, partitionList);
                 }
-                partitionListGroupByBroker.add(info);
-                partitionListGroupByConsumer.add(info);
+                partitionList.add(info);
             }
-            allPartitions.put(consumerIdString, partitionListGroupByConsumer);
 
             //start a fetcher thread for every broker, fetcher thread contains a NIO client
+            threadList = new ArrayList<FetcherRunnable>();
+            consumerThreadsMap.put(consumerId, threadList);
             for (Map.Entry<String, List<PartitionTopicInfo>> entry : brokerPartitionInfoMap.entrySet()) {
-                FetcherRunnable fetcherThread = new FetcherRunnable(entry.getKey(), entry.getValue());
+                String brokerString = entry.getKey();
+                List<PartitionTopicInfo> pInfoList = entry.getValue();
+                FetcherRunnable fetcherThread = new FetcherRunnable(consumerId, brokerString, pInfoList, c.getDataQueue());
                 threadList.add(fetcherThread);
                 fetcherThread.start();
             }
@@ -179,23 +172,22 @@ public class ConsumerConnector extends Node implements Runnable {
         default:
             LOG.error("Illegal message type " + msg.getType());
         }
-        return false;
+        return true;
     }
 
     /**
      * register consumer data to supervisor
+     * @param consumer 
      */
-    void registerConsumer(final String consumerIdString, final String topic,
-            final int minConsumersInGroup) {
-        BlockingQueue<FetchedDataChunk> queue = new LinkedBlockingQueue<FetchedDataChunk>(Consumer.config.getMaxQueuedChunks());
-        queues.put(consumerIdString, queue);
-        Message message = PBwrap.wrapConsumerReg(consumerIdString, topic, minConsumersInGroup);
-        LOG.info("register consumer to supervisor " + consumerIdString + " => " + topic);
+    void registerConsumer(String topic, String group, String consumerId, Consumer consumer) {
+        consumers.put(consumerId, consumer);
+        Message message = PBwrap.wrapConsumerReg(group, consumerId, topic);
+        LOG.info("register consumer to supervisor " + group + "-" + consumerId + " => " + topic);
         super.send(message);
     }
     
-    void updateOffset(String topic, String partitionName, long offset) {
-        Message message = PBwrap.wrapOffsetCommit(topic, partitionName, offset);
+    void updateOffset(String consumerId, String topic, String partitionName, long offset) {
+        Message message = PBwrap.wrapOffsetCommit(consumerId, topic, partitionName, offset);
         super.send(message);
     }
     

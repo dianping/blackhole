@@ -4,7 +4,7 @@ option java_package = "com.dp.blackhole.common.gen";
 option java_outer_classname = "ConsumerRegPB";
 
 message ConsumerReg {
-    required string consumerIdString = 1;
-    required string topic = 2;
-    optional int32 minConsumersInGroup = 3;
+    required string groupId = 1;  
+    required string consumerId = 2;
+    required string topic = 3;
 }

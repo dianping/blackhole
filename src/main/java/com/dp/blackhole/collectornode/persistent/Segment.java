@@ -140,7 +140,12 @@ public class Segment {
         if (offset + length > endOffset) {
             length = (int) (endOffset - offset);
         }
-        return new FileMessageSet(channel, offset, length);
+        return new FileMessageSet(channel, offset - startOffset, length);
+    }
+    
+    @Override
+    public String toString() {
+       return "segment[" + startOffset + "," + endOffset.get() + "]";
     }
     
 }

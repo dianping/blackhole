@@ -104,7 +104,7 @@ public class PersistentManager {
         }
         
         private void report() {
-            entrylist = new ArrayList();
+            entrylist = new ArrayList<ReportEntry>();
             for (Entry<String, Map<String, Partition>> topicEntry : storage.entrySet()) {
                 String topic = topicEntry.getKey();
                 Map<String, Partition> partitions = topicEntry.getValue();
@@ -124,15 +124,16 @@ public class PersistentManager {
                     }
                 }
             }
-            Publisher.reportPartitionInfo(entrylist);
+            if (entrylist.size() != 0) {
+                Publisher.reportPartitionInfo(entrylist);
+            }
         }
         
         @Override
         public void run() {
             while (true) {
                 try {
-                    Thread.sleep(2000);
-                    System.out.println("report");
+                    Thread.sleep(3000);
                     report();
                 } catch (InterruptedException e) {
                     // TODO Auto-generated catch block

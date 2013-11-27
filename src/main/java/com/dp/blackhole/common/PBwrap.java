@@ -208,21 +208,20 @@ public class PBwrap {
     /**
      * register consumer data to supervisor
      */
-    public static Message wrapConsumerReg(final String consumerIdString, final String topic, 
-            final int minConsumersInGroup) {
+    public static Message wrapConsumerReg(String group, String consumerId, String topic) {
         ConsumerReg.Builder builder = ConsumerReg.newBuilder();
-        builder.setConsumerIdString(consumerIdString);
+        builder.setGroupId(group);
+        builder.setConsumerId(consumerId);
         builder.setTopic(topic);
-        builder.setMinConsumersInGroup(minConsumersInGroup);
         return wrapMessage(MessageType.CONSUMER_REG, builder.build());
     }
 
     /**
      * report committed offset of a partition
      */
-    public static Message wrapOffsetCommit(String topic,
-            String partitionName, long offset) {
+    public static Message wrapOffsetCommit(String consumerId, String topic, String partitionName, long offset) {
         OffsetCommit.Builder builder = OffsetCommit.newBuilder();
+        builder.setConsumerIdString(consumerId);
         builder.setTopic(topic);
         builder.setPartition(partitionName);
         builder.setOffset(offset);
@@ -236,7 +235,7 @@ public class PBwrap {
         
         for (PartitionInfo info : partitionInfos) {
             AssignConsumer.PartitionOffset.Builder infoBuilder = AssignConsumer.PartitionOffset.newBuilder();
-            infoBuilder.setBrokerString(info.getConnection().getHost());
+            infoBuilder.setBrokerString(info.getConnection().getHost()+":2222");
             infoBuilder.setPartitionName(info.getId());
             infoBuilder.setOffset(info.getEndOffset());
             builder.addPartitionOffsets(infoBuilder.build());

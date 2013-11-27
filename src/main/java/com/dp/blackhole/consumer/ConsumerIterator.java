@@ -67,7 +67,7 @@ public class ConsumerIterator implements Iterator<String> {
                     throw new ConsumerTimeoutException("consumer timeout in " + consumerTimeoutMs + " ms");
                 }
             }
-            if (currentDataChunk == ConsumerConnector.SHUTDOWN_COMMAND) {
+            if (currentDataChunk == Consumer.SHUTDOWN_COMMAND) {
                 logger.warn("Now closing the message stream");
                 queue.offer(currentDataChunk);
                 state = State.DONE;
@@ -89,6 +89,7 @@ public class ConsumerIterator implements Iterator<String> {
             item = current.next();
         }
         consumedOffset = item.offset;
+        logger.info(item.message + "  @  " +item.offset);
         return Util.toEvent(item.message);
     }
 
@@ -124,5 +125,6 @@ public class ConsumerIterator implements Iterator<String> {
 
     @Override
     public void remove() {
+        throw new UnsupportedOperationException();
     }
 }

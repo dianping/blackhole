@@ -149,7 +149,7 @@ public class DelegationIOEchoService {
             prop.setProperty("Server.host", "localhost");
             prop.setProperty("Server.port", "2222");
             try {
-                client.init(prop, "echo client");
+                client.init(prop, "echo");
             } catch (ClosedChannelException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -158,24 +158,6 @@ public class DelegationIOEchoService {
                 e.printStackTrace();
             }
         }
-    }
-    
-    private wappedObject sendAndReceive(SocketChannel channel, wappedObject buf)
-            throws IOException {
-        
-        TransferWrap sent = new TransferWrap(buf);
-        
-        while (!sent.complete()) {
-            sent.write(channel);
-        }
-        
-        TransferWrap receive = new TransferWrap(new wappedObjectType());
-        
-        while (!receive.complete()) {
-            receive.read(channel);
-        }
-
-        return (wappedObject) receive.unwrap();
     }
     
     public static void main(String[] args) throws IOException, InterruptedException {
