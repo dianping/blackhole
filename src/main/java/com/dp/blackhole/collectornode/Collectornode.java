@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -20,6 +21,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.SecurityUtil;
 
+import com.dp.blackhole.collectornode.persistent.PersistentManager.reporter.ReportEntry;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
@@ -30,6 +32,9 @@ import com.dp.blackhole.node.Node;
 
 public class Collectornode extends Node {
 
+    private static Collectornode collectorNode;
+    private static Publisher publisher;
+    
     private ExecutorService pool;
     private ServerSocket server;
     private ConcurrentHashMap<RollIdent, File> fileRolls;
@@ -188,6 +193,18 @@ public class Collectornode extends Node {
         acceptor.setDaemon(true);
         acceptor.start();
         
+        // start PublisherService
+        Properties prop1 = new Properties();
+        prop1.setProperty("publisher.storage.dir", "/tmp/realtime");
+        prop1.setProperty("GenServer.port", "2222");
+        Publisher pub = new Publisher(prop1);
+        pub.setDaemon(true);
+        pub.start();
+        
+        publisher = pub;
+        
+        collectorNode = this;
+        
         loop();
         close();
     }
@@ -326,6 +343,18 @@ public class Collectornode extends Node {
         synchronized (collectors) {
             collectors.remove(collector);
         }
+    }
+    
+    public void reportPartitionInfo(List<ReportEntry> entrylist) {
+        send(PBwrap.wrapTopicReport(entrylist));
+    }
+    
+    public static Collectornode getCollectorNode() {
+        return collectorNode;
+    }
+    
+    public static Publisher getPublisher() {
+        return publisher;
     }
     
     /**

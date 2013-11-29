@@ -6,6 +6,7 @@ import java.nio.channels.GatheringByteChannel;
 
 public class FileMessageSet implements MessageSet{
     FileChannel channel;
+    // it is the real offset, the offset in the file
     long offset;
     int length;
     
@@ -20,9 +21,9 @@ public class FileMessageSet implements MessageSet{
     }
 
     @Override
-    public long write(GatheringByteChannel target, int offset, int length)
+    public long write(GatheringByteChannel target, int _offset, int length)
             throws IOException {
-        return channel.transferTo(offset, length, target);
+        return channel.transferTo(offset + _offset, length, target);
     }
 
     @Override

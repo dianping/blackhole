@@ -11,45 +11,50 @@ public final class ConsumerRegPB {
   public interface ConsumerRegOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // required string consumerIdString = 1;
+    // required string groupId = 1;
     /**
-     * <code>required string consumerIdString = 1;</code>
+     * <code>required string groupId = 1;</code>
      */
-    boolean hasConsumerIdString();
+    boolean hasGroupId();
     /**
-     * <code>required string consumerIdString = 1;</code>
+     * <code>required string groupId = 1;</code>
      */
-    java.lang.String getConsumerIdString();
+    java.lang.String getGroupId();
     /**
-     * <code>required string consumerIdString = 1;</code>
+     * <code>required string groupId = 1;</code>
      */
     com.google.protobuf.ByteString
-        getConsumerIdStringBytes();
+        getGroupIdBytes();
 
-    // required string topic = 2;
+    // required string consumerId = 2;
     /**
-     * <code>required string topic = 2;</code>
+     * <code>required string consumerId = 2;</code>
+     */
+    boolean hasConsumerId();
+    /**
+     * <code>required string consumerId = 2;</code>
+     */
+    java.lang.String getConsumerId();
+    /**
+     * <code>required string consumerId = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getConsumerIdBytes();
+
+    // required string topic = 3;
+    /**
+     * <code>required string topic = 3;</code>
      */
     boolean hasTopic();
     /**
-     * <code>required string topic = 2;</code>
+     * <code>required string topic = 3;</code>
      */
     java.lang.String getTopic();
     /**
-     * <code>required string topic = 2;</code>
+     * <code>required string topic = 3;</code>
      */
     com.google.protobuf.ByteString
         getTopicBytes();
-
-    // optional int32 minConsumersInGroup = 3;
-    /**
-     * <code>optional int32 minConsumersInGroup = 3;</code>
-     */
-    boolean hasMinConsumersInGroup();
-    /**
-     * <code>optional int32 minConsumersInGroup = 3;</code>
-     */
-    int getMinConsumersInGroup();
   }
   /**
    * Protobuf type {@code blackhole.ConsumerReg}
@@ -104,17 +109,17 @@ public final class ConsumerRegPB {
             }
             case 10: {
               bitField0_ |= 0x00000001;
-              consumerIdString_ = input.readBytes();
+              groupId_ = input.readBytes();
               break;
             }
             case 18: {
               bitField0_ |= 0x00000002;
-              topic_ = input.readBytes();
+              consumerId_ = input.readBytes();
               break;
             }
-            case 24: {
+            case 26: {
               bitField0_ |= 0x00000004;
-              minConsumersInGroup_ = input.readInt32();
+              topic_ = input.readBytes();
               break;
             }
           }
@@ -157,20 +162,20 @@ public final class ConsumerRegPB {
     }
 
     private int bitField0_;
-    // required string consumerIdString = 1;
-    public static final int CONSUMERIDSTRING_FIELD_NUMBER = 1;
-    private java.lang.Object consumerIdString_;
+    // required string groupId = 1;
+    public static final int GROUPID_FIELD_NUMBER = 1;
+    private java.lang.Object groupId_;
     /**
-     * <code>required string consumerIdString = 1;</code>
+     * <code>required string groupId = 1;</code>
      */
-    public boolean hasConsumerIdString() {
+    public boolean hasGroupId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required string consumerIdString = 1;</code>
+     * <code>required string groupId = 1;</code>
      */
-    public java.lang.String getConsumerIdString() {
-      java.lang.Object ref = consumerIdString_;
+    public java.lang.String getGroupId() {
+      java.lang.Object ref = groupId_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
@@ -178,39 +183,82 @@ public final class ConsumerRegPB {
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
-          consumerIdString_ = s;
+          groupId_ = s;
         }
         return s;
       }
     }
     /**
-     * <code>required string consumerIdString = 1;</code>
+     * <code>required string groupId = 1;</code>
      */
     public com.google.protobuf.ByteString
-        getConsumerIdStringBytes() {
-      java.lang.Object ref = consumerIdString_;
+        getGroupIdBytes() {
+      java.lang.Object ref = groupId_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        consumerIdString_ = b;
+        groupId_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
 
-    // required string topic = 2;
-    public static final int TOPIC_FIELD_NUMBER = 2;
-    private java.lang.Object topic_;
+    // required string consumerId = 2;
+    public static final int CONSUMERID_FIELD_NUMBER = 2;
+    private java.lang.Object consumerId_;
     /**
-     * <code>required string topic = 2;</code>
+     * <code>required string consumerId = 2;</code>
      */
-    public boolean hasTopic() {
+    public boolean hasConsumerId() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>required string topic = 2;</code>
+     * <code>required string consumerId = 2;</code>
+     */
+    public java.lang.String getConsumerId() {
+      java.lang.Object ref = consumerId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          consumerId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string consumerId = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getConsumerIdBytes() {
+      java.lang.Object ref = consumerId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        consumerId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // required string topic = 3;
+    public static final int TOPIC_FIELD_NUMBER = 3;
+    private java.lang.Object topic_;
+    /**
+     * <code>required string topic = 3;</code>
+     */
+    public boolean hasTopic() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required string topic = 3;</code>
      */
     public java.lang.String getTopic() {
       java.lang.Object ref = topic_;
@@ -227,7 +275,7 @@ public final class ConsumerRegPB {
       }
     }
     /**
-     * <code>required string topic = 2;</code>
+     * <code>required string topic = 3;</code>
      */
     public com.google.protobuf.ByteString
         getTopicBytes() {
@@ -243,33 +291,21 @@ public final class ConsumerRegPB {
       }
     }
 
-    // optional int32 minConsumersInGroup = 3;
-    public static final int MINCONSUMERSINGROUP_FIELD_NUMBER = 3;
-    private int minConsumersInGroup_;
-    /**
-     * <code>optional int32 minConsumersInGroup = 3;</code>
-     */
-    public boolean hasMinConsumersInGroup() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    /**
-     * <code>optional int32 minConsumersInGroup = 3;</code>
-     */
-    public int getMinConsumersInGroup() {
-      return minConsumersInGroup_;
-    }
-
     private void initFields() {
-      consumerIdString_ = "";
+      groupId_ = "";
+      consumerId_ = "";
       topic_ = "";
-      minConsumersInGroup_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
-      if (!hasConsumerIdString()) {
+      if (!hasGroupId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasConsumerId()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -285,13 +321,13 @@ public final class ConsumerRegPB {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getConsumerIdStringBytes());
+        output.writeBytes(1, getGroupIdBytes());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getTopicBytes());
+        output.writeBytes(2, getConsumerIdBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeInt32(3, minConsumersInGroup_);
+        output.writeBytes(3, getTopicBytes());
       }
       getUnknownFields().writeTo(output);
     }
@@ -304,15 +340,15 @@ public final class ConsumerRegPB {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getConsumerIdStringBytes());
+          .computeBytesSize(1, getGroupIdBytes());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getTopicBytes());
+          .computeBytesSize(2, getConsumerIdBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(3, minConsumersInGroup_);
+          .computeBytesSize(3, getTopicBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -430,11 +466,11 @@ public final class ConsumerRegPB {
 
       public Builder clear() {
         super.clear();
-        consumerIdString_ = "";
+        groupId_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
-        topic_ = "";
+        consumerId_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
-        minConsumersInGroup_ = 0;
+        topic_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
@@ -467,15 +503,15 @@ public final class ConsumerRegPB {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.consumerIdString_ = consumerIdString_;
+        result.groupId_ = groupId_;
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.topic_ = topic_;
+        result.consumerId_ = consumerId_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
-        result.minConsumersInGroup_ = minConsumersInGroup_;
+        result.topic_ = topic_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -492,25 +528,31 @@ public final class ConsumerRegPB {
 
       public Builder mergeFrom(com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg other) {
         if (other == com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg.getDefaultInstance()) return this;
-        if (other.hasConsumerIdString()) {
+        if (other.hasGroupId()) {
           bitField0_ |= 0x00000001;
-          consumerIdString_ = other.consumerIdString_;
+          groupId_ = other.groupId_;
+          onChanged();
+        }
+        if (other.hasConsumerId()) {
+          bitField0_ |= 0x00000002;
+          consumerId_ = other.consumerId_;
           onChanged();
         }
         if (other.hasTopic()) {
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000004;
           topic_ = other.topic_;
           onChanged();
-        }
-        if (other.hasMinConsumersInGroup()) {
-          setMinConsumersInGroup(other.getMinConsumersInGroup());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
-        if (!hasConsumerIdString()) {
+        if (!hasGroupId()) {
+          
+          return false;
+        }
+        if (!hasConsumerId()) {
           
           return false;
         }
@@ -540,90 +582,164 @@ public final class ConsumerRegPB {
       }
       private int bitField0_;
 
-      // required string consumerIdString = 1;
-      private java.lang.Object consumerIdString_ = "";
+      // required string groupId = 1;
+      private java.lang.Object groupId_ = "";
       /**
-       * <code>required string consumerIdString = 1;</code>
+       * <code>required string groupId = 1;</code>
        */
-      public boolean hasConsumerIdString() {
+      public boolean hasGroupId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required string consumerIdString = 1;</code>
+       * <code>required string groupId = 1;</code>
        */
-      public java.lang.String getConsumerIdString() {
-        java.lang.Object ref = consumerIdString_;
+      public java.lang.String getGroupId() {
+        java.lang.Object ref = groupId_;
         if (!(ref instanceof java.lang.String)) {
           java.lang.String s = ((com.google.protobuf.ByteString) ref)
               .toStringUtf8();
-          consumerIdString_ = s;
+          groupId_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
         }
       }
       /**
-       * <code>required string consumerIdString = 1;</code>
+       * <code>required string groupId = 1;</code>
        */
       public com.google.protobuf.ByteString
-          getConsumerIdStringBytes() {
-        java.lang.Object ref = consumerIdString_;
+          getGroupIdBytes() {
+        java.lang.Object ref = groupId_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          consumerIdString_ = b;
+          groupId_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
       /**
-       * <code>required string consumerIdString = 1;</code>
+       * <code>required string groupId = 1;</code>
        */
-      public Builder setConsumerIdString(
+      public Builder setGroupId(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000001;
-        consumerIdString_ = value;
+        groupId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string consumerIdString = 1;</code>
+       * <code>required string groupId = 1;</code>
        */
-      public Builder clearConsumerIdString() {
+      public Builder clearGroupId() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        consumerIdString_ = getDefaultInstance().getConsumerIdString();
+        groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
       }
       /**
-       * <code>required string consumerIdString = 1;</code>
+       * <code>required string groupId = 1;</code>
        */
-      public Builder setConsumerIdStringBytes(
+      public Builder setGroupIdBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000001;
-        consumerIdString_ = value;
+        groupId_ = value;
         onChanged();
         return this;
       }
 
-      // required string topic = 2;
-      private java.lang.Object topic_ = "";
+      // required string consumerId = 2;
+      private java.lang.Object consumerId_ = "";
       /**
-       * <code>required string topic = 2;</code>
+       * <code>required string consumerId = 2;</code>
        */
-      public boolean hasTopic() {
+      public boolean hasConsumerId() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required string topic = 2;</code>
+       * <code>required string consumerId = 2;</code>
+       */
+      public java.lang.String getConsumerId() {
+        java.lang.Object ref = consumerId_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          consumerId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string consumerId = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getConsumerIdBytes() {
+        java.lang.Object ref = consumerId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          consumerId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string consumerId = 2;</code>
+       */
+      public Builder setConsumerId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        consumerId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string consumerId = 2;</code>
+       */
+      public Builder clearConsumerId() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        consumerId_ = getDefaultInstance().getConsumerId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string consumerId = 2;</code>
+       */
+      public Builder setConsumerIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        consumerId_ = value;
+        onChanged();
+        return this;
+      }
+
+      // required string topic = 3;
+      private java.lang.Object topic_ = "";
+      /**
+       * <code>required string topic = 3;</code>
+       */
+      public boolean hasTopic() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required string topic = 3;</code>
        */
       public java.lang.String getTopic() {
         java.lang.Object ref = topic_;
@@ -637,7 +753,7 @@ public final class ConsumerRegPB {
         }
       }
       /**
-       * <code>required string topic = 2;</code>
+       * <code>required string topic = 3;</code>
        */
       public com.google.protobuf.ByteString
           getTopicBytes() {
@@ -653,70 +769,37 @@ public final class ConsumerRegPB {
         }
       }
       /**
-       * <code>required string topic = 2;</code>
+       * <code>required string topic = 3;</code>
        */
       public Builder setTopic(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000004;
         topic_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string topic = 2;</code>
+       * <code>required string topic = 3;</code>
        */
       public Builder clearTopic() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000004);
         topic_ = getDefaultInstance().getTopic();
         onChanged();
         return this;
       }
       /**
-       * <code>required string topic = 2;</code>
+       * <code>required string topic = 3;</code>
        */
       public Builder setTopicBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000004;
         topic_ = value;
-        onChanged();
-        return this;
-      }
-
-      // optional int32 minConsumersInGroup = 3;
-      private int minConsumersInGroup_ ;
-      /**
-       * <code>optional int32 minConsumersInGroup = 3;</code>
-       */
-      public boolean hasMinConsumersInGroup() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      /**
-       * <code>optional int32 minConsumersInGroup = 3;</code>
-       */
-      public int getMinConsumersInGroup() {
-        return minConsumersInGroup_;
-      }
-      /**
-       * <code>optional int32 minConsumersInGroup = 3;</code>
-       */
-      public Builder setMinConsumersInGroup(int value) {
-        bitField0_ |= 0x00000004;
-        minConsumersInGroup_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional int32 minConsumersInGroup = 3;</code>
-       */
-      public Builder clearMinConsumersInGroup() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        minConsumersInGroup_ = 0;
         onChanged();
         return this;
       }
@@ -746,11 +829,10 @@ public final class ConsumerRegPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\021ConsumerReg.proto\022\tblackhole\"S\n\013Consum" +
-      "erReg\022\030\n\020consumerIdString\030\001 \002(\t\022\r\n\005topic" +
-      "\030\002 \002(\t\022\033\n\023minConsumersInGroup\030\003 \001(\005B,\n\033c" +
-      "om.dp.blackhole.common.genB\rConsumerRegP" +
-      "B"
+      "\n\021ConsumerReg.proto\022\tblackhole\"A\n\013Consum" +
+      "erReg\022\017\n\007groupId\030\001 \002(\t\022\022\n\nconsumerId\030\002 \002" +
+      "(\t\022\r\n\005topic\030\003 \002(\tB,\n\033com.dp.blackhole.co" +
+      "mmon.genB\rConsumerRegPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -762,7 +844,7 @@ public final class ConsumerRegPB {
           internal_static_blackhole_ConsumerReg_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConsumerReg_descriptor,
-              new java.lang.String[] { "ConsumerIdString", "Topic", "MinConsumersInGroup", });
+              new java.lang.String[] { "GroupId", "ConsumerId", "Topic", });
           return null;
         }
       };

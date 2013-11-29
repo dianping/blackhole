@@ -12,6 +12,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Map.Entry;
@@ -27,13 +28,17 @@ import com.dp.blackhole.common.gen.AppRegPB.AppReg;
 import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.Connection;
 import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
+import com.dp.blackhole.common.gen.OffsetCommitPB.OffsetCommit;
 import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
 import com.dp.blackhole.common.gen.StreamIDPB.StreamID;
+import com.dp.blackhole.common.gen.TopicReportPB.TopicReport;
+import com.dp.blackhole.common.gen.TopicReportPB.TopicReport.TopicEntry;
 import com.dp.blackhole.common.Util;
 
 public class Supervisor {
@@ -52,6 +57,10 @@ public class Supervisor {
     private ConcurrentHashMap<String, Connection> appNodes;
     private ConcurrentHashMap<Stream, ArrayList<Stage>> Streams;
     private ConcurrentHashMap<StreamId, Stream> streamIdMap;
+    
+    private ConcurrentHashMap<String, ConcurrentHashMap<String ,PartitionInfo>> topics;
+    private ConcurrentHashMap<ConsumerGroup, ConcurrentHashMap<String, Consumer>> consumerGroups;
+    private ConcurrentHashMap<Connection, Consumer> consumerConnectionMap;
     
     private class Msg {
         Message msg;
@@ -169,7 +178,7 @@ public class Supervisor {
                         if (data.remaining() == 0) {
                             data.flip();
                             Message msg = Message.parseFrom(data.array());
-                            if (msg.getType() != MessageType.HEARTBEART) {
+                            if (msg.getType() != MessageType.HEARTBEART && msg.getType() != MessageType.TOPICREPORT) {
                                 LOG.debug("receive message from " + connection.getHost() +" :" + msg);
                             }
                             Msg event = new Msg();
@@ -185,6 +194,105 @@ public class Supervisor {
                 closeConnection((Connection) key.attachment());
             }
         }
+    }
+    
+    private void handleTopicReport(TopicReport report, Connection from) {
+        for (TopicEntry entry : report.getEntriesList()) {
+            String topic = entry.getTopic();
+            String partitionId = entry.getPartitionId();
+            ConcurrentHashMap<String, PartitionInfo> partitionInfos = topics.get(topic);
+            if (partitionInfos == null) {
+                partitionInfos = new ConcurrentHashMap<String, PartitionInfo>();
+                topics.put(topic, partitionInfos);
+            }
+            PartitionInfo partitionInfo = partitionInfos.get(partitionId);
+            if (partitionInfo == null) {
+                partitionInfo = new PartitionInfo(partitionId, from, entry.getOffset());
+                partitionInfos.put(partitionId, partitionInfo);
+            } else {
+                partitionInfo.setEndOffset(entry.getOffset());
+            } 
+        }
+    }
+    
+    private void handleConsumerReg(ConsumerReg consumerReg, Connection from) {
+        String groupId = consumerReg.getGroupId();
+        String id = consumerReg.getConsumerId();
+        String topic = consumerReg.getTopic();
+        
+        ConsumerGroup group = new ConsumerGroup(groupId, topic);
+        ConcurrentHashMap<String, Consumer> consumersMap = consumerGroups.get(group);
+        if (consumersMap == null) {
+            consumersMap = new ConcurrentHashMap<String, Consumer>();
+            consumerGroups.put(group, consumersMap);
+        }
+        
+        Consumer consumer = consumersMap.get(id);
+        if (consumer == null) {
+            consumer = new Consumer(id, group, topic, from);
+            consumersMap.put(id, consumer);
+            consumerConnectionMap.put(from, consumer);
+            assignConsumers(group);
+        } else {
+            LOG.error("consumer " + id + "already registered");
+        }
+    }
+    
+    private void assignConsumers(ConsumerGroup group) {
+        ConcurrentHashMap<String, Consumer> consumersMap = consumerGroups.get(group);
+        int consumerNum = consumersMap.size();
+        
+        String topic = group.getTopic();
+        ConcurrentHashMap<String, PartitionInfo> partitionMap = topics.get(topic);
+        if (partitionMap == null) {
+            LOG.error("unknown topic: " + topic);
+            return;
+        }
+        Collection<PartitionInfo> topicPartitions = partitionMap.values();
+        if (topicPartitions.size() == 0) {
+            return;
+        }
+        
+        ArrayList<ArrayList<PartitionInfo>> assignPartitions = new ArrayList<ArrayList<PartitionInfo>>(consumerNum);
+        for (int index = 0; index < consumerNum; index++) {
+            assignPartitions.add(new ArrayList<PartitionInfo>());
+        }
+        int i = 0;
+        for (PartitionInfo partition: topicPartitions) {
+            assignPartitions.get(i % consumerNum).add(partition);
+            i ++;
+        }
+        
+        int j = 0;
+        for (Consumer consumer : consumersMap.values()) {
+            Message assign = PBwrap.wrapAssignConsumer(consumer.getId(), topic, assignPartitions.get(j));
+            consumer.setPartitions(assignPartitions.get(j));
+            j++;
+            send(consumer.getConnection(), assign);
+        }
+    }
+
+    private void handlerOffsetCommit(OffsetCommit offsetCommit) {
+        // TODO
+        String groupId = offsetCommit.getConsumerIdString();
+        String id = offsetCommit.getConsumerIdString();
+        String topic = offsetCommit.getTopic();
+        String partition = offsetCommit.getPartition();
+        long offset = offsetCommit.getOffset();
+        
+        ConsumerGroup group = new ConsumerGroup(groupId, topic);
+        ConcurrentHashMap<String, Consumer> groupConsumers = consumerGroups.get(group);
+        if (groupConsumers == null) {
+            LOG.error("can not find consumer group " + group);
+            return;
+        }
+        Consumer consumer = groupConsumers.get(id);
+        if (consumer == null) {
+            LOG.error("can not find consumer by id " + id);
+            return;
+        }
+        
+        consumer.updateOffset(partition, offset);
     }
     
     /*
@@ -312,6 +420,21 @@ public class Supervisor {
         }
     }
     
+
+    private void handlerConsumerFail(Connection connection, long now) {
+        Consumer consumer = consumerConnectionMap.get(connection);
+        String id = consumer.getId();
+        ConsumerGroup group = consumer.getConsumerGroup();
+        ConcurrentHashMap<String, Consumer> groupConsumers = consumerGroups.get(group);
+        if (groupConsumers != null) {
+            groupConsumers.remove(id);
+        }
+        if (groupConsumers.size() != 0) {
+            LOG.info("reassign consumers in group: " + group + ", caused by consumer fail: " + consumer);
+            assignConsumers(group);
+        }
+    }
+    
     /*
      * cancel the key, remove it from appNodes or collectorNodes, then revisit streams
      * 1. appNode fail, mark the stream as inactive, mark all the stages as pending unless the uploading stage
@@ -338,6 +461,10 @@ public class Supervisor {
             collectorNodes.remove(host);
             LOG.info("close COLLECTORNODE: " + host);
             handleCollectorNodeFail(connection, now);
+        } else if (consumerConnectionMap.get(connection) != null) {
+            LOG.info("close consumer: " + host);
+            handlerConsumerFail(connection, now);
+            consumerConnectionMap.remove(connection);
         }
         
         connectionStreamMap.remove(connection);
@@ -1106,6 +1233,15 @@ public class Supervisor {
             case RETIRESTREAM:
                 handleRetireStream(msg.getStreamId());
                 break;
+            case TOPICREPORT:
+                handleTopicReport(msg.getTopicReport(), from);
+                break;
+            case CONSUMER_REG:
+                handleConsumerReg(msg.getConsumerReg(), from);
+                break;
+            case OFFSET_COMMIT:
+                handlerOffsetCommit(msg.getOffsetCommit());
+                break;
             default:
                 LOG.warn("unknown message: " + msg.toString());
             }
@@ -1156,6 +1292,10 @@ public class Supervisor {
         Streams = new ConcurrentHashMap<Stream, ArrayList<Stage>>();
         streamIdMap = new ConcurrentHashMap<StreamId, Stream>();
         
+        topics = new ConcurrentHashMap<String, ConcurrentHashMap<String,PartitionInfo>>();
+        consumerGroups = new ConcurrentHashMap<ConsumerGroup, ConcurrentHashMap<String,Consumer>>();
+        consumerConnectionMap = new ConcurrentHashMap<Connection, Consumer>();
+        
         // start message handler thread
         handlers = new Handler[handlerCount];
         for (int i=0; i < handlerCount; i++) {
@@ -1166,11 +1306,11 @@ public class Supervisor {
         // start heart beat checker thread
         LiveChecker checker = new LiveChecker();
         checker.setDaemon(true);
-        checker.start();
+//        checker.start();
         
         LOG.info("supervisor started");
     }
-    
+
     /**
      * @param args
      * @throws IOException 

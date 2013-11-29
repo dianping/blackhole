@@ -43,8 +43,7 @@ public class SimpleEchoService {
             GenServer<ByteBuffer, SimpleConnection, echoProcessor> server = 
                     new GenServer(new echoProcessor(), new SimpleConnection.SimpleConnectionFactory(), null);
             Properties prop = new Properties();
-            prop.setProperty("supervisor.handlercount", "1");
-            prop.setProperty("supervisor.port", "2222");
+            prop.setProperty("GenServer.port", "2223");
             server.init(prop, "echo");
         }
         
@@ -66,7 +65,6 @@ public class SimpleEchoService {
      */
     @Test
     public void testEcho() throws IOException, InterruptedException {
-//    public static void main(String[] args) throws IOException, InterruptedException {
         SimpleEchoService echo = new SimpleEchoService();
         Server s = echo.new Server();
         s.setDaemon(true);

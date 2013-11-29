@@ -1,59 +1,63 @@
 package com.dp.blackhole.consumer;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.UUID;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Consumer {
-    
-    private static final Log LOG = LogFactory.getLog(ConsumerConnector.class);
-    
-    private static boolean running = false;
-    
     static ConsumerConfig config;
+    public static final FetchedDataChunk SHUTDOWN_COMMAND = new FetchedDataChunk(null, null, -1);
+    
+    private LinkedBlockingQueue<FetchedDataChunk> queue;
+    
+    private String topic;
+    private String group;
+    private String consumerId;
+    private int consumerTimeoutMs;
+    
+    public Consumer(String topic, String group, int consumerTimeoutMs) {
+        this.topic = topic;
+        this.group = group;
+        consumerId = generateConsumerId(group);
+        this.consumerTimeoutMs = consumerTimeoutMs;
+        queue = new LinkedBlockingQueue<FetchedDataChunk>(Consumer.config.getMaxQueuedChunks());
+        ConsumerConnector.getInstance().registerConsumer(topic, group, consumerId ,this);
+    }
+    
+    public Consumer(String topic, String group) {
+        this(topic, group, -1);
+    }
+    
+    LinkedBlockingQueue<FetchedDataChunk> getDataQueue() {
+        return queue;
+    }
+    
+    public void clearQueue() {
+        queue.clear();   
+    }
+    
+    public void shutdown() throws InterruptedException {
+        queue.put(SHUTDOWN_COMMAND);
+    }
     
     public synchronized static void initEnv(Properties prop) {
         config = new ConsumerConfig(prop);
-        //TODO check
         ConsumerConnector connector = ConsumerConnector.getInstance();
-        if (!running) {
-            running = true;
+        if (!connector.initialized) {
+            connector.initialized = true;
             Thread thread = new Thread(connector);
             thread.setDaemon(true);
             thread.start();
-        } else {
-            LOG.info("Connector thread has already started");
         }
     }
     
-    public static String createConsumer (final String topic, final String group, 
-            final int minConsumersInGroup) {
-        String consumerUuid = generateConsumerId();
-        LOG.info("create message stream by consumerid " + consumerUuid + " with groupid " + group);
-        //consumerIdString => groupid_consumerid
-        final String consumerIdString = group + "_" + consumerUuid;
-        ConsumerConnector connector = ConsumerConnector.getInstance();
-        connector.registerConsumer(consumerIdString, topic, minConsumersInGroup);
-        return consumerIdString;
-    }
-    
-    public static MessageStream getStreamByConsumer(String topic, String consumerIdString) {
-        return getStreamByConsumer(topic, consumerIdString, -1);
-    }
-    
-    /**
-     * consumerTimeoutMs: throw a timeout exception to the consumer 
-     * if no message is available for consumption after the specified interval
-     * -1 never time out
-     */
-    public static MessageStream getStreamByConsumer(String topic, String consumerIdString,
-            int consumerTimeoutMs) {
-        ConsumerConnector connector = ConsumerConnector.getInstance();
-        return new MessageStream(topic, connector.queues.get(consumerIdString), consumerTimeoutMs);
+    public MessageStream getStream( ) {
+        return new MessageStream(topic, queue, consumerTimeoutMs);
     }
 
     /**
@@ -61,10 +65,10 @@ public class Consumer {
      *
      * @return random consumerid
      */
-    private static String generateConsumerId() {
+    private String generateConsumerId(String group) {
         UUID uuid = UUID.randomUUID();
         try {
-            return InetAddress.getLocalHost().getHostName() + "-"
+            return group + "-" + InetAddress.getLocalHost().getHostName() + "-"
                     + System.currentTimeMillis() + "-"
                     + Long.toHexString(uuid.getMostSignificantBits()).substring(0, 8);
         } catch (UnknownHostException e) {
@@ -74,15 +78,28 @@ public class Consumer {
     }
     
     public static void main(String[] args) {
-        String topic = "topic1";
-        String group = "g1";
+        String topic = "openAPI1";
+        String group = "testgroup";
         Properties properties = new Properties();
         properties.setProperty("bla", "bla");
         Consumer.initEnv(properties);
-        String consumerIdString = Consumer.createConsumer(topic, group, 3);
-        MessageStream stream = Consumer.getStreamByConsumer(topic, consumerIdString, 5000);
-        for (String message : stream) {
-            System.out.println(message);
+        Consumer consumer = new Consumer(topic, group, -1);
+        MessageStream stream = consumer.getStream();
+        
+        try {
+            RandomAccessFile r = new RandomAccessFile("/tmp/r.txt", "rw");
+
+            for (String message : stream) {
+                System.out.println(message);
+                r.writeBytes(message+"\n");
+            }
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
+
 }

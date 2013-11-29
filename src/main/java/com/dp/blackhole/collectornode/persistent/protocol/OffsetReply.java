@@ -2,6 +2,7 @@ package com.dp.blackhole.collectornode.persistent.protocol;
 
 import java.nio.ByteBuffer;
 
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.GenUtil;
 import com.dp.blackhole.network.NonDelegationTypedWrappable;
 
@@ -27,11 +28,15 @@ public class OffsetReply extends NonDelegationTypedWrappable {
     @Override
     public void read(ByteBuffer buffer) {
         offset = buffer.getLong();
+        topic = Util.readString(buffer);
+        partition = Util.readString(buffer);
     }
 
     @Override
     public void write(ByteBuffer buffer) {
         buffer.putLong(offset);
+        Util.writeString(topic, buffer);
+        Util.writeString(partition, buffer);
     }
 
     @Override

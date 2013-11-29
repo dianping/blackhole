@@ -107,13 +107,14 @@ public class Partition {
         }
     }
     
-    public Segment findSegment(long offset) {
+    public Segment findSegment(long offset) {        
         if (segments.size() == 0) {
             return null;
         }
         int high = segments.size() -1;
         Segment last = segments.get(high);
-        if (last.contains(offset)) {
+        // TODO check last.getEndOffset() == offset condition
+        if (last.contains(offset) || last.getEndOffset() == offset) {
             return last;
         } else if (last.getEndOffset() < offset) {
             return null;

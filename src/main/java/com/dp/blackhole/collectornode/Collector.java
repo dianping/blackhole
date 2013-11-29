@@ -29,6 +29,7 @@ public class Collector implements Runnable {
     File appending;
     long rollPeriod;
     SimpleDateFormat format;
+    Producer producer;
     
     public Collector(Collectornode server, Socket s, String home, String appname, String host, long period) {
         node = server;
@@ -38,7 +39,8 @@ public class Collector implements Runnable {
         rollPeriod = period;
         format = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         storagedir = home+"/"+ app + "/" + remoteAddress;
-        
+        producer = new Producer();
+        producer.setPublisher(Collectornode.getPublisher().getExecutor());
         init();
     }
     
@@ -127,6 +129,6 @@ public class Collector implements Runnable {
     }
     
     private void emit(String line) {
-        // TODO send to realtime data comsumer
+        producer.send(app, remoteAddress + "-1", line.getBytes());
     }
 }

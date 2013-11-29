@@ -206,7 +206,7 @@ public abstract class Node {
     protected abstract boolean process(Message msg);
 
     protected void send(Message msg) {
-        if (msg.getType() != MessageType.HEARTBEART) {
+        if (msg.getType() != MessageType.HEARTBEART && msg.getType() != MessageType.TOPICREPORT) {
             LOG.debug("send message: " + msg);
         }
         queue.offer(msg);

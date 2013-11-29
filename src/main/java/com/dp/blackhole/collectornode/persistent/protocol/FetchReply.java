@@ -12,6 +12,7 @@ import com.dp.blackhole.network.GenUtil;
 
 public class FetchReply extends DelegationTypedWrappable {
 
+    private ByteBuffer headlength;
     private ByteBuffer head;
     private ByteBuffer messagesBuf;
     
@@ -25,23 +26,32 @@ public class FetchReply extends DelegationTypedWrappable {
     private boolean complete;
     
     public FetchReply() {
-        head = allocateHead();
+        headlength = ByteBuffer.allocate(4);
     }
     
     public FetchReply(String partition, MessageSet messages, long offset) {
         this.partition = partition;
         this.offset = offset;
         this.messages = messages;
-        this.size = messages.getSize();
-        this.head = allocateHead();
+        if (messages != null) {
+            this.size = messages.getSize();
+        } else {
+            this.size = 0; 
+        }
+
+        this.headlength = ByteBuffer.allocate(4);
+        headlength.putInt(getHeadSize());
+        headlength.flip();
+        
+        this.head = ByteBuffer.allocate(getHeadSize());
         this.head.putInt(size);
         this.head.putLong(this.offset);
         GenUtil.writeString(partition, this.head);
         this.head.flip();
     }
 
-    private ByteBuffer allocateHead() {
-        return ByteBuffer.allocate((Integer.SIZE + Long.SIZE)/8 + GenUtil.getStringSize(partition));
+    private int getHeadSize() {
+        return (Integer.SIZE + Long.SIZE)/8 + GenUtil.getStringSize(partition);
     }
     
     @Override
@@ -69,13 +79,19 @@ public class FetchReply extends DelegationTypedWrappable {
     @Override
     public int write(GatheringByteChannel channel) throws IOException {
         int written = 0;
+        if (headlength.hasRemaining()) {
+            written += GenUtil.retryWrite(channel, headlength);
+            if (headlength.hasRemaining()) {
+                return written;
+            }
+        }
         if (head.hasRemaining()) {
-          written = GenUtil.retryWrite(channel, head);
-          if (!head.hasRemaining()) {
+          written += GenUtil.retryWrite(channel, head);
+          if (head.hasRemaining()) {
               return written;
           }
         }
-        if (!head.hasRemaining()) {
+        if (!head.hasRemaining() && (messages != null)) {
             for (int i=0; i< 16; i++) {
                 int num = (int) messages.write(channel, sent, size -sent);
                 written += num;
@@ -95,6 +111,20 @@ public class FetchReply extends DelegationTypedWrappable {
     @Override
     public int read(ScatteringByteChannel channel) throws IOException {
         int read = 0;
+        if (headlength.hasRemaining()) {
+            int num = channel.read(headlength);
+            if (num < 0) {
+                throw new IOException("end-of-stream reached");
+            }
+            read += num;
+            if (headlength.hasRemaining()) {
+                return read;
+            } else {
+                headlength.flip();
+                int headsize = headlength.getInt();
+                head = ByteBuffer.allocate(headsize);
+            }
+        }
         if (head.hasRemaining()) {
             int num = channel.read(head);
             if (num < 0) {
@@ -108,11 +138,13 @@ public class FetchReply extends DelegationTypedWrappable {
                 size = head.getInt();
                 offset = head.getLong();
                 partition = GenUtil.readString(head);
-                messagesBuf = ByteBuffer.allocate(size);                
+                if (size != 0) {
+                    messagesBuf = ByteBuffer.allocate(size);
+                }
             }
         }
         
-        if (!head.hasRemaining()) {
+        if (!head.hasRemaining() && (messagesBuf != null)) {
             int num = channel.read(messagesBuf);
             if (num < 0) {
                 throw new IOException("end-of-stream reached");
@@ -123,6 +155,8 @@ public class FetchReply extends DelegationTypedWrappable {
                 messages = new ByteBufferMessageSet(messagesBuf, offset);
                 complete = true;
             }
+        } else if (messagesBuf == null) {
+            complete = true;
         }
         return read;
     }
