@@ -12,7 +12,9 @@ import java.util.Properties;
 import org.apache.tools.ant.filters.TokenFilter.StringTokenizer;
 
 import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.gen.DumpReplyPB.DumpReply;
 import com.dp.blackhole.common.gen.MessagePB.Message;
+import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.node.Node;
 
 public class Cli extends Node {
@@ -53,6 +55,10 @@ public class Cli extends Node {
                 Message msg = PBwrap.wrapRetireStream(appName, appServer);
                 send(msg);
                 out.println("send message: " + msg);
+            } else if (cmd.equals("dumpconf")) {
+                Message msg = PBwrap.wrapDumpConf();
+                send(msg);
+                out.println("send message: " + msg);
             } else if (cmd.equals("quit")) {
                 System.exit(0);
             } else {
@@ -80,7 +86,19 @@ public class Cli extends Node {
     
     @Override
     protected boolean process(Message msg) {
-        return false;
+        MessageType type = msg.getType();
+        switch (type) {
+        case DUMPREPLY:
+            DumpReply dumpReply = msg.getDumpReply();
+            PrintStream out = new PrintStream(System.out);
+            out.println("receive reply: ");
+            out.println(dumpReply.getReply());
+            out.print("blackhole.cli>");
+            break;
+        default:
+            LOG.error("Illegal message type " + msg.getType());
+        }
+        return true;
     }
 
     private void start() throws FileNotFoundException, IOException {

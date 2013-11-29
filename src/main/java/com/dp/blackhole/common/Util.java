@@ -202,4 +202,47 @@ public class Util {
     public static String formatTs(long ts) {
         return format.format(new Date(ts));
     }
+    
+    public static String getKey(String content) {
+        return content.substring(0, content.indexOf('=') - 1);
+    }
+    public static String getValue(String content) {
+        return content.substring(content.indexOf('=') + 1);
+    }
+
+    public static String[] getStringListOfLionValue(String value) {
+        if (value == null) {
+            return null;
+        }
+        if (value.charAt(0) != '[' || value.charAt(value.length() - 1) != ']') {
+            return null;
+        }
+        String[] tmp = value.substring(1, value.length() - 1).split(",");
+        String[] result = new String[tmp.length];
+        for (int i = 0; i < tmp.length; i++) {
+            result[i] = tmp[i].substring(1, tmp[i].length() -1 );
+        }
+        return result;
+    }
+
+    public static String[][] getStringMapOfLionValue(String value) {
+        if (value == null) {
+            return null;
+        }
+        if (value.charAt(0) != '{' || value.charAt(value.length() - 1) != '}') {
+            return null;
+        }
+        String[] tmp = value.substring(1, value.length() - 1).split(",");
+        if (tmp.length == 0) {
+            return null;
+        }
+        String[][] result = new String[tmp.length][2];
+        for (int i = 0; i < tmp.length; i++) {
+            String[] tmp2 = tmp[i].split(":");
+            for (int j = 0; j < 2; j++) {
+                result[i][j] = tmp2[j].substring(1, tmp2[j].length() -1 );
+            }
+        }
+        return result;
+    }
 }

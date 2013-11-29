@@ -1,8 +1,13 @@
 package com.dp.blackhole.common;
 
+import java.util.List;
+
 import com.dp.blackhole.common.gen.AppRegPB.AppReg;
 import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.common.gen.ConfResPB.ConfRes;
+import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
+import com.dp.blackhole.common.gen.DumpReplyPB.DumpReply;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
@@ -57,6 +62,18 @@ public class PBwrap {
             break;
         case DUMPSTAT:
             break;
+        case NOAVAILABLECONF:
+            break;
+        case CONF_REQ:
+            break;
+        case CONF_RES:
+            msg.setConfRes((ConfRes) message);
+            break;
+        case DUMPCONF:
+            break;
+        case DUMPREPLY:
+            msg.setDumpReply((DumpReply) message);
+            break;
         default:
         }
         return msg.build();
@@ -84,10 +101,11 @@ public class PBwrap {
         return wrapMessage(MessageType.COLLECTOR_REG, null);
     }
     
-    public static Message wrapAssignCollector(String appName, String collectorServer) {
+    public static Message wrapAssignCollector(String appName, String collectorServer, int port) {
         AssignCollector.Builder builder = AssignCollector.newBuilder();
         builder.setAppName(appName);
         builder.setCollectorServer(collectorServer);
+        builder.setCollectorPort(port);
         return wrapMessage(MessageType.ASSIGN_COLLECTOR, builder.build());
     }
     
@@ -133,10 +151,11 @@ public class PBwrap {
         return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, appServer, 0, rollTs));
     }
     
-    public static Message wrapRecoveryRoll(String appName, String collectorServer, long rollTs) {
+    public static Message wrapRecoveryRoll(String appName, String collectorServer, int port, long rollTs) {
         RecoveryRoll.Builder builder = RecoveryRoll.newBuilder();
         builder.setAppName(appName);
         builder.setCollectorServer(collectorServer);
+        builder.setCollectorPort(port);
         builder.setRollTs(rollTs);
         return wrapMessage(MessageType.RECOVERY_ROLL, builder.build());
     }
@@ -183,5 +202,42 @@ public class PBwrap {
     
     public static Message wrapDumpStat() {
         return wrapMessage(MessageType.DUMPSTAT, null);
+    }
+
+    public static Message wrapConfReq () {
+        return wrapMessage(MessageType.CONF_REQ, null);
+    }
+    
+    public static AppConfRes wrapAppConfRes (String appName, String watchFile, String period, String bufSize) {
+        AppConfRes.Builder builder = AppConfRes.newBuilder();
+        builder.setAppName(appName);
+        builder.setWatchFile(watchFile);
+        if (period != null) {
+            builder.setPeriod(period);
+        }
+        if (bufSize != null) {
+            builder.setBufferSize(bufSize);
+        }
+        return builder.build();
+    }
+    
+    public static Message wrapConfRes (List<AppConfRes> appConfResList) {
+        ConfRes.Builder builder = ConfRes.newBuilder();
+        builder.addAllAppConfRes(appConfResList);
+        return wrapMessage(MessageType.CONF_RES, builder.build());
+    }
+    
+    public static Message wrapNoAvailableConf() {
+        return wrapMessage(MessageType.NOAVAILABLECONF, null);
+    }
+
+    public static Message wrapDumpConf() {
+        return wrapMessage(MessageType.DUMPCONF, null);
+    }
+
+    public static Message wrapDumpReply(String dumpReply) {
+        DumpReply.Builder builder = DumpReply.newBuilder();
+        builder.setReply(dumpReply);
+        return wrapMessage(MessageType.DUMPREPLY, builder.build());
     }
 }

@@ -4,8 +4,6 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
@@ -61,13 +59,7 @@ public class TestHDFSRecovery {
         Util.createTmpFile(MAGIC + "." + Util.FILE_SUFFIX, Util.expected);
         Util.createTmpFile(APP_HOST + "@" + MAGIC + "_" + Util.FILE_SUFFIX, Util.expected);
         
-        try {
-            String client = InetAddress.getLocalHost().getHostName();
-            appnode = new SimAppnode(client, port);
-        } catch (UnknownHostException e1) {
-            LOG.debug("Oops, got an exception:", e1);
-            return;
-        }
+        appnode = new SimAppnode();
         
         //deploy some condition
         ConfigKeeper confKeeper = new ConfigKeeper();
@@ -90,7 +82,7 @@ public class TestHDFSRecovery {
 
     @Test
     public void test() throws IOException, InterruptedException {
-        AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), new Date().getTime());
+        AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), new Date().getTime(), 100);
         RollRecovery clientTask = new RollRecovery(appnode, Util.HOSTNAME, port, appLog, Util.rollTS);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();

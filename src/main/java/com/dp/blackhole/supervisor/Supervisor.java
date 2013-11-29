@@ -13,6 +13,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -23,10 +24,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dianping.lion.EnvZooKeeperConfig;
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.LionException;
 import com.dp.blackhole.common.gen.AppRegPB.AppReg;
 import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.Connection;
 import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
@@ -35,6 +41,8 @@ import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
 import com.dp.blackhole.common.gen.StreamIDPB.StreamID;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.conf.Context;
 
 public class Supervisor {
 
@@ -44,6 +52,7 @@ public class Supervisor {
     volatile private boolean running = true;
     private Handler[] handlers = null;
     private int handlerCount = 1;
+    private int collectorPort;
     
     private BlockingQueue<Msg> messageQueue;
     private ConcurrentHashMap<Connection, ArrayList<Stream>> connectionStreamMap;
@@ -52,6 +61,7 @@ public class Supervisor {
     private ConcurrentHashMap<String, Connection> appNodes;
     private ConcurrentHashMap<Stream, ArrayList<Stage>> Streams;
     private ConcurrentHashMap<StreamId, Stream> streamIdMap;
+    private LionConfChange lionConfChange;
     
     private class Msg {
         Message msg;
@@ -346,7 +356,7 @@ public class Supervisor {
         }
     }
 
-    private void dumpstat() {
+    private void dumpstat(Connection from) {
         StringBuilder sb = new StringBuilder();
         sb.append("dumpstat:\n");
         sb.append("############################## dump ##############################\n");
@@ -429,7 +439,17 @@ public class Supervisor {
         
         sb.append("##################################################################");
         
-        LOG.info(sb.toString());
+        String dumpstat = sb.toString();
+        LOG.info(dumpstat);
+        Message message = PBwrap.wrapDumpReply(dumpstat);
+        send(from, message);
+    }
+    
+    public void dumpconf(Connection from) {
+        String dumpconf = lionConfChange.dumpconf();
+        LOG.info(dumpconf);
+        Message message = PBwrap.wrapDumpReply(dumpconf);
+        send(from, message);
     }
 
     private void handleRetireStream(StreamID streamId) {
@@ -804,7 +824,7 @@ public class Supervisor {
             stageConnectionMap.remove(stage);
         } else {
             Connection c = appNodes.get(stream.appHost);
-            Message message = PBwrap.wrapRecoveryRoll(stream.app, collector, stage.rollTs);
+            Message message = PBwrap.wrapRecoveryRoll(stream.app, collector, collectorPort, stage.rollTs);
             send(c, message);
             
             stage.status = Stage.RECOVERYING;
@@ -1011,7 +1031,7 @@ public class Supervisor {
         String collector = getCollector();
         Message message;
         if (collector != null) {
-            message = PBwrap.wrapAssignCollector(app, collector);
+            message = PBwrap.wrapAssignCollector(app, collector, collectorPort);
         } else {
             message = PBwrap.wrapNoAvailableNode(app);
         }
@@ -1101,10 +1121,16 @@ public class Supervisor {
                 handleManualRecoveryRoll(msg.getRollID());
                 break;
             case DUMPSTAT:
-                dumpstat();
+                dumpstat(from);
                 break;
             case RETIRESTREAM:
                 handleRetireStream(msg.getStreamId());
+                break;
+            case CONF_REQ:
+                findConfs(from);
+                break;
+            case DUMPCONF:
+                dumpconf(from);
                 break;
             default:
                 LOG.warn("unknown message: " + msg.toString());
@@ -1135,12 +1161,13 @@ public class Supervisor {
         }
     }
        
-    private void init() throws IOException, ClosedChannelException {
+    private void init() throws IOException, ClosedChannelException, LionException {
         Properties prop = new Properties();
         prop.load(new FileReader(new File("config.properties")));
         
         handlerCount = Integer.parseInt(prop.getProperty("supervisor.handlercount"));
         int port = Integer.parseInt(prop.getProperty("supervisor.port"));
+        collectorPort = Integer.parseInt(prop.getProperty("collectornode.port"));
         
         ServerSocketChannel ssc = ServerSocketChannel.open();
         ssc.configureBlocking(false);
@@ -1155,7 +1182,8 @@ public class Supervisor {
         messageQueue = new LinkedBlockingQueue<Msg>();
         Streams = new ConcurrentHashMap<Stream, ArrayList<Stage>>();
         streamIdMap = new ConcurrentHashMap<StreamId, Stream>();
-        
+        //initLion(or initZooKeeper)
+        connectAppConfKeeper(prop);
         // start message handler thread
         handlers = new Handler[handlerCount];
         for (int i=0; i < handlerCount; i++) {
@@ -1170,12 +1198,46 @@ public class Supervisor {
         
         LOG.info("supervisor started");
     }
+
+    private void connectAppConfKeeper(Properties prop) throws IOException, LionException {
+        ConfigCache configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
+        lionConfChange = new LionConfChange(configCache);
+        lionConfChange.initLion();
+    }
     
+    public void findConfs(Connection from) {
+        Message message;
+        List<String> appNamesInOneHost;
+        if ((appNamesInOneHost = lionConfChange.hostToAppNames.get(from.getHost())) == null) {
+            message = PBwrap.wrapNoAvailableConf();
+            LOG.info("Hosts for app configurations are not ready, send NoAvailableConf message to " + from.getHost());
+            send(from, message);
+            return;
+        }
+        List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
+        for (String appName : appNamesInOneHost) {
+            Context context = ConfigKeeper.configMap.get(appName);
+            String watchFile = context.getString(ParamsKey.Appconf.WATCH_FILE);
+            if (context == null || watchFile == null) {
+                message = PBwrap.wrapNoAvailableConf();
+                send(from, message);
+                return;
+            }
+            String period = context.getString(ParamsKey.Appconf.ROLL_PERIOD);
+            String bufSize = context.getString(ParamsKey.Appconf.BUFFER_SIZE);
+            AppConfRes appConfRes = PBwrap.wrapAppConfRes(appName, watchFile, period, bufSize);
+            appConfResList.add(appConfRes);
+        }
+        message = PBwrap.wrapConfRes(appConfResList);
+        send(from, message);  
+    }
+
     /**
      * @param args
      * @throws IOException 
+     * @throws LionException
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, LionException {
         Supervisor supervisor = new Supervisor();
         supervisor.init();
         supervisor.loop();

@@ -85,12 +85,9 @@ public class FileListener implements JNotifyListener{
             if (!path2wd.containsKey(watchPath)) {
                 return;
             } else {
+                LOG.info("Unregister watch path " + watchPath);
                 wd = path2wd.get(watchPath);
                 path2wd.remove(watchPath);
-                readerMap.remove(watchPath);
-                if (readerMap.isEmpty()) {
-                    parentWathchPathSet.clear();
-                }
             }
         } finally {
             lock.unlock();
@@ -102,6 +99,10 @@ public class FileListener implements JNotifyListener{
                     ". Because the watch descriptor wd is not valid;" +
                     " or fd is not an inotify file descriptor." +
                     " See \"inotify_rm_watch\" for more detail", e);
+        }
+        readerMap.remove(watchPath);
+        if (readerMap.isEmpty()) {
+            parentWathchPathSet.clear();
         }
     }
 
@@ -147,7 +148,10 @@ public class FileListener implements JNotifyListener{
 
     @Override
     public void fileModified(int wd, String rootPath, String name) {
-        readerMap.get(rootPath).eventWriter.process();
+        LogReader reader; 
+        if ((reader = readerMap.get(rootPath)) != null ) {
+            reader.eventWriter.process();
+        }
     }
 
     @Override

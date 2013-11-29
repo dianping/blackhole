@@ -12,6 +12,8 @@ import "RollID.proto";
 import "Failure.proto";
 import "NoAvailableNode.proto";
 import "StreamID.proto";
+import "ConfRes.proto";
+import "DumpReply.proto";
 
 message Message {
     enum MessageType {
@@ -33,6 +35,11 @@ message Message {
         MANUAL_RECOVERY_ROLL =16;
         DUMPSTAT = 17;
         RETIRESTREAM = 18;
+        CONF_REQ = 19;
+        CONF_RES = 20;
+        NOAVAILABLECONF = 21;
+        DUMPCONF = 22;
+        DUMPREPLY = 23;
     }
 
     required MessageType type = 1;
@@ -45,4 +52,6 @@ message Message {
     optional Failure failure = 8;
     optional NoAvailableNode noAvailableNode = 9;
     optional StreamID streamId = 10;
+    optional ConfRes confRes = 11;
+    optional DumpReply dumpReply = 12;
 }
