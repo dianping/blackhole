@@ -185,20 +185,20 @@ public final class ConfResPB {
       com.google.protobuf.ByteString
           getPeriodBytes();
 
-      // optional string buffer_size = 4 [default = "4096"];
+      // optional string max_line_size = 4 [default = "65536"];
       /**
-       * <code>optional string buffer_size = 4 [default = "4096"];</code>
+       * <code>optional string max_line_size = 4 [default = "65536"];</code>
        */
-      boolean hasBufferSize();
+      boolean hasMaxLineSize();
       /**
-       * <code>optional string buffer_size = 4 [default = "4096"];</code>
+       * <code>optional string max_line_size = 4 [default = "65536"];</code>
        */
-      java.lang.String getBufferSize();
+      java.lang.String getMaxLineSize();
       /**
-       * <code>optional string buffer_size = 4 [default = "4096"];</code>
+       * <code>optional string max_line_size = 4 [default = "65536"];</code>
        */
       com.google.protobuf.ByteString
-          getBufferSizeBytes();
+          getMaxLineSizeBytes();
     }
     /**
      * Protobuf type {@code blackhole.ConfRes.AppConfRes}
@@ -268,7 +268,7 @@ public final class ConfResPB {
               }
               case 34: {
                 bitField0_ |= 0x00000008;
-                bufferSize_ = input.readBytes();
+                maxLineSize_ = input.readBytes();
                 break;
               }
             }
@@ -440,20 +440,20 @@ public final class ConfResPB {
         }
       }
 
-      // optional string buffer_size = 4 [default = "4096"];
-      public static final int BUFFER_SIZE_FIELD_NUMBER = 4;
-      private java.lang.Object bufferSize_;
+      // optional string max_line_size = 4 [default = "65536"];
+      public static final int MAX_LINE_SIZE_FIELD_NUMBER = 4;
+      private java.lang.Object maxLineSize_;
       /**
-       * <code>optional string buffer_size = 4 [default = "4096"];</code>
+       * <code>optional string max_line_size = 4 [default = "65536"];</code>
        */
-      public boolean hasBufferSize() {
+      public boolean hasMaxLineSize() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>optional string buffer_size = 4 [default = "4096"];</code>
+       * <code>optional string max_line_size = 4 [default = "65536"];</code>
        */
-      public java.lang.String getBufferSize() {
-        java.lang.Object ref = bufferSize_;
+      public java.lang.String getMaxLineSize() {
+        java.lang.Object ref = maxLineSize_;
         if (ref instanceof java.lang.String) {
           return (java.lang.String) ref;
         } else {
@@ -461,22 +461,22 @@ public final class ConfResPB {
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
-            bufferSize_ = s;
+            maxLineSize_ = s;
           }
           return s;
         }
       }
       /**
-       * <code>optional string buffer_size = 4 [default = "4096"];</code>
+       * <code>optional string max_line_size = 4 [default = "65536"];</code>
        */
       public com.google.protobuf.ByteString
-          getBufferSizeBytes() {
-        java.lang.Object ref = bufferSize_;
+          getMaxLineSizeBytes() {
+        java.lang.Object ref = maxLineSize_;
         if (ref instanceof java.lang.String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          bufferSize_ = b;
+          maxLineSize_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -487,7 +487,7 @@ public final class ConfResPB {
         appName_ = "";
         watchFile_ = "";
         period_ = "3600";
-        bufferSize_ = "4096";
+        maxLineSize_ = "65536";
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -523,7 +523,7 @@ public final class ConfResPB {
           output.writeBytes(3, getPeriodBytes());
         }
         if (((bitField0_ & 0x00000008) == 0x00000008)) {
-          output.writeBytes(4, getBufferSizeBytes());
+          output.writeBytes(4, getMaxLineSizeBytes());
         }
         getUnknownFields().writeTo(output);
       }
@@ -548,7 +548,7 @@ public final class ConfResPB {
         }
         if (((bitField0_ & 0x00000008) == 0x00000008)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(4, getBufferSizeBytes());
+            .computeBytesSize(4, getMaxLineSizeBytes());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -672,7 +672,7 @@ public final class ConfResPB {
           bitField0_ = (bitField0_ & ~0x00000002);
           period_ = "3600";
           bitField0_ = (bitField0_ & ~0x00000004);
-          bufferSize_ = "4096";
+          maxLineSize_ = "65536";
           bitField0_ = (bitField0_ & ~0x00000008);
           return this;
         }
@@ -717,7 +717,7 @@ public final class ConfResPB {
           if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
             to_bitField0_ |= 0x00000008;
           }
-          result.bufferSize_ = bufferSize_;
+          result.maxLineSize_ = maxLineSize_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -749,9 +749,9 @@ public final class ConfResPB {
             period_ = other.period_;
             onChanged();
           }
-          if (other.hasBufferSize()) {
+          if (other.hasMaxLineSize()) {
             bitField0_ |= 0x00000008;
-            bufferSize_ = other.bufferSize_;
+            maxLineSize_ = other.maxLineSize_;
             onChanged();
           }
           this.mergeUnknownFields(other.getUnknownFields());
@@ -1015,76 +1015,76 @@ public final class ConfResPB {
           return this;
         }
 
-        // optional string buffer_size = 4 [default = "4096"];
-        private java.lang.Object bufferSize_ = "4096";
+        // optional string max_line_size = 4 [default = "65536"];
+        private java.lang.Object maxLineSize_ = "65536";
         /**
-         * <code>optional string buffer_size = 4 [default = "4096"];</code>
+         * <code>optional string max_line_size = 4 [default = "65536"];</code>
          */
-        public boolean hasBufferSize() {
+        public boolean hasMaxLineSize() {
           return ((bitField0_ & 0x00000008) == 0x00000008);
         }
         /**
-         * <code>optional string buffer_size = 4 [default = "4096"];</code>
+         * <code>optional string max_line_size = 4 [default = "65536"];</code>
          */
-        public java.lang.String getBufferSize() {
-          java.lang.Object ref = bufferSize_;
+        public java.lang.String getMaxLineSize() {
+          java.lang.Object ref = maxLineSize_;
           if (!(ref instanceof java.lang.String)) {
             java.lang.String s = ((com.google.protobuf.ByteString) ref)
                 .toStringUtf8();
-            bufferSize_ = s;
+            maxLineSize_ = s;
             return s;
           } else {
             return (java.lang.String) ref;
           }
         }
         /**
-         * <code>optional string buffer_size = 4 [default = "4096"];</code>
+         * <code>optional string max_line_size = 4 [default = "65536"];</code>
          */
         public com.google.protobuf.ByteString
-            getBufferSizeBytes() {
-          java.lang.Object ref = bufferSize_;
+            getMaxLineSizeBytes() {
+          java.lang.Object ref = maxLineSize_;
           if (ref instanceof String) {
             com.google.protobuf.ByteString b = 
                 com.google.protobuf.ByteString.copyFromUtf8(
                     (java.lang.String) ref);
-            bufferSize_ = b;
+            maxLineSize_ = b;
             return b;
           } else {
             return (com.google.protobuf.ByteString) ref;
           }
         }
         /**
-         * <code>optional string buffer_size = 4 [default = "4096"];</code>
+         * <code>optional string max_line_size = 4 [default = "65536"];</code>
          */
-        public Builder setBufferSize(
+        public Builder setMaxLineSize(
             java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000008;
-          bufferSize_ = value;
+          maxLineSize_ = value;
           onChanged();
           return this;
         }
         /**
-         * <code>optional string buffer_size = 4 [default = "4096"];</code>
+         * <code>optional string max_line_size = 4 [default = "65536"];</code>
          */
-        public Builder clearBufferSize() {
+        public Builder clearMaxLineSize() {
           bitField0_ = (bitField0_ & ~0x00000008);
-          bufferSize_ = getDefaultInstance().getBufferSize();
+          maxLineSize_ = getDefaultInstance().getMaxLineSize();
           onChanged();
           return this;
         }
         /**
-         * <code>optional string buffer_size = 4 [default = "4096"];</code>
+         * <code>optional string max_line_size = 4 [default = "65536"];</code>
          */
-        public Builder setBufferSizeBytes(
+        public Builder setMaxLineSizeBytes(
             com.google.protobuf.ByteString value) {
           if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000008;
-          bufferSize_ = value;
+          maxLineSize_ = value;
           onChanged();
           return this;
         }
@@ -1676,12 +1676,12 @@ public final class ConfResPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rConfRes.proto\022\tblackhole\"\241\001\n\007ConfRes\0221" +
+      "\n\rConfRes.proto\022\tblackhole\"\244\001\n\007ConfRes\0221" +
       "\n\nappConfRes\030\001 \003(\0132\035.blackhole.ConfRes.A" +
-      "ppConfRes\032c\n\nAppConfRes\022\020\n\010app_name\030\001 \002(" +
+      "ppConfRes\032f\n\nAppConfRes\022\020\n\010app_name\030\001 \002(" +
       "\t\022\022\n\nwatch_file\030\002 \002(\t\022\024\n\006period\030\003 \002(\t:\0043" +
-      "600\022\031\n\013buffer_size\030\004 \001(\t:\0044096B(\n\033com.dp" +
-      ".blackhole.common.genB\tConfResPB"
+      "600\022\034\n\rmax_line_size\030\004 \001(\t:\00565536B(\n\033com" +
+      ".dp.blackhole.common.genB\tConfResPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1699,7 +1699,7 @@ public final class ConfResPB {
           internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_AppConfRes_descriptor,
-              new java.lang.String[] { "AppName", "WatchFile", "Period", "BufferSize", });
+              new java.lang.String[] { "AppName", "WatchFile", "Period", "MaxLineSize", });
           return null;
         }
       };

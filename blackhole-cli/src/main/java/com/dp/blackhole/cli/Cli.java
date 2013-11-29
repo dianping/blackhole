@@ -49,6 +49,21 @@ public class Cli extends Node {
                 Message msg = PBwrap.wrapManualRecoveryRoll(appName, appServer, rollTs);
                 send(msg);
                 out.println("send message: " + msg);
+            } else if (cmd.startsWith("range")) {
+                //recovery -a 3600 1385276400000 1385301600000
+                String[] tokens = getTokens(cmd);
+                String appName = tokens[1];
+                String appServer = tokens[2];
+                long period = Long.parseLong(tokens[3]);
+                long startRollTs = Long.parseLong(tokens[4]);
+                long endRollTs = Long.parseLong(tokens[5]);
+                long recoveryStageCount = (endRollTs - startRollTs) / period / 1000;
+                for (int i = 0; i<= recoveryStageCount; i++) {
+                    long rollTs = startRollTs + period * 1000 * (i);
+                    Message msg = PBwrap.wrapManualRecoveryRoll(appName, appServer, rollTs);
+                    send(msg);
+                    out.println("send message: " + msg);
+                }
             } else if (cmd.startsWith("retire")) {
                 String[] tokens = getTokens(cmd);
                 String appName = tokens[1];
@@ -58,6 +73,10 @@ public class Cli extends Node {
                 out.println("send message: " + msg);
             } else if (cmd.equals("dumpconf")) {
                 Message msg = PBwrap.wrapDumpConf();
+                send(msg);
+                out.println("send message: " + msg);
+            } else if (cmd.equals("listapps")) {
+                Message msg = PBwrap.wrapListApps();
                 send(msg);
                 out.println("send message: " + msg);
             } else if (cmd.equals("quit")) {

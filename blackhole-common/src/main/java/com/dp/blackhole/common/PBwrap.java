@@ -74,6 +74,8 @@ public class PBwrap {
         case DUMPREPLY:
             msg.setDumpReply((DumpReply) message);
             break;
+        case LISTAPPS:
+            break;
         default:
         }
         return msg.build();
@@ -208,15 +210,15 @@ public class PBwrap {
         return wrapMessage(MessageType.CONF_REQ, null);
     }
     
-    public static AppConfRes wrapAppConfRes (String appName, String watchFile, String period, String bufSize) {
+    public static AppConfRes wrapAppConfRes (String appName, String watchFile, String period, String maxLineSize) {
         AppConfRes.Builder builder = AppConfRes.newBuilder();
         builder.setAppName(appName);
         builder.setWatchFile(watchFile);
         if (period != null) {
             builder.setPeriod(period);
         }
-        if (bufSize != null) {
-            builder.setBufferSize(bufSize);
+        if (maxLineSize != null) {
+            builder.setMaxLineSize(maxLineSize);
         }
         return builder.build();
     }
@@ -239,5 +241,9 @@ public class PBwrap {
         DumpReply.Builder builder = DumpReply.newBuilder();
         builder.setReply(dumpReply);
         return wrapMessage(MessageType.DUMPREPLY, builder.build());
+    }
+
+    public static Message wrapListApps() {
+        return wrapMessage(MessageType.LISTAPPS, null);
     }
 }
