@@ -10,14 +10,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
 
 public class SimRecoveryServer implements Runnable {
-    private static final Log LOG = LogFactory.getLog(SimRecoveryServer.class);
     public static final int MAX_LINE = 9;
     private ServerSocket ss;
     private List<String> header;
@@ -66,16 +62,12 @@ public class SimRecoveryServer implements Runnable {
             
             protocol.recieveHead(din, head);
             String type = String.valueOf(head.type);
-            LOG.debug("Receive... " + type);
             header.add(type);
             String appname = head.app;
-            LOG.debug("Receive... " + appname);
             header.add(appname);
             String periodStr = String.valueOf(head.peroid);
-            LOG.debug("Receive... " + periodStr);
             header.add(periodStr);
             String ts = String.valueOf(head.ts);
-            LOG.debug("Receive... " + ts);
             header.add(ts); 
             
             //similar get offset from hdfs file
@@ -87,7 +79,7 @@ public class SimRecoveryServer implements Runnable {
             System.out.println("server "+socket.isConnected());
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             while (!Thread.interrupted() && !shouldStop && (line = reader.readLine()) != null) {
-                LOG.debug("server>" + line);
+//                LOG.debug("server>" + line);
                 receives.add(line);
                 if (receives.size() == MAX_LINE) {
                     break;

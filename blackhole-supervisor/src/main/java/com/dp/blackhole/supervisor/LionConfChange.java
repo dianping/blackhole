@@ -149,9 +149,9 @@ public class LionConfChange {
                 .append(" = ")
                 .append(confContext.getString(ParamsKey.Appconf.ROLL_PERIOD, "3600"))
                 .append("\n")
-                .append(ParamsKey.Appconf.BUFFER_SIZE)
+                .append(ParamsKey.Appconf.MAX_LINE_SIZE)
                 .append(" = ")
-                .append(confContext.getString(ParamsKey.Appconf.BUFFER_SIZE, "4096"))
+                .append(confContext.getString(ParamsKey.Appconf.MAX_LINE_SIZE, "65536"))
                 .append("\n");
             }
             sb.append("\n");

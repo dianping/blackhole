@@ -168,7 +168,7 @@ public class SimCollectornode extends Collectornode implements Runnable{
                 } else if (simType.equals("stream")) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(din));
                     while (!Thread.interrupted() && !shouldStop && (line = reader.readLine()) != null) {
-                        LOG.debug("server>" + line);
+//                        LOG.debug("server>" + line);
                         receives.add(line);
                     }
                     if (din != null) {
