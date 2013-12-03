@@ -1,11 +1,12 @@
 package com.dp.blackhole.supervisor;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,9 +22,9 @@ import com.dp.blackhole.conf.Context;
 public class LionConfChange {
     private static final Log LOG = LogFactory.getLog(LionConfChange.class);
 
-    final Map<String, List<String>> hostToAppNames = new ConcurrentHashMap<String, List<String>>();
-    private final Map<String, List<String>> appToHosts = new ConcurrentHashMap<String, List<String>>();
-    private final Set<String> appSet = new CopyOnWriteArraySet<String>();
+    final Map<String, List<String>> hostToAppNames = Collections.synchronizedMap(new HashMap<String, List<String>>());
+    private final Map<String, List<String>> appToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
+    private final Set<String> appSet = Collections.synchronizedSet(new HashSet<String>());
 
     private ConfigCache cache;
     
@@ -106,19 +107,20 @@ public class LionConfChange {
     private synchronized void fillHostMap(String appName, String hostsValue) {
         String[] hosts = Util.getStringListOfLionValue(hostsValue);
         if (hosts != null) {
-            LinkedList<String> list = new LinkedList<String>();
+            List<String> list = Collections.synchronizedList(new LinkedList<String>());
             for (int i = 0; i < hosts.length; i++) {
                 list.add(hosts[i]);
             }
             appToHosts.put(appName, list);
             for (int i = 0; i < hosts.length; i++) {
-                if (hosts[i].trim().length() == 0) {
+                String host = hosts[i].trim();
+                if (host.length() == 0) {
                     continue;
                 }
                 List<String> appNamesInOneHost;
-                if ((appNamesInOneHost = hostToAppNames.get(hosts[i].trim())) == null) {
-                    appNamesInOneHost = new LinkedList<String>();
-                    hostToAppNames.put(hosts[i].trim(), appNamesInOneHost);
+                if ((appNamesInOneHost = hostToAppNames.get(host)) == null) {
+                    appNamesInOneHost = Collections.synchronizedList(new LinkedList<String>());
+                    hostToAppNames.put(host, appNamesInOneHost);
                 }
                 appNamesInOneHost.add(appName);
             }
@@ -171,14 +173,16 @@ public class LionConfChange {
                 appSet.remove(appName);
                 appToHosts.remove(appName);
                 ConfigKeeper.configMap.remove(appName);
-                for (String host : hostsOfOneApp) {
-                    List<String> appNamesInOneHost = hostToAppNames.get(host);
-                    int index = indexOf(appName, appNamesInOneHost);
-                    if (index != -1) {
-                        appNamesInOneHost.remove(index);
-                        LOG.info("remove "+ appName + " form hostToAppNames for " + host);
-                    } else {
-                        LOG.warn(appName + " in appNamesInOneHost had been removed before.");
+                if (hostsOfOneApp != null) {
+                    for (String host : hostsOfOneApp) {
+                        List<String> appNamesInOneHost = hostToAppNames.get(host);
+                        int index = indexOf(appName, appNamesInOneHost);
+                        if (index != -1) {
+                            appNamesInOneHost.remove(index);
+                            LOG.info("remove "+ appName + " form hostToAppNames for " + host);
+                        } else {
+                            LOG.warn(appName + " in appNamesInOneHost had been removed before.");
+                        }
                     }
                 }
             } else {
@@ -204,6 +208,9 @@ public class LionConfChange {
     }
     
     private int indexOf(String needToRemove, List<String> list) {
+        if (list == null) {
+            return -1;
+        }
         int index = 0;
         for (String element : list) {
             if (needToRemove.equals(element))

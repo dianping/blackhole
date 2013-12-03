@@ -111,7 +111,15 @@ public class Appnode extends Node implements Runnable {
                         + ParamsKey.Appconf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
             }
             if (!checkAllFilesExist()) {
-                Thread.currentThread().interrupt();
+//                Thread.currentThread().interrupt();
+                LOG.error("Configurations are incorrect, sleep 5 seconds..");
+                try {
+                    Thread.sleep(5 * 1000);
+                } catch (InterruptedException e) {
+                    LOG.error("Oops, sleep interrupted");
+                }
+                requireConfigFromSupersivor();
+                break;
             }
             fillUpAppLogsFromConfig();
             registerApps();
@@ -134,7 +142,7 @@ public class Appnode extends Node implements Runnable {
                     .getString(ParamsKey.Appconf.WATCH_FILE);
             File fileForTest = new File(path);
             if (!fileForTest.exists()) {
-                LOG.error("Appnode process start faild, because file " + path + " not found. Thread interrupt!");
+                LOG.error("Appnode process start faild, because file " + path + " not found!");
                 res = false;
             } else {
                 LOG.info("Check file " + path + " ok.");
@@ -146,7 +154,7 @@ public class Appnode extends Node implements Runnable {
     @Override
     public void run() {
         //hard code, please modify to real supervisor address before mvn package
-        String supervisorHost = "test90.hadoop";
+        String supervisorHost = "localhost";
         String supervisorPort = "6999";
         try {
             init(supervisorHost, Integer.parseInt(supervisorPort));

@@ -97,7 +97,7 @@ public class Collector implements Runnable {
     private void completefile() throws IOException {
         RollIdent rollIdent = getRollIdent();
         File rollFile = getRollFile(rollIdent);
-
+        LOG.info("Trigger complete file, rename to " + rollFile);
         writer.close();
         if(!appending.renameTo(rollFile)) {
             LOG.error("rename to " + rollFile + " failed");

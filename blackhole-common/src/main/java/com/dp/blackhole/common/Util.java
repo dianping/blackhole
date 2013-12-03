@@ -194,7 +194,7 @@ public class Util {
         for (int i = 0; i < tmp.length; i++) {
             String[] tmp2 = tmp[i].split(":");
             for (int j = 0; j < 2; j++) {
-                result[i][j] = tmp2[j].substring(1, tmp2[j].length() -1 );
+                result[i][j] = tmp2[j].trim().substring(1, tmp2[j].length() -1 );
             }
         }
         return result;
