@@ -107,10 +107,11 @@ public class Segment {
     long append(MessageSet messages) throws IOException {
         int written = (int) messages.write(channel, 0 ,messages.getSize());
         unflushSize += written;
+        endOffset.addAndGet(written);
         if (unflushSize > flushThreshold) {
             flush();
         }
-        long length = endOffset.get() - startOffset + unflushSize;
+        long length = endOffset.get() - startOffset;
         if (length > splitThreshold) {
             return startOffset + length;
         }
@@ -123,7 +124,6 @@ public class Segment {
         }
 
         channel.force(true);
-        endOffset.addAndGet(unflushSize);
         unflushSize = 0;
     }
 

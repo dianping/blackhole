@@ -103,23 +103,11 @@ public class FetcherRunnable extends Thread {
         
         @Override
         public void OnConnected(DelegationIOConnection connection) {
-            //Offset from supervisor less than zero means that it should be correct first. 
-            //That's a specification rule.
-            boolean offsetNeedRecoveryBeforeWork = false;
-            for (PartitionTopicInfo info : partitionBlockMap.keySet()) {
-                if (info.getFetchedOffset() < 0) {
-                    offsetNeedRecoveryBeforeWork = true;
-                    partitionBlockMap.put(info, true);
-                    sendOffsetRequest(connection, info);
-                }
-            }
-            if (!offsetNeedRecoveryBeforeWork) {
-                if (keepOrder) {
-                    sendMultiFetchRequest(connection);
-                } else {
-                    for (PartitionTopicInfo info : partitionBlockMap.keySet()) {
-                        sendFetchRequest(connection, info);
-                    }
+            if (keepOrder) {
+                sendMultiFetchRequest(connection);
+            } else {
+                for (PartitionTopicInfo info : partitionBlockMap.keySet()) {
+                    sendFetchRequest(connection, info);
                 }
             }
         }
@@ -135,13 +123,13 @@ public class FetcherRunnable extends Thread {
         public void process(TransferWrap response, DelegationIOConnection from) {
             switch (response.getType()) {
             case DataMessageTypeFactory.FetchReply:
-                handleFetchReply(response, from);
+                handleFetchReply((FetchReply) response.unwrap(), from);
                 break;
             case DataMessageTypeFactory.OffsetReply:
-                handleOffsetReply(response, from);
+                handleOffsetReply((OffsetReply) response.unwrap(), from);
                 break;
             case DataMessageTypeFactory.MultiFetchReply:
-                handleMultiFetchReply(response, from);
+                handleMultiFetchReply((MultiFetchReply) response.unwrap(), from);
                 break;
             default:
                 LOG.error("response type is undefined");
@@ -149,6 +137,9 @@ public class FetcherRunnable extends Thread {
             }
         }
 
+        /*
+         * put received messages into chunkQueue, and update fetchOffset in the PartitionTopicInfo
+         */
         private long enqueue(ByteBufferMessageSet messages, PartitionTopicInfo info) throws InterruptedException {
             // TODO better way? this is for fetchreply with messageSet of size 0
             if (messages == null) {
@@ -165,9 +156,7 @@ public class FetcherRunnable extends Thread {
             return size;
         }
         
-        private void handleMultiFetchReply(TransferWrap response,
-                DelegationIOConnection from) {
-            MultiFetchReply multiFetchReply = (MultiFetchReply)response.unwrap();
+        private void handleMultiFetchReply(MultiFetchReply multiFetchReply, DelegationIOConnection from) {
             List<String> partitions = multiFetchReply.getPartitionList();
             List<MessageSet> messageSets = multiFetchReply.getMessagesList();
             List<Long> offsets = multiFetchReply.getOffsetList();
@@ -193,9 +182,7 @@ public class FetcherRunnable extends Thread {
             }
         }
 
-        private void handleOffsetReply(TransferWrap response,
-                DelegationIOConnection from) {
-            OffsetReply offsetReply = (OffsetReply) response.unwrap();
+        private void handleOffsetReply(OffsetReply offsetReply, DelegationIOConnection from) {
             long resetOffset = offsetReply.getOffset();
             String topic = offsetReply.getTopic();
             String partition = offsetReply.getPartition();
@@ -205,7 +192,7 @@ public class FetcherRunnable extends Thread {
                 info.resetConsumeOffset(resetOffset);
                 partitionBlockMap.put(info, false);
             } else {
-                LOG.warn("Reset offset incorrect! Retry!");
+                LOG.warn("received offset " + resetOffset + " < 0, retry send offset request");
                 sendOffsetRequest(from, info);
                 return;
             }
@@ -222,13 +209,12 @@ public class FetcherRunnable extends Thread {
             }
         }
 
-        private void handleFetchReply(TransferWrap response,
-                DelegationIOConnection from) {
-            FetchReply fetchReply = (FetchReply) response.unwrap();
+        private void handleFetchReply(FetchReply fetchReply, DelegationIOConnection from) {
             ByteBufferMessageSet messageSet = (ByteBufferMessageSet) fetchReply.getMessageSet();
             String partition = fetchReply.getPartition();
             PartitionTopicInfo info = partitionMap.get(partition);
             long offset = fetchReply.getOffset();
+            LOG.debug("reveived fetch reply: " + offset);
             if (offset == MessageAndOffset.OFFSET_OUT_OF_RANGE) {
                 sendOffsetRequest(from, info);
             } else {
@@ -237,11 +223,9 @@ public class FetcherRunnable extends Thread {
                 } catch (InterruptedException e) {
                     LOG.error("Oops, catch an Interrupted Exception of queue.put()," +
                             " but ignore it.", e);//TODO to be review;
-                } catch (RuntimeException e) {
-                    throw e;
                 }
+                sendFetchRequest(from, info);
             }
-            sendFetchRequest(from, info);
         }
 
         private void sendMultiFetchRequest(DelegationIOConnection connection) {
@@ -261,7 +245,7 @@ public class FetcherRunnable extends Thread {
 
         private void sendOffsetRequest(DelegationIOConnection from,
                 PartitionTopicInfo info) {
-            LOG.info("offset for " + info + " out of range, now we fix it");
+            LOG.info("send offset request for " + info);
             long offset;
             String autoOffsetReset = Consumer.config.getAutoOffsetReset();
             if (OffsetRequest.SMALLES_TIME_STRING.equals(autoOffsetReset)) {

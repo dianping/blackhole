@@ -9,6 +9,8 @@ import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.dp.blackhole.common.Util;
+
 public class Consumer {
     static ConsumerConfig config;
     public static final FetchedDataChunk SHUTDOWN_COMMAND = new FetchedDataChunk(null, null, -1);
@@ -88,10 +90,11 @@ public class Consumer {
         
         try {
             RandomAccessFile r = new RandomAccessFile("/tmp/r.txt", "rw");
-
+            r.seek(r.length());
+            
             for (String message : stream) {
-                System.out.println(message);
-                r.writeBytes(message+"\n");
+                r.writeBytes(message + " " +Util.getTS() +"\n");
+
             }
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
