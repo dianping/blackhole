@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.dp.blackhole.common.Util;
 
@@ -15,6 +16,7 @@ public class Partition {
     private String id;
     private List<Segment> segments;
     private File dir;
+    private final ReentrantReadWriteLock lock;
     
     int splitThreshold;
     int flushThreshold;
@@ -26,6 +28,7 @@ public class Partition {
         segments = new ArrayList<Segment>();
         this.splitThreshold = splitThreshold;
         this.flushThreshold = flushThreshold;
+        lock = new ReentrantReadWriteLock();
         loadSegments();
     }
     
@@ -75,19 +78,33 @@ public class Partition {
     
     private Segment addSegment(long offset) throws IOException {
         Segment segment = new Segment(dir.getAbsolutePath(), offset, false, false, splitThreshold, flushThreshold);
-        segments.add(segment);
+        lock.writeLock().lock();
+        try {
+            segments.add(segment);
+        } finally {
+            lock.writeLock().unlock();
+        }
         return segment;
     }
     
-    private Segment getLastSegment() {
+    private Segment unprotectedGetLastSegment() {
         if (segments.size() == 0) {
             return null;
         }
         return segments.get(segments.size() - 1);
     }
     
+    private Segment getLastSegment() {
+        lock.readLock().lock();
+        try {
+            return unprotectedGetLastSegment();
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+    
     public void append(MessageSet messages) throws IOException {
-        Segment segment = getLastSegment();
+        Segment segment = unprotectedGetLastSegment();
         if (segment == null) {
             segment = addSegment(0);
         }
@@ -107,39 +124,44 @@ public class Partition {
         }
     }
     
-    public Segment findSegment(long offset) {        
-        if (segments.size() == 0) {
-            return null;
-        }
-        int high = segments.size() -1;
-        Segment last = segments.get(high);
-        // TODO check last.getEndOffset() == offset condition
-        if (last.contains(offset) || last.getEndOffset() == offset) {
-            return last;
-        } else if (last.getEndOffset() < offset) {
-            return null;
-        }
-        
-        int low = 0;
-        Segment first = segments.get(0);
-        if (first.contains(offset)) {
-            return first;
-        } else if (first.getStartOffset() > offset) {
-            return null;
-        }
-        
-        while (low < high) {
-            int mid = (low + high)/2;
-            Segment found = segments.get(mid);
-            if (found.contains(offset)) {
-                return found;
-            } else if (found.getStartOffset() > offset) {
-                high = mid -1;
-            } else {
-                low = mid +1;
+    public Segment findSegment(long offset) {
+        lock.readLock().lock();
+        try {
+            if (segments.size() == 0) {
+                return null;
             }
+            int high = segments.size() -1;
+            Segment last = segments.get(high);
+            // TODO check last.getEndOffset() == offset condition
+            if (last.contains(offset) || last.getEndOffset() == offset) {
+                return last;
+            } else if (last.getEndOffset() < offset) {
+                return null;
+            }
+            
+            int low = 0;
+            Segment first = segments.get(0);
+            if (first.contains(offset)) {
+                return first;
+            } else if (first.getStartOffset() > offset) {
+                return null;
+            }
+            
+            while (low < high) {
+                int mid = (low + high)/2;
+                Segment found = segments.get(mid);
+                if (found.contains(offset)) {
+                    return found;
+                } else if (found.getStartOffset() > offset) {
+                    high = mid -1;
+                } else {
+                    low = mid +1;
+                }
+            }
+            return null;
+        } finally {
+            lock.readLock().unlock();
         }
-        return null;
     }
     
     public FileMessageSet read(long offset, int length) {
