@@ -6,6 +6,7 @@ import java.util.List;
 import com.dp.blackhole.common.gen.AppRegPB.AppReg;
 import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg;
 import com.dp.blackhole.common.gen.ConfResPB.ConfRes;
 import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.common.gen.DumpReplyPB.DumpReply;
@@ -34,6 +35,7 @@ public class PBwrap {
             msg.setAppReg((AppReg) message);
             break;
         case COLLECTOR_REG:
+            msg.setColNodeReg((ColNodeReg) message);
             break;
         case ASSIGN_COLLECTOR:
             msg.setAssignCollector((AssignCollector) message);
@@ -104,8 +106,10 @@ public class PBwrap {
         return wrapMessage(MessageType.APP_REG, builder.build());
     }
     
-    public static Message wrapCollectorReg() {
-        return wrapMessage(MessageType.COLLECTOR_REG, null);
+    public static Message wrapCollectorReg(int port) {
+        ColNodeReg.Builder builder = ColNodeReg.newBuilder();
+        builder.setPort(port);
+        return wrapMessage(MessageType.COLLECTOR_REG, builder.build());
     }
     
     public static Message wrapAssignCollector(String appName, String collectorServer, int port) {

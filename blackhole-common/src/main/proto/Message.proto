@@ -15,6 +15,7 @@ import "StreamID.proto";
 import "ConfRes.proto";
 import "DumpReply.proto";
 import "RemoveConf.proto";
+import "ColNodeReg.proto";
 
 message Message {
     enum MessageType {
@@ -58,4 +59,5 @@ message Message {
     optional ConfRes confRes = 11;
     optional DumpReply dumpReply = 12;
     optional RemoveConf removeConf = 13;
+    optional ColNodeReg colNodeReg =14;
 }

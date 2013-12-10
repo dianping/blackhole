@@ -188,6 +188,20 @@ public final class MessagePB {
      * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
      */
     com.dp.blackhole.common.gen.RemoveConfPB.RemoveConfOrBuilder getRemoveConfOrBuilder();
+
+    // optional .blackhole.ColNodeReg colNodeReg = 14;
+    /**
+     * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+     */
+    boolean hasColNodeReg();
+    /**
+     * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+     */
+    com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg getColNodeReg();
+    /**
+     * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+     */
+    com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeRegOrBuilder getColNodeRegOrBuilder();
   }
   /**
    * Protobuf type {@code blackhole.Message}
@@ -405,6 +419,19 @@ public final class MessagePB {
                 removeConf_ = subBuilder.buildPartial();
               }
               bitField0_ |= 0x00001000;
+              break;
+            }
+            case 114: {
+              com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.Builder subBuilder = null;
+              if (((bitField0_ & 0x00002000) == 0x00002000)) {
+                subBuilder = colNodeReg_.toBuilder();
+              }
+              colNodeReg_ = input.readMessage(com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(colNodeReg_);
+                colNodeReg_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00002000;
               break;
             }
           }
@@ -1016,6 +1043,28 @@ public final class MessagePB {
       return removeConf_;
     }
 
+    // optional .blackhole.ColNodeReg colNodeReg = 14;
+    public static final int COLNODEREG_FIELD_NUMBER = 14;
+    private com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg colNodeReg_;
+    /**
+     * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+     */
+    public boolean hasColNodeReg() {
+      return ((bitField0_ & 0x00002000) == 0x00002000);
+    }
+    /**
+     * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+     */
+    public com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg getColNodeReg() {
+      return colNodeReg_;
+    }
+    /**
+     * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+     */
+    public com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeRegOrBuilder getColNodeRegOrBuilder() {
+      return colNodeReg_;
+    }
+
     private void initFields() {
       type_ = com.dp.blackhole.common.gen.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.common.gen.AppRegPB.AppReg.getDefaultInstance();
@@ -1030,6 +1079,7 @@ public final class MessagePB {
       confRes_ = com.dp.blackhole.common.gen.ConfResPB.ConfRes.getDefaultInstance();
       dumpReply_ = com.dp.blackhole.common.gen.DumpReplyPB.DumpReply.getDefaultInstance();
       removeConf_ = com.dp.blackhole.common.gen.RemoveConfPB.RemoveConf.getDefaultInstance();
+      colNodeReg_ = com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1112,6 +1162,12 @@ public final class MessagePB {
           return false;
         }
       }
+      if (hasColNodeReg()) {
+        if (!getColNodeReg().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -1157,6 +1213,9 @@ public final class MessagePB {
       }
       if (((bitField0_ & 0x00001000) == 0x00001000)) {
         output.writeMessage(13, removeConf_);
+      }
+      if (((bitField0_ & 0x00002000) == 0x00002000)) {
+        output.writeMessage(14, colNodeReg_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1218,6 +1277,10 @@ public final class MessagePB {
       if (((bitField0_ & 0x00001000) == 0x00001000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(13, removeConf_);
+      }
+      if (((bitField0_ & 0x00002000) == 0x00002000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(14, colNodeReg_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1339,6 +1402,7 @@ public final class MessagePB {
           getConfResFieldBuilder();
           getDumpReplyFieldBuilder();
           getRemoveConfFieldBuilder();
+          getColNodeRegFieldBuilder();
         }
       }
       private static Builder create() {
@@ -1421,6 +1485,12 @@ public final class MessagePB {
           removeConfBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00001000);
+        if (colNodeRegBuilder_ == null) {
+          colNodeReg_ = com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.getDefaultInstance();
+        } else {
+          colNodeRegBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00002000);
         return this;
       }
 
@@ -1549,6 +1619,14 @@ public final class MessagePB {
         } else {
           result.removeConf_ = removeConfBuilder_.build();
         }
+        if (((from_bitField0_ & 0x00002000) == 0x00002000)) {
+          to_bitField0_ |= 0x00002000;
+        }
+        if (colNodeRegBuilder_ == null) {
+          result.colNodeReg_ = colNodeReg_;
+        } else {
+          result.colNodeReg_ = colNodeRegBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1603,6 +1681,9 @@ public final class MessagePB {
         }
         if (other.hasRemoveConf()) {
           mergeRemoveConf(other.getRemoveConf());
+        }
+        if (other.hasColNodeReg()) {
+          mergeColNodeReg(other.getColNodeReg());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1682,6 +1763,11 @@ public final class MessagePB {
         if (hasRemoveConf()) {
           if (!getRemoveConf().isInitialized()) {
             
+            return false;
+          }
+        }
+        if (hasColNodeReg()) {
+          if (!getColNodeReg().isInitialized()) {
             return false;
           }
         }
@@ -3147,6 +3233,123 @@ public final class MessagePB {
         return removeConfBuilder_;
       }
 
+      // optional .blackhole.ColNodeReg colNodeReg = 14;
+      private com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg colNodeReg_ = com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg, com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.Builder, com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeRegOrBuilder> colNodeRegBuilder_;
+      /**
+       * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+       */
+      public boolean hasColNodeReg() {
+        return ((bitField0_ & 0x00002000) == 0x00002000);
+      }
+      /**
+       * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+       */
+      public com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg getColNodeReg() {
+        if (colNodeRegBuilder_ == null) {
+          return colNodeReg_;
+        } else {
+          return colNodeRegBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+       */
+      public Builder setColNodeReg(com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg value) {
+        if (colNodeRegBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          colNodeReg_ = value;
+          onChanged();
+        } else {
+          colNodeRegBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00002000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+       */
+      public Builder setColNodeReg(
+          com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.Builder builderForValue) {
+        if (colNodeRegBuilder_ == null) {
+          colNodeReg_ = builderForValue.build();
+          onChanged();
+        } else {
+          colNodeRegBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00002000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+       */
+      public Builder mergeColNodeReg(com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg value) {
+        if (colNodeRegBuilder_ == null) {
+          if (((bitField0_ & 0x00002000) == 0x00002000) &&
+              colNodeReg_ != com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.getDefaultInstance()) {
+            colNodeReg_ =
+              com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.newBuilder(colNodeReg_).mergeFrom(value).buildPartial();
+          } else {
+            colNodeReg_ = value;
+          }
+          onChanged();
+        } else {
+          colNodeRegBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00002000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+       */
+      public Builder clearColNodeReg() {
+        if (colNodeRegBuilder_ == null) {
+          colNodeReg_ = com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.getDefaultInstance();
+          onChanged();
+        } else {
+          colNodeRegBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00002000);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+       */
+      public com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.Builder getColNodeRegBuilder() {
+        bitField0_ |= 0x00002000;
+        onChanged();
+        return getColNodeRegFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+       */
+      public com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeRegOrBuilder getColNodeRegOrBuilder() {
+        if (colNodeRegBuilder_ != null) {
+          return colNodeRegBuilder_.getMessageOrBuilder();
+        } else {
+          return colNodeReg_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg, com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.Builder, com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeRegOrBuilder> 
+          getColNodeRegFieldBuilder() {
+        if (colNodeRegBuilder_ == null) {
+          colNodeRegBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg, com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.Builder, com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeRegOrBuilder>(
+                  colNodeReg_,
+                  getParentForChildren(),
+                  isClean());
+          colNodeReg_ = null;
+        }
+        return colNodeRegBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
 
@@ -3177,34 +3380,36 @@ public final class MessagePB {
       "RecoveryRoll.proto\032\024ReadyCollector.proto" +
       "\032\014RollID.proto\032\rFailure.proto\032\025NoAvailab" +
       "leNode.proto\032\016StreamID.proto\032\rConfRes.pr" +
-      "oto\032\017DumpReply.proto\032\020RemoveConf.proto\"\372" +
-      "\007\n\007Message\022,\n\004type\030\001 \002(\0162\036.blackhole.Mes" +
-      "sage.MessageType\022!\n\006appReg\030\002 \001(\0132\021.black" +
-      "hole.AppReg\0223\n\017assignCollector\030\003 \001(\0132\032.b" +
-      "lackhole.AssignCollector\022#\n\007appRoll\030\004 \001(",
-      "\0132\022.blackhole.AppRoll\022-\n\014recoveryRoll\030\005 " +
-      "\001(\0132\027.blackhole.RecoveryRoll\0221\n\016readyCol" +
-      "lector\030\006 \001(\0132\031.blackhole.ReadyCollector\022" +
-      "!\n\006rollID\030\007 \001(\0132\021.blackhole.RollID\022#\n\007fa" +
-      "ilure\030\010 \001(\0132\022.blackhole.Failure\0223\n\017noAva" +
-      "ilableNode\030\t \001(\0132\032.blackhole.NoAvailable" +
-      "Node\022%\n\010streamId\030\n \001(\0132\023.blackhole.Strea" +
-      "mID\022#\n\007confRes\030\013 \001(\0132\022.blackhole.ConfRes" +
-      "\022\'\n\tdumpReply\030\014 \001(\0132\024.blackhole.DumpRepl" +
-      "y\022)\n\nremoveConf\030\r \001(\0132\025.blackhole.Remove",
-      "Conf\"\304\003\n\013MessageType\022\016\n\nHEARTBEART\020\001\022\013\n\007" +
-      "APP_REG\020\002\022\021\n\rCOLLECTOR_REG\020\003\022\024\n\020ASSIGN_C" +
-      "OLLECTOR\020\004\022\023\n\017READY_COLLECTOR\020\005\022\014\n\010APP_R" +
-      "OLL\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_SUCCESS" +
-      "\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_ROLL\020\n\022\024" +
-      "\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOVERY_FAIL\020\014\022" +
-      "\013\n\007FAILURE\020\r\022\023\n\017NOAVAILABLENODE\020\016\022\021\n\rUNR" +
-      "ECOVERABLE\020\017\022\030\n\024MANUAL_RECOVERY_ROLL\020\020\022\014" +
-      "\n\010DUMPSTAT\020\021\022\020\n\014RETIRESTREAM\020\022\022\014\n\010CONF_R" +
-      "EQ\020\023\022\014\n\010CONF_RES\020\024\022\023\n\017NOAVAILABLECONF\020\025\022",
-      "\014\n\010DUMPCONF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010LISTAPPS" +
-      "\020\030\022\017\n\013REMOVE_CONF\020\031B(\n\033com.dp.blackhole." +
-      "common.genB\tMessagePB"
+      "oto\032\017DumpReply.proto\032\020RemoveConf.proto\032\020" +
+      "ColNodeReg.proto\"\245\010\n\007Message\022,\n\004type\030\001 \002" +
+      "(\0162\036.blackhole.Message.MessageType\022!\n\006ap" +
+      "pReg\030\002 \001(\0132\021.blackhole.AppReg\0223\n\017assignC" +
+      "ollector\030\003 \001(\0132\032.blackhole.AssignCollect",
+      "or\022#\n\007appRoll\030\004 \001(\0132\022.blackhole.AppRoll\022" +
+      "-\n\014recoveryRoll\030\005 \001(\0132\027.blackhole.Recove" +
+      "ryRoll\0221\n\016readyCollector\030\006 \001(\0132\031.blackho" +
+      "le.ReadyCollector\022!\n\006rollID\030\007 \001(\0132\021.blac" +
+      "khole.RollID\022#\n\007failure\030\010 \001(\0132\022.blackhol" +
+      "e.Failure\0223\n\017noAvailableNode\030\t \001(\0132\032.bla" +
+      "ckhole.NoAvailableNode\022%\n\010streamId\030\n \001(\013" +
+      "2\023.blackhole.StreamID\022#\n\007confRes\030\013 \001(\0132\022" +
+      ".blackhole.ConfRes\022\'\n\tdumpReply\030\014 \001(\0132\024." +
+      "blackhole.DumpReply\022)\n\nremoveConf\030\r \001(\0132",
+      "\025.blackhole.RemoveConf\022)\n\ncolNodeReg\030\016 \001" +
+      "(\0132\025.blackhole.ColNodeReg\"\304\003\n\013MessageTyp" +
+      "e\022\016\n\nHEARTBEART\020\001\022\013\n\007APP_REG\020\002\022\021\n\rCOLLEC" +
+      "TOR_REG\020\003\022\024\n\020ASSIGN_COLLECTOR\020\004\022\023\n\017READY" +
+      "_COLLECTOR\020\005\022\014\n\010APP_ROLL\020\006\022\017\n\013UPLOAD_ROL" +
+      "L\020\007\022\022\n\016UPLOAD_SUCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t" +
+      "\022\021\n\rRECOVERY_ROLL\020\n\022\024\n\020RECOVERY_SUCCESS\020" +
+      "\013\022\021\n\rRECOVERY_FAIL\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOA" +
+      "VAILABLENODE\020\016\022\021\n\rUNRECOVERABLE\020\017\022\030\n\024MAN" +
+      "UAL_RECOVERY_ROLL\020\020\022\014\n\010DUMPSTAT\020\021\022\020\n\014RET",
+      "IRESTREAM\020\022\022\014\n\010CONF_REQ\020\023\022\014\n\010CONF_RES\020\024\022" +
+      "\023\n\017NOAVAILABLECONF\020\025\022\014\n\010DUMPCONF\020\026\022\r\n\tDU" +
+      "MPREPLY\020\027\022\014\n\010LISTAPPS\020\030\022\017\n\013REMOVE_CONF\020\031" +
+      "B(\n\033com.dp.blackhole.common.genB\tMessage" +
+      "PB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -3216,7 +3421,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "ReadyCollector", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", });
+              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "ReadyCollector", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "ColNodeReg", });
           return null;
         }
       };
@@ -3235,6 +3440,7 @@ public final class MessagePB {
           com.dp.blackhole.common.gen.ConfResPB.getDescriptor(),
           com.dp.blackhole.common.gen.DumpReplyPB.getDescriptor(),
           com.dp.blackhole.common.gen.RemoveConfPB.getDescriptor(),
+          com.dp.blackhole.common.gen.ColNodeRegPB.getDescriptor(),
         }, assigner);
   }
 

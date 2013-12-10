@@ -235,7 +235,7 @@ public class Collectornode extends Node {
     }
 
     private void registerNode() {  
-        send(PBwrap.wrapCollectorReg());
+        send(PBwrap.wrapCollectorReg(port));
         LOG.info("register collector node with supervisor");
     }
 

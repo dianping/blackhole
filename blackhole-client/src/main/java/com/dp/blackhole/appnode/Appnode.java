@@ -66,8 +66,8 @@ public class Appnode extends Node implements Runnable {
                 recoveryThreadPool.execute(recovery);
                 return true;
             } else {
-                LOG.error("AppName [" + recoveryRoll.getAppName()
-                        + "] from supervisor message not match with local");
+                LOG.error("RECOVERY_ROLL: " + recoveryRoll.getAppName()
+                        + " from supervisor message not match with local");
             }
             break;
         case ASSIGN_COLLECTOR:
@@ -85,8 +85,8 @@ public class Appnode extends Node implements Runnable {
                     LOG.info("duplicated assign collector message: " + assignCollector);
                 }
             } else {
-                LOG.error("AppName [" + assignCollector.getAppName()
-                        + "] from supervisor message not match with local");
+                LOG.error("ASSIGN_COLLECTOR: " + assignCollector.getAppName()
+                        + " from supervisor message not match with local");
             }
             break;
         case NOAVAILABLECONF:

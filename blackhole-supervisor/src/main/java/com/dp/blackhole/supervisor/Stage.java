@@ -13,7 +13,6 @@ public class Stage {
     public static final int COLLECTORFAIL = 6;
 //    public static final int NOCOLLECTOR = 7;
     public static final int PENDING = 5;
-    public static final int MISSED = 7;
     
     List<Issue> issuelist;
     
@@ -39,8 +38,6 @@ public class Stage {
             return "COLLECTORFAIL";
         case Stage.PENDING:
             return "PENDING";
-        case Stage.MISSED:
-            return "MISSED";
         default:
             return "UNKNOWN";
         }

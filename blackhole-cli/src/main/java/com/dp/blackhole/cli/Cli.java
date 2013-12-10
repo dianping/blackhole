@@ -21,6 +21,8 @@ import com.dp.blackhole.node.Node;
 
 public class Cli extends Node {
     private static final Log LOG = LogFactory.getLog(Cli.class);
+    private String[] args;
+    private String autoCmd;
 
     class CliProcessor extends Thread {
         BufferedReader in;
@@ -37,7 +39,7 @@ public class Cli extends Node {
             return cmd.split("\\s+");
         }
         
-        private void processCommand(String cmd) {
+        public void processCommand(String cmd) {
             if (cmd.equals("dumpstat")) {
                 Message msg = PBwrap.wrapDumpStat();
                 send(msg);
@@ -114,6 +116,20 @@ public class Cli extends Node {
         }
     }
     
+    class CloseTimer extends Thread {
+        @Override
+        public void run() {
+            LOG.info("Currently Cli JVM will be terminated after 10 sec.");
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                LOG.warn(e.getMessage());
+            }
+            LOG.info("Cli shutdown.");
+            System.exit(0);
+        }
+    }
+    
     @Override
     protected boolean process(Message msg) {
         MessageType type = msg.getType();
@@ -131,6 +147,16 @@ public class Cli extends Node {
         return true;
     }
 
+    @Override
+    protected void onConnected() {
+        if (autoCmd == null) {
+            return;
+        }
+        CliProcessor processor = new CliProcessor();
+        processor.processCommand(autoCmd.trim());
+        new CloseTimer().start();
+    }
+
     private void start() throws FileNotFoundException, IOException {
         Properties prop = new Properties();
         prop.load(new FileReader(new File("config.properties")));
@@ -140,15 +166,25 @@ public class Cli extends Node {
         
         init(serverhost, serverport);
         
-        CliProcessor processor = new CliProcessor();
-        processor.setDaemon(true);
-        processor.start();
-        
+        if (args.length > 0 && args[0].equals("auto")) {
+            String cmd = new String();
+            for (int i = 1; i < args.length; i++) {
+                cmd += args[i] + " ";
+            }
+            LOG.info("auto command: " + cmd);
+            autoCmd = cmd.trim();
+        } else {
+            CliProcessor processor = new CliProcessor();
+            processor.setDaemon(true);
+            processor.start();
+        }
+
         loop();
     }
     
     public static void main(String[] args) throws FileNotFoundException, IOException {
         Cli cli = new Cli();
+        cli.args = args;
         cli.start();
     }
 }

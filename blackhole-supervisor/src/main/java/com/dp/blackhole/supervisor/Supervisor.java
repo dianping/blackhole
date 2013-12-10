@@ -34,6 +34,7 @@ import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.Connection;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg;
 import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
@@ -55,7 +56,6 @@ public class Supervisor {
     volatile private boolean running = true;
     private Handler[] handlers = null;
     private int handlerCount = 1;
-    private int collectorPort;
     
     private BlockingQueue<Msg> messageQueue;
     private ConcurrentHashMap<Connection, ArrayList<Stream>> connectionStreamMap;
@@ -64,6 +64,7 @@ public class Supervisor {
     private ConcurrentHashMap<String, Connection> appNodes;
     private ConcurrentHashMap<Stream, ArrayList<Stage>> Streams;
     private ConcurrentHashMap<StreamId, Stream> streamIdMap;
+    private ConcurrentHashMap<String, Integer> collectorHostPortMap;
     private LionConfChange lionConfChange;
     
     private class Msg {
@@ -349,6 +350,7 @@ public class Supervisor {
             handleAppNodeFail(connection, now);
         } else if (connection.getNodeType() == Connection.COLLECTORNODE) {
             collectorNodes.remove(host);
+            collectorHostPortMap.remove(host);
             LOG.info("close COLLECTORNODE: " + host);
             handleCollectorNodeFail(connection, now);
         }
@@ -541,16 +543,23 @@ public class Supervisor {
         Stream stream = streamIdMap.get(id);
 
         if (stream != null) {
+            // check the stream is active
+            if (!stream.isActive()) {
+                LOG.error("the manual recovery stage must belong to an active stream");
+                return;
+            }
             ArrayList<Stage> stages = Streams.get(stream);
             if (stages != null) {
                 synchronized (stages) {
                     // process stage missed only
                     for (Stage stage : stages) {
                         if (stage.rollTs == rollID.getRollTs()) {
-                            if (stage.status == Stage.MISSED) {
+                            if (stage.status != Stage.RECOVERYING && stage.status != Stage.UPLOADING) {
                                 doRecovery(stream, stage);
-                                return;
+                            } else {
+                                LOG.warn("Can't recovery stage manually cause the stage is " + stage.status);
                             }
+                            return;
                         }
                     }
                     // create the stage
@@ -591,7 +600,8 @@ public class Supervisor {
                     for (Stage stage : stages) {
                         if (stage.rollTs == rollID.getRollTs()) {
                             LOG.error("stage " + stage + " cannot be recovered");
-                            stage.status = Stage.MISSED;
+                            stages.remove(stage);
+                            stageConnectionMap.remove(stage);
                             break;
                         }
                     }
@@ -705,10 +715,10 @@ public class Supervisor {
                     }
                 }
             } else {
-                LOG.error("can not find stages of stream: " + stream);
+                LOG.warn("can not find stages of stream: " + stream);
             }
         } else {
-            LOG.error("can't find stream by streamid: " + id);
+            LOG.warn("can't find stream by streamid: " + id);
         }
     }
 
@@ -797,7 +807,7 @@ public class Supervisor {
                     }
                     if (current == null) {
                         LOG.error("Stages may missed from stage:" + stages.get(stages.size() - 1) 
-                                + " to before stage:" + msg.getRollTs());
+                                + " to stage:" + msg.getRollTs());
                         int missedStageCount = getMissedStageCount(stream, msg.getRollTs());
                         LOG.info("need recovery missed stages: " + missedStageCount);
                         Stage oldcurrent = stages.get(stages.size() - 1);
@@ -871,7 +881,7 @@ public class Supervisor {
             stageConnectionMap.remove(stage);
         } else {
             Connection c = appNodes.get(stream.appHost);
-            Message message = PBwrap.wrapRecoveryRoll(stream.app, collector, collectorPort, stage.rollTs);
+            Message message = PBwrap.wrapRecoveryRoll(stream.app, collector, collectorHostPortMap.get(collector), stage.rollTs);
             send(c, message);
             
             stage.status = Stage.RECOVERYING;
@@ -1078,7 +1088,7 @@ public class Supervisor {
         String collector = getCollector();
         Message message;
         if (collector != null) {
-            message = PBwrap.wrapAssignCollector(app, collector, collectorPort);
+            message = PBwrap.wrapAssignCollector(app, collector, collectorHostPortMap.get(collector));
         } else {
             message = PBwrap.wrapNoAvailableNode(app);
         }
@@ -1087,9 +1097,10 @@ public class Supervisor {
         return collector;
     }
     
-    private void registerCollectorNode(Connection from) {
+    private void registerCollectorNode(ColNodeReg colNodeReg, Connection from) {
         from.setNodeType(Connection.COLLECTORNODE);
         collectorNodes.put(from.getHost(), from);
+        collectorHostPortMap.put(from.getHost(), colNodeReg.getPort());
     }
 
     /* 
@@ -1135,7 +1146,7 @@ public class Supervisor {
                 from.updateHeartBeat();
                 break;
             case COLLECTOR_REG:
-                registerCollectorNode(from);
+                registerCollectorNode(msg.getColNodeReg(), from);
                 break;
             case APP_REG:
                 registerApp(msg, from);
@@ -1220,7 +1231,6 @@ public class Supervisor {
         
         handlerCount = Integer.parseInt(prop.getProperty("supervisor.handlercount"));
         int port = Integer.parseInt(prop.getProperty("supervisor.port"));
-        collectorPort = Integer.parseInt(prop.getProperty("collectornode.port"));
         
         ServerSocketChannel ssc = ServerSocketChannel.open();
         ssc.configureBlocking(false);
@@ -1235,6 +1245,7 @@ public class Supervisor {
         messageQueue = new LinkedBlockingQueue<Msg>();
         Streams = new ConcurrentHashMap<Stream, ArrayList<Stage>>();
         streamIdMap = new ConcurrentHashMap<StreamId, Stream>();
+        collectorHostPortMap = new ConcurrentHashMap<String, Integer>();
         //initLion(or initZooKeeper)
         connectAppConfKeeper(prop);
         // start message handler thread
