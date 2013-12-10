@@ -228,8 +228,9 @@ public class PBwrap {
         return wrapMessage(MessageType.OFFSET_COMMIT, builder.build());
     }
     
-    public static Message wrapAssignConsumer(String consumerId, String topic, ArrayList<PartitionInfo> partitionInfos) {
+    public static Message wrapAssignConsumer(String groupId, String consumerId, String topic, ArrayList<PartitionInfo> partitionInfos) {
         AssignConsumer.Builder builder = AssignConsumer.newBuilder();
+        builder.setGroup(groupId);
         builder.setConsumerIdString(consumerId);
         builder.setTopic(topic);
         

@@ -111,6 +111,7 @@ public class Partition {
         long offset = segment.append(messages);
         if (offset != 0) {
             segment.flush();
+            segment.setCloseTimestamp(Util.getTS());
             addSegment(offset);
         }
     }
@@ -172,7 +173,22 @@ public class Partition {
         return segment.read(offset, length);
     }
     
+    // for test only
     List<Segment> getSegments() {
         return segments;
+    }
+    
+    public void cleanupSegments(long current, long threshold) {
+        lock.writeLock().lock();
+        try {
+            for (Segment s : segments) {
+                if (current - s.getCloseTimestamp() >= threshold) {
+                    segments.remove(s);
+                    s.destory();
+                }
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 }

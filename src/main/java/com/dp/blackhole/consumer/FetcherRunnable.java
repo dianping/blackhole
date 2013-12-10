@@ -38,11 +38,11 @@ public class FetcherRunnable extends Thread {
     private final Map<String, PartitionTopicInfo> partitionMap;
     private Map<PartitionTopicInfo, Boolean> partitionBlockMap;
     private BlockingQueue<FetchedDataChunk> chunkQueue;
-    private boolean keepOrder;
+    private ConsumerConfig config;
     
     private GenClient<TransferWrap, DelegationIOConnection, ConsumerProcessor> client;
     
-    public FetcherRunnable(String consumerId, String broker, List<PartitionTopicInfo> partitionTopicInfos, LinkedBlockingQueue<FetchedDataChunk> queue) {
+    public FetcherRunnable(String consumerId, String broker, List<PartitionTopicInfo> partitionTopicInfos, LinkedBlockingQueue<FetchedDataChunk> queue, ConsumerConfig config) {
         this.consumerId = consumerId;
         this.broker = broker;
         this.chunkQueue = queue;
@@ -52,7 +52,7 @@ public class FetcherRunnable extends Thread {
             partitionMap.put(info.partition, info);
             partitionBlockMap.put(info, false);
         }
-        keepOrder = false;
+        this.config = config;
     }
 
     public Collection<PartitionTopicInfo> getpartitionInfos() {
@@ -103,7 +103,7 @@ public class FetcherRunnable extends Thread {
         
         @Override
         public void OnConnected(DelegationIOConnection connection) {
-            if (keepOrder) {
+            if (config.isMultiFetch()) {
                 sendMultiFetchRequest(connection);
             } else {
                 for (PartitionTopicInfo info : partitionBlockMap.keySet()) {
@@ -200,7 +200,7 @@ public class FetcherRunnable extends Thread {
             ConsumerConnector connector = ConsumerConnector.getInstance();
             connector.updateOffset(consumerId, topic, partition, resetOffset);
             
-            if (keepOrder) {
+            if (config.isMultiFetch()) {
                 if (!needBlocking()) {
                     sendMultiFetchRequest(from);
                 }
@@ -236,8 +236,8 @@ public class FetcherRunnable extends Thread {
                         info.topic, 
                         info.partition, 
                         info.getFetchedOffset(), 
-                        Consumer.config.getFetchSize()
-                    )
+                        config.getFetchSize()
+                            )
                 );
             }
             connection.send(new TransferWrap(new MultiFetchRequest(fetches)));
@@ -247,10 +247,9 @@ public class FetcherRunnable extends Thread {
                 PartitionTopicInfo info) {
             LOG.info("send offset request for " + info);
             long offset;
-            String autoOffsetReset = Consumer.config.getAutoOffsetReset();
-            if (OffsetRequest.SMALLES_TIME_STRING.equals(autoOffsetReset)) {
+            if (OffsetRequest.SMALLES_TIME_STRING.equals(config.getAutoOffsetReset())) {
                 offset = OffsetRequest.EARLIES_TTIME;
-            } else if (OffsetRequest.LARGEST_TIME_STRING.equals(autoOffsetReset)) {
+            } else if (OffsetRequest.LARGEST_TIME_STRING.equals(config.getAutoOffsetReset())) {
                 offset = OffsetRequest.LATES_TTIME;
             } else {
                 offset = OffsetRequest.LATES_TTIME;
@@ -267,9 +266,7 @@ public class FetcherRunnable extends Thread {
                             info.topic, 
                             info.partition, 
                             info.getFetchedOffset(), 
-                            Consumer.config.getFetchSize()
-                    )
-                )
+                            config.getFetchSize()))
             );
         }
 

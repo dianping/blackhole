@@ -12,7 +12,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import com.dp.blackhole.common.Util;
 
 public class Consumer {
-    static ConsumerConfig config;
     public static final FetchedDataChunk SHUTDOWN_COMMAND = new FetchedDataChunk(null, null, -1);
     
     private LinkedBlockingQueue<FetchedDataChunk> queue;
@@ -20,19 +19,23 @@ public class Consumer {
     private String topic;
     private String group;
     private String consumerId;
-    private int consumerTimeoutMs;
+    private int ConsumerTimeoutMs;
     
-    public Consumer(String topic, String group, int consumerTimeoutMs) {
+    public Consumer(String topic, String group) {
+        this(topic, group, -1, 2);
+    }
+    
+    public Consumer(String topic, String group, int ConsumerTimeoutMs) {
+        this(topic, group, ConsumerTimeoutMs, 2);
+    }
+    
+    public Consumer(String topic, String group, int ConsumerTimeoutMs, int dataQueueSize) {
         this.topic = topic;
         this.group = group;
         consumerId = generateConsumerId(group);
-        this.consumerTimeoutMs = consumerTimeoutMs;
-        queue = new LinkedBlockingQueue<FetchedDataChunk>(Consumer.config.getMaxQueuedChunks());
+        queue = new LinkedBlockingQueue<FetchedDataChunk>(dataQueueSize);
         ConsumerConnector.getInstance().registerConsumer(topic, group, consumerId ,this);
-    }
-    
-    public Consumer(String topic, String group) {
-        this(topic, group, -1);
+        this.ConsumerTimeoutMs = ConsumerTimeoutMs;
     }
     
     LinkedBlockingQueue<FetchedDataChunk> getDataQueue() {
@@ -47,19 +50,8 @@ public class Consumer {
         queue.put(SHUTDOWN_COMMAND);
     }
     
-    public synchronized static void initEnv(Properties prop) {
-        config = new ConsumerConfig(prop);
-        ConsumerConnector connector = ConsumerConnector.getInstance();
-        if (!connector.initialized) {
-            connector.initialized = true;
-            Thread thread = new Thread(connector);
-            thread.setDaemon(true);
-            thread.start();
-        }
-    }
-    
-    public MessageStream getStream( ) {
-        return new MessageStream(topic, queue, consumerTimeoutMs);
+    public MessageStream getStream() {
+        return new MessageStream(topic, queue, ConsumerTimeoutMs);
     }
 
     /**
@@ -83,9 +75,10 @@ public class Consumer {
         String topic = "openAPI1";
         String group = "testgroup";
         Properties properties = new Properties();
-        properties.setProperty("bla", "bla");
-        Consumer.initEnv(properties);
-        Consumer consumer = new Consumer(topic, group, -1);
+
+        ConsumerConfig config = new ConsumerConfig(properties);
+        ConsumerConnector.init(config);
+        Consumer consumer = new Consumer(topic, group);
         MessageStream stream = consumer.getStream();
         
         try {

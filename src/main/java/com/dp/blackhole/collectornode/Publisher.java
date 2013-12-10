@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.mortbay.log.Log;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.collectornode.persistent.FileMessageSet;
 import com.dp.blackhole.collectornode.persistent.MessageAndOffset;
@@ -29,6 +30,8 @@ import com.dp.blackhole.network.TransferWrap;
 import com.dp.blackhole.network.TypedFactory;
 
 public class Publisher extends Thread {
+    private final Log Log = LogFactory.getLog(Publisher.class);
+    
     GenServer<TransferWrap, DelegationIOConnection, EntityProcessor<TransferWrap, DelegationIOConnection>> server;
     PublisherExecutor executor;
     Properties prop;
@@ -49,8 +52,8 @@ public class Publisher extends Thread {
     public Publisher(Properties prop) throws IOException {
         this.prop = prop;
         String storagedir = prop.getProperty("publisher.storage.dir");
-        int splitThreshold = Integer.parseInt(prop.getProperty("publisher.storage.splitThreshold", "65536"));
-        int flushThreshold = Integer.parseInt(prop.getProperty("publisher.storage.flushThreshold", "8192"));
+        int splitThreshold = Integer.parseInt(prop.getProperty("publisher.storage.splitThreshold", "536870912"));
+        int flushThreshold = Integer.parseInt(prop.getProperty("publisher.storage.flushThreshold", "4194304"));
         PersistentManager mananger = new PersistentManager(storagedir, splitThreshold, flushThreshold);
         executor = new PublisherExecutor(mananger);
         ConnectionFactory<DelegationIOConnection> factory = new DelegationIOConnection.DelegationIOConnectionFactory();

@@ -5,7 +5,7 @@
 	<groupId>com.dp</groupId>
 	<artifactId>blackhole</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.2</version>
+	<version>realtime.snapshot</version>
 	<name>blackhole</name>
 	<build>
 		<plugins>

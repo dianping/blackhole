@@ -16,23 +16,24 @@ public class ConsumerConfig {
 
     private int autoCommitIntervalMs;
 
-    private int maxQueuedChunks;
+//    private int maxQueuedChunks;
 
     private String autoOffsetReset;
 
     private int consumerTimeoutMs;
     
-    private boolean betterOrdered;
+    private boolean multiFetch;
 
     public ConsumerConfig(Properties props) {
-        this.supervisorHost = getString(props, "supervisor.host", "localhost");
-        this.supervisorPort = getInt(props, "supervisor.port", 8080);
+        this.supervisorHost = getString(props, "supervisor.host", "192.168.7.80");
+        this.supervisorPort = getInt(props, "supervisor.port", 6999);
         this.fetchSize = getInt(props, "fetch.size", 1024 * 1024);//1MB
         this.autoCommit = getBoolean(props, "autocommit.enable", true);
         this.autoCommitIntervalMs = getInt(props, "autocommit.interval.ms", 1000);//1 seconds
-        this.maxQueuedChunks = getInt(props, "queuedchunks.max", 10);
+//        this.maxQueuedChunks = getInt(props, "queuedchunks.max", 2);
         this.autoOffsetReset = getString(props, "autooffset.reset", OffsetRequest.SMALLES_TIME_STRING);
-        this.betterOrdered = getBoolean(props, "messages.betterOrdered", false);
+        this.multiFetch = getBoolean(props, "messages.multiFetch", false);
+        this.consumerTimeoutMs = getInt(props, "consumer.timeout.ms", -1);
     }
 
     public String getSupervisorHost() {
@@ -71,10 +72,10 @@ public class ConsumerConfig {
         return autoCommitIntervalMs;
     }
 
-    /** max number of messages buffered for consumption */
-    public int getMaxQueuedChunks() {
-        return maxQueuedChunks;
-    }
+//    /** max number of messages buffered for consumption */
+//    public int getMaxQueuedChunks() {
+//        return maxQueuedChunks;
+//    }
 
     /**
      * what to do if an offset is out of range.
@@ -114,15 +115,15 @@ public class ConsumerConfig {
         return props.getProperty(name, defaultValue);
     }
 
-    public boolean isBetterOrdered() {
-        return betterOrdered;
+    public boolean isMultiFetch() {
+        return multiFetch;
     }
 
     /**
      * @param betterOrdered if true, the latency of message receiving will be increase,
      * but messages receiving form different partitions are synchronous and better time ordered.
      */
-    public void setBetterOrdered(boolean betterOrdered) {
-        this.betterOrdered = betterOrdered;
+    public void setMultiFetch(boolean multiFetch) {
+        this.multiFetch = multiFetch;
     }
 }

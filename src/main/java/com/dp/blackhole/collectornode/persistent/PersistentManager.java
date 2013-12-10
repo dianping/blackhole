@@ -9,10 +9,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.dp.blackhole.collectornode.Publisher;
 import com.dp.blackhole.common.Util;
 
 public class PersistentManager {
+    private final Log Log = LogFactory.getLog(PersistentManager.class);
+    
     private Map<String, Map<String, Partition>> storage;
     
     private String basedir;
@@ -29,6 +34,10 @@ public class PersistentManager {
         reporter r = new reporter();
         r.setDaemon(true);
         r.start();
+        
+        cleanner c = new cleanner();
+        c.setDaemon(true);
+        c.start();
     }
     
     private void load() throws IOException {
@@ -69,7 +78,6 @@ public class PersistentManager {
             map.put(topic, partition);
         }
         return partition;
-        //TODO notify supervisor new topic/partition created
     }
     
     public int getFlushThreshold() {
@@ -95,6 +103,8 @@ public class PersistentManager {
         
         private List<ReportEntry> entrylist;
         private Map<String, Long> knownTopicParitionOffsets;
+        private long interval = 3000;
+        
         public reporter() {
             knownTopicParitionOffsets = new HashMap<String, Long>();
         }
@@ -131,9 +141,10 @@ public class PersistentManager {
         
         @Override
         public void run() {
+            Log.info("start report thread at interval " + interval/1000);
             while (true) {
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(interval);
                     report();
                 } catch (InterruptedException e) {
                     // TODO Auto-generated catch block
@@ -144,4 +155,32 @@ public class PersistentManager {
         }
     }
     
+    public class cleanner extends Thread {
+        private long threshold = 24 * 3600 * 1000l;
+        private long interval = 3600 * 1000l;
+        
+        private void cleanup() {
+            long current = Util.getTS();
+            for (Map<String, Partition> m : storage.values()) {
+                for (Partition p : m.values()) {
+                    p.cleanupSegments(current, threshold);
+                }
+            }
+        }
+        
+        @Override
+        public void run() {
+            Log.info("start cleanner thread at interval " + interval/1000);
+            while (true) {
+                try {
+                    Thread.sleep(interval);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                cleanup();
+            }
+        }
+                
+    }
 }

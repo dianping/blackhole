@@ -265,7 +265,7 @@ public class Supervisor {
         
         int j = 0;
         for (Consumer consumer : consumersMap.values()) {
-            Message assign = PBwrap.wrapAssignConsumer(consumer.getId(), topic, assignPartitions.get(j));
+            Message assign = PBwrap.wrapAssignConsumer(group.getId(), consumer.getId(), topic, assignPartitions.get(j));
             consumer.setPartitions(assignPartitions.get(j));
             j++;
             send(consumer.getConnection(), assign);

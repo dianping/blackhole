@@ -194,10 +194,7 @@ public class Collectornode extends Node {
         acceptor.start();
         
         // start PublisherService
-        Properties prop1 = new Properties();
-        prop1.setProperty("publisher.storage.dir", "/tmp/realtime");
-        prop1.setProperty("GenServer.port", "2222");
-        Publisher pub = new Publisher(prop1);
+        Publisher pub = new Publisher(prop);
         pub.setDaemon(true);
         pub.start();
         
