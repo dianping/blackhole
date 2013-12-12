@@ -98,10 +98,6 @@ public class Publisher extends Thread {
                 e.printStackTrace();
             }
             
-            if (messages == null) {
-                Log.info("request offset: " + request.offset + "current tail offset: " + p.getEndOffset());
-            }
-            
             TransferWrap reply = null;
             if (messages == null) {
                 reply = new TransferWrap(new FetchReply(p.getId(), messages, MessageAndOffset.OFFSET_OUT_OF_RANGE));

@@ -57,7 +57,9 @@ public class Partition {
 
             @Override
             public int compare(File o1, File o2) {
-                return (int) (getFileOffset(o1) - getFileOffset(o2));
+                Long of1 = getFileOffset(o1);
+                Long of2 = getFileOffset(o2);
+                return of1.compareTo(of2);
             } 
         });
         
@@ -148,7 +150,7 @@ public class Partition {
                 return null;
             }
             
-            while (low < high) {
+            while (low <= high) {
                 int mid = (low + high)/2;
                 Segment found = segments.get(mid);
                 if (found.contains(offset)) {
