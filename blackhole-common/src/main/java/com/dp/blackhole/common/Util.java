@@ -138,8 +138,20 @@ public class Util {
      * return ts of 15:00;
      */
     public static long getLatestRotateRollTs(long ts, long rollPeriod) {
+        return getLatestRotateRollTsUnderTimeBuf(ts, rollPeriod, 0);
+    }
+    
+    /*
+     * get the stage roll timestamp under a forward delay, for example
+     * timebuf is 5000, now is 15:59:55, and rollPeroid is 1 hour, then
+     * return ts of 15:00;
+     * timebuf is 5000, now is 15:59:54, and rollPeroid is 1 hour, then
+     * return ts of 14:00;
+     */
+    public static long getLatestRotateRollTsUnderTimeBuf(
+            long ts, long rollPeriod, long clockSyncBufMillis) {
         rollPeriod = rollPeriod * 1000;
-        ts = (ts / rollPeriod -1) * rollPeriod;
+        ts = ((ts + clockSyncBufMillis) / rollPeriod -1) * rollPeriod;
         //TODO 1378443602000 will get wrong result
         if (rollPeriod >= magic) {
             ts = ts - magic;
