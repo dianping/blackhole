@@ -9,6 +9,7 @@ import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
 import com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg;
 import com.dp.blackhole.common.gen.ConfResPB.ConfRes;
 import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
+import com.dp.blackhole.common.gen.DumpAppPB.DumpApp;
 import com.dp.blackhole.common.gen.DumpReplyPB.DumpReply;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
@@ -82,6 +83,9 @@ public class PBwrap {
             break;
         case REMOVE_CONF:
             msg.setRemoveConf((RemoveConf) message);
+            break;
+        case DUMP_APP:
+            msg.setDumpApp((DumpApp) message);
             break;
         default:
         }
@@ -261,5 +265,11 @@ public class PBwrap {
         builder.setAppName(appName);
         builder.addAllAppServers(appServers);
         return wrapMessage(MessageType.REMOVE_CONF, builder.build());
+    }
+    
+    public static Message wrapDumpApp(String appName) {
+        DumpApp.Builder builder = DumpApp.newBuilder();
+        builder.setAppName(appName);
+        return wrapMessage(MessageType.DUMP_APP, builder.build());
     }
 }

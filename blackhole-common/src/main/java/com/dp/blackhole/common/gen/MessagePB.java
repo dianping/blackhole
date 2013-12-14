@@ -202,6 +202,20 @@ public final class MessagePB {
      * <code>optional .blackhole.ColNodeReg colNodeReg = 14;</code>
      */
     com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeRegOrBuilder getColNodeRegOrBuilder();
+
+    // optional .blackhole.DumpApp dumpApp = 15;
+    /**
+     * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+     */
+    boolean hasDumpApp();
+    /**
+     * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+     */
+    com.dp.blackhole.common.gen.DumpAppPB.DumpApp getDumpApp();
+    /**
+     * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+     */
+    com.dp.blackhole.common.gen.DumpAppPB.DumpAppOrBuilder getDumpAppOrBuilder();
   }
   /**
    * Protobuf type {@code blackhole.Message}
@@ -434,6 +448,19 @@ public final class MessagePB {
               bitField0_ |= 0x00002000;
               break;
             }
+            case 122: {
+              com.dp.blackhole.common.gen.DumpAppPB.DumpApp.Builder subBuilder = null;
+              if (((bitField0_ & 0x00004000) == 0x00004000)) {
+                subBuilder = dumpApp_.toBuilder();
+              }
+              dumpApp_ = input.readMessage(com.dp.blackhole.common.gen.DumpAppPB.DumpApp.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(dumpApp_);
+                dumpApp_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00004000;
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -578,6 +605,10 @@ public final class MessagePB {
        * <code>REMOVE_CONF = 25;</code>
        */
       REMOVE_CONF(24, 25),
+      /**
+       * <code>DUMP_APP = 26;</code>
+       */
+      DUMP_APP(25, 26),
       ;
 
       /**
@@ -680,6 +711,10 @@ public final class MessagePB {
        * <code>REMOVE_CONF = 25;</code>
        */
       public static final int REMOVE_CONF_VALUE = 25;
+      /**
+       * <code>DUMP_APP = 26;</code>
+       */
+      public static final int DUMP_APP_VALUE = 26;
 
 
       public final int getNumber() { return value; }
@@ -711,6 +746,7 @@ public final class MessagePB {
           case 23: return DUMPREPLY;
           case 24: return LISTAPPS;
           case 25: return REMOVE_CONF;
+          case 26: return DUMP_APP;
           default: return null;
         }
       }
@@ -1065,6 +1101,28 @@ public final class MessagePB {
       return colNodeReg_;
     }
 
+    // optional .blackhole.DumpApp dumpApp = 15;
+    public static final int DUMPAPP_FIELD_NUMBER = 15;
+    private com.dp.blackhole.common.gen.DumpAppPB.DumpApp dumpApp_;
+    /**
+     * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+     */
+    public boolean hasDumpApp() {
+      return ((bitField0_ & 0x00004000) == 0x00004000);
+    }
+    /**
+     * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+     */
+    public com.dp.blackhole.common.gen.DumpAppPB.DumpApp getDumpApp() {
+      return dumpApp_;
+    }
+    /**
+     * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+     */
+    public com.dp.blackhole.common.gen.DumpAppPB.DumpAppOrBuilder getDumpAppOrBuilder() {
+      return dumpApp_;
+    }
+
     private void initFields() {
       type_ = com.dp.blackhole.common.gen.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.common.gen.AppRegPB.AppReg.getDefaultInstance();
@@ -1080,6 +1138,7 @@ public final class MessagePB {
       dumpReply_ = com.dp.blackhole.common.gen.DumpReplyPB.DumpReply.getDefaultInstance();
       removeConf_ = com.dp.blackhole.common.gen.RemoveConfPB.RemoveConf.getDefaultInstance();
       colNodeReg_ = com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg.getDefaultInstance();
+      dumpApp_ = com.dp.blackhole.common.gen.DumpAppPB.DumpApp.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1168,6 +1227,12 @@ public final class MessagePB {
           return false;
         }
       }
+      if (hasDumpApp()) {
+        if (!getDumpApp().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -1216,6 +1281,9 @@ public final class MessagePB {
       }
       if (((bitField0_ & 0x00002000) == 0x00002000)) {
         output.writeMessage(14, colNodeReg_);
+      }
+      if (((bitField0_ & 0x00004000) == 0x00004000)) {
+        output.writeMessage(15, dumpApp_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1281,6 +1349,10 @@ public final class MessagePB {
       if (((bitField0_ & 0x00002000) == 0x00002000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(14, colNodeReg_);
+      }
+      if (((bitField0_ & 0x00004000) == 0x00004000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(15, dumpApp_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1403,6 +1475,7 @@ public final class MessagePB {
           getDumpReplyFieldBuilder();
           getRemoveConfFieldBuilder();
           getColNodeRegFieldBuilder();
+          getDumpAppFieldBuilder();
         }
       }
       private static Builder create() {
@@ -1491,6 +1564,12 @@ public final class MessagePB {
           colNodeRegBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00002000);
+        if (dumpAppBuilder_ == null) {
+          dumpApp_ = com.dp.blackhole.common.gen.DumpAppPB.DumpApp.getDefaultInstance();
+        } else {
+          dumpAppBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00004000);
         return this;
       }
 
@@ -1627,6 +1706,14 @@ public final class MessagePB {
         } else {
           result.colNodeReg_ = colNodeRegBuilder_.build();
         }
+        if (((from_bitField0_ & 0x00004000) == 0x00004000)) {
+          to_bitField0_ |= 0x00004000;
+        }
+        if (dumpAppBuilder_ == null) {
+          result.dumpApp_ = dumpApp_;
+        } else {
+          result.dumpApp_ = dumpAppBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1684,6 +1771,9 @@ public final class MessagePB {
         }
         if (other.hasColNodeReg()) {
           mergeColNodeReg(other.getColNodeReg());
+        }
+        if (other.hasDumpApp()) {
+          mergeDumpApp(other.getDumpApp());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1768,6 +1858,13 @@ public final class MessagePB {
         }
         if (hasColNodeReg()) {
           if (!getColNodeReg().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasDumpApp()) {
+          if (!getDumpApp().isInitialized()) {
+            
             return false;
           }
         }
@@ -3350,6 +3447,123 @@ public final class MessagePB {
         return colNodeRegBuilder_;
       }
 
+      // optional .blackhole.DumpApp dumpApp = 15;
+      private com.dp.blackhole.common.gen.DumpAppPB.DumpApp dumpApp_ = com.dp.blackhole.common.gen.DumpAppPB.DumpApp.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.gen.DumpAppPB.DumpApp, com.dp.blackhole.common.gen.DumpAppPB.DumpApp.Builder, com.dp.blackhole.common.gen.DumpAppPB.DumpAppOrBuilder> dumpAppBuilder_;
+      /**
+       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+       */
+      public boolean hasDumpApp() {
+        return ((bitField0_ & 0x00004000) == 0x00004000);
+      }
+      /**
+       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+       */
+      public com.dp.blackhole.common.gen.DumpAppPB.DumpApp getDumpApp() {
+        if (dumpAppBuilder_ == null) {
+          return dumpApp_;
+        } else {
+          return dumpAppBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+       */
+      public Builder setDumpApp(com.dp.blackhole.common.gen.DumpAppPB.DumpApp value) {
+        if (dumpAppBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          dumpApp_ = value;
+          onChanged();
+        } else {
+          dumpAppBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00004000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+       */
+      public Builder setDumpApp(
+          com.dp.blackhole.common.gen.DumpAppPB.DumpApp.Builder builderForValue) {
+        if (dumpAppBuilder_ == null) {
+          dumpApp_ = builderForValue.build();
+          onChanged();
+        } else {
+          dumpAppBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00004000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+       */
+      public Builder mergeDumpApp(com.dp.blackhole.common.gen.DumpAppPB.DumpApp value) {
+        if (dumpAppBuilder_ == null) {
+          if (((bitField0_ & 0x00004000) == 0x00004000) &&
+              dumpApp_ != com.dp.blackhole.common.gen.DumpAppPB.DumpApp.getDefaultInstance()) {
+            dumpApp_ =
+              com.dp.blackhole.common.gen.DumpAppPB.DumpApp.newBuilder(dumpApp_).mergeFrom(value).buildPartial();
+          } else {
+            dumpApp_ = value;
+          }
+          onChanged();
+        } else {
+          dumpAppBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00004000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+       */
+      public Builder clearDumpApp() {
+        if (dumpAppBuilder_ == null) {
+          dumpApp_ = com.dp.blackhole.common.gen.DumpAppPB.DumpApp.getDefaultInstance();
+          onChanged();
+        } else {
+          dumpAppBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00004000);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+       */
+      public com.dp.blackhole.common.gen.DumpAppPB.DumpApp.Builder getDumpAppBuilder() {
+        bitField0_ |= 0x00004000;
+        onChanged();
+        return getDumpAppFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+       */
+      public com.dp.blackhole.common.gen.DumpAppPB.DumpAppOrBuilder getDumpAppOrBuilder() {
+        if (dumpAppBuilder_ != null) {
+          return dumpAppBuilder_.getMessageOrBuilder();
+        } else {
+          return dumpApp_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.common.gen.DumpAppPB.DumpApp, com.dp.blackhole.common.gen.DumpAppPB.DumpApp.Builder, com.dp.blackhole.common.gen.DumpAppPB.DumpAppOrBuilder> 
+          getDumpAppFieldBuilder() {
+        if (dumpAppBuilder_ == null) {
+          dumpAppBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.common.gen.DumpAppPB.DumpApp, com.dp.blackhole.common.gen.DumpAppPB.DumpApp.Builder, com.dp.blackhole.common.gen.DumpAppPB.DumpAppOrBuilder>(
+                  dumpApp_,
+                  getParentForChildren(),
+                  isClean());
+          dumpApp_ = null;
+        }
+        return dumpAppBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
 
@@ -3381,35 +3595,36 @@ public final class MessagePB {
       "\032\014RollID.proto\032\rFailure.proto\032\025NoAvailab" +
       "leNode.proto\032\016StreamID.proto\032\rConfRes.pr" +
       "oto\032\017DumpReply.proto\032\020RemoveConf.proto\032\020" +
-      "ColNodeReg.proto\"\245\010\n\007Message\022,\n\004type\030\001 \002" +
-      "(\0162\036.blackhole.Message.MessageType\022!\n\006ap" +
-      "pReg\030\002 \001(\0132\021.blackhole.AppReg\0223\n\017assignC" +
-      "ollector\030\003 \001(\0132\032.blackhole.AssignCollect",
-      "or\022#\n\007appRoll\030\004 \001(\0132\022.blackhole.AppRoll\022" +
-      "-\n\014recoveryRoll\030\005 \001(\0132\027.blackhole.Recove" +
-      "ryRoll\0221\n\016readyCollector\030\006 \001(\0132\031.blackho" +
-      "le.ReadyCollector\022!\n\006rollID\030\007 \001(\0132\021.blac" +
-      "khole.RollID\022#\n\007failure\030\010 \001(\0132\022.blackhol" +
-      "e.Failure\0223\n\017noAvailableNode\030\t \001(\0132\032.bla" +
-      "ckhole.NoAvailableNode\022%\n\010streamId\030\n \001(\013" +
-      "2\023.blackhole.StreamID\022#\n\007confRes\030\013 \001(\0132\022" +
-      ".blackhole.ConfRes\022\'\n\tdumpReply\030\014 \001(\0132\024." +
-      "blackhole.DumpReply\022)\n\nremoveConf\030\r \001(\0132",
-      "\025.blackhole.RemoveConf\022)\n\ncolNodeReg\030\016 \001" +
-      "(\0132\025.blackhole.ColNodeReg\"\304\003\n\013MessageTyp" +
-      "e\022\016\n\nHEARTBEART\020\001\022\013\n\007APP_REG\020\002\022\021\n\rCOLLEC" +
-      "TOR_REG\020\003\022\024\n\020ASSIGN_COLLECTOR\020\004\022\023\n\017READY" +
-      "_COLLECTOR\020\005\022\014\n\010APP_ROLL\020\006\022\017\n\013UPLOAD_ROL" +
-      "L\020\007\022\022\n\016UPLOAD_SUCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t" +
-      "\022\021\n\rRECOVERY_ROLL\020\n\022\024\n\020RECOVERY_SUCCESS\020" +
-      "\013\022\021\n\rRECOVERY_FAIL\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOA" +
-      "VAILABLENODE\020\016\022\021\n\rUNRECOVERABLE\020\017\022\030\n\024MAN" +
-      "UAL_RECOVERY_ROLL\020\020\022\014\n\010DUMPSTAT\020\021\022\020\n\014RET",
-      "IRESTREAM\020\022\022\014\n\010CONF_REQ\020\023\022\014\n\010CONF_RES\020\024\022" +
-      "\023\n\017NOAVAILABLECONF\020\025\022\014\n\010DUMPCONF\020\026\022\r\n\tDU" +
-      "MPREPLY\020\027\022\014\n\010LISTAPPS\020\030\022\017\n\013REMOVE_CONF\020\031" +
-      "B(\n\033com.dp.blackhole.common.genB\tMessage" +
-      "PB"
+      "ColNodeReg.proto\032\rDumpApp.proto\"\330\010\n\007Mess" +
+      "age\022,\n\004type\030\001 \002(\0162\036.blackhole.Message.Me" +
+      "ssageType\022!\n\006appReg\030\002 \001(\0132\021.blackhole.Ap" +
+      "pReg\0223\n\017assignCollector\030\003 \001(\0132\032.blackhol",
+      "e.AssignCollector\022#\n\007appRoll\030\004 \001(\0132\022.bla" +
+      "ckhole.AppRoll\022-\n\014recoveryRoll\030\005 \001(\0132\027.b" +
+      "lackhole.RecoveryRoll\0221\n\016readyCollector\030" +
+      "\006 \001(\0132\031.blackhole.ReadyCollector\022!\n\006roll" +
+      "ID\030\007 \001(\0132\021.blackhole.RollID\022#\n\007failure\030\010" +
+      " \001(\0132\022.blackhole.Failure\0223\n\017noAvailableN" +
+      "ode\030\t \001(\0132\032.blackhole.NoAvailableNode\022%\n" +
+      "\010streamId\030\n \001(\0132\023.blackhole.StreamID\022#\n\007" +
+      "confRes\030\013 \001(\0132\022.blackhole.ConfRes\022\'\n\tdum" +
+      "pReply\030\014 \001(\0132\024.blackhole.DumpReply\022)\n\nre",
+      "moveConf\030\r \001(\0132\025.blackhole.RemoveConf\022)\n" +
+      "\ncolNodeReg\030\016 \001(\0132\025.blackhole.ColNodeReg" +
+      "\022#\n\007dumpApp\030\017 \001(\0132\022.blackhole.DumpApp\"\322\003" +
+      "\n\013MessageType\022\016\n\nHEARTBEART\020\001\022\013\n\007APP_REG" +
+      "\020\002\022\021\n\rCOLLECTOR_REG\020\003\022\024\n\020ASSIGN_COLLECTO" +
+      "R\020\004\022\023\n\017READY_COLLECTOR\020\005\022\014\n\010APP_ROLL\020\006\022\017" +
+      "\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_SUCCESS\020\010\022\017\n\013U" +
+      "PLOAD_FAIL\020\t\022\021\n\rRECOVERY_ROLL\020\n\022\024\n\020RECOV" +
+      "ERY_SUCCESS\020\013\022\021\n\rRECOVERY_FAIL\020\014\022\013\n\007FAIL" +
+      "URE\020\r\022\023\n\017NOAVAILABLENODE\020\016\022\021\n\rUNRECOVERA",
+      "BLE\020\017\022\030\n\024MANUAL_RECOVERY_ROLL\020\020\022\014\n\010DUMPS" +
+      "TAT\020\021\022\020\n\014RETIRESTREAM\020\022\022\014\n\010CONF_REQ\020\023\022\014\n" +
+      "\010CONF_RES\020\024\022\023\n\017NOAVAILABLECONF\020\025\022\014\n\010DUMP" +
+      "CONF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010LISTAPPS\020\030\022\017\n\013R" +
+      "EMOVE_CONF\020\031\022\014\n\010DUMP_APP\020\032B(\n\033com.dp.bla" +
+      "ckhole.common.genB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -3421,7 +3636,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "ReadyCollector", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "ColNodeReg", });
+              new java.lang.String[] { "Type", "AppReg", "AssignCollector", "AppRoll", "RecoveryRoll", "ReadyCollector", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "ColNodeReg", "DumpApp", });
           return null;
         }
       };
@@ -3441,6 +3656,7 @@ public final class MessagePB {
           com.dp.blackhole.common.gen.DumpReplyPB.getDescriptor(),
           com.dp.blackhole.common.gen.RemoveConfPB.getDescriptor(),
           com.dp.blackhole.common.gen.ColNodeRegPB.getDescriptor(),
+          com.dp.blackhole.common.gen.DumpAppPB.getDescriptor(),
         }, assigner);
   }
 

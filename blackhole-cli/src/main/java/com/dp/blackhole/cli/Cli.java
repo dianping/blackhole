@@ -40,61 +40,86 @@ public class Cli extends Node {
         }
         
         public void processCommand(String cmd) {
-            if (cmd.equals("dumpstat")) {
-                Message msg = PBwrap.wrapDumpStat();
-                send(msg);
-                out.println("send message: " + msg);
-            } else if (cmd.startsWith("recovery")) {
-                String[] tokens = getTokens(cmd);
-                String appName = tokens[1];
-                String appServer = tokens[2];
-                long rollTs = Long.parseLong(tokens[3]); 
-                Message msg = PBwrap.wrapManualRecoveryRoll(appName, appServer, rollTs);
-                send(msg);
-                out.println("send message: " + msg);
-            } else if (cmd.startsWith("range")) {
-                //recovery -a 3600 1385276400000 1385301600000
-                String[] tokens = getTokens(cmd);
-                String appName = tokens[1];
-                String appServer = tokens[2];
-                long period = Long.parseLong(tokens[3]);
-                long startRollTs = Long.parseLong(tokens[4]);
-                long endRollTs = Long.parseLong(tokens[5]);
-                long recoveryStageCount = (endRollTs - startRollTs) / period / 1000;
-                for (int i = 0; i<= recoveryStageCount; i++) {
-                    long rollTs = startRollTs + period * 1000 * (i);
+            try {
+                if (cmd.equals("dumpstat")) {
+                    Message msg = PBwrap.wrapDumpStat();
+                    send(msg);
+                    out.println("send message: " + msg);
+                } else if (cmd.startsWith("dumpapp")) {
+                    String[] tokens = getTokens(cmd);
+                    String appName = tokens[1];
+                    Message msg = PBwrap.wrapDumpApp(appName);
+                    send(msg);
+                    out.println("send message: " + msg);
+                } else if (cmd.startsWith("recovery")) {
+                    String[] tokens = getTokens(cmd);
+                    String appName = tokens[1];
+                    String appServer = tokens[2];
+                    long rollTs = Long.parseLong(tokens[3]); 
                     Message msg = PBwrap.wrapManualRecoveryRoll(appName, appServer, rollTs);
                     send(msg);
                     out.println("send message: " + msg);
+                } else if (cmd.startsWith("range")) {
+                    //recovery -a 3600 1385276400000 1385301600000
+                    String[] tokens = getTokens(cmd);
+                    String appName = tokens[1];
+                    String appServer = tokens[2];
+                    long period = Long.parseLong(tokens[3]);
+                    long startRollTs = Long.parseLong(tokens[4]);
+                    long endRollTs = Long.parseLong(tokens[5]);
+                    long recoveryStageCount = (endRollTs - startRollTs) / period / 1000;
+                    for (int i = 0; i<= recoveryStageCount; i++) {
+                        long rollTs = startRollTs + period * 1000 * (i);
+                        Message msg = PBwrap.wrapManualRecoveryRoll(appName, appServer, rollTs);
+                        send(msg);
+                        out.println("send message: " + msg);
+                    }
+                } else if (cmd.startsWith("retire")) {
+                    String[] tokens = getTokens(cmd);
+                    String appName = tokens[1];
+                    String appServer = tokens[2];
+                    Message msg = PBwrap.wrapRetireStream(appName, appServer);
+                    send(msg);
+                    out.println("send message: " + msg);
+                } else if (cmd.equals("dumpconf")) {
+                    Message msg = PBwrap.wrapDumpConf();
+                    send(msg);
+                    out.println("send message: " + msg);
+                } else if (cmd.equals("listapps")) {
+                    Message msg = PBwrap.wrapListApps();
+                    send(msg);
+                    out.println("send message: " + msg);
+                } else if (cmd.startsWith("rmconf")) {
+                    String[] tokens = getTokens(cmd);
+                    String appName = tokens[1];
+                    ArrayList<String> appServers = new ArrayList<String>();
+                    for (int i = 2; i < tokens.length; i++) {
+                        appServers.add(tokens[i]);
+                    }
+                    Message msg = PBwrap.wrapRemoveConf(appName, appServers);
+                    send(msg);
+                } else if (cmd.equals("help")) {
+                    out.println("Usage:");
+                    out.println(" dumpstat              Display all of streams information.");
+                    out.println(" dumpconf              Display all of app config information.");
+                    out.println(" listapps              List all of application names.");
+                    out.println(" dumpapp <appname>     Display the stream, stages of the application followed.");
+                    out.println(" rmconf <appname>      Remove the configuration specified by appname which should be useless.");
+                    out.println("                       (Just remove from supervisor memory rather than lion/ZK).");
+                    out.println(" retire <appname> <appserver>      Retire the stream specified by appname and appserver.");
+                    out.println(" recovery <appname> <appserver> <rolltimestamp>");
+                    out.println("                       Recovery the stream specified by appname, appserver and roll ts.");
+                    out.println(" range <appname> <appserver> <period> <start rolltimestamp> <end rolltimestamp>");
+                    out.println("                       Recovery a range of streams specified period from start timestamp to end timestamp.");
+                    out.println(" quit                  Quit the command line interface.");
+                    out.println(" help                  Display help information.");
+                } else if (cmd.equals("quit")) {
+                    System.exit(0);
+                } else {
+                    out.println("unknown command. Enter \"help\" for more information.");
                 }
-            } else if (cmd.startsWith("retire")) {
-                String[] tokens = getTokens(cmd);
-                String appName = tokens[1];
-                String appServer = tokens[2];
-                Message msg = PBwrap.wrapRetireStream(appName, appServer);
-                send(msg);
-                out.println("send message: " + msg);
-            } else if (cmd.equals("dumpconf")) {
-                Message msg = PBwrap.wrapDumpConf();
-                send(msg);
-                out.println("send message: " + msg);
-            } else if (cmd.equals("listapps")) {
-                Message msg = PBwrap.wrapListApps();
-                send(msg);
-                out.println("send message: " + msg);
-            } else if (cmd.startsWith("rmconf")) {
-                String[] tokens = getTokens(cmd);
-                String appName = tokens[1];
-                ArrayList<String> appServers = new ArrayList<String>();
-                for (int i = 2; i < tokens.length; i++) {
-                    appServers.add(tokens[i]);
-                }
-                Message msg = PBwrap.wrapRemoveConf(appName, appServers);
-                send(msg);
-            } else if (cmd.equals("quit")) {
-                System.exit(0);
-            } else {
-                out.println("unknown command");
+            } catch (ArrayIndexOutOfBoundsException e) {
+                out.println("Incorrect command format. Enter \"help\" for more information.");
             }
         }
         
@@ -107,7 +132,7 @@ public class Cli extends Node {
             
             try {
                 while ((cmd = in.readLine()) != null) {
-                    processCommand(cmd);
+                    processCommand(cmd.trim());
                     out.print("blackhole.cli>");
                 }
             } catch (Exception e) {
