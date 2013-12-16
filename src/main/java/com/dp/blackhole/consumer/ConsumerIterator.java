@@ -69,7 +69,6 @@ public class ConsumerIterator implements Iterator<String> {
             }
             if (currentDataChunk == Consumer.SHUTDOWN_COMMAND) {
                 logger.warn("Now closing the message stream");
-                queue.offer(currentDataChunk);
                 state = State.DONE;
                 return null;
             } else {

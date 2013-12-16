@@ -36,7 +36,7 @@ public class PartitionTopicInfo {
         return consumedOffsetChanged;
     }
 
-    public boolean resetComsumedOffsetChanged(long lastChanged) {
+    public boolean updateComsumedOffsetChanged(long lastChanged) {
         return consumedOffsetChanged.compareAndSet(lastChanged, 0);
     }
 

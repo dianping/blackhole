@@ -33,14 +33,13 @@ import com.dp.blackhole.network.TransferWrap;
 public class FetcherRunnable extends Thread {
     private final Log LOG = LogFactory.getLog(FetcherRunnable.class);
     
+    private GenClient<TransferWrap, DelegationIOConnection, ConsumerProcessor> client;
     private String consumerId; 
     private String broker;
     private final Map<String, PartitionTopicInfo> partitionMap;
     private Map<PartitionTopicInfo, Boolean> partitionBlockMap;
     private BlockingQueue<FetchedDataChunk> chunkQueue;
     private ConsumerConfig config;
-    
-    private GenClient<TransferWrap, DelegationIOConnection, ConsumerProcessor> client;
     
     public FetcherRunnable(String consumerId, String broker, List<PartitionTopicInfo> partitionTopicInfos, LinkedBlockingQueue<FetchedDataChunk> queue, ConsumerConfig config) {
         this.consumerId = consumerId;
@@ -58,7 +57,7 @@ public class FetcherRunnable extends Thread {
     public Collection<PartitionTopicInfo> getpartitionInfos() {
         return partitionMap.values();
     }
-    public void shutdown() throws InterruptedException {
+    public void shutdown() {
         LOG.debug("shutdown the fetcher " + getName());
         client.shutdown();
     }
@@ -107,6 +106,9 @@ public class FetcherRunnable extends Thread {
                 sendMultiFetchRequest(connection);
             } else {
                 for (PartitionTopicInfo info : partitionBlockMap.keySet()) {
+                    long uoffset = 268437820;
+                    info.updateFetchOffset(uoffset);
+                    info.updateComsumedOffsetChanged(uoffset);
                     sendFetchRequest(connection, info);
                 }
             }

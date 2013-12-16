@@ -3,6 +3,7 @@ package com.dp.blackhole.consumer;
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dianping.lion.EnvZooKeeperConfig;
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.LionException;
+
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer;
 import com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset;
@@ -22,40 +27,62 @@ import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.node.Node;
 
 public class ConsumerConnector extends Node implements Runnable {
+    private final Log LOG = LogFactory.getLog(ConsumerConnector.class);
+    
     private static ConsumerConnector instance = new ConsumerConnector();
     
     public static ConsumerConnector getInstance() {
         return instance;
     }
     
-    private final Log LOG = LogFactory.getLog(ConsumerConnector.class);
     public volatile boolean initialized = false;
     
     // consumerIdString->[fetcherrunable1, fetcherrunable2]
     private Map<String, List<FetcherRunnable>> consumerThreadsMap;
-    //registered consumers
+    // registered consumers
     private ConcurrentHashMap<String, Consumer> consumers;   
     private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
 
-    private ConsumerConfig config;
+    private String supervisorHost;
+    private int supervisorPort;
+    private boolean autoCommit;
+    private int autoCommitIntervalMs;
+    
+    private Map<String, ConsumerConfig> configMap = Collections.synchronizedMap(new HashMap<String, ConsumerConfig>());
     
     private ConsumerConnector() {
     }
     
-    public synchronized static void init(ConsumerConfig config) {
+    public synchronized void init() throws LionException {
+        ConfigCache configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
+        String host = configCache.getProperty("blackhole.supervisor.host");
+        int port = configCache.getIntProperty("blackhole.supervisor.port");
+        init(host, port, true, 3000);
+    }
+
+    public synchronized void init(String supervisorHost, int supervisorPort, boolean autoCommit, int autoCommitIntervalMs) {
         if (!instance.initialized) {
-            instance.config = config;
             instance.initialized = true;
+            instance.supervisorHost = supervisorHost;
+            instance.supervisorPort = supervisorPort;
+            instance.autoCommit = autoCommit;
+            instance.autoCommitIntervalMs = autoCommitIntervalMs;
+            
             Thread thread = new Thread(instance);
             thread.setDaemon(true);
             thread.start();
-        }
+        } 
     }
-    
+
     public void commitOffsets() {
+        if (!isConnected()) {
+            LOG.debug("ConsumerConnector is not connected, do not commit offset this time");
+            return;
+        }
         for (Entry<String, List<FetcherRunnable>> e : consumerThreadsMap.entrySet()) {
             String id = e.getKey();
             List<FetcherRunnable> fetches = e.getValue();
+
             for (FetcherRunnable f : fetches) {
                 for (PartitionTopicInfo info : f.getpartitionInfos()) {
                     long lastChanged = info.getConsumedOffsetChanged().get();
@@ -64,7 +91,7 @@ public class ConsumerConnector extends Node implements Runnable {
                     }
                     long newOffset = info.getConsumedOffset();
                     updateOffset(id , info.topic, info.partition, newOffset);
-                    info.resetComsumedOffsetChanged(lastChanged);
+                    info.updateComsumedOffsetChanged(lastChanged);
                     LOG.debug("Committed " + info.partition + " for topic " + info.topic);
                 }
             }
@@ -73,49 +100,22 @@ public class ConsumerConnector extends Node implements Runnable {
     
     @Override
     public void onDisconnected() {
-        LOG.info("ConsumerConnector shutting down");
-        try {
-            scheduler.shutdown();
-            for (Map.Entry<String, List<FetcherRunnable>> entry : consumerThreadsMap.entrySet()) {
-                for (FetcherRunnable fetcherThread : entry.getValue()) {
-                    try {
-                        fetcherThread.shutdown();
-                    } catch (InterruptedException e) {
-                        LOG.warn(e.getMessage(), e);
-                    }
-                }
-                LOG.debug("Clear consumer=>fetcherthread map. KEY[" + entry.getKey() + "]");
-            }
-            
-            for (Consumer c : consumers.values()) {
-                c.clearQueue();
-                try {
-                    c.shutdown();
-                } catch (InterruptedException e) {
-                    LOG.warn(e.getMessage(), e);
-                }
-            }
-            consumerThreadsMap.clear();
-        } catch (Exception e) {
-            LOG.error("error during consumer connector shutdown", e);
-        }
-        LOG.info("ConsumerConnector shut down completed");
+        LOG.info("ConsumerConnector disconnected");
     }
     
     @Override
     public void run() {
         consumerThreadsMap = new ConcurrentHashMap<String, List<FetcherRunnable>>();
         consumers = new ConcurrentHashMap<String, Consumer>();
-        if (config.isAutoCommit()) {
-            int interval = config.getAutoCommitIntervalMs();
-            LOG.info("starting auto committer every " + interval + " ms");
+        if (autoCommit) {
+            LOG.info("starting auto committer every " + autoCommitIntervalMs + " ms");
             scheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
             scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-            scheduler.scheduleAtFixedRate(new AutoCommitTask(), interval, 
-                    interval, TimeUnit.MILLISECONDS);
+            scheduler.scheduleAtFixedRate(new AutoCommitTask(), autoCommitIntervalMs, 
+                    autoCommitIntervalMs, TimeUnit.MILLISECONDS);
         }
         try {
-            init(config.getSupervisorHost(), config.getSupervisorPort());
+            init(supervisorHost, supervisorPort);
         } catch (ClosedChannelException e) {
             LOG.error("Oops, got an exception, thread start fail.", e);
             return;
@@ -147,14 +147,10 @@ public class ConsumerConnector extends Node implements Runnable {
             
             String consumerId = assign.getConsumerIdString();
             //First, shutdown thread and clear consumer queue.
-            List<FetcherRunnable> threadList = consumerThreadsMap.get(consumerId);
-            if (threadList != null) {
-                for (FetcherRunnable fetcherThread : threadList) {
-                    try {
-                        fetcherThread.shutdown();
-                    } catch (InterruptedException e) {
-                        LOG.warn(e.getMessage(), e);
-                    }
+            List<FetcherRunnable> fetches = consumerThreadsMap.get(consumerId);
+            if (fetches != null) {
+                for (FetcherRunnable fetcherThread : fetches) {
+                    fetcherThread.shutdown();
                 }
                 consumerThreadsMap.remove(consumerId);
             }
@@ -185,15 +181,15 @@ public class ConsumerConnector extends Node implements Runnable {
             }
 
             //start a fetcher thread for every broker, fetcher thread contains a NIO client
-            threadList = new ArrayList<FetcherRunnable>();
-            consumerThreadsMap.put(consumerId, threadList);
+            fetches = Collections.synchronizedList(new ArrayList<FetcherRunnable>());
             for (Map.Entry<String, List<PartitionTopicInfo>> entry : brokerPartitionInfoMap.entrySet()) {
                 String brokerString = entry.getKey();
                 List<PartitionTopicInfo> pInfoList = entry.getValue();
-                FetcherRunnable fetcherThread = new FetcherRunnable(consumerId, brokerString, pInfoList, c.getDataQueue(), config);
-                threadList.add(fetcherThread);
+                FetcherRunnable fetcherThread = new FetcherRunnable(consumerId, brokerString, pInfoList, c.getDataQueue(), configMap.get(consumerId));
+                fetches.add(fetcherThread);
                 fetcherThread.start();
             }
+            consumerThreadsMap.put(consumerId, fetches);
             break;
         default:
             LOG.error("Illegal message type " + msg.getType());
@@ -206,10 +202,31 @@ public class ConsumerConnector extends Node implements Runnable {
      * @param consumer 
      */
     void registerConsumer(String topic, String group, String consumerId, Consumer consumer) {
+        configMap.put(consumerId, consumer.getConf());
         consumers.put(consumerId, consumer);
         sendRegConsumer(topic, group, consumerId);
     }
-
+    
+    public void stop() throws InterruptedException {
+        super.shutdown();
+        scheduler.shutdown();
+        for (List<FetcherRunnable> fetchers : consumerThreadsMap.values()) {
+            for (FetcherRunnable f : fetchers) {
+                f.shutdown();
+            }
+        }
+        consumerThreadsMap.clear();
+        configMap.clear();
+        for (Consumer c : consumers.values()) {
+            c.shutdown();
+        }
+        consumers.clear();
+    }
+    
+    public static void shutdownNow() throws InterruptedException {
+        instance.stop();
+    }
+    
     private void sendRegConsumer(String topic, String group, String consumerId) {
         Message message = PBwrap.wrapConsumerReg(group, consumerId, topic);
         LOG.info("register consumer to supervisor " + group + "-" + consumerId + " => " + topic);

@@ -77,7 +77,7 @@ public abstract class Node {
     
     protected void loopInternal() {
         SelectionKey key = null;
-        while (socketChannel.isOpen()) {
+        while (running && socketChannel.isOpen()) {
             try {
                 selector.select();
                 Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
@@ -245,6 +245,15 @@ public abstract class Node {
     
     public String getHost() {
         return host;
+    }
+    
+    public void shutdown() {
+        running = false;
+        selector.wakeup();
+    }
+    
+    protected boolean isConnected() {
+        return connected.get();
     }
     
     public Node() {

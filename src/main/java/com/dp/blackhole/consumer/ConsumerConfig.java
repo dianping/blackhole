@@ -5,18 +5,10 @@ import java.util.Properties;
 import com.dp.blackhole.collectornode.persistent.protocol.OffsetRequest;
 
 public class ConsumerConfig {
-    
-    private String supervisorHost;
-    
-    private int supervisorPort;
 
     private int fetchSize;
 
-    private boolean autoCommit;
-
-    private int autoCommitIntervalMs;
-
-//    private int maxQueuedChunks;
+    private int maxQueuedChunks;
 
     private String autoOffsetReset;
 
@@ -25,57 +17,26 @@ public class ConsumerConfig {
     private boolean multiFetch;
 
     public ConsumerConfig(Properties props) {
-        this.supervisorHost = getString(props, "supervisor.host", "192.168.7.80");
-        this.supervisorPort = getInt(props, "supervisor.port", 6999);
         this.fetchSize = getInt(props, "fetch.size", 1024 * 1024);//1MB
-        this.autoCommit = getBoolean(props, "autocommit.enable", true);
-        this.autoCommitIntervalMs = getInt(props, "autocommit.interval.ms", 1000);//1 seconds
-//        this.maxQueuedChunks = getInt(props, "queuedchunks.max", 2);
+        this.maxQueuedChunks = getInt(props, "queuedchunks.max", 2);
         this.autoOffsetReset = getString(props, "autooffset.reset", OffsetRequest.SMALLES_TIME_STRING);
         this.multiFetch = getBoolean(props, "messages.multiFetch", false);
         this.consumerTimeoutMs = getInt(props, "consumer.timeout.ms", -1);
     }
 
-    public String getSupervisorHost() {
-        return supervisorHost;
+    public ConsumerConfig() {
+        this(new Properties());
     }
-
-    public void setSupervisorHost(String supervisorHost) {
-        this.supervisorHost = supervisorHost;
-    }
-
-    public int getSupervisorPort() {
-        return supervisorPort;
-    }
-
-    public void setSupervisorPort(int supervisorPort) {
-        this.supervisorPort = supervisorPort;
-    }
-
+    
     /** the number of byes of messages to attempt to fetch */
     public int getFetchSize() {
         return fetchSize;
     }
 
-    /**
-     * if true, periodically commit to zookeeper the offset of messages already fetched by the
-     * consumer
-     */
-    public boolean isAutoCommit() {
-        return autoCommit;
+    /** max number of messages buffered for consumption */
+    public int getMaxQueuedChunks() {
+        return maxQueuedChunks;
     }
-
-    /**
-     * the frequency in ms that the consumer offsets are committed to zookeeper
-     */
-    public int getAutoCommitIntervalMs() {
-        return autoCommitIntervalMs;
-    }
-
-//    /** max number of messages buffered for consumption */
-//    public int getMaxQueuedChunks() {
-//        return maxQueuedChunks;
-//    }
 
     /**
      * what to do if an offset is out of range.
@@ -98,6 +59,10 @@ public class ConsumerConfig {
         return consumerTimeoutMs;
     }
 
+    public boolean isMultiFetch() {
+        return multiFetch;
+    }
+    
     public boolean getBoolean(Properties props, String name, boolean defaultValue) {
         if (!props.containsKey(name)) return defaultValue;
         return "true".equalsIgnoreCase(props.getProperty(name));
@@ -113,17 +78,5 @@ public class ConsumerConfig {
     
     public String getString(Properties props, String name, String defaultValue) {
         return props.getProperty(name, defaultValue);
-    }
-
-    public boolean isMultiFetch() {
-        return multiFetch;
-    }
-
-    /**
-     * @param betterOrdered if true, the latency of message receiving will be increase,
-     * but messages receiving form different partitions are synchronous and better time ordered.
-     */
-    public void setMultiFetch(boolean multiFetch) {
-        this.multiFetch = multiFetch;
     }
 }
