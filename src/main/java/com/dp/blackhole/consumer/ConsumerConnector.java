@@ -134,7 +134,7 @@ public class ConsumerConnector extends Node implements Runnable {
             AssignConsumer assign = msg.getAssignConsumer();
             
             if (assign.getPartitionOffsetsList().isEmpty()) {
-                LOG.info("received no PartitionOffsetsList, retry atfer 3 seconds");
+                LOG.info("received no PartitionOffsetsList, retry atfer 5 seconds");
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {

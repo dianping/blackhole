@@ -106,9 +106,6 @@ public class FetcherRunnable extends Thread {
                 sendMultiFetchRequest(connection);
             } else {
                 for (PartitionTopicInfo info : partitionBlockMap.keySet()) {
-                    long uoffset = 268437820;
-                    info.updateFetchOffset(uoffset);
-                    info.updateComsumedOffsetChanged(uoffset);
                     sendFetchRequest(connection, info);
                 }
             }
