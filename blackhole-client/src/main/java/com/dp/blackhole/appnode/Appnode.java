@@ -30,41 +30,51 @@ public class Appnode extends Node implements Runnable {
     private FileListener listener;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
-    
+    private Map<String, RollRecovery> recoveryingMap = new ConcurrentHashMap<String, RollRecovery>();
+
     public Appnode() {
         pool = Executors.newCachedThreadPool();
         recoveryThreadPool = Executors.newFixedThreadPool(2);
     }
-    
+
     @Override
     public boolean process(Message msg) {
-	    String appName;
-	    String collectorServer;
-	    int collectorPort;
-  	    AppLog appLog = null;
-  	    LogReader logReader = null;
-  	    MessageType type = msg.getType();
-  	    switch (type) {
-  	    case NOAVAILABLENODE:
-  	        try {
+        String appName;
+        String collectorServer;
+        int collectorPort;
+        AppLog appLog = null;
+        LogReader logReader = null;
+        RollRecovery rollRecovery = null;
+        MessageType type = msg.getType();
+        switch (type) {
+        case NOAVAILABLENODE:
+            try {
                 Thread.sleep(5 * 1000);
             } catch (InterruptedException e) {
                 LOG.info("NOAVAILABLENODE sleep interrupted");
             }
-  	        String app = msg.getNoAvailableNode().getAppName();
-  	        AppLog applog = appLogs.get(app); 
-  	        register(app, applog.getCreateTime());
-  	        break;
+            String app = msg.getNoAvailableNode().getAppName();
+            AppLog applog = appLogs.get(app);
+            register(app, applog.getCreateTime());
+            break;
         case RECOVERY_ROLL:
             RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
             appName = recoveryRoll.getAppName();
             if ((appLog = appLogs.get(appName)) != null) {
                 long rollTs = recoveryRoll.getRollTs();
-                collectorServer = recoveryRoll.getCollectorServer();
-                collectorPort =  recoveryRoll.getCollectorPort();
-                RollRecovery recovery = new RollRecovery(this, collectorServer, collectorPort, appLog, rollTs);
-                recoveryThreadPool.execute(recovery);
-                return true;
+                String recoveryKey = appName + ":" + rollTs;
+                if ((rollRecovery = recoveryingMap.get(recoveryKey)) == null) {
+                    collectorServer = recoveryRoll.getCollectorServer();
+                    collectorPort = recoveryRoll.getCollectorPort();
+                    rollRecovery = new RollRecovery(this, collectorServer,
+                            collectorPort, appLog, rollTs);
+                    recoveryingMap.put(recoveryKey, rollRecovery);
+                    recoveryThreadPool.execute(rollRecovery);
+                    return true;
+                } else {
+                    LOG.debug("duplicated recovery roll message: "
+                            + recoveryRoll);
+                }
             } else {
                 LOG.error("RECOVERY_ROLL: " + recoveryRoll.getAppName()
                         + " from supervisor message not match with local");
@@ -111,7 +121,6 @@ public class Appnode extends Node implements Runnable {
                         + ParamsKey.Appconf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
             }
             if (!checkAllFilesExist()) {
-//                Thread.currentThread().interrupt();
                 LOG.error("Configurations are incorrect, sleep 5 seconds..");
                 try {
                     Thread.sleep(5 * 1000);
@@ -127,7 +136,7 @@ public class Appnode extends Node implements Runnable {
         default:
             LOG.error("Illegal message type " + msg.getType());
         }
-  	    return false;
+        return false;
     }
 
     private void register(String appName, long regTimestamp) {
@@ -138,8 +147,8 @@ public class Appnode extends Node implements Runnable {
     private boolean checkAllFilesExist() {
         boolean res = true;
         for (String appName : ConfigKeeper.configMap.keySet()) {
-            String path = ConfigKeeper.configMap.get(appName)
-                    .getString(ParamsKey.Appconf.WATCH_FILE);
+            String path = ConfigKeeper.configMap.get(appName).getString(
+                    ParamsKey.Appconf.WATCH_FILE);
             File fileForTest = new File(path);
             if (!fileForTest.exists()) {
                 LOG.error("Appnode process start faild, because file " + path + " not found!");
@@ -153,7 +162,7 @@ public class Appnode extends Node implements Runnable {
 
     @Override
     public void run() {
-        //hard code, please modify to real supervisor address before mvn package
+        // hard code, please modify to real supervisor address before mvn package
         String supervisorHost = "localhost";
         String supervisorPort = "6999";
         try {
@@ -165,22 +174,22 @@ public class Appnode extends Node implements Runnable {
             LOG.error(e.getMessage(), e);
             return;
         }
-        try {    
+        try {
             listener = new FileListener();
         } catch (Exception e) {
             LOG.error("Failed to create a file listener, node shutdown!", e);
             return;
         }
-        //wait for receiving message from supervisor
+        // wait for receiving message from supervisor
         super.loop();
     }
 
     public void fillUpAppLogsFromConfig() {
         for (String appName : ConfigKeeper.configMap.keySet()) {
-            String path = ConfigKeeper.configMap.get(appName)
-                    .getString(ParamsKey.Appconf.WATCH_FILE);
-            int maxLineSize = ConfigKeeper.configMap.get(appName)
-                    .getInteger(ParamsKey.Appconf.MAX_LINE_SIZE, 65536);
+            String path = ConfigKeeper.configMap.get(appName).getString(
+                    ParamsKey.Appconf.WATCH_FILE);
+            int maxLineSize = ConfigKeeper.configMap.get(appName).getInteger(
+                    ParamsKey.Appconf.MAX_LINE_SIZE, 65536);
             AppLog appLog = new AppLog(appName, path, maxLineSize);
             appLogs.put(appName, appLog);
         }
@@ -194,15 +203,20 @@ public class Appnode extends Node implements Runnable {
     protected void onDisconnected() {
         // close connected streams
         LOG.info("shutdown app node");
-        for (java.util.Map.Entry<AppLog, LogReader> e : appReaders.entrySet()) {
+        for (Map.Entry<AppLog, LogReader> e : appReaders.entrySet()) {
             LogReader reader = e.getValue();
             reader.stop();
             appReaders.remove(e.getKey());
         }
+        for (Map.Entry<String, RollRecovery> e : recoveryingMap.entrySet()) {
+            RollRecovery recovery = e.getValue();
+            recovery.stop();
+            recoveryingMap.remove(e.getKey());
+        }
         appLogs.clear();
         ConfigKeeper.configMap.clear();
     }
-    
+
     @Override
     protected void onConnected() {
         clearMessageQueue();
@@ -213,11 +227,10 @@ public class Appnode extends Node implements Runnable {
         Message msg = PBwrap.wrapConfReq();
         super.send(msg);
     }
-    
+
     private void registerApps() {
-        //register the app to supervisor
+        // register the app to supervisor
         for (AppLog appLog : appLogs.values()) {
-//            register(appLog.getAppName(), appLog.getCreateTime());
             register(appLog.getAppName(), Util.getTS());
         }
     }
@@ -240,13 +253,27 @@ public class Appnode extends Node implements Runnable {
         appReaders.remove(applog);
         register(app, applog.getCreateTime());
     }
-    
-    public void reportUnrecoverable(String appName, String appHost, long ts) {
-        Message message = PBwrap.wrapUnrecoverable(appName, appHost, ts);
+
+    public void reportUnrecoverable(String appname, String appHost, long rollTs) {
+        Message message = PBwrap.wrapUnrecoverable(appname, appHost, rollTs);
         send(message);
+        String recoveryKey = appname + ":" + rollTs;
+        recoveryingMap.remove(recoveryKey);
     }
-    
-    //for test
+
+    public void reportRecoveryFail(String appname, String appServer, long rollTs) {
+        Message message = PBwrap.wrapRecoveryFail(appname, appServer, rollTs);
+        send(message);
+        String recoveryKey = appname + ":" + rollTs;
+        recoveryingMap.remove(recoveryKey);
+    }
+
+    public void removeRecoverying(String appname, long rollTs) {
+        String recoveryKey = appname + ":" + rollTs;
+        recoveryingMap.remove(recoveryKey);
+    }
+
+    // for test
     public static void main(String[] args) {
         Appnode appnode = new Appnode();
         Thread thread = new Thread(appnode);

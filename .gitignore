@@ -10,3 +10,4 @@ bin/.settings
 */bin
 target
 *.iml
+*.versionsBackup

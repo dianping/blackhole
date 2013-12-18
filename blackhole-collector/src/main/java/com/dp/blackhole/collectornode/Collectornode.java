@@ -52,8 +52,9 @@ public class Collectornode extends Node {
         @Override
         public void run() {
             while (running) {
+                Socket socket = null;
                 try {
-                    Socket socket = server.accept();
+                    socket = server.accept();
                     
                     DataInputStream in = new DataInputStream(socket.getInputStream());
                     
@@ -86,6 +87,14 @@ public class Collectornode extends Node {
                     }
                 } catch (IOException e) {
                     LOG.error("error in acceptor: ", e);
+                    if (socket != null && !socket.isClosed()) {
+                        try {
+                            socket.close();
+                        } catch (IOException e1) {
+                            LOG.error(e1.getMessage());
+                        }
+                        socket = null;
+                    }
                 }
             }
         }

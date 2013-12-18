@@ -1144,6 +1144,7 @@ public class Supervisor {
         from.setNodeType(Connection.COLLECTORNODE);
         collectorNodes.put(from.getHost(), from);
         collectorHostPortMap.put(from.getHost(), colNodeReg.getPort());
+        LOG.info("CollectorNode " + from.getHost() + " registered");
     }
 
     /* 

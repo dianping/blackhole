@@ -104,9 +104,15 @@ public class HDFSRecovery implements Runnable{
             try {
                 if (gin != null) {
                     gin.close();
+                    gin = null;
                 }
                 if (gout != null) {
                     gout.close();
+                    gout = null;
+                }
+                if (client != null && !client.isClosed()) {
+                    client.close();
+                    client = null;
                 }
             } catch (IOException e) {
                 LOG.warn("Cound not close the gzip output stream", e);

@@ -3,11 +3,9 @@ package com.dp.blackhole.appnode;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 
 import org.apache.commons.logging.Log;
@@ -26,8 +24,8 @@ public class RollRecovery implements Runnable{
     private String collectorServer;
     private int port;
     private AppLog appLog;
-    private long rollTimestamp;
-    private Socket server;
+    private final long rollTimestamp;
+    private Socket socket;
     private byte[] inbuf;
     private Appnode node;
     public RollRecovery(Appnode node, String collectorServer, int port, AppLog appLog, long rollTimestamp) {
@@ -38,77 +36,116 @@ public class RollRecovery implements Runnable{
         this.rollTimestamp = rollTimestamp;
         this.inbuf = new byte[DEFAULT_BUFSIZE];
     }
-    
+
+    public void stop() {
+        if (socket != null && !socket.isClosed()) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                LOG.warn("Warnning, clean fail:", e);
+            }
+            socket = null;
+        }
+    }
+
     @Override
     public void run() {
+        LOG.info("Roll Recovery for " + appLog + " running...");
         long period = ConfigKeeper.configMap.get(appLog.getAppName())
                 .getLong(ParamsKey.Appconf.ROLL_PERIOD, 3600l);
         SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         String rollIdent = unitFormat.format(rollTimestamp);
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
-        
         if (rolledFile == null || !rolledFile.exists()) {
             LOG.error("app " + appLog.getAppName() + " rollIdent " + rollIdent + " can not be found");
             node.reportUnrecoverable(appLog.getAppName(), node.getHost(), rollTimestamp);
             return;
         }
-        
+        LOG.debug("roll file is " + rolledFile);
         RandomAccessFile reader = null;
         DataOutputStream out = null;
         DataInputStream in = null;
         long offset = 0;
+        AgentProtocol protocol = null;
         try {
-            
-            server = new Socket(collectorServer, port);
-            out = new DataOutputStream(server.getOutputStream());
-            in = new DataInputStream(server.getInputStream());
-            
-            AgentProtocol protocol = new AgentProtocol();
+            socket = new Socket(collectorServer, port);
+            reader = new RandomAccessFile(rolledFile, RAF_MODE);
+            out = new DataOutputStream(socket.getOutputStream());
+            in = new DataInputStream(socket.getInputStream());
+        } catch (IOException e) {
+            LOG.error("Faild to build recovery stream.", e);
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e1) {
+                }
+                reader = null;
+            }
+            stop();
+            node.reportUnrecoverable(appLog.getAppName(), node.getHost(), rollTimestamp);
+            return;
+        }
+
+        try {
+            protocol = new AgentProtocol();
             AgentHead head = protocol.new AgentHead();
             head.type = AgentProtocol.RECOVERY;
             head.app = appLog.getAppName();
             head.peroid = period;
             head.ts = rollTimestamp;
-            
             protocol.sendHead(out, head);
+        } catch (IOException e) {
+            LOG.error("Protocol head send fail, report recovery fail from appnode. ", e);
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e1) {
+                }
+                reader = null;
+            }
+            stop();
+            node.reportRecoveryFail(appLog.getAppName(), node.getHost(), rollTimestamp);
+            return;
+        }
+
+        try {
             offset = protocol.receiveOffset(in);
-            
             LOG.info("Received offset [" + offset + "] in header response.");
-            LOG.debug("roll file is " + rolledFile);
-            reader = new RandomAccessFile(rolledFile, RAF_MODE);
-            
             reader.seek(offset);
             LOG.info("Seeked to the position " + offset + ". Begin to transfer...");
             int len = 0;
             long transferBytes = 0;
-            LOG.debug("server socket in client " + server.isClosed());
             while ((len = reader.read(inbuf)) != -1) {
                 out.write(inbuf, 0, len);
                 transferBytes += len;
             }
             out.flush();
             LOG.info("Roll file transfered, including [" + transferBytes + "] bytes.");
-        } catch (FileNotFoundException e) {
-            LOG.error("Oops, got an exception:", e);
-        } catch (UnknownHostException e) {
-            LOG.error("Faild to build a socket with host:" 
-                    + collectorServer + " port:" + port, e);
         } catch (IOException e) {
-            LOG.error("Faild to build Input/Output stream. ", e);
+            LOG.error("Recover stream broken.", e);
         } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-                if (out != null) {
-                    out.close();
-                }
-                if (reader != null) {
+            if (reader != null) {
+                try {
                     reader.close();
+                } catch (IOException e) {
                 }
-            } catch (IOException e) {
-                LOG.warn("Oops, got an exception:", e);
+                reader = null;
             }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                }
+                in = null;
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                }
+                out = null;
+            }
+            node.removeRecoverying(appLog.getAppName(), rollTimestamp);
         }
     }
 }
