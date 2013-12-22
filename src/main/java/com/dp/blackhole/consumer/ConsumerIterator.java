@@ -69,12 +69,11 @@ public class ConsumerIterator implements Iterator<String> {
             }
             if (currentDataChunk == Consumer.SHUTDOWN_COMMAND) {
                 logger.warn("Now closing the message stream");
-                queue.offer(currentDataChunk);
                 state = State.DONE;
                 return null;
             } else {
                 currentTopicInfo = currentDataChunk.topicInfo;
-                if (currentTopicInfo.getConsumedOffset() < currentDataChunk.fetchOffset) {
+                if (currentTopicInfo.getConsumedOffset() > currentDataChunk.fetchOffset) {
                     logger.error("consumed offset: " + currentTopicInfo.getConsumedOffset() 
                             + " doesn't match fetch offset: " 
                             + currentDataChunk.fetchOffset + " for " 
@@ -89,7 +88,7 @@ public class ConsumerIterator implements Iterator<String> {
             item = current.next();
         }
         consumedOffset = item.offset;
-        logger.info(item.message + "  @  " +item.offset);
+//        logger.debug(item.message + "  @  " +item.offset);
         return Util.toEvent(item.message);
     }
 

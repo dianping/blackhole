@@ -10,9 +10,10 @@ message AssignConsumer {
         required string partitionName = 2;
         required int64 offset = 3;
     }
-    
-    required string topic = 1;
-    required string consumerIdString = 2;
-    repeated PartitionOffset partitionOffsets = 3;
+
+    required string group = 1;
+    required string topic = 2;
+    required string consumerIdString = 3;
+    repeated PartitionOffset partitionOffsets = 4;
 }
 

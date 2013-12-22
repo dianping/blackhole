@@ -162,6 +162,7 @@ public class LogReader implements Runnable{
         private void handleLine(String line) throws IOException {
             writer.write(line);
             writer.write('\n'); //make server easy to handle
+            writer.flush();
         }
         
         /**

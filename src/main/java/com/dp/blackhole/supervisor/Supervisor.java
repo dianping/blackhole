@@ -62,6 +62,8 @@ public class Supervisor {
     private ConcurrentHashMap<ConsumerGroup, ConcurrentHashMap<String, Consumer>> consumerGroups;
     private ConcurrentHashMap<Connection, Consumer> consumerConnectionMap;
     
+    private ConcurrentHashMap<Connection, ConnectionDescription> connections;
+    
     private class Msg {
         Message msg;
         Connection c;
@@ -102,6 +104,13 @@ public class Supervisor {
                         Connection connection = new Connection(channel);
                         channel.register(selector, SelectionKey.OP_READ, connection);
                    
+                        if (connections.get(connection) == null) {
+                            connections.put(connection, new ConnectionDescription());
+                        } else {
+                            LOG.error("connection already contained in connectionMap: " + connection.getHost());
+                            connection.close();
+                        }
+                        
                         if (connectionStreamMap.get(connection) == null) {
                             ArrayList<Stream> streams = new ArrayList<Stream>();
                             connectionStreamMap.put(connection, streams);
@@ -196,6 +205,16 @@ public class Supervisor {
         }
     }
     
+    private void handleHeartBeat(Connection from) {
+        ConnectionDescription desc = connections.get(from);
+        if (desc == null) {
+            LOG.error("can not find ConnectionDesc by connection " + from);
+            return;
+        }
+        
+        desc.updateHeartBeat();
+    }
+    
     private void handleTopicReport(TopicReport report, Connection from) {
         for (TopicEntry entry : report.getEntriesList()) {
             String topic = entry.getTopic();
@@ -216,6 +235,13 @@ public class Supervisor {
     }
     
     private void handleConsumerReg(ConsumerReg consumerReg, Connection from) {
+        ConnectionDescription desc = connections.get(from);
+        if (desc == null) {
+            LOG.error("can not find ConnectionDesc by connection " + from);
+            return;
+        }
+        desc.setType(ConnectionDescription.CONSUMER);
+        
         String groupId = consumerReg.getGroupId();
         String id = consumerReg.getConsumerId();
         String topic = consumerReg.getTopic();
@@ -257,6 +283,7 @@ public class Supervisor {
         for (int index = 0; index < consumerNum; index++) {
             assignPartitions.add(new ArrayList<PartitionInfo>());
         }
+        
         int i = 0;
         for (PartitionInfo partition: topicPartitions) {
             assignPartitions.get(i % consumerNum).add(partition);
@@ -265,14 +292,14 @@ public class Supervisor {
         
         int j = 0;
         for (Consumer consumer : consumersMap.values()) {
-            Message assign = PBwrap.wrapAssignConsumer(consumer.getId(), topic, assignPartitions.get(j));
+            Message assign = PBwrap.wrapAssignConsumer(group.getId(), consumer.getId(), topic, assignPartitions.get(j));
             consumer.setPartitions(assignPartitions.get(j));
             j++;
             send(consumer.getConnection(), assign);
         }
     }
 
-    private void handlerOffsetCommit(OffsetCommit offsetCommit) {
+    private void handleOffsetCommit(OffsetCommit offsetCommit) {
         // TODO
         String groupId = offsetCommit.getConsumerIdString();
         String id = offsetCommit.getConsumerIdString();
@@ -422,6 +449,7 @@ public class Supervisor {
     
 
     private void handlerConsumerFail(Connection connection, long now) {
+        LOG.info("consumer " + connection + " disconnectted");
         Consumer consumer = consumerConnectionMap.get(connection);
         String id = consumer.getId();
         ConsumerGroup group = consumer.getConsumerGroup();
@@ -452,21 +480,28 @@ public class Supervisor {
         key.cancel();
         
         long now = Util.getTS();
+        ConnectionDescription desc = connections.get(connection);
+        if (desc == null) {
+            LOG.error("can not find ConnectionDesc by connection " + connection);
+            return;
+        }
+        
         String host = connection.getHost();
-        if (connection.getNodeType() == Connection.APPNODE) {
+        if (desc.getType() == ConnectionDescription.AGENT) {
             appNodes.remove(host);
             LOG.info("close APPNODE: " + host);
             handleAppNodeFail(connection, now);
-        } else if (connection.getNodeType() == Connection.COLLECTORNODE) {
+        } else if (desc.getType() == ConnectionDescription.BROKER) {
             collectorNodes.remove(host);
             LOG.info("close COLLECTORNODE: " + host);
             handleCollectorNodeFail(connection, now);
-        } else if (consumerConnectionMap.get(connection) != null) {
+        } else if (desc.getType() == ConnectionDescription.CONSUMER) {
             LOG.info("close consumer: " + host);
             handlerConsumerFail(connection, now);
             consumerConnectionMap.remove(connection);
         }
         
+        connections.remove(connection);
         connectionStreamMap.remove(connection);
         if (connection != null) {
             connection.close();
@@ -1124,7 +1159,14 @@ public class Supervisor {
      * 1. recored the connection in appNodes
      * 2. assign a collect to the app
      */
-    private void registerApp(Message m, Connection from) throws InterruptedException {
+    private void registerApp(Message m, Connection from) {
+        ConnectionDescription desc = connections.get(from);
+        if (desc == null) {
+            LOG.error("can not find ConnectionDesc by connection " + from);
+            return;
+        }
+        desc.setType(ConnectionDescription.AGENT);
+        
         from.setNodeType(Connection.APPNODE);
         if (appNodes.get(from.getHost()) == null) {
             appNodes.put(from.getHost(), from);
@@ -1148,6 +1190,13 @@ public class Supervisor {
     }
     
     private void registerCollectorNode(Connection from) {
+        ConnectionDescription desc = connections.get(from);
+        if (desc == null) {
+            LOG.error("can not find ConnectionDesc by connection " + from);
+            return;
+        }
+        desc.setType(ConnectionDescription.BROKER);
+        
         from.setNodeType(Connection.COLLECTORNODE);
         collectorNodes.put(from.getHost(), from);
     }
@@ -1188,11 +1237,11 @@ public class Supervisor {
             }
         }
         
-        private void process(Message msg, Connection from) throws InterruptedException {
-
+        private void process(Message msg, Connection from) {
             switch (msg.getType()) {
             case HEARTBEART:
                 from.updateHeartBeat();
+                handleHeartBeat(from);
                 break;
             case COLLECTOR_REG:
                 registerCollectorNode(from);
@@ -1240,7 +1289,7 @@ public class Supervisor {
                 handleConsumerReg(msg.getConsumerReg(), from);
                 break;
             case OFFSET_COMMIT:
-                handlerOffsetCommit(msg.getOffsetCommit());
+                handleOffsetCommit(msg.getOffsetCommit());
                 break;
             default:
                 LOG.warn("unknown message: " + msg.toString());
@@ -1258,9 +1307,10 @@ public class Supervisor {
                 try {
                     Thread.sleep(5000);
                     long now = Util.getTS();
-                    for (Connection c : connectionStreamMap.keySet()) {
-                        if (now - c.getLastHeartBeat() > THRESHOLD) {
-                            closeConnection(c);
+                    for (Entry<Connection, ConnectionDescription> entry : connections.entrySet()) {
+                        if (now - entry.getValue().getLastHeartBeat() > THRESHOLD) {
+                            LOG.info("failed to get heartbeat for 15 seconds, close connection " + entry.getKey());
+                            closeConnection(entry.getKey());
                         }
                     }
                 } catch (InterruptedException e) {
@@ -1295,6 +1345,7 @@ public class Supervisor {
         topics = new ConcurrentHashMap<String, ConcurrentHashMap<String,PartitionInfo>>();
         consumerGroups = new ConcurrentHashMap<ConsumerGroup, ConcurrentHashMap<String,Consumer>>();
         consumerConnectionMap = new ConcurrentHashMap<Connection, Consumer>();
+        connections = new ConcurrentHashMap<Connection, ConnectionDescription>();
         
         // start message handler thread
         handlers = new Handler[handlerCount];
@@ -1306,7 +1357,7 @@ public class Supervisor {
         // start heart beat checker thread
         LiveChecker checker = new LiveChecker();
         checker.setDaemon(true);
-//        checker.start();
+        checker.start();
         
         LOG.info("supervisor started");
     }

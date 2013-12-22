@@ -5,8 +5,11 @@
 	<groupId>com.dp</groupId>
 	<artifactId>blackhole</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.2</version>
+	<version>realtime-0.0.1-SNAPSHOT</version>
 	<name>blackhole</name>
+	<properties>
+	   <env>dev</env>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -48,10 +51,32 @@
 			<version>1.2.14</version>
 		</dependency>
 		<dependency>
+			<groupId>com.dianping.lion</groupId>
+			<artifactId>lion-client</artifactId>
+			<version>0.2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.dianping.lion</groupId>
+			<artifactId>lion-${env}</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.7</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>dianping.repo</id>
+			<name>Dian Ping internal repository for released artifacts</name>
+			<url>http://mvn.dianpingoa.com/dianping-releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>dianping.repo.snapshots</id>
+			<name>mvn.dianpingoa.com-snapshots</name>
+			<url>http://mvn.dianpingoa.com/dianping-snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 </project>

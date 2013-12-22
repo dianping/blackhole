@@ -1,5 +1,6 @@
 package com.dp.blackhole.collectornode.persistent;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -8,14 +9,17 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class Segment {
     FileChannel channel;
+    String file;
     private long startOffset;
     private AtomicLong endOffset;
     private long unflushSize;
     
+    private long closeTimestamp;
     int splitThreshold;
     int flushThreshold;
     
     public Segment(String parent, long offset, boolean verify, boolean readonly, int splitThreshold, int flushThreshold) throws IOException {
+        file = getFilePath(parent, offset);
         if (!readonly) {
             channel = new RandomAccessFile(getFilePath(parent, offset), "rw").getChannel();
         } else {
@@ -107,10 +111,11 @@ public class Segment {
     long append(MessageSet messages) throws IOException {
         int written = (int) messages.write(channel, 0 ,messages.getSize());
         unflushSize += written;
+        endOffset.addAndGet(written);
         if (unflushSize > flushThreshold) {
             flush();
         }
-        long length = endOffset.get() - startOffset + unflushSize;
+        long length = endOffset.get() - startOffset;
         if (length > splitThreshold) {
             return startOffset + length;
         }
@@ -123,7 +128,6 @@ public class Segment {
         }
 
         channel.force(true);
-        endOffset.addAndGet(unflushSize);
         unflushSize = 0;
     }
 
@@ -148,4 +152,22 @@ public class Segment {
        return "segment[" + startOffset + "," + endOffset.get() + "]";
     }
     
+    public Long getCloseTimestamp() {
+        return closeTimestamp;
+    }
+    
+    public void setCloseTimestamp(long ts) {
+        closeTimestamp = ts;
+    }
+    
+    public void destory() {
+        try {
+            channel.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        File f = new File(file);
+        f.delete();
+    }
 }

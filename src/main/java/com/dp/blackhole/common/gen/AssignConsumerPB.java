@@ -11,57 +11,72 @@ public final class AssignConsumerPB {
   public interface AssignConsumerOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // required string topic = 1;
+    // required string group = 1;
     /**
-     * <code>required string topic = 1;</code>
+     * <code>required string group = 1;</code>
+     */
+    boolean hasGroup();
+    /**
+     * <code>required string group = 1;</code>
+     */
+    java.lang.String getGroup();
+    /**
+     * <code>required string group = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getGroupBytes();
+
+    // required string topic = 2;
+    /**
+     * <code>required string topic = 2;</code>
      */
     boolean hasTopic();
     /**
-     * <code>required string topic = 1;</code>
+     * <code>required string topic = 2;</code>
      */
     java.lang.String getTopic();
     /**
-     * <code>required string topic = 1;</code>
+     * <code>required string topic = 2;</code>
      */
     com.google.protobuf.ByteString
         getTopicBytes();
 
-    // required string consumerIdString = 2;
+    // required string consumerIdString = 3;
     /**
-     * <code>required string consumerIdString = 2;</code>
+     * <code>required string consumerIdString = 3;</code>
      */
     boolean hasConsumerIdString();
     /**
-     * <code>required string consumerIdString = 2;</code>
+     * <code>required string consumerIdString = 3;</code>
      */
     java.lang.String getConsumerIdString();
     /**
-     * <code>required string consumerIdString = 2;</code>
+     * <code>required string consumerIdString = 3;</code>
      */
     com.google.protobuf.ByteString
         getConsumerIdStringBytes();
 
-    // repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;
+    // repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;
     /**
-     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
      */
     java.util.List<com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset> 
         getPartitionOffsetsList();
     /**
-     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
      */
     com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset getPartitionOffsets(int index);
     /**
-     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
      */
     int getPartitionOffsetsCount();
     /**
-     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
      */
     java.util.List<? extends com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder> 
         getPartitionOffsetsOrBuilderList();
     /**
-     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
      */
     com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder getPartitionOffsetsOrBuilder(
         int index);
@@ -119,18 +134,23 @@ public final class AssignConsumerPB {
             }
             case 10: {
               bitField0_ |= 0x00000001;
-              topic_ = input.readBytes();
+              group_ = input.readBytes();
               break;
             }
             case 18: {
               bitField0_ |= 0x00000002;
-              consumerIdString_ = input.readBytes();
+              topic_ = input.readBytes();
               break;
             }
             case 26: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              bitField0_ |= 0x00000004;
+              consumerIdString_ = input.readBytes();
+              break;
+            }
+            case 34: {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
                 partitionOffsets_ = new java.util.ArrayList<com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset>();
-                mutable_bitField0_ |= 0x00000004;
+                mutable_bitField0_ |= 0x00000008;
               }
               partitionOffsets_.add(input.readMessage(com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset.PARSER, extensionRegistry));
               break;
@@ -143,7 +163,7 @@ public final class AssignConsumerPB {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
           partitionOffsets_ = java.util.Collections.unmodifiableList(partitionOffsets_);
         }
         this.unknownFields = unknownFields.build();
@@ -910,17 +930,60 @@ public final class AssignConsumerPB {
     }
 
     private int bitField0_;
-    // required string topic = 1;
-    public static final int TOPIC_FIELD_NUMBER = 1;
-    private java.lang.Object topic_;
+    // required string group = 1;
+    public static final int GROUP_FIELD_NUMBER = 1;
+    private java.lang.Object group_;
     /**
-     * <code>required string topic = 1;</code>
+     * <code>required string group = 1;</code>
      */
-    public boolean hasTopic() {
+    public boolean hasGroup() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required string topic = 1;</code>
+     * <code>required string group = 1;</code>
+     */
+    public java.lang.String getGroup() {
+      java.lang.Object ref = group_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          group_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string group = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getGroupBytes() {
+      java.lang.Object ref = group_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        group_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // required string topic = 2;
+    public static final int TOPIC_FIELD_NUMBER = 2;
+    private java.lang.Object topic_;
+    /**
+     * <code>required string topic = 2;</code>
+     */
+    public boolean hasTopic() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required string topic = 2;</code>
      */
     public java.lang.String getTopic() {
       java.lang.Object ref = topic_;
@@ -937,7 +1000,7 @@ public final class AssignConsumerPB {
       }
     }
     /**
-     * <code>required string topic = 1;</code>
+     * <code>required string topic = 2;</code>
      */
     public com.google.protobuf.ByteString
         getTopicBytes() {
@@ -953,17 +1016,17 @@ public final class AssignConsumerPB {
       }
     }
 
-    // required string consumerIdString = 2;
-    public static final int CONSUMERIDSTRING_FIELD_NUMBER = 2;
+    // required string consumerIdString = 3;
+    public static final int CONSUMERIDSTRING_FIELD_NUMBER = 3;
     private java.lang.Object consumerIdString_;
     /**
-     * <code>required string consumerIdString = 2;</code>
+     * <code>required string consumerIdString = 3;</code>
      */
     public boolean hasConsumerIdString() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
+      return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>required string consumerIdString = 2;</code>
+     * <code>required string consumerIdString = 3;</code>
      */
     public java.lang.String getConsumerIdString() {
       java.lang.Object ref = consumerIdString_;
@@ -980,7 +1043,7 @@ public final class AssignConsumerPB {
       }
     }
     /**
-     * <code>required string consumerIdString = 2;</code>
+     * <code>required string consumerIdString = 3;</code>
      */
     public com.google.protobuf.ByteString
         getConsumerIdStringBytes() {
@@ -996,36 +1059,36 @@ public final class AssignConsumerPB {
       }
     }
 
-    // repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;
-    public static final int PARTITIONOFFSETS_FIELD_NUMBER = 3;
+    // repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;
+    public static final int PARTITIONOFFSETS_FIELD_NUMBER = 4;
     private java.util.List<com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset> partitionOffsets_;
     /**
-     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
      */
     public java.util.List<com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset> getPartitionOffsetsList() {
       return partitionOffsets_;
     }
     /**
-     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
      */
     public java.util.List<? extends com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder> 
         getPartitionOffsetsOrBuilderList() {
       return partitionOffsets_;
     }
     /**
-     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
      */
     public int getPartitionOffsetsCount() {
       return partitionOffsets_.size();
     }
     /**
-     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
      */
     public com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset getPartitionOffsets(int index) {
       return partitionOffsets_.get(index);
     }
     /**
-     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
      */
     public com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder getPartitionOffsetsOrBuilder(
         int index) {
@@ -1033,6 +1096,7 @@ public final class AssignConsumerPB {
     }
 
     private void initFields() {
+      group_ = "";
       topic_ = "";
       consumerIdString_ = "";
       partitionOffsets_ = java.util.Collections.emptyList();
@@ -1042,6 +1106,10 @@ public final class AssignConsumerPB {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      if (!hasGroup()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       if (!hasTopic()) {
         memoizedIsInitialized = 0;
         return false;
@@ -1064,13 +1132,16 @@ public final class AssignConsumerPB {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getTopicBytes());
+        output.writeBytes(1, getGroupBytes());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getConsumerIdStringBytes());
+        output.writeBytes(2, getTopicBytes());
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, getConsumerIdStringBytes());
       }
       for (int i = 0; i < partitionOffsets_.size(); i++) {
-        output.writeMessage(3, partitionOffsets_.get(i));
+        output.writeMessage(4, partitionOffsets_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -1083,15 +1154,19 @@ public final class AssignConsumerPB {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getTopicBytes());
+          .computeBytesSize(1, getGroupBytes());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getConsumerIdStringBytes());
+          .computeBytesSize(2, getTopicBytes());
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, getConsumerIdStringBytes());
       }
       for (int i = 0; i < partitionOffsets_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, partitionOffsets_.get(i));
+          .computeMessageSize(4, partitionOffsets_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1210,13 +1285,15 @@ public final class AssignConsumerPB {
 
       public Builder clear() {
         super.clear();
-        topic_ = "";
+        group_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
-        consumerIdString_ = "";
+        topic_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
+        consumerIdString_ = "";
+        bitField0_ = (bitField0_ & ~0x00000004);
         if (partitionOffsetsBuilder_ == null) {
           partitionOffsets_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000008);
         } else {
           partitionOffsetsBuilder_.clear();
         }
@@ -1251,15 +1328,19 @@ public final class AssignConsumerPB {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.topic_ = topic_;
+        result.group_ = group_;
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
+        result.topic_ = topic_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
         result.consumerIdString_ = consumerIdString_;
         if (partitionOffsetsBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          if (((bitField0_ & 0x00000008) == 0x00000008)) {
             partitionOffsets_ = java.util.Collections.unmodifiableList(partitionOffsets_);
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000008);
           }
           result.partitionOffsets_ = partitionOffsets_;
         } else {
@@ -1281,13 +1362,18 @@ public final class AssignConsumerPB {
 
       public Builder mergeFrom(com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer other) {
         if (other == com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.getDefaultInstance()) return this;
-        if (other.hasTopic()) {
+        if (other.hasGroup()) {
           bitField0_ |= 0x00000001;
+          group_ = other.group_;
+          onChanged();
+        }
+        if (other.hasTopic()) {
+          bitField0_ |= 0x00000002;
           topic_ = other.topic_;
           onChanged();
         }
         if (other.hasConsumerIdString()) {
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000004;
           consumerIdString_ = other.consumerIdString_;
           onChanged();
         }
@@ -1295,7 +1381,7 @@ public final class AssignConsumerPB {
           if (!other.partitionOffsets_.isEmpty()) {
             if (partitionOffsets_.isEmpty()) {
               partitionOffsets_ = other.partitionOffsets_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000008);
             } else {
               ensurePartitionOffsetsIsMutable();
               partitionOffsets_.addAll(other.partitionOffsets_);
@@ -1308,7 +1394,7 @@ public final class AssignConsumerPB {
               partitionOffsetsBuilder_.dispose();
               partitionOffsetsBuilder_ = null;
               partitionOffsets_ = other.partitionOffsets_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000008);
               partitionOffsetsBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getPartitionOffsetsFieldBuilder() : null;
@@ -1322,6 +1408,10 @@ public final class AssignConsumerPB {
       }
 
       public final boolean isInitialized() {
+        if (!hasGroup()) {
+          
+          return false;
+        }
         if (!hasTopic()) {
           
           return false;
@@ -1358,16 +1448,90 @@ public final class AssignConsumerPB {
       }
       private int bitField0_;
 
-      // required string topic = 1;
-      private java.lang.Object topic_ = "";
+      // required string group = 1;
+      private java.lang.Object group_ = "";
       /**
-       * <code>required string topic = 1;</code>
+       * <code>required string group = 1;</code>
        */
-      public boolean hasTopic() {
+      public boolean hasGroup() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required string topic = 1;</code>
+       * <code>required string group = 1;</code>
+       */
+      public java.lang.String getGroup() {
+        java.lang.Object ref = group_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          group_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string group = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getGroupBytes() {
+        java.lang.Object ref = group_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          group_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string group = 1;</code>
+       */
+      public Builder setGroup(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        group_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string group = 1;</code>
+       */
+      public Builder clearGroup() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        group_ = getDefaultInstance().getGroup();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string group = 1;</code>
+       */
+      public Builder setGroupBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        group_ = value;
+        onChanged();
+        return this;
+      }
+
+      // required string topic = 2;
+      private java.lang.Object topic_ = "";
+      /**
+       * <code>required string topic = 2;</code>
+       */
+      public boolean hasTopic() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required string topic = 2;</code>
        */
       public java.lang.String getTopic() {
         java.lang.Object ref = topic_;
@@ -1381,7 +1545,7 @@ public final class AssignConsumerPB {
         }
       }
       /**
-       * <code>required string topic = 1;</code>
+       * <code>required string topic = 2;</code>
        */
       public com.google.protobuf.ByteString
           getTopicBytes() {
@@ -1397,51 +1561,51 @@ public final class AssignConsumerPB {
         }
       }
       /**
-       * <code>required string topic = 1;</code>
+       * <code>required string topic = 2;</code>
        */
       public Builder setTopic(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  bitField0_ |= 0x00000002;
         topic_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string topic = 1;</code>
+       * <code>required string topic = 2;</code>
        */
       public Builder clearTopic() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000002);
         topic_ = getDefaultInstance().getTopic();
         onChanged();
         return this;
       }
       /**
-       * <code>required string topic = 1;</code>
+       * <code>required string topic = 2;</code>
        */
       public Builder setTopicBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  bitField0_ |= 0x00000002;
         topic_ = value;
         onChanged();
         return this;
       }
 
-      // required string consumerIdString = 2;
+      // required string consumerIdString = 3;
       private java.lang.Object consumerIdString_ = "";
       /**
-       * <code>required string consumerIdString = 2;</code>
+       * <code>required string consumerIdString = 3;</code>
        */
       public boolean hasConsumerIdString() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
+        return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>required string consumerIdString = 2;</code>
+       * <code>required string consumerIdString = 3;</code>
        */
       public java.lang.String getConsumerIdString() {
         java.lang.Object ref = consumerIdString_;
@@ -1455,7 +1619,7 @@ public final class AssignConsumerPB {
         }
       }
       /**
-       * <code>required string consumerIdString = 2;</code>
+       * <code>required string consumerIdString = 3;</code>
        */
       public com.google.protobuf.ByteString
           getConsumerIdStringBytes() {
@@ -1471,48 +1635,48 @@ public final class AssignConsumerPB {
         }
       }
       /**
-       * <code>required string consumerIdString = 2;</code>
+       * <code>required string consumerIdString = 3;</code>
        */
       public Builder setConsumerIdString(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000004;
         consumerIdString_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string consumerIdString = 2;</code>
+       * <code>required string consumerIdString = 3;</code>
        */
       public Builder clearConsumerIdString() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000004);
         consumerIdString_ = getDefaultInstance().getConsumerIdString();
         onChanged();
         return this;
       }
       /**
-       * <code>required string consumerIdString = 2;</code>
+       * <code>required string consumerIdString = 3;</code>
        */
       public Builder setConsumerIdStringBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000004;
         consumerIdString_ = value;
         onChanged();
         return this;
       }
 
-      // repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;
+      // repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;
       private java.util.List<com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset> partitionOffsets_ =
         java.util.Collections.emptyList();
       private void ensurePartitionOffsetsIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
           partitionOffsets_ = new java.util.ArrayList<com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset>(partitionOffsets_);
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000008;
          }
       }
 
@@ -1520,7 +1684,7 @@ public final class AssignConsumerPB {
           com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder> partitionOffsetsBuilder_;
 
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public java.util.List<com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset> getPartitionOffsetsList() {
         if (partitionOffsetsBuilder_ == null) {
@@ -1530,7 +1694,7 @@ public final class AssignConsumerPB {
         }
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public int getPartitionOffsetsCount() {
         if (partitionOffsetsBuilder_ == null) {
@@ -1540,7 +1704,7 @@ public final class AssignConsumerPB {
         }
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset getPartitionOffsets(int index) {
         if (partitionOffsetsBuilder_ == null) {
@@ -1550,7 +1714,7 @@ public final class AssignConsumerPB {
         }
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public Builder setPartitionOffsets(
           int index, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset value) {
@@ -1567,7 +1731,7 @@ public final class AssignConsumerPB {
         return this;
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public Builder setPartitionOffsets(
           int index, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder builderForValue) {
@@ -1581,7 +1745,7 @@ public final class AssignConsumerPB {
         return this;
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public Builder addPartitionOffsets(com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset value) {
         if (partitionOffsetsBuilder_ == null) {
@@ -1597,7 +1761,7 @@ public final class AssignConsumerPB {
         return this;
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public Builder addPartitionOffsets(
           int index, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset value) {
@@ -1614,7 +1778,7 @@ public final class AssignConsumerPB {
         return this;
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public Builder addPartitionOffsets(
           com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder builderForValue) {
@@ -1628,7 +1792,7 @@ public final class AssignConsumerPB {
         return this;
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public Builder addPartitionOffsets(
           int index, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder builderForValue) {
@@ -1642,7 +1806,7 @@ public final class AssignConsumerPB {
         return this;
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public Builder addAllPartitionOffsets(
           java.lang.Iterable<? extends com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset> values) {
@@ -1656,12 +1820,12 @@ public final class AssignConsumerPB {
         return this;
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public Builder clearPartitionOffsets() {
         if (partitionOffsetsBuilder_ == null) {
           partitionOffsets_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000008);
           onChanged();
         } else {
           partitionOffsetsBuilder_.clear();
@@ -1669,7 +1833,7 @@ public final class AssignConsumerPB {
         return this;
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public Builder removePartitionOffsets(int index) {
         if (partitionOffsetsBuilder_ == null) {
@@ -1682,14 +1846,14 @@ public final class AssignConsumerPB {
         return this;
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder getPartitionOffsetsBuilder(
           int index) {
         return getPartitionOffsetsFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder getPartitionOffsetsOrBuilder(
           int index) {
@@ -1699,7 +1863,7 @@ public final class AssignConsumerPB {
         }
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public java.util.List<? extends com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder> 
            getPartitionOffsetsOrBuilderList() {
@@ -1710,14 +1874,14 @@ public final class AssignConsumerPB {
         }
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder addPartitionOffsetsBuilder() {
         return getPartitionOffsetsFieldBuilder().addBuilder(
             com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset.getDefaultInstance());
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder addPartitionOffsetsBuilder(
           int index) {
@@ -1725,7 +1889,7 @@ public final class AssignConsumerPB {
             index, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset.getDefaultInstance());
       }
       /**
-       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 3;</code>
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
        */
       public java.util.List<com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder> 
            getPartitionOffsetsBuilderList() {
@@ -1738,7 +1902,7 @@ public final class AssignConsumerPB {
           partitionOffsetsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder, com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder>(
                   partitionOffsets_,
-                  ((bitField0_ & 0x00000004) == 0x00000004),
+                  ((bitField0_ & 0x00000008) == 0x00000008),
                   getParentForChildren(),
                   isClean());
           partitionOffsets_ = null;
@@ -1776,14 +1940,14 @@ public final class AssignConsumerPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\024AssignConsumer.proto\022\tblackhole\"\316\001\n\016As" +
-      "signConsumer\022\r\n\005topic\030\001 \002(\t\022\030\n\020consumerI" +
-      "dString\030\002 \002(\t\022C\n\020partitionOffsets\030\003 \003(\0132" +
-      ").blackhole.AssignConsumer.PartitionOffs" +
-      "et\032N\n\017PartitionOffset\022\024\n\014brokerString\030\001 " +
-      "\002(\t\022\025\n\rpartitionName\030\002 \002(\t\022\016\n\006offset\030\003 \002" +
-      "(\003B/\n\033com.dp.blackhole.common.genB\020Assig" +
-      "nConsumerPB"
+      "\n\024AssignConsumer.proto\022\tblackhole\"\335\001\n\016As" +
+      "signConsumer\022\r\n\005group\030\001 \002(\t\022\r\n\005topic\030\002 \002" +
+      "(\t\022\030\n\020consumerIdString\030\003 \002(\t\022C\n\020partitio" +
+      "nOffsets\030\004 \003(\0132).blackhole.AssignConsume" +
+      "r.PartitionOffset\032N\n\017PartitionOffset\022\024\n\014" +
+      "brokerString\030\001 \002(\t\022\025\n\rpartitionName\030\002 \002(" +
+      "\t\022\016\n\006offset\030\003 \002(\003B/\n\033com.dp.blackhole.co" +
+      "mmon.genB\020AssignConsumerPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1795,7 +1959,7 @@ public final class AssignConsumerPB {
           internal_static_blackhole_AssignConsumer_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_AssignConsumer_descriptor,
-              new java.lang.String[] { "Topic", "ConsumerIdString", "PartitionOffsets", });
+              new java.lang.String[] { "Group", "Topic", "ConsumerIdString", "PartitionOffsets", });
           internal_static_blackhole_AssignConsumer_PartitionOffset_descriptor =
             internal_static_blackhole_AssignConsumer_descriptor.getNestedTypes().get(0);
           internal_static_blackhole_AssignConsumer_PartitionOffset_fieldAccessorTable = new

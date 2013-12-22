@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.dp.blackhole.collectornode.Publisher.PublisherExecutor;
 import com.dp.blackhole.collectornode.persistent.ByteBufferMessageSet;
@@ -11,6 +13,10 @@ import com.dp.blackhole.collectornode.persistent.Message;
 import com.dp.blackhole.collectornode.persistent.protocol.ProduceRequest;
 
 public class Producer {
+    
+    private static String delimiter = "#";
+    
+    private Lock lock = new ReentrantLock();
     
     class preparedRequest {
         String topic;
@@ -43,6 +49,9 @@ public class Producer {
     
     public Producer() {
         requests = new ConcurrentHashMap<String, preparedRequest>();
+        flush f = new flush();
+        f.setDaemon(true);
+        f.start();
     }
     
     public void setPublisher(PublisherExecutor p) {
@@ -53,8 +62,8 @@ public class Producer {
         p.handleProduceRequest(request, null);
     }
     
-    public preparedRequest flush(String topic, String partitionId) {
-        String id = topic + "-" +partitionId;
+    public synchronized preparedRequest flush(String topic, String partitionId) {
+        String id = topic + delimiter +partitionId;
         preparedRequest request = requests.get(id);
         send(request.createRequest());
         preparedRequest newRequest = new preparedRequest(topic, partitionId);
@@ -63,17 +72,22 @@ public class Producer {
     }
     
     public void send(String topic, String partitionId, byte[] data) {
-        String id = topic + "-" +partitionId;
-        preparedRequest request = requests.get(id);
-        if (request == null) {
-            request = new preparedRequest(topic, partitionId);
-            requests.put(id, request);
+        lock.lock();
+        try {
+            String id = topic + delimiter +partitionId;
+            preparedRequest request = requests.get(id);
+            if (request == null) {
+                request = new preparedRequest(topic, partitionId);
+                requests.put(id, request);
+            }
+            Message message = new Message(data);
+            if (message.getSize() > request.remaining()) {
+                request = flush(topic, partitionId);
+            }
+            request.put(message);
+        } finally {
+            lock.unlock();
         }
-        Message message = new Message(data);
-        if (message.getSize() > request.remaining()) {
-            request = flush(topic, partitionId);
-        }
-        request.put(message);
     }
     
     class flush extends Thread {
@@ -82,11 +96,15 @@ public class Producer {
            while (true) {
                try {
                 Thread.sleep(100);
+                lock.lock();
+                try {
                 for (Entry<String, preparedRequest> e : requests.entrySet()) {
-                    String topic = e.getKey().split("-")[0];
-                    String partitionId = e.getKey().split("-")[1];
-                    System.out.println("flushing");
+                    String topic = e.getKey().split(delimiter)[0];
+                    String partitionId = e.getKey().split(delimiter)[1];
                     flush(topic, partitionId);
+                }
+                } finally {
+                    lock.unlock();
                 }
 
             } catch (InterruptedException e) {
