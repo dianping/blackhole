@@ -42,7 +42,7 @@ public class HDFSUpload implements Runnable{
             LOG.info("Collector file " + file + " has been uploaded.");
             //rename
             Path dst = new Path(dfsPath);
-            if (!Util.retryRename(fs, tmp, dst)) {
+            if (!HDFSUtil.retryRename(fs, tmp, dst)) {
                 throw new IOException("Faild to rename tmp to " + dst);
             }
             uploadSuccess = true;

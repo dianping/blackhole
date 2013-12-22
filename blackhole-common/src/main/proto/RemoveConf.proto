@@ -1,0 +1,9 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.common.gen";
+option java_outer_classname = "RemoveConfPB";
+
+message RemoveConf {
+    required string app_name = 1;
+    repeated string app_servers = 2;
+}

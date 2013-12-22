@@ -14,6 +14,8 @@ import "NoAvailableNode.proto";
 import "StreamID.proto";
 import "ConfRes.proto";
 import "DumpReply.proto";
+import "RemoveConf.proto";
+import "ColNodeReg.proto";
 
 message Message {
     enum MessageType {
@@ -40,6 +42,8 @@ message Message {
         NOAVAILABLECONF = 21;
         DUMPCONF = 22;
         DUMPREPLY = 23;
+        LISTAPPS = 24;
+        REMOVE_CONF = 25;
     }
 
     required MessageType type = 1;
@@ -54,4 +58,6 @@ message Message {
     optional StreamID streamId = 10;
     optional ConfRes confRes = 11;
     optional DumpReply dumpReply = 12;
+    optional RemoveConf removeConf = 13;
+    optional ColNodeReg colNodeReg =14;
 }

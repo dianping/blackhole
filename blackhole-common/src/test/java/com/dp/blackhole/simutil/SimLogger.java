@@ -16,7 +16,7 @@ public class SimLogger implements Runnable {
     public static final String TEST_ROLL_FILE = "/tmp/rollfile";
 	private long delay;
 	private OutputStreamWriter writer;
-	private static final int WORD_COUNT_PER_LINE = 3000;
+	private static final int WORD_COUNT_PER_LINE = 256;
 	
     public SimLogger(long delay) {
 		this.delay = delay;

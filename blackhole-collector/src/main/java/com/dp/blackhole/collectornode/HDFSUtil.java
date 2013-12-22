@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-public class Util {
+public class HDFSUtil {
     private static final int REPEATE = 3;
     private static final int RETRY_SLEEP_TIME = 3000;
     public static boolean retryDelete(FileSystem fs, Path path) {

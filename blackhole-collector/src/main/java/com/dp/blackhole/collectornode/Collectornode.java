@@ -39,6 +39,7 @@ public class Collectornode extends Node {
     private int port;
     private FileSystem fs;
     private ArrayList<Collector> collectors;
+    private long clockSyncBufMillis;
 
     public Collectornode() throws IOException {
         pool = Executors.newCachedThreadPool();
@@ -63,7 +64,7 @@ public class Collectornode extends Node {
                                  
                     if (AgentProtocol.STREAM == head.type) {
                         LOG.debug("logreader connected: " + head.app);
-                        Collector collector = new Collector(Collectornode.this, socket, basedir, head.app, getHost(), head.peroid);
+                        Collector collector = new Collector(Collectornode.this, socket, basedir, head.app, getHost(), head.peroid, clockSyncBufMillis);
                         synchronized (collectors) {
                             collectors.add(collector);
                         }
@@ -154,6 +155,7 @@ public class Collectornode extends Node {
         
         basedir = prop.getProperty("collectornode.basedir");
         port = Integer.parseInt(prop.getProperty("collectornode.port"));
+        clockSyncBufMillis = Long.parseLong(prop.getProperty("collectornode.clockSyncBufMillis", "5000"));
         hdfsbasedir = prop.getProperty("hdfs.basedir");
         suffix = prop.getProperty("hdfs.file.suffix");
         boolean enableSecurity = Boolean.parseBoolean(prop.getProperty("hdfs.security.enable", "true"));
@@ -235,7 +237,7 @@ public class Collectornode extends Node {
     }
 
     private void registerNode() {  
-        send(PBwrap.wrapCollectorReg());
+        send(PBwrap.wrapCollectorReg(port));
         LOG.info("register collector node with supervisor");
     }
 

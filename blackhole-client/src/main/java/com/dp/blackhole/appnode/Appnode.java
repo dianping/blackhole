@@ -26,12 +26,14 @@ import com.dp.blackhole.node.Node;
 public class Appnode extends Node implements Runnable {
     private static final Log LOG = LogFactory.getLog(Appnode.class);
     private ExecutorService pool;
+    private ExecutorService recoveryThreadPool;
     private FileListener listener;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
     
     public Appnode() {
         pool = Executors.newCachedThreadPool();
+        recoveryThreadPool = Executors.newFixedThreadPool(2);
     }
     
     @Override
@@ -61,11 +63,11 @@ public class Appnode extends Node implements Runnable {
                 collectorServer = recoveryRoll.getCollectorServer();
                 collectorPort =  recoveryRoll.getCollectorPort();
                 RollRecovery recovery = new RollRecovery(this, collectorServer, collectorPort, appLog, rollTs);
-                pool.execute(recovery);
+                recoveryThreadPool.execute(recovery);
                 return true;
             } else {
-                LOG.error("AppName [" + recoveryRoll.getAppName()
-                        + "] from supervisor message not match with local");
+                LOG.error("RECOVERY_ROLL: " + recoveryRoll.getAppName()
+                        + " from supervisor message not match with local");
             }
             break;
         case ASSIGN_COLLECTOR:
@@ -83,8 +85,8 @@ public class Appnode extends Node implements Runnable {
                     LOG.info("duplicated assign collector message: " + assignCollector);
                 }
             } else {
-                LOG.error("AppName [" + assignCollector.getAppName()
-                        + "] from supervisor message not match with local");
+                LOG.error("ASSIGN_COLLECTOR: " + assignCollector.getAppName()
+                        + " from supervisor message not match with local");
             }
             break;
         case NOAVAILABLECONF:
@@ -106,10 +108,18 @@ public class Appnode extends Node implements Runnable {
                 confKeeper.addRawProperty(appConfRes.getAppName() + "."
                         + ParamsKey.Appconf.ROLL_PERIOD, appConfRes.getPeriod());
                 confKeeper.addRawProperty(appConfRes.getAppName() + "."
-                        + ParamsKey.Appconf.BUFFER_SIZE, appConfRes.getBufferSize());
+                        + ParamsKey.Appconf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
             }
             if (!checkAllFilesExist()) {
-                Thread.currentThread().interrupt();
+//                Thread.currentThread().interrupt();
+                LOG.error("Configurations are incorrect, sleep 5 seconds..");
+                try {
+                    Thread.sleep(5 * 1000);
+                } catch (InterruptedException e) {
+                    LOG.error("Oops, sleep interrupted");
+                }
+                requireConfigFromSupersivor();
+                break;
             }
             fillUpAppLogsFromConfig();
             registerApps();
@@ -132,7 +142,7 @@ public class Appnode extends Node implements Runnable {
                     .getString(ParamsKey.Appconf.WATCH_FILE);
             File fileForTest = new File(path);
             if (!fileForTest.exists()) {
-                LOG.error("Appnode process start faild, because file " + path + " not found. Thread interrupt!");
+                LOG.error("Appnode process start faild, because file " + path + " not found!");
                 res = false;
             } else {
                 LOG.info("Check file " + path + " ok.");
@@ -169,9 +179,9 @@ public class Appnode extends Node implements Runnable {
         for (String appName : ConfigKeeper.configMap.keySet()) {
             String path = ConfigKeeper.configMap.get(appName)
                     .getString(ParamsKey.Appconf.WATCH_FILE);
-            int bufSize = Integer.parseInt(ConfigKeeper.configMap.get(appName)
-                    .getString(ParamsKey.Appconf.BUFFER_SIZE));
-            AppLog appLog = new AppLog(appName, path, bufSize);
+            int maxLineSize = ConfigKeeper.configMap.get(appName)
+                    .getInteger(ParamsKey.Appconf.MAX_LINE_SIZE, 65536);
+            AppLog appLog = new AppLog(appName, path, maxLineSize);
             appLogs.put(appName, appLog);
         }
     }

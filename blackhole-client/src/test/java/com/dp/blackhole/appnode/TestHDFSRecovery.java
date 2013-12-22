@@ -67,8 +67,8 @@ public class TestHDFSRecovery {
         
         //deploy some condition
         ConfigKeeper confKeeper = new ConfigKeeper();
-        confKeeper.addRawProperty(MAGIC+".ROLL_PERIOD", "3600");
-        confKeeper.addRawProperty(MAGIC + ".BUFFER_SIZE", "100");
+        confKeeper.addRawProperty(MAGIC+".rollPeriod", "3600");
+        confKeeper.addRawProperty(MAGIC + ".maxLineSize", "1024");
         
         serverThread = new Thread(
                 new SimCollectornode("recovery", MAGIC, port, fs));
@@ -86,7 +86,7 @@ public class TestHDFSRecovery {
 
     @Test
     public void test() throws IOException, InterruptedException {
-        AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), new Date().getTime(), 100);
+        AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), new Date().getTime(), 1024);
         RollRecovery clientTask = new RollRecovery(appnode, SimAppnode.HOSTNAME, port, appLog, SimAppnode.rollTS);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();

@@ -1,10 +1,12 @@
 package com.dp.blackhole.common;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.dp.blackhole.common.gen.AppRegPB.AppReg;
 import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
 import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg;
 import com.dp.blackhole.common.gen.ConfResPB.ConfRes;
 import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.common.gen.DumpReplyPB.DumpReply;
@@ -15,6 +17,7 @@ import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode;
 import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
+import com.dp.blackhole.common.gen.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
 import com.dp.blackhole.common.gen.StreamIDPB.StreamID;
 
@@ -32,6 +35,7 @@ public class PBwrap {
             msg.setAppReg((AppReg) message);
             break;
         case COLLECTOR_REG:
+            msg.setColNodeReg((ColNodeReg) message);
             break;
         case ASSIGN_COLLECTOR:
             msg.setAssignCollector((AssignCollector) message);
@@ -74,6 +78,11 @@ public class PBwrap {
         case DUMPREPLY:
             msg.setDumpReply((DumpReply) message);
             break;
+        case LISTAPPS:
+            break;
+        case REMOVE_CONF:
+            msg.setRemoveConf((RemoveConf) message);
+            break;
         default:
         }
         return msg.build();
@@ -97,8 +106,10 @@ public class PBwrap {
         return wrapMessage(MessageType.APP_REG, builder.build());
     }
     
-    public static Message wrapCollectorReg() {
-        return wrapMessage(MessageType.COLLECTOR_REG, null);
+    public static Message wrapCollectorReg(int port) {
+        ColNodeReg.Builder builder = ColNodeReg.newBuilder();
+        builder.setPort(port);
+        return wrapMessage(MessageType.COLLECTOR_REG, builder.build());
     }
     
     public static Message wrapAssignCollector(String appName, String collectorServer, int port) {
@@ -208,15 +219,15 @@ public class PBwrap {
         return wrapMessage(MessageType.CONF_REQ, null);
     }
     
-    public static AppConfRes wrapAppConfRes (String appName, String watchFile, String period, String bufSize) {
+    public static AppConfRes wrapAppConfRes (String appName, String watchFile, String period, String maxLineSize) {
         AppConfRes.Builder builder = AppConfRes.newBuilder();
         builder.setAppName(appName);
         builder.setWatchFile(watchFile);
         if (period != null) {
             builder.setPeriod(period);
         }
-        if (bufSize != null) {
-            builder.setBufferSize(bufSize);
+        if (maxLineSize != null) {
+            builder.setMaxLineSize(maxLineSize);
         }
         return builder.build();
     }
@@ -239,5 +250,16 @@ public class PBwrap {
         DumpReply.Builder builder = DumpReply.newBuilder();
         builder.setReply(dumpReply);
         return wrapMessage(MessageType.DUMPREPLY, builder.build());
+    }
+
+    public static Message wrapListApps() {
+        return wrapMessage(MessageType.LISTAPPS, null);
+    }
+
+    public static Message wrapRemoveConf(String appName, ArrayList<String> appServers) {
+        RemoveConf.Builder builder = RemoveConf.newBuilder();
+        builder.setAppName(appName);
+        builder.addAllAppServers(appServers);
+        return wrapMessage(MessageType.REMOVE_CONF, builder.build());
     }
 }

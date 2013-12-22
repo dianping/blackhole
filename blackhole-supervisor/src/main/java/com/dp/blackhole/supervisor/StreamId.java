@@ -8,6 +8,7 @@ public class StreamId {
         this.app = app;
         this.appHost = appHost;
     }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -16,6 +17,7 @@ public class StreamId {
         result = prime * result + ((appHost == null) ? 0 : appHost.hashCode());
         return result;
     }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -37,7 +39,7 @@ public class StreamId {
             return false;
         return true;
     }
-    
+
     @Override
     public String toString() {
         return app + "@" + appHost;

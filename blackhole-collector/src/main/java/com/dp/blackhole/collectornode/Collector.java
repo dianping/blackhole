@@ -29,8 +29,9 @@ public class Collector implements Runnable {
     File appending;
     long rollPeriod;
     SimpleDateFormat format;
+    private long clockSyncBufMillis;
     
-    public Collector(Collectornode server, Socket s, String home, String appname, String host, long period) {
+    public Collector(Collectornode server, Socket s, String home, String appname, String host, long period, long clockSyncBufMillis) {
         node = server;
         socket = s;
         remoteAddress = Util.getRemoteHost(s);
@@ -38,7 +39,7 @@ public class Collector implements Runnable {
         rollPeriod = period;
         format = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         storagedir = home+"/"+ app + "/" + remoteAddress;
-        
+        this.clockSyncBufMillis = clockSyncBufMillis;
         init();
     }
     
@@ -97,7 +98,7 @@ public class Collector implements Runnable {
     private void completefile() throws IOException {
         RollIdent rollIdent = getRollIdent();
         File rollFile = getRollFile(rollIdent);
-
+        LOG.info("Trigger complete file, rename to " + rollFile);
         writer.close();
         if(!appending.renameTo(rollFile)) {
             LOG.error("rename to " + rollFile + " failed");
@@ -112,7 +113,7 @@ public class Collector implements Runnable {
     }
 
     private RollIdent getRollIdent() {
-        Date time = new Date(Util.getClosestRollTs(Util.getTS(), rollPeriod));
+        Date time = new Date(Util.getLatestRotateRollTsUnderTimeBuf(Util.getTS(), rollPeriod, clockSyncBufMillis));
         RollIdent roll = new RollIdent();
         roll.app = app;
         roll.period = rollPeriod;

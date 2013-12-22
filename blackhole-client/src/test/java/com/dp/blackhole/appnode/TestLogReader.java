@@ -27,8 +27,7 @@ public class TestLogReader {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         ConfigKeeper confKeeper = new ConfigKeeper();
-        confKeeper.addRawProperty(MAGIC + ".ROLL_PERIOD", "3600");
-        confKeeper.addRawProperty(MAGIC + ".BUFFER_SIZE", "100");
+        confKeeper.addRawProperty(MAGIC + ".rollPeriod", "3600");
     }
 
     @AfterClass
@@ -57,7 +56,7 @@ public class TestLogReader {
     @Test
     public void testFileRotated() {
         AppLog appLog = new AppLog(MAGIC, SimAppnode.TEST_ROLL_FILE,
-        		System.currentTimeMillis(), 100);
+        		System.currentTimeMillis(), 1024);
         SimAppnode appnode = new SimAppnode();
         FileListener listener;
         try {

@@ -123,7 +123,7 @@ public class Util {
      * now is 16:02, and rollPeroid is 1 hour, then
      * return st of 16:00
      */
-    public static long getRollTs(long ts, long rollPeriod) {
+    public static long getCurrentRollTs(long ts, long rollPeriod) {
         rollPeriod = rollPeriod * 1000;
         long ret = (ts / rollPeriod) * rollPeriod;
         if (rollPeriod >= magic) {
@@ -133,21 +133,25 @@ public class Util {
     }
     
     /*
-     * get the closest roll timestamp, for example
+     * get the stage roll timestamp, for example
      * now is 16:02, and rollPeroid is 1 hour, then
      * return ts of 15:00;
-     * now is 15:59, and rollPeroid is 1 hour, then
-     * return ts of 15:00
      */
-    public static long getClosestRollTs(long ts, long rollPeriod) {
+    public static long getLatestRotateRollTs(long ts, long rollPeriod) {
+        return getLatestRotateRollTsUnderTimeBuf(ts, rollPeriod, 0);
+    }
+    
+    /*
+     * get the stage roll timestamp under a forward delay, for example
+     * timebuf is 5000, now is 15:59:55, and rollPeroid is 1 hour, then
+     * return ts of 15:00;
+     * timebuf is 5000, now is 15:59:54, and rollPeroid is 1 hour, then
+     * return ts of 14:00;
+     */
+    public static long getLatestRotateRollTsUnderTimeBuf(
+            long ts, long rollPeriod, long clockSyncBufMillis) {
         rollPeriod = rollPeriod * 1000;
-        
-        if ((ts % rollPeriod) < (rollPeriod/2)) {
-            ts = (ts / rollPeriod -1) * rollPeriod;
-        } else {
-            ts = (ts / rollPeriod) * rollPeriod;
-        }
-        
+        ts = ((ts + clockSyncBufMillis) / rollPeriod -1) * rollPeriod;
         //TODO 1378443602000 will get wrong result
         if (rollPeriod >= magic) {
             ts = ts - magic;
@@ -202,7 +206,7 @@ public class Util {
         for (int i = 0; i < tmp.length; i++) {
             String[] tmp2 = tmp[i].split(":");
             for (int j = 0; j < 2; j++) {
-                result[i][j] = tmp2[j].substring(1, tmp2[j].length() -1 );
+                result[i][j] = tmp2[j].trim().substring(1, tmp2[j].length() -1 );
             }
         }
         return result;

@@ -72,25 +72,28 @@ public class HDFSRecovery implements Runnable{
                 gout.close();
                 gout = null;
                 
-                if (Util.retryRename(fs, recoveryPath, normalPath)) {
+                if (HDFSUtil.retryRename(fs, recoveryPath, normalPath)) {
                     LOG.info("Finished to rename to " + normalPathname);
                 } else {
-                    if (fs.exists(normalPath)) {
-                        LOG.warn("failed to rename to " + normalPathname + ", it exists, delete " + recoveryPath);
-                        if (!Util.retryDelete(fs, recoveryPath)) {
-                            LOG.error("delete " + recoveryPath + " failed");
-                        }
-                    } else {
-                        throw new IOException("Faild to rename to " + normalPathname);
+                    if (!HDFSUtil.retryDelete(fs, recoveryPath)) {
+                        LOG.error("delete " + recoveryPath + " failed, try next time.");
                     }
+                    throw new IOException("Faild to rename to " + normalPathname);
                 }
                 
-                if (fs.exists(tmpPath) && !Util.retryDelete(fs, tmpPath)) {   //delete .tmp if exists
-                    throw new IOException("Faild to delete recovery file " + tmpPathname);
+                if (fs.exists(tmpPath) && !HDFSUtil.retryDelete(fs, tmpPath)) {
+                    throw new IOException("Recovery success but faild to delete " + tmpPathname
+                            + ", it will try again next time.");
                 }
-            } else {    //When normal path exists then just delete .tmp if they exist.
-                if (fs.exists(tmpPath) && !Util.retryDelete(fs, tmpPath)) {
-                    throw new IOException("Faild to delete recovery file " + tmpPathname);
+            } else {
+                //When normal path exists then just delete .tmp if it exists.
+                if (fs.exists(tmpPath) && !HDFSUtil.retryDelete(fs, tmpPath)) {
+                    throw new IOException("Recovery success but faild to delete " + tmpPathname
+                            + ", it will try again next time.");
+                }
+                if (fs.exists(normalPath) && !HDFSUtil.retryDelete(fs, normalPath)) {
+                    throw new IOException("Recovery success but faild to delete " + recoveryPathname
+                            + ", it will try again next time.");
                 }
             }
             recoverySuccess = true;
