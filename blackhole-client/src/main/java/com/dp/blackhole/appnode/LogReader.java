@@ -5,11 +5,10 @@ import java.io.Closeable;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,7 +21,6 @@ import com.dp.blackhole.conf.ConfigKeeper;
 
 public class LogReader implements Runnable{
     private static final Log LOG = LogFactory.getLog(LogReader.class);
-    private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
     private static final int IN_BUF = 1024 * 8;
     private static final int SYS_MAX_LINE_SIZE = 1024 * 512;
 
@@ -84,26 +82,21 @@ public class LogReader implements Runnable{
     }
 
     class EventWriter {
-        private final Charset cset;
         private final File file;
         private final byte inbuf[] = new byte[IN_BUF];
-        private final OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
+        private final OutputStream out = socket.getOutputStream();
         private RandomAccessFile reader;
         private final int maxLineSize;
         private final ByteArrayOutputStream lineBuf;
         private boolean accept;
         
         public EventWriter(final File file, int maxLineSize) throws IOException {
-            this(file, maxLineSize, DEFAULT_CHARSET);
-        }
-        public EventWriter(final File file, int maxLineSize, Charset cset) throws IOException {
             this.file = file;
             if (maxLineSize > SYS_MAX_LINE_SIZE) {
                 this.maxLineSize = SYS_MAX_LINE_SIZE;
             } else {
                 this.maxLineSize = maxLineSize;
             }
-            this.cset = cset;
             this.reader = new RandomAccessFile(file, "r");
             this.lineBuf = new ByteArrayOutputStream(maxLineSize);
             this.accept = true;
@@ -117,12 +110,12 @@ public class LogReader implements Runnable{
                 // Finish scanning the old file and then we'll start with the new one
                 readLines(save);
                 closeQuietly(save);
-                writer.write('\n'); //make server easy to handle
-                writer.flush();
+                out.write('\n'); //make server easy to handle
+                out.flush();
             } catch (IOException e) {
                 LOG.error("Oops, got an exception:", e);
                 closeQuietly(reader);
-                closeQuietly(writer);
+                closeQuietly(out);
                 LOG.debug("process rotate failed, stop.");
                 stop();
                 node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
@@ -135,7 +128,7 @@ public class LogReader implements Runnable{
             } catch (IOException e) {
                 LOG.error("Oops, process read lines fail:", e);
                 closeQuietly(reader);
-                closeQuietly(writer);
+                closeQuietly(out);
                 LOG.debug("process failed, stop.");
                 stop();
                 node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
@@ -152,7 +145,7 @@ public class LogReader implements Runnable{
                     switch (ch) {
                     case '\n':
                         if (accept) {
-                            handleLine(new String(lineBuf.toByteArray(), cset));
+                            handleLine(lineBuf.toByteArray());
                         }
                         accept = true;
                         lineBuf.reset();
@@ -175,9 +168,9 @@ public class LogReader implements Runnable{
             return rePos;
         }
         
-        private void handleLine(String line) throws IOException {
-            writer.write(line);
-            writer.write('\n'); //make server easy to handle
+        private void handleLine(byte[] line) throws IOException {
+            out.write(line);
+            out.write('\n'); //make server easy to handle
         }
         
         /**

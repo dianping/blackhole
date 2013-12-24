@@ -1,9 +1,9 @@
 package com.dp.blackhole.appnode;
 
 public class AppLog {
-    private String appName;
-    private String tailFile;
-    private long createTime;
+    private final String appName;
+    private final String tailFile;
+    private final long createTime;
     private int maxLineSize;
     
     public AppLog(String appName, String tailFile, int maxLineSize) {
@@ -21,16 +21,8 @@ public class AppLog {
         return appName;
     }
 
-    public void setAppName(String appName) {
-        this.appName = appName;
-    }
-
     public String getTailFile() {
         return tailFile;
-    }
-
-    public void setTailFile(String tailFile) {
-        this.tailFile = tailFile;
     }
 
     public long getCreateTime() {

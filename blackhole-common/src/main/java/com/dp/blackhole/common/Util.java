@@ -45,10 +45,27 @@ public class Util {
     public static File findRealFileByIdent(String appTailFile, final String rollIdent) {
         // real file: trace.log.2013-07-11.12
         // rollIdent is "2013-07-11.12" as long as time unit is "hour"
-        File realFile = new File(appTailFile + "." + rollIdent);
-        if (realFile.isFile() && realFile.exists()) {
-            return realFile;
-        } else {
+        return new File(appTailFile + "." + rollIdent);
+    }
+
+    public static File findGZFileByIdent(String appTailFile, final String rollIdent) {
+        try {
+            String hostName = getLocalHost();
+            int indexOfLastSlash = appTailFile.lastIndexOf('/');
+            File gzFile = new File(appTailFile.substring(0, indexOfLastSlash + 1)
+                    + hostName
+                    + "__"
+                    + hostName.substring(0, hostName.lastIndexOf('.') - 2)
+                    + "."
+                    + appTailFile.substring(indexOfLastSlash + 1)
+                    + "."
+                    + rollIdent
+                    + ".gz");
+            return gzFile;
+        } catch (UnknownHostException e) {
+            LOG.error("Oops, it not should be happen. " + e.getMessage());
+            return null;
+        } catch (StringIndexOutOfBoundsException e) {
             return null;
         }
     }
@@ -206,7 +223,7 @@ public class Util {
         for (int i = 0; i < tmp.length; i++) {
             String[] tmp2 = tmp[i].split(":");
             for (int j = 0; j < 2; j++) {
-                result[i][j] = tmp2[j].trim().substring(1, tmp2[j].length() -1 );
+                result[i][j] = tmp2[j].trim().substring(1, tmp2[j].length() -1);
             }
         }
         return result;
