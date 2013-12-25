@@ -52,7 +52,7 @@ public class Util {
 
     public static File findGZFileByIdent(final String appTailFile, final String rollIdent) {
         try {
-            int indexOfLastSlash = appTailFile.lastIndexOf('/');
+            final int indexOfLastSlash = appTailFile.lastIndexOf('/');
             File root = new File(appTailFile.substring(0, indexOfLastSlash + 1)); 
             File[] files = root.listFiles(new FilenameFilter() {
                 @Override
@@ -60,6 +60,8 @@ public class Util {
                     String gzFileRegex = "[_a-z0-9-\\.]+"
                             + "__"
                             + "[_a-z0-9-\\.]+"
+                            + appTailFile.substring(indexOfLastSlash + 1)
+                            + "\\."
                             + rollIdent
                             + "\\.gz";
                     Pattern p = Pattern.compile(gzFileRegex);
@@ -72,6 +74,7 @@ public class Util {
                 return files[0];
             }
         } catch (StringIndexOutOfBoundsException e) {
+            LOG.error("Handle " + appTailFile + " " + rollIdent, e);
             return null;
         }
     }
