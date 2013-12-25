@@ -257,13 +257,11 @@ public class Appnode extends Node implements Runnable {
     public void reportUnrecoverable(final String appname, final String appHost, final long rollTs) {
         Message message = PBwrap.wrapUnrecoverable(appname, appHost, rollTs);
         send(message);
-        removeRecoverying(appname, rollTs);
     }
 
     public void reportRecoveryFail(final String appname, final String appServer, final long rollTs) {
         Message message = PBwrap.wrapRecoveryFail(appname, appServer, rollTs);
         send(message);
-        removeRecoverying(appname, rollTs);
     }
 
     public void removeRecoverying(final String appname, final long rollTs) {
