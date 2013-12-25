@@ -25,7 +25,6 @@ public class SimRecoveryServer implements Runnable {
         this.receives = receives;
         try {
             ss = new ServerSocket(port);
-            System.out.println("server begin at " + port);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -50,7 +49,6 @@ public class SimRecoveryServer implements Runnable {
         InputStream in = null;
         DataInputStream din = null;
         DataOutputStream dout = null;
-        System.out.println(Thread.currentThread());
         try {
             String line = null;
             socket = ss.accept();
@@ -75,8 +73,6 @@ public class SimRecoveryServer implements Runnable {
             //send the offset to client
             dout = new DataOutputStream(socket.getOutputStream());
             dout.writeLong(offset);
-            System.out.println("server "+socket.isClosed());
-            System.out.println("server "+socket.isConnected());
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             while (!Thread.interrupted() && !shouldStop && (line = reader.readLine()) != null) {
 //                LOG.debug("server>" + line);

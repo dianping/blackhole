@@ -72,9 +72,8 @@ public class RollRecovery implements Runnable{
             out = new DataOutputStream(socket.getOutputStream());
             in = new DataInputStream(socket.getInputStream());
         } catch (IOException e) {
-            LOG.error("Faild to build recovery stream.", e);
-            stop();
-            node.reportUnrecoverable(appLog.getAppName(), node.getHost(), rollTimestamp);
+            stopRecoveryingCauseException("Faild to build recovery stream.", e);
+            node.reportRecoveryFail(appLog.getAppName(), node.getHost(), rollTimestamp);
             return;
         }
 
@@ -87,7 +86,7 @@ public class RollRecovery implements Runnable{
         File gzFile = Util.findGZFileByIdent(appLog.getTailFile(), rollIdent);
         if (!rolledFile.exists() && (gzFile == null || !gzFile.exists())) {
             LOG.error("Can not found both " + rolledFile + " add " + gzFile);
-            stop();
+            stopRecoverying();
             node.reportUnrecoverable(appLog.getAppName(), node.getHost(), rollTimestamp);
             return;
         }
@@ -97,8 +96,7 @@ public class RollRecovery implements Runnable{
         try {
             protocol = wrapSendRecoveryHead(out, period);
         } catch (IOException e) {
-            LOG.error("Protocol head send fail, report recovery fail from appnode.", e);
-            stop();
+            stopRecoveryingCauseException("Protocol head send fail, report recovery fail from appnode.", e);
             node.reportRecoveryFail(appLog.getAppName(), node.getHost(), rollTimestamp);
             return;
         }

@@ -3,6 +3,7 @@ package com.dp.blackhole.common;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -13,6 +14,7 @@ import java.nio.channels.SocketChannel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,27 +50,32 @@ public class Util {
         return new File(appTailFile + "." + rollIdent);
     }
 
-    public static File findGZFileByIdent(String appTailFile, final String rollIdent) {
+    public static File findGZFileByIdent(final String appTailFile, final String rollIdent) {
         try {
-            String hostName = getLocalHost();
             int indexOfLastSlash = appTailFile.lastIndexOf('/');
-            File gzFile = new File(appTailFile.substring(0, indexOfLastSlash + 1)
-                    + hostName
-                    + "__"
-                    + hostName.substring(0, hostName.lastIndexOf('.') - 2)
-                    + "."
-                    + appTailFile.substring(indexOfLastSlash + 1)
-                    + "."
-                    + rollIdent
-                    + ".gz");
-            return gzFile;
-        } catch (UnknownHostException e) {
-            LOG.error("Oops, it not should be happen. " + e.getMessage());
-            return null;
+            File root = new File(appTailFile.substring(0, indexOfLastSlash + 1)); 
+            File[] files = root.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    String gzFileRegex = "[_a-z0-9-\\.]+"
+                            + "__"
+                            + "[_a-z0-9-\\.]+"
+                            + rollIdent
+                            + "\\.gz";
+                    Pattern p = Pattern.compile(gzFileRegex);
+                    return p.matcher(name).matches();
+                }
+            });
+            if (files == null || files.length == 0) {
+                return null;
+            } else {
+                return files[0];
+            }
         } catch (StringIndexOutOfBoundsException e) {
             return null;
         }
     }
+
     @Deprecated
     public static long getPeriodInSeconds(int value, String unit) {
         if (unit.equalsIgnoreCase("hour")) {
