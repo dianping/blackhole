@@ -1,0 +1,8 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.common.gen";
+option java_outer_classname = "DumpAppPB";
+
+message DumpApp {
+    required string app_name = 1;
+}

@@ -36,6 +36,7 @@
 		<module>blackhole-supervisor</module>
 		<module>blackhole-cli</module>
 		<module>blackhole-collector</module>
+		<module>blackhole-check</module>
 	</modules>
 	<distributionManagement>
 		<repository>
@@ -54,7 +55,7 @@
 		<dependencies>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>lackhole-client</artifactId>
+				<artifactId>blackhole-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -75,6 +76,11 @@
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>blackhole-collector</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>blackhole-check</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

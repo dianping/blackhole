@@ -45,4 +45,7 @@ public class StreamId {
         return app + "@" + appHost;
     }
     
+    public boolean belongTo(String appName) {
+        return app.equals(appName) ? true : false;
+    }
 }

@@ -3,12 +3,13 @@ package com.dp.blackhole.appnode;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,11 +27,11 @@ public class RollRecovery implements Runnable{
     private String collectorServer;
     private int port;
     private AppLog appLog;
-    private long rollTimestamp;
-    private Socket server;
+    private final long rollTimestamp;
+    private Socket socket;
     private byte[] inbuf;
     private Appnode node;
-    public RollRecovery(Appnode node, String collectorServer, int port, AppLog appLog, long rollTimestamp) {
+    public RollRecovery(Appnode node, String collectorServer, int port, AppLog appLog, final long rollTimestamp) {
         this.node = node;
         this.collectorServer = collectorServer;
         this.port = port;
@@ -38,77 +39,159 @@ public class RollRecovery implements Runnable{
         this.rollTimestamp = rollTimestamp;
         this.inbuf = new byte[DEFAULT_BUFSIZE];
     }
-    
+
+    public void stop() {
+        if (socket != null && !socket.isClosed()) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                LOG.warn("Warnning, clean fail:", e);
+            }
+            socket = null;
+        }
+    }
+
+    private void stopRecoverying() {
+        stop();
+        node.removeRecoverying(appLog.getAppName(), rollTimestamp);
+    }
+
+    private void stopRecoveryingCauseException(String desc, Exception e) {
+        LOG.error(desc, e);
+        stopRecoverying();
+    }
+
     @Override
     public void run() {
+        LOG.info("Roll Recovery for " + appLog + " running...");
+        // check socket connection
+        DataOutputStream out = null;
+        DataInputStream in = null;
+        try {
+            socket = new Socket(collectorServer, port);
+            out = new DataOutputStream(socket.getOutputStream());
+            in = new DataInputStream(socket.getInputStream());
+        } catch (IOException e) {
+            LOG.error("Faild to build recovery stream.", e);
+            stop();
+            node.reportUnrecoverable(appLog.getAppName(), node.getHost(), rollTimestamp);
+            return;
+        }
+
+        // check local file existence 
         long period = ConfigKeeper.configMap.get(appLog.getAppName())
                 .getLong(ParamsKey.Appconf.ROLL_PERIOD, 3600l);
         SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         String rollIdent = unitFormat.format(rollTimestamp);
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
-        
-        if (rolledFile == null || !rolledFile.exists()) {
-            LOG.error("app " + appLog.getAppName() + " rollIdent " + rollIdent + " can not be found");
+        File gzFile = Util.findGZFileByIdent(appLog.getTailFile(), rollIdent);
+        if (!rolledFile.exists() && (gzFile == null || !gzFile.exists())) {
+            LOG.error("Can not found both " + rolledFile + " add " + gzFile);
+            stop();
             node.reportUnrecoverable(appLog.getAppName(), node.getHost(), rollTimestamp);
             return;
         }
-        
-        RandomAccessFile reader = null;
-        DataOutputStream out = null;
-        DataInputStream in = null;
+
+        // send recovery head, report fail in appnode if catch exception.
+        AgentProtocol protocol = null;
+        try {
+            protocol = wrapSendRecoveryHead(out, period);
+        } catch (IOException e) {
+            LOG.error("Protocol head send fail, report recovery fail from appnode.", e);
+            stop();
+            node.reportRecoveryFail(appLog.getAppName(), node.getHost(), rollTimestamp);
+            return;
+        }
+
+        // receive begin offset, do not report anything if catch exception.
         long offset = 0;
         try {
-            
-            server = new Socket(collectorServer, port);
-            out = new DataOutputStream(server.getOutputStream());
-            in = new DataInputStream(server.getInputStream());
-            
-            AgentProtocol protocol = new AgentProtocol();
-            AgentHead head = protocol.new AgentHead();
-            head.type = AgentProtocol.RECOVERY;
-            head.app = appLog.getAppName();
-            head.peroid = period;
-            head.ts = rollTimestamp;
-            
-            protocol.sendHead(out, head);
             offset = protocol.receiveOffset(in);
-            
             LOG.info("Received offset [" + offset + "] in header response.");
-            LOG.debug("roll file is " + rolledFile);
-            reader = new RandomAccessFile(rolledFile, RAF_MODE);
-            
-            reader.seek(offset);
-            LOG.info("Seeked to the position " + offset + ". Begin to transfer...");
-            int len = 0;
-            long transferBytes = 0;
-            LOG.debug("server socket in client " + server.isClosed());
-            while ((len = reader.read(inbuf)) != -1) {
-                out.write(inbuf, 0, len);
-                transferBytes += len;
-            }
-            out.flush();
-            LOG.info("Roll file transfered, including [" + transferBytes + "] bytes.");
-        } catch (FileNotFoundException e) {
-            LOG.error("Oops, got an exception:", e);
-        } catch (UnknownHostException e) {
-            LOG.error("Faild to build a socket with host:" 
-                    + collectorServer + " port:" + port, e);
         } catch (IOException e) {
-            LOG.error("Faild to build Input/Output stream. ", e);
-        } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-                if (out != null) {
-                    out.close();
-                }
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-                LOG.warn("Oops, got an exception:", e);
-            }
+            stopRecoveryingCauseException("Recover stream broken. just report recovery fail from collectornode.", e);
+            return;
         }
+
+        int len = 0;
+        long transferBytes = 0;
+        if (rolledFile.exists()) {
+            // recovery if raw rolledfile exists, using RandomAccessFile
+            LOG.debug("roll file is " + rolledFile);
+            RandomAccessFile reader = null;
+            try {
+                reader = new RandomAccessFile(rolledFile, RAF_MODE);
+            } catch (FileNotFoundException e) {
+                stopRecoveryingCauseException("Oops! It not should be happen here.", e);
+                return;
+            }
+            try {
+                reader.seek(offset);
+                LOG.info("Seeked to the position " + offset + ". Begin to transfer...");
+                while ((len = reader.read(inbuf)) != -1) {
+                    out.write(inbuf, 0, len);
+                    transferBytes += len;
+                }
+                out.flush();
+                LOG.info("Roll file transfered, including [" + transferBytes + "] bytes.");
+            } catch (IOException e) {
+                LOG.error("Recover stream broken.", e);
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                    }
+                    reader = null;
+                }
+                stopRecoverying();
+            }
+        } else if (gzFile != null && gzFile.exists()) {
+            // recovery if and only if gz file exists, using GZInputstream
+            LOG.info("Can not found " + rolledFile + ", trying gz file.");
+            GZIPInputStream gin = null;
+            try {
+                gin = new GZIPInputStream(new FileInputStream(gzFile));
+            } catch (IOException e) {
+                stopRecoveryingCauseException("Create GZIP stream fail.", e);
+                return;
+            }
+            try {
+                gin.skip(offset);
+                while((len = gin.read(inbuf)) != -1) {
+                    out.write(inbuf, 0, len);
+                    transferBytes += len;
+                }
+                out.flush();
+                LOG.info("Roll file transfered, including [" + transferBytes + "] bytes.");
+            } catch (IOException e) {
+                LOG.error("Recover stream broken.", e);
+            } finally {
+                if (gin != null) {
+                    try {
+                        gin.close();
+                    } catch (IOException e) {
+                    }
+                    gin = null;
+                }
+                stopRecoverying();
+            }
+        } else {
+            LOG.error("Oops! It not should be happen here.");
+            stopRecoverying();
+            return;
+        }
+    }
+
+    private AgentProtocol wrapSendRecoveryHead(DataOutputStream out, long period)
+            throws IOException {
+        AgentProtocol protocol = new AgentProtocol();
+        AgentHead head = protocol.new AgentHead();
+        head.type = AgentProtocol.RECOVERY;
+        head.app = appLog.getAppName();
+        head.peroid = period;
+        head.ts = rollTimestamp;
+        protocol.sendHead(out, head);
+        return protocol;
     }
 }

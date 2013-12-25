@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.zip.GZIPOutputStream;
@@ -18,7 +19,8 @@ import com.dp.blackhole.common.Util;
 
 public class Collector implements Runnable {
 
-    private final static Log LOG = LogFactory.getLog(Collector.class);
+    private static final Log LOG = LogFactory.getLog(Collector.class);
+    private static final Charset DEFAULT_CHARSET = Charset.forName("utf-8");
     Socket socket;
     final String remoteAddress;
     final String app;
@@ -47,7 +49,7 @@ public class Collector implements Runnable {
         try {
             appending = node.getappendingFile(storagedir);
             writer = new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(appending)));
-            streamIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            streamIn = new BufferedReader(new InputStreamReader(socket.getInputStream(), DEFAULT_CHARSET));
         } catch (IOException e) {
             LOG.error("error in init: ", e);
             handleIOException() ;

@@ -12,9 +12,11 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -36,6 +38,7 @@ import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg;
 import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
+import com.dp.blackhole.common.gen.DumpAppPB.DumpApp;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
@@ -444,6 +447,47 @@ public class Supervisor {
         send(from, message);
     }
     
+    private void dumpapp(DumpApp dumpApp, Connection from) {
+        String appName = dumpApp.getAppName();
+        StringBuilder sb = new StringBuilder();
+        sb.append("dumpapp:\n");
+        sb.append("############################## dump ##############################\n");
+        sb.append("print streamIdMap:\n");
+        Set<Stream> printStreams = new HashSet<Stream>();
+        for (StreamId streamId : streamIdMap.keySet()) {
+            if (streamId.belongTo(appName)) {
+                Stream stream = streamIdMap.get(streamId);
+                printStreams.add(stream);
+                sb.append("<")
+                .append(stream)
+                .append(">")
+                .append("\n");
+            }
+        }
+        sb.append("\n");
+        
+        sb.append("print Streams:\n");
+        for (Stream stream : printStreams) {
+            sb.append("[stream]\n")
+            .append(stream)
+            .append("\n")
+            .append("[stages]\n");
+            ArrayList<Stage> stages = Streams.get(stream);
+            synchronized (stages) {
+                for (Stage stage : stages) {
+                    sb.append(stage)
+                    .append("\n");
+                }
+            }
+        }
+        sb.append("##################################################################");
+        
+        String dumpstat = sb.toString();
+        LOG.info(dumpstat);
+        Message message = PBwrap.wrapDumpReply(dumpstat);
+        send(from, message);
+    }
+    
     public void dumpconf(Connection from) {
         String dumpconf = lionConfChange.dumpconf();
         LOG.info(dumpconf);
@@ -472,7 +516,6 @@ public class Supervisor {
             .append(">")
             .append("\n");
         }
-        sb.append("\n");
         sb.append("##################################################################");
         
         String listApps = sb.toString();
@@ -1101,6 +1144,7 @@ public class Supervisor {
         from.setNodeType(Connection.COLLECTORNODE);
         collectorNodes.put(from.getHost(), from);
         collectorHostPortMap.put(from.getHost(), colNodeReg.getPort());
+        LOG.info("CollectorNode " + from.getHost() + " registered");
     }
 
     /* 
@@ -1196,6 +1240,8 @@ public class Supervisor {
             case REMOVE_CONF:
                 removeConf(msg.getRemoveConf(), from);
                 break;
+            case DUMP_APP:
+                dumpapp(msg.getDumpApp(), from);
             default:
                 LOG.warn("unknown message: " + msg.toString());
             }

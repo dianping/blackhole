@@ -16,6 +16,7 @@ import "ConfRes.proto";
 import "DumpReply.proto";
 import "RemoveConf.proto";
 import "ColNodeReg.proto";
+import "DumpApp.proto";
 
 message Message {
     enum MessageType {
@@ -44,6 +45,7 @@ message Message {
         DUMPREPLY = 23;
         LISTAPPS = 24;
         REMOVE_CONF = 25;
+        DUMP_APP = 26;
     }
 
     required MessageType type = 1;
@@ -60,4 +62,5 @@ message Message {
     optional DumpReply dumpReply = 12;
     optional RemoveConf removeConf = 13;
     optional ColNodeReg colNodeReg =14;
+    optional DumpApp dumpApp = 15;
 }
