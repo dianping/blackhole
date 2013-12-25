@@ -72,7 +72,7 @@ public class Appnode extends Node implements Runnable {
                     recoveryThreadPool.execute(rollRecovery);
                     return true;
                 } else {
-                    LOG.debug("duplicated recovery roll message: "
+                    LOG.info("duplicated recovery roll message: "
                             + recoveryRoll);
                 }
             } else {

@@ -813,7 +813,7 @@ public class Supervisor {
                     for (Stage stage : stages) {
                         if (stage.rollTs == rollID.getRollTs()) {
                             stage.status = Stage.UPLOADED;
-                            LOG.info(stage.toString());
+                            LOG.info(stage);
                             stages.remove(stage);
                             stageConnectionMap.remove(stage);
                             break;
@@ -849,25 +849,32 @@ public class Supervisor {
                         }
                     }
                     if (current == null) {
-                        LOG.error("Stages may missed from stage:" + stages.get(stages.size() - 1) 
-                                + " to stage:" + msg.getRollTs());
+                        if (stages.size() > 0) {
+                            LOG.error("Stages may missed from stage:" + stages.get(stages.size() - 1)
+                                    + " to stage:" + msg.getRollTs());
+                        } else {
+                            LOG.warn("There are no stages in stream " + stream);
+                        }
                         int missedStageCount = getMissedStageCount(stream, msg.getRollTs());
                         LOG.info("need recovery missed stages: " + missedStageCount);
-                        Stage oldcurrent = stages.get(stages.size() - 1);
-                        stages.remove(oldcurrent);
-                        oldcurrent.isCurrent = false;
+                        for (Stage stage : stages) {
+                            stage.isCurrent = false;
+                        }
                         Issue issue = new Issue();
-                        issue.ts = oldcurrent.rollTs;
+                        issue.ts = stream.getlastSuccessTs() + stream.period * 1000;
                         issue.desc = "log discontinuous";
                         ArrayList<Stage> missedStages = getMissedStages(stream, missedStageCount, issue);
-                        for (Stage stage : missedStages) {
-                            LOG.info("processing missed stages: " + stage);
+                        for (Stage missedStage : missedStages) {
+                            LOG.info("processing missed stages: " + missedStage);
                             // check whether it is missed
-                            if (stage.isCurrent()) {
-                                current = stage;
+                            if (missedStage.isCurrent()) {
+                                missedStage.isCurrent = false;
+                                current = missedStage;
                             }
-                            doRecovery(stream, stage);
-                            stages.add(stage);
+                            if (!stages.contains(missedStage)) {
+                                stages.add(missedStage);
+                            }
+                            doRecovery(stream, missedStage);
                         }
                     } else {
                         if (current.cleanstart == false || current.issuelist.size() != 0) {
@@ -890,7 +897,6 @@ public class Supervisor {
                         next.status = Stage.APPENDING;
                         next.issuelist = new ArrayList<Issue>();
                         next.isCurrent = true;
-                        
                         stages.add(next);
                     }
                 }
@@ -1184,7 +1190,6 @@ public class Supervisor {
         }
         
         private void process(Message msg, Connection from) throws InterruptedException {
-
             switch (msg.getType()) {
             case HEARTBEART:
                 from.updateHeartBeat();
