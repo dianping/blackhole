@@ -59,7 +59,10 @@ public class CheckDone implements Runnable{
                 if (attemptSource.isEmpty()) { //all file ready
                     if (expectedFile != null) {
                         if (!retryTouch(expectedFile.getParent())) {
-                            LOG.warn("Failed to touch a done file. Try in next check cycle.");
+                            LOG.error("Alarm, failed to touch a done file. " +
+                            		"Try in next check cycle. " +
+                            		"If you see this message for the second time, " +
+                            		"please find out why.");
                             break;
                         }
                         firstDeploy = false;
@@ -74,7 +77,7 @@ public class CheckDone implements Runnable{
                     }
                     if (calendar.get(Calendar.MINUTE) >= alartTime) {
                         if (!tried) {
-                            LOG.error("Alarm, too long to finish. Attempt to recovery using blackhole cli once.");
+                            LOG.warn("Too long to finish. Attempt to recovery using blackhole cli once.");
                             Runtime runtime = Runtime.getRuntime();
                             tried = true;
                             for (String source : attemptSource) {
@@ -95,6 +98,8 @@ public class CheckDone implements Runnable{
                                 }
                             }
                             break;
+                        } else {
+                            LOG.error("Alarm, file recovery may be unsuccessful. Please check it out.");
                         }
                     } else {
                         break;
