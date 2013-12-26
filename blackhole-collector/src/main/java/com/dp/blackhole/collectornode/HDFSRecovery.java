@@ -91,7 +91,7 @@ public class HDFSRecovery implements Runnable{
                     throw new IOException("Recovery success but faild to delete " + tmpPathname
                             + ", it will try again next time.");
                 }
-                if (fs.exists(normalPath) && !HDFSUtil.retryDelete(fs, normalPath)) {
+                if (fs.exists(recoveryPath) && !HDFSUtil.retryDelete(fs, recoveryPath)) {
                     throw new IOException("Recovery success but faild to delete " + recoveryPathname
                             + ", it will try again next time.");
                 }
