@@ -99,7 +99,7 @@ public class CheckDone implements Runnable{
                             }
                             break;
                         } else {
-                            LOG.error("Alarm, file recovery may be unsuccessful. Please check it out.");
+                            LOG.error("Alarm, auto recovery for " + ident.app + " may be unsuccessful. Please check it out.");
                         }
                     } else {
                         break;
