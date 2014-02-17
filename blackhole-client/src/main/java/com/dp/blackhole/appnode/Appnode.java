@@ -144,20 +144,53 @@ public class Appnode extends Node implements Runnable {
         super.send(msg);
     }
 
-    private boolean checkAllFilesExist() {
+    public boolean checkAllFilesExist() {
         boolean res = true;
-        for (String appName : ConfigKeeper.configMap.keySet()) {
-            String path = ConfigKeeper.configMap.get(appName).getString(
-                    ParamsKey.Appconf.WATCH_FILE);
-            File fileForTest = new File(path);
-            if (!fileForTest.exists()) {
-                LOG.error("Appnode process start faild, because file " + path + " not found!");
-                res = false;
-            } else {
-                LOG.info("Check file " + path + " ok.");
+        try {
+            String hostname = Util.getLocalHost();
+            for (String appName : ConfigKeeper.configMap.keySet()) {
+                String path = ConfigKeeper.configMap.get(appName).getString(
+                        ParamsKey.Appconf.WATCH_FILE);
+                if (path == null) {
+                    LOG.error("Oops, can not get WATCH_FILE from mapping for app " + appName);
+                    return false;
+                }
+                File fileForTest = new File(path);
+                if (fileForTest.exists()) {
+                    LOG.info("Check file " + path + " ok.");
+                } else if (isCompatibleWithOldVersion(appName, fileForTest, hostname)) {
+                    LOG.info("It's an old version of log printer. Ok");
+                } else {
+                    LOG.error("Appnode process start faild, because file " + path + " not found!");
+                    res = false;
+                }
             }
+        } catch (UnknownHostException e) {
+            LOG.error("Oops, unknow host, maybe cause by DNS exception.");
+            res = false;
         }
         return res;
+    }
+
+    private boolean isCompatibleWithOldVersion(String appName, final File fileForTest, String hostname) {
+        int index = fileForTest.getName().indexOf('.');
+        if (index == -1) {
+            LOG.error("Invaild fileName " + fileForTest.getName());
+            return false;
+        }
+        String specifiedName = fileForTest.getName().substring(0, index);
+        if (specifiedName == null) {
+            return false;
+        }
+        if (hostname.contains(specifiedName)) {
+            String oldVersionPath = fileForTest.getParent() + "/" + hostname + fileForTest.getName().substring(index);
+            if (new File(oldVersionPath).exists()) {
+                ConfigKeeper.configMap.get(appName).put(ParamsKey.Appconf.WATCH_FILE, oldVersionPath);
+                LOG.debug("WATCH_FILE change to " + oldVersionPath);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
