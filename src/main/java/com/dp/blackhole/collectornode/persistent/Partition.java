@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -183,9 +184,11 @@ public class Partition {
     public void cleanupSegments(long current, long threshold) {
         lock.writeLock().lock();
         try {
-            for (Segment s : segments) {
+            Iterator<Segment> iter = segments.iterator();
+            while(iter.hasNext()) {
+                Segment s = iter.next();
                 if (current - s.getCloseTimestamp() >= threshold) {
-                    segments.remove(s);
+                    iter.remove();
                     s.destory();
                 }
             }

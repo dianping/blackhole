@@ -16,6 +16,7 @@ public class DataMessageTypeFactory implements TypedFactory {
     public static final int MultiFetchReply = 5;
     public static final int OffsetRequest = 6;
     public static final int OffsetReply = 7;
+    public static final int RotateRequest = 8;
     
     @Override
     public TypedWrappable getWrappedInstanceFromType(int type) {
