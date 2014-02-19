@@ -10,6 +10,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -23,6 +24,9 @@ import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 
 public abstract class Node {
     public static final Log LOG = LogFactory.getLog(Node.class);
+    static {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+    }
     private Selector selector;
     private SocketChannel socketChannel;
     volatile private boolean running = true;

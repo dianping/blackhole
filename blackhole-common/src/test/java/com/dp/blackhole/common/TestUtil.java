@@ -18,6 +18,8 @@ import com.dp.blackhole.common.Util;
 public class TestUtil {
     private static final String filepathname = "/tmp/893jfc842.log.2013-01-01.15";
     private static File file;
+    private static final long PEROID_OF_HOUR = 3600l;
+    private static final long PEROID_OF_DAY = 3600 * 24l;
     enum MONTH {
         JAN,
         FEB,
@@ -72,5 +74,44 @@ public class TestUtil {
     public void testFindRealFileByIdent() throws FileNotFoundException, IOException {
         File file = Util.findRealFileByIdent("/tmp/893jfc842.log", "2013-01-01.15");
         assertNotNull(file);
+    }
+    @Test
+    public void testGetCurrentRollTs() {
+        long same = 1386950400000l;     //2013-12-14 00:00:00
+        long diff1 = 1386950400001l;    //2013-12-14 00:00:01
+        long diff2 = 1386950399999l;    //2013-12-13 23:59:59
+        long result = Util.getCurrentRollTs(same, PEROID_OF_HOUR);
+        assertEquals(same, result);
+        assertFalse(diff1 == result);
+        assertFalse(diff2 == result);
+        result = Util.getCurrentRollTs(same, PEROID_OF_DAY);
+        assertEquals(same, result);
+        assertFalse(diff1 == result);
+        assertFalse(diff2 == result);
+    }
+
+    @Test
+    public void testGetLatestRotateRollTsUnderTimeBuf() {
+        long beforeAndInBuf = 1386950395000l; //2013-12-13 23:59:55
+        long beforeAndOutBuf = 1386950394000l; //2013-12-13 23:59:54
+        long afterAndInBuf = 1386950401000l; //2013-12-14 00:00:01
+        long testValue = 1378443602000l;
+        long bufMs = 5000l;
+        long result = Util.getLatestRotateRollTsUnderTimeBuf(beforeAndInBuf, PEROID_OF_HOUR, bufMs);
+        assertEquals(1386946800000l, result);
+        result = Util.getLatestRotateRollTsUnderTimeBuf(beforeAndOutBuf, PEROID_OF_HOUR, bufMs);
+        assertEquals(1386943200000l, result);
+        result = Util.getLatestRotateRollTsUnderTimeBuf(afterAndInBuf, PEROID_OF_HOUR, bufMs);
+        assertEquals(1386946800000l, result);
+        result = Util.getLatestRotateRollTsUnderTimeBuf(beforeAndInBuf, PEROID_OF_DAY, bufMs);
+        assertEquals(1386864000000l, result);
+        result = Util.getLatestRotateRollTsUnderTimeBuf(beforeAndOutBuf, PEROID_OF_DAY, bufMs);
+        assertEquals(1386777600000l, result);
+        result = Util.getLatestRotateRollTsUnderTimeBuf(afterAndInBuf, PEROID_OF_DAY, bufMs);
+        assertEquals(1386864000000l, result);
+        result = Util.getLatestRotateRollTsUnderTimeBuf(testValue, PEROID_OF_HOUR, bufMs);
+        assertEquals(1378440000000l, result);
+        result = Util.getLatestRotateRollTsUnderTimeBuf(testValue, PEROID_OF_DAY, bufMs);
+        assertEquals(1378310400000l, result);
     }
 }
