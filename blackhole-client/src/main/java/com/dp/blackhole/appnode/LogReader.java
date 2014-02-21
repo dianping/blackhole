@@ -9,10 +9,12 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dianping.cat.Cat;
 import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
@@ -30,6 +32,7 @@ public class LogReader implements Runnable{
     private int port;
     private Socket socket;
     EventWriter eventWriter;
+    private AtomicLong readSum = new AtomicLong(0L);
     
     public LogReader(Appnode node, String collectorServer, int port, AppLog appLog) {
         this.node = node;
@@ -45,7 +48,8 @@ public class LogReader implements Runnable{
                 socket = null;
             }
         } catch (IOException e) {
-            LOG.warn("Warnning, clean fail:", e);
+            LOG.warn("Failed to close socket.", e);
+            Cat.logError("Failed to close socket.", e);
         }
         node.getListener().unregisterLogReader(appLog.getTailFile());
     }
@@ -71,14 +75,29 @@ public class LogReader implements Runnable{
             }
         } catch (UnknownHostException e) {
             LOG.error("Socket fail!", e);
+            Cat.logError("Socket fail!", e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
         } catch (IOException e) {
             LOG.error("Oops, got an exception", e);
+            Cat.logError("Oops, got an exception", e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
         } catch (RuntimeException e) {
             LOG.error("Oops, got an RuntimException:" , e);
+            Cat.logError("Oops, got an RuntimException:" , e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
         }
+    }
+
+    public long getReadSum() {
+        return this.readSum.get();
+    }
+
+    public void resetReadSum() {
+        this.readSum.set(0L);
+    }
+
+    public String getAppName() {
+        return this.appLog.getAppName();
     }
 
     class EventWriter {
@@ -114,6 +133,7 @@ public class LogReader implements Runnable{
                 out.flush();
             } catch (IOException e) {
                 LOG.error("Oops, got an exception:", e);
+                Cat.logError("Oops, got an exception:", e);
                 closeQuietly(reader);
                 closeQuietly(out);
                 LOG.debug("process rotate failed, stop.");
@@ -127,6 +147,7 @@ public class LogReader implements Runnable{
                 readLines(reader);
             } catch (IOException e) {
                 LOG.error("Oops, process read lines fail:", e);
+                Cat.logError("Oops, process read lines fail:", e);
                 closeQuietly(reader);
                 closeQuietly(out);
                 LOG.debug("process failed, stop.");
@@ -140,6 +161,7 @@ public class LogReader implements Runnable{
             long rePos = pos; // position to re-read
             int num;
             while ((num = reader.read(inbuf)) != -1) {
+                LogReader.this.readSum.addAndGet(num);
                 for (int i = 0; i < num; i++) {
                     final byte ch = inbuf[i];
                     switch (ch) {
@@ -171,6 +193,7 @@ public class LogReader implements Runnable{
         private void handleLine(byte[] line) throws IOException {
             out.write(line);
             out.write('\n'); //make server easy to handle
+            Cat.logEvent("BHLineStat", LogReader.this.appLog.getAppName());
         }
         
         /**

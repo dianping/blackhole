@@ -1,9 +1,11 @@
 package com.dp.blackhole.appnode;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,6 +13,7 @@ import java.util.concurrent.Executors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dianping.cat.Cat;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
@@ -21,6 +24,7 @@ import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.exception.BlackholeClientException;
 import com.dp.blackhole.node.Node;
 
 public class Appnode extends Node implements Runnable {
@@ -31,6 +35,7 @@ public class Appnode extends Node implements Runnable {
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
     private Map<String, RollRecovery> recoveryingMap = new ConcurrentHashMap<String, RollRecovery>();
+    private ThroughputStat stat;
 
     public Appnode() {
         pool = Executors.newCachedThreadPool();
@@ -51,7 +56,8 @@ public class Appnode extends Node implements Runnable {
             try {
                 Thread.sleep(5 * 1000);
             } catch (InterruptedException e) {
-                LOG.info("NOAVAILABLENODE sleep interrupted");
+                LOG.info("NOAVAILABLENODE sleep interrupted", e);
+                Cat.logError("NOAVAILABLENODE sleep interrupted", e);
             }
             String app = msg.getNoAvailableNode().getAppName();
             AppLog applog = appLogs.get(app);
@@ -78,6 +84,8 @@ public class Appnode extends Node implements Runnable {
             } else {
                 LOG.error("RECOVERY_ROLL: " + recoveryRoll.getAppName()
                         + " from supervisor message not match with local");
+                Cat.logError(new BlackholeClientException("RECOVERY_ROLL: " + recoveryRoll.getAppName()
+                        + " from supervisor message not match with local"));
             }
             break;
         case ASSIGN_COLLECTOR:
@@ -90,6 +98,7 @@ public class Appnode extends Node implements Runnable {
                     logReader = new LogReader(this, collectorServer, collectorPort, appLog);
                     appReaders.put(appLog, logReader);
                     pool.execute(logReader);
+                    stat.add(logReader);
                     return true;
                 } else {
                     LOG.info("duplicated assign collector message: " + assignCollector);
@@ -97,6 +106,8 @@ public class Appnode extends Node implements Runnable {
             } else {
                 LOG.error("ASSIGN_COLLECTOR: " + assignCollector.getAppName()
                         + " from supervisor message not match with local");
+                Cat.logError(new BlackholeClientException("ASSIGN_COLLECTOR: " + assignCollector.getAppName()
+                        + " from supervisor message not match with local"));
             }
             break;
         case NOAVAILABLECONF:
@@ -104,7 +115,8 @@ public class Appnode extends Node implements Runnable {
             try {
                 Thread.sleep(5 * 1000);
             } catch (InterruptedException e) {
-                LOG.info("NOAVAILABLECONF sleep interrupted");
+                LOG.info("NOAVAILABLECONF sleep interrupted", e);
+                Cat.logError("NOAVAILABLECONF sleep interrupted", e);
             }
             requireConfigFromSupersivor();
             break;
@@ -122,10 +134,12 @@ public class Appnode extends Node implements Runnable {
             }
             if (!checkAllFilesExist()) {
                 LOG.error("Configurations are incorrect, sleep 5 seconds..");
+                Cat.logError(new BlackholeClientException("Configurations are incorrect, sleep 5 seconds.."));
                 try {
                     Thread.sleep(5 * 1000);
                 } catch (InterruptedException e) {
-                    LOG.error("Oops, sleep interrupted");
+                    LOG.error("Oops, sleep interrupted", e);
+                    Cat.logError("Oops, sleep interrupted", e);
                 }
                 requireConfigFromSupersivor();
                 break;
@@ -135,6 +149,7 @@ public class Appnode extends Node implements Runnable {
             break;
         default:
             LOG.error("Illegal message type " + msg.getType());
+            Cat.logError(new BlackholeClientException("Illegal message type " + msg.getType()));
         }
         return false;
     }
@@ -149,33 +164,49 @@ public class Appnode extends Node implements Runnable {
         try {
             String hostname = Util.getLocalHost();
             for (String appName : ConfigKeeper.configMap.keySet()) {
-                String path = ConfigKeeper.configMap.get(appName).getString(
+                String pathCandidateStr = ConfigKeeper.configMap.get(appName).getString(
                         ParamsKey.Appconf.WATCH_FILE);
-                if (path == null) {
+                if (pathCandidateStr == null) {
                     LOG.error("Oops, can not get WATCH_FILE from mapping for app " + appName);
+                    Cat.logError(new BlackholeClientException("Oops, can not get WATCH_FILE from mapping for app " + appName));
                     return false;
                 }
-                File fileForTest = new File(path);
-                if (fileForTest.exists()) {
-                    LOG.info("Check file " + path + " ok.");
-                } else if (isCompatibleWithOldVersion(appName, fileForTest, hostname)) {
-                    LOG.info("It's an old version of log printer. Ok");
-                } else {
-                    LOG.error("Appnode process start faild, because file " + path + " not found!");
-                    res = false;
+                String[] pathCandidates = pathCandidateStr.split("\\s+");
+                for (int i = 0; i < pathCandidates.length; i++) {
+                    File fileForTest = new File(pathCandidates[i]);
+                    if (fileForTest.exists()) {
+                        LOG.info("Check file " + pathCandidates[i] + " ok.");
+                        ConfigKeeper.configMap.get(appName).put(ParamsKey.Appconf.WATCH_FILE, pathCandidates[i]);
+                        break;
+                    } else if (isCompatibleWithOldVersion(appName, fileForTest, hostname)) {
+                        LOG.info("It's an old version of log printer. Ok");
+                        break;
+                    } else {
+                        if (i == pathCandidates.length - 1) {
+                            LOG.error("Appnode process start faild, because all of file " + pathCandidates + " not found!");
+                            Cat.logError(new BlackholeClientException("Appnode process start faild, because all of file "
+                                            + pathCandidates + " not found!"));
+                            res = false;
+                        }
+                    }
                 }
             }
         } catch (UnknownHostException e) {
-            LOG.error("Oops, unknow host, maybe cause by DNS exception.");
+            LOG.error("Oops, unknow host, maybe cause by DNS exception.", e);
+            Cat.logError("Oops, unknow host, maybe cause by DNS exception.", e);
             res = false;
         }
         return res;
     }
 
     private boolean isCompatibleWithOldVersion(String appName, final File fileForTest, String hostname) {
+        if (fileForTest.getParent() == null || !fileForTest.getParentFile().exists()) {
+            return false;
+        }
         int index = fileForTest.getName().indexOf('.');
         if (index == -1) {
             LOG.error("Invaild fileName " + fileForTest.getName());
+            Cat.logError(new BlackholeClientException("Invaild fileName " + fileForTest.getName()));
             return false;
         }
         String specifiedName = fileForTest.getName().substring(0, index);
@@ -196,25 +227,48 @@ public class Appnode extends Node implements Runnable {
     @Override
     public void run() {
         // hard code, please modify to real supervisor address before mvn package
-        String supervisorHost = "localhost";
-        String supervisorPort = "6999";
+        Properties prop = new Properties();
+        try {
+          prop.load(ClassLoader.getSystemResourceAsStream("META-INF/app.properties"));
+        } catch (IOException e) {
+          LOG.fatal("Load app.properties file fail.", e);
+          Cat.logError("Load app.properties file fail.", e);
+          return;
+        }
+        String supervisorHost = prop.getProperty("supervisor.host");
+        if (supervisorHost == null) {
+          LOG.fatal("Oops, no supervisor.host provided. Thread quit.");
+          Cat.logError(new BlackholeClientException("Oops, no supervisor.host provided."));
+          return;
+        }
+        String supervisorPort = prop.getProperty("supervisor.port", "6999");
         try {
             init(supervisorHost, Integer.parseInt(supervisorPort));
         } catch (NumberFormatException e) {
             LOG.error(e.getMessage(), e);
+            Cat.logError(e);
             return;
         } catch (UnknownHostException e) {
             LOG.error(e.getMessage(), e);
+            Cat.logError(e);
             return;
         }
         try {
             listener = new FileListener();
         } catch (Exception e) {
             LOG.error("Failed to create a file listener, node shutdown!", e);
+            Cat.logError("Failed to create a file listener, node shutdown!", e);
             return;
         }
+        long statPeriodMillis = Long.parseLong(prop.getProperty("stat.thoughput.periodMillis", "60000"));
+        initThroughputStat(statPeriodMillis);
+        this.stat.start();
         // wait for receiving message from supervisor
         super.loop();
+    }
+
+    public void initThroughputStat(long statPeriodMillis) {
+        this.stat = new ThroughputStat(statPeriodMillis);
     }
 
     public void fillUpAppLogsFromConfig() {
@@ -284,6 +338,12 @@ public class Appnode extends Node implements Runnable {
         send(message);
         AppLog applog = appLogs.get(app);
         appReaders.remove(applog);
+        try {
+            Thread.sleep(5 * 1000);
+        } catch (InterruptedException e) {
+            LOG.info("report failure sleep interrupted", e);
+            Cat.logError("report failure sleep interrupted", e);
+        }
         register(app, applog.getCreateTime());
     }
 

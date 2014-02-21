@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -14,11 +14,19 @@ import org.junit.Test;
 
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.conf.ConfigKeeper;
 
 public class TestAppnode {
-    private static final String MAGIC = "9vjrder3";
+    private static String MAGIC;
+    static {
+        try {
+            MAGIC = Util.getLocalHost().substring(0, 2);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
     private SimAppnode appnode;
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -39,6 +47,7 @@ public class TestAppnode {
     @Before
     public void setUp() throws Exception {
         appnode = new SimAppnode();
+        appnode.initThroughputStat(60*1000l);
         appnode.fillUpAppLogsFromConfig();
     }
 
@@ -48,23 +57,57 @@ public class TestAppnode {
     }
 
     /**
-     * specifiedFileName: "/tmp/hostna.access.log"
-     * expectedFileName: "/tmp/hostname.nh.access.log"
+     * WATCH_FILE: "/tmp/check1/name.access.log /tmp/check2/name.access.log"
+     * expectedFileName1: "/tmp/check1/name.access.log"
+     * expectedFileName2: "/tmp/check2/name.access.log"
+     * expectedFileName3: "/tmp/check1/hostname.nh.access.log"
+     * expectedFileName4: "/tmp/check2/hostname.nh.access.log"
+     * expectedFileName5: "/tmp/check2/xxxx.access.log"
      */
     @Test
     public void testCheckAllFilesExist() throws IOException {
-        String specifiedFileName = "/tmp/" + InetAddress.getLocalHost().getHostName().substring(0, 2) + ".access.log";
-        String expectedFileName = "/tmp/" + InetAddress.getLocalHost().getHostName() + ".access.log";
-        File expectedFile = new File(expectedFileName);
+        new File("/tmp/check1").mkdir();
+        new File("/tmp/check2").mkdir();
+        String hostname = Util.getLocalHost();
+        String name = hostname.substring(0, 2);
+        String WATCH_FILE = "/tmp/check1/" + name + ".access.log /tmp/check2/" + name + ".access.log";
+        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.WATCH_FILE, WATCH_FILE);
+        String expectedFileName1 = "/tmp/check1/" + name + ".access.log";
+        String expectedFileName2 = "/tmp/check2/" + name + ".access.log";
+        String expectedFileName3 = "/tmp/check1/" + hostname + ".access.log";
+        String expectedFileName4 = "/tmp/check2/" + hostname + ".access.log";
+        String expectedFileName5 = "/tmp/check2/xxxxxxx.access.log";
+        File expectedFile;
+        expectedFile = new File(expectedFileName1);
         expectedFile.createNewFile();
-        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.WATCH_FILE, "/tmp/" + MAGIC + ".log");
         assertTrue(appnode.checkAllFilesExist());
-        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.WATCH_FILE, specifiedFileName);
+        assertEquals(expectedFileName1, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
+        expectedFile.delete();
+        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.WATCH_FILE, WATCH_FILE);
+        expectedFile = new File(expectedFileName2);
+        expectedFile.createNewFile();
         assertTrue(appnode.checkAllFilesExist());
-        assertEquals(expectedFileName, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
-        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.WATCH_FILE, "/tmp/" + MAGIC+MAGIC + ".log");
+        assertEquals(expectedFileName2, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
+        expectedFile.delete();
+        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.WATCH_FILE, WATCH_FILE);
+        expectedFile = new File(expectedFileName3);
+        expectedFile.createNewFile();
+        assertTrue(appnode.checkAllFilesExist());
+        assertEquals(expectedFileName3, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
+        expectedFile.delete();
+        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.WATCH_FILE, WATCH_FILE);
+        expectedFile = new File(expectedFileName4);
+        expectedFile.createNewFile();
+        assertTrue(appnode.checkAllFilesExist());
+        assertEquals(expectedFileName4, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
+        expectedFile.delete();
+        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.WATCH_FILE, WATCH_FILE);
+        expectedFile = new File(expectedFileName5);
+        expectedFile.createNewFile();
         assertFalse(appnode.checkAllFilesExist());
         expectedFile.delete();
+        new File("/tmp/check1").delete();
+        new File("/tmp/check2").delete();
     }
 
     @Test
