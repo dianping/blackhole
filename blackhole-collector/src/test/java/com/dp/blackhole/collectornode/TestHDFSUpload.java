@@ -59,6 +59,7 @@ public class TestHDFSUpload {
         thread.start();
         thread.join();
         FileInputStream fis = new FileInputStream(file);
+        String expectedMD5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
         Path actualFile = new Path(SimCollectornode.SCHEMA + SimCollectornode.BASE_PATH 
                 + MAGIC + "/2013-01-01/15/" + APP_HOST + "@"
                 + MAGIC + "_2013-01-01.15.gz");
@@ -66,7 +67,7 @@ public class TestHDFSUpload {
         if (fs.exists(actualFile)) {
             actualMDS = org.apache.commons.codec.digest.DigestUtils.md5Hex(fs.open(actualFile));
         }
-        assertEquals("md5sum not equals", "b70f4649c257220daa38215ff1c912c2", actualMDS);
+        assertEquals("md5sum not equals", expectedMD5, actualMDS);
         fis.close();
         fs.delete(new Path(SimCollectornode.SCHEMA + SimCollectornode.BASE_PATH + MAGIC), true);
     }
