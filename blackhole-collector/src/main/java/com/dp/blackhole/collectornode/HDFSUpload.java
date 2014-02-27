@@ -1,11 +1,12 @@
 package com.dp.blackhole.collectornode;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -14,8 +15,8 @@ public class HDFSUpload implements Runnable{
     private static final String TMP_SUFFIX = ".tmp";
     private Collectornode node;
     private FileSystem fs;
+    private static final int DEFAULT_BUFSIZE = 8192;
     private File file;
-    private DataOutputStream out;
     private RollIdent ident;
     private boolean uploadSuccess;
     
@@ -33,13 +34,21 @@ public class HDFSUpload implements Runnable{
             node.uploadResult(ident, uploadSuccess);
             return;
         }
-        Path src = new Path(file.getPath());
         String dfsPath = node.getRollHdfsPath(ident);
         Path tmp = new Path(dfsPath + TMP_SUFFIX);
-        
+        FSDataOutputStream out = null;
+        FSDataInputStream in = null;
+        int len = 0;
+        byte[] buf = new byte[DEFAULT_BUFSIZE];
         try {
-            fs.copyFromLocalFile(false, true, src, tmp);
+            in = fs.open(new Path(file.toURI()));
+            out = fs.create(tmp);
+            while((len = in.read(buf)) != -1) {
+                out.write(buf, 0, len);
+            }
             LOG.info("Collector file " + file + " has been uploaded.");
+            out.close();
+            out = null;
             //rename
             Path dst = new Path(dfsPath);
             if (!HDFSUtil.retryRename(fs, tmp, dst)) {
@@ -49,14 +58,19 @@ public class HDFSUpload implements Runnable{
         } catch (IOException e) {
             LOG.error("Oops, got an exception:", e);
         } finally {
-            node.uploadResult(ident, uploadSuccess);
             try {
+                if (in != null) {
+                    in.close();
+                    in = null;
+                }
                 if (out != null) {
                     out.close();
+                    out = null;
                 }
             } catch (IOException e) {
                 LOG.warn("Faild to close Outputstream or RandomAccessFile ", e);
             }
+            node.uploadResult(ident, uploadSuccess);
         }
     }
 }

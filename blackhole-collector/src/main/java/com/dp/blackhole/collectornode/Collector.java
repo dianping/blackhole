@@ -68,8 +68,10 @@ public class Collector implements Runnable {
                     completefile();
                 }
             }
+            LOG.error("Oops, reached the end of the stream.");
             handleIOException();
         } catch (IOException e) {
+            LOG.error("Oops, error in collecting ", e);
             handleIOException();
         }
     }

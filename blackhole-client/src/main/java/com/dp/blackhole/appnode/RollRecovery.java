@@ -14,11 +14,13 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dianping.cat.Cat;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
+import com.dp.blackhole.exception.BlackholeClientException;
 
 public class RollRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(RollRecovery.class);
@@ -58,6 +60,7 @@ public class RollRecovery implements Runnable{
 
     private void stopRecoveryingCauseException(String desc, Exception e) {
         LOG.error(desc, e);
+        Cat.logError(desc, e);
         stopRecoverying();
     }
 
@@ -86,6 +89,7 @@ public class RollRecovery implements Runnable{
         File gzFile = Util.findGZFileByIdent(appLog.getTailFile(), rollIdent);
         if (!rolledFile.exists() && (gzFile == null || !gzFile.exists())) {
             LOG.error("Can not found both " + rolledFile + " add " + gzFile);
+            Cat.logError(new BlackholeClientException("Can not found both " + rolledFile + " add " + gzFile));
             stopRecoverying();
             node.reportUnrecoverable(appLog.getAppName(), node.getHost(), rollTimestamp);
             return;
@@ -134,6 +138,7 @@ public class RollRecovery implements Runnable{
                 LOG.info("Roll file transfered, including [" + transferBytes + "] bytes.");
             } catch (IOException e) {
                 LOG.error("Recover stream broken.", e);
+                Cat.logError("Recover stream broken.", e);
             } finally {
                 if (reader != null) {
                     try {
@@ -164,6 +169,7 @@ public class RollRecovery implements Runnable{
                 LOG.info("Roll file transfered, including [" + transferBytes + "] bytes.");
             } catch (IOException e) {
                 LOG.error("Recover stream broken.", e);
+                Cat.logError("Recover stream broken.", e);
             } finally {
                 if (gin != null) {
                     try {
@@ -176,6 +182,7 @@ public class RollRecovery implements Runnable{
             }
         } else {
             LOG.error("Oops! It not should be happen here.");
+            Cat.logError(new BlackholeClientException("Oops! It not should be happen here."));
             stopRecoverying();
             return;
         }

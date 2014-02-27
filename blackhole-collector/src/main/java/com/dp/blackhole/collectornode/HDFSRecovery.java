@@ -49,15 +49,23 @@ public class HDFSRecovery implements Runnable{
                 byte[] buf = new byte[DEFAULT_BUFSIZE];
                 gout = new GZIPOutputStream(fs.create(recoveryPath));
                 if (fs.exists(tmpPath)) {   //When tmp path exists then extract some data from tmp file
-                    gin = new GZIPInputStream(fs.open(tmpPath));
-                    while((len = gin.read(buf)) != -1) {
+                    boolean tmpCanRead = true;
+                    try {
+                        gin = new GZIPInputStream(fs.open(tmpPath));
+                    } catch (IOException e) {
+                        LOG.error("Oops, can not open the tmp file, try to delete it.", e);
+                        HDFSUtil.retryDelete(fs, tmpPath);
+                        tmpCanRead = false;
+                    }
+                    while(tmpCanRead && (len = gin.read(buf)) != -1) {
                         gout.write(buf, 0, len);
                         offset += len;
                     }
-                    LOG.info("Reloaded the hdfs file " + tmpPath);
-                    
-                    gin.close();
-                    gin = null;
+                    if (tmpCanRead) {
+                        LOG.info("Reloaded tmp hdfs file " + tmpPath);
+                    } else {
+                        LOG.info("Skipped reloading of tmp hdfs file " + tmpPath);
+                    }
                 }
                 DataOutputStream out = new DataOutputStream(client.getOutputStream());
                 out.writeLong(offset);
@@ -86,12 +94,12 @@ public class HDFSRecovery implements Runnable{
                             + ", it will try again next time.");
                 }
             } else {
-                //When normal path exists then just delete .tmp if it exists.
+                //When normal path exists then just delete .tmp and .r if it exists.
                 if (fs.exists(tmpPath) && !HDFSUtil.retryDelete(fs, tmpPath)) {
                     throw new IOException("Recovery success but faild to delete " + tmpPathname
                             + ", it will try again next time.");
                 }
-                if (fs.exists(normalPath) && !HDFSUtil.retryDelete(fs, normalPath)) {
+                if (fs.exists(recoveryPath) && !HDFSUtil.retryDelete(fs, recoveryPath)) {
                     throw new IOException("Recovery success but faild to delete " + recoveryPathname
                             + ", it will try again next time.");
                 }
@@ -100,7 +108,6 @@ public class HDFSRecovery implements Runnable{
         } catch (IOException e) {
             LOG.error("Oops, got an exception:", e);
         } finally {
-            node.recoveryResult(ident, recoverySuccess);
             try {
                 if (gin != null) {
                     gin.close();
@@ -117,6 +124,12 @@ public class HDFSRecovery implements Runnable{
             } catch (IOException e) {
                 LOG.warn("Cound not close the gzip output stream", e);
             }
+            if (!recoverySuccess) {
+                try {
+                    Thread.sleep(3 * 1000);
+                } catch (InterruptedException e) {}
+            }
+            node.recoveryResult(ident, recoverySuccess);
         }
     }
 }

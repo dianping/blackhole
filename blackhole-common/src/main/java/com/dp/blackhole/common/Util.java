@@ -14,6 +14,7 @@ import java.nio.channels.SocketChannel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -22,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private static long magic = 8 * 3600 * 1000l;
+    private static long localTimezoneOffset = TimeZone.getTimeZone("Asia/Shanghai").getRawOffset();
     
     public static String getRemoteHost(Socket socket) {
       InetSocketAddress remoteAddr= ((InetSocketAddress)socket.getRemoteSocketAddress());
@@ -152,10 +153,9 @@ public class Util {
      */
     public static long getCurrentRollTs(long ts, long rollPeriod) {
         rollPeriod = rollPeriod * 1000;
+        ts = ts + localTimezoneOffset;
         long ret = (ts / rollPeriod) * rollPeriod;
-        if (rollPeriod >= magic) {
-            ret = ret - magic;
-        }
+        ret = ret - localTimezoneOffset;
         return ret;
     }
     
@@ -178,13 +178,10 @@ public class Util {
     public static long getLatestRotateRollTsUnderTimeBuf(
             long ts, long rollPeriod, long clockSyncBufMillis) {
         rollPeriod = rollPeriod * 1000;
-        ts = ((ts + clockSyncBufMillis) / rollPeriod -1) * rollPeriod;
-        //TODO 1378443602000 will get wrong result
-        if (rollPeriod >= magic) {
-            ts = ts - magic;
-        }
-
-        return ts;
+        ts = ts + localTimezoneOffset;
+        long ret = ((ts + clockSyncBufMillis) / rollPeriod -1) * rollPeriod;
+        ret = ret - localTimezoneOffset;
+        return ret;
     }
     
     public static String getParentAbsolutePath(String absolutePath) {

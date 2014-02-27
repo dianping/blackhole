@@ -14,11 +14,13 @@ import java.text.SimpleDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dianping.cat.Cat;
 import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
 import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.exception.BlackholeClientException;
 
 public class RollRecoveryZero implements Runnable{
     private static final Log LOG = LogFactory.getLog(RollRecoveryZero.class);
@@ -43,6 +45,7 @@ public class RollRecoveryZero implements Runnable{
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
         if (rolledFile == null) {
             LOG.error("Can not find the file match rollTimestamp " + rollTimestamp);
+            Cat.logError(new BlackholeClientException("Can not find the file match rollTimestamp " + rollTimestamp));
             return;
         }
         SocketChannel socketChannel = null;
@@ -77,6 +80,7 @@ public class RollRecoveryZero implements Runnable{
             LOG.info("Roll file " + rolledFile + " has been transfered, ");
         } catch (IOException e) {
             LOG.error("Oops, got an exception:", e);
+            Cat.logError("Oops, got an exception:", e);
         } finally {
             try {
                 if (in != null) {
