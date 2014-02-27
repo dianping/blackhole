@@ -66,8 +66,6 @@ public class HDFSRecovery implements Runnable{
                     } else {
                         LOG.info("Skipped reloading of tmp hdfs file " + tmpPath);
                     }
-                    gin.close();
-                    gin = null;
                 }
                 DataOutputStream out = new DataOutputStream(client.getOutputStream());
                 out.writeLong(offset);
@@ -96,7 +94,7 @@ public class HDFSRecovery implements Runnable{
                             + ", it will try again next time.");
                 }
             } else {
-                //When normal path exists then just delete .tmp if it exists.
+                //When normal path exists then just delete .tmp and .r if it exists.
                 if (fs.exists(tmpPath) && !HDFSUtil.retryDelete(fs, tmpPath)) {
                     throw new IOException("Recovery success but faild to delete " + tmpPathname
                             + ", it will try again next time.");
