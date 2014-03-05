@@ -645,6 +645,12 @@ public class Supervisor {
                             LOG.error("stage " + stage + " cannot be recovered");
                             stages.remove(stage);
                             stageConnectionMap.remove(stage);
+                            String collector = getCollector();
+                            if (collector != null) {
+                                Connection collectorConnection = collectorNodes.get(collector);
+                                Message message = PBwrap.wrapMarkUnrecoverable(rollID);
+                                send(collectorConnection, message);
+                            }
                             break;
                         }
                     }

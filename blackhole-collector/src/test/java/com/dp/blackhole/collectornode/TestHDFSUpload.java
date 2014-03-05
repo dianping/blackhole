@@ -54,7 +54,7 @@ public class TestHDFSUpload {
     @Test
     public void testUploadWhole() throws InterruptedException, IOException {
         HDFSUpload writer = new HDFSUpload(SimCollectornode.getSimpleInstance("upload", MAGIC, fs), 
-                fs, file, getRollIdent(MAGIC));
+                fs, file, SimCollectornode.getRollIdent(MAGIC));
         Thread thread = new Thread(writer);
         thread.start();
         thread.join();
@@ -70,15 +70,6 @@ public class TestHDFSUpload {
         assertEquals("md5sum not equals", expectedMD5, actualMDS);
         fis.close();
         fs.delete(new Path(SimCollectornode.SCHEMA + SimCollectornode.BASE_PATH + MAGIC), true);
-    }
-    
-    public RollIdent getRollIdent(String appName) {
-        RollIdent rollIdent = new RollIdent();
-        rollIdent.app = appName;
-        rollIdent.period = 3600;
-        rollIdent.source = SimCollectornode.HOSTNAME;
-        rollIdent.ts = SimCollectornode.rollTS;
-        return rollIdent;
     }
     
     public File createTmpFile(String MAGIC, String expected) 

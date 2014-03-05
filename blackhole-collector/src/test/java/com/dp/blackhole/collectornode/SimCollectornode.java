@@ -128,14 +128,26 @@ public class SimCollectornode extends Collectornode implements Runnable{
     public void uploadResult(RollIdent ident, boolean uploadSuccess) {
         LOG.debug("send upload result: " + uploadSuccess);
     }
-    @Override
-    public String getRollHdfsPath (RollIdent ident) {
+    private String getRollHdfsPathPrefix(RollIdent ident, boolean hidden) {
         String format;
         format = Util.getFormatFromPeroid(ident.period);
         Date roll = new Date(ident.ts);
         SimpleDateFormat dm= new SimpleDateFormat(format);
-        return BASE_HDFS_PATH + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) + 
-                ident.source + '@' + ident.app + "_" + dm.format(roll) + ".gz";
+        if (hidden) {
+            return BASE_HDFS_PATH + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
+                "_" + ident.source + '@' + ident.app + "_" + dm.format(roll);
+        } else {
+            return BASE_HDFS_PATH + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
+                ident.source + '@' + ident.app + "_" + dm.format(roll);
+        }
+    }
+    @Override
+    public String getRollHdfsPath(RollIdent ident) {
+        return getRollHdfsPathPrefix(ident, false) + ".gz";
+    }
+    @Override
+    public String getMarkHdfsPath(RollIdent ident) {
+        return getRollHdfsPathPrefix(ident, true);
     }
     @Override
     public void run() {
@@ -174,6 +186,7 @@ public class SimCollectornode extends Collectornode implements Runnable{
                     if (din != null) {
                         din.close();
                     }
+                } else if (simType.equals("mark")) {
                 }
             }
         } catch (IOException e) {
@@ -198,5 +211,14 @@ public class SimCollectornode extends Collectornode implements Runnable{
                 file.delete();
             }
         }
+    }
+
+    public static RollIdent getRollIdent(String appName) {
+        RollIdent rollIdent = new RollIdent();
+        rollIdent.app = appName;
+        rollIdent.period = 3600;
+        rollIdent.source = SimCollectornode.HOSTNAME;
+        rollIdent.ts = SimCollectornode.rollTS;
+        return rollIdent;
     }
 }
