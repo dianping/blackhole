@@ -6,8 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.common.Connection;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.network.SimpleConnection;
 
 public class Consumer {
     public static final Log LOG = LogFactory.getLog(Consumer.class);
@@ -15,12 +15,12 @@ public class Consumer {
     private String id;
     private String topic;
     private ConsumerGroup group;
-    private Connection connection;
+    private SimpleConnection connection;
     private long reg_ts;
     
     private ConcurrentHashMap<String, PartitionInfo> consumedPartitions;
     
-    public Consumer(String id, ConsumerGroup group, String topic, Connection from) {
+    public Consumer(String id, ConsumerGroup group, String topic, SimpleConnection from) {
         this.id = id;
         this.group = group;
         this.topic = topic;
@@ -33,7 +33,7 @@ public class Consumer {
         return id;
     }
     
-    public Connection getConnection() {
+    public SimpleConnection getConnection() {
         return connection;
     }
 

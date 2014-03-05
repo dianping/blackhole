@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.common.Util;
+
 public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
 
     public static class SimpleConnectionFactory implements ConnectionFactory<SimpleConnection> {
@@ -57,7 +59,7 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
         return channel.keyFor(selector);
     }
 
-    public void offer(ByteBuffer buffer) {
+    private void offer(ByteBuffer buffer) {
         writeQueue.offer(buffer);
     }
 
@@ -147,7 +149,7 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
 
     @Override
     public ByteBuffer getEntity() {
-        return readBuffer;
+        return readBuffer.duplicate();
     }
 
     @Override
@@ -183,8 +185,12 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
         
         SelectionKey key = keyFor(selector);
         key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
-        offer(entity);
+        offer(entity.duplicate());
         selector.wakeup();
+    }
+
+    public String getHost() {
+        return Util.getRemoteHost(channel.socket());
     }
 
 }

@@ -1,5 +1,7 @@
 package com.dp.blackhole.common;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +23,7 @@ import com.dp.blackhole.common.gen.RollIDPB.RollID;
 import com.dp.blackhole.common.gen.StreamIDPB.StreamID;
 import com.dp.blackhole.common.gen.TopicReportPB.TopicReport;
 import com.dp.blackhole.supervisor.PartitionInfo;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 public class PBwrap {
     public static Message wrapMessage(MessageType type, Object message) {
@@ -254,5 +257,14 @@ public class PBwrap {
             builder.addEntries(entryBuilder.build());
         }
         return wrapMessage(MessageType.TOPICREPORT, builder.build());
+    }
+    
+    public static Message Buf2PB(ByteBuffer buf) throws InvalidProtocolBufferException {
+        return Message.parseFrom(buf.array());
+    }
+    
+    public static ByteBuffer PB2Buf(Message msg) {
+        ByteBuffer buf = ByteBuffer.wrap(msg.toByteArray());
+        return buf;
     }
 }

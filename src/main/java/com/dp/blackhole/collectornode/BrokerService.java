@@ -14,6 +14,7 @@ import com.dp.blackhole.collectornode.persistent.MessageSet;
 import com.dp.blackhole.collectornode.persistent.Partition;
 import com.dp.blackhole.collectornode.persistent.PersistentManager;
 import com.dp.blackhole.collectornode.persistent.PersistentManager.reporter.ReportEntry;
+import com.dp.blackhole.collectornode.persistent.RollPartition;
 import com.dp.blackhole.collectornode.persistent.protocol.FetchReply;
 import com.dp.blackhole.collectornode.persistent.protocol.FetchRequest;
 import com.dp.blackhole.collectornode.persistent.protocol.DataMessageTypeFactory;
@@ -22,6 +23,11 @@ import com.dp.blackhole.collectornode.persistent.protocol.MultiFetchRequest;
 import com.dp.blackhole.collectornode.persistent.protocol.OffsetReply;
 import com.dp.blackhole.collectornode.persistent.protocol.OffsetRequest;
 import com.dp.blackhole.collectornode.persistent.protocol.ProduceRequest;
+import com.dp.blackhole.collectornode.persistent.protocol.RegisterRequest;
+import com.dp.blackhole.collectornode.persistent.protocol.RotateRequest;
+import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.Util;
+import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.network.ConnectionFactory;
 import com.dp.blackhole.network.DelegationIOConnection;
 import com.dp.blackhole.network.EntityProcessor;
@@ -29,29 +35,29 @@ import com.dp.blackhole.network.GenServer;
 import com.dp.blackhole.network.TransferWrap;
 import com.dp.blackhole.network.TypedFactory;
 
-public class Publisher extends Thread {
-    private final Log Log = LogFactory.getLog(Publisher.class);
+public class BrokerService extends Thread {
+    private final Log LOG = LogFactory.getLog(BrokerService.class);
     
     GenServer<TransferWrap, DelegationIOConnection, EntityProcessor<TransferWrap, DelegationIOConnection>> server;
     PublisherExecutor executor;
     Properties prop;
     
     public static void reportPartitionInfo(List<ReportEntry> entrylist) {
-        Collectornode.getCollectorNode().reportPartitionInfo(entrylist);
+        Broker.getSupervisor().reportPartitionInfo(entrylist);
     }
     
     @Override
     public void run() {
         try {
-            server.init(prop, "Publisher");
+            server.init(prop, "Publisher", "broker.service.port");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     
-    public Publisher(Properties prop) throws IOException {
+    public BrokerService(Properties prop) throws IOException {
         this.prop = prop;
-        String storagedir = prop.getProperty("publisher.storage.dir");
+        String storagedir = prop.getProperty("broker.storage.dir");
         int splitThreshold = Integer.parseInt(prop.getProperty("publisher.storage.splitThreshold", "536870912"));
         int flushThreshold = Integer.parseInt(prop.getProperty("publisher.storage.flushThreshold", "4194304"));
         PersistentManager mananger = new PersistentManager(storagedir, splitThreshold, flushThreshold);
@@ -143,12 +149,27 @@ public class Publisher extends Thread {
             from.send(new TransferWrap(new OffsetReply(request.topic, request.partition, p.getEndOffset())));
         }
         
+        public void handleRotateRequest(RotateRequest request, DelegationIOConnection from) {
+            Partition p = null;
+            try {
+                p = mananger.getPartition(request.topic, request.partitionId);
+                RollPartition roll = p.markRotate();
+                Broker.getRollMgr().doRegister(request.topic, request.partitionId, request.rollPeriod, roll);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        public void handleRegisterRequest(RegisterRequest request, DelegationIOConnection from) {
+            Message msg = PBwrap.wrapReadyCollector(request.topic, request.source, request.peroid, request.broker, Util.getTS());
+            Broker.getSupervisor().send(msg);
+        }
+        
         @Override
         public void process(TransferWrap request, DelegationIOConnection from) {
             switch (request.getType()) {
             case DataMessageTypeFactory.MultiFetchRequest:
-                handleMultiFetchRequest((MultiFetchRequest) request.unwrap(),
-                        from);
+                handleMultiFetchRequest((MultiFetchRequest) request.unwrap(), from);
                 break;
             case DataMessageTypeFactory.FetchRequest:
                 handleFetchRequest((FetchRequest) request.unwrap(), from);
@@ -159,6 +180,14 @@ public class Publisher extends Thread {
             case DataMessageTypeFactory.produceRequest:
                 handleProduceRequest((ProduceRequest) request.unwrap(), from);
                 break;
+            case DataMessageTypeFactory.RotateRequest:
+                handleRotateRequest((RotateRequest) request.unwrap(), from);
+                break;
+            case DataMessageTypeFactory.RegisterRequest:
+                handleRegisterRequest((RegisterRequest) request.unwrap(), from);
+                break;
+            default:
+                LOG.error("unknown message type: " + request.getType());
             }
         }
 
@@ -181,7 +210,7 @@ public class Publisher extends Thread {
         properties.setProperty("GenServer.handlercount", "1");
         properties.setProperty("GenServer.port", "2222");
         properties.setProperty("publisher.storage.dir", "/tmp/base");
-        Publisher pubservice = new Publisher(properties);
+        BrokerService pubservice = new BrokerService(properties);
         pubservice.run();
     }
 }

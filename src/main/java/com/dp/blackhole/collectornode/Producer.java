@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.dp.blackhole.collectornode.Publisher.PublisherExecutor;
+import com.dp.blackhole.collectornode.BrokerService.PublisherExecutor;
 import com.dp.blackhole.collectornode.persistent.ByteBufferMessageSet;
 import com.dp.blackhole.collectornode.persistent.Message;
 import com.dp.blackhole.collectornode.persistent.protocol.ProduceRequest;

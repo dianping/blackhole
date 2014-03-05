@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.dp.blackhole.collectornode.Broker;
 import com.dp.blackhole.common.Util;
 
 public class Partition {
@@ -18,6 +19,7 @@ public class Partition {
     private List<Segment> segments;
     private File dir;
     private final ReentrantReadWriteLock lock;
+    private RollPartition roll;
     
     int splitThreshold;
     int flushThreshold;
@@ -30,6 +32,7 @@ public class Partition {
         this.splitThreshold = splitThreshold;
         this.flushThreshold = flushThreshold;
         lock = new ReentrantReadWriteLock();
+        roll = new RollPartition(this);
         loadSegments();
     }
     
@@ -77,6 +80,13 @@ public class Partition {
             Segment segment = new Segment(dir.getAbsolutePath(), getFileOffset(segmentFiles[i]), verify, readonly, splitThreshold, flushThreshold);
             segments.add(segment);
         }
+        
+        Segment s = unprotectedGetLastSegment();
+        if (s == null) {
+            roll.startOffset = 0;
+        } else {
+            roll.startOffset = s.getEndOffset();
+        }
     }
     
     private Segment addSegment(long offset) throws IOException {
@@ -117,6 +127,27 @@ public class Partition {
             segment.setCloseTimestamp(Util.getTS());
             addSegment(offset);
         }
+    }
+    
+    public RollPartition markRotate() throws IOException {
+        RollPartition ret = null;
+        long endoffset;
+        lock.writeLock().lock();
+        try {
+            Segment segment = unprotectedGetLastSegment();
+            if (segment == null) {
+                throw new IOException("segment should not be null when mark rotate");
+            }
+            segment.flush();
+            endoffset = segment.getEndOffset();
+        } finally {
+            lock.writeLock().unlock();
+        }
+        
+        roll.length = endoffset - roll.startOffset;
+        ret = roll;
+        roll = new RollPartition(this, endoffset);
+        return ret;
     }
     
     public long getEndOffset() {
@@ -180,6 +211,10 @@ public class Partition {
     List<Segment> getSegments() {
         return segments;
     }
+    
+//    public RollPartition getRollPartition() {
+//        return roll;
+//    }
     
     public void cleanupSegments(long current, long threshold) {
         lock.writeLock().lock();

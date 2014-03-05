@@ -10,7 +10,7 @@ public class testPublisherExecutor {
         
         Properties prop = new Properties();
         prop.setProperty("publisher.storage.dir", "/tmp/base");
-        Publisher p = new Publisher(prop);
+        BrokerService p = new BrokerService(prop);
         
         Producer producer = new Producer();
         producer.setPublisher(p.getExecutor());

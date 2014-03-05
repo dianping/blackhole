@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
@@ -23,6 +25,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.collectornode.ControlMessageTypeFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
@@ -31,80 +34,39 @@ import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.conf.ConfigKeeper;
-import com.dp.blackhole.node.Node;
+import com.dp.blackhole.network.EntityProcessor;
+import com.dp.blackhole.network.GenClient;
+import com.dp.blackhole.network.SimpleConnection;
+import com.google.protobuf.InvalidProtocolBufferException;
 
-public class Appnode extends Node {
+public class Appnode {
     private static final Log LOG = LogFactory.getLog(Appnode.class);
     private String[] args;
     private File configFile = null;
     private ExecutorService pool;
-    protected int port;   //protected for test case SimAppnode
+    protected int recoveryPort;   //protected for test case SimAppnode
+    private int brokerPort;
+    private String hostname;
     private FileListener listener;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
     
-    public Appnode(String appClient) {
+    private GenClient<ByteBuffer, SimpleConnection, AgentProcessor> client;
+    private AgentProcessor processor;
+    
+    public Appnode(String hostname, String[] args) {
+        this.hostname = hostname;
+        this.args = args;
         pool = Executors.newCachedThreadPool();
     }
     
-    public boolean process(Message msg) {
-	    String appName;
-	    String collectorServer;
-  	    AppLog appLog = null;
-  	    LogReader logReader = null;
-  	    MessageType type = msg.getType();
-  	    switch (type) {
-  	    case NOAVAILABLENODE:
-  	        try {
-                Thread.sleep(5 * 1000);
-            } catch (InterruptedException e) {
-                LOG.info("thead interrupted");
-            }
-  	        String app = msg.getNoAvailableNode().getAppName();
-  	        AppLog applog = appLogs.get(app); 
-  	        register(app, applog.getCreateTime());
-  	        break;
-        case RECOVERY_ROLL:
-            RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
-            appName = recoveryRoll.getAppName();
-            if ((appLog = appLogs.get(appName)) != null) {
-                long rollTs = recoveryRoll.getRollTs();
-                collectorServer = recoveryRoll.getCollectorServer();
-                RollRecovery recovery = new RollRecovery(this, collectorServer, port, appLog, rollTs);
-                pool.execute(recovery);
-                return true;
-            } else {
-                LOG.error("AppName [" + recoveryRoll.getAppName()
-                        + "] from supervisor message not match with local");
-            }
-            break;
-        case ASSIGN_COLLECTOR:
-            AssignCollector assignCollector = msg.getAssignCollector();
-            appName = assignCollector.getAppName();
-            if ((appLog = appLogs.get(appName)) != null) {
-                if ((logReader = appReaders.get(appLog)) == null) {
-                    collectorServer = assignCollector.getCollectorServer();
-                    logReader = new LogReader(this, collectorServer, port, appLog);
-                    appReaders.put(appLog, logReader);
-                    pool.execute(logReader);
-                    return true;
-                } else {
-                    LOG.info("duplicated assign collector message: " + assignCollector);
-                }
-            } else {
-                LOG.error("AppName [" + assignCollector.getAppName()
-                        + "] from supervisor message not match with local");
-            }
-            break;
-        default:
-            LOG.error("Illegal message type " + msg.getType());
-        }
-  	    return false;
+    private void register(String appName, long regTimestamp) {
+        Message msg = PBwrap.wrapAppReg(appName, hostname, regTimestamp);
+        send(msg);
     }
 
-    private void register(String appName, long regTimestamp) {
-        Message msg = PBwrap.wrapAppReg(appName, getHost(), regTimestamp);
-        super.send(msg);
+    public String getHost() {
+        return hostname;
     }
 
     private boolean checkAllFilesExist() {
@@ -123,7 +85,7 @@ public class Appnode extends Node {
         return res;
     }
 
-    public void run() {
+    public void run(Properties property) throws ClosedChannelException, IOException {
         if (!checkAllFilesExist()) {
             return;
         }
@@ -134,35 +96,27 @@ public class Appnode extends Node {
             LOG.error("Failed to create a file listener, node shutdown!", e);
             return;
         }
-        //wait for receiving message from supervisor
-        super.loop();
+        
+        processor = new AgentProcessor();
+        client = new GenClient(
+                processor,
+                new SimpleConnection.SimpleConnectionFactory(),
+                new ControlMessageTypeFactory());
+
+        client.init(property, "agent", "supervisor.host", "supervisor.port");
     }
 
     public void fillUpAppLogsFromConfig() {
         for (String appName : ConfigKeeper.configMap.keySet()) {
             String path = ConfigKeeper.configMap.get(appName)
                     .getString(ParamsKey.Appconf.WATCH_FILE);
-            AppLog appLog = new AppLog(appName, path);
+            long rollPeroid = ConfigKeeper.configMap.get(appName)
+                            .getLong(ParamsKey.Appconf.ROLL_PERIOD);
+            AppLog appLog = new AppLog(appName, path, rollPeroid);
             appLogs.put(appName, appLog);
         }
     }
 
-    @Override
-    protected void onDisconnected() {
-        // close connected streams
-        LOG.info("shutdown app node");
-        for (java.util.Map.Entry<AppLog, LogReader> e : appReaders.entrySet()) {
-            LogReader reader = e.getValue();
-            reader.stop();
-            appReaders.remove(e.getKey());
-        }
-    }
-    
-    @Override
-    protected void onConnected() {
-        clearMessageQueue();
-        registerApps();
-    }
 
     private void registerApps() {
         //register the app to supervisor
@@ -208,7 +162,7 @@ public class Appnode extends Node {
         }
     }
 
-    public void loadConfig() throws FileNotFoundException, IOException {
+    public Properties loadConfig() throws FileNotFoundException, IOException {
         if (configFile != null) {
             loadLocalConfig();
         } else {
@@ -216,11 +170,10 @@ public class Appnode extends Node {
         }
         Properties prop = new Properties();
         prop.load(new FileReader(new File("config.properties")));
-        port = Integer.parseInt(prop.getProperty("collectornode.port"));
+        recoveryPort = Integer.parseInt(prop.getProperty("broker.recovery.port"));      
+        brokerPort = Integer.parseInt(prop.getProperty("broker.service.port"));
         
-        String serverhost = prop.getProperty("supervisor.host");
-        int serverport = Integer.parseInt(prop.getProperty("supervisor.port"));
-        init(serverhost, serverport);    
+        return prop;
     }
 
     public boolean parseOptions() throws ParseException {
@@ -249,14 +202,6 @@ public class Appnode extends Node {
     
         return true;
     }
-
-    public String[] getArgs() {
-        return args;
-    }
-
-    public void setArgs(String[] args) {
-        this.args = args;
-    }
     
     public FileListener getListener() {
         return listener;
@@ -282,6 +227,105 @@ public class Appnode extends Node {
         send(message);
     }
 
+    private void send(Message message) {
+        processor.send(message);
+    }
+    
+    public class AgentProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
+        private SimpleConnection supervisor;
+        
+        @Override
+        public void OnConnected(SimpleConnection connection) {
+            supervisor = connection;
+            registerApps();
+        }
+
+        @Override
+        public void OnDisconnected(SimpleConnection connection) {
+            supervisor.close();
+            supervisor = null;
+            
+            // close connected streams
+            LOG.info("shutdown app node");
+            for (java.util.Map.Entry<AppLog, LogReader> e : appReaders.entrySet()) {
+                LogReader reader = e.getValue();
+                reader.stop();
+                appReaders.remove(e.getKey());
+            }        
+        }
+
+        @Override
+        public void process(ByteBuffer reply, SimpleConnection from) {
+
+            Message msg = null;
+            try {
+                msg = PBwrap.Buf2PB(reply);
+            } catch (InvalidProtocolBufferException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+
+            LOG.debug("agent received: " + msg);
+            
+            String appName;
+            String broker;
+            AppLog appLog = null;
+            LogReader logReader = null;
+            MessageType type = msg.getType();
+            switch (type) {
+            case NOAVAILABLENODE:
+                try {
+                    Thread.sleep(5 * 1000);
+                } catch (InterruptedException e) {
+                    LOG.info("thead interrupted");
+                }
+                String app = msg.getNoAvailableNode().getAppName();
+                AppLog applog = appLogs.get(app);
+                register(app, applog.getCreateTime());
+                break;
+            case RECOVERY_ROLL:
+                RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
+                appName = recoveryRoll.getAppName();
+                if ((appLog = appLogs.get(appName)) != null) {
+                    long rollTs = recoveryRoll.getRollTs();
+                    broker = recoveryRoll.getCollectorServer();
+                    RollRecovery recovery = new RollRecovery(Appnode.this,
+                            broker, recoveryPort, appLog, rollTs);
+                    pool.execute(recovery);
+                } else {
+                    LOG.error("AppName [" + recoveryRoll.getAppName()
+                            + "] from supervisor message not match with local");
+                }
+                break;
+            case ASSIGN_COLLECTOR:
+                AssignCollector assignCollector = msg.getAssignCollector();
+                appName = assignCollector.getAppName();
+                if ((appLog = appLogs.get(appName)) != null) {
+                    if ((logReader = appReaders.get(appLog)) == null) {
+                        broker = assignCollector.getCollectorServer();
+                        logReader = new LogReader(Appnode.this, hostname, broker, brokerPort,
+                                appLog);
+                        appReaders.put(appLog, logReader);
+                        pool.execute(logReader);
+                    } else {
+                        LOG.info("duplicated assign collector message: "
+                                + assignCollector);
+                    }
+                } else {
+                    LOG.error("AppName [" + assignCollector.getAppName()
+                            + "] from supervisor message not match with local");
+                }
+                break;
+            default:
+                LOG.error("Illegal message type " + msg.getType());
+            }
+        }
+
+        public void send(Message message) {
+            supervisor.send(PBwrap.PB2Buf(message));
+        }
+    }
+    
     public static void main(String[] args) {
         String hostname;
         try {
@@ -290,13 +334,12 @@ public class Appnode extends Node {
             LOG.error("Oops, got an exception:", e1);
             return;
         }
-        Appnode appnode = new Appnode(hostname);
-        appnode.setArgs(args);
+        Appnode appnode = new Appnode(hostname, args);
 
         try {
             if (appnode.parseOptions()) {
-                appnode.loadConfig();
-                appnode.run();
+                Properties prop = appnode.loadConfig();
+                appnode.run(prop);
             }
         } catch (ParseException e) {
             LOG.error("Oops, got an exception:", e);

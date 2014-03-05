@@ -174,9 +174,9 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
        
-    public void init(Properties prop, String name) throws IOException {
-        handlerCount = Integer.parseInt(prop.getProperty("GenServer.handlercount", "3"));
-        int port = Integer.parseInt(prop.getProperty("GenServer.port"));
+    public void init(Properties prop, String name, String servicePort) throws IOException {
+        handlerCount = Integer.parseInt(prop.getProperty("GenServer.handler.count", "3"));
+        int port = Integer.parseInt(prop.getProperty(servicePort));
         
         ServerSocketChannel ssc = ServerSocketChannel.open();
         ssc.configureBlocking(false);
@@ -195,7 +195,7 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
             handler.start();
         }
         
-        LOG.info(name + " Server started");
+        LOG.info("GenServer " + name + " started at port:" + port);
         
         loop();
     }

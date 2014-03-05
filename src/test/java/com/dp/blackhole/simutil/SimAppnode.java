@@ -13,7 +13,7 @@ public class SimAppnode extends Appnode{
     }
 
     private void setPort(int port) {
-        super.port = port;
+        super.recoveryPort = port;
     }
 
     @Override

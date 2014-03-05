@@ -2,14 +2,14 @@ package com.dp.blackhole.supervisor;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.dp.blackhole.common.Connection;
+import com.dp.blackhole.network.SimpleConnection;
 
 public class PartitionInfo {
     private String id;
-    private Connection connection;
+    private SimpleConnection connection;
     private AtomicLong endOffset;
     
-    public PartitionInfo(String id, Connection connection, long endOffset) {
+    public PartitionInfo(String id, SimpleConnection connection, long endOffset) {
         this.id = id;
         this.connection = connection;
         this.endOffset = new AtomicLong(endOffset);
@@ -29,7 +29,7 @@ public class PartitionInfo {
         return id;
     }
 
-    public Connection getConnection() {
+    public SimpleConnection getConnection() {
         return connection;
     }
 

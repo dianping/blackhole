@@ -2,39 +2,46 @@ package com.dp.blackhole.appnode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.common.AgentProtocol;
-import com.dp.blackhole.common.Util;
-import com.dp.blackhole.common.AgentProtocol.AgentHead;
+import com.dp.blackhole.collectornode.persistent.ByteBufferMessageSet;
+import com.dp.blackhole.collectornode.persistent.Message;
+import com.dp.blackhole.collectornode.persistent.protocol.ProduceRequest;
+import com.dp.blackhole.collectornode.persistent.protocol.RegisterRequest;
+import com.dp.blackhole.collectornode.persistent.protocol.RotateRequest;
 import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.network.TransferWrap;
 
 public class LogReader implements Runnable{
     private static final Log LOG = LogFactory.getLog(LogReader.class);
     private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
     private AppLog appLog;
     private Appnode node;
-    private String collectorServer;
-    private int port;
+    private String localhost;
+    private String broker;
+    private int brokerPort;
     private int bufSize;
     private Socket socket;
     EventWriter eventWriter;
     
-    public LogReader(Appnode node, String collectorServer, int port, AppLog appLog) {
+    public LogReader(Appnode node, String localhost, String broker, int port, AppLog appLog) {
         this.node = node;
-        this.collectorServer = collectorServer;
-        this.port = port;
+        this.localhost = localhost;
+        this.broker = broker;
+        this.brokerPort = port;
         this.appLog = appLog;
         this.bufSize = ConfigKeeper.configMap.get(appLog.getAppName()).getInteger(ParamsKey.Appconf.BUFFER_SIZE, 4096);
     }
@@ -56,13 +63,6 @@ public class LogReader implements Runnable{
     public void run() {
         try {
             LOG.info("Log reader for " + appLog + " running...");
-            socket = new Socket(collectorServer, port);
-            AgentProtocol protocol = new AgentProtocol();
-            AgentHead head = protocol.new AgentHead();
-            head.type = AgentProtocol.STREAM;
-            head.app = appLog.getAppName();
-            head.peroid = ConfigKeeper.configMap.get(appLog.getAppName()).getLong(ParamsKey.Appconf.ROLL_PERIOD);
-            protocol.sendHead(new DataOutputStream(socket.getOutputStream()), head);
             
             File tailFile = new File(appLog.getTailFile());
             this.eventWriter = new EventWriter(tailFile, bufSize);
@@ -73,13 +73,13 @@ public class LogReader implements Runnable{
             }
         } catch (UnknownHostException e) {
             LOG.error("Socket fail!", e);
-            node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+            node.reportFailure(appLog.getAppName(), localhost, Util.getTS());
         } catch (IOException e) {
             LOG.error("Oops, got an exception", e);
-            node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+            node.reportFailure(appLog.getAppName(), localhost, Util.getTS());
         } catch (RuntimeException e) {
             LOG.error("Oops, got an RuntimException:" , e);
-            node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+            node.reportFailure(appLog.getAppName(), localhost, Util.getTS());
         }
     }
 
@@ -87,8 +87,11 @@ public class LogReader implements Runnable{
         private final Charset cset;
         private final File file;
         private final byte inbuf[];
-        private OutputStreamWriter writer;
+        private SocketChannel channel;
         private RandomAccessFile reader;
+        
+        private ByteBuffer messageBuffer;
+        private int messageNum;
         
         public EventWriter(final File file, final int bufSize) throws IOException {
             this(file, bufSize, DEFAULT_CHARSET);
@@ -97,8 +100,20 @@ public class LogReader implements Runnable{
             this.file = file;
             this.inbuf = new byte[bufSize];
             this.cset = cset;
-            writer = new OutputStreamWriter(socket.getOutputStream());
+            
+            channel = SocketChannel.open();
+            channel.connect(new InetSocketAddress(broker, brokerPort));
+            
+            doStreamReg();
+            
             this.reader = new RandomAccessFile(file, "r");
+            messageBuffer = ByteBuffer.allocate(512 * 1024);
+        }
+        
+        private void doStreamReg() throws IOException {
+            RegisterRequest request = new RegisterRequest(appLog.getAppName(), localhost, appLog.getRollPeriod(), broker);
+            TransferWrap wrap = new TransferWrap(request);
+            wrap.write(channel);
         }
         
         public void processRotate() {
@@ -109,15 +124,17 @@ public class LogReader implements Runnable{
                 // Finish scanning the old file and then we'll start with the new one
                 readLines(save);
                 closeQuietly(save);
-                writer.write('\n'); //make server easy to handle
-                writer.flush();
+                
+                RotateRequest request = new RotateRequest(appLog.getAppName(), localhost, appLog.getRollPeriod());
+                TransferWrap wrap = new TransferWrap(request);
+                wrap.write(channel);
             } catch (IOException e) {
                 LOG.error("Oops, got an exception:", e);
                 closeQuietly(reader);
-                closeQuietly(writer);
+                closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
                 stop();
-                node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+                node.reportFailure(appLog.getAppName(), localhost, Util.getTS());
             }
         }
         
@@ -127,10 +144,10 @@ public class LogReader implements Runnable{
             } catch (IOException e) {
                 LOG.error("Oops, process read lines fail:", e);
                 closeQuietly(reader);
-                closeQuietly(writer);
+                closeChannelQuietly(channel);
                 LOG.debug("process failed, stop.");
                 stop();
-                node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+                node.reportFailure(appLog.getAppName(), localhost, Util.getTS());
             }
         }
         
@@ -144,7 +161,7 @@ public class LogReader implements Runnable{
                     final byte ch = inbuf[i];
                     switch (ch) {
                     case '\n':
-                        handleLine(new String(lineBuf.toByteArray(), cset));
+                        handleLine(lineBuf.toByteArray());
                         lineBuf.reset();
                         rePos = pos + i + 1;
                         break;
@@ -159,10 +176,26 @@ public class LogReader implements Runnable{
             return rePos;
         }
         
-        private void handleLine(String line) throws IOException {
-            writer.write(line);
-            writer.write('\n'); //make server easy to handle
-            writer.flush();
+        private void sendMessage() throws IOException {
+            messageBuffer.flip();
+            ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
+            ProduceRequest request = new ProduceRequest(appLog.getAppName(), localhost, messages);
+            TransferWrap wrap = new TransferWrap(request);
+            wrap.write(channel);
+            messageBuffer.clear();
+            messageNum = 0;
+        }
+        
+        private void handleLine(byte[] line) throws IOException {
+            
+            Message message = new Message(line); 
+            
+            if (messageNum >= 30 || message.getSize() > messageBuffer.remaining()) {
+                sendMessage();
+            }
+            
+            message.write(messageBuffer);
+            messageNum++;
         }
         
         /**
@@ -177,6 +210,25 @@ public class LogReader implements Runnable{
                 }
             } catch (IOException ioe) {
                 // ignore
+            }
+        }
+        
+        private void closeChannelQuietly(SocketChannel channel) {
+            try {
+                channel.socket().shutdownOutput();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
+            try {
+                channel.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                channel.socket().close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

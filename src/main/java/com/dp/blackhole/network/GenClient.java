@@ -33,8 +33,8 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
     private AtomicBoolean connected = new AtomicBoolean(false);
     private BlockingQueue<EntityEvent> entityQueue;
 
-    private String serverHost;
-    private int serverPort;
+    private String host;
+    private int port;
     
     private class EntityEvent {
         static final int CONNECTED = 1;
@@ -99,6 +99,7 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
                         doRead(key);
                     }
                 } catch (IOException e) {
+                    LOG.error("catch IOE: ", e);
                     closeConnection((Connection) key.attachment());
                 }
             }
@@ -139,6 +140,9 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
     }
     
     private void closeConnection(Connection connection) {
+        if (connection == null) {
+            return;
+        }
         connected.getAndSet(false);
         if (!connection.isActive()) {
             LOG.info("connection " + connection + "already closed" );
@@ -198,9 +202,9 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
     
-    public void init(Properties prop, String name) throws IOException, ClosedChannelException {  
-        serverHost = prop.getProperty("Server.host");
-        serverPort = Integer.parseInt(prop.getProperty("Server.port"));;
+    public void init(Properties prop, String clientName, String serverHost, String serverPort) throws IOException, ClosedChannelException {  
+        host = prop.getProperty(serverHost);
+        port = Integer.parseInt(prop.getProperty(serverPort));;
         handlerCount = Integer.parseInt(prop.getProperty("GenClient.handlercount", "1"));
         
         entityQueue = new LinkedBlockingQueue<EntityEvent>();
@@ -213,7 +217,7 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
             handler.start();
         }
         
-        LOG.info(name + " client started");
+        LOG.info("GenClient "+ clientName + " started");
         
         loop();
     }
@@ -221,7 +225,7 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
     private void connect() throws IOException, ClosedChannelException {
         socketChannel = SocketChannel.open();
         socketChannel.configureBlocking(false);
-        SocketAddress server = new InetSocketAddress(serverHost, serverPort);
+        SocketAddress server = new InetSocketAddress(host, port);
         socketChannel.connect(server);
         selector = Selector.open();
         socketChannel.register(selector, SelectionKey.OP_CONNECT);

@@ -17,6 +17,7 @@ public class DataMessageTypeFactory implements TypedFactory {
     public static final int OffsetRequest = 6;
     public static final int OffsetReply = 7;
     public static final int RotateRequest = 8;
+    public static final int RegisterRequest = 9;
     
     @Override
     public TypedWrappable getWrappedInstanceFromType(int type) {
@@ -42,6 +43,12 @@ public class DataMessageTypeFactory implements TypedFactory {
             break;
         case 7:
             ret = new OffsetReply();
+            break;
+        case 8:
+            ret = new RotateRequest();
+            break;
+        case 9:
+            ret = new RegisterRequest();
             break;
         default:
             LOG.error("unknown Message Type: " + type);

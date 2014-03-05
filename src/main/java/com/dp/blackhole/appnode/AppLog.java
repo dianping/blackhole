@@ -3,15 +3,17 @@ package com.dp.blackhole.appnode;
 public class AppLog {
     private String appName;
     private String tailFile;
+    private long rollPeriod;
     private long createTime;
     
-    public AppLog(String appName, String tailFile) {
-        this(appName, tailFile, System.currentTimeMillis());
+    public AppLog(String appName, String tailFile, long rollPeriod) {
+        this(appName, tailFile, rollPeriod, System.currentTimeMillis());
     }
     
-    public AppLog(String appName, String tailFile, long createTime) {
+    public AppLog(String appName, String tailFile, long rollPeriod, long createTime) {
         this.appName = appName;
         this.tailFile = tailFile;
+        this.rollPeriod = rollPeriod;
         this.createTime = createTime;
     }
 
@@ -23,6 +25,10 @@ public class AppLog {
         this.appName = appName;
     }
 
+    public long getRollPeriod() {
+        return rollPeriod;
+    }
+    
     public String getTailFile() {
         return tailFile;
     }

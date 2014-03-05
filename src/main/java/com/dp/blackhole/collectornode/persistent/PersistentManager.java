@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.collectornode.Publisher;
+import com.dp.blackhole.collectornode.BrokerService;
 import com.dp.blackhole.common.Util;
 
 public class PersistentManager {
@@ -33,7 +33,7 @@ public class PersistentManager {
         
         reporter r = new reporter();
         r.setDaemon(true);
-        r.start();
+//        r.start();
         
         cleanner c = new cleanner();
         c.setDaemon(true);
@@ -135,7 +135,7 @@ public class PersistentManager {
                 }
             }
             if (entrylist.size() != 0) {
-                Publisher.reportPartitionInfo(entrylist);
+                BrokerService.reportPartitionInfo(entrylist);
             }
         }
         
