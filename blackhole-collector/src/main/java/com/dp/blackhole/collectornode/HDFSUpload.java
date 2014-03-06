@@ -1,11 +1,13 @@
 package com.dp.blackhole.collectornode;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -36,12 +38,12 @@ public class HDFSUpload implements Runnable{
         }
         String dfsPath = node.getRollHdfsPath(ident);
         Path tmp = new Path(dfsPath + TMP_SUFFIX);
+        InputStream in = null;
         FSDataOutputStream out = null;
-        FSDataInputStream in = null;
         int len = 0;
         byte[] buf = new byte[DEFAULT_BUFSIZE];
         try {
-            in = fs.open(new Path(file.toURI()));
+            in = new BufferedInputStream(new FileInputStream(file));
             out = fs.create(tmp);
             while((len = in.read(buf)) != -1) {
                 out.write(buf, 0, len);
