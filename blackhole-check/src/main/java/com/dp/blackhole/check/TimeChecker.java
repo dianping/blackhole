@@ -25,6 +25,7 @@ public class TimeChecker extends Thread {
         List<Long> checkTsList;
         if ((checkTsList = checkerMap.get(ident)) == null) {
             checkTsList = new ArrayList<Long>();
+            checkerMap.put(ident, checkTsList);
         }
         checkTsList.add(checkTs);
     }
@@ -33,6 +34,9 @@ public class TimeChecker extends Thread {
         List<Long> checkTsList;
         if ((checkTsList = checkerMap.get(ident)) != null) {
             checkTsList.remove(checkTs);
+            if (checkTsList.isEmpty()) {
+                checkerMap.remove(ident);
+            }
         }
     }
 
