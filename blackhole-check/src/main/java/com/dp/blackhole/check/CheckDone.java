@@ -94,7 +94,7 @@ public class CheckDone implements Runnable{
                             		"please find out why.");
                             break;
                         } else {
-                            LOG.info("[" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + "]....Done!");
+                            LOG.info("[" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + "]===>Done!");
                         }
                         ident.firstDeploy = false;
                     } else {
@@ -114,7 +114,7 @@ public class CheckDone implements Runnable{
                                         "please find out why.");
                                 break;
                             } else {
-                                LOG.info("[" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + "]....Timeout!");
+                                LOG.info("[" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + "]===>Timeout!");
                             }
                             ident.firstDeploy = false;
                         } else {
@@ -128,7 +128,7 @@ public class CheckDone implements Runnable{
                     }
                 }
             } else {
-                LOG.info("[" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + "]....already Done!");
+                LOG.info("[" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + "]===>Already Done!");
             }
             ident.ts = Util.getNextWholeTs(ident.ts, ident.period);
         }
@@ -174,10 +174,6 @@ public class CheckDone implements Runnable{
         String keytab = prop.getProperty("KEYTAB_FILE");
         String namenodePrincipal = prop.getProperty("NAMENODE.PRINCIPAL");
         String principal = prop.getProperty("PRINCIPAL");
-        blackholeBinPath = prop.getProperty("BLACKHOLE_BIN");
-        if (blackholeBinPath.endsWith("/")) {
-            blackholeBinPath = blackholeBinPath.substring(0, blackholeBinPath.length() - 1);
-        }
         Configuration conf = new Configuration();
         conf.set("checkdone.keytab", keytab);
         conf.set("dfs.namenode.kerberos.principal", namenodePrincipal);
@@ -229,7 +225,6 @@ public class CheckDone implements Runnable{
     public static String hdfsbasedir;
     public static String hdfsfilesuffix;
     public static String hdfsHiddenfileprefix = "_";
-    private static String blackholeBinPath;
     private static int alartTime;
     private static long checkperiod;
     private static ScheduledExecutorService checkerThreadPool;

@@ -333,7 +333,7 @@ public class Appnode extends Node implements Runnable {
         this.listener = listener;
     }
 
-    public void reportFailure(final String app, final String appHost, final long ts) {
+    public void reportFailure(String app, String appHost, final long ts) {
         Message message = PBwrap.wrapAppFailure(app, appHost, ts);
         send(message);
         AppLog applog = appLogs.get(app);
@@ -347,17 +347,17 @@ public class Appnode extends Node implements Runnable {
         register(app, applog.getCreateTime());
     }
 
-    public void reportUnrecoverable(final String appname, final String appHost, final long rollTs) {
-        Message message = PBwrap.wrapUnrecoverable(appname, appHost, rollTs);
+    public void reportUnrecoverable(String appname, String appHost, final long period, final long rollTs) {
+        Message message = PBwrap.wrapUnrecoverable(appname, appHost, period, rollTs);
         send(message);
     }
 
-    public void reportRecoveryFail(final String appname, final String appServer, final long rollTs) {
+    public void reportRecoveryFail(String appname, String appServer, final long rollTs) {
         Message message = PBwrap.wrapRecoveryFail(appname, appServer, rollTs);
         send(message);
     }
 
-    public void removeRecoverying(final String appname, final long rollTs) {
+    public void removeRecoverying(String appname, final long rollTs) {
         String recoveryKey = appname + ":" + rollTs;
         recoveryingMap.remove(recoveryKey);
     }

@@ -91,7 +91,7 @@ public class RollRecovery implements Runnable{
             LOG.error("Can not found both " + rolledFile + " add " + gzFile);
             Cat.logError(new BlackholeClientException("Can not found both " + rolledFile + " add " + gzFile));
             stopRecoverying();
-            node.reportUnrecoverable(appLog.getAppName(), node.getHost(), rollTimestamp);
+            node.reportUnrecoverable(appLog.getAppName(), node.getHost(), period, rollTimestamp);
             return;
         }
 
