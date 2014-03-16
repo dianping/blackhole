@@ -13,19 +13,19 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 public class HDFSRecovery implements Runnable{
-    private static final Log LOG = LogFactory.getLog(HDFSUpload.class);
+    private static final Log LOG = LogFactory.getLog(HDFSRecovery.class);
     private static final String TMP_SUFFIX = ".tmp";
     private static final String R_SUFFIX = ".r";
 
-    private Collectornode node;
+    private RollManager mgr;
     private FileSystem fs;
     private static final int DEFAULT_BUFSIZE = 8192;
     private Socket client;
     private boolean recoverySuccess;
     private RollIdent ident;
 
-    public HDFSRecovery(Collectornode node, FileSystem fs, Socket socket, RollIdent roll) {
-        this.node = node;
+    public HDFSRecovery(RollManager mgr, FileSystem fs, Socket socket, RollIdent roll) {
+        this.mgr = mgr;
         this.fs = fs;
         this.ident = roll;
         this.recoverySuccess = false;
@@ -37,7 +37,7 @@ public class HDFSRecovery implements Runnable{
         GZIPOutputStream gout = null;
         GZIPInputStream gin = null;
         try {
-            String normalPathname = node.getRollHdfsPath(ident);
+            String normalPathname = mgr.getRollHdfsPath(ident);
             String tmpPathname = normalPathname + TMP_SUFFIX;
             String recoveryPathname = normalPathname + R_SUFFIX;
             Path normalPath = new Path(normalPathname);
@@ -129,7 +129,7 @@ public class HDFSRecovery implements Runnable{
                     Thread.sleep(3 * 1000);
                 } catch (InterruptedException e) {}
             }
-            node.recoveryResult(ident, recoverySuccess);
+            mgr.reportRecovery(ident, recoverySuccess);
         }
     }
 }

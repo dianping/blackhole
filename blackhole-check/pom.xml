@@ -15,6 +15,7 @@
 			<groupId>com.dp.cosmos</groupId>
 			<artifactId>hadoop-core</artifactId>
 			<version>1.0.3.0</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

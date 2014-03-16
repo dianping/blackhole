@@ -5,17 +5,20 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.SocketChannel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
+import java.util.zip.CRC32;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +32,11 @@ public class Util {
       InetSocketAddress remoteAddr= ((InetSocketAddress)socket.getRemoteSocketAddress());
       return remoteAddr.getHostName();
     }
+    
+    public static String getRemoteHostAndPort(Socket socket) {
+        InetSocketAddress remoteAddr= ((InetSocketAddress)socket.getRemoteSocketAddress());
+        return remoteAddr.toString();
+      }
     
     public static String getLocalHost() throws UnknownHostException {
       return InetAddress.getLocalHost().getHostName();
@@ -108,7 +116,20 @@ public class Util {
         return format;
     }
 
-    public static void writeString(String str, SocketChannel channel) throws IOException {
+    public static void writeString(String str, ByteBuffer buffer) {
+        byte[] data = str.getBytes();
+        buffer.putInt(data.length);
+        buffer.put(data);
+    }
+    
+    public static String readString(ByteBuffer buffer) {
+        int len = buffer.getInt();
+        byte[] data = new byte[len];
+        buffer.get(data);
+        return new String(data);
+    }
+    
+    public static void writeString(String str, GatheringByteChannel channel) throws IOException {
         byte[] data = str.getBytes();
         ByteBuffer writeBuffer = ByteBuffer.allocate(4 + data.length);
         writeBuffer.putInt(data.length);
@@ -235,4 +256,63 @@ public class Util {
         }
         return result;
     }
+
+    public static long getCRC32(byte[] data) {
+        return getCRC32(data, 0 ,data.length);
+    }
+    
+    public static long getCRC32(byte[] data, int offset, int length) {
+        CRC32 crc = new CRC32();
+        crc.update(data, offset, length);
+        return crc.getValue();
+    }
+    
+    public static void checkDir(File dir) throws IOException {
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        if (!dir.isDirectory()) {
+            throw new IOException("file " + dir
+                    + " exists, it should be directory");
+        }
+    }
+
+    public static void rmr(File file) throws IOException {
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            
+            if (children == null) {
+                throw new IOException("error listing directory " + file);
+            }
+            
+            for (File f : children) {
+                rmr(f);
+            }
+            file.delete();
+        } else {
+            file.delete();
+        }
+    }
+
+    public static String fromBytes(byte[] b) {
+        return fromBytes(b, "UTF-8");
+    }
+
+    public static String fromBytes(byte[] b, String encoding) {
+        if (b == null) return null;
+        try {
+            return new String(b, encoding);
+        } catch (UnsupportedEncodingException e) {
+            return new String(b);
+        }
+    }
+
+    public static String getHostFromBroker(String brokerString) {
+        return brokerString.substring(0, brokerString.lastIndexOf(':'));
+    }
+    
+    public static String getPortFromBroker(String brokerString) {
+        return brokerString.substring(brokerString.lastIndexOf(':') + 1);
+    }
+
 }

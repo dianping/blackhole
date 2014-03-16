@@ -17,6 +17,10 @@ import "DumpReply.proto";
 import "RemoveConf.proto";
 import "ColNodeReg.proto";
 import "DumpApp.proto";
+import "ConsumerReg.proto";
+import "AssignConsumer.proto";
+import "OffsetCommit.proto";
+import "TopicReport.proto";
 
 message Message {
     enum MessageType {
@@ -46,6 +50,10 @@ message Message {
         LISTAPPS = 24;
         REMOVE_CONF = 25;
         DUMP_APP = 26;
+        CONSUMER_REG = 27;
+        ASSIGN_CONSUMER = 28;
+        OFFSET_COMMIT = 29;
+        TOPICREPORT = 30;
     }
 
     required MessageType type = 1;
@@ -63,4 +71,8 @@ message Message {
     optional RemoveConf removeConf = 13;
     optional ColNodeReg colNodeReg =14;
     optional DumpApp dumpApp = 15;
+    optional ConsumerReg consumerReg = 16;
+    optional AssignConsumer assignConsumer = 17;
+    optional OffsetCommit offsetCommit = 18;
+    optional TopicReport topicReport = 19;
 }

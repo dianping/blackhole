@@ -70,7 +70,7 @@ public class TestLogReader {
         Thread readerThread = null;
         try {
             Thread.sleep(500);
-            LogReader reader = new LogReader(appnode, SimAppnode.HOSTNAME, 
+            LogReader reader = new LogReader(appnode, SimAppnode.HOSTNAME, "localhost",
                     port, appLog);
             readerThread = new Thread(reader);
         	Thread.sleep(1000);//ignore file first create

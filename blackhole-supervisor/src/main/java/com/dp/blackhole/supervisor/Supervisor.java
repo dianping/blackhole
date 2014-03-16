@@ -1,29 +1,18 @@
 package com.dp.blackhole.supervisor;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.Map.Entry;
-import java.util.Random;
 import java.util.TreeSet;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,184 +20,192 @@ import org.apache.commons.logging.LogFactory;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
-import com.dp.blackhole.common.gen.AppRegPB.AppReg;
-import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
-import com.dp.blackhole.common.Connection;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.Util;
+import com.dp.blackhole.common.gen.AppRegPB.AppReg;
+import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
+import com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer;
 import com.dp.blackhole.common.gen.ColNodeRegPB.ColNodeReg;
 import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
+import com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.common.gen.DumpAppPB.DumpApp;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
+import com.dp.blackhole.common.gen.OffsetCommitPB.OffsetCommit;
 import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.gen.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
 import com.dp.blackhole.common.gen.StreamIDPB.StreamID;
-import com.dp.blackhole.common.Util;
+import com.dp.blackhole.common.gen.TopicReportPB.TopicReport;
+import com.dp.blackhole.common.gen.TopicReportPB.TopicReport.TopicEntry;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.conf.Context;
+import com.dp.blackhole.network.ConnectionFactory;
+import com.dp.blackhole.network.EntityProcessor;
+import com.dp.blackhole.network.GenServer;
+import com.dp.blackhole.network.SimpleConnection;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Supervisor {
 
     public static final Log LOG = LogFactory.getLog(Supervisor.class);
     
-    private Selector selector;
-    volatile private boolean running = true;
-    private Handler[] handlers = null;
-    private int handlerCount = 1;
-    
-    private BlockingQueue<Msg> messageQueue;
-    private ConcurrentHashMap<Connection, ArrayList<Stream>> connectionStreamMap;
-    private ConcurrentHashMap<Stage, Connection> stageConnectionMap;
-    private ConcurrentHashMap<String, Connection> collectorNodes;
-    private ConcurrentHashMap<String, Connection> appNodes;
+    private GenServer<ByteBuffer, SimpleConnection, EntityProcessor<ByteBuffer, SimpleConnection>> server;  
+    private ConcurrentHashMap<SimpleConnection, ArrayList<Stream>> connectionStreamMap;
+    private ConcurrentHashMap<Stage, SimpleConnection> stageConnectionMap;
+    private ConcurrentHashMap<String, SimpleConnection> collectorNodes;
+    private ConcurrentHashMap<String, SimpleConnection> appNodes;
     private ConcurrentHashMap<Stream, ArrayList<Stage>> Streams;
     private ConcurrentHashMap<StreamId, Stream> streamIdMap;
     private ConcurrentHashMap<String, Integer> collectorHostPortMap;
     private LionConfChange lionConfChange;
     
-    private class Msg {
-        Message msg;
-        Connection c;
-    }
+    private ConcurrentHashMap<String, ConcurrentHashMap<String ,PartitionInfo>> topics;
+    private ConcurrentHashMap<ConsumerGroup, ConcurrentHashMap<String, Consumer>> consumerGroups;
+    private ConcurrentHashMap<SimpleConnection, Consumer> consumerConnectionMap;
     
-    private void send(Connection connection, Message msg) {
+    private ConcurrentHashMap<SimpleConnection, ConnectionDescription> connections;
+    
+    private void send(SimpleConnection connection, Message msg) {
         if (connection == null || !connection.isActive()) {
             LOG.error("connection is null or closed, message sending abort: " + msg);
             return;
         }
-        SocketChannel channel = connection.getChannel();
-        SelectionKey key = channel.keyFor(selector);
-        key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
-        connection.offer(msg);
-        LOG.debug("send message to " + connection.getHost() + " :" +msg);
-        selector.wakeup();
+        LOG.debug("send message to " + connection + " :" +msg);
+        
+        connection.send(PBwrap.PB2Buf(msg));
     }
     
-    protected void loop() {
-
-        while (running) {
-            SelectionKey key = null;
-            try {
-                selector.select();
-                Iterator<SelectionKey> iter = selector.selectedKeys()
-                        .iterator();
-                while (iter.hasNext()) {
-                    key = iter.next();
-                    iter.remove();
-                    if (key.isAcceptable()) {
-                        ServerSocketChannel server = (ServerSocketChannel) key
-                                .channel();
-                        SocketChannel channel = server.accept();
-                        if (channel == null) {
-                            continue;
-                        }
-                        channel.configureBlocking(false);
-                        Connection connection = new Connection(channel);
-                        channel.register(selector, SelectionKey.OP_READ, connection);
-                   
-                        if (connectionStreamMap.get(connection) == null) {
-                            ArrayList<Stream> streams = new ArrayList<Stream>();
-                            connectionStreamMap.put(connection, streams);
-                            String remote = connection.getHost();
-                            LOG.debug("client node "+remote+" connected");
-                        } else {
-                            LOG.error("connection already contained in connectionMap: " + connection.getHost());
-                            connection.close();
-                        }
-                    } else if (key.isWritable()) {
-                        key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
-
-                        SocketChannel channel = (SocketChannel) key.channel();
-                        Connection connection = (Connection) key.attachment();
-
-                        while (true) {
-                            ByteBuffer reply = connection.getWritebuffer();
-                            if (reply == null) {
-                                Message msg = connection.peek();
-                                if (msg == null) {
-                                    break;
-                                }
-                                byte[] data = msg.toByteArray();
-                                reply = connection.createWritebuffer(4 + data.length);
-                                reply.putInt(data.length);
-                                reply.put(data);
-                                reply.flip();
-                            }
-                            if (reply.remaining() == 0) {
-                                connection.poll();
-                                connection.resetWritebuffer();
-                                continue;
-                            }
-                            int num = 0;
-                            for (int i = 0; i < 16; i++) {
-                                num = channel.write(reply);
-                                if (num != 0) {
-                                    break;
-                                }
-                            }
-                            // socket buffer is full, register OP_WRITE, wait for next write
-                            if (num == 0) {
-                                key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
-                                break;
-                            }
-                        }
-                    } else if (key.isReadable()) {
-                        int count;
-                        Connection connection = (Connection) key.attachment();
-                        SocketChannel channel = (SocketChannel) key.channel();
-
-                        ByteBuffer lengthBuf = connection.getLengthBuffer();
-                        if (lengthBuf.hasRemaining()) {
-                            count = channel.read(lengthBuf);
-                            if (count < 0) {
-                                closeConnection((Connection) key.attachment());
-                                continue;
-                            } else if (lengthBuf.hasRemaining()) {
-                                continue;
-                            } else {
-                                lengthBuf.flip();
-                                int length = lengthBuf.getInt();
-                                lengthBuf.clear();
-                                connection.createDatabuffer(length);
-                            }
-                        }
-
-                        ByteBuffer data = connection.getDataBuffer();
-                        count = channel.read(data);
-                        if (count < 0) {
-                            closeConnection((Connection) key.attachment());
-                            continue;
-                        }
-                        if (data.remaining() == 0) {
-                            data.flip();
-                            Message msg = Message.parseFrom(data.array());
-                            if (msg.getType() != MessageType.HEARTBEART) {
-                                LOG.debug("receive message from " + connection.getHost() +" :" + msg);
-                            }
-                            Msg event = new Msg();
-                            event.c = connection;
-                            event.msg = msg;
-                            messageQueue.put(event);
-                        }
-                    }
-                }
-            } catch (InterruptedException ie) {
-                LOG.warn("got InterruptedException", ie);
-            } catch (IOException e) {
-                closeConnection((Connection) key.attachment());
-            }
+    private void handleHeartBeat(SimpleConnection from) {
+        ConnectionDescription desc = connections.get(from);
+        if (desc == null) {
+            LOG.error("can not find ConnectionDesc by connection " + from);
+            return;
         }
+        
+        desc.updateHeartBeat();
+    }
+    
+    private void handleTopicReport(TopicReport report, SimpleConnection from) {
+        for (TopicEntry entry : report.getEntriesList()) {
+            String topic = entry.getTopic();
+            String partitionId = entry.getPartitionId();
+            ConcurrentHashMap<String, PartitionInfo> partitionInfos = topics.get(topic);
+            if (partitionInfos == null) {
+                partitionInfos = new ConcurrentHashMap<String, PartitionInfo>();
+                topics.put(topic, partitionInfos);
+            }
+            PartitionInfo partitionInfo = partitionInfos.get(partitionId);
+            if (partitionInfo == null) {
+                partitionInfo = new PartitionInfo(partitionId, from, entry.getOffset());
+                partitionInfos.put(partitionId, partitionInfo);
+            } else {
+                partitionInfo.setEndOffset(entry.getOffset());
+            } 
+        }
+    }
+    
+    private void handleConsumerReg(ConsumerReg consumerReg, SimpleConnection from) {
+        ConnectionDescription desc = connections.get(from);
+        if (desc == null) {
+            LOG.error("can not find ConnectionDesc by connection " + from);
+            return;
+        }
+        desc.setType(ConnectionDescription.CONSUMER);
+        
+        String groupId = consumerReg.getGroupId();
+        String id = consumerReg.getConsumerId();
+        String topic = consumerReg.getTopic();
+        
+        ConsumerGroup group = new ConsumerGroup(groupId, topic);
+        ConcurrentHashMap<String, Consumer> consumersMap = consumerGroups.get(group);
+        if (consumersMap == null) {
+            consumersMap = new ConcurrentHashMap<String, Consumer>();
+            consumerGroups.put(group, consumersMap);
+        }
+        
+        Consumer consumer = consumersMap.get(id);
+        if (consumer == null) {
+            consumer = new Consumer(id, group, topic, from);
+            consumersMap.put(id, consumer);
+            consumerConnectionMap.put(from, consumer);
+            assignConsumers(group);
+        } else {
+            LOG.error("consumer " + id + "already registered");
+        }
+    }
+    
+    private void assignConsumers(ConsumerGroup group) {
+        ConcurrentHashMap<String, Consumer> consumersMap = consumerGroups.get(group);
+        int consumerNum = consumersMap.size();
+        
+        String topic = group.getTopic();
+        ConcurrentHashMap<String, PartitionInfo> partitionMap = topics.get(topic);
+        if (partitionMap == null) {
+            LOG.error("unknown topic: " + topic);
+            return;
+        }
+        Collection<PartitionInfo> topicPartitions = partitionMap.values();
+        if (topicPartitions.size() == 0) {
+            return;
+        }
+        
+        ArrayList<ArrayList<PartitionInfo>> assignPartitions = new ArrayList<ArrayList<PartitionInfo>>(consumerNum);
+        for (int index = 0; index < consumerNum; index++) {
+            assignPartitions.add(new ArrayList<PartitionInfo>());
+        }
+        
+        int i = 0;
+        for (PartitionInfo partition: topicPartitions) {
+            assignPartitions.get(i % consumerNum).add(partition);
+            i ++;
+        }
+        
+        int j = 0;
+        for (Consumer consumer : consumersMap.values()) {
+            List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(assignPartitions.get(j).size());
+            for (PartitionInfo info : assignPartitions.get(j)) {
+                AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(info.getConnection().getHost()+":8090", info.getId(), info.getEndOffset());
+                offsets.add(offset);
+            }
+            Message assign = PBwrap.wrapAssignConsumer(group.getId(), consumer.getId(), topic, offsets);
+            consumer.setPartitions(assignPartitions.get(j));
+            j++;
+            send(consumer.getConnection(), assign);
+        }
+    }
+
+    private void handleOffsetCommit(OffsetCommit offsetCommit) {
+        // TODO
+        String groupId = offsetCommit.getConsumerIdString();
+        String id = offsetCommit.getConsumerIdString();
+        String topic = offsetCommit.getTopic();
+        String partition = offsetCommit.getPartition();
+        long offset = offsetCommit.getOffset();
+        
+        ConsumerGroup group = new ConsumerGroup(groupId, topic);
+        ConcurrentHashMap<String, Consumer> groupConsumers = consumerGroups.get(group);
+        if (groupConsumers == null) {
+            LOG.error("can not find consumer group " + group);
+            return;
+        }
+        Consumer consumer = groupConsumers.get(id);
+        if (consumer == null) {
+            LOG.error("can not find consumer by id " + id);
+            return;
+        }
+        
+        consumer.updateOffset(partition, offset);
     }
     
     /*
      * mark the stream as inactive, mark all the stages as pending unless the uploading stage
      * remove the relationship of the corresponding collectorNode and streams
      */
-    private void handleAppNodeFail(Connection connection, long now) {
+    private void handleAppNodeFail(SimpleConnection connection, long now) {
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         if (streams != null) {
             for (Stream stream : streams) {
@@ -232,7 +229,7 @@ public class Supervisor {
                 
                 // remove corresponding collectorNodes's relationship with the stream
                 String collectorHost = stream.getCollectorHost();
-                Connection collectorConnection = collectorNodes.get(collectorHost);
+                SimpleConnection collectorConnection = collectorNodes.get(collectorHost);
                 if (collectorConnection != null) {
                     ArrayList<Stream> associatedStreams = connectionStreamMap.get(collectorConnection);
                     if (associatedStreams != null) {
@@ -255,7 +252,7 @@ public class Supervisor {
      * 2. remove the relationship of the corresponding appNode and streams
      * 3. processing uploading and recovery stages
      */
-    private void handleCollectorNodeFail(Connection connection, long now) {
+    private void handleCollectorNodeFail(SimpleConnection connection, long now) {
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         // processing current stage on streams
         if (streams != null) {
@@ -286,7 +283,7 @@ public class Supervisor {
                    
                 // remove corresponding appNodes's relationship with the stream
                 String appHost = stream.appHost;
-                Connection appConnection = appNodes.get(appHost);
+                SimpleConnection appConnection = appNodes.get(appHost);
                 if (appConnection != null) {
                     ArrayList<Stream> associatedStreams = connectionStreamMap.get(appConnection);
                     if (associatedStreams != null) {
@@ -304,7 +301,7 @@ public class Supervisor {
         }
         
         // processing uploading and recovery stages
-        for (Entry<Stage, Connection> entry : stageConnectionMap.entrySet()) {
+        for (Entry<Stage, SimpleConnection> entry : stageConnectionMap.entrySet()) {
             if (connection.equals(entry.getValue())) {
                 LOG.info("processing entry: "+ entry);
                 Stage stage = entry.getKey();
@@ -329,42 +326,59 @@ public class Supervisor {
         }
     }
     
+
+    private void handleConsumerFail(SimpleConnection connection, long now) {
+        LOG.info("consumer " + connection + " disconnectted");
+        Consumer consumer = consumerConnectionMap.get(connection);
+        String id = consumer.getId();
+        ConsumerGroup group = consumer.getConsumerGroup();
+        ConcurrentHashMap<String, Consumer> groupConsumers = consumerGroups.get(group);
+        if (groupConsumers != null) {
+            groupConsumers.remove(id);
+        }
+        if (groupConsumers.size() != 0) {
+            LOG.info("reassign consumers in group: " + group + ", caused by consumer fail: " + consumer);
+            assignConsumers(group);
+        }
+    }
+    
     /*
      * cancel the key, remove it from appNodes or collectorNodes, then revisit streams
      * 1. appNode fail, mark the stream as inactive, mark all the stages as pending unless the uploading stage
      * 2. collectorNode fail, reassign collector if it is current stage, mark the stream as pending when no available collector;
      *  do recovery if the stage is not current stage, mark the stage as pending when no available collector
      */
-    private void closeConnection(Connection connection) {
-        if (!connection.isActive()) {
-            LOG.info("connection " + connection + "already closed" );
+    private void closeConnection(SimpleConnection connection) {
+    	LOG.info("close connection: " + connection);
+    	
+        long now = Util.getTS();
+        ConnectionDescription desc = connections.get(connection);
+        if (desc == null) {
+            LOG.error("can not find ConnectionDesc by connection " + connection);
             return;
         }
         
-        SelectionKey key = connection.getChannel().keyFor(selector);
-        LOG.info("close connection: " + connection);
-        key.cancel();
-        
-        long now = Util.getTS();
         String host = connection.getHost();
-        if (connection.getNodeType() == Connection.APPNODE) {
+        if (desc.getType() == ConnectionDescription.AGENT) {
             appNodes.remove(host);
             LOG.info("close APPNODE: " + host);
             handleAppNodeFail(connection, now);
-        } else if (connection.getNodeType() == Connection.COLLECTORNODE) {
+        } else if (desc.getType() == ConnectionDescription.BROKER) {
             collectorNodes.remove(host);
             collectorHostPortMap.remove(host);
             LOG.info("close COLLECTORNODE: " + host);
             handleCollectorNodeFail(connection, now);
+        } else if (desc.getType() == ConnectionDescription.CONSUMER) {
+            LOG.info("close consumer: " + host);
+            handleConsumerFail(connection, now);
+            consumerConnectionMap.remove(connection);
         }
         
+        connections.remove(connection);
         connectionStreamMap.remove(connection);
-        if (connection != null) {
-            connection.close();
-        }
     }
 
-    private void dumpstat(Connection from) {
+    private void dumpstat(SimpleConnection from) {
         StringBuilder sb = new StringBuilder();
         sb.append("dumpstat:\n");
         sb.append("############################## dump ##############################\n");
@@ -396,7 +410,7 @@ public class Supervisor {
         sb.append("\n");
         
         sb.append("print stageConnectionMap:\n");
-        for(Entry<Stage, Connection> entry : stageConnectionMap.entrySet()) {
+        for(Entry<Stage, SimpleConnection> entry : stageConnectionMap.entrySet()) {
             sb.append("<")
             .append(entry.getKey())
             .append(", ")
@@ -407,7 +421,7 @@ public class Supervisor {
         sb.append("\n");
         
         sb.append("print appNodes:\n");
-        for(Entry<String, Connection> entry : appNodes.entrySet()) {
+        for(Entry<String, SimpleConnection> entry : appNodes.entrySet()) {
             sb.append("<")
             .append(entry.getValue())
             .append(">")
@@ -416,7 +430,7 @@ public class Supervisor {
         sb.append("\n");
         
         sb.append("print collectorNodes:\n");
-        for(Entry<String, Connection> entry : collectorNodes.entrySet()) {
+        for(Entry<String, SimpleConnection> entry : collectorNodes.entrySet()) {
             sb.append("<")
             .append(entry.getValue())
             .append(">")
@@ -425,8 +439,8 @@ public class Supervisor {
         sb.append("\n");
         
         sb.append("print connectionStreamMap:\n");
-        for(Entry<Connection, ArrayList<Stream>> entry : connectionStreamMap.entrySet()) {
-            Connection conn = entry.getKey();
+        for(Entry<SimpleConnection, ArrayList<Stream>> entry : connectionStreamMap.entrySet()) {
+            SimpleConnection conn = entry.getKey();
             sb.append(conn)
             .append("\n");
             ArrayList<Stream> streams = entry.getValue();
@@ -447,7 +461,7 @@ public class Supervisor {
         send(from, message);
     }
     
-    private void dumpapp(DumpApp dumpApp, Connection from) {
+    private void dumpapp(DumpApp dumpApp, SimpleConnection from) {
         String appName = dumpApp.getAppName();
         StringBuilder sb = new StringBuilder();
         sb.append("dumpapp:\n");
@@ -488,14 +502,14 @@ public class Supervisor {
         send(from, message);
     }
     
-    public void dumpconf(Connection from) {
+    public void dumpconf(SimpleConnection from) {
         String dumpconf = lionConfChange.dumpconf();
         LOG.info(dumpconf);
         Message message = PBwrap.wrapDumpReply(dumpconf);
         send(from, message);
     }
 
-    public void listApps(Connection from) {
+    public void listApps(SimpleConnection from) {
         StringBuilder sb = new StringBuilder();
         SortedSet<String> appNameSet = new TreeSet<String>();
         sb.append("list apps:\n");
@@ -524,7 +538,7 @@ public class Supervisor {
         send(from, message);
     }
 
-    public void removeConf(RemoveConf removeConf, Connection from) {
+    public void removeConf(RemoveConf removeConf, SimpleConnection from) {
         String appName = removeConf.getAppName();
         List<String> appServers = removeConf.getAppServersList();
         lionConfChange.removeConf(appName, appServers);
@@ -566,7 +580,7 @@ public class Supervisor {
             }
             
             // remove stream from connectionStreamMap
-            for (Entry<Connection, ArrayList<Stream>> e : connectionStreamMap.entrySet()) {
+            for (Entry<SimpleConnection, ArrayList<Stream>> e : connectionStreamMap.entrySet()) {
                 ArrayList<Stream> associatedStreams = e.getValue();
                 synchronized (associatedStreams) {
                     associatedStreams.remove(stream);
@@ -800,7 +814,7 @@ public class Supervisor {
      * update the stream's lastSuccessTs
      * make the uploaded stage as uploaded and remove it from Streams
      */
-    private void handleUploadSuccess(RollID rollID, Connection from) {
+    private void handleUploadSuccess(RollID rollID, SimpleConnection from) {
         StreamId id = new StreamId(rollID.getAppName(), rollID.getAppServer());
         Stream stream = streamIdMap.get(id);
         
@@ -834,7 +848,7 @@ public class Supervisor {
      * or upload the rolled stage;
      * create next stage as new current stage
      */
-    private void handleRolling(AppRoll msg, Connection from) {
+    private void handleRolling(AppRoll msg, SimpleConnection from) {
         StreamId id = new StreamId(msg.getAppName(), msg.getAppServer());
         Stream stream = streamIdMap.get(id);
         
@@ -908,7 +922,7 @@ public class Supervisor {
         }
     }
 
-    private String doUpload(Stream stream, Stage current, Connection from) {
+    private String doUpload(Stream stream, Stage current, SimpleConnection from) {
         Message message = PBwrap.wrapUploadRoll(current.app, current.apphost, stream.period, current.rollTs);
         send(from, message);
         stageConnectionMap.put(current, from);
@@ -928,15 +942,15 @@ public class Supervisor {
         if (collector == null || !stream.isActive()) {
             stage.status = Stage.PENDING;
             stageConnectionMap.remove(stage);
-        } else {
-            Connection c = appNodes.get(stream.appHost);
+        } else {            
+            SimpleConnection c = appNodes.get(stream.appHost);
             Message message = PBwrap.wrapRecoveryRoll(stream.app, collector, collectorHostPortMap.get(collector), stage.rollTs);
             send(c, message);
             
             stage.status = Stage.RECOVERYING;
             stage.collectorhost = collector;
             
-            Connection collectorConnection = collectorNodes.get(collector);
+            SimpleConnection collectorConnection = collectorNodes.get(collector);
             stageConnectionMap.put(stage, collectorConnection);
         }
 
@@ -947,7 +961,7 @@ public class Supervisor {
      * record the stream if it is a new stream;
      * do recovery if it is a old stream
      */
-    private void registerStream(ReadyCollector message, Connection from) {
+    private void registerStream(ReadyCollector message, SimpleConnection from) {
         long connectedTs = message.getConnectedTs();
         long currentTs = Util.getCurrentRollTs(connectedTs, message.getPeriod());
         
@@ -999,7 +1013,7 @@ public class Supervisor {
         
         // register connection with appNode and collectorNode
         recordConnectionStreamMapping(from, stream);
-        Connection appConnection = appNodes.get(stream.appHost);
+        SimpleConnection appConnection = appNodes.get(stream.appHost);
         recordConnectionStreamMapping(appConnection, stream);
     }
 
@@ -1073,7 +1087,7 @@ public class Supervisor {
         }
     }
    
-    private void recordConnectionStreamMapping(Connection connection, Stream stream) {
+    private void recordConnectionStreamMapping(SimpleConnection connection, Stream stream) {
         if (connection == null) {
             LOG.fatal("Connection is null");
             return;
@@ -1123,8 +1137,14 @@ public class Supervisor {
      * 1. recored the connection in appNodes
      * 2. assign a collect to the app
      */
-    private void registerApp(Message m, Connection from) throws InterruptedException {
-        from.setNodeType(Connection.APPNODE);
+    private void registerApp(Message m, SimpleConnection from) {
+        ConnectionDescription desc = connections.get(from);
+        if (desc == null) {
+            LOG.error("can not find ConnectionDesc by connection " + from);
+            return;
+        }
+        desc.setType(ConnectionDescription.AGENT);
+        
         if (appNodes.get(from.getHost()) == null) {
             appNodes.put(from.getHost(), from);
             LOG.info("AppNode " + from.getHost() + " registered");
@@ -1133,7 +1153,7 @@ public class Supervisor {
         assignCollector(message.getAppName(), from);
     }
 
-    private String assignCollector(String app, Connection from) {
+    private String assignCollector(String app, SimpleConnection from) {
         String collector = getCollector();
         Message message;
         if (collector != null) {
@@ -1146,8 +1166,14 @@ public class Supervisor {
         return collector;
     }
     
-    private void registerCollectorNode(ColNodeReg colNodeReg, Connection from) {
-        from.setNodeType(Connection.COLLECTORNODE);
+    private void registerCollectorNode(ColNodeReg colNodeReg, SimpleConnection from) {
+        ConnectionDescription desc = connections.get(from);
+        if (desc == null) {
+            LOG.error("can not find ConnectionDesc by connection " + from);
+            return;
+        }
+        desc.setType(ConnectionDescription.BROKER);
+        
         collectorNodes.put(from.getHost(), from);
         collectorHostPortMap.put(from.getHost(), colNodeReg.getPort());
         LOG.info("CollectorNode " + from.getHost() + " registered");
@@ -1167,32 +1193,42 @@ public class Supervisor {
         return collector;
     }
     
-    private class Handler extends Thread {
-        private boolean running= true;
+    
+    public class SupervisorExecutor implements EntityProcessor<ByteBuffer, SimpleConnection> {
 
-        public Handler(int instanceNumber) {
-            this.setDaemon(true);
-            this.setName("process handler thread-"+instanceNumber);
+        @Override
+        public void OnConnected(SimpleConnection connection) {
+            ConnectionDescription desc = connections.get(connection);
+            if (desc == null) {
+            	LOG.info("client " + connection + " connected");
+                connections.put(connection, new ConnectionDescription());
+            } else {
+                LOG.error("connection already registered: " + connection);
+            }
+        }
+
+        @Override
+        public void OnDisconnected(SimpleConnection connection) {
+            closeConnection(connection);
         }
         
         @Override
-        public void run() {
-            while (running) {
-                Msg e;
-                try {
-                    e = messageQueue.take();
-                    process(e.msg, e.c);
-                } catch (InterruptedException ie) {
-                    LOG.info("handler thread interrupted");
-                    running = false;
-                }
+        public void process(ByteBuffer request, SimpleConnection from) {
+            Message msg = null;
+            try {
+                msg = PBwrap.Buf2PB(from.getEntity());
+            } catch (InvalidProtocolBufferException e) {
+                LOG.error("InvalidProtocolBufferException catched: ", e);
+                return;
             }
-        }
-        
-        private void process(Message msg, Connection from) throws InterruptedException {
+            
+            if (msg.getType() != MessageType.HEARTBEART && msg.getType() != MessageType.TOPICREPORT) {
+            	LOG.debug("received: " + msg);
+            }
+            
             switch (msg.getType()) {
             case HEARTBEART:
-                from.updateHeartBeat();
+                handleHeartBeat(from);
                 break;
             case COLLECTOR_REG:
                 registerCollectorNode(msg.getColNodeReg(), from);
@@ -1247,6 +1283,16 @@ public class Supervisor {
                 break;
             case DUMP_APP:
                 dumpapp(msg.getDumpApp(), from);
+                break;
+            case TOPICREPORT:
+                handleTopicReport(msg.getTopicReport(), from);
+                break;
+            case CONSUMER_REG:
+                handleConsumerReg(msg.getConsumerReg(), from);
+                break;
+            case OFFSET_COMMIT:
+                handleOffsetCommit(msg.getOffsetCommit());
+                break;
             default:
                 LOG.warn("unknown message: " + msg.toString());
             }
@@ -1263,9 +1309,10 @@ public class Supervisor {
                 try {
                     Thread.sleep(5000);
                     long now = Util.getTS();
-                    for (Connection c : connectionStreamMap.keySet()) {
-                        if (now - c.getLastHeartBeat() > THRESHOLD) {
-                            closeConnection(c);
+                    for (Entry<SimpleConnection, ConnectionDescription> entry : connections.entrySet()) {
+                        if (now - entry.getValue().getLastHeartBeat() > THRESHOLD) {
+                            LOG.info("failed to get heartbeat for 15 seconds, close connection " + entry.getKey());
+                            closeConnection(entry.getKey());
                         }
                     }
                 } catch (InterruptedException e) {
@@ -1276,42 +1323,40 @@ public class Supervisor {
         }
     }
        
-    private void init() throws IOException, ClosedChannelException, LionException {
+//    private void init() throws IOException, ClosedChannelException, LionException {
+
+    private void init() throws IOException, LionException {
         Properties prop = new Properties();
-        prop.load(new FileReader(new File("config.properties")));
-        
-        handlerCount = Integer.parseInt(prop.getProperty("supervisor.handlercount"));
-        int port = Integer.parseInt(prop.getProperty("supervisor.port"));
-        
-        ServerSocketChannel ssc = ServerSocketChannel.open();
-        ssc.configureBlocking(false);
-        ServerSocket ss = ssc.socket();
-        ss.bind(new InetSocketAddress(port));
-        selector = Selector.open();
-        ssc.register(selector, SelectionKey.OP_ACCEPT);
-        connectionStreamMap = new ConcurrentHashMap<Connection, ArrayList<Stream>>();
-        stageConnectionMap = new ConcurrentHashMap<Stage, Connection>();
-        collectorNodes = new ConcurrentHashMap<String, Connection>();
-        appNodes =  new ConcurrentHashMap<String, Connection>();
-        messageQueue = new LinkedBlockingQueue<Msg>();
+        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
+
+        connectionStreamMap = new ConcurrentHashMap<SimpleConnection, ArrayList<Stream>>();
+        stageConnectionMap = new ConcurrentHashMap<Stage, SimpleConnection>();
+        collectorNodes = new ConcurrentHashMap<String, SimpleConnection>();
+        appNodes =  new ConcurrentHashMap<String, SimpleConnection>();
+
         Streams = new ConcurrentHashMap<Stream, ArrayList<Stage>>();
         streamIdMap = new ConcurrentHashMap<StreamId, Stream>();
+
         collectorHostPortMap = new ConcurrentHashMap<String, Integer>();
         //initLion(or initZooKeeper)
         connectAppConfKeeper(prop);
-        // start message handler thread
-        handlers = new Handler[handlerCount];
-        for (int i=0; i < handlerCount; i++) {
-            handlers[i] = new Handler(i);
-            handlers[i].start();
-        }
+        
+        topics = new ConcurrentHashMap<String, ConcurrentHashMap<String,PartitionInfo>>();
+        consumerGroups = new ConcurrentHashMap<ConsumerGroup, ConcurrentHashMap<String,Consumer>>();
+        consumerConnectionMap = new ConcurrentHashMap<SimpleConnection, Consumer>();
+        connections = new ConcurrentHashMap<SimpleConnection, ConnectionDescription>();
         
         // start heart beat checker thread
         LiveChecker checker = new LiveChecker();
         checker.setDaemon(true);
-        checker.start();
+//        checker.start();
         
-        LOG.info("supervisor started");
+        SupervisorExecutor executor = new SupervisorExecutor();
+        ConnectionFactory<SimpleConnection> factory = new SimpleConnection.SimpleConnectionFactory();
+        server = new GenServer<ByteBuffer, SimpleConnection, EntityProcessor<ByteBuffer, SimpleConnection>>
+            (executor, factory, null);
+
+        server.init(prop, "supervisor", "supervisor.port");
     }
 
     private void connectAppConfKeeper(Properties prop) throws IOException, LionException {
@@ -1320,7 +1365,7 @@ public class Supervisor {
         lionConfChange.initLion();
     }
     
-    public void findConfs(Connection from) {
+    public void findConfs(SimpleConnection from) {
         Message message;
         List<String> appNamesInOneHost;
         if ((appNamesInOneHost = lionConfChange.hostToAppNames.get(from.getHost())) == null) {
@@ -1355,7 +1400,6 @@ public class Supervisor {
     public static void main(String[] args) throws IOException, LionException {
         Supervisor supervisor = new Supervisor();
         supervisor.init();
-        supervisor.loop();
     }
 
 }
