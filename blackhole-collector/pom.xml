@@ -14,10 +14,17 @@
 			<groupId>com.dp.cosmos</groupId>
 			<artifactId>hadoop-core</artifactId>
 			<version>1.0.3.0</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>blackhole-common</artifactId>
 		</dependency>
+                <dependency>
+                        <groupId>org.mockito</groupId>
+                        <artifactId>mockito-core</artifactId>
+                        <version>1.8.0</version>
+                        <scope>test</scope>
+                </dependency>
 	</dependencies>
 </project>

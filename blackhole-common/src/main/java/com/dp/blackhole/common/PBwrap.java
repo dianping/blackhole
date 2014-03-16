@@ -2,6 +2,8 @@ package com.dp.blackhole.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import com.dp.blackhole.common.gen.AppRegPB.AppReg;
 import com.dp.blackhole.common.gen.AppRollPB.AppRoll;
@@ -11,16 +13,21 @@ import com.dp.blackhole.common.gen.ConfResPB.ConfRes;
 import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.common.gen.DumpAppPB.DumpApp;
 import com.dp.blackhole.common.gen.DumpReplyPB.DumpReply;
+import com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer;
+import com.dp.blackhole.common.gen.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.NoAvailableNodePB.NoAvailableNode;
+import com.dp.blackhole.common.gen.OffsetCommitPB.OffsetCommit;
 import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.common.gen.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
 import com.dp.blackhole.common.gen.StreamIDPB.StreamID;
+import com.dp.blackhole.common.gen.TopicReportPB.TopicReport;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 public class PBwrap {
     public static Message wrapMessage(MessageType type, Object message) {
@@ -31,6 +38,9 @@ public class PBwrap {
             msg.setNoAvailableNode((NoAvailableNode) message);
             break;
         case HEARTBEART:
+            break;
+        case TOPICREPORT:
+            msg.setTopicReport((TopicReport) message);
             break;
         case APP_REG:
             msg.setAppReg((AppReg) message);
@@ -87,6 +97,14 @@ public class PBwrap {
         case DUMP_APP:
             msg.setDumpApp((DumpApp) message);
             break;
+        case CONSUMER_REG:
+            msg.setConsumerReg((ConsumerReg) message);
+            break;
+        case ASSIGN_CONSUMER:
+            msg.setAssignConsumer((AssignConsumer) message);
+            break;
+        case OFFSET_COMMIT:
+            msg.setOffsetCommit((OffsetCommit) message);
         default:
         }
         return msg.build();
@@ -271,5 +289,73 @@ public class PBwrap {
         DumpApp.Builder builder = DumpApp.newBuilder();
         builder.setAppName(appName);
         return wrapMessage(MessageType.DUMP_APP, builder.build());
+    }
+
+    /**
+     * register consumer data to supervisor
+     */
+    public static Message wrapConsumerReg(String group, String consumerId, String topic) {
+        ConsumerReg.Builder builder = ConsumerReg.newBuilder();
+        builder.setGroupId(group);
+        builder.setConsumerId(consumerId);
+        builder.setTopic(topic);
+        return wrapMessage(MessageType.CONSUMER_REG, builder.build());
+    }
+
+    /**
+     * report committed offset of a partition
+     */
+    public static Message wrapOffsetCommit(String consumerId, String topic, String partitionName, long offset) {
+        OffsetCommit.Builder builder = OffsetCommit.newBuilder();
+        builder.setConsumerIdString(consumerId);
+        builder.setTopic(topic);
+        builder.setPartition(partitionName);
+        builder.setOffset(offset);
+        return wrapMessage(MessageType.OFFSET_COMMIT, builder.build());
+    }
+    
+    public static AssignConsumer.PartitionOffset getPartitionOffset(String broker, String partition, long offset) {
+        AssignConsumer.PartitionOffset.Builder infoBuilder = AssignConsumer.PartitionOffset.newBuilder();
+        infoBuilder.setBrokerString(broker);
+        infoBuilder.setPartitionName(partition);
+        infoBuilder.setOffset(offset);
+        return infoBuilder.build();
+    }
+    
+    public static Message wrapAssignConsumer(String groupId, String consumerId, String topic, List<AssignConsumer.PartitionOffset> partitionOffsets) {
+        AssignConsumer.Builder builder = AssignConsumer.newBuilder();
+        builder.setGroup(groupId);
+        builder.setConsumerIdString(consumerId);
+        builder.setTopic(topic);
+        
+        for (AssignConsumer.PartitionOffset offset : partitionOffsets) {
+            builder.addPartitionOffsets(offset);
+        }
+        return wrapMessage(MessageType.ASSIGN_CONSUMER, builder.build());
+    }
+    
+    public static TopicReport.TopicEntry getTopicEntry(String topic, String partition, long offset) {
+        TopicReport.TopicEntry.Builder entryBuilder = TopicReport.TopicEntry.newBuilder();
+        entryBuilder.setTopic(topic);
+        entryBuilder.setPartitionId(partition);
+        entryBuilder.setOffset(offset);
+        return entryBuilder.build();
+    }
+    
+    public static Message wrapTopicReport(List<TopicReport.TopicEntry> entryList) {
+        TopicReport.Builder builder = TopicReport.newBuilder();
+        for (TopicReport.TopicEntry entry : entryList) {
+            builder.addEntries(entry);
+        }
+        return wrapMessage(MessageType.TOPICREPORT, builder.build());
+    }
+    
+    public static Message Buf2PB(ByteBuffer buf) throws InvalidProtocolBufferException {
+        return Message.parseFrom(buf.array());
+    }
+    
+    public static ByteBuffer PB2Buf(Message msg) {
+        ByteBuffer buf = ByteBuffer.wrap(msg.toByteArray());
+        return buf;
     }
 }

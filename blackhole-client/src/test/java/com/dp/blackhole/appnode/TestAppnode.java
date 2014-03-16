@@ -113,23 +113,23 @@ public class TestAppnode {
     @Test
     public void testAssignCollectorProcess() throws InterruptedException {
         Message bad = getMessageOfAssignCollector(MAGIC + MAGIC);
-        assertFalse(appnode.process(bad));
+        assertFalse(appnode.processor.processInternal(bad));
         Message good = getMessageOfAssignCollector(MAGIC);
-        assertTrue(appnode.process(good));
+        assertTrue(appnode.processor.processInternal(good));
     }
     
     @Test
     public void testRecoveryRollProcess() throws InterruptedException {
         Message bad = getMessageOfRecoveryRoll(MAGIC + MAGIC);
-        assertFalse(appnode.process(bad));
+        assertFalse(appnode.processor.processInternal(bad));
         Message good = getMessageOfRecoveryRoll(MAGIC);
-        assertTrue(appnode.process(good));
+        assertTrue(appnode.processor.processInternal(good));
     }
     
     @Test
     public void testUnknowMessageProcess() throws InterruptedException {
         Message unknow = getUnknowMessage();
-        assertFalse(appnode.process(unknow));
+        assertFalse(appnode.processor.processInternal(unknow));
     }
 
     private Message getMessageOfAssignCollector(String appName) {

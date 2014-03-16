@@ -2,14 +2,19 @@ package com.dp.blackhole.collectornode;
 
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.ByteBuffer;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,55 +26,67 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dp.blackhole.collectornode.HDFSUpload;
+import com.dp.blackhole.collectornode.persistent.ByteBufferMessageSet;
+import com.dp.blackhole.collectornode.persistent.Message;
+import com.dp.blackhole.collectornode.persistent.Partition;
+import com.dp.blackhole.collectornode.persistent.PersistentManager;
+import com.dp.blackhole.collectornode.persistent.RollPartition;
+import com.dp.blackhole.common.Util;
 
 public class TestHDFSUpload {
     private static final Log LOG = LogFactory.getLog(TestHDFSUpload.class);
-    private final String APP_HOST = "localhost";
-    private final String MAGIC = "dcasdfef";
-    private File file;
+    private final String MAGIC = "TestHDFSUpload_" + Util.getTS();
+    private File expect;
     private FileSystem fs;
 
     @Before
     public void setUp() throws Exception {
-        //build a tmp file
-        file = createTmpFile(MAGIC, SimCollectornode.expected);
-        File renameFile = new File(file.getParent(), APP_HOST + "@" + MAGIC + "_" + SimCollectornode.FILE_SUFFIX);
-        file.renameTo(renameFile);
-        file = renameFile;
+        //build a expect file
+    	expect = createExpectFile(getExpectFile()+".gz");
         Configuration conf = new Configuration();
-        try {
-            fs = FileSystem.get(conf);
-        } catch (IOException e) {
-            LOG.debug("Failed to get FileSystem.", e);
-            throw e;
-        }
+        fs = FileSystem.get(conf);
     } 
 
     @After
     public void tearDown() throws Exception {
-        SimCollectornode.deleteTmpFile(MAGIC);
-        file.delete();
+//    	File testdir = new File("/tmp/testHDFSUpload");
+//        if (testdir.exists()) {
+//            Util.rmr(testdir);
+//        }
+//        expect.delete();
+//        new File(getRealFile()+".gz").delete();
     }
 
     @Test
     public void testUploadWhole() throws InterruptedException, IOException {
-        HDFSUpload writer = new HDFSUpload(SimCollectornode.getSimpleInstance("upload", MAGIC, fs), 
-                fs, file, getRollIdent(MAGIC));
+    	RollIdent ident = getRollIdent(MAGIC);
+    	
+    	Partition p = createPartition();
+    	
+    	appendData(p);
+    	appendData(p);
+    	
+    	RollPartition roll1 = p.markRotate();
+    	
+    	appendData(p);
+        
+    	RollManager mgr = mock(RollManager.class);
+    	when(mgr.getRollHdfsPath(ident)).thenReturn(getRealFile()+".gz");
+    	
+    	PersistentManager manager = mock(PersistentManager.class);
+    	when(manager.getPartition(ident.app, ident.source)).thenReturn(p);
+    	
+        HDFSUpload writer = new HDFSUpload(mgr, manager, fs, ident, roll1);
         Thread thread = new Thread(writer);
         thread.start();
         thread.join();
-        FileInputStream fis = new FileInputStream(file);
+        
+        FileInputStream fis = new FileInputStream(expect);
         String expectedMD5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-        Path actualFile = new Path(SimCollectornode.SCHEMA + SimCollectornode.BASE_PATH 
-                + MAGIC + "/2013-01-01/15/" + APP_HOST + "@"
-                + MAGIC + "_2013-01-01.15.gz");
-        String actualMDS = "";
-        if (fs.exists(actualFile)) {
-            actualMDS = org.apache.commons.codec.digest.DigestUtils.md5Hex(fs.open(actualFile));
-        }
+        String actualFile = getRealFile();
+        String actualMDS = org.apache.commons.codec.digest.DigestUtils.md5Hex(new FileInputStream(actualFile+".gz"));
         assertEquals("md5sum not equals", expectedMD5, actualMDS);
         fis.close();
-        fs.delete(new Path(SimCollectornode.SCHEMA + SimCollectornode.BASE_PATH + MAGIC), true);
     }
     
     public RollIdent getRollIdent(String appName) {
@@ -81,27 +98,54 @@ public class TestHDFSUpload {
         return rollIdent;
     }
     
-    public File createTmpFile(String MAGIC, String expected) 
+    public File createExpectFile(String filename) 
             throws IOException, FileNotFoundException {
-        String string = 
-                "begin>    owefoq jfojnofownfowofnownefowoefojweofjwosfnvvoco\n" +
-                "jlsdfpasjdfaopsdpfaskdfkpasdkpfkasdfas     100>     jcsopdnvon\n" +
-                "vononoifjopwejf opwjfiop jpwj fopqwejfop qjfopiqjqertgbrtg\n" +
-                "aspd jfoiasj df ioajsiodf asj fasof jasdopjf pasfj asopfjo\n" +
-                "rtgrtghrthrthrthrhrthtrp sjfop asdj fopasj fopsfjopsjf wef\n" +
-                "j faiosjf opwqejo fjopwej faeopsf jopawefj opsjf opsafj ao\n" +
-                " wopejf opwj efopqwj epo fjwopefj pwef opw ejfopwj efopwf \n" +
-                "3 wjopef joiqwf io j 9049 fj2490r 0pjfioj fioj qiowegio f \n" +
-                " f90fj 9034u j90 jgioqpwejf iopwe jfopqwefj opewji fopq934\n" +
-                expected + "\n";
-        //build a app log
-        File file = new File("/tmp/" + MAGIC);
-        file.createNewFile();
-        LOG.debug("create tmp file " + file);
-        BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(file)));
-        writer.write(string);
-        writer.close();
+    	
+        File file = new File(filename);
+        GZIPOutputStream gout = new GZIPOutputStream(new FileOutputStream(file));
+        
+        for (int i=0; i < 65; i++) {
+        	gout.write(Integer.toString(i).getBytes());
+        	gout.write("\n".getBytes());
+        }
+        
+        for (int i=0; i < 65; i++) {
+        	gout.write(Integer.toString(i).getBytes());
+        	gout.write("\n".getBytes());
+        }
+               
+        gout.close();
         return file;
+    }
+    
+    public String getExpectFile() {
+    	return "/tmp/expect_" + MAGIC;
+    }
+    
+    public String getRealFile() {
+    	return "/tmp/real_" + MAGIC;
+    }
+    
+    public Partition createPartition() throws IOException {
+    	File testdir = new File("/tmp/testHDFSUpload");
+        if (testdir.exists()) {
+            Util.rmr(testdir);
+        }
+        testdir.mkdirs();
+        
+        Partition partition = new Partition(testdir.getAbsolutePath(), "test", "localhost-1", 1024, 128);
+        return partition;
+    }
+    
+    public static void appendData(Partition p) throws IOException {
+        ByteBuffer messageBuffer = ByteBuffer.allocate(2048);      
+        for (int i=0; i < 65; i++) {
+            Message message = new Message(Integer.toString(i).getBytes());
+            message.write(messageBuffer);
+        }
+        
+        messageBuffer.flip();
+        ByteBufferMessageSet messages1 = new ByteBufferMessageSet(messageBuffer);       
+        p.append(messages1);
     }
 }
