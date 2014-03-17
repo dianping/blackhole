@@ -46,6 +46,7 @@ message Message {
         LISTAPPS = 24;
         REMOVE_CONF = 25;
         DUMP_APP = 26;
+        MAKR_UNRECOVERABLE = 27;
     }
 
     required MessageType type = 1;

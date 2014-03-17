@@ -60,6 +60,7 @@ public class PBwrap {
         case RECOVERY_FAIL:
         case UNRECOVERABLE:
         case MANUAL_RECOVERY_ROLL:
+        case MAKR_UNRECOVERABLE:
             msg.setRollID((RollID) message);
             break;
         case RETIRESTREAM:
@@ -200,8 +201,8 @@ public class PBwrap {
         return wrapFailure(app, appHost, NodeType.COLLECTOR_NODE, failTs);
     }
     
-    public static Message wrapUnrecoverable(String appName, String appServer, long rollTs) {
-        return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, appServer, 0, rollTs));
+    public static Message wrapUnrecoverable(String appName, String appServer, long period, long rollTs) {
+        return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, appServer, period, rollTs));
     }
     
     public static Message wrapManualRecoveryRoll(String appName, String appServer, long rollTs) {
@@ -271,5 +272,10 @@ public class PBwrap {
         DumpApp.Builder builder = DumpApp.newBuilder();
         builder.setAppName(appName);
         return wrapMessage(MessageType.DUMP_APP, builder.build());
+    }
+
+    public static Message wrapMarkUnrecoverable(String appName, String appServer, long period, long rollTs) {
+        return wrapMessage(MessageType.MAKR_UNRECOVERABLE,
+                wrapRollID(appName, appServer, period, rollTs));
     }
 }

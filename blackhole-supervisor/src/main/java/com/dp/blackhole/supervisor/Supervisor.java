@@ -645,6 +645,26 @@ public class Supervisor {
                             LOG.error("stage " + stage + " cannot be recovered");
                             stages.remove(stage);
                             stageConnectionMap.remove(stage);
+                            String collector = getCollector();
+                            if (collector != null) {
+                                Connection collectorConnection = collectorNodes.get(collector);
+                                if (collectorConnection != null) {
+                                    String appName = rollID.getAppName();
+                                    String appServer = rollID.getAppServer();
+                                    long rollTs = rollID.getRollTs();
+                                    long period = rollID.getPeriod();
+                                    if (period == 0) {
+                                        Context context = ConfigKeeper.configMap.get(appName);
+                                        if (context == null) {
+                                            LOG.error("Can not get app: " + appName + " from configMap");
+                                            break;
+                                        }
+                                        period = context.getLong(ParamsKey.Appconf.ROLL_PERIOD);
+                                    }
+                                    Message message = PBwrap.wrapMarkUnrecoverable(appName, appServer, period, rollTs);
+                                    send(collectorConnection, message);
+                                }
+                            }
                             break;
                         }
                     }
@@ -1332,8 +1352,14 @@ public class Supervisor {
         List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
         for (String appName : appNamesInOneHost) {
             Context context = ConfigKeeper.configMap.get(appName);
+            if (context == null) {
+                LOG.error("Can not get app: " + appName + " from configMap");
+                message = PBwrap.wrapNoAvailableConf();
+                send(from, message);
+                return;
+            }
             String watchFile = context.getString(ParamsKey.Appconf.WATCH_FILE);
-            if (context == null || watchFile == null) {
+            if (watchFile == null) {
                 message = PBwrap.wrapNoAvailableConf();
                 send(from, message);
                 return;

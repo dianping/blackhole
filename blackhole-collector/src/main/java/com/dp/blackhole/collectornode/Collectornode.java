@@ -107,7 +107,12 @@ public class Collectornode extends Node {
         switch (msg.getType()) {
         case UPLOAD_ROLL:
             ret = uploadRoll(msg.getRollID());
+            break;
+        case MAKR_UNRECOVERABLE:
+            ret = markUnrecoverable(msg.getRollID());
+            break;
         default:
+            LOG.error("Unknow message " + msg);
         }
         return ret;
     }
@@ -132,7 +137,19 @@ public class Collectornode extends Node {
         return true;
     }
 
-    public String getDatepathbyFormat (String format) {
+    private boolean markUnrecoverable(RollID rollID) {
+        RollIdent ident = new RollIdent();
+        ident.app = rollID.getAppName();
+        ident.source = rollID.getAppServer();
+        ident.period = rollID.getPeriod();
+        ident.ts = rollID.getRollTs();
+        
+        HDFSMarker marker = new HDFSMarker(this, fs, ident);
+        pool.execute(marker);
+        return true;
+    }
+
+    public String getDatepathbyFormat(String format) {
         StringBuilder dirs = new StringBuilder();
         for (String dir: format.split("\\.")) {
             dirs.append(dir);
@@ -145,17 +162,26 @@ public class Collectornode extends Node {
      * Path format:
      * hdfsbasedir/appname/2013-11-01/14/08/machine01@appname_2013-11-01.14.08.gz.tmp
      */
-    public String getRollHdfsPathPrefix (RollIdent ident) {
+    private String getRollHdfsPathPrefix(RollIdent ident, boolean hidden) {
         String format;
         format = Util.getFormatFromPeroid(ident.period);
         Date roll = new Date(ident.ts);
         SimpleDateFormat dm= new SimpleDateFormat(format);
-        return hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) + 
+        if (hidden) {
+            return hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
+                "_" + ident.source + '@' + ident.app + "_" + dm.format(roll);
+        } else {
+            return hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
                 ident.source + '@' + ident.app + "_" + dm.format(roll);
+        }
+    }
+
+    public String getRollHdfsPath(RollIdent ident) {
+        return getRollHdfsPathPrefix(ident, false) + suffix;
     }
     
-    public String getRollHdfsPath (RollIdent ident) {
-        return getRollHdfsPathPrefix(ident) + suffix;
+    public String getMarkHdfsPath(RollIdent ident) {
+        return getRollHdfsPathPrefix(ident, true);
     }
     
     private void start() throws FileNotFoundException, IOException {        
