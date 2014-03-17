@@ -48,4 +48,9 @@ public class ConsumerGroup {
         return true;
     }
     
+    @Override
+    public String toString() {
+    	return "ConsumerGroup[" + id + "/" + topic + "]";
+    }
+    
 }

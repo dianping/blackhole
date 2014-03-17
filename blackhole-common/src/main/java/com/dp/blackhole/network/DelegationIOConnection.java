@@ -136,25 +136,19 @@ public class DelegationIOConnection implements NonblockingConnection<TransferWra
     @Override
     public void close() {
         active.getAndSet(false);
+        
         if (!channel.isOpen()) {
             return;
         }
         try {
             channel.socket().shutdownOutput();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-
+        } catch (IOException e1) {}
         try {
             channel.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) {}
         try {
             channel.socket().close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) {}
     }
     
     @Override

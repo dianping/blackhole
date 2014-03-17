@@ -36,6 +36,7 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
     private AtomicBoolean active;
     private Selector selector;
     private String remote;
+    private String host;
 
     public SimpleConnection(SocketChannel channel, Selector selector) {
         this.channel = channel;
@@ -44,6 +45,7 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
         active = new AtomicBoolean(true);
         length = ByteBuffer.allocate(4);
         remote = Util.getRemoteHostAndPort(channel.socket());
+        host = Util.getRemoteHost(channel.socket());
     }
 
     @Override
@@ -157,25 +159,19 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
     @Override
     public void close() {
         active.getAndSet(false);
+        
         if (!channel.isOpen()) {
             return;
         }
         try {
             channel.socket().shutdownOutput();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-
+        } catch (IOException e1) {}
         try {
             channel.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) {}
         try {
             channel.socket().close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) {}
     }
 
     @Override
@@ -192,7 +188,7 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
     }
 
     public String getHost() {
-        return Util.getRemoteHost(channel.socket());
+        return host;
     }
     
     @Override

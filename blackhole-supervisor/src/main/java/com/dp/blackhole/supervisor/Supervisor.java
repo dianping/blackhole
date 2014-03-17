@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Random;
@@ -64,7 +65,7 @@ public class Supervisor {
     private LionConfChange lionConfChange;
     
     private ConcurrentHashMap<String, ConcurrentHashMap<String ,PartitionInfo>> topics;
-    private ConcurrentHashMap<ConsumerGroup, ConcurrentHashMap<String, Consumer>> consumerGroups;
+    private ConcurrentHashMap<ConsumerGroup, ConsumerGroupDesc> consumerGroups;
     private ConcurrentHashMap<SimpleConnection, Consumer> consumerConnectionMap;
     
     private ConcurrentHashMap<SimpleConnection, ConnectionDescription> connections;
@@ -100,7 +101,7 @@ public class Supervisor {
             }
             PartitionInfo partitionInfo = partitionInfos.get(partitionId);
             if (partitionInfo == null) {
-                partitionInfo = new PartitionInfo(partitionId, from, entry.getOffset());
+                partitionInfo = new PartitionInfo(partitionId, from.getHost(), entry.getOffset());
                 partitionInfos.put(partitionId, partitionInfo);
             } else {
                 partitionInfo.setEndOffset(entry.getOffset());
@@ -119,67 +120,85 @@ public class Supervisor {
         String groupId = consumerReg.getGroupId();
         String id = consumerReg.getConsumerId();
         String topic = consumerReg.getTopic();
+
+    	ConcurrentHashMap<String, PartitionInfo> partitionMap = topics.get(topic);
+    	if (partitionMap == null) {
+    		LOG.error("unknown topic: " + topic);
+            return;
+    	}
+    	Collection<PartitionInfo> partitions = partitionMap.values();
+    	if (partitions.size() == 0) {
+    		LOG.error("no partition available , topic: " + topic);
+    		return;
+    	}
         
         ConsumerGroup group = new ConsumerGroup(groupId, topic);
-        ConcurrentHashMap<String, Consumer> consumersMap = consumerGroups.get(group);
-        if (consumersMap == null) {
-            consumersMap = new ConcurrentHashMap<String, Consumer>();
-            consumerGroups.put(group, consumersMap);
+        ConsumerGroupDesc groupDesc = consumerGroups.get(group);
+        if (groupDesc == null) {
+        	groupDesc = new ConsumerGroupDesc(group, partitions);
+            consumerGroups.put(group, groupDesc);
         }
         
-        Consumer consumer = consumersMap.get(id);
-        if (consumer == null) {
-            consumer = new Consumer(id, group, topic, from);
-            consumersMap.put(id, consumer);
-            consumerConnectionMap.put(from, consumer);
-            assignConsumers(group);
-        } else {
-            LOG.error("consumer " + id + "already registered");
-        }
+        Consumer consumer = new Consumer(id, group, topic, from);
+        tryAssignConsumer(consumer, group, groupDesc, from);
     }
     
-    private void assignConsumers(ConsumerGroup group) {
-        ConcurrentHashMap<String, Consumer> consumersMap = consumerGroups.get(group);
-        int consumerNum = consumersMap.size();
-        
-        String topic = group.getTopic();
-        ConcurrentHashMap<String, PartitionInfo> partitionMap = topics.get(topic);
-        if (partitionMap == null) {
-            LOG.error("unknown topic: " + topic);
-            return;
-        }
-        Collection<PartitionInfo> topicPartitions = partitionMap.values();
-        if (topicPartitions.size() == 0) {
-            return;
-        }
-        
-        ArrayList<ArrayList<PartitionInfo>> assignPartitions = new ArrayList<ArrayList<PartitionInfo>>(consumerNum);
-        for (int index = 0; index < consumerNum; index++) {
-            assignPartitions.add(new ArrayList<PartitionInfo>());
-        }
-        
-        int i = 0;
-        for (PartitionInfo partition: topicPartitions) {
-            assignPartitions.get(i % consumerNum).add(partition);
-            i ++;
-        }
-        
-        int j = 0;
-        for (Consumer consumer : consumersMap.values()) {
-            List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(assignPartitions.get(j).size());
-            for (PartitionInfo info : assignPartitions.get(j)) {
-                AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(info.getConnection().getHost()+":8090", info.getId(), info.getEndOffset());
+	public void tryAssignConsumer(Consumer consumer, ConsumerGroup group, ConsumerGroupDesc groupDesc, SimpleConnection from) {
+		Map<Consumer, ArrayList<String>> consumeMap = groupDesc.getConsumeMap();
+		Map<String, PartitionInfo> partitions = groupDesc.getPartitions();
+		
+		// new consumer arrived?
+		if (consumer != null) {
+			if (groupDesc.exists(consumer)) {
+				LOG.error("consumer already exists: " + consumer);
+				return;
+			}
+			consumeMap.put(consumer, null);
+			consumerConnectionMap.put(from, consumer);
+		}
+		
+		// prepare for split
+		int consumerNum = consumeMap.keySet().size();
+		ArrayList<ArrayList<String>> assignPartitions = new ArrayList<ArrayList<String>>(consumerNum);
+		for (int i =0 ; i < consumerNum; i++) {
+			assignPartitions.add(new ArrayList<String>());
+		}
+		
+		// split partition into consumerNum groups
+		int i =0;
+		for (String id : partitions.keySet()) {
+			assignPartitions.get(i % consumerNum).add(id);
+			i++;
+		}
+		
+		// assign each group to a consumer
+		i = 0;
+		for (Consumer c : consumeMap.keySet()) {
+			consumeMap.put(c, assignPartitions.get(i));
+			i++;
+		}
+		
+		i = 0;
+		for (Entry<Consumer, ArrayList<String>> entry : consumeMap.entrySet()) {
+			Consumer c = entry.getKey();
+			ArrayList<String> pinfoList = entry.getValue();
+			List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(pinfoList.size());
+            for (String partitionId : pinfoList) {
+            	PartitionInfo info = partitions.get(partitionId);
+            	if (info == null) {
+            		LOG.error("can not find PartitionInfo by partitionId " + partitionId + ", it shouldn't happen");
+            		continue;
+            	}
+                AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(info.getHost()+":8090", info.getId(), info.getEndOffset());
                 offsets.add(offset);
             }
-            Message assign = PBwrap.wrapAssignConsumer(group.getId(), consumer.getId(), topic, offsets);
-            consumer.setPartitions(assignPartitions.get(j));
-            j++;
-            send(consumer.getConnection(), assign);
-        }
-    }
+            Message assign = PBwrap.wrapAssignConsumer(group.getId(), c.getId(), group.getTopic(), offsets);
+            send(c.getConnection(), assign);
+            i++;
+		}
+	}
 
     private void handleOffsetCommit(OffsetCommit offsetCommit) {
-        // TODO
         String groupId = offsetCommit.getConsumerIdString();
         String id = offsetCommit.getConsumerIdString();
         String topic = offsetCommit.getTopic();
@@ -187,18 +206,13 @@ public class Supervisor {
         long offset = offsetCommit.getOffset();
         
         ConsumerGroup group = new ConsumerGroup(groupId, topic);
-        ConcurrentHashMap<String, Consumer> groupConsumers = consumerGroups.get(group);
-        if (groupConsumers == null) {
-            LOG.error("can not find consumer group " + group);
-            return;
-        }
-        Consumer consumer = groupConsumers.get(id);
-        if (consumer == null) {
-            LOG.error("can not find consumer by id " + id);
-            return;
+        ConsumerGroupDesc groupDesc = consumerGroups.get(group);
+        if (groupDesc == null) {
+        	LOG.error("can not find consumer group " + group);
+        	return;
         }
         
-        consumer.updateOffset(partition, offset);
+        groupDesc.updateOffset(id, topic, partition, offset);
     }
     
     /*
@@ -330,15 +344,18 @@ public class Supervisor {
     private void handleConsumerFail(SimpleConnection connection, long now) {
         LOG.info("consumer " + connection + " disconnectted");
         Consumer consumer = consumerConnectionMap.get(connection);
-        String id = consumer.getId();
         ConsumerGroup group = consumer.getConsumerGroup();
-        ConcurrentHashMap<String, Consumer> groupConsumers = consumerGroups.get(group);
-        if (groupConsumers != null) {
-            groupConsumers.remove(id);
+        ConsumerGroupDesc groupDesc = consumerGroups.get(group);
+        if (groupDesc == null) {
+        	LOG.error("can not find groupDesc by ConsumerGroup: " + group);
+        	return;
         }
-        if (groupConsumers.size() != 0) {
+
+        groupDesc.unregisterConsumer(consumer);
+        
+        if (groupDesc.getConsumers().size() != 0) {
             LOG.info("reassign consumers in group: " + group + ", caused by consumer fail: " + consumer);
-            assignConsumers(group);
+            tryAssignConsumer(null, group, groupDesc, connection);
         }
     }
     
@@ -1222,7 +1239,9 @@ public class Supervisor {
                 return;
             }
             
-            if (msg.getType() != MessageType.HEARTBEART && msg.getType() != MessageType.TOPICREPORT) {
+            if (msg.getType() != MessageType.HEARTBEART 
+            		&& msg.getType() != MessageType.TOPICREPORT
+            		&& msg.getType() != MessageType.OFFSET_COMMIT) {
             	LOG.debug("received: " + msg);
             }
             
@@ -1342,7 +1361,7 @@ public class Supervisor {
         connectAppConfKeeper(prop);
         
         topics = new ConcurrentHashMap<String, ConcurrentHashMap<String,PartitionInfo>>();
-        consumerGroups = new ConcurrentHashMap<ConsumerGroup, ConcurrentHashMap<String,Consumer>>();
+        consumerGroups = new ConcurrentHashMap<ConsumerGroup, ConsumerGroupDesc>();
         consumerConnectionMap = new ConcurrentHashMap<SimpleConnection, Consumer>();
         connections = new ConcurrentHashMap<SimpleConnection, ConnectionDescription>();
         
