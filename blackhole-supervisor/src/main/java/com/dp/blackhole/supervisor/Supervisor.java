@@ -42,7 +42,6 @@ import com.dp.blackhole.common.gen.DumpAppPB.DumpApp;
 import com.dp.blackhole.common.gen.FailurePB.Failure;
 import com.dp.blackhole.common.gen.FailurePB.Failure.NodeType;
 import com.dp.blackhole.common.gen.MessagePB.Message;
-import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.ReadyCollectorPB.ReadyCollector;
 import com.dp.blackhole.common.gen.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.common.gen.RollIDPB.RollID;
@@ -84,7 +83,16 @@ public class Supervisor {
         SelectionKey key = channel.keyFor(selector);
         key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
         connection.offer(msg);
-        LOG.debug("send message to " + connection.getHost() + " :" +msg);
+        switch (msg.getType()) {
+        case NOAVAILABLECONF:
+        case DUMP_APP:
+        case DUMPCONF:
+        case DUMPSTAT:
+        case DUMPREPLY:
+            break;
+        default:
+            LOG.debug("send message to " + connection.getHost() + " :" +msg);
+        }
         selector.wakeup();
     }
     
@@ -186,7 +194,11 @@ public class Supervisor {
                         if (data.remaining() == 0) {
                             data.flip();
                             Message msg = Message.parseFrom(data.array());
-                            if (msg.getType() != MessageType.HEARTBEART) {
+                            switch (msg.getType()) {
+                            case HEARTBEART:
+                            case CONF_REQ:
+                                break;
+                            default:
                                 LOG.debug("receive message from " + connection.getHost() +" :" + msg);
                             }
                             Msg event = new Msg();
@@ -442,7 +454,6 @@ public class Supervisor {
         sb.append("##################################################################");
         
         String dumpstat = sb.toString();
-        LOG.info(dumpstat);
         Message message = PBwrap.wrapDumpReply(dumpstat);
         send(from, message);
     }
@@ -483,14 +494,12 @@ public class Supervisor {
         sb.append("##################################################################");
         
         String dumpstat = sb.toString();
-        LOG.info(dumpstat);
         Message message = PBwrap.wrapDumpReply(dumpstat);
         send(from, message);
     }
     
     public void dumpconf(Connection from) {
         String dumpconf = lionConfChange.dumpconf();
-        LOG.info(dumpconf);
         Message message = PBwrap.wrapDumpReply(dumpconf);
         send(from, message);
     }
@@ -519,8 +528,33 @@ public class Supervisor {
         sb.append("##################################################################");
         
         String listApps = sb.toString();
-        LOG.info(listApps);
         Message message = PBwrap.wrapDumpReply(listApps);
+        send(from, message);
+    }
+    
+    public void listIdle(Connection from) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("list idle hosts:\n");
+        sb.append("############################## dump ##############################\n");
+        SortedSet<String> idleHosts = new TreeSet<String>();
+        for(Connection conn : connectionStreamMap.keySet()) {
+            int nodeType = conn.getNodeType();
+            if (nodeType != Connection.APPNODE && nodeType != Connection.COLLECTORNODE) {
+                idleHosts.add(conn.getHost());
+            }
+        }
+        int count = 0;
+        for (String idleHostInOrder : idleHosts) {
+            count++;
+            sb.append(idleHostInOrder).append("  ");
+            if (count % 5 == 0) {
+                sb.append("\n");
+            }
+        }
+        sb.append("\n").append("##################################################################");
+        
+        String listIdle = sb.toString();
+        Message message = PBwrap.wrapDumpReply(listIdle);
         send(from, message);
     }
 
@@ -1267,6 +1301,10 @@ public class Supervisor {
                 break;
             case DUMP_APP:
                 dumpapp(msg.getDumpApp(), from);
+                break;
+            case LISTIDLE:
+                listIdle(from);
+                break;
             default:
                 LOG.warn("unknown message: " + msg.toString());
             }
@@ -1283,7 +1321,12 @@ public class Supervisor {
                 try {
                     Thread.sleep(5000);
                     long now = Util.getTS();
-                    for (Connection c : connectionStreamMap.keySet()) {
+                    for (Connection c : collectorNodes.values()) {
+                        if (now - c.getLastHeartBeat() > THRESHOLD) {
+                            closeConnection(c);
+                        }
+                    }
+                    for (Connection c : appNodes.values()) {
                         if (now - c.getLastHeartBeat() > THRESHOLD) {
                             closeConnection(c);
                         }
@@ -1345,7 +1388,6 @@ public class Supervisor {
         List<String> appNamesInOneHost;
         if ((appNamesInOneHost = lionConfChange.hostToAppNames.get(from.getHost())) == null) {
             message = PBwrap.wrapNoAvailableConf();
-            LOG.info("Hosts for app configurations are not ready, send NoAvailableConf message to " + from.getHost());
             send(from, message);
             return;
         }

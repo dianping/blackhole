@@ -260,6 +260,10 @@ public class PBwrap {
     public static Message wrapListApps() {
         return wrapMessage(MessageType.LISTAPPS, null);
     }
+    
+    public static Message wrapListIdle() {
+        return wrapMessage(MessageType.LISTIDLE, null);
+    }
 
     public static Message wrapRemoveConf(String appName, ArrayList<String> appServers) {
         RemoveConf.Builder builder = RemoveConf.newBuilder();

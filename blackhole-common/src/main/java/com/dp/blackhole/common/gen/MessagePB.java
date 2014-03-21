@@ -613,6 +613,10 @@ public final class MessagePB {
        * <code>MAKR_UNRECOVERABLE = 27;</code>
        */
       MAKR_UNRECOVERABLE(26, 27),
+      /**
+       * <code>LISTIDLE = 28;</code>
+       */
+      LISTIDLE(27, 28),
       ;
 
       /**
@@ -723,6 +727,10 @@ public final class MessagePB {
        * <code>MAKR_UNRECOVERABLE = 27;</code>
        */
       public static final int MAKR_UNRECOVERABLE_VALUE = 27;
+      /**
+       * <code>LISTIDLE = 28;</code>
+       */
+      public static final int LISTIDLE_VALUE = 28;
 
 
       public final int getNumber() { return value; }
@@ -756,6 +764,7 @@ public final class MessagePB {
           case 25: return REMOVE_CONF;
           case 26: return DUMP_APP;
           case 27: return MAKR_UNRECOVERABLE;
+          case 28: return LISTIDLE;
           default: return null;
         }
       }
@@ -3604,7 +3613,7 @@ public final class MessagePB {
       "\032\014RollID.proto\032\rFailure.proto\032\025NoAvailab" +
       "leNode.proto\032\016StreamID.proto\032\rConfRes.pr" +
       "oto\032\017DumpReply.proto\032\020RemoveConf.proto\032\020" +
-      "ColNodeReg.proto\032\rDumpApp.proto\"\360\010\n\007Mess" +
+      "ColNodeReg.proto\032\rDumpApp.proto\"\376\010\n\007Mess" +
       "age\022,\n\004type\030\001 \002(\0162\036.blackhole.Message.Me" +
       "ssageType\022!\n\006appReg\030\002 \001(\0132\021.blackhole.Ap" +
       "pReg\0223\n\017assignCollector\030\003 \001(\0132\032.blackhol",
@@ -3620,7 +3629,7 @@ public final class MessagePB {
       "pReply\030\014 \001(\0132\024.blackhole.DumpReply\022)\n\nre",
       "moveConf\030\r \001(\0132\025.blackhole.RemoveConf\022)\n" +
       "\ncolNodeReg\030\016 \001(\0132\025.blackhole.ColNodeReg" +
-      "\022#\n\007dumpApp\030\017 \001(\0132\022.blackhole.DumpApp\"\352\003" +
+      "\022#\n\007dumpApp\030\017 \001(\0132\022.blackhole.DumpApp\"\370\003" +
       "\n\013MessageType\022\016\n\nHEARTBEART\020\001\022\013\n\007APP_REG" +
       "\020\002\022\021\n\rCOLLECTOR_REG\020\003\022\024\n\020ASSIGN_COLLECTO" +
       "R\020\004\022\023\n\017READY_COLLECTOR\020\005\022\014\n\010APP_ROLL\020\006\022\017" +
@@ -3633,8 +3642,8 @@ public final class MessagePB {
       "\010CONF_RES\020\024\022\023\n\017NOAVAILABLECONF\020\025\022\014\n\010DUMP" +
       "CONF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010LISTAPPS\020\030\022\017\n\013R" +
       "EMOVE_CONF\020\031\022\014\n\010DUMP_APP\020\032\022\026\n\022MAKR_UNREC" +
-      "OVERABLE\020\033B(\n\033com.dp.blackhole.common.ge" +
-      "nB\tMessagePB"
+      "OVERABLE\020\033\022\014\n\010LISTIDLE\020\034B(\n\033com.dp.black" +
+      "hole.common.genB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

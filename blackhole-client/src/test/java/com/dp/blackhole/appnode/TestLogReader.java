@@ -55,8 +55,7 @@ public class TestLogReader {
 
     @Test
     public void testFileRotated() {
-        AppLog appLog = new AppLog(MAGIC, SimAppnode.TEST_ROLL_FILE,
-        		System.currentTimeMillis(), 1024);
+        AppLog appLog = new AppLog(MAGIC, SimAppnode.TEST_ROLL_FILE, 3600, 1024);
         SimAppnode appnode = new SimAppnode();
         FileListener listener;
         try {

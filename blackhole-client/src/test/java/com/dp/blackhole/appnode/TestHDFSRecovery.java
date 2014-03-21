@@ -9,7 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
@@ -86,7 +85,7 @@ public class TestHDFSRecovery {
 
     @Test
     public void test() throws IOException, InterruptedException {
-        AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), new Date().getTime(), 1024);
+        AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), 3600, 1024);
         RollRecovery clientTask = new RollRecovery(appnode, SimAppnode.HOSTNAME, port, appLog, SimAppnode.rollTS);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();

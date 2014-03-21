@@ -15,9 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dianping.cat.Cat;
-import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.common.AgentProtocol;
-import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
 import com.dp.blackhole.exception.BlackholeClientException;
@@ -69,8 +67,7 @@ public class RollRecovery implements Runnable{
         LOG.info("Roll Recovery for " + appLog + " running...");
 
         // check local file existence 
-        long period = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getLong(ParamsKey.Appconf.ROLL_PERIOD, 3600l);
+        long period = appLog.getRollPeriod();
         SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         String rollIdent = unitFormat.format(rollTimestamp);
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
