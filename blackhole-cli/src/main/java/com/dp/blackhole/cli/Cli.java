@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -16,20 +17,24 @@ import org.apache.commons.logging.LogFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.gen.DumpReplyPB.DumpReply;
 import com.dp.blackhole.common.gen.MessagePB.Message;
-import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
-import com.dp.blackhole.node.Node;
+import com.dp.blackhole.network.EntityProcessor;
+import com.dp.blackhole.network.GenClient;
+import com.dp.blackhole.network.SimpleConnection;
+import com.google.protobuf.InvalidProtocolBufferException;
 
-public class Cli extends Node {
+public class Cli {
     private static final Log LOG = LogFactory.getLog(Cli.class);
-    private String[] args;
     private String autoCmd;
+    private CliProcessor processor;
+    private SimpleConnection supervisor;
+    private GenClient<ByteBuffer, SimpleConnection, CliProcessor> client;
 
-    class CliProcessor extends Thread {
+    class CliInnerProcessor extends Thread {
         BufferedReader in;
         PrintStream out;
         PrintStream err;
         
-        public CliProcessor() {
+        public CliInnerProcessor() {
             in = new BufferedReader(new InputStreamReader(System.in));
             out = new PrintStream(System.out);
             err = new PrintStream(System.err);
@@ -155,61 +160,84 @@ public class Cli extends Node {
         }
     }
     
-    @Override
-    protected boolean process(Message msg) {
-        MessageType type = msg.getType();
-        switch (type) {
-        case DUMPREPLY:
-            DumpReply dumpReply = msg.getDumpReply();
-            PrintStream out = new PrintStream(System.out);
-            out.println("receive reply: ");
-            out.println(dumpReply.getReply());
-            out.print("blackhole.cli>");
-            break;
-        default:
-            LOG.error("Illegal message type " + msg.getType());
-        }
-        return true;
-    }
+    public class CliProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
 
-    @Override
-    protected void onConnected() {
-        if (autoCmd == null) {
-            return;
+        @Override
+        public void OnConnected(SimpleConnection connection) {
+            supervisor = connection;
+            if (autoCmd == null) {
+                return;
+            }
+            CliInnerProcessor processor = new CliInnerProcessor();
+            processor.processCommand(autoCmd.trim());
+            new CloseTimer().start();
         }
-        CliProcessor processor = new CliProcessor();
-        processor.processCommand(autoCmd.trim());
-        new CloseTimer().start();
+
+        @Override
+        public void OnDisconnected(SimpleConnection connection) {
+            supervisor.close();
+            supervisor = null;
+        }
+
+        @Override
+        public void process(ByteBuffer buf, SimpleConnection from) {
+            Message message = null;;
+            try {
+                message = PBwrap.Buf2PB(buf);
+            } catch (InvalidProtocolBufferException e) {
+                LOG.error("InvalidProtocolBufferException catched: ", e);
+                return;
+            }
+            
+            LOG.debug("received: " + message);
+            
+            switch (message.getType()) {
+            case DUMPREPLY:
+                DumpReply dumpReply = message.getDumpReply();
+                PrintStream out = new PrintStream(System.out);
+                out.println("receive reply: ");
+                out.println(dumpReply.getReply());
+                out.print("blackhole.cli>");
+                break;
+            default:
+                LOG.error("Illegal message type " + message.getType());
+            }
+        }
+        
+    }
+    
+    public void send(Message msg) {
+        if (supervisor != null) {
+            supervisor.send(PBwrap.PB2Buf(msg));
+        }
     }
 
     private void start() throws FileNotFoundException, IOException {
         Properties prop = new Properties();
         prop.load(new FileReader(new File("config.properties")));
         
-        String serverhost = prop.getProperty("supervisor.host");
-        int serverport = Integer.parseInt(prop.getProperty("supervisor.port"));
-        
-        init(serverhost, serverport);
-        
+        processor = new CliProcessor();
+        client = new GenClient<ByteBuffer, SimpleConnection, Cli.CliProcessor>(
+                processor,
+                new SimpleConnection.SimpleConnectionFactory(),
+                null);
+        client.init(prop, "cli", "supervisor.host", "supervisor.port");
+    }
+    
+    public static void main(String[] args) throws FileNotFoundException, IOException {
+        Cli cli = new Cli();
         if (args.length > 0 && args[0].equals("auto")) {
             String cmd = new String();
             for (int i = 1; i < args.length; i++) {
                 cmd += args[i] + " ";
             }
             LOG.info("auto command: " + cmd);
-            autoCmd = cmd.trim();
+            cli.autoCmd = cmd.trim();
         } else {
-            CliProcessor processor = new CliProcessor();
+            CliInnerProcessor processor = cli.new CliInnerProcessor();
             processor.setDaemon(true);
             processor.start();
         }
-
-        loop();
-    }
-    
-    public static void main(String[] args) throws FileNotFoundException, IOException {
-        Cli cli = new Cli();
-        cli.args = args;
         cli.start();
     }
 }
