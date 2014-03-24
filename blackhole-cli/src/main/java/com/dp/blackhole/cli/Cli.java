@@ -98,11 +98,16 @@ public class Cli extends Node {
                     }
                     Message msg = PBwrap.wrapRemoveConf(appName, appServers);
                     send(msg);
+                } else if (cmd.equals("listidle")) {
+                    Message msg = PBwrap.wrapListIdle();
+                    send(msg);
+                    out.println("send message: " + msg);
                 } else if (cmd.equals("help")) {
                     out.println("Usage:");
                     out.println(" dumpstat              Display all of streams information.");
                     out.println(" dumpconf              Display all of app config information.");
                     out.println(" listapps              List all of application names.");
+                    out.println(" listidle              List all of idle hostname or ip.");
                     out.println(" dumpapp <appname>     Display the stream, stages of the application followed.");
                     out.println(" rmconf <appname>      Remove the configuration specified by appname which should be useless.");
                     out.println("                       (Just remove from supervisor memory rather than lion/ZK).");

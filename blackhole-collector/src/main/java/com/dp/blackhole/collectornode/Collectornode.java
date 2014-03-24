@@ -31,6 +31,10 @@ import com.dp.blackhole.node.Node;
 public class Collectornode extends Node {
 
     private ExecutorService pool;
+    private ExecutorService recoveryPool;
+    private ExecutorService uploadPool;
+    private int maxRecoveryThreads = 1;
+    private int maxUploadThreads = 1;
     private ServerSocket server;
     private ConcurrentHashMap<RollIdent, File> fileRolls;
     private String basedir;
@@ -40,9 +44,12 @@ public class Collectornode extends Node {
     private FileSystem fs;
     private ArrayList<Collector> collectors;
     private long clockSyncBufMillis;
+    private HeartBeat heartBeat;
 
     public Collectornode() throws IOException {
         pool = Executors.newCachedThreadPool();
+        recoveryPool = Executors.newFixedThreadPool(maxRecoveryThreads);
+        uploadPool = Executors.newFixedThreadPool(maxUploadThreads);
         fileRolls = new ConcurrentHashMap<RollIdent, File>();
     }
 
@@ -83,7 +90,7 @@ public class Collectornode extends Node {
                         removeRollFiles(roll, true);
                         
                         HDFSRecovery recovery = new HDFSRecovery(Collectornode.this, fs, socket, roll);
-                        pool.execute(recovery);
+                        recoveryPool.execute(recovery);
                     }
                 } catch (IOException e) {
                     LOG.error("error in acceptor: ", e);
@@ -133,7 +140,7 @@ public class Collectornode extends Node {
         }
         
         HDFSUpload upload = new HDFSUpload(this, fs, roll, ident);
-        pool.execute(upload);
+        uploadPool.execute(upload);
         return true;
     }
 
@@ -145,7 +152,7 @@ public class Collectornode extends Node {
         ident.ts = rollID.getRollTs();
         
         HDFSMarker marker = new HDFSMarker(this, fs, ident);
-        pool.execute(marker);
+        uploadPool.execute(marker);
         return true;
     }
 
@@ -191,6 +198,8 @@ public class Collectornode extends Node {
         basedir = prop.getProperty("collectornode.basedir");
         port = Integer.parseInt(prop.getProperty("collectornode.port"));
         clockSyncBufMillis = Long.parseLong(prop.getProperty("collectornode.clockSyncBufMillis", "5000"));
+        maxRecoveryThreads = Integer.parseInt(prop.getProperty("collectornode.maxRecoveryThreads", "10"));
+        maxUploadThreads = Integer.parseInt(prop.getProperty("collectornode.maxUploadThreads", "20"));
         hdfsbasedir = prop.getProperty("hdfs.basedir");
         suffix = prop.getProperty("hdfs.file.suffix");
         boolean enableSecurity = Boolean.parseBoolean(prop.getProperty("hdfs.security.enable", "true"));
@@ -217,7 +226,7 @@ public class Collectornode extends Node {
         cleanupLocalStorage();
 
         init(serverhost, serverport);
-        
+
         collectors = new ArrayList<Collector>();
         
         // start to accept connection
@@ -233,10 +242,14 @@ public class Collectornode extends Node {
     protected void onDisconnected() {
         // close connected streams
         synchronized (collectors) {
-         for (Collector collector : collectors) {
-             collector.close();
-         }
-         collectors.clear();
+            for (Collector collector : collectors) {
+                collector.close();
+            }
+            collectors.clear();
+        }
+        if (heartBeat != null) {
+            heartBeat.shutdown();
+            heartBeat = null;
         }
     }
     
@@ -244,6 +257,11 @@ public class Collectornode extends Node {
     protected void onConnected() {
         clearMessageQueue();
         registerNode();
+        if (this.heartBeat == null || !this.heartBeat.isAlive()) {
+            this.heartBeat = new HeartBeat();
+            this.heartBeat.setDaemon(true);
+            this.heartBeat.start();
+        }
     }
     
     private void delete(File file) throws IOException {
@@ -279,6 +297,8 @@ public class Collectornode extends Node {
     private void close() {
         LOG.info("shutdown collector node");
         pool.shutdownNow();
+        recoveryPool.shutdownNow();
+        uploadPool.shutdownNow();
         try {
             server.close();
         } catch (IOException e) {

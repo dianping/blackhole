@@ -3,9 +3,11 @@ package com.dp.blackhole.appnode;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,6 +26,7 @@ import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.conf.Context;
 import com.dp.blackhole.exception.BlackholeClientException;
 import com.dp.blackhole.node.Node;
 
@@ -35,7 +38,8 @@ public class Appnode extends Node implements Runnable {
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
     private Map<String, RollRecovery> recoveryingMap = new ConcurrentHashMap<String, RollRecovery>();
-    private ThroughputStat stat;
+    private int confLoopFactor = 1;
+    private HeartBeat heartBeat;
 
     public Appnode() {
         pool = Executors.newCachedThreadPool();
@@ -51,10 +55,11 @@ public class Appnode extends Node implements Runnable {
         LogReader logReader = null;
         RollRecovery rollRecovery = null;
         MessageType type = msg.getType();
+        Random random = new Random();
         switch (type) {
         case NOAVAILABLENODE:
             try {
-                Thread.sleep(5 * 1000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 LOG.info("NOAVAILABLENODE sleep interrupted", e);
                 Cat.logError("NOAVAILABLENODE sleep interrupted", e);
@@ -98,7 +103,6 @@ public class Appnode extends Node implements Runnable {
                     logReader = new LogReader(this, collectorServer, collectorPort, appLog);
                     appReaders.put(appLog, logReader);
                     pool.execute(logReader);
-                    stat.add(logReader);
                     return true;
                 } else {
                     LOG.info("duplicated assign collector message: " + assignCollector);
@@ -111,9 +115,13 @@ public class Appnode extends Node implements Runnable {
             }
             break;
         case NOAVAILABLECONF:
-            LOG.info("Configurations not ready, sleep 5 seconds..");
+            if (confLoopFactor < 30) {
+                confLoopFactor = confLoopFactor << 1;
+            }
+            int randomSecond = confLoopFactor * (random.nextInt(21) + 40) * 1000;
+            LOG.info("Configurations not ready, sleep " + randomSecond/1000 + " second.");
             try {
-                Thread.sleep(5 * 1000);
+                Thread.sleep(randomSecond);
             } catch (InterruptedException e) {
                 LOG.info("NOAVAILABLECONF sleep interrupted", e);
                 Cat.logError("NOAVAILABLECONF sleep interrupted", e);
@@ -121,6 +129,7 @@ public class Appnode extends Node implements Runnable {
             requireConfigFromSupersivor();
             break;
         case CONF_RES:
+            confLoopFactor = 1;
             ConfigKeeper confKeeper = new ConfigKeeper();
             ConfRes confRes = msg.getConfRes();
             List<AppConfRes> appConfResList = confRes.getAppConfResList();
@@ -133,10 +142,10 @@ public class Appnode extends Node implements Runnable {
                         + ParamsKey.Appconf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
             }
             if (!checkAllFilesExist()) {
-                LOG.error("Configurations are incorrect, sleep 5 seconds..");
-                Cat.logError(new BlackholeClientException("Configurations are incorrect, sleep 5 seconds.."));
+                LOG.error("Configurations are incorrect, sleep 60 seconds..");
+                Cat.logError(new BlackholeClientException("Configurations are incorrect, sleep 60 seconds.."));
                 try {
-                    Thread.sleep(5 * 1000);
+                    Thread.sleep(60 * 1000);
                 } catch (InterruptedException e) {
                     LOG.error("Oops, sleep interrupted", e);
                     Cat.logError("Oops, sleep interrupted", e);
@@ -146,6 +155,11 @@ public class Appnode extends Node implements Runnable {
             }
             fillUpAppLogsFromConfig();
             registerApps();
+            if (this.heartBeat == null || !this.heartBeat.isAlive()) {
+                this.heartBeat = new HeartBeat();
+                this.heartBeat.setDaemon(true);
+                this.heartBeat.start();
+            }
             break;
         default:
             LOG.error("Illegal message type " + msg.getType());
@@ -163,9 +177,10 @@ public class Appnode extends Node implements Runnable {
         boolean res = true;
         try {
             String hostname = Util.getLocalHost();
-            for (String appName : ConfigKeeper.configMap.keySet()) {
-                String pathCandidateStr = ConfigKeeper.configMap.get(appName).getString(
-                        ParamsKey.Appconf.WATCH_FILE);
+            for (Map.Entry<String, Context> entry : ConfigKeeper.configMap.entrySet()) {
+                String appName = entry.getKey();
+                Context context = entry.getValue();
+                String pathCandidateStr = context.getString(ParamsKey.Appconf.WATCH_FILE);
                 if (pathCandidateStr == null) {
                     LOG.error("Oops, can not get WATCH_FILE from mapping for app " + appName);
                     Cat.logError(new BlackholeClientException("Oops, can not get WATCH_FILE from mapping for app " + appName));
@@ -176,14 +191,14 @@ public class Appnode extends Node implements Runnable {
                     File fileForTest = new File(pathCandidates[i]);
                     if (fileForTest.exists()) {
                         LOG.info("Check file " + pathCandidates[i] + " ok.");
-                        ConfigKeeper.configMap.get(appName).put(ParamsKey.Appconf.WATCH_FILE, pathCandidates[i]);
+                        context.put(ParamsKey.Appconf.WATCH_FILE, pathCandidates[i]);
                         break;
-                    } else if (isCompatibleWithOldVersion(appName, fileForTest, hostname)) {
+                    } else if (isCompatibleWithOldVersion(context, fileForTest, hostname)) {
                         LOG.info("It's an old version of log printer. Ok");
                         break;
                     } else {
                         if (i == pathCandidates.length - 1) {
-                            LOG.error("Appnode process start faild, because all of file " + pathCandidates + " not found!");
+                            LOG.error("Appnode process start faild, because all of file " + Arrays.toString(pathCandidates) + " not found!");
                             Cat.logError(new BlackholeClientException("Appnode process start faild, because all of file "
                                             + pathCandidates + " not found!"));
                             res = false;
@@ -199,7 +214,7 @@ public class Appnode extends Node implements Runnable {
         return res;
     }
 
-    private boolean isCompatibleWithOldVersion(String appName, final File fileForTest, String hostname) {
+    private boolean isCompatibleWithOldVersion(Context context, final File fileForTest, String hostname) {
         if (fileForTest.getParent() == null || !fileForTest.getParentFile().exists()) {
             return false;
         }
@@ -216,7 +231,7 @@ public class Appnode extends Node implements Runnable {
         if (hostname.contains(specifiedName)) {
             String oldVersionPath = fileForTest.getParent() + "/" + hostname + fileForTest.getName().substring(index);
             if (new File(oldVersionPath).exists()) {
-                ConfigKeeper.configMap.get(appName).put(ParamsKey.Appconf.WATCH_FILE, oldVersionPath);
+                context.put(ParamsKey.Appconf.WATCH_FILE, oldVersionPath);
                 LOG.debug("WATCH_FILE change to " + oldVersionPath);
                 return true;
             }
@@ -260,24 +275,18 @@ public class Appnode extends Node implements Runnable {
             Cat.logError("Failed to create a file listener, node shutdown!", e);
             return;
         }
-        long statPeriodMillis = Long.parseLong(prop.getProperty("stat.thoughput.periodMillis", "60000"));
-        initThroughputStat(statPeriodMillis);
-        this.stat.start();
         // wait for receiving message from supervisor
         super.loop();
     }
 
-    public void initThroughputStat(long statPeriodMillis) {
-        this.stat = new ThroughputStat(statPeriodMillis);
-    }
-
     public void fillUpAppLogsFromConfig() {
-        for (String appName : ConfigKeeper.configMap.keySet()) {
-            String path = ConfigKeeper.configMap.get(appName).getString(
-                    ParamsKey.Appconf.WATCH_FILE);
-            int maxLineSize = ConfigKeeper.configMap.get(appName).getInteger(
-                    ParamsKey.Appconf.MAX_LINE_SIZE, 65536);
-            AppLog appLog = new AppLog(appName, path, maxLineSize);
+        for (Map.Entry<String, Context> entry : ConfigKeeper.configMap.entrySet()) {
+            String appName = entry.getKey();
+            Context context = entry.getValue();
+            String path = context.getString(ParamsKey.Appconf.WATCH_FILE);
+            long rollPeroid = context.getLong(ParamsKey.Appconf.ROLL_PERIOD);
+            int maxLineSize = context.getInteger(ParamsKey.Appconf.MAX_LINE_SIZE, 512000);
+            AppLog appLog = new AppLog(appName, path, rollPeroid, maxLineSize);
             appLogs.put(appName, appLog);
         }
     }
@@ -288,6 +297,7 @@ public class Appnode extends Node implements Runnable {
 
     @Override
     protected void onDisconnected() {
+        confLoopFactor = 1;
         // close connected streams
         LOG.info("shutdown app node");
         for (Map.Entry<AppLog, LogReader> e : appReaders.entrySet()) {
@@ -302,6 +312,10 @@ public class Appnode extends Node implements Runnable {
         }
         appLogs.clear();
         ConfigKeeper.configMap.clear();
+        if (heartBeat != null) {
+            heartBeat.shutdown();
+            heartBeat = null;
+        }
     }
 
     @Override

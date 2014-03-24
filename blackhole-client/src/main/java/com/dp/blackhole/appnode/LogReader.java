@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,7 +31,6 @@ public class LogReader implements Runnable{
     private int port;
     private Socket socket;
     EventWriter eventWriter;
-    private AtomicLong readSum = new AtomicLong(0L);
     
     public LogReader(Appnode node, String collectorServer, int port, AppLog appLog) {
         this.node = node;
@@ -86,14 +84,6 @@ public class LogReader implements Runnable{
             Cat.logError("Oops, got an RuntimException:" , e);
             node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
         }
-    }
-
-    public long getReadSum() {
-        return this.readSum.get();
-    }
-
-    public void resetReadSum() {
-        this.readSum.set(0L);
     }
 
     public String getAppName() {
@@ -161,7 +151,6 @@ public class LogReader implements Runnable{
             long rePos = pos; // position to re-read
             int num;
             while ((num = reader.read(inbuf)) != -1) {
-                LogReader.this.readSum.addAndGet(num);
                 for (int i = 0; i < num; i++) {
                     final byte ch = inbuf[i];
                     switch (ch) {

@@ -4,21 +4,27 @@ public class AppLog {
     private final String appName;
     private final String tailFile;
     private final long createTime;
-    private int maxLineSize;
+    private final long rollPeriod;
+    private final int maxLineSize;
     
-    public AppLog(String appName, String tailFile, int maxLineSize) {
-        this(appName, tailFile, System.currentTimeMillis(), maxLineSize);
+    public AppLog(String appName, String tailFile, long rollPeriod, int maxLineSize) {
+        this(appName, tailFile, rollPeriod, System.currentTimeMillis(), maxLineSize);
     }
     
-    public AppLog(String appName, String tailFile, long createTime, int maxLineSize) {
+    public AppLog(String appName, String tailFile, long rollPeriod, long createTime, int maxLineSize) {
         this.appName = appName;
         this.tailFile = tailFile;
+        this.rollPeriod = rollPeriod;
         this.createTime = createTime;
         this.maxLineSize = maxLineSize;
     }
 
     public String getAppName() {
         return appName;
+    }
+
+    public long getRollPeriod() {
+        return rollPeriod;
     }
 
     public String getTailFile() {
@@ -33,9 +39,6 @@ public class AppLog {
         return maxLineSize;
     }
 
-    public void setMaxLineSize(int maxLineSize) {
-        this.maxLineSize = maxLineSize;
-    }
 
     @Override
     public int hashCode() {
@@ -64,7 +67,7 @@ public class AppLog {
     @Override
     public String toString() {
         return "AppLog [appName=" + appName + ", tailFile=" + tailFile
-                + ", createTime=" + createTime + ", maxLineSize=" + maxLineSize
-                + "]";
+                + ", createTime=" + createTime + ", rollPeriod=" + rollPeriod
+                + ", maxLineSize=" + maxLineSize + "]";
     }
 }

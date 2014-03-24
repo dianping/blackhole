@@ -47,7 +47,6 @@ public class TestAppnode {
     @Before
     public void setUp() throws Exception {
         appnode = new SimAppnode();
-        appnode.initThroughputStat(60*1000l);
         appnode.fillUpAppLogsFromConfig();
     }
 

@@ -42,11 +42,15 @@ public abstract class Node {
     
     private ConcurrentLinkedQueue<Message> queue; 
     
-    class HeartBeat extends Thread {
+    public class HeartBeat extends Thread {
+        private boolean running = true;
+        public void shutdown() {
+            this.running = false;
+        }
         @Override
         public void run() {
             Message heartbeat = PBwrap.wrapHeartBeat();
-            while (true) {
+            while (running) {
                 try {
                     sleep(1000);
                     if (connected.get()) {
@@ -232,10 +236,6 @@ public abstract class Node {
         readLength = ByteBuffer.allocate(4);
         this.queue = new ConcurrentLinkedQueue<Message>();
         this.host = Util.getLocalHost();
-        
-        HeartBeat heartBeatThread = new HeartBeat();
-        heartBeatThread.setDaemon(true);
-        heartBeatThread.start();
     }
 
     private void connectSupervisor() throws IOException, ClosedChannelException {
