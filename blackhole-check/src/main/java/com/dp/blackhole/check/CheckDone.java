@@ -76,7 +76,7 @@ public class CheckDone implements Runnable{
         while (ident.ts <= Util.getPrevWholeTs(nowTS, ident.period)) {
             LOG.info("Try to handle [" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + "]");
             attemptSource.clear();
-            if (!Util.wasDone(ident)) {
+            if (!Util.wasDone(ident, ident.ts)) {
                 Path expectedFile = null;
                 for(String source : ident.sources) {
                     expectedFile = Util.getRollHdfsPath(ident, source);

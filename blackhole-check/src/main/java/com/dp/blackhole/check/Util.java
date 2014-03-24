@@ -125,9 +125,9 @@ public class Util {
         return false;
     }
 
-    public static boolean wasDone (RollIdent ident) {
+    public static boolean wasDone (RollIdent ident, long ts) {
         String format  = Util.getFormatFromPeroid(ident.period);
-        Date roll = new Date(ident.ts);
+        Date roll = new Date(ts);
         SimpleDateFormat dm= new SimpleDateFormat(format);
         Path done =  new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' +
                 Util.getDatepathbyFormat(dm.format(roll)) + DONE_FLAG);

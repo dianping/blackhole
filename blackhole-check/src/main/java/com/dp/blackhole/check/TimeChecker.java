@@ -62,9 +62,13 @@ public class TimeChecker extends Thread {
             Path hiddenFile = null;
             for (int index = 0; index < checkTsList.size(); index++) {
                 boolean shouldDone = true;
+                long checkTs = checkTsList.get(index);
+                if (Util.wasDone(ident, checkTs)) {
+                    continue;
+                }
                 for(String source : ident.sources) {
-                    expectedFile = Util.getRollHdfsPathByTs(ident, checkTsList.get(index), source, false);
-                    hiddenFile = Util.getRollHdfsPathByTs(ident, checkTsList.get(index), source, true);
+                    expectedFile = Util.getRollHdfsPathByTs(ident, checkTs, source, false);
+                    hiddenFile = Util.getRollHdfsPathByTs(ident, checkTs, source, true);
                     if (Util.retryExists(expectedFile) || Util.retryExists(hiddenFile)) {
                     } else {
                         LOG.debug("TimeChecker: File " + expectedFile + " not ready.");
@@ -74,7 +78,7 @@ public class TimeChecker extends Thread {
                 }
                 if (shouldDone) {
                     if (Util.retryTouch(expectedFile.getParent(), Util.DONE_FLAG)) {
-                        LOG.info("TimeChecker: [" + ident.app + ":" + Util.format.format(new Date(checkTsList.get(index))) + "]....Done!");
+                        LOG.info("TimeChecker: [" + ident.app + ":" + Util.format.format(new Date(checkTs)) + "]....Done!");
                         checkTsList.remove(index);
                     } else {
                         LOG.error("TimeChecker: Alarm, failed to touch a DONE_FLAG file. " +

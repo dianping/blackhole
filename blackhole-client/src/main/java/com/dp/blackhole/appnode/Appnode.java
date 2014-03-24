@@ -3,6 +3,7 @@ package com.dp.blackhole.appnode;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -58,7 +59,7 @@ public class Appnode extends Node implements Runnable {
         switch (type) {
         case NOAVAILABLENODE:
             try {
-                Thread.sleep(60 * 1000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 LOG.info("NOAVAILABLENODE sleep interrupted", e);
                 Cat.logError("NOAVAILABLENODE sleep interrupted", e);
@@ -197,7 +198,7 @@ public class Appnode extends Node implements Runnable {
                         break;
                     } else {
                         if (i == pathCandidates.length - 1) {
-                            LOG.error("Appnode process start faild, because all of file " + pathCandidates + " not found!");
+                            LOG.error("Appnode process start faild, because all of file " + Arrays.toString(pathCandidates) + " not found!");
                             Cat.logError(new BlackholeClientException("Appnode process start faild, because all of file "
                                             + pathCandidates + " not found!"));
                             res = false;
