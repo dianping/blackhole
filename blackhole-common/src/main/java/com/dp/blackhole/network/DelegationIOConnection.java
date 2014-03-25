@@ -1,6 +1,7 @@
 package com.dp.blackhole.network;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -34,6 +35,8 @@ public class DelegationIOConnection implements NonblockingConnection<TransferWra
     private boolean writeComplete;
     
     private String remote;
+    private String host;
+    private int port;
   
     private TypedFactory wrappedFactory;
 
@@ -43,7 +46,11 @@ public class DelegationIOConnection implements NonblockingConnection<TransferWra
         active = new AtomicBoolean(true);
         this.selector = selector;
         this.wrappedFactory = wrappedFactory;
-        remote = Util.getRemoteHostAndPort(channel.socket());
+        
+        InetSocketAddress remoteAddr = Util.getRemoteAddr(channel.socket());
+        host = remoteAddr.getHostName();
+        port = remoteAddr.getPort();
+        remote = host+ ":" + port;
     }
     
     @Override
@@ -151,8 +158,12 @@ public class DelegationIOConnection implements NonblockingConnection<TransferWra
         } catch (IOException e) {}
     }
     
+    public String getHost() {
+        return host;
+    }
+    
     @Override
     public String toString() {
-    	return remote;
+        return remote;
     }
 }

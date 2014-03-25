@@ -107,7 +107,7 @@ public class PersistentManager {
         
         private List<ReportEntry> entrylist;
         private Map<String, Long> knownTopicParitionOffsets;
-        private long interval = 3000;
+        private long interval = 10000;
         
         public reporter() {
             knownTopicParitionOffsets = new HashMap<String, Long>();
@@ -151,8 +151,6 @@ public class PersistentManager {
                     Thread.sleep(interval);
                     report();
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
                 }
                 
             }

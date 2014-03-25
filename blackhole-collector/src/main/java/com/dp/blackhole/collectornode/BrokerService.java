@@ -2,7 +2,10 @@ package com.dp.blackhole.collectornode;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -41,7 +44,7 @@ public class BrokerService extends Thread {
     GenServer<TransferWrap, DelegationIOConnection, EntityProcessor<TransferWrap, DelegationIOConnection>> server;
     PersistentManager manager;
     PublisherExecutor executor;
-    private ArrayList<DelegationIOConnection> clients;
+    private Map<DelegationIOConnection, ClientDesc> clients;
     Properties prop;
     
     public static void reportPartitionInfo(List<ReportEntry> entrylist) {
@@ -62,7 +65,7 @@ public class BrokerService extends Thread {
         String storagedir = prop.getProperty("broker.storage.dir");
         int splitThreshold = Integer.parseInt(prop.getProperty("publisher.storage.splitThreshold", "536870912"));
         int flushThreshold = Integer.parseInt(prop.getProperty("publisher.storage.flushThreshold", "4194304"));
-        clients = new ArrayList<DelegationIOConnection>();
+        clients = Collections.synchronizedMap(new HashMap<DelegationIOConnection, ClientDesc>());
         manager = new PersistentManager(storagedir, splitThreshold, flushThreshold);
         executor = new PublisherExecutor();
         ConnectionFactory<DelegationIOConnection> factory = new DelegationIOConnection.DelegationIOConnectionFactory();
@@ -76,14 +79,14 @@ public class BrokerService extends Thread {
     }
     
     public PersistentManager getPersistentManager() {
-    	return manager;
+        return manager;
     }
     
     public void disconnectClients() {
-    	for (DelegationIOConnection client : clients) {
-    		client.close();
-    	}
-    	clients.clear();
+        for (DelegationIOConnection client : clients.keySet()) {
+            client.close();
+        }
+        clients.clear();
     }
     
     public class PublisherExecutor implements
@@ -170,6 +173,7 @@ public class BrokerService extends Thread {
         }
         
         public void handleRegisterRequest(RegisterRequest request, DelegationIOConnection from) {
+            clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT));
             Message msg = PBwrap.wrapReadyCollector(request.topic, request.source, request.peroid, request.broker, Util.getTS());
             Broker.getSupervisor().send(msg);
         }
@@ -202,20 +206,37 @@ public class BrokerService extends Thread {
 
         @Override
         public void OnConnected(DelegationIOConnection connection) {
-        	synchronized (clients) {
-            	clients.add(connection);
-			}
+            clients.put(connection, new ClientDesc(ClientDesc.CONSUMER));
         }
 
         @Override
         public void OnDisconnected(DelegationIOConnection connection) {
-        	synchronized (clients) {
-            	clients.remove(connection);
-			}
+            ClientDesc desc = clients.get(connection);
+            if (desc.type == ClientDesc.AGENT) {
+                Broker.getRollMgr().reportFailure(desc.topic, connection.getHost(), Util.getTS());
+            }
+            clients.remove(connection);
         }
 
     }
 
+    class ClientDesc {
+        public static final int AGENT = 0;
+        public static final int CONSUMER = 1;
+        
+        public String topic;
+        public int type;
+        
+        public ClientDesc (String topic, int type) {
+            this.topic = topic;
+            this.type = type;
+        }
+        
+        public ClientDesc(int type) {
+            this.type = type;
+        }
+    }
+    
     public static void main(String[] args) throws IOException {
         Properties properties = new Properties();
         properties.setProperty("GenServer.handlercount", "1");
