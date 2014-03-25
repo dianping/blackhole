@@ -5,23 +5,18 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.network.SimpleConnection;
 
-public class Consumer {
-    public static final Log LOG = LogFactory.getLog(Consumer.class);
+public class ConsumerDesc extends NodeDesc {
+    public static final Log LOG = LogFactory.getLog(ConsumerDesc.class);
     
-    private String id;
     private String topic;
     private ConsumerGroup group;
     private SimpleConnection from;
     
-    public Consumer(String id, ConsumerGroup group, String topic, SimpleConnection from) {
-        this.id = id;
+    public ConsumerDesc(String id, ConsumerGroup group, String topic, SimpleConnection from) {
+    	super(id);
         this.group = group;
         this.topic = topic;
         this.from = from;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public ConsumerGroup getConsumerGroup() {
@@ -63,7 +58,7 @@ public class Consumer {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Consumer other = (Consumer) obj;
+		ConsumerDesc other = (ConsumerDesc) obj;
 		if (from == null) {
 			if (other.from != null)
 				return false;

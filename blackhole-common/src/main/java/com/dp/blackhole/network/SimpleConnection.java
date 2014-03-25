@@ -1,6 +1,7 @@
 package com.dp.blackhole.network;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -37,6 +38,7 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
     private Selector selector;
     private String remote;
     private String host;
+    private int port;
 
     public SimpleConnection(SocketChannel channel, Selector selector) {
         this.channel = channel;
@@ -44,8 +46,11 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
         writeQueue = new ConcurrentLinkedQueue<ByteBuffer>();
         active = new AtomicBoolean(true);
         length = ByteBuffer.allocate(4);
-        remote = Util.getRemoteHostAndPort(channel.socket());
-        host = Util.getRemoteHost(channel.socket());
+        
+        InetSocketAddress remoteAddr = Util.getRemoteAddr(channel.socket());
+        host = remoteAddr.getHostName();
+        port = remoteAddr.getPort();
+        remote = host+ ":" + port;
     }
 
     @Override

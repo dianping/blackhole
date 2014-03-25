@@ -11,8 +11,9 @@ import org.apache.commons.logging.LogFactory;
 
 public class ConsumerGroupDesc {
 	private ConsumerGroup group;
+	// currrently available partitions
 	private Map<String, PartitionInfo> partitions;
-	private Map<Consumer, ArrayList<String>> consumeMap;
+	private Map<ConsumerDesc, ArrayList<String>> consumeMap;
 	
 	public static final Log LOG = LogFactory.getLog(Supervisor.class);
 	
@@ -20,12 +21,12 @@ public class ConsumerGroupDesc {
 		this.group = group;
 		partitions = Collections.synchronizedMap(new HashMap<String, PartitionInfo>());
 		for (PartitionInfo pinfo: pinfos) {
-			partitions.put(pinfo.getId(),new PartitionInfo(pinfo));
+			partitions.put(pinfo.getId(), new PartitionInfo(pinfo));
 		}
-		consumeMap = Collections.synchronizedMap(new HashMap<Consumer, ArrayList<String>>());
+		consumeMap = Collections.synchronizedMap(new HashMap<ConsumerDesc, ArrayList<String>>());
 	}
 
-	public boolean exists (Consumer consumer) {
+	public boolean exists (ConsumerDesc consumer) {
 		return consumeMap.containsKey(consumer);
 	}
 
@@ -33,15 +34,15 @@ public class ConsumerGroupDesc {
 		return partitions;
 	}
 	
-	public Map<Consumer, ArrayList<String>> getConsumeMap () {
+	public Map<ConsumerDesc, ArrayList<String>> getConsumeMap () {
 		return consumeMap;
 	}
 
-	public void unregisterConsumer(Consumer consumer) {
+	public void unregisterConsumer(ConsumerDesc consumer) {
 		consumeMap.remove(consumer);
 	}
 
-	public Collection<Consumer> getConsumers() {
+	public Collection<ConsumerDesc> getConsumers() {
 		return consumeMap.keySet();
 	}
 
@@ -51,6 +52,12 @@ public class ConsumerGroupDesc {
 			LOG.error("can not find PartitionInfo by partition: " + "[" + topic +"]" + partition + " ,request from " + consumerId);
 		}
 		info.setEndOffset(offset);
+	}
+	
+	// TODO
+	@Override
+	public String toString() {
+		return super.toString();
 	}
 	
 }

@@ -29,6 +29,10 @@ public class PersistentManager {
         this.splitThreshold = splitThreshold;
         this.flushThreshold = flushThreshold;
         storage = new ConcurrentHashMap<String, Map<String,Partition>>();
+        
+        // currently, clean storage when broker start for simplicity;
+        // so load() has not effect
+        Util.rmr(new File(basedir));
         load();
         
         reporter r = new reporter();

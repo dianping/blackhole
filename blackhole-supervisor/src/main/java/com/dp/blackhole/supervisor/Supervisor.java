@@ -57,18 +57,17 @@ public class Supervisor {
     private GenServer<ByteBuffer, SimpleConnection, EntityProcessor<ByteBuffer, SimpleConnection>> server;  
     private ConcurrentHashMap<SimpleConnection, ArrayList<Stream>> connectionStreamMap;
     private ConcurrentHashMap<Stage, SimpleConnection> stageConnectionMap;
-    private ConcurrentHashMap<String, SimpleConnection> collectorNodes;
-    private ConcurrentHashMap<String, SimpleConnection> appNodes;
+
     private ConcurrentHashMap<Stream, ArrayList<Stage>> Streams;
     private ConcurrentHashMap<StreamId, Stream> streamIdMap;
-    private ConcurrentHashMap<String, Integer> collectorHostPortMap;
     private LionConfChange lionConfChange;
     
     private ConcurrentHashMap<String, ConcurrentHashMap<String ,PartitionInfo>> topics;
     private ConcurrentHashMap<ConsumerGroup, ConsumerGroupDesc> consumerGroups;
-    private ConcurrentHashMap<SimpleConnection, Consumer> consumerConnectionMap;
-    
+  
     private ConcurrentHashMap<SimpleConnection, ConnectionDescription> connections;
+    private ConcurrentHashMap<String, SimpleConnection> agentsMapping;
+    private ConcurrentHashMap<String, SimpleConnection> brokersMapping;
     
     private void send(SimpleConnection connection, Message msg) {
         if (connection == null || !connection.isActive()) {
@@ -86,14 +85,27 @@ public class Supervisor {
             LOG.error("can not find ConnectionDesc by connection " + from);
             return;
         }
-        
         desc.updateHeartBeat();
     }
     
     private void handleTopicReport(TopicReport report, SimpleConnection from) {
+        HashSet<String> TopicsNeedtoReassign = new HashSet<String>();
+        
+        ConnectionDescription desc = connections.get(from);
+        if (desc == null) {
+            LOG.error("can not find ConnectionDesc by connection " + from);
+            return;
+        }
+        BrokerDesc brokerDesc = (BrokerDesc) desc.getAttachment();
         for (TopicEntry entry : report.getEntriesList()) {
             String topic = entry.getTopic();
             String partitionId = entry.getPartitionId();
+            
+            // record topic and partitions on the broker
+            brokerDesc.update(topic, partitionId);
+            
+            // update partitionInfo, if the partition was offline or new created,
+            // consumers may need to reassigned
             ConcurrentHashMap<String, PartitionInfo> partitionInfos = topics.get(topic);
             if (partitionInfos == null) {
                 partitionInfos = new ConcurrentHashMap<String, PartitionInfo>();
@@ -103,9 +115,44 @@ public class Supervisor {
             if (partitionInfo == null) {
                 partitionInfo = new PartitionInfo(partitionId, from.getHost(), entry.getOffset());
                 partitionInfos.put(partitionId, partitionInfo);
+                TopicsNeedtoReassign.add(topic);
             } else {
+                if (partitionInfo.isOffline()) {
+                    partitionInfo.markOffline(false);
+                    TopicsNeedtoReassign.add(topic);
+                }
                 partitionInfo.setEndOffset(entry.getOffset());
             } 
+        }
+        
+        if (!TopicsNeedtoReassign.isEmpty()) {
+            for (Entry<ConsumerGroup, ConsumerGroupDesc> entry : consumerGroups.entrySet()) {
+                ConsumerGroup group = entry.getKey();
+                ConsumerGroupDesc groupDesc = entry.getValue();
+                String topic = group.getTopic();
+                Map<String, PartitionInfo> groupPartitions = groupDesc.getPartitions();
+                if (TopicsNeedtoReassign.contains(topic)) {
+                    ConcurrentHashMap<String, PartitionInfo> partitionInfos = topics.get(topic);
+                    if (partitionInfos == null) {
+                        LOG.error("can not get partitionInfos from topic: " + topic);
+                        continue;
+                    }
+                    // update available partitions
+                    for (PartitionInfo p : partitionInfos.values()) {
+                        String id = p.getId();
+                        if (p.isOffline()) {
+                            if (groupPartitions.containsKey(id)) {
+                                groupPartitions.remove(id);
+                            }
+                        } else {
+                            if (!groupPartitions.containsKey(id)) {
+                                groupPartitions.put(id, p);
+                            }
+                        }
+                    }
+                    tryAssignConsumer(null, group, groupDesc);
+                }
+            }
         }
     }
     
@@ -121,86 +168,98 @@ public class Supervisor {
         String id = consumerReg.getConsumerId();
         String topic = consumerReg.getTopic();
 
-    	ConcurrentHashMap<String, PartitionInfo> partitionMap = topics.get(topic);
-    	if (partitionMap == null) {
-    		LOG.error("unknown topic: " + topic);
+        // get available Partitions
+        ConcurrentHashMap<String, PartitionInfo> partitionMap = topics.get(topic);
+        if (partitionMap == null) {
+            LOG.error("unknown topic: " + topic);
             return;
-    	}
-    	Collection<PartitionInfo> partitions = partitionMap.values();
-    	if (partitions.size() == 0) {
-    		LOG.error("no partition available , topic: " + topic);
-    		return;
-    	}
+        }      
+        Collection<PartitionInfo> partitions = partitionMap.values();
+        ArrayList<PartitionInfo> availPartitions = new ArrayList<PartitionInfo>();
+        for (PartitionInfo pinfo : partitions) {
+            if (pinfo.isOffline()) {
+                continue;
+            }
+            availPartitions.add(pinfo);
+        }
+        
+        if (availPartitions.size() == 0) {
+            LOG.error("no partition available , topic: " + topic);
+            return;
+        }
         
         ConsumerGroup group = new ConsumerGroup(groupId, topic);
         ConsumerGroupDesc groupDesc = consumerGroups.get(group);
         if (groupDesc == null) {
-        	groupDesc = new ConsumerGroupDesc(group, partitions);
+            groupDesc = new ConsumerGroupDesc(group, availPartitions);
             consumerGroups.put(group, groupDesc);
         }
         
-        Consumer consumer = new Consumer(id, group, topic, from);
-        tryAssignConsumer(consumer, group, groupDesc, from);
+        ConsumerDesc consumerDesc = new ConsumerDesc(id, group, topic, from);
+        desc.attach(consumerDesc);
+        
+        tryAssignConsumer(consumerDesc, group, groupDesc);
     }
     
-	public void tryAssignConsumer(Consumer consumer, ConsumerGroup group, ConsumerGroupDesc groupDesc, SimpleConnection from) {
-		Map<Consumer, ArrayList<String>> consumeMap = groupDesc.getConsumeMap();
-		Map<String, PartitionInfo> partitions = groupDesc.getPartitions();
-		
-		// new consumer arrived?
-		if (consumer != null) {
-			if (groupDesc.exists(consumer)) {
-				LOG.error("consumer already exists: " + consumer);
-				return;
-			}
-			consumeMap.put(consumer, null);
-			consumerConnectionMap.put(from, consumer);
-		}
-		
-		// prepare for split
-		int consumerNum = consumeMap.keySet().size();
-		ArrayList<ArrayList<String>> assignPartitions = new ArrayList<ArrayList<String>>(consumerNum);
-		for (int i =0 ; i < consumerNum; i++) {
-			assignPartitions.add(new ArrayList<String>());
-		}
-		
-		// split partition into consumerNum groups
-		int i =0;
-		for (String id : partitions.keySet()) {
-			assignPartitions.get(i % consumerNum).add(id);
-			i++;
-		}
-		
-		// assign each group to a consumer
-		i = 0;
-		for (Consumer c : consumeMap.keySet()) {
-			consumeMap.put(c, assignPartitions.get(i));
-			i++;
-		}
-		
-		i = 0;
-		for (Entry<Consumer, ArrayList<String>> entry : consumeMap.entrySet()) {
-			Consumer c = entry.getKey();
-			ArrayList<String> pinfoList = entry.getValue();
-			List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(pinfoList.size());
+    public void tryAssignConsumer(ConsumerDesc consumer, ConsumerGroup group, ConsumerGroupDesc groupDesc) {
+        Map<ConsumerDesc, ArrayList<String>> consumeMap = groupDesc.getConsumeMap();
+        Map<String, PartitionInfo> partitions = groupDesc.getPartitions();
+        
+        // new consumer arrived?
+        if (consumer != null) {
+            if (groupDesc.exists(consumer)) {
+                LOG.error("consumer already exists: " + consumer);
+                return;
+            }
+            consumeMap.put(consumer, null);
+        }
+        
+        // prepare for split
+        int consumerNum = consumeMap.keySet().size();
+        ArrayList<ArrayList<String>> assignPartitions = new ArrayList<ArrayList<String>>(consumerNum);
+        for (int i =0 ; i < consumerNum; i++) {
+            assignPartitions.add(new ArrayList<String>());
+        }
+        
+        // split partition into consumerNum groups, and skip offline partitions
+        int i =0;
+        for (String id : partitions.keySet()) {
+            assignPartitions.get(i % consumerNum).add(id);
+            i++;
+        }
+        
+        // assign each group to a consumer
+        i = 0;
+        for (ConsumerDesc c : consumeMap.keySet()) {
+            consumeMap.put(c, assignPartitions.get(i));
+            i++;
+        }
+        
+        i = 0;
+        for (Entry<ConsumerDesc, ArrayList<String>> entry : consumeMap.entrySet()) {
+            ConsumerDesc c = entry.getKey();
+            ArrayList<String> pinfoList = entry.getValue();
+            List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(pinfoList.size());
             for (String partitionId : pinfoList) {
-            	PartitionInfo info = partitions.get(partitionId);
-            	if (info == null) {
-            		LOG.error("can not find PartitionInfo by partitionId " + partitionId + ", it shouldn't happen");
-            		continue;
-            	}
-                AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(info.getHost()+":8090", info.getId(), info.getEndOffset());
+                PartitionInfo info = partitions.get(partitionId);
+                if (info == null) {
+                    LOG.error("can not find PartitionInfo by partitionId " + partitionId + ", it shouldn't happen");
+                    continue;
+                }
+
+                String broker = info.getHost()+ ":" + getBrokerPort(info.getHost());
+                AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(broker, info.getId(), info.getEndOffset());
                 offsets.add(offset);
             }
             Message assign = PBwrap.wrapAssignConsumer(group.getId(), c.getId(), group.getTopic(), offsets);
             send(c.getConnection(), assign);
             i++;
-		}
-	}
+        }
+    }
 
     private void handleOffsetCommit(OffsetCommit offsetCommit) {
-        String groupId = offsetCommit.getConsumerIdString();
         String id = offsetCommit.getConsumerIdString();
+        String groupId = id.split("-")[0];
         String topic = offsetCommit.getTopic();
         String partition = offsetCommit.getPartition();
         long offset = offsetCommit.getOffset();
@@ -208,8 +267,8 @@ public class Supervisor {
         ConsumerGroup group = new ConsumerGroup(groupId, topic);
         ConsumerGroupDesc groupDesc = consumerGroups.get(group);
         if (groupDesc == null) {
-        	LOG.error("can not find consumer group " + group);
-        	return;
+            LOG.error("can not find consumer group " + group);
+            return;
         }
         
         groupDesc.updateOffset(id, topic, partition, offset);
@@ -219,7 +278,8 @@ public class Supervisor {
      * mark the stream as inactive, mark all the stages as pending unless the uploading stage
      * remove the relationship of the corresponding collectorNode and streams
      */
-    private void handleAppNodeFail(SimpleConnection connection, long now) {
+    private void handleAppNodeFail(ConnectionDescription desc, long now) {
+        SimpleConnection connection = desc.getConnection();
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         if (streams != null) {
             for (Stream stream : streams) {
@@ -243,7 +303,7 @@ public class Supervisor {
                 
                 // remove corresponding collectorNodes's relationship with the stream
                 String collectorHost = stream.getCollectorHost();
-                SimpleConnection collectorConnection = collectorNodes.get(collectorHost);
+                SimpleConnection collectorConnection = brokersMapping.get(collectorHost);
                 if (collectorConnection != null) {
                     ArrayList<Stream> associatedStreams = connectionStreamMap.get(collectorConnection);
                     if (associatedStreams != null) {
@@ -266,7 +326,8 @@ public class Supervisor {
      * 2. remove the relationship of the corresponding appNode and streams
      * 3. processing uploading and recovery stages
      */
-    private void handleCollectorNodeFail(SimpleConnection connection, long now) {
+    private void handleCollectorNodeFail(ConnectionDescription desc, long now) {
+        SimpleConnection connection = desc.getConnection();
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         // processing current stage on streams
         if (streams != null) {
@@ -287,7 +348,7 @@ public class Supervisor {
 
                     // do not reassign collector here, since logreader will find collector fail,
                     // and do appReg again; otherwise two appReg for the same stream will send 
-                    if (collectorNodes.size() == 0) {
+                    if (brokersMapping.size() == 0) {
                         current.status = Stage.PENDING;
                     } else {
                         current.status = Stage.COLLECTORFAIL;
@@ -297,7 +358,11 @@ public class Supervisor {
                    
                 // remove corresponding appNodes's relationship with the stream
                 String appHost = stream.appHost;
-                SimpleConnection appConnection = appNodes.get(appHost);
+                SimpleConnection appConnection = agentsMapping.get(appHost);
+                if (appConnection == null) {
+                    LOG.error("can not find appConnection by host " + appHost);
+                    continue;
+                }
                 if (appConnection != null) {
                     ArrayList<Stream> associatedStreams = connectionStreamMap.get(appConnection);
                     if (associatedStreams != null) {
@@ -338,24 +403,51 @@ public class Supervisor {
                 }
             }
         }
+        
+        // mark partitions as offline
+        BrokerDesc brokerDesc = (BrokerDesc) desc.getAttachment();
+        for (Entry<String, ArrayList<String>> entry : brokerDesc.getPartitions().entrySet()) {
+            String topic = entry.getKey();
+            ArrayList<String> plist = entry.getValue();
+            ConcurrentHashMap<String, PartitionInfo> pinfos = topics.get(topic);
+            if (pinfos == null) {
+                LOG.error("can not find partitionInfo map by topic " + topic);
+                continue;
+            }
+            synchronized (plist) {
+                for (String pid : plist) {
+                    PartitionInfo pinfo = pinfos.get(pid);
+                    if (pinfo == null) {
+                        LOG.error("can not find PartitionInfo by partitionid " + pid);
+                        continue;
+                    }
+                    pinfo.markOffline(true);
+                }
+            }
+        }
     }
     
 
-    private void handleConsumerFail(SimpleConnection connection, long now) {
+    private void handleConsumerFail(ConnectionDescription desc, long now) {
+        SimpleConnection connection = desc.getConnection();
         LOG.info("consumer " + connection + " disconnectted");
-        Consumer consumer = consumerConnectionMap.get(connection);
-        ConsumerGroup group = consumer.getConsumerGroup();
+        
+        ConsumerDesc consumerDesc = (ConsumerDesc) desc.getAttachment();
+        ConsumerGroup group = consumerDesc.getConsumerGroup();
         ConsumerGroupDesc groupDesc = consumerGroups.get(group);
         if (groupDesc == null) {
-        	LOG.error("can not find groupDesc by ConsumerGroup: " + group);
-        	return;
+            LOG.error("can not find groupDesc by ConsumerGroup: " + group);
+            return;
         }
 
-        groupDesc.unregisterConsumer(consumer);
+        groupDesc.unregisterConsumer(consumerDesc);
         
         if (groupDesc.getConsumers().size() != 0) {
-            LOG.info("reassign consumers in group: " + group + ", caused by consumer fail: " + consumer);
-            tryAssignConsumer(null, group, groupDesc, connection);
+            LOG.info("reassign consumers in group: " + group + ", caused by consumer fail: " + consumerDesc);
+            tryAssignConsumer(null, group, groupDesc);
+        } else {
+        	LOG.info("consumerGroup " + group +" has not live consumer, thus be removed");
+        	consumerGroups.remove(group);
         }
     }
     
@@ -366,29 +458,26 @@ public class Supervisor {
      *  do recovery if the stage is not current stage, mark the stage as pending when no available collector
      */
     private void closeConnection(SimpleConnection connection) {
-    	LOG.info("close connection: " + connection);
-    	
+        LOG.info("close connection: " + connection);
+        
         long now = Util.getTS();
         ConnectionDescription desc = connections.get(connection);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + connection);
             return;
         }
-        
         String host = connection.getHost();
         if (desc.getType() == ConnectionDescription.AGENT) {
-            appNodes.remove(host);
+            agentsMapping.remove(host);
             LOG.info("close APPNODE: " + host);
-            handleAppNodeFail(connection, now);
+            handleAppNodeFail(desc, now);
         } else if (desc.getType() == ConnectionDescription.BROKER) {
-            collectorNodes.remove(host);
-            collectorHostPortMap.remove(host);
+            brokersMapping.remove(host);
             LOG.info("close COLLECTORNODE: " + host);
-            handleCollectorNodeFail(connection, now);
+            handleCollectorNodeFail(desc, now);
         } else if (desc.getType() == ConnectionDescription.CONSUMER) {
             LOG.info("close consumer: " + host);
-            handleConsumerFail(connection, now);
-            consumerConnectionMap.remove(connection);
+            handleConsumerFail(desc, now);
         }
         
         connections.remove(connection);
@@ -438,18 +527,18 @@ public class Supervisor {
         sb.append("\n");
         
         sb.append("print appNodes:\n");
-        for(Entry<String, SimpleConnection> entry : appNodes.entrySet()) {
+        for(SimpleConnection connection: agentsMapping.values()) {
             sb.append("<")
-            .append(entry.getValue())
+            .append(connection)
             .append(">")
             .append("\n");
         }
         sb.append("\n");
         
         sb.append("print collectorNodes:\n");
-        for(Entry<String, SimpleConnection> entry : collectorNodes.entrySet()) {
+        for(SimpleConnection connection: brokersMapping.values()) {
             sb.append("<")
-            .append(entry.getValue())
+            .append(connection)
             .append(">")
             .append("\n");
         }
@@ -574,7 +663,7 @@ public class Supervisor {
             LOG.error("only inactive stream can be retired");
             return;
         } else {
-            if (collectorNodes.isEmpty()) {
+            if (brokersMapping.isEmpty()) {
                 LOG.error("only inactive app can be retired");
                 return;
             }
@@ -959,15 +1048,23 @@ public class Supervisor {
         if (collector == null || !stream.isActive()) {
             stage.status = Stage.PENDING;
             stageConnectionMap.remove(stage);
-        } else {            
-            SimpleConnection c = appNodes.get(stream.appHost);
-            Message message = PBwrap.wrapRecoveryRoll(stream.app, collector, collectorHostPortMap.get(collector), stage.rollTs);
+        } else {
+            SimpleConnection c = agentsMapping.get(stream.appHost);
+            if (c == null) {
+                LOG.error("can not find connection by host: " + stream.appHost);
+                return null;
+            }
+            
+            Message message = PBwrap.wrapRecoveryRoll(stream.app, collector, getBrokerPort(collector), stage.rollTs);
             send(c, message);
             
             stage.status = Stage.RECOVERYING;
             stage.collectorhost = collector;
             
-            SimpleConnection collectorConnection = collectorNodes.get(collector);
+            SimpleConnection collectorConnection = brokersMapping.get(collector);
+            if (collectorConnection == null) {
+                LOG.error("");
+            }
             stageConnectionMap.put(stage, collectorConnection);
         }
 
@@ -1030,7 +1127,7 @@ public class Supervisor {
         
         // register connection with appNode and collectorNode
         recordConnectionStreamMapping(from, stream);
-        SimpleConnection appConnection = appNodes.get(stream.appHost);
+        SimpleConnection appConnection = agentsMapping.get(stream.appHost);
         recordConnectionStreamMapping(appConnection, stream);
     }
 
@@ -1161,26 +1258,38 @@ public class Supervisor {
             return;
         }
         desc.setType(ConnectionDescription.AGENT);
-        
-        if (appNodes.get(from.getHost()) == null) {
-            appNodes.put(from.getHost(), from);
-            LOG.info("AppNode " + from.getHost() + " registered");
-        }
+        LOG.info("AppNode " + from.getHost() + " registered");
+        agentsMapping.put(from.getHost(), from);
         AppReg message = m.getAppReg();
         assignCollector(message.getAppName(), from);
     }
 
     private String assignCollector(String app, SimpleConnection from) {
-        String collector = getCollector();
+        String broker;
+        String previousBroker = null;
+        for (Stream stream : Streams.keySet()) {
+            if (stream.app.equals(app)) {
+                previousBroker = stream.getCollectorHost();
+                break;
+            }
+        }
+
+        Collection<String> brokers = brokersMapping.keySet();
+        if (previousBroker!= null && brokers.contains(previousBroker)) {
+            broker = previousBroker;
+        } else {
+            broker = getCollector();
+        }
+        
         Message message;
-        if (collector != null) {
-            message = PBwrap.wrapAssignCollector(app, collector, collectorHostPortMap.get(collector));
+        if (broker != null) {
+            message = PBwrap.wrapAssignCollector(app, broker, getBrokerPort(broker));
         } else {
             message = PBwrap.wrapNoAvailableNode(app);
         }
 
         send(from, message);
-        return collector;
+        return broker;
     }
     
     private void registerCollectorNode(ColNodeReg colNodeReg, SimpleConnection from) {
@@ -1190,9 +1299,8 @@ public class Supervisor {
             return;
         }
         desc.setType(ConnectionDescription.BROKER);
-        
-        collectorNodes.put(from.getHost(), from);
-        collectorHostPortMap.put(from.getHost(), colNodeReg.getPort());
+        desc.attach(new BrokerDesc(from.toString(), colNodeReg.getPort()));
+        brokersMapping.put(from.getHost(), from);
         LOG.info("CollectorNode " + from.getHost() + " registered");
     }
 
@@ -1201,7 +1309,7 @@ public class Supervisor {
      * if no collectorNodes now, return null
      */
     private String getCollector() {
-        ArrayList<String> array = new ArrayList<String>(collectorNodes.keySet());
+        ArrayList<String> array = new ArrayList<String>(brokersMapping.keySet());
         if (array.size() == 0 ) {
             return null;
         }
@@ -1217,8 +1325,8 @@ public class Supervisor {
         public void OnConnected(SimpleConnection connection) {
             ConnectionDescription desc = connections.get(connection);
             if (desc == null) {
-            	LOG.info("client " + connection + " connected");
-                connections.put(connection, new ConnectionDescription());
+                LOG.info("client " + connection + " connected");
+                connections.put(connection, new ConnectionDescription(connection));
             } else {
                 LOG.error("connection already registered: " + connection);
             }
@@ -1240,9 +1348,9 @@ public class Supervisor {
             }
             
             if (msg.getType() != MessageType.HEARTBEART 
-            		&& msg.getType() != MessageType.TOPICREPORT
-            		&& msg.getType() != MessageType.OFFSET_COMMIT) {
-            	LOG.debug("received: " + msg);
+                    && msg.getType() != MessageType.TOPICREPORT
+                    && msg.getType() != MessageType.OFFSET_COMMIT) {
+                LOG.debug("received: " + msg);
             }
             
             switch (msg.getType()) {
@@ -1329,9 +1437,10 @@ public class Supervisor {
                     Thread.sleep(5000);
                     long now = Util.getTS();
                     for (Entry<SimpleConnection, ConnectionDescription> entry : connections.entrySet()) {
+                        SimpleConnection conn = entry.getKey();
                         if (now - entry.getValue().getLastHeartBeat() > THRESHOLD) {
-                            LOG.info("failed to get heartbeat for 15 seconds, close connection " + entry.getKey());
-                            closeConnection(entry.getKey());
+                            LOG.info("failed to get heartbeat for 15 seconds, close connection " + conn);
+                            closeConnection(conn);
                         }
                     }
                 } catch (InterruptedException e) {
@@ -1350,20 +1459,19 @@ public class Supervisor {
 
         connectionStreamMap = new ConcurrentHashMap<SimpleConnection, ArrayList<Stream>>();
         stageConnectionMap = new ConcurrentHashMap<Stage, SimpleConnection>();
-        collectorNodes = new ConcurrentHashMap<String, SimpleConnection>();
-        appNodes =  new ConcurrentHashMap<String, SimpleConnection>();
 
         Streams = new ConcurrentHashMap<Stream, ArrayList<Stage>>();
         streamIdMap = new ConcurrentHashMap<StreamId, Stream>();
 
-        collectorHostPortMap = new ConcurrentHashMap<String, Integer>();
         //initLion(or initZooKeeper)
         connectAppConfKeeper(prop);
         
         topics = new ConcurrentHashMap<String, ConcurrentHashMap<String,PartitionInfo>>();
         consumerGroups = new ConcurrentHashMap<ConsumerGroup, ConsumerGroupDesc>();
-        consumerConnectionMap = new ConcurrentHashMap<SimpleConnection, Consumer>();
+        
         connections = new ConcurrentHashMap<SimpleConnection, ConnectionDescription>();
+        agentsMapping = new ConcurrentHashMap<String, SimpleConnection>();
+        brokersMapping = new ConcurrentHashMap<String, SimpleConnection>();
         
         // start heart beat checker thread
         LiveChecker checker = new LiveChecker();
@@ -1410,7 +1518,22 @@ public class Supervisor {
         message = PBwrap.wrapConfRes(appConfResList);
         send(from, message);  
     }
-
+    
+    private int getBrokerPort(String host) {
+        SimpleConnection connection = brokersMapping.get(host);
+        if (connection == null) {
+        	LOG.error("can not get connection from host: " + host);
+        	return 0;
+        }
+        ConnectionDescription desc = connections.get(connection);
+        if (desc == null) {
+        	LOG.error("can not get ConnectionDescription from connection: " + connection);
+        	return 0;
+        }
+        BrokerDesc brokerDesc = (BrokerDesc) desc.getAttachment();
+        return brokerDesc.getPort();
+    }
+    
     /**
      * @param args
      * @throws IOException 

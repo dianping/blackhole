@@ -23,10 +23,16 @@ import java.util.zip.CRC32;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.network.SimpleConnection;
+
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static long localTimezoneOffset = TimeZone.getTimeZone("Asia/Shanghai").getRawOffset();
+    
+    public static InetSocketAddress getRemoteAddr(Socket socket) {
+    	return (InetSocketAddress) socket.getRemoteSocketAddress();
+    }
     
     public static String getRemoteHost(Socket socket) {
       InetSocketAddress remoteAddr= ((InetSocketAddress)socket.getRemoteSocketAddress());
