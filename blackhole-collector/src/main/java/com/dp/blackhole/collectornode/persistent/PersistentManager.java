@@ -18,7 +18,7 @@ import com.dp.blackhole.common.Util;
 public class PersistentManager {
     private final Log Log = LogFactory.getLog(PersistentManager.class);
     
-    private Map<String, Map<String, Partition>> storage;
+    private ConcurrentHashMap<String, ConcurrentHashMap<String, Partition>> storage;
     
     private String basedir;
     private int flushThreshold;
@@ -28,7 +28,7 @@ public class PersistentManager {
         this.basedir = basedir;
         this.splitThreshold = splitThreshold;
         this.flushThreshold = flushThreshold;
-        storage = new ConcurrentHashMap<String, Map<String,Partition>>();
+        storage = new ConcurrentHashMap<String, ConcurrentHashMap<String,Partition>>();
         
         // currently, clean storage when broker start for simplicity;
         // so load() has not effect
@@ -67,19 +67,19 @@ public class PersistentManager {
 
     public Partition getPartition(String topic, String partitionId) throws IOException {
         // add new topic if not exist
-        Map<String, Partition> map = storage.get(topic);
+        ConcurrentHashMap<String, Partition> map = storage.get(topic);
         if (map == null) {
-            Partition partition = new Partition(basedir, topic, partitionId, splitThreshold, flushThreshold);
-            map = new ConcurrentHashMap<String, Partition>();
-            map.put(partitionId, partition);
-            storage.put(topic, map);
-            return partition;
+            ConcurrentHashMap newMap = new ConcurrentHashMap<String, Partition>();
+            storage.putIfAbsent(topic, newMap);
+            map = storage.get(topic);
         }
+           
         // add new partition if not exist
         Partition partition = map.get(partitionId);
         if (partition == null) {
-            partition = new Partition(basedir, topic, partitionId, splitThreshold, flushThreshold);
-            map.put(topic, partition);
+            Partition newPartition = new Partition(basedir, topic, partitionId, splitThreshold, flushThreshold);
+            map.putIfAbsent(partitionId, newPartition);
+            partition = map.get(partitionId);
         }
         return partition;
     }
@@ -119,7 +119,7 @@ public class PersistentManager {
         
         private void report() {
             entrylist = new ArrayList<ReportEntry>();
-            for (Entry<String, Map<String, Partition>> topicEntry : storage.entrySet()) {
+            for (Entry<String, ConcurrentHashMap<String, Partition>> topicEntry : storage.entrySet()) {
                 String topic = topicEntry.getKey();
                 Map<String, Partition> partitions = topicEntry.getValue();
                 for (Entry<String, Partition> partitionEntry : partitions.entrySet()) {

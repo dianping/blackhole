@@ -126,7 +126,8 @@ public class LogReader implements Runnable{
             
             
             channel = SocketChannel.open();
-            channel.connect(new InetSocketAddress(broker, brokerPort));           
+            channel.connect(new InetSocketAddress(broker, brokerPort));
+            LOG.info("connected broker: " + broker + ":" + brokerPort);
             doStreamReg();
         }
         

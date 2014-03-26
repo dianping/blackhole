@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.dp.blackhole.collectornode.Broker;
 import com.dp.blackhole.common.Util;
 
 public class Partition {

@@ -99,8 +99,7 @@ public class BrokerService extends Thread {
                         request.partitionId);
                 p.append(request.getMesssageSet());
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.error("IOE catched", e);
             }
         }
 
@@ -112,8 +111,7 @@ public class BrokerService extends Thread {
                 p = manager.getPartition(request.topic, request.partitionId);
                 messages = p.read(request.offset, request.limit);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.error("IOE catched", e);
             }
             
             TransferWrap reply = null;
@@ -137,8 +135,7 @@ public class BrokerService extends Thread {
                     p = manager.getPartition(f.topic, f.partitionId);
                     messages = p.read(f.offset, f.limit);
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.error("IOE catched", e);
                 }
                 partitionList.add(p.getId());
                 messagesList.add(messages);
@@ -155,8 +152,7 @@ public class BrokerService extends Thread {
             try {
                 p = manager.getPartition(request.topic, request.partition);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.error("IOE catched", e);
             }
             from.send(new TransferWrap(new OffsetReply(request.topic, request.partition, p.getEndOffset())));
         }
@@ -206,11 +202,13 @@ public class BrokerService extends Thread {
 
         @Override
         public void OnConnected(DelegationIOConnection connection) {
+            LOG.info(connection + " connected");
             clients.put(connection, new ClientDesc(ClientDesc.CONSUMER));
         }
 
         @Override
         public void OnDisconnected(DelegationIOConnection connection) {
+            LOG.info(connection + " disconnected");
             ClientDesc desc = clients.get(connection);
             if (desc.type == ClientDesc.AGENT) {
                 Broker.getRollMgr().reportFailure(desc.topic, connection.getHost(), Util.getTS());

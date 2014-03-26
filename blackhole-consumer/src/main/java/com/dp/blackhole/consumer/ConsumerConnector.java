@@ -50,7 +50,7 @@ public class ConsumerConnector implements Runnable {
 
     private GenClient<ByteBuffer, SimpleConnection, ConsumerProcessor> client;
     private ConsumerProcessor processor;
-	private SimpleConnection supervisor;
+    private SimpleConnection supervisor;
     private String supervisorHost;
     private int supervisorPort;
     private boolean autoCommit;
@@ -165,7 +165,7 @@ public class ConsumerConnector implements Runnable {
     
     private void sendRegConsumer(String topic, String group, String consumerId) {
         Message message = PBwrap.wrapConsumerReg(group, consumerId, topic);
-        LOG.info("register consumer to supervisor " + group + "-" + consumerId + " => " + topic);
+        LOG.info("register consumer to supervisor " + consumerId + " => " + topic);
         send(message);
     }
     
@@ -175,34 +175,34 @@ public class ConsumerConnector implements Runnable {
     }
     
     private void send(Message message) {
-    	LOG.debug("send message: " + message);
-    	if (supervisor != null) {
-    		supervisor.send(PBwrap.PB2Buf(message));
-    	}
+        LOG.debug("send message: " + message);
+        if (supervisor != null) {
+            supervisor.send(PBwrap.PB2Buf(message));
+        }
     }
     
     public class ConsumerProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
-    	private HeartBeat heartbeat = null;
-    	
-		@Override
-		public void OnConnected(SimpleConnection connection) {
-			supervisor = connection;
-			heartbeat = new HeartBeat(supervisor);
+        private HeartBeat heartbeat = null;
+        
+        @Override
+        public void OnConnected(SimpleConnection connection) {
+            supervisor = connection;
+            heartbeat = new HeartBeat(supervisor);
             heartbeat.start();
-		}
+        }
 
-		@Override
-		public void OnDisconnected(SimpleConnection connection) {
-			LOG.info("ConsumerConnector disconnected");
-			supervisor.close();
-			supervisor = null;
+        @Override
+        public void OnDisconnected(SimpleConnection connection) {
+            LOG.info("ConsumerConnector disconnected");
+            supervisor.close();
+            supervisor = null;
             heartbeat.shutdown();
             heartbeat = null;
-		}
+        }
 
-		@Override
-		public void process(ByteBuffer reply, SimpleConnection from) {
-			Message msg = null;
+        @Override
+        public void process(ByteBuffer reply, SimpleConnection from) {
+            Message msg = null;
             try {
                 msg = PBwrap.Buf2PB(reply);
             } catch (InvalidProtocolBufferException e) {
@@ -211,77 +211,77 @@ public class ConsumerConnector implements Runnable {
 
             LOG.debug("consumer received: " + msg);         
             processInternal(msg);
-		}
-		
-	    protected boolean processInternal(Message msg) {
-	        MessageType type = msg.getType();
-	        switch (type) {
-	        case ASSIGN_CONSUMER:
-	            AssignConsumer assign = msg.getAssignConsumer();
-	            
-	            if (assign.getPartitionOffsetsList().isEmpty()) {
-	                LOG.info("received no PartitionOffsetsList, retry atfer 5 seconds");
-	                try {
-	                    Thread.sleep(5000);
-	                } catch (InterruptedException e) {
-	                    // TODO Auto-generated catch block
-	                    e.printStackTrace();
-	                }
-	                sendRegConsumer(assign.getTopic(), assign.getGroup(), assign.getConsumerIdString());
-	                return false;
-	            }
-	            
-	            String consumerId = assign.getConsumerIdString();
-	            //First, shutdown thread and clear consumer queue.
-	            List<FetcherRunnable> fetches = consumerThreadsMap.get(consumerId);
-	            if (fetches != null) {
-	                for (FetcherRunnable fetcherThread : fetches) {
-	                    fetcherThread.shutdown();
-	                }
-	                consumerThreadsMap.remove(consumerId);
-	            }
-	            Consumer c = consumers.get(consumerId);
-	            if (c != null) {
-	                c.clearQueue();
-	            } else {
-	                LOG.fatal("unkown consumerId: " + consumerId);
-	                return false;
-	            }
+        }
+        
+        protected boolean processInternal(Message msg) {
+            MessageType type = msg.getType();
+            switch (type) {
+            case ASSIGN_CONSUMER:
+                AssignConsumer assign = msg.getAssignConsumer();
+                
+                // TODO halt when assigned no partition
+                if (assign.getPartitionOffsetsList().isEmpty()) {
+                    LOG.info("received no PartitionOffsetsList, retry atfer 5 seconds");
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                    }
+                    sendRegConsumer(assign.getTopic(), assign.getGroup(), assign.getConsumerIdString());
+                    return false;
+                }
+                
+                String consumerId = assign.getConsumerIdString();
+                //First, shutdown thread and clear consumer queue.
+                List<FetcherRunnable> fetches = consumerThreadsMap.get(consumerId);
+                if (fetches != null) {
+                    LOG.info("supervisor start to reassign partition, shutdown old FetcherRunnables");
+                    for (FetcherRunnable fetcherThread : fetches) {
+                        fetcherThread.shutdown();
+                    }
+                    consumerThreadsMap.remove(consumerId);
+                }
+                Consumer c = consumers.get(consumerId);
+                if (c != null) {
+                    c.clearQueue();
+                } else {
+                    LOG.fatal("unkown consumerId: " + consumerId);
+                    return false;
+                }
 
-	            //create PartitionTopicInfos and group them by broker and comsumerId
-	            Map<String, List<PartitionTopicInfo>> brokerPartitionInfoMap = new HashMap<String, List<PartitionTopicInfo>>();     
-	            for (PartitionOffset partitionOffset : assign.getPartitionOffsetsList()) {
-	                String topic = assign.getTopic();
-	                String brokerString = partitionOffset.getBrokerString();
-	                String partitionName = partitionOffset.getPartitionName();
-	                long offset = partitionOffset.getOffset();
-	                PartitionTopicInfo info = 
-	                        new PartitionTopicInfo(topic, partitionName, brokerString, offset, offset);
+                //create PartitionTopicInfos and group them by broker and comsumerId
+                Map<String, List<PartitionTopicInfo>> brokerPartitionInfoMap = new HashMap<String, List<PartitionTopicInfo>>();     
+                for (PartitionOffset partitionOffset : assign.getPartitionOffsetsList()) {
+                    String topic = assign.getTopic();
+                    String brokerString = partitionOffset.getBrokerString();
+                    String partitionName = partitionOffset.getPartitionName();
+                    long offset = partitionOffset.getOffset();
+                    PartitionTopicInfo info = 
+                            new PartitionTopicInfo(topic, partitionName, brokerString, offset, offset);
 
-	                List<PartitionTopicInfo> partitionList = brokerPartitionInfoMap.get(brokerString);
-	                if (partitionList == null) {
-	                    partitionList = new ArrayList<PartitionTopicInfo>();
-	                    brokerPartitionInfoMap.put(brokerString, partitionList);
-	                }
-	                partitionList.add(info);
-	            }
+                    List<PartitionTopicInfo> partitionList = brokerPartitionInfoMap.get(brokerString);
+                    if (partitionList == null) {
+                        partitionList = new ArrayList<PartitionTopicInfo>();
+                        brokerPartitionInfoMap.put(brokerString, partitionList);
+                    }
+                    partitionList.add(info);
+                }
 
-	            //start a fetcher thread for every broker, fetcher thread contains a NIO client
-	            fetches = Collections.synchronizedList(new ArrayList<FetcherRunnable>());
-	            for (Map.Entry<String, List<PartitionTopicInfo>> entry : brokerPartitionInfoMap.entrySet()) {
-	                String brokerString = entry.getKey();
-	                List<PartitionTopicInfo> pInfoList = entry.getValue();
-	                FetcherRunnable fetcherThread = new FetcherRunnable(consumerId, brokerString, pInfoList, c.getDataQueue(), configMap.get(consumerId));
-	                fetches.add(fetcherThread);
-	                fetcherThread.start();
-	            }
-	            consumerThreadsMap.put(consumerId, fetches);
-	            break;
-	        default:
-	            LOG.error("Illegal message type " + msg.getType());
-	        }
-	        return true;
-	    }
+                //start a fetcher thread for every broker, fetcher thread contains a NIO client
+                fetches = Collections.synchronizedList(new ArrayList<FetcherRunnable>());
+                for (Map.Entry<String, List<PartitionTopicInfo>> entry : brokerPartitionInfoMap.entrySet()) {
+                    String brokerString = entry.getKey();
+                    List<PartitionTopicInfo> pInfoList = entry.getValue();
+                    FetcherRunnable fetcherThread = new FetcherRunnable(consumerId, brokerString, pInfoList, c.getDataQueue(), configMap.get(consumerId));
+                    fetches.add(fetcherThread);
+                    fetcherThread.start();
+                }
+                consumerThreadsMap.put(consumerId, fetches);
+                break;
+            default:
+                LOG.error("Illegal message type " + msg.getType());
+            }
+            return true;
+        }
     }
     
     class AutoCommitTask implements Runnable {
