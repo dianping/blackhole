@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -130,26 +131,27 @@ public class Supervisor {
                 ConsumerGroup group = entry.getKey();
                 ConsumerGroupDesc groupDesc = entry.getValue();
                 String topic = group.getTopic();
-                Map<String, PartitionInfo> groupPartitions = groupDesc.getPartitions();
+                // TODO disable at present, first reassign with online partitions in topics
+//                Map<String, PartitionInfo> groupPartitions = groupDesc.getPartitions();
                 if (TopicsNeedtoReassign.contains(topic)) {
-                    ConcurrentHashMap<String, PartitionInfo> partitionInfos = topics.get(topic);
-                    if (partitionInfos == null) {
-                        LOG.error("can not get partitionInfos from topic: " + topic);
-                        continue;
-                    }
+//                    ConcurrentHashMap<String, PartitionInfo> partitionInfos = topics.get(topic);
+//                    if (partitionInfos == null) {
+//                        LOG.error("can not get partitionInfos from topic: " + topic);
+//                        continue;
+//                    }
                     // update available partitions
-                    for (PartitionInfo p : partitionInfos.values()) {
-                        String id = p.getId();
-                        if (p.isOffline()) {
-                            if (groupPartitions.containsKey(id)) {
-                                groupPartitions.remove(id);
-                            }
-                        } else {
-                            if (!groupPartitions.containsKey(id)) {
-                                groupPartitions.put(id, p);
-                            }
-                        }
-                    }
+//                    for (PartitionInfo p : partitionInfos.values()) {
+//                        String id = p.getId();
+//                        if (p.isOffline()) {
+//                            if (groupPartitions.containsKey(id)) {
+//                                groupPartitions.remove(id);
+//                            }
+//                        } else {
+//                            if (!groupPartitions.containsKey(id)) {
+//                                groupPartitions.put(id, new PartitionInfo(p));
+//                            }
+//                        }
+//                    }
                     tryAssignConsumer(null, group, groupDesc);
                 }
             }
@@ -203,7 +205,7 @@ public class Supervisor {
     
     public void tryAssignConsumer(ConsumerDesc consumer, ConsumerGroup group, ConsumerGroupDesc groupDesc) {
         Map<ConsumerDesc, ArrayList<String>> consumeMap = groupDesc.getConsumeMap();
-        Map<String, PartitionInfo> partitions = groupDesc.getPartitions();
+//        Map<String, PartitionInfo> partitions = groupDesc.getPartitions();
         
         // new consumer arrived?
         if (consumer != null) {
@@ -212,6 +214,16 @@ public class Supervisor {
                 return;
             }
             consumeMap.put(consumer, null);
+        }
+        
+        // calc online partitions
+        Map<String, PartitionInfo> allpartitions = topics.get(group.getTopic());
+        Map<String, PartitionInfo> partitions = new HashMap<String, PartitionInfo>();
+        for (Entry<String, PartitionInfo> entry : allpartitions.entrySet()) {
+            if (entry.getValue().isOffline()) {
+                continue;
+            }
+            partitions.put(entry.getKey(), entry.getValue());
         }
         
         // prepare for split
@@ -446,8 +458,8 @@ public class Supervisor {
             LOG.info("reassign consumers in group: " + group + ", caused by consumer fail: " + consumerDesc);
             tryAssignConsumer(null, group, groupDesc);
         } else {
-        	LOG.info("consumerGroup " + group +" has not live consumer, thus be removed");
-        	consumerGroups.remove(group);
+            LOG.info("consumerGroup " + group +" has not live consumer, thus be removed");
+            consumerGroups.remove(group);
         }
     }
     
@@ -1522,13 +1534,13 @@ public class Supervisor {
     private int getBrokerPort(String host) {
         SimpleConnection connection = brokersMapping.get(host);
         if (connection == null) {
-        	LOG.error("can not get connection from host: " + host);
-        	return 0;
+            LOG.error("can not get connection from host: " + host);
+            return 0;
         }
         ConnectionDescription desc = connections.get(connection);
         if (desc == null) {
-        	LOG.error("can not get ConnectionDescription from connection: " + connection);
-        	return 0;
+            LOG.error("can not get ConnectionDescription from connection: " + connection);
+            return 0;
         }
         BrokerDesc brokerDesc = (BrokerDesc) desc.getAttachment();
         return brokerDesc.getPort();
