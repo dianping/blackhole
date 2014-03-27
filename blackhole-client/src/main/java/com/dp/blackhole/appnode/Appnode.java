@@ -257,7 +257,7 @@ public class Appnode implements Runnable {
     
     public class AgentProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
         private HeartBeat heartbeat = null;
-    	
+        
         @Override
         public void OnConnected(SimpleConnection connection) {
             supervisor = connection;
@@ -306,7 +306,7 @@ public class Appnode implements Runnable {
         }
 
         boolean processInternal(Message msg) {
-			String appName;
+            String appName;
             String broker;
             AppLog appLog = null;
             LogReader logReader = null;
@@ -416,7 +416,7 @@ public class Appnode implements Runnable {
                 Cat.logError(new BlackholeClientException("Illegal message type " + msg.getType()));
             }
             return false;
-		}
+        }
     }
     
     public static void main(String[] args) {

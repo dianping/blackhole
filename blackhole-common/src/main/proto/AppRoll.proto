@@ -1,6 +1,6 @@
 package blackhole;
 
-option java_package = "com.dp.blackhole.common.gen";
+option java_package = "com.dp.blackhole.protocol.control";
 option java_outer_classname = "AppRollPB";
 
 message AppRoll {

@@ -96,9 +96,9 @@ public class Broker {
     }
     
     public void send(Message msg) {
-    	if (msg.getType() != MessageType.TOPICREPORT) {
-    		LOG.debug("send: " + msg);
-    	}
+        if (msg.getType() != MessageType.TOPICREPORT) {
+            LOG.debug("send: " + msg);
+        }
         if (supervisor != null) {
             supervisor.send(PBwrap.PB2Buf(msg));
         }
@@ -113,12 +113,12 @@ public class Broker {
     }
     
     public static BrokerService getBrokerService() {
-    	return brokerService;
+        return brokerService;
     }
     
     class BrokerProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
-    	private HeartBeat heartbeat = null;
-    	
+        private HeartBeat heartbeat = null;
+        
         @Override
         public void OnConnected(SimpleConnection connection) {
             supervisor = connection;          

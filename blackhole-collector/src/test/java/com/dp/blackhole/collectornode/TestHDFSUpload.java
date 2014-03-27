@@ -42,14 +42,14 @@ public class TestHDFSUpload {
     @Before
     public void setUp() throws Exception {
         //build a expect file
-    	expect = createExpectFile(getExpectFile()+".gz");
+        expect = createExpectFile(getExpectFile()+".gz");
         Configuration conf = new Configuration();
         fs = FileSystem.get(conf);
     } 
 
     @After
     public void tearDown() throws Exception {
-//    	File testdir = new File("/tmp/testHDFSUpload");
+//      File testdir = new File("/tmp/testHDFSUpload");
 //        if (testdir.exists()) {
 //            Util.rmr(testdir);
 //        }
@@ -59,23 +59,23 @@ public class TestHDFSUpload {
 
     @Test
     public void testUploadWhole() throws InterruptedException, IOException {
-    	RollIdent ident = getRollIdent(MAGIC);
-    	
-    	Partition p = createPartition();
-    	
-    	appendData(p);
-    	appendData(p);
-    	
-    	RollPartition roll1 = p.markRotate();
-    	
-    	appendData(p);
+        RollIdent ident = getRollIdent(MAGIC);
         
-    	RollManager mgr = mock(RollManager.class);
-    	when(mgr.getRollHdfsPath(ident)).thenReturn(getRealFile()+".gz");
-    	
-    	PersistentManager manager = mock(PersistentManager.class);
-    	when(manager.getPartition(ident.app, ident.source)).thenReturn(p);
-    	
+        Partition p = createPartition();
+        
+        appendData(p);
+        appendData(p);
+        
+        RollPartition roll1 = p.markRotate();
+        
+        appendData(p);
+        
+        RollManager mgr = mock(RollManager.class);
+        when(mgr.getRollHdfsPath(ident)).thenReturn(getRealFile()+".gz");
+        
+        PersistentManager manager = mock(PersistentManager.class);
+        when(manager.getPartition(ident.app, ident.source)).thenReturn(p);
+        
         HDFSUpload writer = new HDFSUpload(mgr, manager, fs, ident, roll1);
         Thread thread = new Thread(writer);
         thread.start();
@@ -100,18 +100,18 @@ public class TestHDFSUpload {
     
     public File createExpectFile(String filename) 
             throws IOException, FileNotFoundException {
-    	
+        
         File file = new File(filename);
         GZIPOutputStream gout = new GZIPOutputStream(new FileOutputStream(file));
         
         for (int i=0; i < 65; i++) {
-        	gout.write(Integer.toString(i).getBytes());
-        	gout.write("\n".getBytes());
+            gout.write(Integer.toString(i).getBytes());
+            gout.write("\n".getBytes());
         }
         
         for (int i=0; i < 65; i++) {
-        	gout.write(Integer.toString(i).getBytes());
-        	gout.write("\n".getBytes());
+            gout.write(Integer.toString(i).getBytes());
+            gout.write("\n".getBytes());
         }
                
         gout.close();
@@ -119,15 +119,15 @@ public class TestHDFSUpload {
     }
     
     public String getExpectFile() {
-    	return "/tmp/expect_" + MAGIC;
+        return "/tmp/expect_" + MAGIC;
     }
     
     public String getRealFile() {
-    	return "/tmp/real_" + MAGIC;
+        return "/tmp/real_" + MAGIC;
     }
     
     public Partition createPartition() throws IOException {
-    	File testdir = new File("/tmp/testHDFSUpload");
+        File testdir = new File("/tmp/testHDFSUpload");
         if (testdir.exists()) {
             Util.rmr(testdir);
         }

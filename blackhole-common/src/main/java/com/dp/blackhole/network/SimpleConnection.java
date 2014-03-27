@@ -198,6 +198,6 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
     
     @Override
     public String toString() {
-    	return remote;
+        return remote;
     }
 }
