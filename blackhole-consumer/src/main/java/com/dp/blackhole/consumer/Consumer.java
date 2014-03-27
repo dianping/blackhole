@@ -42,6 +42,18 @@ public class Consumer {
         queue.put(SHUTDOWN_COMMAND);
     }
     
+    public String getTopic() {
+		return topic;
+	}
+
+	public String getGroup() {
+		return group;
+	}
+
+	public String getConsumerId() {
+		return consumerId;
+	}
+    
     public ConsumerConfig getConf() {
         return config;
     }

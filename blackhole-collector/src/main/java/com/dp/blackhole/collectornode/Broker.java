@@ -131,7 +131,7 @@ public class Broker {
         public void OnDisconnected(SimpleConnection connection) {
             supervisor.close();
             supervisor = null;
-            brokerService.disconnectClients();
+//            brokerService.disconnectClients();
             heartbeat.shutdown();
             heartbeat = null;
         }
