@@ -1,4 +1,4 @@
-package com.dp.blackhole.simutil;
+package com.dp.blackhole.appnode;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.apache.commons.logging.Log;
@@ -17,7 +18,12 @@ public class SimLogger implements Runnable {
     private long delay;
     private OutputStreamWriter writer;
     private static final int WORD_COUNT_PER_LINE = 256;
+    private ArrayList<String> verifyLines = new ArrayList<String>();
     
+    public ArrayList<String> getVerifyLines() {
+        return verifyLines;
+    }
+
     public SimLogger(long delay) {
         this.delay = delay;
     }
@@ -49,8 +55,10 @@ public class SimLogger implements Runnable {
                 for (int k = 0; k < WORD_COUNT_PER_LINE; k++) {
                     sb.append(create());
                 }
+                verifyLines.add(sb.toString());
                 sb.append('\n');
                 writer.write(sb.toString());
+                writer.flush();
                 i++;
                 Thread.sleep(delay);
             }
@@ -59,7 +67,6 @@ public class SimLogger implements Runnable {
             File dir = new File("/tmp");
             for (File del : dir.listFiles()) {
                 if (del.getName().startsWith("rollfile")) {
-                    LOG.debug("delete tmp file " + del);
                     del.delete();
                 }
             }

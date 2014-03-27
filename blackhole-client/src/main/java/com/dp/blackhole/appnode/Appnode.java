@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -80,12 +81,12 @@ public class Appnode implements Runnable {
                     LOG.info("Check file " + pathCandidates[i] + " ok.");
                     ConfigKeeper.configMap.get(appName).put(ParamsKey.Appconf.WATCH_FILE, pathCandidates[i]);
                     break;
-                } else if (isCompatibleWithOldVersion(appName, fileForTest, hostname)) {
+                } else if (isCompatibleWithOldVersion(appName, fileForTest, getHost())) {
                     LOG.info("It's an old version of log printer. Ok");
                     break;
                 } else {
                     if (i == pathCandidates.length - 1) {
-                        LOG.error("Appnode process start faild, because all of file " + pathCandidates + " not found!");
+                        LOG.error("Appnode process start faild, because all of file " + Arrays.toString(pathCandidates) + " not found!");
                         Cat.logError(new BlackholeClientException("Appnode process start faild, because all of file "
                                         + pathCandidates + " not found!"));
                         res = false;
@@ -150,8 +151,6 @@ public class Appnode implements Runnable {
             Cat.logError("Failed to create a file listener, agent shutdown!", e);
             return;
         }
-        
-        long statPeriodMillis = Long.parseLong(prop.getProperty("stat.thoughput.periodMillis", "60000"));
         
         processor = new AgentProcessor();
         client = new GenClient(
