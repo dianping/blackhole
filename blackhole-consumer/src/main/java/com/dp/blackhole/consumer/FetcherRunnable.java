@@ -78,7 +78,7 @@ public class FetcherRunnable extends Thread {
         } catch (ClosedChannelException e) {
             LOG.error("ClosedChannelException catched: ", e);
         } catch (IOException e) {
-        	LOG.error("IOException catched: ", e);
+            LOG.error("IOException catched: ", e);
         }
         LOG.debug("stopping fetcher " + getName() + " to broker " + broker);
     }
@@ -113,6 +113,7 @@ public class FetcherRunnable extends Thread {
         public void OnDisconnected(DelegationIOConnection connection) {
             partitionBlockMap.clear();
             partitionMap.clear();
+            client.shutdown();
         }
 
         @Override
@@ -167,7 +168,7 @@ public class FetcherRunnable extends Thread {
                         enqueue((ByteBufferMessageSet)messageSets.get(i), info);
                     } catch (InterruptedException e) {
                         LOG.error("Oops, catch an Interrupted Exception of queue.put()," +
-                                " but ignore it.", e);//TODO to be review;
+                                " but ignore it.", e);
                     } catch (RuntimeException e) {
                         throw e;
                     }
@@ -184,6 +185,7 @@ public class FetcherRunnable extends Thread {
             String partition = offsetReply.getPartition();
             PartitionTopicInfo info = partitionMap.get(partition);
             if (resetOffset >= 0) {
+                LOG.debug("adjust " + "topic: " + topic + " with offset of " + resetOffset);
                 info.updateFetchOffset(resetOffset);
                 info.resetConsumeOffset(resetOffset);
                 partitionBlockMap.put(info, false);
@@ -218,7 +220,7 @@ public class FetcherRunnable extends Thread {
                     enqueue(messageSet, info);
                 } catch (InterruptedException e) {
                     LOG.error("Oops, catch an Interrupted Exception of queue.put()," +
-                            " but ignore it.", e);//TODO to be review;
+                            " but ignore it.", e);
                 }
                 sendFetchRequest(from, info);
             }

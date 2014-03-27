@@ -46,4 +46,9 @@ public class FetchRequest extends NonDelegationTypedWrappable {
     public int getType() {
         return DataMessageTypeFactory.FetchRequest;
     }
+    
+    @Override
+    public String toString() {
+        return "fetchrequest " + topic + "/" + partitionId + ": " +offset;
+    }
 }
