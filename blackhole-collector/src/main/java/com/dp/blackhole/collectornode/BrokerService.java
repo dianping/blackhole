@@ -2,38 +2,41 @@ package com.dp.blackhole.collectornode;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.collectornode.persistent.FileMessageSet;
-import com.dp.blackhole.collectornode.persistent.MessageAndOffset;
-import com.dp.blackhole.collectornode.persistent.MessageSet;
 import com.dp.blackhole.collectornode.persistent.Partition;
 import com.dp.blackhole.collectornode.persistent.PersistentManager;
 import com.dp.blackhole.collectornode.persistent.PersistentManager.reporter.ReportEntry;
 import com.dp.blackhole.collectornode.persistent.RollPartition;
-import com.dp.blackhole.collectornode.persistent.protocol.FetchReply;
-import com.dp.blackhole.collectornode.persistent.protocol.FetchRequest;
-import com.dp.blackhole.collectornode.persistent.protocol.DataMessageTypeFactory;
-import com.dp.blackhole.collectornode.persistent.protocol.MultiFetchReply;
-import com.dp.blackhole.collectornode.persistent.protocol.MultiFetchRequest;
-import com.dp.blackhole.collectornode.persistent.protocol.OffsetReply;
-import com.dp.blackhole.collectornode.persistent.protocol.OffsetRequest;
-import com.dp.blackhole.collectornode.persistent.protocol.ProduceRequest;
-import com.dp.blackhole.collectornode.persistent.protocol.RegisterRequest;
-import com.dp.blackhole.collectornode.persistent.protocol.RotateRequest;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.network.ConnectionFactory;
 import com.dp.blackhole.network.DelegationIOConnection;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenServer;
 import com.dp.blackhole.network.TransferWrap;
 import com.dp.blackhole.network.TypedFactory;
+import com.dp.blackhole.protocol.control.MessagePB.Message;
+import com.dp.blackhole.protocol.data.DataMessageTypeFactory;
+import com.dp.blackhole.protocol.data.FetchReply;
+import com.dp.blackhole.protocol.data.FetchRequest;
+import com.dp.blackhole.protocol.data.MultiFetchReply;
+import com.dp.blackhole.protocol.data.MultiFetchRequest;
+import com.dp.blackhole.protocol.data.OffsetReply;
+import com.dp.blackhole.protocol.data.OffsetRequest;
+import com.dp.blackhole.protocol.data.ProduceRequest;
+import com.dp.blackhole.protocol.data.RegisterRequest;
+import com.dp.blackhole.protocol.data.RotateRequest;
+import com.dp.blackhole.storage.FileMessageSet;
+import com.dp.blackhole.storage.MessageAndOffset;
+import com.dp.blackhole.storage.MessageSet;
 
 public class BrokerService extends Thread {
     private final Log LOG = LogFactory.getLog(BrokerService.class);
@@ -41,7 +44,7 @@ public class BrokerService extends Thread {
     GenServer<TransferWrap, DelegationIOConnection, EntityProcessor<TransferWrap, DelegationIOConnection>> server;
     PersistentManager manager;
     PublisherExecutor executor;
-    private ArrayList<DelegationIOConnection> clients;
+    private Map<DelegationIOConnection, ClientDesc> clients;
     Properties prop;
     
     public static void reportPartitionInfo(List<ReportEntry> entrylist) {
@@ -62,7 +65,7 @@ public class BrokerService extends Thread {
         String storagedir = prop.getProperty("broker.storage.dir");
         int splitThreshold = Integer.parseInt(prop.getProperty("publisher.storage.splitThreshold", "536870912"));
         int flushThreshold = Integer.parseInt(prop.getProperty("publisher.storage.flushThreshold", "4194304"));
-        clients = new ArrayList<DelegationIOConnection>();
+        clients = Collections.synchronizedMap(new HashMap<DelegationIOConnection, ClientDesc>());
         manager = new PersistentManager(storagedir, splitThreshold, flushThreshold);
         executor = new PublisherExecutor();
         ConnectionFactory<DelegationIOConnection> factory = new DelegationIOConnection.DelegationIOConnectionFactory();
@@ -76,14 +79,14 @@ public class BrokerService extends Thread {
     }
     
     public PersistentManager getPersistentManager() {
-    	return manager;
+        return manager;
     }
     
     public void disconnectClients() {
-    	for (DelegationIOConnection client : clients) {
-    		client.close();
-    	}
-    	clients.clear();
+        for (DelegationIOConnection client : clients.keySet()) {
+            client.close();
+        }
+        clients.clear();
     }
     
     public class PublisherExecutor implements
@@ -96,8 +99,7 @@ public class BrokerService extends Thread {
                         request.partitionId);
                 p.append(request.getMesssageSet());
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.error("IOE catched", e);
             }
         }
 
@@ -109,8 +111,7 @@ public class BrokerService extends Thread {
                 p = manager.getPartition(request.topic, request.partitionId);
                 messages = p.read(request.offset, request.limit);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.error("IOE catched", e);
             }
             
             TransferWrap reply = null;
@@ -134,8 +135,7 @@ public class BrokerService extends Thread {
                     p = manager.getPartition(f.topic, f.partitionId);
                     messages = p.read(f.offset, f.limit);
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.error("IOE catched", e);
                 }
                 partitionList.add(p.getId());
                 messagesList.add(messages);
@@ -152,8 +152,7 @@ public class BrokerService extends Thread {
             try {
                 p = manager.getPartition(request.topic, request.partition);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.error("IOE catched", e);
             }
             from.send(new TransferWrap(new OffsetReply(request.topic, request.partition, p.getEndOffset())));
         }
@@ -170,6 +169,7 @@ public class BrokerService extends Thread {
         }
         
         public void handleRegisterRequest(RegisterRequest request, DelegationIOConnection from) {
+            clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT));
             Message msg = PBwrap.wrapReadyCollector(request.topic, request.source, request.peroid, request.broker, Util.getTS());
             Broker.getSupervisor().send(msg);
         }
@@ -202,20 +202,39 @@ public class BrokerService extends Thread {
 
         @Override
         public void OnConnected(DelegationIOConnection connection) {
-        	synchronized (clients) {
-            	clients.add(connection);
-			}
+            LOG.info(connection + " connected");
+            clients.put(connection, new ClientDesc(ClientDesc.CONSUMER));
         }
 
         @Override
         public void OnDisconnected(DelegationIOConnection connection) {
-        	synchronized (clients) {
-            	clients.remove(connection);
-			}
+            LOG.info(connection + " disconnected");
+            ClientDesc desc = clients.get(connection);
+            if (desc.type == ClientDesc.AGENT) {
+                Broker.getRollMgr().reportFailure(desc.topic, connection.getHost(), Util.getTS());
+            }
+            clients.remove(connection);
         }
 
     }
 
+    class ClientDesc {
+        public static final int AGENT = 0;
+        public static final int CONSUMER = 1;
+        
+        public String topic;
+        public int type;
+        
+        public ClientDesc (String topic, int type) {
+            this.topic = topic;
+            this.type = type;
+        }
+        
+        public ClientDesc(int type) {
+            this.type = type;
+        }
+    }
+    
     public static void main(String[] args) throws IOException {
         Properties properties = new Properties();
         properties.setProperty("GenServer.handlercount", "1");

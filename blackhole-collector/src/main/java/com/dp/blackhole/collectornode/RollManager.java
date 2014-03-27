@@ -23,8 +23,8 @@ import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
-import com.dp.blackhole.common.gen.MessagePB.Message;
-import com.dp.blackhole.common.gen.RollIDPB.RollID;
+import com.dp.blackhole.protocol.control.MessagePB.Message;
+import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 
 public class RollManager {
     private final static Log LOG = LogFactory.getLog(RollManager.class);
@@ -135,8 +135,8 @@ public class RollManager {
     }
 
     public void reportUpload(RollIdent ident, boolean uploadSuccess) {
-    	rolls.remove(ident);
-    	
+        rolls.remove(ident);
+        
         if (uploadSuccess == true) {
             Message message = PBwrap.wrapUploadSuccess(ident.app, ident.source, ident.ts);
             Broker.getSupervisor().send(message);

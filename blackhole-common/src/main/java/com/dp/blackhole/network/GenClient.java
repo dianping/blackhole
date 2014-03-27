@@ -99,7 +99,7 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
                         doRead(key);
                     }
                 } catch (IOException e) {
-                    LOG.error("catch IOE: ", e);
+                    LOG.warn("catch IOE: ", e);
                     closeConnection((Connection) key.attachment());
                 }
             }

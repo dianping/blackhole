@@ -8,9 +8,9 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.collectornode.persistent.Message;
-import com.dp.blackhole.collectornode.persistent.MessageAndOffset;
 import com.dp.blackhole.consumer.exception.ConsumerTimeoutException;
+import com.dp.blackhole.storage.Message;
+import com.dp.blackhole.storage.MessageAndOffset;
 
 public class ConsumerIterator implements Iterator<String> {
     

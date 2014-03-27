@@ -14,14 +14,14 @@ import org.apache.hadoop.security.SecurityUtil;
 
 import com.dp.blackhole.collectornode.persistent.PersistentManager.reporter.ReportEntry;
 import com.dp.blackhole.common.PBwrap;
-import com.dp.blackhole.common.gen.MessagePB.Message;
-import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
-import com.dp.blackhole.common.gen.RollIDPB.RollID;
-import com.dp.blackhole.common.gen.TopicReportPB.TopicReport;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
 import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.protocol.control.MessagePB.Message;
+import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
+import com.dp.blackhole.protocol.control.RollIDPB.RollID;
+import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Broker {
@@ -96,9 +96,9 @@ public class Broker {
     }
     
     public void send(Message msg) {
-    	if (msg.getType() != MessageType.TOPICREPORT) {
-    		LOG.debug("send: " + msg);
-    	}
+        if (msg.getType() != MessageType.TOPICREPORT) {
+            LOG.debug("send: " + msg);
+        }
         if (supervisor != null) {
             supervisor.send(PBwrap.PB2Buf(msg));
         }
@@ -113,12 +113,12 @@ public class Broker {
     }
     
     public static BrokerService getBrokerService() {
-    	return brokerService;
+        return brokerService;
     }
     
     class BrokerProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
-    	private HeartBeat heartbeat = null;
-    	
+        private HeartBeat heartbeat = null;
+        
         @Override
         public void OnConnected(SimpleConnection connection) {
             supervisor = connection;          
@@ -131,7 +131,7 @@ public class Broker {
         public void OnDisconnected(SimpleConnection connection) {
             supervisor.close();
             supervisor = null;
-            brokerService.disconnectClients();
+//            brokerService.disconnectClients();
             heartbeat.shutdown();
             heartbeat = null;
         }

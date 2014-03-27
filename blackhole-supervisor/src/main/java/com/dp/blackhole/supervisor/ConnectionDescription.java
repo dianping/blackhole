@@ -3,6 +3,7 @@ package com.dp.blackhole.supervisor;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.network.SimpleConnection;
 
 public class ConnectionDescription {
     public static final int AGENT = 1;
@@ -11,8 +12,11 @@ public class ConnectionDescription {
     
     private int type;
     private AtomicLong lastHeartBeat;
+    private SimpleConnection connection;
+    private NodeDesc attachment;
     
-    public ConnectionDescription() {
+    public ConnectionDescription(SimpleConnection connection) {
+        this.connection = connection;
         lastHeartBeat = new AtomicLong(Util.getTS());
     }
     
@@ -30,5 +34,17 @@ public class ConnectionDescription {
 
     public long getLastHeartBeat() {
         return lastHeartBeat.get();
+    }
+    
+    public SimpleConnection getConnection() {
+        return connection;
+    }
+    
+    public NodeDesc getAttachment() {
+        return attachment;
+    }
+
+    public void attach(NodeDesc desc) {
+        attachment = desc;
     }
 }
