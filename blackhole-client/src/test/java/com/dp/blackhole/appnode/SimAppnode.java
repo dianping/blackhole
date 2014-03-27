@@ -6,11 +6,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.UnknownHostException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.appnode.Appnode;
+import com.dp.blackhole.common.Util;
 
 public class SimAppnode extends Appnode{
     private static final Log LOG = LogFactory.getLog(SimAppnode.class);
@@ -24,6 +26,18 @@ public class SimAppnode extends Appnode{
     public static final String TEST_ROLL_FILE = "/tmp/rollfile";
     public SimAppnode() {
         super();
+        super.processor = new AgentProcessor();
+    }
+    
+    @Override
+    public String getHost() {
+        try {
+            return Util.getLocalHost();
+        } catch (UnknownHostException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
@@ -40,6 +54,22 @@ public class SimAppnode extends Appnode{
         for (File file : dir.listFiles()) {
             if (file.getName().contains(MAGIC)) {
                 LOG.debug("delete tmp file " + file);
+                if (file.isDirectory()) {
+                    deleteInnerFile(file.listFiles());
+                    file.delete();
+                } else {
+                    file.delete();
+                }
+            }
+        }
+    }
+    
+    private static void deleteInnerFile(File[] files) {
+        for (File file : files) {
+            if (file.isDirectory()) {
+                deleteInnerFile(file.listFiles());
+                file.delete();
+            } else {
                 file.delete();
             }
         }

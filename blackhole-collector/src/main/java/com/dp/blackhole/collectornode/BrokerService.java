@@ -239,7 +239,7 @@ public class BrokerService extends Thread {
         Properties properties = new Properties();
         properties.setProperty("GenServer.handlercount", "1");
         properties.setProperty("GenServer.port", "2222");
-        properties.setProperty("publisher.storage.dir", "/tmp/base");
+        properties.setProperty("broker.storage.dir", "/tmp/base");
         BrokerService pubservice = new BrokerService(properties);
         pubservice.run();
     }
