@@ -216,7 +216,7 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
             handler.start();
         }
         
-        LOG.info("GenClient "+ clientName + " started");
+        LOG.info("GenClient "+ clientName + " started, connecting to " + host + ":" + port);
         
         loop();
     }
