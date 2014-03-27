@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -19,18 +20,18 @@ import com.dianping.cat.Cat;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
-import com.dp.blackhole.common.gen.ConfResPB.ConfRes;
-import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
-import com.dp.blackhole.common.gen.MessagePB.Message;
-import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
-import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.exception.BlackholeClientException;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
 import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.protocol.control.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.protocol.control.ConfResPB.ConfRes;
+import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
+import com.dp.blackhole.protocol.control.MessagePB.Message;
+import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
+import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Appnode implements Runnable {
@@ -81,12 +82,12 @@ public class Appnode implements Runnable {
                     LOG.info("Check file " + pathCandidates[i] + " ok.");
                     ConfigKeeper.configMap.get(appName).put(ParamsKey.Appconf.WATCH_FILE, pathCandidates[i]);
                     break;
-                } else if (isCompatibleWithOldVersion(appName, fileForTest, hostname)) {
+                } else if (isCompatibleWithOldVersion(appName, fileForTest, getHost())) {
                     LOG.info("It's an old version of log printer. Ok");
                     break;
                 } else {
                     if (i == pathCandidates.length - 1) {
-                        LOG.error("Appnode process start faild, because all of file " + pathCandidates + " not found!");
+                        LOG.error("Appnode process start faild, because all of file " + Arrays.toString(pathCandidates) + " not found!");
                         Cat.logError(new BlackholeClientException("Appnode process start faild, because all of file "
                                         + pathCandidates + " not found!"));
                         res = false;
@@ -257,7 +258,7 @@ public class Appnode implements Runnable {
     
     public class AgentProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
         private HeartBeat heartbeat = null;
-    	
+        
         @Override
         public void OnConnected(SimpleConnection connection) {
             supervisor = connection;
@@ -306,7 +307,7 @@ public class Appnode implements Runnable {
         }
 
         boolean processInternal(Message msg) {
-			String appName;
+            String appName;
             String broker;
             AppLog appLog = null;
             LogReader logReader = null;
@@ -416,7 +417,7 @@ public class Appnode implements Runnable {
                 Cat.logError(new BlackholeClientException("Illegal message type " + msg.getType()));
             }
             return false;
-		}
+        }
     }
     
     public static void main(String[] args) {

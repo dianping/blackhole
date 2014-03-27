@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.dianping</groupId>
 		<artifactId>blackhole</artifactId>
-		<version>1.1.0-SNAPSHOT</version>
+		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>blackhole-client</artifactId>
 	<name>blackhole-client</name>
@@ -16,18 +16,25 @@
 			<version>0.94-dp</version>
 		</dependency>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>blackhole-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>blackhole-collector</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.dp.cosmos</groupId>
 			<artifactId>hadoop-core</artifactId>
 			<version>1.0.3.0</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>blackhole-common</artifactId>
+		</dependency>
+                <dependency>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>blackhole-collector</artifactId>
+                </dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>blackhole-collector</artifactId>
+                        <version>${project.version}</version>
+                        <type>test-jar</type>
+                        <scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

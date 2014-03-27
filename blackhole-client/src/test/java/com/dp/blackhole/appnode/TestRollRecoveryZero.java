@@ -17,7 +17,6 @@ import org.junit.Test;
 import com.dp.blackhole.appnode.AppLog;
 import com.dp.blackhole.appnode.RollRecoveryZero;
 import com.dp.blackhole.conf.ConfigKeeper;
-import com.dp.blackhole.simutil.SimRecoveryServer;
 
 public class TestRollRecoveryZero {
     private static final Log LOG = LogFactory.getLog(TestRollRecoveryZero.class);

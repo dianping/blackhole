@@ -1,5 +1,6 @@
 package com.dp.blackhole.collectornode.persistent;
 
+
 public class RollPartition {
     public Partition p;
     public long startOffset;

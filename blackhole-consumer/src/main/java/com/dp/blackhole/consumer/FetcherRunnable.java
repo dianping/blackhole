@@ -14,21 +14,21 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.collectornode.persistent.ByteBufferMessageSet;
-import com.dp.blackhole.collectornode.persistent.MessageAndOffset;
-import com.dp.blackhole.collectornode.persistent.MessageSet;
-import com.dp.blackhole.collectornode.persistent.protocol.DataMessageTypeFactory;
-import com.dp.blackhole.collectornode.persistent.protocol.FetchReply;
-import com.dp.blackhole.collectornode.persistent.protocol.FetchRequest;
-import com.dp.blackhole.collectornode.persistent.protocol.MultiFetchReply;
-import com.dp.blackhole.collectornode.persistent.protocol.MultiFetchRequest;
-import com.dp.blackhole.collectornode.persistent.protocol.OffsetReply;
-import com.dp.blackhole.collectornode.persistent.protocol.OffsetRequest;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.DelegationIOConnection;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.TransferWrap;
+import com.dp.blackhole.protocol.data.DataMessageTypeFactory;
+import com.dp.blackhole.protocol.data.FetchReply;
+import com.dp.blackhole.protocol.data.FetchRequest;
+import com.dp.blackhole.protocol.data.MultiFetchReply;
+import com.dp.blackhole.protocol.data.MultiFetchRequest;
+import com.dp.blackhole.protocol.data.OffsetReply;
+import com.dp.blackhole.protocol.data.OffsetRequest;
+import com.dp.blackhole.storage.ByteBufferMessageSet;
+import com.dp.blackhole.storage.MessageAndOffset;
+import com.dp.blackhole.storage.MessageSet;
 
 public class FetcherRunnable extends Thread {
     private final Log LOG = LogFactory.getLog(FetcherRunnable.class);
@@ -78,7 +78,7 @@ public class FetcherRunnable extends Thread {
         } catch (ClosedChannelException e) {
             LOG.error("ClosedChannelException catched: ", e);
         } catch (IOException e) {
-        	LOG.error("IOException catched: ", e);
+            LOG.error("IOException catched: ", e);
         }
         LOG.debug("stopping fetcher " + getName() + " to broker " + broker);
     }
@@ -113,6 +113,7 @@ public class FetcherRunnable extends Thread {
         public void OnDisconnected(DelegationIOConnection connection) {
             partitionBlockMap.clear();
             partitionMap.clear();
+            client.shutdown();
         }
 
         @Override
@@ -167,7 +168,7 @@ public class FetcherRunnable extends Thread {
                         enqueue((ByteBufferMessageSet)messageSets.get(i), info);
                     } catch (InterruptedException e) {
                         LOG.error("Oops, catch an Interrupted Exception of queue.put()," +
-                                " but ignore it.", e);//TODO to be review;
+                                " but ignore it.", e);
                     } catch (RuntimeException e) {
                         throw e;
                     }
@@ -184,6 +185,7 @@ public class FetcherRunnable extends Thread {
             String partition = offsetReply.getPartition();
             PartitionTopicInfo info = partitionMap.get(partition);
             if (resetOffset >= 0) {
+                LOG.debug("adjust " + "topic: " + topic + " with offset of " + resetOffset);
                 info.updateFetchOffset(resetOffset);
                 info.resetConsumeOffset(resetOffset);
                 partitionBlockMap.put(info, false);
@@ -218,7 +220,7 @@ public class FetcherRunnable extends Thread {
                     enqueue(messageSet, info);
                 } catch (InterruptedException e) {
                     LOG.error("Oops, catch an Interrupted Exception of queue.put()," +
-                            " but ignore it.", e);//TODO to be review;
+                            " but ignore it.", e);
                 }
                 sendFetchRequest(from, info);
             }

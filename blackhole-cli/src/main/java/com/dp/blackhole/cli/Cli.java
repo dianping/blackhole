@@ -15,12 +15,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.PBwrap;
-import com.dp.blackhole.common.gen.DumpReplyPB.DumpReply;
-import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.SimpleConnection;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply;
+import com.dp.blackhole.protocol.control.MessagePB.Message;
+import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 
 public class Cli {
     private static final Log LOG = LogFactory.getLog(Cli.class);
