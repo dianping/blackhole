@@ -14,10 +14,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.PBwrap;
-import com.dp.blackhole.common.gen.DumpReplyPB.DumpReply;
-import com.dp.blackhole.common.gen.MessagePB.Message;
-import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.node.Node;
+import com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply;
+import com.dp.blackhole.protocol.control.MessagePB.Message;
+import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 
 public class Cli extends Node {
     private static final Log LOG = LogFactory.getLog(Cli.class);

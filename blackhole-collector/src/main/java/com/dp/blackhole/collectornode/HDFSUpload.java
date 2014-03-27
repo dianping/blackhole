@@ -14,12 +14,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.dp.blackhole.collectornode.persistent.ByteBufferMessageSet;
-import com.dp.blackhole.collectornode.persistent.FileMessageSet;
-import com.dp.blackhole.collectornode.persistent.MessageAndOffset;
 import com.dp.blackhole.collectornode.persistent.Partition;
 import com.dp.blackhole.collectornode.persistent.PersistentManager;
 import com.dp.blackhole.collectornode.persistent.RollPartition;
+import com.dp.blackhole.storage.ByteBufferMessageSet;
+import com.dp.blackhole.storage.FileMessageSet;
+import com.dp.blackhole.storage.MessageAndOffset;
 
 public class HDFSUpload implements Runnable{
     private static final Log LOG = LogFactory.getLog(HDFSUpload.class);

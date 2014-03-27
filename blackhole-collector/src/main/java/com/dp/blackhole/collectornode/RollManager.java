@@ -23,8 +23,8 @@ import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
-import com.dp.blackhole.common.gen.MessagePB.Message;
-import com.dp.blackhole.common.gen.RollIDPB.RollID;
+import com.dp.blackhole.protocol.control.MessagePB.Message;
+import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 
 public class RollManager {
     private final static Log LOG = LogFactory.getLog(RollManager.class);

@@ -9,6 +9,8 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.storage.ByteBufferMessageSet;
+import com.dp.blackhole.storage.Message;
 
 public class TestSegment {
     @Test

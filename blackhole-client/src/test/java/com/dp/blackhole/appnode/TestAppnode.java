@@ -15,8 +15,8 @@ import org.junit.Test;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.common.gen.MessagePB.Message;
 import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.protocol.control.MessagePB.Message;
 
 public class TestAppnode {
     private static String MAGIC;

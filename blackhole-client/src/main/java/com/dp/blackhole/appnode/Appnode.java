@@ -19,18 +19,18 @@ import com.dianping.cat.Cat;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.common.gen.AssignCollectorPB.AssignCollector;
-import com.dp.blackhole.common.gen.ConfResPB.ConfRes;
-import com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes;
-import com.dp.blackhole.common.gen.MessagePB.Message;
-import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
-import com.dp.blackhole.common.gen.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.exception.BlackholeClientException;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
 import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.protocol.control.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.protocol.control.ConfResPB.ConfRes;
+import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
+import com.dp.blackhole.protocol.control.MessagePB.Message;
+import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
+import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Appnode implements Runnable {
