@@ -8,721 +8,284 @@ public final class ConfResPB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface ConfResOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-
-    // repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;
-    /**
-     * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-     */
-    java.util.List<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes> 
-        getAppConfResList();
-    /**
-     * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-     */
-    com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes getAppConfRes(int index);
-    /**
-     * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-     */
-    int getAppConfResCount();
-    /**
-     * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-     */
-    java.util.List<? extends com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfResOrBuilder> 
-        getAppConfResOrBuilderList();
-    /**
-     * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-     */
-    com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfResOrBuilder getAppConfResOrBuilder(
-        int index);
-  }
-  /**
-   * Protobuf type {@code blackhole.ConfRes}
-   */
   public static final class ConfRes extends
-      com.google.protobuf.GeneratedMessage
-      implements ConfResOrBuilder {
+      com.google.protobuf.GeneratedMessage {
     // Use ConfRes.newBuilder() to construct.
-    private ConfRes(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-      super(builder);
-      this.unknownFields = builder.getUnknownFields();
+    private ConfRes() {
+      initFields();
     }
-    private ConfRes(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private ConfRes(boolean noInit) {}
+    
     private static final ConfRes defaultInstance;
     public static ConfRes getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public ConfRes getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private ConfRes(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                appConfRes_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              appConfRes_.add(input.readMessage(com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.PARSER, extensionRegistry));
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          appConfRes_ = java.util.Collections.unmodifiableList(appConfRes_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.dp.blackhole.protocol.control.ConfResPB.ConfRes.class, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.Builder.class);
+      return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<ConfRes> PARSER =
-        new com.google.protobuf.AbstractParser<ConfRes>() {
-      public ConfRes parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ConfRes(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<ConfRes> getParserForType() {
-      return PARSER;
-    }
-
-    public interface AppConfResOrBuilder
-        extends com.google.protobuf.MessageOrBuilder {
-
-      // required string app_name = 1;
-      /**
-       * <code>required string app_name = 1;</code>
-       */
-      boolean hasAppName();
-      /**
-       * <code>required string app_name = 1;</code>
-       */
-      java.lang.String getAppName();
-      /**
-       * <code>required string app_name = 1;</code>
-       */
-      com.google.protobuf.ByteString
-          getAppNameBytes();
-
-      // required string watch_file = 2;
-      /**
-       * <code>required string watch_file = 2;</code>
-       */
-      boolean hasWatchFile();
-      /**
-       * <code>required string watch_file = 2;</code>
-       */
-      java.lang.String getWatchFile();
-      /**
-       * <code>required string watch_file = 2;</code>
-       */
-      com.google.protobuf.ByteString
-          getWatchFileBytes();
-
-      // required string period = 3 [default = "3600"];
-      /**
-       * <code>required string period = 3 [default = "3600"];</code>
-       */
-      boolean hasPeriod();
-      /**
-       * <code>required string period = 3 [default = "3600"];</code>
-       */
-      java.lang.String getPeriod();
-      /**
-       * <code>required string period = 3 [default = "3600"];</code>
-       */
-      com.google.protobuf.ByteString
-          getPeriodBytes();
-
-      // optional string max_line_size = 4 [default = "65536"];
-      /**
-       * <code>optional string max_line_size = 4 [default = "65536"];</code>
-       */
-      boolean hasMaxLineSize();
-      /**
-       * <code>optional string max_line_size = 4 [default = "65536"];</code>
-       */
-      java.lang.String getMaxLineSize();
-      /**
-       * <code>optional string max_line_size = 4 [default = "65536"];</code>
-       */
-      com.google.protobuf.ByteString
-          getMaxLineSizeBytes();
-    }
-    /**
-     * Protobuf type {@code blackhole.ConfRes.AppConfRes}
-     */
+    
     public static final class AppConfRes extends
-        com.google.protobuf.GeneratedMessage
-        implements AppConfResOrBuilder {
+        com.google.protobuf.GeneratedMessage {
       // Use AppConfRes.newBuilder() to construct.
-      private AppConfRes(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-        super(builder);
-        this.unknownFields = builder.getUnknownFields();
+      private AppConfRes() {
+        initFields();
       }
-      private AppConfRes(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+      private AppConfRes(boolean noInit) {}
+      
       private static final AppConfRes defaultInstance;
       public static AppConfRes getDefaultInstance() {
         return defaultInstance;
       }
-
+      
       public AppConfRes getDefaultInstanceForType() {
         return defaultInstance;
       }
-
-      private final com.google.protobuf.UnknownFieldSet unknownFields;
-      @java.lang.Override
-      public final com.google.protobuf.UnknownFieldSet
-          getUnknownFields() {
-        return this.unknownFields;
-      }
-      private AppConfRes(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        initFields();
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              default: {
-                if (!parseUnknownField(input, unknownFields,
-                                       extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-              case 10: {
-                bitField0_ |= 0x00000001;
-                appName_ = input.readBytes();
-                break;
-              }
-              case 18: {
-                bitField0_ |= 0x00000002;
-                watchFile_ = input.readBytes();
-                break;
-              }
-              case 26: {
-                bitField0_ |= 0x00000004;
-                period_ = input.readBytes();
-                break;
-              }
-              case 34: {
-                bitField0_ |= 0x00000008;
-                maxLineSize_ = input.readBytes();
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e.getMessage()).setUnfinishedMessage(this);
-        } finally {
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
-      }
+      
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_AppConfRes_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.class, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder.class);
+        return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable;
       }
-
-      public static com.google.protobuf.Parser<AppConfRes> PARSER =
-          new com.google.protobuf.AbstractParser<AppConfRes>() {
-        public AppConfRes parsePartialFrom(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-          return new AppConfRes(input, extensionRegistry);
-        }
-      };
-
-      @java.lang.Override
-      public com.google.protobuf.Parser<AppConfRes> getParserForType() {
-        return PARSER;
-      }
-
-      private int bitField0_;
+      
       // required string app_name = 1;
       public static final int APP_NAME_FIELD_NUMBER = 1;
-      private java.lang.Object appName_;
-      /**
-       * <code>required string app_name = 1;</code>
-       */
-      public boolean hasAppName() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>required string app_name = 1;</code>
-       */
-      public java.lang.String getAppName() {
-        java.lang.Object ref = appName_;
-        if (ref instanceof java.lang.String) {
-          return (java.lang.String) ref;
-        } else {
-          com.google.protobuf.ByteString bs = 
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            appName_ = s;
-          }
-          return s;
-        }
-      }
-      /**
-       * <code>required string app_name = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getAppNameBytes() {
-        java.lang.Object ref = appName_;
-        if (ref instanceof java.lang.String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          appName_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-
+      private boolean hasAppName;
+      private java.lang.String appName_ = "";
+      public boolean hasAppName() { return hasAppName; }
+      public java.lang.String getAppName() { return appName_; }
+      
       // required string watch_file = 2;
       public static final int WATCH_FILE_FIELD_NUMBER = 2;
-      private java.lang.Object watchFile_;
-      /**
-       * <code>required string watch_file = 2;</code>
-       */
-      public boolean hasWatchFile() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>required string watch_file = 2;</code>
-       */
-      public java.lang.String getWatchFile() {
-        java.lang.Object ref = watchFile_;
-        if (ref instanceof java.lang.String) {
-          return (java.lang.String) ref;
-        } else {
-          com.google.protobuf.ByteString bs = 
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            watchFile_ = s;
-          }
-          return s;
-        }
-      }
-      /**
-       * <code>required string watch_file = 2;</code>
-       */
-      public com.google.protobuf.ByteString
-          getWatchFileBytes() {
-        java.lang.Object ref = watchFile_;
-        if (ref instanceof java.lang.String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          watchFile_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-
+      private boolean hasWatchFile;
+      private java.lang.String watchFile_ = "";
+      public boolean hasWatchFile() { return hasWatchFile; }
+      public java.lang.String getWatchFile() { return watchFile_; }
+      
       // required string period = 3 [default = "3600"];
       public static final int PERIOD_FIELD_NUMBER = 3;
-      private java.lang.Object period_;
-      /**
-       * <code>required string period = 3 [default = "3600"];</code>
-       */
-      public boolean hasPeriod() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      /**
-       * <code>required string period = 3 [default = "3600"];</code>
-       */
-      public java.lang.String getPeriod() {
-        java.lang.Object ref = period_;
-        if (ref instanceof java.lang.String) {
-          return (java.lang.String) ref;
-        } else {
-          com.google.protobuf.ByteString bs = 
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            period_ = s;
-          }
-          return s;
-        }
-      }
-      /**
-       * <code>required string period = 3 [default = "3600"];</code>
-       */
-      public com.google.protobuf.ByteString
-          getPeriodBytes() {
-        java.lang.Object ref = period_;
-        if (ref instanceof java.lang.String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          period_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-
+      private boolean hasPeriod;
+      private java.lang.String period_ = "3600";
+      public boolean hasPeriod() { return hasPeriod; }
+      public java.lang.String getPeriod() { return period_; }
+      
       // optional string max_line_size = 4 [default = "65536"];
       public static final int MAX_LINE_SIZE_FIELD_NUMBER = 4;
-      private java.lang.Object maxLineSize_;
-      /**
-       * <code>optional string max_line_size = 4 [default = "65536"];</code>
-       */
-      public boolean hasMaxLineSize() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
-      }
-      /**
-       * <code>optional string max_line_size = 4 [default = "65536"];</code>
-       */
-      public java.lang.String getMaxLineSize() {
-        java.lang.Object ref = maxLineSize_;
-        if (ref instanceof java.lang.String) {
-          return (java.lang.String) ref;
-        } else {
-          com.google.protobuf.ByteString bs = 
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            maxLineSize_ = s;
-          }
-          return s;
-        }
-      }
-      /**
-       * <code>optional string max_line_size = 4 [default = "65536"];</code>
-       */
-      public com.google.protobuf.ByteString
-          getMaxLineSizeBytes() {
-        java.lang.Object ref = maxLineSize_;
-        if (ref instanceof java.lang.String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          maxLineSize_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-
+      private boolean hasMaxLineSize;
+      private java.lang.String maxLineSize_ = "65536";
+      public boolean hasMaxLineSize() { return hasMaxLineSize; }
+      public java.lang.String getMaxLineSize() { return maxLineSize_; }
+      
       private void initFields() {
-        appName_ = "";
-        watchFile_ = "";
-        period_ = "3600";
-        maxLineSize_ = "65536";
       }
-      private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
-        byte isInitialized = memoizedIsInitialized;
-        if (isInitialized != -1) return isInitialized == 1;
-
-        if (!hasAppName()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        if (!hasWatchFile()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        if (!hasPeriod()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        memoizedIsInitialized = 1;
+        if (!hasAppName) return false;
+        if (!hasWatchFile) return false;
+        if (!hasPeriod) return false;
         return true;
       }
-
+      
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
         getSerializedSize();
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          output.writeBytes(1, getAppNameBytes());
+        if (hasAppName()) {
+          output.writeString(1, getAppName());
         }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
-          output.writeBytes(2, getWatchFileBytes());
+        if (hasWatchFile()) {
+          output.writeString(2, getWatchFile());
         }
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
-          output.writeBytes(3, getPeriodBytes());
+        if (hasPeriod()) {
+          output.writeString(3, getPeriod());
         }
-        if (((bitField0_ & 0x00000008) == 0x00000008)) {
-          output.writeBytes(4, getMaxLineSizeBytes());
+        if (hasMaxLineSize()) {
+          output.writeString(4, getMaxLineSize());
         }
         getUnknownFields().writeTo(output);
       }
-
+      
       private int memoizedSerializedSize = -1;
       public int getSerializedSize() {
         int size = memoizedSerializedSize;
         if (size != -1) return size;
-
+      
         size = 0;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (hasAppName()) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(1, getAppNameBytes());
+            .computeStringSize(1, getAppName());
         }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (hasWatchFile()) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(2, getWatchFileBytes());
+            .computeStringSize(2, getWatchFile());
         }
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (hasPeriod()) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(3, getPeriodBytes());
+            .computeStringSize(3, getPeriod());
         }
-        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (hasMaxLineSize()) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(4, getMaxLineSizeBytes());
+            .computeStringSize(4, getMaxLineSize());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
         return size;
       }
-
-      private static final long serialVersionUID = 0L;
-      @java.lang.Override
-      protected java.lang.Object writeReplace()
-          throws java.io.ObjectStreamException {
-        return super.writeReplace();
-      }
-
+      
       public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes parseFrom(
           com.google.protobuf.ByteString data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
+        return newBuilder().mergeFrom(data).buildParsed();
       }
       public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes parseFrom(
           com.google.protobuf.ByteString data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
+        return newBuilder().mergeFrom(data, extensionRegistry)
+                 .buildParsed();
       }
       public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes parseFrom(byte[] data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
+        return newBuilder().mergeFrom(data).buildParsed();
       }
       public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes parseFrom(
           byte[] data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
+        return newBuilder().mergeFrom(data, extensionRegistry)
+                 .buildParsed();
       }
       public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes parseFrom(java.io.InputStream input)
           throws java.io.IOException {
-        return PARSER.parseFrom(input);
+        return newBuilder().mergeFrom(input).buildParsed();
       }
       public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return PARSER.parseFrom(input, extensionRegistry);
+        return newBuilder().mergeFrom(input, extensionRegistry)
+                 .buildParsed();
       }
       public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes parseDelimitedFrom(java.io.InputStream input)
           throws java.io.IOException {
-        return PARSER.parseDelimitedFrom(input);
+        Builder builder = newBuilder();
+        if (builder.mergeDelimitedFrom(input)) {
+          return builder.buildParsed();
+        } else {
+          return null;
+        }
       }
       public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+        Builder builder = newBuilder();
+        if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+          return builder.buildParsed();
+        } else {
+          return null;
+        }
       }
       public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
-        return PARSER.parseFrom(input);
+        return newBuilder().mergeFrom(input).buildParsed();
       }
       public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return PARSER.parseFrom(input, extensionRegistry);
+        return newBuilder().mergeFrom(input, extensionRegistry)
+                 .buildParsed();
       }
-
+      
       public static Builder newBuilder() { return Builder.create(); }
       public Builder newBuilderForType() { return newBuilder(); }
       public static Builder newBuilder(com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes prototype) {
         return newBuilder().mergeFrom(prototype);
       }
       public Builder toBuilder() { return newBuilder(this); }
-
-      @java.lang.Override
-      protected Builder newBuilderForType(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        Builder builder = new Builder(parent);
-        return builder;
-      }
-      /**
-       * Protobuf type {@code blackhole.ConfRes.AppConfRes}
-       */
+      
       public static final class Builder extends
-          com.google.protobuf.GeneratedMessage.Builder<Builder>
-         implements com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfResOrBuilder {
-        public static final com.google.protobuf.Descriptors.Descriptor
-            getDescriptor() {
-          return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_AppConfRes_descriptor;
-        }
-
-        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-            internalGetFieldAccessorTable() {
-          return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable
-              .ensureFieldAccessorsInitialized(
-                  com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.class, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder.class);
-        }
-
-        // Construct using com.dp.blackhole.common.gen.ConfResPB.ConfRes.AppConfRes.newBuilder()
-        private Builder() {
-          maybeForceBuilderInitialization();
-        }
-
-        private Builder(
-            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-          super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          }
-        }
+          com.google.protobuf.GeneratedMessage.Builder<Builder> {
+        private com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes result;
+        
+        // Construct using com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.newBuilder()
+        private Builder() {}
+        
         private static Builder create() {
-          return new Builder();
+          Builder builder = new Builder();
+          builder.result = new com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes();
+          return builder;
         }
-
+        
+        protected com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes internalGetResult() {
+          return result;
+        }
+        
         public Builder clear() {
-          super.clear();
-          appName_ = "";
-          bitField0_ = (bitField0_ & ~0x00000001);
-          watchFile_ = "";
-          bitField0_ = (bitField0_ & ~0x00000002);
-          period_ = "3600";
-          bitField0_ = (bitField0_ & ~0x00000004);
-          maxLineSize_ = "65536";
-          bitField0_ = (bitField0_ & ~0x00000008);
+          if (result == null) {
+            throw new IllegalStateException(
+              "Cannot call clear() after build().");
+          }
+          result = new com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes();
           return this;
         }
-
+        
         public Builder clone() {
-          return create().mergeFrom(buildPartial());
+          return create().mergeFrom(result);
         }
-
+        
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_AppConfRes_descriptor;
+          return com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.getDescriptor();
         }
-
+        
         public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes getDefaultInstanceForType() {
           return com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.getDefaultInstance();
         }
-
+        
+        public boolean isInitialized() {
+          return result.isInitialized();
+        }
         public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes build() {
-          com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes result = buildPartial();
-          if (!result.isInitialized()) {
+          if (result != null && !isInitialized()) {
             throw newUninitializedMessageException(result);
           }
-          return result;
+          return buildPartial();
         }
-
+        
+        private com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes buildParsed()
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          if (!isInitialized()) {
+            throw newUninitializedMessageException(
+              result).asInvalidProtocolBufferException();
+          }
+          return buildPartial();
+        }
+        
         public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes buildPartial() {
-          com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes result = new com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes(this);
-          int from_bitField0_ = bitField0_;
-          int to_bitField0_ = 0;
-          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-            to_bitField0_ |= 0x00000001;
+          if (result == null) {
+            throw new IllegalStateException(
+              "build() has already been called on this Builder.");
           }
-          result.appName_ = appName_;
-          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-            to_bitField0_ |= 0x00000002;
-          }
-          result.watchFile_ = watchFile_;
-          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-            to_bitField0_ |= 0x00000004;
-          }
-          result.period_ = period_;
-          if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-            to_bitField0_ |= 0x00000008;
-          }
-          result.maxLineSize_ = maxLineSize_;
-          result.bitField0_ = to_bitField0_;
-          onBuilt();
-          return result;
+          com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes returnMe = result;
+          result = null;
+          return returnMe;
         }
-
+        
         public Builder mergeFrom(com.google.protobuf.Message other) {
           if (other instanceof com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes) {
             return mergeFrom((com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes)other);
@@ -731,611 +294,354 @@ public final class ConfResPB {
             return this;
           }
         }
-
+        
         public Builder mergeFrom(com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes other) {
           if (other == com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.getDefaultInstance()) return this;
           if (other.hasAppName()) {
-            bitField0_ |= 0x00000001;
-            appName_ = other.appName_;
-            onChanged();
+            setAppName(other.getAppName());
           }
           if (other.hasWatchFile()) {
-            bitField0_ |= 0x00000002;
-            watchFile_ = other.watchFile_;
-            onChanged();
+            setWatchFile(other.getWatchFile());
           }
           if (other.hasPeriod()) {
-            bitField0_ |= 0x00000004;
-            period_ = other.period_;
-            onChanged();
+            setPeriod(other.getPeriod());
           }
           if (other.hasMaxLineSize()) {
-            bitField0_ |= 0x00000008;
-            maxLineSize_ = other.maxLineSize_;
-            onChanged();
+            setMaxLineSize(other.getMaxLineSize());
           }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
         }
-
-        public final boolean isInitialized() {
-          if (!hasAppName()) {
-            
-            return false;
-          }
-          if (!hasWatchFile()) {
-            
-            return false;
-          }
-          if (!hasPeriod()) {
-            
-            return false;
-          }
-          return true;
-        }
-
+        
         public Builder mergeFrom(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes parsedMessage = null;
-          try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes) e.getUnfinishedMessage();
-            throw e;
-          } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
+          com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder(
+              this.getUnknownFields());
+          while (true) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                this.setUnknownFields(unknownFields.build());
+                return this;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  this.setUnknownFields(unknownFields.build());
+                  return this;
+                }
+                break;
+              }
+              case 10: {
+                setAppName(input.readString());
+                break;
+              }
+              case 18: {
+                setWatchFile(input.readString());
+                break;
+              }
+              case 26: {
+                setPeriod(input.readString());
+                break;
+              }
+              case 34: {
+                setMaxLineSize(input.readString());
+                break;
+              }
             }
           }
-          return this;
         }
-        private int bitField0_;
-
+        
+        
         // required string app_name = 1;
-        private java.lang.Object appName_ = "";
-        /**
-         * <code>required string app_name = 1;</code>
-         */
         public boolean hasAppName() {
-          return ((bitField0_ & 0x00000001) == 0x00000001);
+          return result.hasAppName();
         }
-        /**
-         * <code>required string app_name = 1;</code>
-         */
         public java.lang.String getAppName() {
-          java.lang.Object ref = appName_;
-          if (!(ref instanceof java.lang.String)) {
-            java.lang.String s = ((com.google.protobuf.ByteString) ref)
-                .toStringUtf8();
-            appName_ = s;
-            return s;
-          } else {
-            return (java.lang.String) ref;
-          }
+          return result.getAppName();
         }
-        /**
-         * <code>required string app_name = 1;</code>
-         */
-        public com.google.protobuf.ByteString
-            getAppNameBytes() {
-          java.lang.Object ref = appName_;
-          if (ref instanceof String) {
-            com.google.protobuf.ByteString b = 
-                com.google.protobuf.ByteString.copyFromUtf8(
-                    (java.lang.String) ref);
-            appName_ = b;
-            return b;
-          } else {
-            return (com.google.protobuf.ByteString) ref;
-          }
-        }
-        /**
-         * <code>required string app_name = 1;</code>
-         */
-        public Builder setAppName(
-            java.lang.String value) {
+        public Builder setAppName(java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
-          appName_ = value;
-          onChanged();
+  result.hasAppName = true;
+          result.appName_ = value;
           return this;
         }
-        /**
-         * <code>required string app_name = 1;</code>
-         */
         public Builder clearAppName() {
-          bitField0_ = (bitField0_ & ~0x00000001);
-          appName_ = getDefaultInstance().getAppName();
-          onChanged();
+          result.hasAppName = false;
+          result.appName_ = getDefaultInstance().getAppName();
           return this;
         }
-        /**
-         * <code>required string app_name = 1;</code>
-         */
-        public Builder setAppNameBytes(
-            com.google.protobuf.ByteString value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-          appName_ = value;
-          onChanged();
-          return this;
-        }
-
+        
         // required string watch_file = 2;
-        private java.lang.Object watchFile_ = "";
-        /**
-         * <code>required string watch_file = 2;</code>
-         */
         public boolean hasWatchFile() {
-          return ((bitField0_ & 0x00000002) == 0x00000002);
+          return result.hasWatchFile();
         }
-        /**
-         * <code>required string watch_file = 2;</code>
-         */
         public java.lang.String getWatchFile() {
-          java.lang.Object ref = watchFile_;
-          if (!(ref instanceof java.lang.String)) {
-            java.lang.String s = ((com.google.protobuf.ByteString) ref)
-                .toStringUtf8();
-            watchFile_ = s;
-            return s;
-          } else {
-            return (java.lang.String) ref;
-          }
+          return result.getWatchFile();
         }
-        /**
-         * <code>required string watch_file = 2;</code>
-         */
-        public com.google.protobuf.ByteString
-            getWatchFileBytes() {
-          java.lang.Object ref = watchFile_;
-          if (ref instanceof String) {
-            com.google.protobuf.ByteString b = 
-                com.google.protobuf.ByteString.copyFromUtf8(
-                    (java.lang.String) ref);
-            watchFile_ = b;
-            return b;
-          } else {
-            return (com.google.protobuf.ByteString) ref;
-          }
-        }
-        /**
-         * <code>required string watch_file = 2;</code>
-         */
-        public Builder setWatchFile(
-            java.lang.String value) {
+        public Builder setWatchFile(java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
-          watchFile_ = value;
-          onChanged();
+  result.hasWatchFile = true;
+          result.watchFile_ = value;
           return this;
         }
-        /**
-         * <code>required string watch_file = 2;</code>
-         */
         public Builder clearWatchFile() {
-          bitField0_ = (bitField0_ & ~0x00000002);
-          watchFile_ = getDefaultInstance().getWatchFile();
-          onChanged();
+          result.hasWatchFile = false;
+          result.watchFile_ = getDefaultInstance().getWatchFile();
           return this;
         }
-        /**
-         * <code>required string watch_file = 2;</code>
-         */
-        public Builder setWatchFileBytes(
-            com.google.protobuf.ByteString value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-          watchFile_ = value;
-          onChanged();
-          return this;
-        }
-
+        
         // required string period = 3 [default = "3600"];
-        private java.lang.Object period_ = "3600";
-        /**
-         * <code>required string period = 3 [default = "3600"];</code>
-         */
         public boolean hasPeriod() {
-          return ((bitField0_ & 0x00000004) == 0x00000004);
+          return result.hasPeriod();
         }
-        /**
-         * <code>required string period = 3 [default = "3600"];</code>
-         */
         public java.lang.String getPeriod() {
-          java.lang.Object ref = period_;
-          if (!(ref instanceof java.lang.String)) {
-            java.lang.String s = ((com.google.protobuf.ByteString) ref)
-                .toStringUtf8();
-            period_ = s;
-            return s;
-          } else {
-            return (java.lang.String) ref;
-          }
+          return result.getPeriod();
         }
-        /**
-         * <code>required string period = 3 [default = "3600"];</code>
-         */
-        public com.google.protobuf.ByteString
-            getPeriodBytes() {
-          java.lang.Object ref = period_;
-          if (ref instanceof String) {
-            com.google.protobuf.ByteString b = 
-                com.google.protobuf.ByteString.copyFromUtf8(
-                    (java.lang.String) ref);
-            period_ = b;
-            return b;
-          } else {
-            return (com.google.protobuf.ByteString) ref;
-          }
-        }
-        /**
-         * <code>required string period = 3 [default = "3600"];</code>
-         */
-        public Builder setPeriod(
-            java.lang.String value) {
+        public Builder setPeriod(java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
-          period_ = value;
-          onChanged();
+  result.hasPeriod = true;
+          result.period_ = value;
           return this;
         }
-        /**
-         * <code>required string period = 3 [default = "3600"];</code>
-         */
         public Builder clearPeriod() {
-          bitField0_ = (bitField0_ & ~0x00000004);
-          period_ = getDefaultInstance().getPeriod();
-          onChanged();
+          result.hasPeriod = false;
+          result.period_ = getDefaultInstance().getPeriod();
           return this;
         }
-        /**
-         * <code>required string period = 3 [default = "3600"];</code>
-         */
-        public Builder setPeriodBytes(
-            com.google.protobuf.ByteString value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-          period_ = value;
-          onChanged();
-          return this;
-        }
-
+        
         // optional string max_line_size = 4 [default = "65536"];
-        private java.lang.Object maxLineSize_ = "65536";
-        /**
-         * <code>optional string max_line_size = 4 [default = "65536"];</code>
-         */
         public boolean hasMaxLineSize() {
-          return ((bitField0_ & 0x00000008) == 0x00000008);
+          return result.hasMaxLineSize();
         }
-        /**
-         * <code>optional string max_line_size = 4 [default = "65536"];</code>
-         */
         public java.lang.String getMaxLineSize() {
-          java.lang.Object ref = maxLineSize_;
-          if (!(ref instanceof java.lang.String)) {
-            java.lang.String s = ((com.google.protobuf.ByteString) ref)
-                .toStringUtf8();
-            maxLineSize_ = s;
-            return s;
-          } else {
-            return (java.lang.String) ref;
-          }
+          return result.getMaxLineSize();
         }
-        /**
-         * <code>optional string max_line_size = 4 [default = "65536"];</code>
-         */
-        public com.google.protobuf.ByteString
-            getMaxLineSizeBytes() {
-          java.lang.Object ref = maxLineSize_;
-          if (ref instanceof String) {
-            com.google.protobuf.ByteString b = 
-                com.google.protobuf.ByteString.copyFromUtf8(
-                    (java.lang.String) ref);
-            maxLineSize_ = b;
-            return b;
-          } else {
-            return (com.google.protobuf.ByteString) ref;
-          }
-        }
-        /**
-         * <code>optional string max_line_size = 4 [default = "65536"];</code>
-         */
-        public Builder setMaxLineSize(
-            java.lang.String value) {
+        public Builder setMaxLineSize(java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000008;
-          maxLineSize_ = value;
-          onChanged();
+  result.hasMaxLineSize = true;
+          result.maxLineSize_ = value;
           return this;
         }
-        /**
-         * <code>optional string max_line_size = 4 [default = "65536"];</code>
-         */
         public Builder clearMaxLineSize() {
-          bitField0_ = (bitField0_ & ~0x00000008);
-          maxLineSize_ = getDefaultInstance().getMaxLineSize();
-          onChanged();
+          result.hasMaxLineSize = false;
+          result.maxLineSize_ = getDefaultInstance().getMaxLineSize();
           return this;
         }
-        /**
-         * <code>optional string max_line_size = 4 [default = "65536"];</code>
-         */
-        public Builder setMaxLineSizeBytes(
-            com.google.protobuf.ByteString value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
-          maxLineSize_ = value;
-          onChanged();
-          return this;
-        }
-
+        
         // @@protoc_insertion_point(builder_scope:blackhole.ConfRes.AppConfRes)
       }
-
+      
       static {
         defaultInstance = new AppConfRes(true);
+        com.dp.blackhole.protocol.control.ConfResPB.internalForceInit();
         defaultInstance.initFields();
       }
-
+      
       // @@protoc_insertion_point(class_scope:blackhole.ConfRes.AppConfRes)
     }
-
+    
     // repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;
     public static final int APPCONFRES_FIELD_NUMBER = 1;
-    private java.util.List<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes> appConfRes_;
-    /**
-     * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-     */
+    private java.util.List<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes> appConfRes_ =
+      java.util.Collections.emptyList();
     public java.util.List<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes> getAppConfResList() {
       return appConfRes_;
     }
-    /**
-     * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-     */
-    public java.util.List<? extends com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfResOrBuilder> 
-        getAppConfResOrBuilderList() {
-      return appConfRes_;
-    }
-    /**
-     * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-     */
-    public int getAppConfResCount() {
-      return appConfRes_.size();
-    }
-    /**
-     * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-     */
+    public int getAppConfResCount() { return appConfRes_.size(); }
     public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes getAppConfRes(int index) {
       return appConfRes_.get(index);
     }
-    /**
-     * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-     */
-    public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfResOrBuilder getAppConfResOrBuilder(
-        int index) {
-      return appConfRes_.get(index);
-    }
-
+    
     private void initFields() {
-      appConfRes_ = java.util.Collections.emptyList();
     }
-    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-
-      for (int i = 0; i < getAppConfResCount(); i++) {
-        if (!getAppConfRes(i).isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+      for (com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes element : getAppConfResList()) {
+        if (!element.isInitialized()) return false;
       }
-      memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (int i = 0; i < appConfRes_.size(); i++) {
-        output.writeMessage(1, appConfRes_.get(i));
+      for (com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes element : getAppConfResList()) {
+        output.writeMessage(1, element);
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
-      for (int i = 0; i < appConfRes_.size(); i++) {
+      for (com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes element : getAppConfResList()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, appConfRes_.get(i));
+          .computeMessageSize(1, element);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
+    
     public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.ConfResPB.ConfRes prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code blackhole.ConfRes}
-     */
+    
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.dp.blackhole.protocol.control.ConfResPB.ConfResOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.dp.blackhole.protocol.control.ConfResPB.ConfRes.class, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.Builder.class);
-      }
-
-      // Construct using com.dp.blackhole.common.gen.ConfResPB.ConfRes.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getAppConfResFieldBuilder();
-        }
-      }
+        com.google.protobuf.GeneratedMessage.Builder<Builder> {
+      private com.dp.blackhole.protocol.control.ConfResPB.ConfRes result;
+      
+      // Construct using com.dp.blackhole.protocol.control.ConfResPB.ConfRes.newBuilder()
+      private Builder() {}
+      
       private static Builder create() {
-        return new Builder();
+        Builder builder = new Builder();
+        builder.result = new com.dp.blackhole.protocol.control.ConfResPB.ConfRes();
+        return builder;
       }
-
+      
+      protected com.dp.blackhole.protocol.control.ConfResPB.ConfRes internalGetResult() {
+        return result;
+      }
+      
       public Builder clear() {
-        super.clear();
-        if (appConfResBuilder_ == null) {
-          appConfRes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-        } else {
-          appConfResBuilder_.clear();
+        if (result == null) {
+          throw new IllegalStateException(
+            "Cannot call clear() after build().");
         }
+        result = new com.dp.blackhole.protocol.control.ConfResPB.ConfRes();
         return this;
       }
-
+      
       public Builder clone() {
-        return create().mergeFrom(buildPartial());
+        return create().mergeFrom(result);
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_descriptor;
+        return com.dp.blackhole.protocol.control.ConfResPB.ConfRes.getDescriptor();
       }
-
+      
       public com.dp.blackhole.protocol.control.ConfResPB.ConfRes getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.ConfResPB.ConfRes.getDefaultInstance();
       }
-
+      
+      public boolean isInitialized() {
+        return result.isInitialized();
+      }
       public com.dp.blackhole.protocol.control.ConfResPB.ConfRes build() {
-        com.dp.blackhole.protocol.control.ConfResPB.ConfRes result = buildPartial();
-        if (!result.isInitialized()) {
+        if (result != null && !isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return result;
+        return buildPartial();
       }
-
-      public com.dp.blackhole.protocol.control.ConfResPB.ConfRes buildPartial() {
-        com.dp.blackhole.protocol.control.ConfResPB.ConfRes result = new com.dp.blackhole.protocol.control.ConfResPB.ConfRes(this);
-        int from_bitField0_ = bitField0_;
-        if (appConfResBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
-            appConfRes_ = java.util.Collections.unmodifiableList(appConfRes_);
-            bitField0_ = (bitField0_ & ~0x00000001);
-          }
-          result.appConfRes_ = appConfRes_;
-        } else {
-          result.appConfRes_ = appConfResBuilder_.build();
+      
+      private com.dp.blackhole.protocol.control.ConfResPB.ConfRes buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        if (!isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
         }
-        onBuilt();
-        return result;
+        return buildPartial();
       }
-
+      
+      public com.dp.blackhole.protocol.control.ConfResPB.ConfRes buildPartial() {
+        if (result == null) {
+          throw new IllegalStateException(
+            "build() has already been called on this Builder.");
+        }
+        if (result.appConfRes_ != java.util.Collections.EMPTY_LIST) {
+          result.appConfRes_ =
+            java.util.Collections.unmodifiableList(result.appConfRes_);
+        }
+        com.dp.blackhole.protocol.control.ConfResPB.ConfRes returnMe = result;
+        result = null;
+        return returnMe;
+      }
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.ConfResPB.ConfRes) {
           return mergeFrom((com.dp.blackhole.protocol.control.ConfResPB.ConfRes)other);
@@ -1344,319 +650,114 @@ public final class ConfResPB {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(com.dp.blackhole.protocol.control.ConfResPB.ConfRes other) {
         if (other == com.dp.blackhole.protocol.control.ConfResPB.ConfRes.getDefaultInstance()) return this;
-        if (appConfResBuilder_ == null) {
-          if (!other.appConfRes_.isEmpty()) {
-            if (appConfRes_.isEmpty()) {
-              appConfRes_ = other.appConfRes_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-            } else {
-              ensureAppConfResIsMutable();
-              appConfRes_.addAll(other.appConfRes_);
-            }
-            onChanged();
+        if (!other.appConfRes_.isEmpty()) {
+          if (result.appConfRes_.isEmpty()) {
+            result.appConfRes_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes>();
           }
-        } else {
-          if (!other.appConfRes_.isEmpty()) {
-            if (appConfResBuilder_.isEmpty()) {
-              appConfResBuilder_.dispose();
-              appConfResBuilder_ = null;
-              appConfRes_ = other.appConfRes_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-              appConfResBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getAppConfResFieldBuilder() : null;
-            } else {
-              appConfResBuilder_.addAllMessages(other.appConfRes_);
-            }
-          }
+          result.appConfRes_.addAll(other.appConfRes_);
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
-      public final boolean isInitialized() {
-        for (int i = 0; i < getAppConfResCount(); i++) {
-          if (!getAppConfRes(i).isInitialized()) {
-            
-            return false;
-          }
-        }
-        return true;
-      }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.dp.blackhole.protocol.control.ConfResPB.ConfRes parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.dp.blackhole.protocol.control.ConfResPB.ConfRes) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder subBuilder = com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.newBuilder();
+              input.readMessage(subBuilder, extensionRegistry);
+              addAppConfRes(subBuilder.buildPartial());
+              break;
+            }
           }
         }
-        return this;
       }
-      private int bitField0_;
-
+      
+      
       // repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;
-      private java.util.List<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes> appConfRes_ =
-        java.util.Collections.emptyList();
-      private void ensureAppConfResIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          appConfRes_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes>(appConfRes_);
-          bitField0_ |= 0x00000001;
-         }
-      }
-
-      private com.google.protobuf.RepeatedFieldBuilder<
-          com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfResOrBuilder> appConfResBuilder_;
-
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
       public java.util.List<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes> getAppConfResList() {
-        if (appConfResBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(appConfRes_);
-        } else {
-          return appConfResBuilder_.getMessageList();
-        }
+        return java.util.Collections.unmodifiableList(result.appConfRes_);
       }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
       public int getAppConfResCount() {
-        if (appConfResBuilder_ == null) {
-          return appConfRes_.size();
-        } else {
-          return appConfResBuilder_.getCount();
-        }
+        return result.getAppConfResCount();
       }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
       public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes getAppConfRes(int index) {
-        if (appConfResBuilder_ == null) {
-          return appConfRes_.get(index);
-        } else {
-          return appConfResBuilder_.getMessage(index);
-        }
+        return result.getAppConfRes(index);
       }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
-      public Builder setAppConfRes(
-          int index, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes value) {
-        if (appConfResBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureAppConfResIsMutable();
-          appConfRes_.set(index, value);
-          onChanged();
-        } else {
-          appConfResBuilder_.setMessage(index, value);
+      public Builder setAppConfRes(int index, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes value) {
+        if (value == null) {
+          throw new NullPointerException();
         }
+        result.appConfRes_.set(index, value);
         return this;
       }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
-      public Builder setAppConfRes(
-          int index, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder builderForValue) {
-        if (appConfResBuilder_ == null) {
-          ensureAppConfResIsMutable();
-          appConfRes_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          appConfResBuilder_.setMessage(index, builderForValue.build());
-        }
+      public Builder setAppConfRes(int index, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder builderForValue) {
+        result.appConfRes_.set(index, builderForValue.build());
         return this;
       }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
       public Builder addAppConfRes(com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes value) {
-        if (appConfResBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureAppConfResIsMutable();
-          appConfRes_.add(value);
-          onChanged();
-        } else {
-          appConfResBuilder_.addMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
+        if (result.appConfRes_.isEmpty()) {
+          result.appConfRes_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes>();
+        }
+        result.appConfRes_.add(value);
         return this;
       }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
-      public Builder addAppConfRes(
-          int index, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes value) {
-        if (appConfResBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureAppConfResIsMutable();
-          appConfRes_.add(index, value);
-          onChanged();
-        } else {
-          appConfResBuilder_.addMessage(index, value);
+      public Builder addAppConfRes(com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder builderForValue) {
+        if (result.appConfRes_.isEmpty()) {
+          result.appConfRes_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes>();
         }
+        result.appConfRes_.add(builderForValue.build());
         return this;
       }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
-      public Builder addAppConfRes(
-          com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder builderForValue) {
-        if (appConfResBuilder_ == null) {
-          ensureAppConfResIsMutable();
-          appConfRes_.add(builderForValue.build());
-          onChanged();
-        } else {
-          appConfResBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
-      public Builder addAppConfRes(
-          int index, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder builderForValue) {
-        if (appConfResBuilder_ == null) {
-          ensureAppConfResIsMutable();
-          appConfRes_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          appConfResBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
       public Builder addAllAppConfRes(
           java.lang.Iterable<? extends com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes> values) {
-        if (appConfResBuilder_ == null) {
-          ensureAppConfResIsMutable();
-          super.addAll(values, appConfRes_);
-          onChanged();
-        } else {
-          appConfResBuilder_.addAllMessages(values);
+        if (result.appConfRes_.isEmpty()) {
+          result.appConfRes_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes>();
         }
+        super.addAll(values, result.appConfRes_);
         return this;
       }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
       public Builder clearAppConfRes() {
-        if (appConfResBuilder_ == null) {
-          appConfRes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-          onChanged();
-        } else {
-          appConfResBuilder_.clear();
-        }
+        result.appConfRes_ = java.util.Collections.emptyList();
         return this;
       }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
-      public Builder removeAppConfRes(int index) {
-        if (appConfResBuilder_ == null) {
-          ensureAppConfResIsMutable();
-          appConfRes_.remove(index);
-          onChanged();
-        } else {
-          appConfResBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
-      public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder getAppConfResBuilder(
-          int index) {
-        return getAppConfResFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
-      public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfResOrBuilder getAppConfResOrBuilder(
-          int index) {
-        if (appConfResBuilder_ == null) {
-          return appConfRes_.get(index);  } else {
-          return appConfResBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
-      public java.util.List<? extends com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfResOrBuilder> 
-           getAppConfResOrBuilderList() {
-        if (appConfResBuilder_ != null) {
-          return appConfResBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(appConfRes_);
-        }
-      }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
-      public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder addAppConfResBuilder() {
-        return getAppConfResFieldBuilder().addBuilder(
-            com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
-      public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder addAppConfResBuilder(
-          int index) {
-        return getAppConfResFieldBuilder().addBuilder(
-            index, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;</code>
-       */
-      public java.util.List<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder> 
-           getAppConfResBuilderList() {
-        return getAppConfResFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilder<
-          com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfResOrBuilder> 
-          getAppConfResFieldBuilder() {
-        if (appConfResBuilder_ == null) {
-          appConfResBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfResOrBuilder>(
-                  appConfRes_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
-                  getParentForChildren(),
-                  isClean());
-          appConfRes_ = null;
-        }
-        return appConfResBuilder_;
-      }
-
+      
       // @@protoc_insertion_point(builder_scope:blackhole.ConfRes)
     }
-
+    
     static {
       defaultInstance = new ConfRes(true);
+      com.dp.blackhole.protocol.control.ConfResPB.internalForceInit();
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:blackhole.ConfRes)
   }
-
+  
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_ConfRes_descriptor;
   private static
@@ -1667,7 +768,7 @@ public final class ConfResPB {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable;
-
+  
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -1680,8 +781,9 @@ public final class ConfResPB {
       "\n\nappConfRes\030\001 \003(\0132\035.blackhole.ConfRes.A" +
       "ppConfRes\032f\n\nAppConfRes\022\020\n\010app_name\030\001 \002(" +
       "\t\022\022\n\nwatch_file\030\002 \002(\t\022\024\n\006period\030\003 \002(\t:\0043" +
-      "600\022\034\n\rmax_line_size\030\004 \001(\t:\00565536B(\n\033com" +
-      ".dp.blackhole.common.genB\tConfResPB"
+      "600\022\034\n\rmax_line_size\030\004 \001(\t:\00565536B.\n!com" +
+      ".dp.blackhole.protocol.controlB\tConfResP" +
+      "B"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1693,13 +795,17 @@ public final class ConfResPB {
           internal_static_blackhole_ConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_descriptor,
-              new java.lang.String[] { "AppConfRes", });
+              new java.lang.String[] { "AppConfRes", },
+              com.dp.blackhole.protocol.control.ConfResPB.ConfRes.class,
+              com.dp.blackhole.protocol.control.ConfResPB.ConfRes.Builder.class);
           internal_static_blackhole_ConfRes_AppConfRes_descriptor =
             internal_static_blackhole_ConfRes_descriptor.getNestedTypes().get(0);
           internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_AppConfRes_descriptor,
-              new java.lang.String[] { "AppName", "WatchFile", "Period", "MaxLineSize", });
+              new java.lang.String[] { "AppName", "WatchFile", "Period", "MaxLineSize", },
+              com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.class,
+              com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder.class);
           return null;
         }
       };
@@ -1708,6 +814,8 @@ public final class ConfResPB {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-
+  
+  public static void internalForceInit() {}
+  
   // @@protoc_insertion_point(outer_class_scope)
 }

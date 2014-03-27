@@ -8,612 +8,270 @@ public final class TopicReportPB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface TopicReportOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-
-    // repeated .blackhole.TopicReport.TopicEntry entries = 1;
-    /**
-     * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-     */
-    java.util.List<com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry> 
-        getEntriesList();
-    /**
-     * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-     */
-    com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry getEntries(int index);
-    /**
-     * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-     */
-    int getEntriesCount();
-    /**
-     * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-     */
-    java.util.List<? extends com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntryOrBuilder> 
-        getEntriesOrBuilderList();
-    /**
-     * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-     */
-    com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntryOrBuilder getEntriesOrBuilder(
-        int index);
-  }
-  /**
-   * Protobuf type {@code blackhole.TopicReport}
-   */
   public static final class TopicReport extends
-      com.google.protobuf.GeneratedMessage
-      implements TopicReportOrBuilder {
+      com.google.protobuf.GeneratedMessage {
     // Use TopicReport.newBuilder() to construct.
-    private TopicReport(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-      super(builder);
-      this.unknownFields = builder.getUnknownFields();
+    private TopicReport() {
+      initFields();
     }
-    private TopicReport(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private TopicReport(boolean noInit) {}
+    
     private static final TopicReport defaultInstance;
     public static TopicReport getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public TopicReport getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private TopicReport(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                entries_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              entries_.add(input.readMessage(com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.PARSER, extensionRegistry));
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          entries_ = java.util.Collections.unmodifiableList(entries_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.TopicReportPB.internal_static_blackhole_TopicReport_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.TopicReportPB.internal_static_blackhole_TopicReport_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.class, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.Builder.class);
+      return com.dp.blackhole.protocol.control.TopicReportPB.internal_static_blackhole_TopicReport_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<TopicReport> PARSER =
-        new com.google.protobuf.AbstractParser<TopicReport>() {
-      public TopicReport parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new TopicReport(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<TopicReport> getParserForType() {
-      return PARSER;
-    }
-
-    public interface TopicEntryOrBuilder
-        extends com.google.protobuf.MessageOrBuilder {
-
-      // required string topic = 1;
-      /**
-       * <code>required string topic = 1;</code>
-       */
-      boolean hasTopic();
-      /**
-       * <code>required string topic = 1;</code>
-       */
-      java.lang.String getTopic();
-      /**
-       * <code>required string topic = 1;</code>
-       */
-      com.google.protobuf.ByteString
-          getTopicBytes();
-
-      // required string partitionId = 2;
-      /**
-       * <code>required string partitionId = 2;</code>
-       */
-      boolean hasPartitionId();
-      /**
-       * <code>required string partitionId = 2;</code>
-       */
-      java.lang.String getPartitionId();
-      /**
-       * <code>required string partitionId = 2;</code>
-       */
-      com.google.protobuf.ByteString
-          getPartitionIdBytes();
-
-      // required int64 offset = 3;
-      /**
-       * <code>required int64 offset = 3;</code>
-       */
-      boolean hasOffset();
-      /**
-       * <code>required int64 offset = 3;</code>
-       */
-      long getOffset();
-    }
-    /**
-     * Protobuf type {@code blackhole.TopicReport.TopicEntry}
-     */
+    
     public static final class TopicEntry extends
-        com.google.protobuf.GeneratedMessage
-        implements TopicEntryOrBuilder {
+        com.google.protobuf.GeneratedMessage {
       // Use TopicEntry.newBuilder() to construct.
-      private TopicEntry(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-        super(builder);
-        this.unknownFields = builder.getUnknownFields();
+      private TopicEntry() {
+        initFields();
       }
-      private TopicEntry(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+      private TopicEntry(boolean noInit) {}
+      
       private static final TopicEntry defaultInstance;
       public static TopicEntry getDefaultInstance() {
         return defaultInstance;
       }
-
+      
       public TopicEntry getDefaultInstanceForType() {
         return defaultInstance;
       }
-
-      private final com.google.protobuf.UnknownFieldSet unknownFields;
-      @java.lang.Override
-      public final com.google.protobuf.UnknownFieldSet
-          getUnknownFields() {
-        return this.unknownFields;
-      }
-      private TopicEntry(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        initFields();
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              default: {
-                if (!parseUnknownField(input, unknownFields,
-                                       extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-              case 10: {
-                bitField0_ |= 0x00000001;
-                topic_ = input.readBytes();
-                break;
-              }
-              case 18: {
-                bitField0_ |= 0x00000002;
-                partitionId_ = input.readBytes();
-                break;
-              }
-              case 24: {
-                bitField0_ |= 0x00000004;
-                offset_ = input.readInt64();
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e.getMessage()).setUnfinishedMessage(this);
-        } finally {
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
-      }
+      
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.dp.blackhole.protocol.control.TopicReportPB.internal_static_blackhole_TopicReport_TopicEntry_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.dp.blackhole.protocol.control.TopicReportPB.internal_static_blackhole_TopicReport_TopicEntry_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.class, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder.class);
+        return com.dp.blackhole.protocol.control.TopicReportPB.internal_static_blackhole_TopicReport_TopicEntry_fieldAccessorTable;
       }
-
-      public static com.google.protobuf.Parser<TopicEntry> PARSER =
-          new com.google.protobuf.AbstractParser<TopicEntry>() {
-        public TopicEntry parsePartialFrom(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-          return new TopicEntry(input, extensionRegistry);
-        }
-      };
-
-      @java.lang.Override
-      public com.google.protobuf.Parser<TopicEntry> getParserForType() {
-        return PARSER;
-      }
-
-      private int bitField0_;
+      
       // required string topic = 1;
       public static final int TOPIC_FIELD_NUMBER = 1;
-      private java.lang.Object topic_;
-      /**
-       * <code>required string topic = 1;</code>
-       */
-      public boolean hasTopic() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>required string topic = 1;</code>
-       */
-      public java.lang.String getTopic() {
-        java.lang.Object ref = topic_;
-        if (ref instanceof java.lang.String) {
-          return (java.lang.String) ref;
-        } else {
-          com.google.protobuf.ByteString bs = 
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            topic_ = s;
-          }
-          return s;
-        }
-      }
-      /**
-       * <code>required string topic = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getTopicBytes() {
-        java.lang.Object ref = topic_;
-        if (ref instanceof java.lang.String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          topic_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-
+      private boolean hasTopic;
+      private java.lang.String topic_ = "";
+      public boolean hasTopic() { return hasTopic; }
+      public java.lang.String getTopic() { return topic_; }
+      
       // required string partitionId = 2;
       public static final int PARTITIONID_FIELD_NUMBER = 2;
-      private java.lang.Object partitionId_;
-      /**
-       * <code>required string partitionId = 2;</code>
-       */
-      public boolean hasPartitionId() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>required string partitionId = 2;</code>
-       */
-      public java.lang.String getPartitionId() {
-        java.lang.Object ref = partitionId_;
-        if (ref instanceof java.lang.String) {
-          return (java.lang.String) ref;
-        } else {
-          com.google.protobuf.ByteString bs = 
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            partitionId_ = s;
-          }
-          return s;
-        }
-      }
-      /**
-       * <code>required string partitionId = 2;</code>
-       */
-      public com.google.protobuf.ByteString
-          getPartitionIdBytes() {
-        java.lang.Object ref = partitionId_;
-        if (ref instanceof java.lang.String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          partitionId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-
+      private boolean hasPartitionId;
+      private java.lang.String partitionId_ = "";
+      public boolean hasPartitionId() { return hasPartitionId; }
+      public java.lang.String getPartitionId() { return partitionId_; }
+      
       // required int64 offset = 3;
       public static final int OFFSET_FIELD_NUMBER = 3;
-      private long offset_;
-      /**
-       * <code>required int64 offset = 3;</code>
-       */
-      public boolean hasOffset() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      /**
-       * <code>required int64 offset = 3;</code>
-       */
-      public long getOffset() {
-        return offset_;
-      }
-
+      private boolean hasOffset;
+      private long offset_ = 0L;
+      public boolean hasOffset() { return hasOffset; }
+      public long getOffset() { return offset_; }
+      
       private void initFields() {
-        topic_ = "";
-        partitionId_ = "";
-        offset_ = 0L;
       }
-      private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
-        byte isInitialized = memoizedIsInitialized;
-        if (isInitialized != -1) return isInitialized == 1;
-
-        if (!hasTopic()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        if (!hasPartitionId()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        if (!hasOffset()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        memoizedIsInitialized = 1;
+        if (!hasTopic) return false;
+        if (!hasPartitionId) return false;
+        if (!hasOffset) return false;
         return true;
       }
-
+      
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
         getSerializedSize();
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          output.writeBytes(1, getTopicBytes());
+        if (hasTopic()) {
+          output.writeString(1, getTopic());
         }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
-          output.writeBytes(2, getPartitionIdBytes());
+        if (hasPartitionId()) {
+          output.writeString(2, getPartitionId());
         }
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
-          output.writeInt64(3, offset_);
+        if (hasOffset()) {
+          output.writeInt64(3, getOffset());
         }
         getUnknownFields().writeTo(output);
       }
-
+      
       private int memoizedSerializedSize = -1;
       public int getSerializedSize() {
         int size = memoizedSerializedSize;
         if (size != -1) return size;
-
+      
         size = 0;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (hasTopic()) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(1, getTopicBytes());
+            .computeStringSize(1, getTopic());
         }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (hasPartitionId()) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(2, getPartitionIdBytes());
+            .computeStringSize(2, getPartitionId());
         }
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (hasOffset()) {
           size += com.google.protobuf.CodedOutputStream
-            .computeInt64Size(3, offset_);
+            .computeInt64Size(3, getOffset());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
         return size;
       }
-
-      private static final long serialVersionUID = 0L;
-      @java.lang.Override
-      protected java.lang.Object writeReplace()
-          throws java.io.ObjectStreamException {
-        return super.writeReplace();
-      }
-
+      
       public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry parseFrom(
           com.google.protobuf.ByteString data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
+        return newBuilder().mergeFrom(data).buildParsed();
       }
       public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry parseFrom(
           com.google.protobuf.ByteString data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
+        return newBuilder().mergeFrom(data, extensionRegistry)
+                 .buildParsed();
       }
       public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry parseFrom(byte[] data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
+        return newBuilder().mergeFrom(data).buildParsed();
       }
       public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry parseFrom(
           byte[] data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
+        return newBuilder().mergeFrom(data, extensionRegistry)
+                 .buildParsed();
       }
       public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry parseFrom(java.io.InputStream input)
           throws java.io.IOException {
-        return PARSER.parseFrom(input);
+        return newBuilder().mergeFrom(input).buildParsed();
       }
       public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return PARSER.parseFrom(input, extensionRegistry);
+        return newBuilder().mergeFrom(input, extensionRegistry)
+                 .buildParsed();
       }
       public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry parseDelimitedFrom(java.io.InputStream input)
           throws java.io.IOException {
-        return PARSER.parseDelimitedFrom(input);
+        Builder builder = newBuilder();
+        if (builder.mergeDelimitedFrom(input)) {
+          return builder.buildParsed();
+        } else {
+          return null;
+        }
       }
       public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+        Builder builder = newBuilder();
+        if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+          return builder.buildParsed();
+        } else {
+          return null;
+        }
       }
       public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
-        return PARSER.parseFrom(input);
+        return newBuilder().mergeFrom(input).buildParsed();
       }
       public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return PARSER.parseFrom(input, extensionRegistry);
+        return newBuilder().mergeFrom(input, extensionRegistry)
+                 .buildParsed();
       }
-
+      
       public static Builder newBuilder() { return Builder.create(); }
       public Builder newBuilderForType() { return newBuilder(); }
       public static Builder newBuilder(com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry prototype) {
         return newBuilder().mergeFrom(prototype);
       }
       public Builder toBuilder() { return newBuilder(this); }
-
-      @java.lang.Override
-      protected Builder newBuilderForType(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        Builder builder = new Builder(parent);
-        return builder;
-      }
-      /**
-       * Protobuf type {@code blackhole.TopicReport.TopicEntry}
-       */
+      
       public static final class Builder extends
-          com.google.protobuf.GeneratedMessage.Builder<Builder>
-         implements com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntryOrBuilder {
-        public static final com.google.protobuf.Descriptors.Descriptor
-            getDescriptor() {
-          return com.dp.blackhole.protocol.control.TopicReportPB.internal_static_blackhole_TopicReport_TopicEntry_descriptor;
-        }
-
-        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-            internalGetFieldAccessorTable() {
-          return com.dp.blackhole.protocol.control.TopicReportPB.internal_static_blackhole_TopicReport_TopicEntry_fieldAccessorTable
-              .ensureFieldAccessorsInitialized(
-                  com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.class, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder.class);
-        }
-
-        // Construct using com.dp.blackhole.common.gen.TopicReportPB.TopicReport.TopicEntry.newBuilder()
-        private Builder() {
-          maybeForceBuilderInitialization();
-        }
-
-        private Builder(
-            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-          super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          }
-        }
+          com.google.protobuf.GeneratedMessage.Builder<Builder> {
+        private com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry result;
+        
+        // Construct using com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.newBuilder()
+        private Builder() {}
+        
         private static Builder create() {
-          return new Builder();
+          Builder builder = new Builder();
+          builder.result = new com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry();
+          return builder;
         }
-
+        
+        protected com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry internalGetResult() {
+          return result;
+        }
+        
         public Builder clear() {
-          super.clear();
-          topic_ = "";
-          bitField0_ = (bitField0_ & ~0x00000001);
-          partitionId_ = "";
-          bitField0_ = (bitField0_ & ~0x00000002);
-          offset_ = 0L;
-          bitField0_ = (bitField0_ & ~0x00000004);
+          if (result == null) {
+            throw new IllegalStateException(
+              "Cannot call clear() after build().");
+          }
+          result = new com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry();
           return this;
         }
-
+        
         public Builder clone() {
-          return create().mergeFrom(buildPartial());
+          return create().mergeFrom(result);
         }
-
+        
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return com.dp.blackhole.protocol.control.TopicReportPB.internal_static_blackhole_TopicReport_TopicEntry_descriptor;
+          return com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.getDescriptor();
         }
-
+        
         public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry getDefaultInstanceForType() {
           return com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.getDefaultInstance();
         }
-
+        
+        public boolean isInitialized() {
+          return result.isInitialized();
+        }
         public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry build() {
-          com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry result = buildPartial();
-          if (!result.isInitialized()) {
+          if (result != null && !isInitialized()) {
             throw newUninitializedMessageException(result);
           }
-          return result;
+          return buildPartial();
         }
-
+        
+        private com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry buildParsed()
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          if (!isInitialized()) {
+            throw newUninitializedMessageException(
+              result).asInvalidProtocolBufferException();
+          }
+          return buildPartial();
+        }
+        
         public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry buildPartial() {
-          com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry result = new com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry(this);
-          int from_bitField0_ = bitField0_;
-          int to_bitField0_ = 0;
-          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-            to_bitField0_ |= 0x00000001;
+          if (result == null) {
+            throw new IllegalStateException(
+              "build() has already been called on this Builder.");
           }
-          result.topic_ = topic_;
-          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-            to_bitField0_ |= 0x00000002;
-          }
-          result.partitionId_ = partitionId_;
-          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-            to_bitField0_ |= 0x00000004;
-          }
-          result.offset_ = offset_;
-          result.bitField0_ = to_bitField0_;
-          onBuilt();
-          return result;
+          com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry returnMe = result;
+          result = null;
+          return returnMe;
         }
-
+        
         public Builder mergeFrom(com.google.protobuf.Message other) {
           if (other instanceof com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry) {
             return mergeFrom((com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry)other);
@@ -622,18 +280,14 @@ public final class TopicReportPB {
             return this;
           }
         }
-
+        
         public Builder mergeFrom(com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry other) {
           if (other == com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.getDefaultInstance()) return this;
           if (other.hasTopic()) {
-            bitField0_ |= 0x00000001;
-            topic_ = other.topic_;
-            onChanged();
+            setTopic(other.getTopic());
           }
           if (other.hasPartitionId()) {
-            bitField0_ |= 0x00000002;
-            partitionId_ = other.partitionId_;
-            onChanged();
+            setPartitionId(other.getPartitionId());
           }
           if (other.hasOffset()) {
             setOffset(other.getOffset());
@@ -641,470 +295,308 @@ public final class TopicReportPB {
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
         }
-
-        public final boolean isInitialized() {
-          if (!hasTopic()) {
-            
-            return false;
-          }
-          if (!hasPartitionId()) {
-            
-            return false;
-          }
-          if (!hasOffset()) {
-            
-            return false;
-          }
-          return true;
-        }
-
+        
         public Builder mergeFrom(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry parsedMessage = null;
-          try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry) e.getUnfinishedMessage();
-            throw e;
-          } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
+          com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder(
+              this.getUnknownFields());
+          while (true) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                this.setUnknownFields(unknownFields.build());
+                return this;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  this.setUnknownFields(unknownFields.build());
+                  return this;
+                }
+                break;
+              }
+              case 10: {
+                setTopic(input.readString());
+                break;
+              }
+              case 18: {
+                setPartitionId(input.readString());
+                break;
+              }
+              case 24: {
+                setOffset(input.readInt64());
+                break;
+              }
             }
           }
-          return this;
         }
-        private int bitField0_;
-
+        
+        
         // required string topic = 1;
-        private java.lang.Object topic_ = "";
-        /**
-         * <code>required string topic = 1;</code>
-         */
         public boolean hasTopic() {
-          return ((bitField0_ & 0x00000001) == 0x00000001);
+          return result.hasTopic();
         }
-        /**
-         * <code>required string topic = 1;</code>
-         */
         public java.lang.String getTopic() {
-          java.lang.Object ref = topic_;
-          if (!(ref instanceof java.lang.String)) {
-            java.lang.String s = ((com.google.protobuf.ByteString) ref)
-                .toStringUtf8();
-            topic_ = s;
-            return s;
-          } else {
-            return (java.lang.String) ref;
-          }
+          return result.getTopic();
         }
-        /**
-         * <code>required string topic = 1;</code>
-         */
-        public com.google.protobuf.ByteString
-            getTopicBytes() {
-          java.lang.Object ref = topic_;
-          if (ref instanceof String) {
-            com.google.protobuf.ByteString b = 
-                com.google.protobuf.ByteString.copyFromUtf8(
-                    (java.lang.String) ref);
-            topic_ = b;
-            return b;
-          } else {
-            return (com.google.protobuf.ByteString) ref;
-          }
-        }
-        /**
-         * <code>required string topic = 1;</code>
-         */
-        public Builder setTopic(
-            java.lang.String value) {
+        public Builder setTopic(java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
-          topic_ = value;
-          onChanged();
+  result.hasTopic = true;
+          result.topic_ = value;
           return this;
         }
-        /**
-         * <code>required string topic = 1;</code>
-         */
         public Builder clearTopic() {
-          bitField0_ = (bitField0_ & ~0x00000001);
-          topic_ = getDefaultInstance().getTopic();
-          onChanged();
+          result.hasTopic = false;
+          result.topic_ = getDefaultInstance().getTopic();
           return this;
         }
-        /**
-         * <code>required string topic = 1;</code>
-         */
-        public Builder setTopicBytes(
-            com.google.protobuf.ByteString value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-          topic_ = value;
-          onChanged();
-          return this;
-        }
-
+        
         // required string partitionId = 2;
-        private java.lang.Object partitionId_ = "";
-        /**
-         * <code>required string partitionId = 2;</code>
-         */
         public boolean hasPartitionId() {
-          return ((bitField0_ & 0x00000002) == 0x00000002);
+          return result.hasPartitionId();
         }
-        /**
-         * <code>required string partitionId = 2;</code>
-         */
         public java.lang.String getPartitionId() {
-          java.lang.Object ref = partitionId_;
-          if (!(ref instanceof java.lang.String)) {
-            java.lang.String s = ((com.google.protobuf.ByteString) ref)
-                .toStringUtf8();
-            partitionId_ = s;
-            return s;
-          } else {
-            return (java.lang.String) ref;
-          }
+          return result.getPartitionId();
         }
-        /**
-         * <code>required string partitionId = 2;</code>
-         */
-        public com.google.protobuf.ByteString
-            getPartitionIdBytes() {
-          java.lang.Object ref = partitionId_;
-          if (ref instanceof String) {
-            com.google.protobuf.ByteString b = 
-                com.google.protobuf.ByteString.copyFromUtf8(
-                    (java.lang.String) ref);
-            partitionId_ = b;
-            return b;
-          } else {
-            return (com.google.protobuf.ByteString) ref;
-          }
-        }
-        /**
-         * <code>required string partitionId = 2;</code>
-         */
-        public Builder setPartitionId(
-            java.lang.String value) {
+        public Builder setPartitionId(java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
-          partitionId_ = value;
-          onChanged();
+  result.hasPartitionId = true;
+          result.partitionId_ = value;
           return this;
         }
-        /**
-         * <code>required string partitionId = 2;</code>
-         */
         public Builder clearPartitionId() {
-          bitField0_ = (bitField0_ & ~0x00000002);
-          partitionId_ = getDefaultInstance().getPartitionId();
-          onChanged();
+          result.hasPartitionId = false;
+          result.partitionId_ = getDefaultInstance().getPartitionId();
           return this;
         }
-        /**
-         * <code>required string partitionId = 2;</code>
-         */
-        public Builder setPartitionIdBytes(
-            com.google.protobuf.ByteString value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-          partitionId_ = value;
-          onChanged();
-          return this;
-        }
-
+        
         // required int64 offset = 3;
-        private long offset_ ;
-        /**
-         * <code>required int64 offset = 3;</code>
-         */
         public boolean hasOffset() {
-          return ((bitField0_ & 0x00000004) == 0x00000004);
+          return result.hasOffset();
         }
-        /**
-         * <code>required int64 offset = 3;</code>
-         */
         public long getOffset() {
-          return offset_;
+          return result.getOffset();
         }
-        /**
-         * <code>required int64 offset = 3;</code>
-         */
         public Builder setOffset(long value) {
-          bitField0_ |= 0x00000004;
-          offset_ = value;
-          onChanged();
+          result.hasOffset = true;
+          result.offset_ = value;
           return this;
         }
-        /**
-         * <code>required int64 offset = 3;</code>
-         */
         public Builder clearOffset() {
-          bitField0_ = (bitField0_ & ~0x00000004);
-          offset_ = 0L;
-          onChanged();
+          result.hasOffset = false;
+          result.offset_ = 0L;
           return this;
         }
-
+        
         // @@protoc_insertion_point(builder_scope:blackhole.TopicReport.TopicEntry)
       }
-
+      
       static {
         defaultInstance = new TopicEntry(true);
+        com.dp.blackhole.protocol.control.TopicReportPB.internalForceInit();
         defaultInstance.initFields();
       }
-
+      
       // @@protoc_insertion_point(class_scope:blackhole.TopicReport.TopicEntry)
     }
-
+    
     // repeated .blackhole.TopicReport.TopicEntry entries = 1;
     public static final int ENTRIES_FIELD_NUMBER = 1;
-    private java.util.List<com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry> entries_;
-    /**
-     * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-     */
+    private java.util.List<com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry> entries_ =
+      java.util.Collections.emptyList();
     public java.util.List<com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry> getEntriesList() {
       return entries_;
     }
-    /**
-     * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-     */
-    public java.util.List<? extends com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntryOrBuilder> 
-        getEntriesOrBuilderList() {
-      return entries_;
-    }
-    /**
-     * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-     */
-    public int getEntriesCount() {
-      return entries_.size();
-    }
-    /**
-     * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-     */
+    public int getEntriesCount() { return entries_.size(); }
     public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry getEntries(int index) {
       return entries_.get(index);
     }
-    /**
-     * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-     */
-    public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntryOrBuilder getEntriesOrBuilder(
-        int index) {
-      return entries_.get(index);
-    }
-
+    
     private void initFields() {
-      entries_ = java.util.Collections.emptyList();
     }
-    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-
-      for (int i = 0; i < getEntriesCount(); i++) {
-        if (!getEntries(i).isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+      for (com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry element : getEntriesList()) {
+        if (!element.isInitialized()) return false;
       }
-      memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (int i = 0; i < entries_.size(); i++) {
-        output.writeMessage(1, entries_.get(i));
+      for (com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry element : getEntriesList()) {
+        output.writeMessage(1, element);
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
-      for (int i = 0; i < entries_.size(); i++) {
+      for (com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry element : getEntriesList()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, entries_.get(i));
+          .computeMessageSize(1, element);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
+    
     public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.TopicReportPB.TopicReport parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.TopicReportPB.TopicReport prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code blackhole.TopicReport}
-     */
+    
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.dp.blackhole.protocol.control.TopicReportPB.TopicReportOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.dp.blackhole.protocol.control.TopicReportPB.internal_static_blackhole_TopicReport_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.dp.blackhole.protocol.control.TopicReportPB.internal_static_blackhole_TopicReport_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.class, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.Builder.class);
-      }
-
-      // Construct using com.dp.blackhole.common.gen.TopicReportPB.TopicReport.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getEntriesFieldBuilder();
-        }
-      }
+        com.google.protobuf.GeneratedMessage.Builder<Builder> {
+      private com.dp.blackhole.protocol.control.TopicReportPB.TopicReport result;
+      
+      // Construct using com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.newBuilder()
+      private Builder() {}
+      
       private static Builder create() {
-        return new Builder();
+        Builder builder = new Builder();
+        builder.result = new com.dp.blackhole.protocol.control.TopicReportPB.TopicReport();
+        return builder;
       }
-
+      
+      protected com.dp.blackhole.protocol.control.TopicReportPB.TopicReport internalGetResult() {
+        return result;
+      }
+      
       public Builder clear() {
-        super.clear();
-        if (entriesBuilder_ == null) {
-          entries_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-        } else {
-          entriesBuilder_.clear();
+        if (result == null) {
+          throw new IllegalStateException(
+            "Cannot call clear() after build().");
         }
+        result = new com.dp.blackhole.protocol.control.TopicReportPB.TopicReport();
         return this;
       }
-
+      
       public Builder clone() {
-        return create().mergeFrom(buildPartial());
+        return create().mergeFrom(result);
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.TopicReportPB.internal_static_blackhole_TopicReport_descriptor;
+        return com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.getDescriptor();
       }
-
+      
       public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.getDefaultInstance();
       }
-
+      
+      public boolean isInitialized() {
+        return result.isInitialized();
+      }
       public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport build() {
-        com.dp.blackhole.protocol.control.TopicReportPB.TopicReport result = buildPartial();
-        if (!result.isInitialized()) {
+        if (result != null && !isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return result;
+        return buildPartial();
       }
-
-      public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport buildPartial() {
-        com.dp.blackhole.protocol.control.TopicReportPB.TopicReport result = new com.dp.blackhole.protocol.control.TopicReportPB.TopicReport(this);
-        int from_bitField0_ = bitField0_;
-        if (entriesBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
-            entries_ = java.util.Collections.unmodifiableList(entries_);
-            bitField0_ = (bitField0_ & ~0x00000001);
-          }
-          result.entries_ = entries_;
-        } else {
-          result.entries_ = entriesBuilder_.build();
+      
+      private com.dp.blackhole.protocol.control.TopicReportPB.TopicReport buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        if (!isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
         }
-        onBuilt();
-        return result;
+        return buildPartial();
       }
-
+      
+      public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport buildPartial() {
+        if (result == null) {
+          throw new IllegalStateException(
+            "build() has already been called on this Builder.");
+        }
+        if (result.entries_ != java.util.Collections.EMPTY_LIST) {
+          result.entries_ =
+            java.util.Collections.unmodifiableList(result.entries_);
+        }
+        com.dp.blackhole.protocol.control.TopicReportPB.TopicReport returnMe = result;
+        result = null;
+        return returnMe;
+      }
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.TopicReportPB.TopicReport) {
           return mergeFrom((com.dp.blackhole.protocol.control.TopicReportPB.TopicReport)other);
@@ -1113,319 +605,114 @@ public final class TopicReportPB {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(com.dp.blackhole.protocol.control.TopicReportPB.TopicReport other) {
         if (other == com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.getDefaultInstance()) return this;
-        if (entriesBuilder_ == null) {
-          if (!other.entries_.isEmpty()) {
-            if (entries_.isEmpty()) {
-              entries_ = other.entries_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-            } else {
-              ensureEntriesIsMutable();
-              entries_.addAll(other.entries_);
-            }
-            onChanged();
+        if (!other.entries_.isEmpty()) {
+          if (result.entries_.isEmpty()) {
+            result.entries_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry>();
           }
-        } else {
-          if (!other.entries_.isEmpty()) {
-            if (entriesBuilder_.isEmpty()) {
-              entriesBuilder_.dispose();
-              entriesBuilder_ = null;
-              entries_ = other.entries_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-              entriesBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getEntriesFieldBuilder() : null;
-            } else {
-              entriesBuilder_.addAllMessages(other.entries_);
-            }
-          }
+          result.entries_.addAll(other.entries_);
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
-      public final boolean isInitialized() {
-        for (int i = 0; i < getEntriesCount(); i++) {
-          if (!getEntries(i).isInitialized()) {
-            
-            return false;
-          }
-        }
-        return true;
-      }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.dp.blackhole.protocol.control.TopicReportPB.TopicReport parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.dp.blackhole.protocol.control.TopicReportPB.TopicReport) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder subBuilder = com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.newBuilder();
+              input.readMessage(subBuilder, extensionRegistry);
+              addEntries(subBuilder.buildPartial());
+              break;
+            }
           }
         }
-        return this;
       }
-      private int bitField0_;
-
+      
+      
       // repeated .blackhole.TopicReport.TopicEntry entries = 1;
-      private java.util.List<com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry> entries_ =
-        java.util.Collections.emptyList();
-      private void ensureEntriesIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          entries_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry>(entries_);
-          bitField0_ |= 0x00000001;
-         }
-      }
-
-      private com.google.protobuf.RepeatedFieldBuilder<
-          com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntryOrBuilder> entriesBuilder_;
-
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
       public java.util.List<com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry> getEntriesList() {
-        if (entriesBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(entries_);
-        } else {
-          return entriesBuilder_.getMessageList();
-        }
+        return java.util.Collections.unmodifiableList(result.entries_);
       }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
       public int getEntriesCount() {
-        if (entriesBuilder_ == null) {
-          return entries_.size();
-        } else {
-          return entriesBuilder_.getCount();
-        }
+        return result.getEntriesCount();
       }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
       public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry getEntries(int index) {
-        if (entriesBuilder_ == null) {
-          return entries_.get(index);
-        } else {
-          return entriesBuilder_.getMessage(index);
-        }
+        return result.getEntries(index);
       }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
-      public Builder setEntries(
-          int index, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry value) {
-        if (entriesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureEntriesIsMutable();
-          entries_.set(index, value);
-          onChanged();
-        } else {
-          entriesBuilder_.setMessage(index, value);
+      public Builder setEntries(int index, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry value) {
+        if (value == null) {
+          throw new NullPointerException();
         }
+        result.entries_.set(index, value);
         return this;
       }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
-      public Builder setEntries(
-          int index, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder builderForValue) {
-        if (entriesBuilder_ == null) {
-          ensureEntriesIsMutable();
-          entries_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          entriesBuilder_.setMessage(index, builderForValue.build());
-        }
+      public Builder setEntries(int index, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder builderForValue) {
+        result.entries_.set(index, builderForValue.build());
         return this;
       }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
       public Builder addEntries(com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry value) {
-        if (entriesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureEntriesIsMutable();
-          entries_.add(value);
-          onChanged();
-        } else {
-          entriesBuilder_.addMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
+        if (result.entries_.isEmpty()) {
+          result.entries_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry>();
+        }
+        result.entries_.add(value);
         return this;
       }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
-      public Builder addEntries(
-          int index, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry value) {
-        if (entriesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureEntriesIsMutable();
-          entries_.add(index, value);
-          onChanged();
-        } else {
-          entriesBuilder_.addMessage(index, value);
+      public Builder addEntries(com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder builderForValue) {
+        if (result.entries_.isEmpty()) {
+          result.entries_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry>();
         }
+        result.entries_.add(builderForValue.build());
         return this;
       }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
-      public Builder addEntries(
-          com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder builderForValue) {
-        if (entriesBuilder_ == null) {
-          ensureEntriesIsMutable();
-          entries_.add(builderForValue.build());
-          onChanged();
-        } else {
-          entriesBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
-      public Builder addEntries(
-          int index, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder builderForValue) {
-        if (entriesBuilder_ == null) {
-          ensureEntriesIsMutable();
-          entries_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          entriesBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
       public Builder addAllEntries(
           java.lang.Iterable<? extends com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry> values) {
-        if (entriesBuilder_ == null) {
-          ensureEntriesIsMutable();
-          super.addAll(values, entries_);
-          onChanged();
-        } else {
-          entriesBuilder_.addAllMessages(values);
+        if (result.entries_.isEmpty()) {
+          result.entries_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry>();
         }
+        super.addAll(values, result.entries_);
         return this;
       }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
       public Builder clearEntries() {
-        if (entriesBuilder_ == null) {
-          entries_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-          onChanged();
-        } else {
-          entriesBuilder_.clear();
-        }
+        result.entries_ = java.util.Collections.emptyList();
         return this;
       }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
-      public Builder removeEntries(int index) {
-        if (entriesBuilder_ == null) {
-          ensureEntriesIsMutable();
-          entries_.remove(index);
-          onChanged();
-        } else {
-          entriesBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
-      public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder getEntriesBuilder(
-          int index) {
-        return getEntriesFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
-      public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntryOrBuilder getEntriesOrBuilder(
-          int index) {
-        if (entriesBuilder_ == null) {
-          return entries_.get(index);  } else {
-          return entriesBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
-      public java.util.List<? extends com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntryOrBuilder> 
-           getEntriesOrBuilderList() {
-        if (entriesBuilder_ != null) {
-          return entriesBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(entries_);
-        }
-      }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
-      public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder addEntriesBuilder() {
-        return getEntriesFieldBuilder().addBuilder(
-            com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
-      public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder addEntriesBuilder(
-          int index) {
-        return getEntriesFieldBuilder().addBuilder(
-            index, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .blackhole.TopicReport.TopicEntry entries = 1;</code>
-       */
-      public java.util.List<com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder> 
-           getEntriesBuilderList() {
-        return getEntriesFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilder<
-          com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntryOrBuilder> 
-          getEntriesFieldBuilder() {
-        if (entriesBuilder_ == null) {
-          entriesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntryOrBuilder>(
-                  entries_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
-                  getParentForChildren(),
-                  isClean());
-          entries_ = null;
-        }
-        return entriesBuilder_;
-      }
-
+      
       // @@protoc_insertion_point(builder_scope:blackhole.TopicReport)
     }
-
+    
     static {
       defaultInstance = new TopicReport(true);
+      com.dp.blackhole.protocol.control.TopicReportPB.internalForceInit();
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:blackhole.TopicReport)
   }
-
+  
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_TopicReport_descriptor;
   private static
@@ -1436,7 +723,7 @@ public final class TopicReportPB {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_TopicReport_TopicEntry_fieldAccessorTable;
-
+  
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -1449,8 +736,8 @@ public final class TopicReportPB {
       "Report\0222\n\007entries\030\001 \003(\0132!.blackhole.Topi" +
       "cReport.TopicEntry\032@\n\nTopicEntry\022\r\n\005topi" +
       "c\030\001 \002(\t\022\023\n\013partitionId\030\002 \002(\t\022\016\n\006offset\030\003" +
-      " \002(\003B,\n\033com.dp.blackhole.common.genB\rTop" +
-      "icReportPB"
+      " \002(\003B2\n!com.dp.blackhole.protocol.contro" +
+      "lB\rTopicReportPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1462,13 +749,17 @@ public final class TopicReportPB {
           internal_static_blackhole_TopicReport_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_TopicReport_descriptor,
-              new java.lang.String[] { "Entries", });
+              new java.lang.String[] { "Entries", },
+              com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.class,
+              com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.Builder.class);
           internal_static_blackhole_TopicReport_TopicEntry_descriptor =
             internal_static_blackhole_TopicReport_descriptor.getNestedTypes().get(0);
           internal_static_blackhole_TopicReport_TopicEntry_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_TopicReport_TopicEntry_descriptor,
-              new java.lang.String[] { "Topic", "PartitionId", "Offset", });
+              new java.lang.String[] { "Topic", "PartitionId", "Offset", },
+              com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.class,
+              com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry.Builder.class);
           return null;
         }
       };
@@ -1477,6 +768,8 @@ public final class TopicReportPB {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-
+  
+  public static void internalForceInit() {}
+  
   // @@protoc_insertion_point(outer_class_scope)
 }
