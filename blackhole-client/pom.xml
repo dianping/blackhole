@@ -9,7 +9,12 @@
 	<artifactId>blackhole-client</artifactId>
 	<name>blackhole-client</name>
 	<packaging>jar</packaging>
-	<dependencies>
+    <dependencies>
+        <dependency>
+	       <groupId>com.dianping.cat</groupId>
+	       <artifactId>cat-client</artifactId>
+	       <version>0.6.2</version>
+	       </dependency>
 		<dependency>
 			<groupId>net.contentobjects.jnotify</groupId>
 			<artifactId>jnotify</artifactId>
