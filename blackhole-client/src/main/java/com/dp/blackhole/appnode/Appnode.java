@@ -44,7 +44,6 @@ public class Appnode implements Runnable {
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
     private Map<String, RollRecovery> recoveryingMap = new ConcurrentHashMap<String, RollRecovery>();
-    private ThroughputStat stat;
     
     private GenClient<ByteBuffer, SimpleConnection, AgentProcessor> client;
     AgentProcessor processor;
@@ -153,8 +152,6 @@ public class Appnode implements Runnable {
         }
         
         long statPeriodMillis = Long.parseLong(prop.getProperty("stat.thoughput.periodMillis", "60000"));
-        initThroughputStat(statPeriodMillis);
-        this.stat.start();
         
         processor = new AgentProcessor();
         client = new GenClient(
@@ -171,10 +168,6 @@ public class Appnode implements Runnable {
             LOG.error(e.getMessage(), e);
             Cat.logError(e);
         }
-    }
-
-    public void initThroughputStat(long statPeriodMillis) {
-        this.stat = new ThroughputStat(statPeriodMillis);
     }
     
     public void fillUpAppLogsFromConfig() {
@@ -361,7 +354,6 @@ public class Appnode implements Runnable {
                                 appLog);
                         appReaders.put(appLog, logReader);
                         pool.execute(logReader);
-                        stat.add(logReader);
                         return true;
                     } else {
                         LOG.info("duplicated assign collector message: "
