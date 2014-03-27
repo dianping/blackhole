@@ -1,7 +1,7 @@
 package com.dp.blackhole.network;
 
 import com.dp.blackhole.common.PBwrap;
-import com.dp.blackhole.common.gen.MessagePB.Message;
+import com.dp.blackhole.protocol.control.MessagePB.Message;
 
 public class HeartBeat extends Thread {
 	private SimpleConnection connection;

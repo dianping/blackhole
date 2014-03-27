@@ -7,6 +7,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.dp.blackhole.storage.FileMessageSet;
+import com.dp.blackhole.storage.Message;
+import com.dp.blackhole.storage.MessageSet;
+
 public class Segment {
     FileChannel channel;
     String file;

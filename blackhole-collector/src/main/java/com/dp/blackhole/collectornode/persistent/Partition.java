@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.storage.FileMessageSet;
+import com.dp.blackhole.storage.MessageSet;
 
 public class Partition {
     private String topic;

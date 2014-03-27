@@ -16,13 +16,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dianping.cat.Cat;
-import com.dp.blackhole.collectornode.persistent.ByteBufferMessageSet;
-import com.dp.blackhole.collectornode.persistent.Message;
-import com.dp.blackhole.collectornode.persistent.protocol.ProduceRequest;
-import com.dp.blackhole.collectornode.persistent.protocol.RegisterRequest;
-import com.dp.blackhole.collectornode.persistent.protocol.RotateRequest;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.TransferWrap;
+import com.dp.blackhole.protocol.data.ProduceRequest;
+import com.dp.blackhole.protocol.data.RegisterRequest;
+import com.dp.blackhole.protocol.data.RotateRequest;
+import com.dp.blackhole.storage.ByteBufferMessageSet;
+import com.dp.blackhole.storage.Message;
 
 public class LogReader implements Runnable{
     private static final Log LOG = LogFactory.getLog(LogReader.class);

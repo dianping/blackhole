@@ -2,8 +2,8 @@ package com.dp.blackhole.consumer;
 
 import java.nio.ByteBuffer;
 
-import com.dp.blackhole.collectornode.persistent.Message;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.storage.Message;
 
 public class StringDecoder {
     public String toEvent(Message message) {

@@ -2,7 +2,7 @@ package com.dp.blackhole.consumer;
 
 import java.util.Properties;
 
-import com.dp.blackhole.collectornode.persistent.protocol.OffsetRequest;
+import com.dp.blackhole.protocol.data.OffsetRequest;
 
 public class ConsumerConfig {
 

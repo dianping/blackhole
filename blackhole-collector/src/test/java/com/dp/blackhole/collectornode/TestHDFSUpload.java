@@ -26,12 +26,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dp.blackhole.collectornode.HDFSUpload;
-import com.dp.blackhole.collectornode.persistent.ByteBufferMessageSet;
-import com.dp.blackhole.collectornode.persistent.Message;
 import com.dp.blackhole.collectornode.persistent.Partition;
 import com.dp.blackhole.collectornode.persistent.PersistentManager;
 import com.dp.blackhole.collectornode.persistent.RollPartition;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.storage.ByteBufferMessageSet;
+import com.dp.blackhole.storage.Message;
 
 public class TestHDFSUpload {
     private static final Log LOG = LogFactory.getLog(TestHDFSUpload.class);

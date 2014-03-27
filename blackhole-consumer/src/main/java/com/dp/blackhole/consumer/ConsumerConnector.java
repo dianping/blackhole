@@ -21,14 +21,14 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 import com.dp.blackhole.common.PBwrap;
-import com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer;
-import com.dp.blackhole.common.gen.AssignConsumerPB.AssignConsumer.PartitionOffset;
-import com.dp.blackhole.common.gen.MessagePB.Message;
-import com.dp.blackhole.common.gen.MessagePB.Message.MessageType;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
 import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
+import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset;
+import com.dp.blackhole.protocol.control.MessagePB.Message;
+import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class ConsumerConnector implements Runnable {
@@ -186,6 +186,7 @@ public class ConsumerConnector implements Runnable {
         
         @Override
         public void OnConnected(SimpleConnection connection) {
+            LOG.info("ConsumerConnector connected");
             supervisor = connection;
             heartbeat = new HeartBeat(supervisor);
             heartbeat.start();

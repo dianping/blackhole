@@ -1,6 +1,6 @@
 package com.dp.blackhole.consumer;
 
-import com.dp.blackhole.collectornode.persistent.ByteBufferMessageSet;
+import com.dp.blackhole.storage.ByteBufferMessageSet;
 
 public class FetchedDataChunk {
     public final ByteBufferMessageSet messages;
