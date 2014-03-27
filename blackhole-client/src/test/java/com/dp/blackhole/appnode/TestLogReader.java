@@ -48,15 +48,15 @@ public class TestLogReader {
 
     @After
     public void tearDown() throws Exception {
-    	loggerThread.interrupt();
-//    	serverThread.interrupt();
-    	SimAppnode.deleteTmpFile(MAGIC);
+        loggerThread.interrupt();
+//      serverThread.interrupt();
+        SimAppnode.deleteTmpFile(MAGIC);
     }
 
     @Test
     public void testFileRotated() {
         AppLog appLog = new AppLog(MAGIC, SimAppnode.TEST_ROLL_FILE,
-        		System.currentTimeMillis(), 1024);
+                System.currentTimeMillis(), 1024);
         SimAppnode appnode = new SimAppnode();
         FileListener listener;
         try {
@@ -73,12 +73,12 @@ public class TestLogReader {
             LogReader reader = new LogReader(appnode, SimAppnode.HOSTNAME, "localhost",
                     port, appLog);
             readerThread = new Thread(reader);
-        	Thread.sleep(1000);//ignore file first create
-        	readerThread.start();
-			Thread.sleep(3000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+            Thread.sleep(1000);//ignore file first create
+            readerThread.start();
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         readerThread.interrupt();
         assertNotNull("testFileNotFound function fail.", receives.toArray());
         assertEquals(true, receives.size()>20);

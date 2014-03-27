@@ -135,8 +135,8 @@ public class RollManager {
     }
 
     public void reportUpload(RollIdent ident, boolean uploadSuccess) {
-    	rolls.remove(ident);
-    	
+        rolls.remove(ident);
+        
         if (uploadSuccess == true) {
             Message message = PBwrap.wrapUploadSuccess(ident.app, ident.source, ident.ts);
             Broker.getSupervisor().send(message);

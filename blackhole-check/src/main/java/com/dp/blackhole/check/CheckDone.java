@@ -60,9 +60,9 @@ public class CheckDone implements Runnable{
                     if (expectedFile != null) {
                         if (!retryTouch(expectedFile.getParent())) {
                             LOG.error("Alarm, failed to touch a done file. " +
-                            		"Try in next check cycle. " +
-                            		"If you see this message for the second time, " +
-                            		"please find out why.");
+                                    "Try in next check cycle. " +
+                                    "If you see this message for the second time, " +
+                                    "please find out why.");
                             break;
                         }
                         firstDeploy = false;
