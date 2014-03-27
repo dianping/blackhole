@@ -152,8 +152,6 @@ public class Appnode implements Runnable {
             return;
         }
         
-        long statPeriodMillis = Long.parseLong(prop.getProperty("stat.thoughput.periodMillis", "60000"));
-        
         processor = new AgentProcessor();
         client = new GenClient(
                 processor,

@@ -24,7 +24,7 @@
 			<groupId>com.dp.cosmos</groupId>
 			<artifactId>hadoop-core</artifactId>
 			<version>1.0.3.0</version>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -33,6 +33,7 @@
                 <dependency>
                         <groupId>${project.groupId}</groupId>
                         <artifactId>blackhole-collector</artifactId>
+                        <scope>test</scope>
                 </dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
