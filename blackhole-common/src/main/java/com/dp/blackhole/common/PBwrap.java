@@ -1,9 +1,8 @@
 package com.dp.blackhole.common;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 
 import com.dp.blackhole.protocol.control.AppRegPB.AppReg;
 import com.dp.blackhole.protocol.control.AppRollPB.AppRoll;
@@ -98,6 +97,7 @@ public class PBwrap {
             msg.setDumpApp((DumpApp) message);
             break;
         case CONSUMER_REG:
+        case CONSUMERREGFAIL:
             msg.setConsumerReg((ConsumerReg) message);
             break;
         case ASSIGN_CONSUMER:
@@ -128,9 +128,10 @@ public class PBwrap {
         return wrapMessage(MessageType.APP_REG, builder.build());
     }
     
-    public static Message wrapCollectorReg(int port) {
+    public static Message wrapCollectorReg(int brokerPort, int recoveryPort) {
         ColNodeReg.Builder builder = ColNodeReg.newBuilder();
-        builder.setPort(port);
+        builder.setBrokerPort(brokerPort);
+        builder.setRecoveryPort(recoveryPort);
         return wrapMessage(MessageType.COLLECTOR_REG, builder.build());
     }
     
@@ -138,7 +139,7 @@ public class PBwrap {
         AssignCollector.Builder builder = AssignCollector.newBuilder();
         builder.setAppName(appName);
         builder.setCollectorServer(collectorServer);
-        builder.setCollectorPort(port);
+        builder.setBrokerPort(port);
         return wrapMessage(MessageType.ASSIGN_COLLECTOR, builder.build());
     }
     
@@ -188,7 +189,7 @@ public class PBwrap {
         RecoveryRoll.Builder builder = RecoveryRoll.newBuilder();
         builder.setAppName(appName);
         builder.setCollectorServer(collectorServer);
-        builder.setCollectorPort(port);
+        builder.setRecoveryPort(port);
         builder.setRollTs(rollTs);
         return wrapMessage(MessageType.RECOVERY_ROLL, builder.build());
     }
@@ -302,6 +303,14 @@ public class PBwrap {
         return wrapMessage(MessageType.CONSUMER_REG, builder.build());
     }
 
+    public static Message wrapConsumerRegFail(String group, String consumerId, String topic) {
+        ConsumerReg.Builder builder = ConsumerReg.newBuilder();
+        builder.setGroupId(group);
+        builder.setConsumerId(consumerId);
+        builder.setTopic(topic);
+        return wrapMessage(MessageType.CONSUMERREGFAIL, builder.build());
+    }
+    
     /**
      * report committed offset of a partition
      */

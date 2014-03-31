@@ -56,12 +56,12 @@ public final class RecoveryRollPB {
     public boolean hasRollTs() { return hasRollTs; }
     public long getRollTs() { return rollTs_; }
     
-    // required int32 collector_port = 4;
-    public static final int COLLECTOR_PORT_FIELD_NUMBER = 4;
-    private boolean hasCollectorPort;
-    private int collectorPort_ = 0;
-    public boolean hasCollectorPort() { return hasCollectorPort; }
-    public int getCollectorPort() { return collectorPort_; }
+    // required int32 recovery_port = 4;
+    public static final int RECOVERY_PORT_FIELD_NUMBER = 4;
+    private boolean hasRecoveryPort;
+    private int recoveryPort_ = 0;
+    public boolean hasRecoveryPort() { return hasRecoveryPort; }
+    public int getRecoveryPort() { return recoveryPort_; }
     
     private void initFields() {
     }
@@ -69,7 +69,7 @@ public final class RecoveryRollPB {
       if (!hasAppName) return false;
       if (!hasCollectorServer) return false;
       if (!hasRollTs) return false;
-      if (!hasCollectorPort) return false;
+      if (!hasRecoveryPort) return false;
       return true;
     }
     
@@ -85,8 +85,8 @@ public final class RecoveryRollPB {
       if (hasRollTs()) {
         output.writeInt64(3, getRollTs());
       }
-      if (hasCollectorPort()) {
-        output.writeInt32(4, getCollectorPort());
+      if (hasRecoveryPort()) {
+        output.writeInt32(4, getRecoveryPort());
       }
       getUnknownFields().writeTo(output);
     }
@@ -109,9 +109,9 @@ public final class RecoveryRollPB {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(3, getRollTs());
       }
-      if (hasCollectorPort()) {
+      if (hasRecoveryPort()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(4, getCollectorPort());
+          .computeInt32Size(4, getRecoveryPort());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -280,8 +280,8 @@ public final class RecoveryRollPB {
         if (other.hasRollTs()) {
           setRollTs(other.getRollTs());
         }
-        if (other.hasCollectorPort()) {
-          setCollectorPort(other.getCollectorPort());
+        if (other.hasRecoveryPort()) {
+          setRecoveryPort(other.getRecoveryPort());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -321,7 +321,7 @@ public final class RecoveryRollPB {
               break;
             }
             case 32: {
-              setCollectorPort(input.readInt32());
+              setRecoveryPort(input.readInt32());
               break;
             }
           }
@@ -389,21 +389,21 @@ public final class RecoveryRollPB {
         return this;
       }
       
-      // required int32 collector_port = 4;
-      public boolean hasCollectorPort() {
-        return result.hasCollectorPort();
+      // required int32 recovery_port = 4;
+      public boolean hasRecoveryPort() {
+        return result.hasRecoveryPort();
       }
-      public int getCollectorPort() {
-        return result.getCollectorPort();
+      public int getRecoveryPort() {
+        return result.getRecoveryPort();
       }
-      public Builder setCollectorPort(int value) {
-        result.hasCollectorPort = true;
-        result.collectorPort_ = value;
+      public Builder setRecoveryPort(int value) {
+        result.hasRecoveryPort = true;
+        result.recoveryPort_ = value;
         return this;
       }
-      public Builder clearCollectorPort() {
-        result.hasCollectorPort = false;
-        result.collectorPort_ = 0;
+      public Builder clearRecoveryPort() {
+        result.hasRecoveryPort = false;
+        result.recoveryPort_ = 0;
         return this;
       }
       
@@ -433,11 +433,11 @@ public final class RecoveryRollPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022RecoveryRoll.proto\022\tblackhole\"c\n\014Recov" +
+      "\n\022RecoveryRoll.proto\022\tblackhole\"b\n\014Recov" +
       "eryRoll\022\020\n\010app_name\030\001 \002(\t\022\030\n\020collector_s" +
-      "erver\030\002 \002(\t\022\017\n\007roll_ts\030\003 \002(\003\022\026\n\016collecto" +
-      "r_port\030\004 \002(\005B3\n!com.dp.blackhole.protoco" +
-      "l.controlB\016RecoveryRollPB"
+      "erver\030\002 \002(\t\022\017\n\007roll_ts\030\003 \002(\003\022\025\n\rrecovery" +
+      "_port\030\004 \002(\005B3\n!com.dp.blackhole.protocol" +
+      ".controlB\016RecoveryRollPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -449,7 +449,7 @@ public final class RecoveryRollPB {
           internal_static_blackhole_RecoveryRoll_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RecoveryRoll_descriptor,
-              new java.lang.String[] { "AppName", "CollectorServer", "RollTs", "CollectorPort", },
+              new java.lang.String[] { "AppName", "CollectorServer", "RollTs", "RecoveryPort", },
               com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.class,
               com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.Builder.class);
           return null;

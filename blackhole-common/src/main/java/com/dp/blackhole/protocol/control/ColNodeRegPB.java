@@ -35,25 +35,36 @@ public final class ColNodeRegPB {
       return com.dp.blackhole.protocol.control.ColNodeRegPB.internal_static_blackhole_ColNodeReg_fieldAccessorTable;
     }
     
-    // required int32 port = 1;
-    public static final int PORT_FIELD_NUMBER = 1;
-    private boolean hasPort;
-    private int port_ = 0;
-    public boolean hasPort() { return hasPort; }
-    public int getPort() { return port_; }
+    // required int32 broker_port = 1;
+    public static final int BROKER_PORT_FIELD_NUMBER = 1;
+    private boolean hasBrokerPort;
+    private int brokerPort_ = 0;
+    public boolean hasBrokerPort() { return hasBrokerPort; }
+    public int getBrokerPort() { return brokerPort_; }
+    
+    // required int32 recovery_port = 2;
+    public static final int RECOVERY_PORT_FIELD_NUMBER = 2;
+    private boolean hasRecoveryPort;
+    private int recoveryPort_ = 0;
+    public boolean hasRecoveryPort() { return hasRecoveryPort; }
+    public int getRecoveryPort() { return recoveryPort_; }
     
     private void initFields() {
     }
     public final boolean isInitialized() {
-      if (!hasPort) return false;
+      if (!hasBrokerPort) return false;
+      if (!hasRecoveryPort) return false;
       return true;
     }
     
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasPort()) {
-        output.writeInt32(1, getPort());
+      if (hasBrokerPort()) {
+        output.writeInt32(1, getBrokerPort());
+      }
+      if (hasRecoveryPort()) {
+        output.writeInt32(2, getRecoveryPort());
       }
       getUnknownFields().writeTo(output);
     }
@@ -64,9 +75,13 @@ public final class ColNodeRegPB {
       if (size != -1) return size;
     
       size = 0;
-      if (hasPort()) {
+      if (hasBrokerPort()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, getPort());
+          .computeInt32Size(1, getBrokerPort());
+      }
+      if (hasRecoveryPort()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, getRecoveryPort());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -226,8 +241,11 @@ public final class ColNodeRegPB {
       
       public Builder mergeFrom(com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg other) {
         if (other == com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg.getDefaultInstance()) return this;
-        if (other.hasPort()) {
-          setPort(other.getPort());
+        if (other.hasBrokerPort()) {
+          setBrokerPort(other.getBrokerPort());
+        }
+        if (other.hasRecoveryPort()) {
+          setRecoveryPort(other.getRecoveryPort());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -255,7 +273,11 @@ public final class ColNodeRegPB {
               break;
             }
             case 8: {
-              setPort(input.readInt32());
+              setBrokerPort(input.readInt32());
+              break;
+            }
+            case 16: {
+              setRecoveryPort(input.readInt32());
               break;
             }
           }
@@ -263,21 +285,39 @@ public final class ColNodeRegPB {
       }
       
       
-      // required int32 port = 1;
-      public boolean hasPort() {
-        return result.hasPort();
+      // required int32 broker_port = 1;
+      public boolean hasBrokerPort() {
+        return result.hasBrokerPort();
       }
-      public int getPort() {
-        return result.getPort();
+      public int getBrokerPort() {
+        return result.getBrokerPort();
       }
-      public Builder setPort(int value) {
-        result.hasPort = true;
-        result.port_ = value;
+      public Builder setBrokerPort(int value) {
+        result.hasBrokerPort = true;
+        result.brokerPort_ = value;
         return this;
       }
-      public Builder clearPort() {
-        result.hasPort = false;
-        result.port_ = 0;
+      public Builder clearBrokerPort() {
+        result.hasBrokerPort = false;
+        result.brokerPort_ = 0;
+        return this;
+      }
+      
+      // required int32 recovery_port = 2;
+      public boolean hasRecoveryPort() {
+        return result.hasRecoveryPort();
+      }
+      public int getRecoveryPort() {
+        return result.getRecoveryPort();
+      }
+      public Builder setRecoveryPort(int value) {
+        result.hasRecoveryPort = true;
+        result.recoveryPort_ = value;
+        return this;
+      }
+      public Builder clearRecoveryPort() {
+        result.hasRecoveryPort = false;
+        result.recoveryPort_ = 0;
         return this;
       }
       
@@ -307,9 +347,10 @@ public final class ColNodeRegPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\020ColNodeReg.proto\022\tblackhole\"\032\n\nColNode" +
-      "Reg\022\014\n\004port\030\001 \002(\005B1\n!com.dp.blackhole.pr" +
-      "otocol.controlB\014ColNodeRegPB"
+      "\n\020ColNodeReg.proto\022\tblackhole\"8\n\nColNode" +
+      "Reg\022\023\n\013broker_port\030\001 \002(\005\022\025\n\rrecovery_por" +
+      "t\030\002 \002(\005B1\n!com.dp.blackhole.protocol.con" +
+      "trolB\014ColNodeRegPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -321,7 +362,7 @@ public final class ColNodeRegPB {
           internal_static_blackhole_ColNodeReg_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ColNodeReg_descriptor,
-              new java.lang.String[] { "Port", },
+              new java.lang.String[] { "BrokerPort", "RecoveryPort", },
               com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg.class,
               com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg.Builder.class);
           return null;

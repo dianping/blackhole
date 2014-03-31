@@ -34,6 +34,7 @@ public class Broker {
     private SimpleConnection supervisor;
     private GenClient<ByteBuffer, SimpleConnection, BrokerProcessor> client;
     private int servicePort;
+    private int recoveryPort;
     
     public Broker() throws IOException {
         rollMgr = new RollManager();
@@ -45,7 +46,7 @@ public class Broker {
         prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
         
         servicePort =  Integer.parseInt(prop.getProperty("broker.service.port"));
-        int recoveryPort = Integer.parseInt(prop.getProperty("broker.recovery.port"));
+        recoveryPort = Integer.parseInt(prop.getProperty("broker.recovery.port"));
         String hdfsbasedir = prop.getProperty("broker.hdfs.basedir");
         String suffix = prop.getProperty("broker.hdfs.file.suffix");
         long clockSyncBufMillis = Long.parseLong(prop.getProperty("broker.rollmanager.clockSyncBufMillis", "5000"));
@@ -78,7 +79,7 @@ public class Broker {
     }
     
     private void registerNode() {
-        send(PBwrap.wrapCollectorReg(servicePort));
+        send(PBwrap.wrapCollectorReg(servicePort, recoveryPort));
         LOG.info("register collector node with supervisor");
     }
 
@@ -131,7 +132,7 @@ public class Broker {
         public void OnDisconnected(SimpleConnection connection) {
             supervisor.close();
             supervisor = null;
-//            brokerService.disconnectClients();
+            brokerService.disconnectClients();
             heartbeat.shutdown();
             heartbeat = null;
         }

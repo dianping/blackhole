@@ -38,8 +38,6 @@ public class Appnode implements Runnable {
     private ExecutorService pool;
     private ExecutorService recoveryThreadPool;
     private FileListener listener;
-    protected int recoveryPort;
-    private int brokerPort;
     private String hostname;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
@@ -140,8 +138,6 @@ public class Appnode implements Runnable {
             Cat.logError("Load app.properties file fail.", e);
             return;
         }    
-        recoveryPort = Integer.parseInt(prop.getProperty("broker.recovery.port"));      
-        brokerPort = Integer.parseInt(prop.getProperty("broker.service.port"));
 
         try {    
             listener = new FileListener();
@@ -326,7 +322,7 @@ public class Appnode implements Runnable {
                     String recoveryKey = appName + ":" + rollTs;
                     if ((rollRecovery = recoveryingMap.get(recoveryKey)) == null) {
                         broker = recoveryRoll.getCollectorServer();
-                        //TODO broker recovery port ?
+                        int recoveryPort = recoveryRoll.getRecoveryPort();
                         rollRecovery = new RollRecovery(Appnode.this,
                                 broker, recoveryPort, appLog, rollTs);
                         recoveryingMap.put(recoveryKey, rollRecovery);
@@ -349,7 +345,7 @@ public class Appnode implements Runnable {
                 if ((appLog = appLogs.get(appName)) != null) {
                     if ((logReader = appReaders.get(appLog)) == null) {
                         broker = assignCollector.getCollectorServer();
-                        // TODO brokerPort?
+                        int brokerPort = assignCollector.getBrokerPort();
                         logReader = new LogReader(Appnode.this, hostname, broker, brokerPort,
                                 appLog);
                         appReaders.put(appLog, logReader);
