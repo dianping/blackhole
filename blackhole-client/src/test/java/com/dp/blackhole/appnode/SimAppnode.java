@@ -17,13 +17,21 @@ import com.dp.blackhole.common.Util;
 public class SimAppnode extends Appnode{
     private static final Log LOG = LogFactory.getLog(SimAppnode.class);
     public static final int COLPORT = 11113;
-    public static final String HOSTNAME = "localhost";
+    public static String HOSTNAME;
     public static long rollTS = 1357023691855l;
     public static final String SCHEMA = "file://";
     public static final String BASE_PATH = "/tmp/hdfs/";
     public static final String FILE_SUFFIX = "2013-01-01.15";
     public static final String expected = " 0f j2390jr092jf2f02jf02qjdf2-3j0 fiopwqejfjwffhg5_p    <end";
     public static final String TEST_ROLL_FILE = "/tmp/rollfile";
+    
+    static {
+        try {
+            HOSTNAME = Util.getLocalHost();
+        } catch (UnknownHostException e) {
+        }
+    }
+    
     public SimAppnode() {
         super();
         super.processor = new AgentProcessor();
