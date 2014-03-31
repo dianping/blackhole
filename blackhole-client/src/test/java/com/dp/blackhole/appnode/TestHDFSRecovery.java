@@ -24,12 +24,13 @@ import com.dp.blackhole.appnode.AppLog;
 import com.dp.blackhole.appnode.RollRecovery;
 import com.dp.blackhole.appnode.SimAppnode;
 import com.dp.blackhole.collectornode.SimCollectornode;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
 
 public class TestHDFSRecovery {
     private static final Log LOG = LogFactory.getLog(TestHDFSRecovery.class);
     private final String MAGIC = "e9wjd83h";
-    private final String APP_HOST = "localhost";
+    private String APP_HOST;
     private static final int port = 40004;
     private File file;
     private File fileBroken;
@@ -40,6 +41,7 @@ public class TestHDFSRecovery {
 
     @Before
     public void setUp() throws Exception {
+        APP_HOST = Util.getLocalHost();
         //build a tmp file
         fileBroken = createBrokenTmpFile(MAGIC + "_broken_", SimAppnode.expected);
         convertToGZIP(fileBroken);
