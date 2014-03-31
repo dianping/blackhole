@@ -45,7 +45,7 @@ public class HDFSUpload implements Runnable{
     
     @Override
     public void run() {
-        uploadRoll();   
+        uploadRoll();
         mgr.reportUpload(ident, uploadSuccess);
     }
 
@@ -53,7 +53,7 @@ public class HDFSUpload implements Runnable{
         WritableByteChannel gzChannel = null;
         try {
             String dfsPath = mgr.getRollHdfsPath(ident);
-            Path tmp = new Path(dfsPath + TMP_SUFFIX);  
+            Path tmp = new Path(dfsPath + TMP_SUFFIX);
             gzChannel =  Channels.newChannel(new GZIPOutputStream(fs.create(tmp)));
             
             Partition p = manager.getPartition(ident.app, ident.source);
@@ -84,7 +84,7 @@ public class HDFSUpload implements Runnable{
                 }
                 gzChannel.close();
                 buffer.clear();
-                start += realRead;          
+                start += realRead;
             }
                 
             Path dst = new Path(dfsPath);

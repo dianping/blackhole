@@ -49,7 +49,7 @@ public class TestHDFSUpload {
 
     @After
     public void tearDown() throws Exception {
-//      File testdir = new File("/tmp/testHDFSUpload");
+//        File testdir = new File("/tmp/testHDFSUpload");
 //        if (testdir.exists()) {
 //            Util.rmr(testdir);
 //        }

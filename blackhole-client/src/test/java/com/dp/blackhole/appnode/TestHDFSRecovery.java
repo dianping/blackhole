@@ -9,7 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
@@ -37,21 +36,20 @@ public class TestHDFSRecovery {
     private FileSystem fs;
     private Path oldPath;
     private SimAppnode appnode;
-    private Thread serverThread;
+    private SimCollectornode collecotr;
 
     @Before
     public void setUp() throws Exception {
         //build a tmp file
         fileBroken = createBrokenTmpFile(MAGIC + "_broken_", SimAppnode.expected);
         convertToGZIP(fileBroken);
-        Configuration conf = new Configuration();
         try {
-            fs = FileSystem.get(conf);
+            fs = (new Path("/tmp")).getFileSystem(new Configuration());
         } catch (IOException e) {
             LOG.debug("Failed to get FileSystem.", e);
             throw e;
         }
-        //file:///tmp/e9wjd83h/2013-01-01/15/localhost_e9wjd83h_2013-01-01.03  e9wjd83h is appname
+        //file:///tmp/e9wjd83h/2013-01-01/15/localhost_e9wjd83h_2013-01-01.15  e9wjd83h is appname
         oldPath = new Path(SimAppnode.SCHEMA + SimAppnode.BASE_PATH 
                 + MAGIC + "/2013-01-01/15/" + APP_HOST + "@"
                 + MAGIC + "_2013-01-01.15.gz.tmp");
@@ -70,9 +68,8 @@ public class TestHDFSRecovery {
         confKeeper.addRawProperty(MAGIC+".rollPeriod", "3600");
         confKeeper.addRawProperty(MAGIC + ".maxLineSize", "1024");
         
-        serverThread = new Thread(
-                new SimCollectornode("recovery", MAGIC, port, fs));
-        serverThread.start();
+        collecotr = new SimCollectornode(port);
+        collecotr.start();
     }
 
     @After
@@ -86,7 +83,7 @@ public class TestHDFSRecovery {
 
     @Test
     public void test() throws IOException, InterruptedException {
-        AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), new Date().getTime(), 1024);
+        AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), 3600, 1024);
         RollRecovery clientTask = new RollRecovery(appnode, SimAppnode.HOSTNAME, port, appLog, SimAppnode.rollTS);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();

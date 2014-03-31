@@ -15,7 +15,6 @@ import org.junit.Test;
 import com.dp.blackhole.appnode.AppLog;
 import com.dp.blackhole.appnode.RollRecovery;
 import com.dp.blackhole.conf.ConfigKeeper;
-import com.dp.blackhole.simutil.SimRecoveryServer;
 
 public class TestRollRecovery {
     private static final String MAGIC = "ctg4ewd";
