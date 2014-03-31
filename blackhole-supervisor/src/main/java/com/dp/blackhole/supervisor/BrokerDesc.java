@@ -7,12 +7,14 @@ import java.util.Map;
 
 public class BrokerDesc extends NodeDesc{
     private Map<String, ArrayList<String>> partitions;
-    private int port;
+    private int brokerPort;
+    private int recoveryPort;
     
-    public BrokerDesc(String id, int port) {
+    public BrokerDesc(String id, int brokerPort, int recoveryPort) {
         super(id);
         partitions = Collections.synchronizedMap(new HashMap<String, ArrayList<String>>());
-        this.port = port;
+        this.brokerPort = brokerPort;
+        this.recoveryPort = recoveryPort;
     }
 
     public void update(String topic, String partitionId) {
@@ -32,7 +34,11 @@ public class BrokerDesc extends NodeDesc{
         return partitions;
     }
     
-    public int getPort () {
-        return port;
+    public int getBrokerPort () {
+        return brokerPort;
+    }
+    
+    public int getRecoveryPort () {
+        return recoveryPort;
     }
 }

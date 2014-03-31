@@ -158,6 +158,11 @@ public class Supervisor {
         }
     }
     
+    private void sendConsumerRegFail(SimpleConnection from, String group, String consumerId, String topic) {
+    	Message message = PBwrap.wrapConsumerRegFail(group, consumerId, topic);
+    	send(from, message);
+    }
+    
     private void handleConsumerReg(ConsumerReg consumerReg, SimpleConnection from) {
         ConnectionDescription desc = connections.get(from);
         if (desc == null) {
@@ -174,6 +179,7 @@ public class Supervisor {
         ConcurrentHashMap<String, PartitionInfo> partitionMap = topics.get(topic);
         if (partitionMap == null) {
             LOG.error("unknown topic: " + topic);
+            sendConsumerRegFail(from, groupId, id, topic);
             return;
         }      
         Collection<PartitionInfo> partitions = partitionMap.values();
@@ -187,6 +193,7 @@ public class Supervisor {
         
         if (availPartitions.size() == 0) {
             LOG.error("no partition available , topic: " + topic);
+            sendConsumerRegFail(from, groupId, id, topic);
             return;
         }
         
@@ -445,6 +452,9 @@ public class Supervisor {
         LOG.info("consumer " + connection + " disconnectted");
         
         ConsumerDesc consumerDesc = (ConsumerDesc) desc.getAttachment();
+        if (consumerDesc == null) {
+            return;
+        }
         ConsumerGroup group = consumerDesc.getConsumerGroup();
         ConsumerGroupDesc groupDesc = consumerGroups.get(group);
         if (groupDesc == null) {
@@ -1067,7 +1077,7 @@ public class Supervisor {
                 return null;
             }
             
-            Message message = PBwrap.wrapRecoveryRoll(stream.app, collector, getBrokerPort(collector), stage.rollTs);
+            Message message = PBwrap.wrapRecoveryRoll(stream.app, collector, getRecoveryPort(collector), stage.rollTs);
             send(c, message);
             
             stage.status = Stage.RECOVERYING;
@@ -1311,7 +1321,7 @@ public class Supervisor {
             return;
         }
         desc.setType(ConnectionDescription.BROKER);
-        desc.attach(new BrokerDesc(from.toString(), colNodeReg.getPort()));
+        desc.attach(new BrokerDesc(from.toString(), colNodeReg.getBrokerPort(), colNodeReg.getRecoveryPort()));
         brokersMapping.put(from.getHost(), from);
         LOG.info("CollectorNode " + from.getHost() + " registered");
     }
@@ -1488,7 +1498,7 @@ public class Supervisor {
         // start heart beat checker thread
         LiveChecker checker = new LiveChecker();
         checker.setDaemon(true);
-//        checker.start();
+        checker.start();
         
         SupervisorExecutor executor = new SupervisorExecutor();
         ConnectionFactory<SimpleConnection> factory = new SimpleConnection.SimpleConnectionFactory();
@@ -1543,7 +1553,22 @@ public class Supervisor {
             return 0;
         }
         BrokerDesc brokerDesc = (BrokerDesc) desc.getAttachment();
-        return brokerDesc.getPort();
+        return brokerDesc.getBrokerPort();
+    }
+    
+    private int getRecoveryPort(String host) {
+        SimpleConnection connection = brokersMapping.get(host);
+        if (connection == null) {
+            LOG.error("can not get connection from host: " + host);
+            return 0;
+        }
+        ConnectionDescription desc = connections.get(connection);
+        if (desc == null) {
+            LOG.error("can not get ConnectionDescription from connection: " + connection);
+            return 0;
+        }
+        BrokerDesc brokerDesc = (BrokerDesc) desc.getAttachment();
+        return brokerDesc.getRecoveryPort();
     }
     
     /**

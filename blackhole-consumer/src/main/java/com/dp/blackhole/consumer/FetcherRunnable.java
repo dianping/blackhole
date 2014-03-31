@@ -9,7 +9,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +44,9 @@ public class FetcherRunnable extends Thread {
     private BlockingQueue<FetchedDataChunk> chunkQueue;
     private ConsumerConfig config;
     
+    private ScheduledExecutorService retryPool =
+            Executors.newSingleThreadScheduledExecutor();
+    
     public FetcherRunnable(String consumerId, String broker, List<PartitionTopicInfo> partitionTopicInfos, LinkedBlockingQueue<FetchedDataChunk> queue, ConsumerConfig config) {
         this.consumerId = consumerId;
         this.broker = broker;
@@ -59,6 +65,7 @@ public class FetcherRunnable extends Thread {
     }
     public void shutdown() {
         LOG.debug("shutdown the fetcher " + getName());
+        retryPool.shutdownNow();
         client.shutdown();
     }
 
@@ -216,13 +223,19 @@ public class FetcherRunnable extends Thread {
             if (offset == MessageAndOffset.OFFSET_OUT_OF_RANGE) {
                 sendOffsetRequest(from, info);
             } else {
+                long validSize = 0;
                 try {
-                    enqueue(messageSet, info);
+                    validSize = enqueue(messageSet, info);
                 } catch (InterruptedException e) {
                     LOG.error("Oops, catch an Interrupted Exception of queue.put()," +
                             " but ignore it.", e);
                 }
-                sendFetchRequest(from, info);
+                if (validSize > 0) {
+                    sendFetchRequest(from, info);
+                } else {
+                    RetryTask retry = new RetryTask(from, info);
+                    retryPool.schedule(retry, 1, TimeUnit.SECONDS);
+                }
             }
         }
 
@@ -275,6 +288,21 @@ public class FetcherRunnable extends Thread {
                 }
             }
             return false;
+        }
+        
+        class RetryTask implements Runnable {
+            private DelegationIOConnection from;
+            private PartitionTopicInfo info;
+            
+            public RetryTask(DelegationIOConnection from, PartitionTopicInfo info) {
+                this.from = from;
+                this.info = info;
+            }
+
+            @Override
+            public void run() {
+                sendFetchRequest(from, info);
+            }
         }
     }
 }
