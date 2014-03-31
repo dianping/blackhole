@@ -27,6 +27,7 @@ import com.dp.blackhole.network.HeartBeat;
 import com.dp.blackhole.network.SimpleConnection;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset;
+import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -55,6 +56,7 @@ public class ConsumerConnector implements Runnable {
     private int supervisorPort;
     private boolean autoCommit;
     private int autoCommitIntervalMs;
+    private boolean sentReg;
     
     private Map<String, ConsumerConfig> configMap = Collections.synchronizedMap(new HashMap<String, ConsumerConfig>());
     
@@ -75,6 +77,7 @@ public class ConsumerConnector implements Runnable {
             instance.supervisorPort = supervisorPort;
             instance.autoCommit = autoCommit;
             instance.autoCommitIntervalMs = autoCommitIntervalMs;
+            instance.sentReg = false;
             
             Thread thread = new Thread(instance);
             thread.setDaemon(true);
@@ -141,6 +144,7 @@ public class ConsumerConnector implements Runnable {
         configMap.put(consumerId, consumer.getConf());
         consumers.put(consumerId, consumer);
         sendRegConsumer(topic, group, consumerId);
+        sentReg = true;
     }
     
     public void stop() throws InterruptedException {
@@ -190,6 +194,11 @@ public class ConsumerConnector implements Runnable {
             supervisor = connection;
             heartbeat = new HeartBeat(supervisor);
             heartbeat.start();
+            if (sentReg) {
+                for (Consumer c : consumers.values()) {
+                    sendRegConsumer(c.getTopic(), c.getGroup(), c.getConsumerId());
+                }
+            }
         }
 
         @Override
@@ -217,17 +226,19 @@ public class ConsumerConnector implements Runnable {
         protected boolean processInternal(Message msg) {
             MessageType type = msg.getType();
             switch (type) {
+            case CONSUMERREGFAIL:
+                ConsumerReg reg = msg.getConsumerReg();
+                RetryRegTask retry = new RetryRegTask(reg.getTopic(),
+                        reg.getGroupId(), reg.getConsumerId());
+                LOG.warn("received ConsumerRegFail for topic " + reg.getTopic() + " ,retry after 5 seconds");
+                scheduler.schedule(retry, 5, TimeUnit.SECONDS);
+                break;
             case ASSIGN_CONSUMER:
                 AssignConsumer assign = msg.getAssignConsumer();
                 
-                // TODO halt when assigned no partition
+                // halt when assigned no partition
                 if (assign.getPartitionOffsetsList().isEmpty()) {
-                    LOG.info("received no PartitionOffsetsList, retry atfer 5 seconds");
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                    }
-                    sendRegConsumer(assign.getTopic(), assign.getGroup(), assign.getConsumerIdString());
+                    LOG.info("received no PartitionOffsetsList");
                     return false;
                 }
                 
@@ -293,6 +304,24 @@ public class ConsumerConnector implements Runnable {
             } catch (Throwable e) {
                 LOG.error("exception during autoCommit: ", e);
             }
+        }
+    }
+    
+    class RetryRegTask implements Runnable {
+        private String topic;
+        private String group;
+        private String consumerId;
+        
+        public RetryRegTask(String topic, String group, String consumerId) {
+            super();
+            this.topic = topic;
+            this.group = group;
+            this.consumerId = consumerId;
+        }
+
+        @Override
+        public void run() {
+            sendRegConsumer(topic, group, consumerId);
         }
     }
 }

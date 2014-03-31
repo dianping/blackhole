@@ -66,12 +66,14 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
                 key = iter.next();
                 iter.remove();
                 try {
-                    if (key.isAcceptable()) {
-                        doAccept(key);
-                    } else if (key.isWritable()) {
-                        doWrite(key);
-                    } else if (key.isReadable()) {
-                        doRead(key);
+                    if (key.isValid()) {
+                        if (key.isAcceptable()) {
+                            doAccept(key);
+                        } else if (key.isWritable()) {
+                            doWrite(key);
+                        } else if (key.isReadable()) {
+                            doRead(key);
+                        }
                     }
                 } catch (IOException e) {
                     LOG.warn("IOE catched: ", e);

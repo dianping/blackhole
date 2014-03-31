@@ -4,5 +4,6 @@ option java_package = "com.dp.blackhole.protocol.control";
 option java_outer_classname = "ColNodeRegPB";
 
 message ColNodeReg{
-    required int32 port = 1;
+    required int32 broker_port = 1;
+    required int32 recovery_port = 2;
 }

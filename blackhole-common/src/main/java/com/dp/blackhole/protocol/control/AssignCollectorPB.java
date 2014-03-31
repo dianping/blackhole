@@ -49,19 +49,19 @@ public final class AssignCollectorPB {
     public boolean hasCollectorServer() { return hasCollectorServer; }
     public java.lang.String getCollectorServer() { return collectorServer_; }
     
-    // required int32 collector_port = 3;
-    public static final int COLLECTOR_PORT_FIELD_NUMBER = 3;
-    private boolean hasCollectorPort;
-    private int collectorPort_ = 0;
-    public boolean hasCollectorPort() { return hasCollectorPort; }
-    public int getCollectorPort() { return collectorPort_; }
+    // required int32 broker_port = 3;
+    public static final int BROKER_PORT_FIELD_NUMBER = 3;
+    private boolean hasBrokerPort;
+    private int brokerPort_ = 0;
+    public boolean hasBrokerPort() { return hasBrokerPort; }
+    public int getBrokerPort() { return brokerPort_; }
     
     private void initFields() {
     }
     public final boolean isInitialized() {
       if (!hasAppName) return false;
       if (!hasCollectorServer) return false;
-      if (!hasCollectorPort) return false;
+      if (!hasBrokerPort) return false;
       return true;
     }
     
@@ -74,8 +74,8 @@ public final class AssignCollectorPB {
       if (hasCollectorServer()) {
         output.writeString(2, getCollectorServer());
       }
-      if (hasCollectorPort()) {
-        output.writeInt32(3, getCollectorPort());
+      if (hasBrokerPort()) {
+        output.writeInt32(3, getBrokerPort());
       }
       getUnknownFields().writeTo(output);
     }
@@ -94,9 +94,9 @@ public final class AssignCollectorPB {
         size += com.google.protobuf.CodedOutputStream
           .computeStringSize(2, getCollectorServer());
       }
-      if (hasCollectorPort()) {
+      if (hasBrokerPort()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(3, getCollectorPort());
+          .computeInt32Size(3, getBrokerPort());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -262,8 +262,8 @@ public final class AssignCollectorPB {
         if (other.hasCollectorServer()) {
           setCollectorServer(other.getCollectorServer());
         }
-        if (other.hasCollectorPort()) {
-          setCollectorPort(other.getCollectorPort());
+        if (other.hasBrokerPort()) {
+          setBrokerPort(other.getBrokerPort());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -299,7 +299,7 @@ public final class AssignCollectorPB {
               break;
             }
             case 24: {
-              setCollectorPort(input.readInt32());
+              setBrokerPort(input.readInt32());
               break;
             }
           }
@@ -349,21 +349,21 @@ public final class AssignCollectorPB {
         return this;
       }
       
-      // required int32 collector_port = 3;
-      public boolean hasCollectorPort() {
-        return result.hasCollectorPort();
+      // required int32 broker_port = 3;
+      public boolean hasBrokerPort() {
+        return result.hasBrokerPort();
       }
-      public int getCollectorPort() {
-        return result.getCollectorPort();
+      public int getBrokerPort() {
+        return result.getBrokerPort();
       }
-      public Builder setCollectorPort(int value) {
-        result.hasCollectorPort = true;
-        result.collectorPort_ = value;
+      public Builder setBrokerPort(int value) {
+        result.hasBrokerPort = true;
+        result.brokerPort_ = value;
         return this;
       }
-      public Builder clearCollectorPort() {
-        result.hasCollectorPort = false;
-        result.collectorPort_ = 0;
+      public Builder clearBrokerPort() {
+        result.hasBrokerPort = false;
+        result.brokerPort_ = 0;
         return this;
       }
       
@@ -393,11 +393,11 @@ public final class AssignCollectorPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\025AssignCollector.proto\022\tblackhole\"U\n\017As" +
+      "\n\025AssignCollector.proto\022\tblackhole\"R\n\017As" +
       "signCollector\022\020\n\010app_name\030\001 \002(\t\022\030\n\020colle" +
-      "ctor_server\030\002 \002(\t\022\026\n\016collector_port\030\003 \002(" +
-      "\005B6\n!com.dp.blackhole.protocol.controlB\021" +
-      "AssignCollectorPB"
+      "ctor_server\030\002 \002(\t\022\023\n\013broker_port\030\003 \002(\005B6" +
+      "\n!com.dp.blackhole.protocol.controlB\021Ass" +
+      "ignCollectorPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -409,7 +409,7 @@ public final class AssignCollectorPB {
           internal_static_blackhole_AssignCollector_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_AssignCollector_descriptor,
-              new java.lang.String[] { "AppName", "CollectorServer", "CollectorPort", },
+              new java.lang.String[] { "AppName", "CollectorServer", "BrokerPort", },
               com.dp.blackhole.protocol.control.AssignCollectorPB.AssignCollector.class,
               com.dp.blackhole.protocol.control.AssignCollectorPB.AssignCollector.Builder.class);
           return null;

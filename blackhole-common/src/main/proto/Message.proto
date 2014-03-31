@@ -54,6 +54,7 @@ message Message {
         ASSIGN_CONSUMER = 28;
         OFFSET_COMMIT = 29;
         TOPICREPORT = 30;
+        CONSUMERREGFAIL = 31;
     }
 
     required MessageType type = 1;

@@ -24,6 +24,7 @@ import com.dp.blackhole.collectornode.BrokerService;
 import com.dp.blackhole.collectornode.ByteBufferChannel;
 import com.dp.blackhole.collectornode.SimCollectornode;
 import com.dp.blackhole.collectornode.persistent.Segment;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.FileMessageSet;
@@ -72,6 +73,7 @@ public class TestLogReader {
 
     @Test
     public void testFileRotated() throws IOException {
+        String localhost = Util.getLocalHost();
         AppLog appLog = new AppLog(MAGIC, SimAppnode.TEST_ROLL_FILE, 3600, 1024);
         SimAppnode appnode = new SimAppnode();
         FileListener listener;
@@ -86,7 +88,7 @@ public class TestLogReader {
         Thread readerThread = null;
         try {
             Thread.sleep(500);
-            LogReader reader = new LogReader(appnode, SimAppnode.HOSTNAME, "localhost",
+            LogReader reader = new LogReader(appnode, SimAppnode.HOSTNAME, localhost,
                     port, appLog);
             readerThread = new Thread(reader);
             Thread.sleep(1000);//ignore file first create
@@ -98,7 +100,7 @@ public class TestLogReader {
         readerThread.interrupt();
         ByteBuffer buffer = ByteBuffer.allocate(1024*1024);
         ByteBufferChannel channel = new ByteBufferChannel(buffer);
-        Segment segment = new Segment(tmpDir + "/" + MAGIC + "/localhost", 0, false, false, 1024, 108);
+        Segment segment = new Segment(tmpDir + "/" + MAGIC + "/"+ localhost, 0, false, false, 1024, 108);
         FileMessageSet fms = segment.read(0, 1024*1024);
         fetchFileMessageSet(channel, fms);
         buffer.flip();
