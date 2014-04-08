@@ -9,9 +9,6 @@
 	<artifactId>blackhole-supervisor</artifactId>
 	<name>blackhole-supervisor</name>
 	<packaging>jar</packaging>
-	<properties>
-		<env>dev</env>
-	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>com.dianping.lion</groupId>
