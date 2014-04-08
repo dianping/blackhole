@@ -242,6 +242,20 @@ public class Util {
         return result;
     }
 
+    //["host01","host02"]
+    public static String getLionValueOfStringList(String[] hosts) {
+        StringBuilder lionStringBuilder = new StringBuilder();
+        lionStringBuilder.append('[');
+        for (int i = 0; i < hosts.length; i++) {
+            lionStringBuilder.append('"').append(hosts[i]).append('"');
+            if (i != hosts.length - 1) {
+                lionStringBuilder.append(',');
+            }
+        }
+        lionStringBuilder.append(']');
+        return lionStringBuilder.toString();
+    }
+
     public static String[][] getStringMapOfLionValue(String value) {
         if (value == null) {
             return null;
@@ -320,5 +334,4 @@ public class Util {
     public static String getPortFromBroker(String brokerString) {
         return brokerString.substring(brokerString.lastIndexOf(':') + 1);
     }
-
 }

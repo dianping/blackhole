@@ -1,5 +1,7 @@
 package com.dp.blackhole.supervisor;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +13,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
@@ -22,14 +25,22 @@ import com.dp.blackhole.conf.Context;
 public class LionConfChange {
     private static final Log LOG = LogFactory.getLog(LionConfChange.class);
 
-    final Map<String, List<String>> hostToAppNames = Collections.synchronizedMap(new HashMap<String, List<String>>());
-    private final Map<String, List<String>> appToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
-    private final Set<String> appSet = Collections.synchronizedSet(new HashSet<String>());
+    public final Map<String, List<String>> hostToAppNames = Collections.synchronizedMap(new HashMap<String, List<String>>());
+    public final Map<String, List<String>> appToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
+    public final Set<String> appSet = Collections.synchronizedSet(new HashSet<String>());
+    //TODO
+    private final Map<String, List<String>> cmdbMapping = Collections.synchronizedMap(new HashMap<String, List<String>>());
 
     private ConfigCache cache;
+    private int apiId;
     
-    LionConfChange(ConfigCache cache) {
+    LionConfChange(ConfigCache cache, int apiId) {
         this.cache = cache;
+        this.apiId = apiId;
+    }
+    
+    public Map<String, List<String>> getCmdbMapping() {
+        return cmdbMapping;
     }
     
     public void initLion() {
@@ -218,6 +229,33 @@ public class LionConfChange {
             index++;
         }
         return -1;
+    }
+
+    public String generateGetURL(String key) {
+        return ParamsKey.LionNode.DEFAULT_LION_HOST +
+                ParamsKey.LionNode.LION_GET_PATH +
+                generateURIPrefix() +
+                "&k=" + key;
+    }
+
+    public String generateSetURL(String key, String value) {
+        String encodedValue = "";
+        try {
+            encodedValue = URLEncoder.encode(value,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+        }
+        return ParamsKey.LionNode.DEFAULT_LION_HOST +
+                ParamsKey.LionNode.LION_SET_PATH +
+                generateURIPrefix() +
+                "&ef=1" +
+                "&k=" + key +
+                "&v=" + encodedValue;
+    }
+
+    private String generateURIPrefix() {
+        return "?&p=" + ParamsKey.LionNode.LION_PROJECT +
+                "&e=" + EnvZooKeeperConfig.getEnv() +
+                "&id=" + this.apiId;
     }
 
     class AppsChangeListener implements ConfigChange {
