@@ -2,6 +2,7 @@ package com.dp.blackhole.supervisor;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,11 +27,13 @@ import com.dp.blackhole.conf.Context;
 public class LionConfChange {
     private static final Log LOG = LogFactory.getLog(LionConfChange.class);
 
-    public final Map<String, List<String>> hostToAppNames = Collections.synchronizedMap(new HashMap<String, List<String>>());
-    public final Map<String, List<String>> appToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
     public final Set<String> appSet = Collections.synchronizedSet(new HashSet<String>());
-    //TODO
-    private final Map<String, List<String>> cmdbMapping = Collections.synchronizedMap(new HashMap<String, List<String>>());
+    
+    private final Map<String, Set<String>> hostToAppNames = Collections.synchronizedMap(new HashMap<String, Set<String>>());
+    private final Map<String, List<String>> appToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
+    
+    private final Map<String, Set<String>> cmdbToAppNames = Collections.synchronizedMap(new HashMap<String, Set<String>>());
+    private final Map<String, List<String>> appToCmdbs = Collections.synchronizedMap(new HashMap<String, List<String>>());
 
     private ConfigCache cache;
     private int apiId;
@@ -39,15 +43,18 @@ public class LionConfChange {
         this.apiId = apiId;
     }
     
-    public Map<String, List<String>> getCmdbMapping() {
-        return cmdbMapping;
+    public Set<String> getAppNamesByHost(String host) {
+        return hostToAppNames.get(host);
+    }
+    
+    public Set<String> getAppNamesByCmdb(String cmdbApp) {
+        return cmdbToAppNames.get(cmdbApp);
     }
     
     public void initLion() {
         reloadConf();
         addWatchers();
     }
-
     private void reloadConf() {
         String appNamesString = definitelyGetProperty(ParamsKey.LionNode.APPS);
         String[] appNames = Util.getStringListOfLionValue(appNamesString);
@@ -67,6 +74,11 @@ public class LionConfChange {
                 LOG.error("Lose hosts for " + appNames[i]);
             }
             fillHostMap(appNames[i], hostsString);
+            String cmdbString = definitelyGetProperty(ParamsKey.LionNode.APP_CMDB_PREFIX + appNames[i]);
+            if (cmdbString == null) {
+                LOG.error("Lose CMDB mapping for " + appNames[i]);
+            }
+            fillCMDBMap(appNames[i], cmdbString);
         }
     }
 
@@ -128,12 +140,35 @@ public class LionConfChange {
                 if (host.length() == 0) {
                     continue;
                 }
-                List<String> appNamesInOneHost;
+                Set<String> appNamesInOneHost;
                 if ((appNamesInOneHost = hostToAppNames.get(host)) == null) {
-                    appNamesInOneHost = Collections.synchronizedList(new LinkedList<String>());
+                    appNamesInOneHost = new CopyOnWriteArraySet<String>();
                     hostToAppNames.put(host, appNamesInOneHost);
                 }
                 appNamesInOneHost.add(appName);
+            }
+        }
+    }
+    
+    private synchronized void fillCMDBMap(String appName, String cmdbValue) {
+        String[] cmdbApps = Util.getStringListOfLionValue(cmdbValue);
+        if (cmdbApps != null) {
+            ArrayList<String> list = new ArrayList<String>();
+            for (int i = 0; i < cmdbApps.length; i++) {
+                list.add(cmdbApps[i]);
+            }
+            appToCmdbs.put(appName, list);
+            for (int i = 0; i < cmdbApps.length; i++) {
+                String cmdb = cmdbApps[i].trim();
+                if (cmdb.length() == 0) {
+                    continue;
+                }
+                Set<String> appNamesInOneCMDB;
+                if ((appNamesInOneCMDB = cmdbToAppNames.get(cmdb)) == null) {
+                    appNamesInOneCMDB = new CopyOnWriteArraySet<String>();
+                    cmdbToAppNames.put(cmdb, appNamesInOneCMDB);
+                }
+                appNamesInOneCMDB.add(appName);
             }
         }
     }
@@ -186,10 +221,8 @@ public class LionConfChange {
                 ConfigKeeper.configMap.remove(appName);
                 if (hostsOfOneApp != null) {
                     for (String host : hostsOfOneApp) {
-                        List<String> appNamesInOneHost = hostToAppNames.get(host);
-                        int index = indexOf(appName, appNamesInOneHost);
-                        if (index != -1) {
-                            appNamesInOneHost.remove(index);
+                        Set<String> appNamesInOneHost = hostToAppNames.get(host);
+                        if (appNamesInOneHost.remove(appName)) {
                             LOG.info("remove "+ appName + " form hostToAppNames for " + host);
                         } else {
                             LOG.warn(appName + " in appNamesInOneHost had been removed before.");
@@ -198,15 +231,13 @@ public class LionConfChange {
                 }
             } else {
                 for (String server : appServers) {
-                    List<String> appNamesInOneHost = hostToAppNames.get(server);
-                    int index = indexOf(appName, appNamesInOneHost);
-                    if (index != -1) {
-                        appNamesInOneHost.remove(index);
+                    Set<String> appNamesInOneHost = hostToAppNames.get(server);
+                    if (appNamesInOneHost.remove(appName)) {
                         LOG.info("remove "+ appName + " form hostToAppNames for " + server);
                     } else {
                         LOG.error("Could not find app: " + appName + " in appNamesInOneHost. It should not happen.");
                     }
-                    index = indexOf(server, hostsOfOneApp);
+                    int index = indexOf(server, hostsOfOneApp);
                     if (index != -1) {
                         hostsOfOneApp.remove(index);
                         LOG.info("remove server " + server + " form appToHosts for " + appName);
@@ -280,6 +311,22 @@ public class LionConfChange {
     
         private void addWatherForKey(String watchKey) {
             definitelyGetProperty(watchKey);
+        }
+    }
+    
+    class CMDBChangeListener implements ConfigChange {
+
+        @Override
+        public void onChange(String key, String value) {
+            if (key.startsWith(ParamsKey.LionNode.APP_CMDB_PREFIX)) {
+                for (String appName : appSet) {
+                    if (key.equals(ParamsKey.LionNode.APP_CMDB_PREFIX + appName)) {
+                        LOG.info("CMDB Change is triggered by " + appName);
+                        fillCMDBMap(appName, value);
+                        break;
+                    }
+                }
+            }
         }
     }
 

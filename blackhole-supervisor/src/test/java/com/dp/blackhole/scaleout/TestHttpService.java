@@ -10,10 +10,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.junit.After;
 import org.junit.Before;
@@ -116,12 +114,12 @@ public class TestHttpService {
     
     @Test
     public void test() {
-        List<String> goodAppList = new ArrayList<String>();
-        goodAppList.add(marineapp);
-        goodAppList.add(nginxapp);
-        Map<String, List<String>> mockCmdbMap = new HashMap<String, List<String>>();
-        mockCmdbMap.put("cmdbapp", goodAppList);
-        when(mockLion.getCmdbMapping()).thenReturn(mockCmdbMap);
+        Set<String> rightAppList = new CopyOnWriteArraySet<String>();
+        Set<String> errorAppList = new CopyOnWriteArraySet<String>();
+        rightAppList.add(marineapp);
+        rightAppList.add(nginxapp);
+        when(mockLion.getAppNamesByCmdb("noneed")).thenReturn(errorAppList);
+        when(mockLion.getAppNamesByCmdb("cmdbapp")).thenReturn(rightAppList);
         simulateLionGetUrl(marineapp, marineResp, marineNewValue);
         simulateLionGetUrl(nginxapp, nginxResp, nginxNewValue);
         simulateLionGetUrl(errorapp, errorResp, null);

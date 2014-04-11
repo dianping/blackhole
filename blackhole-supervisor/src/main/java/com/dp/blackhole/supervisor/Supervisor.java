@@ -1492,8 +1492,8 @@ public class Supervisor {
         
         //initWebService
         int webServicePort = Integer.parseInt(prop.getProperty("supervisor.webservice.port"));
-        int connectionTimeout = Integer.parseInt(prop.getProperty("supervisor.webservice.connectionTimeout"));
-        int socketTimeout = Integer.parseInt(prop.getProperty("supervisor.webservice.socketTimeout"));
+        int connectionTimeout = Integer.parseInt(prop.getProperty("supervisor.webservice.connectionTimeout", "30000"));
+        int socketTimeout = Integer.parseInt(prop.getProperty("supervisor.webservice.socketTimeout", "10000"));
         RequestListener httpService = new RequestListener(
                 webServicePort, 
                 lionConfChange,
@@ -1524,15 +1524,15 @@ public class Supervisor {
 
     private void connectAppConfKeeper(Properties prop) throws IOException, LionException {
         ConfigCache configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-        int apiId = Integer.parseInt(prop.getProperty("supervisor.lionapi.id"), 71);
+        int apiId = Integer.parseInt(prop.getProperty("supervisor.lionapi.id"));
         lionConfChange = new LionConfChange(configCache, apiId);
         lionConfChange.initLion();
     }
     
     public void findConfs(SimpleConnection from) {
         Message message;
-        List<String> appNamesInOneHost;
-        if ((appNamesInOneHost = lionConfChange.hostToAppNames.get(from.getHost())) == null) {
+        Set<String> appNamesInOneHost;
+        if ((appNamesInOneHost = lionConfChange.getAppNamesByHost(from.getHost())) == null) {
             message = PBwrap.wrapNoAvailableConf();
             LOG.info("Hosts for app configurations are not ready, send NoAvailableConf message to " + from.getHost());
             send(from, message);

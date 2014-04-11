@@ -7,8 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,13 +80,13 @@ public class HttpScalaoutHandler extends HttpAbstractHandler implements HttpRequ
     
     @Override
     public HttpResult getContent(String cmdbApp, String hostname) {
-        List<String> appList = lionConfChange.getCmdbMapping().get(cmdbApp);
-        if (appList == null) {
+        Set<String> topicList = lionConfChange.getAppNamesByCmdb(cmdbApp);
+        if (topicList == null || topicList.size() == 0) {
             return new HttpResult(HttpResult.NONEED, "It contains no mapping for the cmdbapp " + cmdbApp);
         }
-        for (String app : appList) {
+        for (String topic : topicList) {
             //get string of old hosts of the app
-            String watchKey = ParamsKey.LionNode.APP_HOSTS_PREFIX + app;
+            String watchKey = ParamsKey.LionNode.APP_HOSTS_PREFIX + topic;
             String url = lionConfChange.generateGetURL(watchKey);
             String response = getResponseText(url);
             if (response == null) {
@@ -98,8 +98,9 @@ public class HttpScalaoutHandler extends HttpAbstractHandler implements HttpRequ
             } else if (response.length() == 0) {
                 return new HttpResult(HttpResult.FAILURE, "Invalid response");
             }
-            //change it (add the given hostname)
             String[] oldHosts = Util.getStringListOfLionValue(response);
+
+            //change it (add the given hostname)
             String[] newHosts = Arrays.copyOf(oldHosts, oldHosts.length + 1);
             newHosts[newHosts.length - 1] = hostname;
             String newHostsLionString = Util.getLionValueOfStringList(newHosts);
@@ -109,7 +110,7 @@ public class HttpScalaoutHandler extends HttpAbstractHandler implements HttpRequ
                 return new HttpResult(HttpResult.FAILURE, "IO exception was thrown when handle url ." + url);
             } else if (response.startsWith("1|")) {
                 return new HttpResult(HttpResult.FAILURE, "No configration in lion for key=" + watchKey);
-            } else if (response.equals("0")) {
+            } else if (response.equals("0|")) {
             } else {
                 LOG.error("Unkown response.");
                 return new HttpResult(HttpResult.FAILURE, "Unkown response.");
