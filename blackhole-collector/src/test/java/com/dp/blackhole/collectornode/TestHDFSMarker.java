@@ -14,12 +14,12 @@ import org.junit.Test;
 public class TestHDFSMarker {
     private final String MAGIC = "c344g53";
     private FileSystem fs;
+    private int port = 40005;
 
     @Before
     public void setUp() throws Exception {
-        Configuration conf = new Configuration();
         try {
-            fs = FileSystem.get(conf);
+            fs = (new Path("/tmp")).getFileSystem(new Configuration());
         } catch (IOException e) {
             throw e;
         }
@@ -32,8 +32,9 @@ public class TestHDFSMarker {
 
     @Test
     public void testMark() throws IOException, InterruptedException {
-        HDFSMarker marker = new HDFSMarker(SimCollectornode.getSimpleInstance("mark", MAGIC, fs),
-                fs, SimCollectornode.getRollIdent(MAGIC));
+        new SimCollectornode(port);
+        HDFSMarker marker = new HDFSMarker(SimCollectornode.getRollMgr(), fs, SimCollectornode.getRollIdent(MAGIC));
+        SimCollectornode.getRollMgr().init("/tmp/hdfs", ".gz", port, 5000, 1, 1);
         Thread thread = new Thread(marker);
         thread.start();
         thread.join();

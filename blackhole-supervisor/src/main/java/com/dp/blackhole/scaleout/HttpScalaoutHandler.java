@@ -110,7 +110,7 @@ public class HttpScalaoutHandler extends HttpAbstractHandler implements HttpRequ
                 return new HttpResult(HttpResult.FAILURE, "IO exception was thrown when handle url ." + url);
             } else if (response.startsWith("1|")) {
                 return new HttpResult(HttpResult.FAILURE, "No configration in lion for key=" + watchKey);
-            } else if (response.equals("0|")) {
+            } else if (response.equals("0")) {
             } else {
                 LOG.error("Unkown response.");
                 return new HttpResult(HttpResult.FAILURE, "Unkown response.");
