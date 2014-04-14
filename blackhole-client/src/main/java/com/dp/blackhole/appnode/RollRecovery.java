@@ -15,9 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dianping.cat.Cat;
-import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.common.AgentProtocol;
-import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
 import com.dp.blackhole.exception.BlackholeClientException;
@@ -67,22 +65,9 @@ public class RollRecovery implements Runnable{
     @Override
     public void run() {
         LOG.info("Roll Recovery for " + appLog + " running...");
-        // check socket connection
-        DataOutputStream out = null;
-        DataInputStream in = null;
-        try {
-            socket = new Socket(collectorServer, port);
-            out = new DataOutputStream(socket.getOutputStream());
-            in = new DataInputStream(socket.getInputStream());
-        } catch (IOException e) {
-            stopRecoveryingCauseException("Faild to build recovery stream.", e);
-            node.reportRecoveryFail(appLog.getAppName(), node.getHost(), rollTimestamp);
-            return;
-        }
 
         // check local file existence 
-        long period = ConfigKeeper.configMap.get(appLog.getAppName())
-                .getLong(ParamsKey.Appconf.ROLL_PERIOD, 3600l);
+        long period = appLog.getRollPeriod();
         SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         String rollIdent = unitFormat.format(rollTimestamp);
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
@@ -91,16 +76,21 @@ public class RollRecovery implements Runnable{
             LOG.error("Can not found both " + rolledFile + " add " + gzFile);
             Cat.logError(new BlackholeClientException("Can not found both " + rolledFile + " add " + gzFile));
             stopRecoverying();
-            node.reportUnrecoverable(appLog.getAppName(), node.getHost(), rollTimestamp);
+            node.reportUnrecoverable(appLog.getAppName(), node.getHost(), period, rollTimestamp);
             return;
         }
 
         // send recovery head, report fail in appnode if catch exception.
+        DataOutputStream out = null;
+        DataInputStream in = null;
         AgentProtocol protocol = null;
         try {
+            socket = new Socket(collectorServer, port);
+            out = new DataOutputStream(socket.getOutputStream());
+            in = new DataInputStream(socket.getInputStream());
             protocol = wrapSendRecoveryHead(out, period);
         } catch (IOException e) {
-            stopRecoveryingCauseException("Protocol head send fail, report recovery fail from appnode.", e);
+            stopRecoveryingCauseException("Faild to build recovery stream or send protocol header.", e);
             node.reportRecoveryFail(appLog.getAppName(), node.getHost(), rollTimestamp);
             return;
         }

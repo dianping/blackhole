@@ -5,22 +5,16 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.util.zip.GZIPOutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +28,6 @@ import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.Message;
 
 public class TestHDFSUpload {
-    private static final Log LOG = LogFactory.getLog(TestHDFSUpload.class);
     private final String MAGIC = "TestHDFSUpload_" + Util.getTS();
     private File expect;
     private FileSystem fs;

@@ -38,7 +38,7 @@ public class SimCollectornode extends Broker {
     
     public void start() {
         try {
-            Broker.getRollMgr().init("/tmp/hdfs", ".gz", port, 5000);
+            Broker.getRollMgr().init("/tmp/hdfs", ".gz", port, 5000, 1, 1);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,5 +52,14 @@ public class SimCollectornode extends Broker {
                 file.delete();
             }
         }
+    }
+
+    public static RollIdent getRollIdent(String appName) {
+        RollIdent rollIdent = new RollIdent();
+        rollIdent.app = appName;
+        rollIdent.period = 3600;
+        rollIdent.source = SimCollectornode.HOSTNAME;
+        rollIdent.ts = SimCollectornode.rollTS;
+        return rollIdent;
     }
 }

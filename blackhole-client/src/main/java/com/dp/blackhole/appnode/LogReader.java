@@ -35,7 +35,6 @@ public class LogReader implements Runnable{
     private int brokerPort;
     private Socket socket;
     EventWriter eventWriter;
-
     
     public LogReader(Appnode node, String localhost, String broker, int port, AppLog appLog) {
         this.node = node;
@@ -180,14 +179,16 @@ public class LogReader implements Runnable{
                         lineBuf.reset();
                         rePos = pos + i + 1;
                         break;
+                    case '\r':
+                        break;
                     default:
                         if (accept) {
                             lineBuf.write(ch);
                         }
-                    }
-                    if (accept && lineBuf.size() == maxLineSize) {
-                        LOG.warn("length of this line is longer than maxLineSize " + maxLineSize + ", discard.");
-                        accept = false;
+                        if (accept && lineBuf.size() == maxLineSize) {
+                            LOG.warn("length of this line is longer than maxLineSize " + maxLineSize + ", discard.");
+                            accept = false;
+                        }
                     }
                 }
                 pos = reader.getFilePointer();

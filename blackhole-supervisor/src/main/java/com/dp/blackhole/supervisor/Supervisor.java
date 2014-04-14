@@ -77,8 +77,16 @@ public class Supervisor {
             LOG.error("connection is null or closed, message sending abort: " + msg);
             return;
         }
-        LOG.debug("send message to " + connection + " :" +msg);
-        
+        switch (msg.getType()) {
+        case NOAVAILABLECONF:
+        case DUMP_APP:
+        case DUMPCONF:
+        case DUMPSTAT:
+        case DUMPREPLY:
+            break;
+        default:
+            LOG.debug("send message to " + connection + " :" +msg);
+        }
         connection.send(PBwrap.PB2Buf(msg));
     }
     
@@ -586,7 +594,6 @@ public class Supervisor {
         sb.append("##################################################################");
         
         String dumpstat = sb.toString();
-        LOG.info(dumpstat);
         Message message = PBwrap.wrapDumpReply(dumpstat);
         send(from, message);
     }
@@ -627,14 +634,12 @@ public class Supervisor {
         sb.append("##################################################################");
         
         String dumpstat = sb.toString();
-        LOG.info(dumpstat);
         Message message = PBwrap.wrapDumpReply(dumpstat);
         send(from, message);
     }
     
     public void dumpconf(SimpleConnection from) {
         String dumpconf = lionConfChange.dumpconf();
-        LOG.info(dumpconf);
         Message message = PBwrap.wrapDumpReply(dumpconf);
         send(from, message);
     }
@@ -663,8 +668,37 @@ public class Supervisor {
         sb.append("##################################################################");
         
         String listApps = sb.toString();
-        LOG.info(listApps);
         Message message = PBwrap.wrapDumpReply(listApps);
+        send(from, message);
+    }
+    
+    public void listIdle(SimpleConnection from) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("list idle hosts:\n");
+        sb.append("############################## dump ##############################\n");
+        SortedSet<String> idleHosts = new TreeSet<String>();
+        for(SimpleConnection conn : connectionStreamMap.keySet()) {
+            ConnectionDescription desc = connections.get(from);
+            if (desc == null) {
+                LOG.error("can not find ConnectionDesc by connection " + from);
+                return;
+            }
+            if (desc.getType() != ConnectionDescription.AGENT &&desc.getType() != ConnectionDescription.BROKER) {
+                idleHosts.add(conn.getHost());
+            }
+        }
+        int count = 0;
+        for (String idleHostInOrder : idleHosts) {
+            count++;
+            sb.append(idleHostInOrder).append("  ");
+            if (count % 5 == 0) {
+                sb.append("\n");
+            }
+        }
+        sb.append("\n").append("##################################################################");
+        
+        String listIdle = sb.toString();
+        Message message = PBwrap.wrapDumpReply(listIdle);
         send(from, message);
     }
 
@@ -789,6 +823,26 @@ public class Supervisor {
                             LOG.error("stage " + stage + " cannot be recovered");
                             stages.remove(stage);
                             stageConnectionMap.remove(stage);
+                            String collector = getCollector();
+                            if (collector != null) {
+                                SimpleConnection collectorConnection = brokersMapping.get(collector);
+                                if (collectorConnection != null) {
+                                    String appName = rollID.getAppName();
+                                    String appServer = rollID.getAppServer();
+                                    long rollTs = rollID.getRollTs();
+                                    long period = rollID.getPeriod();
+                                    if (period == 0) {
+                                        Context context = ConfigKeeper.configMap.get(appName);
+                                        if (context == null) {
+                                            LOG.error("Can not get app: " + appName + " from configMap");
+                                            break;
+                                        }
+                                        period = context.getLong(ParamsKey.Appconf.ROLL_PERIOD);
+                                    }
+                                    Message message = PBwrap.wrapMarkUnrecoverable(appName, appServer, period, rollTs);
+                                    send(collectorConnection, message);
+                                }
+                            }
                             break;
                         }
                     }
@@ -1443,6 +1497,8 @@ public class Supervisor {
                 break;
             case OFFSET_COMMIT:
                 handleOffsetCommit(msg.getOffsetCommit());
+            case LISTIDLE:
+                listIdle(from);
                 break;
             default:
                 LOG.warn("unknown message: " + msg.toString());
@@ -1534,15 +1590,20 @@ public class Supervisor {
         Set<String> appNamesInOneHost;
         if ((appNamesInOneHost = lionConfChange.getAppNamesByHost(from.getHost())) == null) {
             message = PBwrap.wrapNoAvailableConf();
-            LOG.info("Hosts for app configurations are not ready, send NoAvailableConf message to " + from.getHost());
             send(from, message);
             return;
         }
         List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
         for (String appName : appNamesInOneHost) {
             Context context = ConfigKeeper.configMap.get(appName);
+            if (context == null) {
+                LOG.error("Can not get app: " + appName + " from configMap");
+                message = PBwrap.wrapNoAvailableConf();
+                send(from, message);
+                return;
+            }
             String watchFile = context.getString(ParamsKey.Appconf.WATCH_FILE);
-            if (context == null || watchFile == null) {
+            if (watchFile == null) {
                 message = PBwrap.wrapNoAvailableConf();
                 send(from, message);
                 return;

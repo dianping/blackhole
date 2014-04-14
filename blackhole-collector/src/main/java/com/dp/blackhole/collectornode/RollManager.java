@@ -35,16 +35,19 @@ public class RollManager {
     private String suffix;
     private int port;
     private FileSystem fs;
-    private ExecutorService pool;
+    private ExecutorService uploadPool;
+    private ExecutorService recoveryPool;
     private RecoveryAcceptor accepter;
     private long clockSyncBufMillis;
     
-    public void init(String hdfsbase, String suffix, int port, long clockSyncBufMillis) throws IOException {
+    public void init(String hdfsbase, String suffix, int port, long clockSyncBufMillis, 
+            int maxUploadThreads, int maxRecoveryThreads) throws IOException {
         this.hdfsbase = hdfsbase;
         this.suffix = suffix;
         this.port = port;
         this.clockSyncBufMillis = clockSyncBufMillis;
-        pool = Executors.newCachedThreadPool();
+        uploadPool = Executors.newFixedThreadPool(maxUploadThreads);
+        recoveryPool = Executors.newFixedThreadPool(maxRecoveryThreads);
         fs = (new Path(hdfsbase)).getFileSystem(new Configuration());
         rolls = Collections.synchronizedMap(new HashMap<RollIdent, RollPartition>());
         accepter = new RecoveryAcceptor();
@@ -83,8 +86,18 @@ public class RollManager {
         }
         
         HDFSUpload upload = new HDFSUpload(this, Broker.getBrokerService().getPersistentManager(), fs, ident, roll);
-        pool.execute(upload);
+        uploadPool.execute(upload);
         return true;
+    }
+
+    public void markUnrecoverable(RollID rollID) {
+        RollIdent ident = new RollIdent();
+        ident.app = rollID.getAppName();
+        ident.source = rollID.getAppServer();
+        ident.period = rollID.getPeriod();
+        ident.ts = rollID.getRollTs();
+        HDFSMarker marker = new HDFSMarker(this, fs, ident);
+        uploadPool.execute(marker);
     }
     
     private RollIdent getRollIdent(String app, String source, long period) {
@@ -110,19 +123,27 @@ public class RollManager {
      * Path format:
      * hdfsbasedir/appname/2013-11-01/14/08/machine01@appname_2013-11-01.14.08.gz.tmp
      */
-    private String getRollHdfsPathPrefix (RollIdent ident) {
+    private String getRollHdfsPathPrefix(RollIdent ident, boolean hidden) {
         String format;
         format = Util.getFormatFromPeroid(ident.period);
         Date roll = new Date(ident.ts);
         SimpleDateFormat dm= new SimpleDateFormat(format);
-        return hdfsbase + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) + 
+        if (hidden) {
+            return hdfsbase + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
+                "_" + ident.source + '@' + ident.app + "_" + dm.format(roll);
+        } else {
+            return hdfsbase + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
                 ident.source + '@' + ident.app + "_" + dm.format(roll);
+        }
+    }
+
+    public String getRollHdfsPath(RollIdent ident) {
+        return getRollHdfsPathPrefix(ident, false) + suffix;
     }
     
-    public String getRollHdfsPath (RollIdent ident) {
-        return getRollHdfsPathPrefix(ident) + suffix;
+    public String getMarkHdfsPath(RollIdent ident) {
+        return getRollHdfsPathPrefix(ident, true);
     }
-    
     
     public void reportRecovery(RollIdent ident, boolean recoverySuccess) {
         Message message;
@@ -153,12 +174,12 @@ public class RollManager {
     
     public void close() {
         LOG.info("shutdown collector node");
-        pool.shutdownNow();
+        uploadPool.shutdownNow();
+        recoveryPool.shutdownNow();
         try {
             accepter.close();
         } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            LOG.error(e1.getMessage());
         }
         try {
             fs.close();
@@ -200,7 +221,7 @@ public class RollManager {
 
                     HDFSRecovery recovery = new HDFSRecovery(
                             RollManager.this, fs, socket, roll);
-                    pool.execute(recovery);
+                    recoveryPool.execute(recovery);
 
                 } catch (IOException e) {
                     LOG.error("error in acceptor: ", e);

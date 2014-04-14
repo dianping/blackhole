@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,6 +22,7 @@ import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.conf.Context;
 import com.dp.blackhole.exception.BlackholeClientException;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
@@ -48,6 +50,8 @@ public class Appnode implements Runnable {
     AgentProcessor processor;
     private SimpleConnection supervisor;
     
+    private int confLoopFactor = 1;
+
     public Appnode() {
         pool = Executors.newCachedThreadPool();
         recoveryThreadPool = Executors.newFixedThreadPool(2);
@@ -64,9 +68,10 @@ public class Appnode implements Runnable {
 
     public boolean checkAllFilesExist() {
         boolean res = true;
-        for (String appName : ConfigKeeper.configMap.keySet()) {
-            String pathCandidateStr = ConfigKeeper.configMap.get(appName).getString(
-                    ParamsKey.Appconf.WATCH_FILE);
+        for (Map.Entry<String, Context> entry : ConfigKeeper.configMap.entrySet()) {
+            String appName = entry.getKey();
+            Context context = entry.getValue();
+            String pathCandidateStr = context.getString(ParamsKey.Appconf.WATCH_FILE);
             if (pathCandidateStr == null) {
                 LOG.error("Oops, can not get WATCH_FILE from mapping for app " + appName);
                 Cat.logError(new BlackholeClientException("Oops, can not get WATCH_FILE from mapping for app " + appName));
@@ -77,9 +82,9 @@ public class Appnode implements Runnable {
                 File fileForTest = new File(pathCandidates[i]);
                 if (fileForTest.exists()) {
                     LOG.info("Check file " + pathCandidates[i] + " ok.");
-                    ConfigKeeper.configMap.get(appName).put(ParamsKey.Appconf.WATCH_FILE, pathCandidates[i]);
+                    context.put(ParamsKey.Appconf.WATCH_FILE, pathCandidates[i]);
                     break;
-                } else if (isCompatibleWithOldVersion(appName, fileForTest, getHost())) {
+                } else if (isCompatibleWithOldVersion(context, fileForTest, getHost())) {
                     LOG.info("It's an old version of log printer. Ok");
                     break;
                 } else {
@@ -94,8 +99,8 @@ public class Appnode implements Runnable {
         }
         return res;
     }
-    
-    private boolean isCompatibleWithOldVersion(String appName, final File fileForTest, String hostname) {
+
+    private boolean isCompatibleWithOldVersion(Context context, final File fileForTest, String hostname) {
         if (fileForTest.getParent() == null || !fileForTest.getParentFile().exists()) {
             return false;
         }
@@ -112,7 +117,7 @@ public class Appnode implements Runnable {
         if (hostname.contains(specifiedName)) {
             String oldVersionPath = fileForTest.getParent() + "/" + hostname + fileForTest.getName().substring(index);
             if (new File(oldVersionPath).exists()) {
-                ConfigKeeper.configMap.get(appName).put(ParamsKey.Appconf.WATCH_FILE, oldVersionPath);
+                context.put(ParamsKey.Appconf.WATCH_FILE, oldVersionPath);
                 LOG.debug("WATCH_FILE change to " + oldVersionPath);
                 return true;
             }
@@ -166,13 +171,12 @@ public class Appnode implements Runnable {
     }
     
     public void fillUpAppLogsFromConfig() {
-        for (String appName : ConfigKeeper.configMap.keySet()) {
-            String path = ConfigKeeper.configMap.get(appName)
-                    .getString(ParamsKey.Appconf.WATCH_FILE);
-            long rollPeroid = ConfigKeeper.configMap.get(appName)
-                            .getLong(ParamsKey.Appconf.ROLL_PERIOD);
-            int maxLineSize = ConfigKeeper.configMap.get(appName).getInteger(
-                    ParamsKey.Appconf.MAX_LINE_SIZE, 65536);
+        for (Map.Entry<String, Context> entry : ConfigKeeper.configMap.entrySet()) {
+            String appName = entry.getKey();
+            Context context = entry.getValue();
+            String path = context.getString(ParamsKey.Appconf.WATCH_FILE);
+            long rollPeroid = context.getLong(ParamsKey.Appconf.ROLL_PERIOD);
+            int maxLineSize = context.getInteger(ParamsKey.Appconf.MAX_LINE_SIZE, 512000);
             AppLog appLog = new AppLog(appName, path, rollPeroid, maxLineSize);
             appLogs.put(appName, appLog);
         }
@@ -207,7 +211,7 @@ public class Appnode implements Runnable {
         this.listener = listener;
     }
 
-    public void reportFailure(String app, String appHost, long ts) {
+    public void reportFailure(String app, String appHost, final long ts) {
         Message message = PBwrap.wrapAppFailure(app, appHost, ts);
         send(message);
         AppLog applog = appLogs.get(app);
@@ -220,18 +224,18 @@ public class Appnode implements Runnable {
         }
         register(app, applog.getCreateTime());
     }
-    
-    public void reportUnrecoverable(String appName, String appHost, long ts) {
-        Message message = PBwrap.wrapUnrecoverable(appName, appHost, ts);
+
+    public void reportUnrecoverable(String appname, String appHost, final long period, final long rollTs) {
+        Message message = PBwrap.wrapUnrecoverable(appname, appHost, period, rollTs);
         send(message);
     }
-    
-    public void reportRecoveryFail(final String appname, final String appServer, final long rollTs) {
+
+    public void reportRecoveryFail(String appname, String appServer, final long rollTs) {
         Message message = PBwrap.wrapRecoveryFail(appname, appServer, rollTs);
         send(message);
     }
-    
-    public void removeRecoverying(final String appname, final long rollTs) {
+
+    public void removeRecoverying(String appname, final long rollTs) {
         String recoveryKey = appname + ":" + rollTs;
         recoveryingMap.remove(recoveryKey);
     }
@@ -250,12 +254,11 @@ public class Appnode implements Runnable {
         public void OnConnected(SimpleConnection connection) {
             supervisor = connection;
             requireConfigFromSupersivor();
-            heartbeat = new HeartBeat(supervisor);
-            heartbeat.start();
         }
 
         @Override
         public void OnDisconnected(SimpleConnection connection) {
+            confLoopFactor = 1;
             supervisor.close();
             supervisor = null;
             
@@ -274,8 +277,10 @@ public class Appnode implements Runnable {
             appLogs.clear();
             ConfigKeeper.configMap.clear();
             
-            heartbeat.shutdown();
-            heartbeat = null;
+            if (heartbeat != null) {
+                heartbeat.shutdown();
+                heartbeat = null;
+            }
         }
         
         @Override
@@ -301,10 +306,11 @@ public class Appnode implements Runnable {
             RollRecovery rollRecovery = null;
             
             MessageType type = msg.getType();
+            Random random = new Random();
             switch (type) {
             case NOAVAILABLENODE:
                 try {
-                    Thread.sleep(5 * 1000);
+                    Thread.sleep(60 * 1000);
                 } catch (InterruptedException e) {
                     LOG.info("NOAVAILABLENODE sleep interrupted", e);
                     Cat.logError("NOAVAILABLENODE sleep interrupted", e);
@@ -362,9 +368,13 @@ public class Appnode implements Runnable {
                 }
                 break;
             case NOAVAILABLECONF:
-                LOG.info("Configurations not ready, sleep 5 seconds..");
+                if (confLoopFactor < 30) {
+                    confLoopFactor = confLoopFactor << 1;
+                }
+                int randomSecond = confLoopFactor * (random.nextInt(21) + 40) * 1000;
+                LOG.info("Configurations not ready, sleep " + randomSecond/1000 + " second.");
                 try {
-                    Thread.sleep(5 * 1000);
+                    Thread.sleep(randomSecond);
                 } catch (InterruptedException e) {
                     LOG.info("NOAVAILABLECONF sleep interrupted", e);
                     Cat.logError("NOAVAILABLECONF sleep interrupted", e);
@@ -372,6 +382,7 @@ public class Appnode implements Runnable {
                 requireConfigFromSupersivor();
                 break;
             case CONF_RES:
+                confLoopFactor = 1;
                 ConfigKeeper confKeeper = new ConfigKeeper();
                 ConfRes confRes = msg.getConfRes();
                 List<AppConfRes> appConfResList = confRes.getAppConfResList();
@@ -384,10 +395,10 @@ public class Appnode implements Runnable {
                             + ParamsKey.Appconf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
                 }
                 if (!checkAllFilesExist()) {
-                    LOG.error("Configurations are incorrect, sleep 5 seconds..");
-                    Cat.logError(new BlackholeClientException("Configurations are incorrect, sleep 5 seconds.."));
+                    LOG.error("Configurations are incorrect, sleep 60 seconds..");
+                    Cat.logError(new BlackholeClientException("Configurations are incorrect, sleep 60 seconds.."));
                     try {
-                        Thread.sleep(5 * 1000);
+                        Thread.sleep(60 * 1000);
                     } catch (InterruptedException e) {
                         LOG.error("Oops, sleep interrupted", e);
                         Cat.logError("Oops, sleep interrupted", e);
@@ -397,6 +408,11 @@ public class Appnode implements Runnable {
                 }
                 fillUpAppLogsFromConfig();
                 registerApps();
+                if (this.heartbeat == null || !this.heartbeat.isAlive()) {
+                    this.heartbeat = new HeartBeat(supervisor);
+                    this.heartbeat.setDaemon(true);
+                    this.heartbeat.start();
+                }
                 break;
             default:
                 LOG.error("Illegal message type " + msg.getType());
