@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
+import com.dp.blackhole.network.HeartBeat;
 import com.dp.blackhole.network.SimpleConnection;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply;
@@ -166,11 +167,13 @@ public class Cli {
     }
     
     public class CliProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
-
+        private HeartBeat heartbeat = null;
         @Override
         public void OnConnected(SimpleConnection connection) {
             supervisor = connection;
             if (autoCmd == null) {
+                heartbeat = new HeartBeat(supervisor);
+                heartbeat.start();
                 return;
             }
             CliInnerProcessor processor = new CliInnerProcessor();
