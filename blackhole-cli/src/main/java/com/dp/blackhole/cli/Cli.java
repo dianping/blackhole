@@ -1,9 +1,7 @@
 package com.dp.blackhole.cli;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -189,7 +187,7 @@ public class Cli extends Node {
 
     private void start() throws FileNotFoundException, IOException {
         Properties prop = new Properties();
-        prop.load(new FileReader(new File("config.properties")));
+        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
         
         String serverhost = prop.getProperty("supervisor.host");
         int serverport = Integer.parseInt(prop.getProperty("supervisor.port"));
