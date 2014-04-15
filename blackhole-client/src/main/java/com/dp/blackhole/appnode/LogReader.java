@@ -206,7 +206,6 @@ public class LogReader implements Runnable{
             wrap.write(channel);
             messageBuffer.clear();
             messageNum = 0;
-            Cat.logEvent("BHLineStat", LogReader.this.appLog.getAppName());
         }
         
         private void handleLine(byte[] line) throws IOException {
