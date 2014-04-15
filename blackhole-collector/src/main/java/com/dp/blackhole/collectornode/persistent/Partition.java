@@ -10,11 +10,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.storage.FileMessageSet;
 import com.dp.blackhole.storage.MessageSet;
 
 public class Partition {
+    private final Log Log = LogFactory.getLog(Partition.class);
+    
     private String topic;
     private String id;
     private List<Segment> segments;
@@ -213,17 +218,18 @@ public class Partition {
         return segments;
     }
     
-//    public RollPartition getRollPartition() {
-//        return roll;
-//    }
-    
     public void cleanupSegments(long current, long threshold) {
         lock.writeLock().lock();
         try {
             Iterator<Segment> iter = segments.iterator();
             while(iter.hasNext()) {
                 Segment s = iter.next();
+                // the segment has not been closed (splitted)
+                if (s.getCloseTimestamp() == 0) {
+                    continue;
+                }
                 if (current - s.getCloseTimestamp() >= threshold) {
+                    Log.info("cleanup segment: " + s);
                     iter.remove();
                     s.destory();
                 }

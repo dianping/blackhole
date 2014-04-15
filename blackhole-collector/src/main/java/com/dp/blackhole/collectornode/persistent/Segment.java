@@ -39,6 +39,7 @@ public class Segment {
         }
         this.flushThreshold = flushThreshold;
         this.splitThreshold = splitThreshold;
+        this.closeTimestamp = 0;
     }
     
     public void close() {
@@ -153,7 +154,7 @@ public class Segment {
     
     @Override
     public String toString() {
-       return "segment[" + startOffset + "," + endOffset.get() + "]";
+       return "segment[" + startOffset + "," + endOffset.get() + "]/" + closeTimestamp;
     }
     
     public Long getCloseTimestamp() {
