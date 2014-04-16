@@ -1462,6 +1462,7 @@ public class Supervisor {
                         SimpleConnection conn = entry.getKey();
                         if (now - entry.getValue().getLastHeartBeat() > THRESHOLD) {
                             LOG.info("failed to get heartbeat for 15 seconds, close connection " + conn);
+                            conn.close();
                             closeConnection(conn);
                         }
                     }
