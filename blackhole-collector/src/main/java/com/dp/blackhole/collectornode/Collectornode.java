@@ -33,8 +33,6 @@ public class Collectornode extends Node {
     private ExecutorService pool;
     private ExecutorService recoveryPool;
     private ExecutorService uploadPool;
-    private int maxRecoveryThreads = 1;
-    private int maxUploadThreads = 1;
     private ServerSocket server;
     private ConcurrentHashMap<RollIdent, File> fileRolls;
     private String basedir;
@@ -48,8 +46,8 @@ public class Collectornode extends Node {
 
     public Collectornode() throws IOException {
         pool = Executors.newCachedThreadPool();
-        recoveryPool = Executors.newFixedThreadPool(maxRecoveryThreads);
-        uploadPool = Executors.newFixedThreadPool(maxUploadThreads);
+        recoveryPool = Executors.newCachedThreadPool();
+        uploadPool = Executors.newCachedThreadPool();
         fileRolls = new ConcurrentHashMap<RollIdent, File>();
     }
 
@@ -80,7 +78,7 @@ public class Collectornode extends Node {
                         Message msg = PBwrap.wrapReadyCollector(head.app, Util.getRemoteHost(socket), head.peroid, getHost(), Util.getTS());
                         send(msg);
                     } else if (AgentProtocol.RECOVERY == head.type) {
-                        
+                        LOG.debug("rollrecovery connected: " + head.app);
                         RollIdent roll = new RollIdent();
                         roll.app = head.app;
                         roll.source = Util.getRemoteHost(socket);
@@ -198,8 +196,6 @@ public class Collectornode extends Node {
         basedir = prop.getProperty("collectornode.basedir");
         port = Integer.parseInt(prop.getProperty("collectornode.port"));
         clockSyncBufMillis = Long.parseLong(prop.getProperty("collectornode.clockSyncBufMillis", "5000"));
-        maxRecoveryThreads = Integer.parseInt(prop.getProperty("collectornode.maxRecoveryThreads", "10"));
-        maxUploadThreads = Integer.parseInt(prop.getProperty("collectornode.maxUploadThreads", "20"));
         hdfsbasedir = prop.getProperty("hdfs.basedir");
         suffix = prop.getProperty("hdfs.file.suffix");
         boolean enableSecurity = Boolean.parseBoolean(prop.getProperty("hdfs.security.enable", "true"));

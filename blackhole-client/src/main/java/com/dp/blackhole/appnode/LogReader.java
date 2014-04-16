@@ -184,7 +184,6 @@ public class LogReader implements Runnable{
         private void handleLine(byte[] line) throws IOException {
             out.write(line);
             out.write('\n'); //make server easy to handle
-            Cat.logEvent("BHLineStat", LogReader.this.appLog.getAppName());
         }
         
         /**
