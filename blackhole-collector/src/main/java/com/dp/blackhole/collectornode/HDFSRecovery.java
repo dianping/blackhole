@@ -1,6 +1,6 @@
 package com.dp.blackhole.collectornode;
 
-import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -44,6 +44,7 @@ public class HDFSRecovery implements Runnable{
             Path tmpPath = new Path(tmpPathname);
             Path recoveryPath = new Path(recoveryPathname);
             if (!fs.exists(normalPath)) {   //When normal path not exists then do recovery.
+                LOG.debug("Begin to recovery " + normalPathname);
                 long offset = 0;
                 int len = 0;
                 byte[] buf = new byte[DEFAULT_BUFSIZE];
@@ -71,7 +72,7 @@ public class HDFSRecovery implements Runnable{
                 out.writeLong(offset);
                 LOG.info("Send an offset [" + offset + "] to client");
                 
-                BufferedInputStream in = new BufferedInputStream(client.getInputStream());
+                DataInputStream in = new DataInputStream(client.getInputStream());
                 while((len = in.read(buf)) != -1) {
                     gout.write(buf, 0, len);
                 }
@@ -94,6 +95,7 @@ public class HDFSRecovery implements Runnable{
                             + ", it will try again next time.");
                 }
             } else {
+                LOG.info("File exists, do not need to repair.");
                 //When normal path exists then just delete .tmp and .r if it exists.
                 if (fs.exists(tmpPath) && !HDFSUtil.retryDelete(fs, tmpPath)) {
                     throw new IOException("Recovery success but faild to delete " + tmpPathname
