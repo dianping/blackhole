@@ -1,12 +1,10 @@
 package com.dp.blackhole.appnode;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.zip.GZIPInputStream;
@@ -22,7 +20,6 @@ import com.dp.blackhole.exception.BlackholeClientException;
 
 public class RollRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(RollRecovery.class);
-    private static final String RAF_MODE = "r";
     private static final int DEFAULT_BUFSIZE = 8192;
     private String collectorServer;
     private int port;
@@ -64,17 +61,16 @@ public class RollRecovery implements Runnable{
 
     @Override
     public void run() {
-        LOG.info("Roll Recovery for " + appLog + " running...");
-
         // check local file existence 
         long period = appLog.getRollPeriod();
         SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         String rollIdent = unitFormat.format(rollTimestamp);
+        LOG.info("Recoverying " + rollIdent + " " + appLog);
         File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
         File gzFile = Util.findGZFileByIdent(appLog.getTailFile(), rollIdent);
         if (!rolledFile.exists() && (gzFile == null || !gzFile.exists())) {
-            LOG.error("Can not found both " + rolledFile + " add " + gzFile);
-            Cat.logError(new BlackholeClientException("Can not found both " + rolledFile + " add " + gzFile));
+            LOG.error("Can not found both " + rolledFile + " and gzFile");
+            Cat.logError(new BlackholeClientException("Can not found both " + rolledFile + " and gzFile"));
             stopRecoverying();
             node.reportUnrecoverable(appLog.getAppName(), node.getHost(), period, rollTimestamp);
             return;
@@ -82,26 +78,13 @@ public class RollRecovery implements Runnable{
 
         // send recovery head, report fail in appnode if catch exception.
         DataOutputStream out = null;
-        DataInputStream in = null;
-        AgentProtocol protocol = null;
         try {
             socket = new Socket(collectorServer, port);
             out = new DataOutputStream(socket.getOutputStream());
-            in = new DataInputStream(socket.getInputStream());
-            protocol = wrapSendRecoveryHead(out, period);
+            wrapSendRecoveryHead(out);
         } catch (IOException e) {
             stopRecoveryingCauseException("Faild to build recovery stream or send protocol header.", e);
             node.reportRecoveryFail(appLog.getAppName(), node.getHost(), rollTimestamp);
-            return;
-        }
-
-        // receive begin offset, do not report anything if catch exception.
-        long offset = 0;
-        try {
-            offset = protocol.receiveOffset(in);
-            LOG.info("Received offset [" + offset + "] in header response.");
-        } catch (IOException e) {
-            stopRecoveryingCauseException("Recover stream broken. just report recovery fail from collectornode.", e);
             return;
         }
 
@@ -110,17 +93,16 @@ public class RollRecovery implements Runnable{
         if (rolledFile.exists()) {
             // recovery if raw rolledfile exists, using RandomAccessFile
             LOG.debug("roll file is " + rolledFile);
-            RandomAccessFile reader = null;
+            FileInputStream fis;
             try {
-                reader = new RandomAccessFile(rolledFile, RAF_MODE);
+                fis = new FileInputStream(rolledFile);
             } catch (FileNotFoundException e) {
                 stopRecoveryingCauseException("Oops! It not should be happen here.", e);
                 return;
             }
             try {
-                reader.seek(offset);
-                LOG.info("Seeked to the position " + offset + ". Begin to transfer...");
-                while ((len = reader.read(inbuf)) != -1) {
+                LOG.info("Begin to transfer...");
+                while ((len = fis.read(inbuf)) != -1) {
                     out.write(inbuf, 0, len);
                     transferBytes += len;
                 }
@@ -130,12 +112,12 @@ public class RollRecovery implements Runnable{
                 LOG.error("Recover stream broken.", e);
                 Cat.logError("Recover stream broken.", e);
             } finally {
-                if (reader != null) {
+                if (fis != null) {
                     try {
-                        reader.close();
+                        fis.close();
                     } catch (IOException e) {
                     }
-                    reader = null;
+                    fis = null;
                 }
                 stopRecoverying();
             }
@@ -150,7 +132,6 @@ public class RollRecovery implements Runnable{
                 return;
             }
             try {
-                gin.skip(offset);
                 while((len = gin.read(inbuf)) != -1) {
                     out.write(inbuf, 0, len);
                     transferBytes += len;
@@ -178,13 +159,13 @@ public class RollRecovery implements Runnable{
         }
     }
 
-    private AgentProtocol wrapSendRecoveryHead(DataOutputStream out, long period)
+    private AgentProtocol wrapSendRecoveryHead(DataOutputStream out)
             throws IOException {
         AgentProtocol protocol = new AgentProtocol();
         AgentHead head = protocol.new AgentHead();
         head.type = AgentProtocol.RECOVERY;
         head.app = appLog.getAppName();
-        head.peroid = period;
+        head.peroid = appLog.getRollPeriod();
         head.ts = rollTimestamp;
         protocol.sendHead(out, head);
         return protocol;
