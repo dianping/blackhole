@@ -38,7 +38,7 @@ public class SimCollectornode extends Broker {
     
     public void start() {
         try {
-            Broker.getRollMgr().init("/tmp/hdfs", ".gz", port, 5000, 1, 1);
+            Broker.getRollMgr().init("/tmp/hdfs", ".gz", port, 5000, 1, 1, 60000);
         } catch (IOException e) {
             e.printStackTrace();
         }

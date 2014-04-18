@@ -41,7 +41,7 @@ public class RollManager {
     private long clockSyncBufMillis;
     
     public void init(String hdfsbase, String suffix, int port, long clockSyncBufMillis, 
-            int maxUploadThreads, int maxRecoveryThreads) throws IOException {
+            int maxUploadThreads, int maxRecoveryThreads, int recoverySocketTimeout) throws IOException {
         this.hdfsbase = hdfsbase;
         this.suffix = suffix;
         this.port = port;
@@ -50,7 +50,7 @@ public class RollManager {
         recoveryPool = Executors.newFixedThreadPool(maxRecoveryThreads);
         fs = (new Path(hdfsbase)).getFileSystem(new Configuration());
         rolls = Collections.synchronizedMap(new HashMap<RollIdent, RollPartition>());
-        accepter = new RecoveryAcceptor();
+        accepter = new RecoveryAcceptor(recoverySocketTimeout);
         accepter.start();
         LOG.info("roll manager started");
     }
@@ -191,8 +191,10 @@ public class RollManager {
     private class RecoveryAcceptor extends Thread {
         private boolean running = true;
         private ServerSocket server;
+        private int recoverySocketTimeout;
         
-        public RecoveryAcceptor() throws IOException {
+        public RecoveryAcceptor(int recoverySocketTimeout) throws IOException {
+            this.recoverySocketTimeout = recoverySocketTimeout;
             server = new ServerSocket(port);
         }
         
@@ -205,6 +207,7 @@ public class RollManager {
             while (running) {
                 try {
                     Socket socket = server.accept();
+                    socket.setSoTimeout(recoverySocketTimeout);
                     
                     DataInputStream in = new DataInputStream(socket.getInputStream());
                     

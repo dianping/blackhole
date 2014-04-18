@@ -34,7 +34,7 @@ public class TestHDFSMarker {
     public void testMark() throws IOException, InterruptedException {
         new SimCollectornode(port);
         HDFSMarker marker = new HDFSMarker(SimCollectornode.getRollMgr(), fs, SimCollectornode.getRollIdent(MAGIC));
-        SimCollectornode.getRollMgr().init("/tmp/hdfs", ".gz", port, 5000, 1, 1);
+        SimCollectornode.getRollMgr().init("/tmp/hdfs", ".gz", port, 5000, 1, 1, 60000);
         Thread thread = new Thread(marker);
         thread.start();
         thread.join();
