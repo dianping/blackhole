@@ -36,11 +36,12 @@ public class FileListener implements JNotifyListener{
     public FileListener() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         iJNotifyInstance = (IJNotify) Class.forName("net.contentobjects.jnotify.linux.JNotifyAdapterLinux").newInstance();
         readerMap = Collections.synchronizedMap(new HashMap<String, LogReader>());
+        //guarantee by synchronized
         parentWathchPathSet = new HashSet<String>();
         path2wd = new HashMap<String, Integer>();
     }
 
-    public boolean registerLogReader(final String watchPath, final LogReader reader) {
+    public synchronized boolean registerLogReader(final String watchPath, final LogReader reader) {
         int fwd, wd;
         if (!readerMap.containsKey(watchPath)) {
             readerMap.put(watchPath, reader);
