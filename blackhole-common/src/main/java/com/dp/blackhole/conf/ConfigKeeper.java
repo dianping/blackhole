@@ -10,7 +10,7 @@ public class ConfigKeeper {
         private static final Log logger = LogFactory.getLog(ConfigKeeper.class);
         public static Map<String, Context> configMap = new HashMap<String, Context>();
 
-        public boolean addRawProperty(String name, String value) {
+        public synchronized boolean addRawProperty(String name, String value) {
                 // Null names and values not supported
                 if (name == null || value == null) {
                         logger.error("Null names and values not supported");
