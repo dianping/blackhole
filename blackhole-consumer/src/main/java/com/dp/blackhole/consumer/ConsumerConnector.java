@@ -195,6 +195,7 @@ public class ConsumerConnector implements Runnable {
             heartbeat = new HeartBeat(supervisor);
             heartbeat.start();
             if (sentReg) {
+                LOG.info("re-register consumers");
                 for (Consumer c : consumers.values()) {
                     sendRegConsumer(c.getTopic(), c.getGroup(), c.getConsumerId());
                 }
