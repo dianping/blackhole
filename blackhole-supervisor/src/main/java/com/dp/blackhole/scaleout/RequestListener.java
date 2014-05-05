@@ -3,6 +3,8 @@ package com.dp.blackhole.scaleout;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
@@ -30,6 +32,7 @@ public class RequestListener extends Thread {
     private final HttpParams params; 
     private final HttpService httpService;
     private boolean running;
+    private ExecutorService handlerPool = Executors.newCachedThreadPool();
     
     public RequestListener(int port, LionConfChange lionConfChange, HttpClientSingle cmdbHttpClient) throws IOException {
         this.serversocket = new ServerSocket(port);
@@ -51,7 +54,6 @@ public class RequestListener extends Thread {
         
         // Set up request handlers
         HttpRequestHandlerRegistry reqistry = new HttpRequestHandlerRegistry();
-        reqistry.register("/search*", new HttpSearchHandler());
         reqistry.register("/scaleout*", new HttpScalaoutHandler(lionConfChange, cmdbHttpClient));
         reqistry.register("*", new HttpFallbackHandler());
         
@@ -77,8 +79,7 @@ public class RequestListener extends Thread {
 
                 // Start worker thread
                 HttpCoreRequestHandler handler = new HttpCoreRequestHandler(this.httpService, conn);
-                WorkQueue w = WorkQueue.getInstance();
-                w.execute(handler);
+                handlerPool.execute(handler);
             } catch (IOException e) {
                 running = false;
                 try {
