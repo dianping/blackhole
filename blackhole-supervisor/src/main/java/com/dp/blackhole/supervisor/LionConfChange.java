@@ -295,16 +295,18 @@ public class LionConfChange {
         public void onChange(String key, String value) {
             if (key.equals(ParamsKey.LionNode.APPS)) {
                 String[] appNames = Util.getStringListOfLionValue(value);
-                for (int i = 0; i < appNames.length; i++) {
-                    if (appSet.contains(appNames[i])) {
-                        continue;
+                if (appNames != null) {
+                    for (int i = 0; i < appNames.length; i++) {
+                        if (appSet.contains(appNames[i])) {
+                            continue;
+                        }
+                        LOG.info("Apps Change is triggered by "+ appNames[i]);
+                        appSet.add(appNames[i]);
+                        String watchKey = ParamsKey.LionNode.APP_CONF_PREFIX + appNames[i];
+                        addWatherForKey(watchKey);
+                        watchKey = ParamsKey.LionNode.APP_HOSTS_PREFIX + appNames[i];
+                        addWatherForKey(watchKey);
                     }
-                    LOG.info("Apps Change is triggered by "+ appNames[i]);
-                    appSet.add(appNames[i]);
-                    String watchKey = ParamsKey.LionNode.APP_CONF_PREFIX + appNames[i];
-                    addWatherForKey(watchKey);
-                    watchKey = ParamsKey.LionNode.APP_HOSTS_PREFIX + appNames[i];
-                    addWatherForKey(watchKey);
                 }
             }
         }
