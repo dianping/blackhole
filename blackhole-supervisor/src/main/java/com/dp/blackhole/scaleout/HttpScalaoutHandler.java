@@ -100,9 +100,15 @@ public class HttpScalaoutHandler extends HttpAbstractHandler implements HttpRequ
             }
             String[] oldHosts = Util.getStringListOfLionValue(response);
 
+            String[] newHosts = null;
             //change it (add the given hostname)
-            String[] newHosts = Arrays.copyOf(oldHosts, oldHosts.length + 1);
-            newHosts[newHosts.length - 1] = hostname;
+            if (oldHosts == null) {
+                newHosts =  new String[]{hostname};
+            } else {
+                newHosts = Arrays.copyOf(oldHosts, oldHosts.length + 1);
+                newHosts[newHosts.length - 1] = hostname;
+            }
+
             String newHostsLionString = Util.getLionValueOfStringList(newHosts);
             url = lionConfChange.generateSetURL(watchKey, newHostsLionString);
             response = getResponseText(url);

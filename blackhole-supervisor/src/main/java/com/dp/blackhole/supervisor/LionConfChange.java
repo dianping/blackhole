@@ -2,7 +2,6 @@ package com.dp.blackhole.supervisor;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,7 +32,6 @@ public class LionConfChange {
     private final Map<String, List<String>> appToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
     
     private final Map<String, Set<String>> cmdbToAppNames = Collections.synchronizedMap(new HashMap<String, Set<String>>());
-    private final Map<String, List<String>> appToCmdbs = Collections.synchronizedMap(new HashMap<String, List<String>>());
 
     private ConfigCache cache;
     private int apiId;
@@ -153,11 +151,6 @@ public class LionConfChange {
     private synchronized void fillCMDBMap(String appName, String cmdbValue) {
         String[] cmdbApps = Util.getStringListOfLionValue(cmdbValue);
         if (cmdbApps != null) {
-            ArrayList<String> list = new ArrayList<String>();
-            for (int i = 0; i < cmdbApps.length; i++) {
-                list.add(cmdbApps[i]);
-            }
-            appToCmdbs.put(appName, list);
             for (int i = 0; i < cmdbApps.length; i++) {
                 String cmdb = cmdbApps[i].trim();
                 if (cmdb.length() == 0) {
