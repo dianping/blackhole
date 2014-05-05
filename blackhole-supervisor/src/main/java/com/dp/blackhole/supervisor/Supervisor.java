@@ -49,6 +49,8 @@ import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 import com.dp.blackhole.protocol.control.StreamIDPB.StreamID;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry;
+import com.dp.blackhole.scaleout.HttpClientSingle;
+import com.dp.blackhole.scaleout.RequestListener;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Supervisor {
@@ -159,8 +161,8 @@ public class Supervisor {
     }
     
     private void sendConsumerRegFail(SimpleConnection from, String group, String consumerId, String topic) {
-    	Message message = PBwrap.wrapConsumerRegFail(group, consumerId, topic);
-    	send(from, message);
+        Message message = PBwrap.wrapConsumerRegFail(group, consumerId, topic);
+        send(from, message);
     }
     
     private void handleConsumerReg(ConsumerReg consumerReg, SimpleConnection from) {
@@ -1488,6 +1490,18 @@ public class Supervisor {
         //initLion(or initZooKeeper)
         connectAppConfKeeper(prop);
         
+        //initWebService
+        int webServicePort = Integer.parseInt(prop.getProperty("supervisor.webservice.port"));
+        int connectionTimeout = Integer.parseInt(prop.getProperty("supervisor.webservice.connectionTimeout", "30000"));
+        int socketTimeout = Integer.parseInt(prop.getProperty("supervisor.webservice.socketTimeout", "10000"));
+        RequestListener httpService = new RequestListener(
+                webServicePort, 
+                lionConfChange,
+                new HttpClientSingle(connectionTimeout, socketTimeout)
+        );
+        httpService.setDaemon(true);
+        httpService.start();
+        
         topics = new ConcurrentHashMap<String, ConcurrentHashMap<String,PartitionInfo>>();
         consumerGroups = new ConcurrentHashMap<ConsumerGroup, ConsumerGroupDesc>();
         
@@ -1510,14 +1524,15 @@ public class Supervisor {
 
     private void connectAppConfKeeper(Properties prop) throws IOException, LionException {
         ConfigCache configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-        lionConfChange = new LionConfChange(configCache);
+        int apiId = Integer.parseInt(prop.getProperty("supervisor.lionapi.id"));
+        lionConfChange = new LionConfChange(configCache, apiId);
         lionConfChange.initLion();
     }
     
     public void findConfs(SimpleConnection from) {
         Message message;
-        List<String> appNamesInOneHost;
-        if ((appNamesInOneHost = lionConfChange.hostToAppNames.get(from.getHost())) == null) {
+        Set<String> appNamesInOneHost;
+        if ((appNamesInOneHost = lionConfChange.getAppNamesByHost(from.getHost())) == null) {
             message = PBwrap.wrapNoAvailableConf();
             LOG.info("Hosts for app configurations are not ready, send NoAvailableConf message to " + from.getHost());
             send(from, message);
