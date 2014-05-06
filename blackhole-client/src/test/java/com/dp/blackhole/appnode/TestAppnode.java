@@ -7,15 +7,14 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
+import com.dp.blackhole.conf.Context;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 
 public class TestAppnode {
@@ -28,7 +27,6 @@ public class TestAppnode {
         }
     }
     private SimAppnode appnode;
-    private ConfigKeeper configKeeper;
 
     @Before
     public void setUp() throws Exception {
@@ -37,9 +35,9 @@ public class TestAppnode {
         tailFile.createNewFile();
         tailFile.deleteOnExit();
         appnode = new SimAppnode();
-        configKeeper = new ConfigKeeper();
-        configKeeper.addRawProperty(MAGIC+"."+ParamsKey.Appconf.ROLL_PERIOD, "3600");
-        configKeeper.addRawProperty(MAGIC+"."+ParamsKey.Appconf.MAX_LINE_SIZE, "1024");
+        ConfigKeeper.configMap.put(MAGIC, new Context(ParamsKey.Appconf.ROLL_PERIOD, "3600"));
+        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.MAX_LINE_SIZE, "1024");
+        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.WATCH_FILE, tailFile.getAbsolutePath());
     }
 
     @After
@@ -69,27 +67,27 @@ public class TestAppnode {
         File expectedFile;
         expectedFile = new File(expectedFileName1);
         expectedFile.createNewFile();
-        assertTrue(appnode.checkFilesExist(MAGIC, WATCH_FILE, configKeeper));
+        assertTrue(appnode.checkFilesExist(MAGIC, WATCH_FILE));
         assertEquals(expectedFileName1, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
         expectedFile.delete();
         expectedFile = new File(expectedFileName2);
         expectedFile.createNewFile();
-        assertTrue(appnode.checkFilesExist(MAGIC, WATCH_FILE, configKeeper));
+        assertTrue(appnode.checkFilesExist(MAGIC, WATCH_FILE));
         assertEquals(expectedFileName2, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
         expectedFile.delete();
         expectedFile = new File(expectedFileName3);
         expectedFile.createNewFile();
-        assertTrue(appnode.checkFilesExist(MAGIC, WATCH_FILE, configKeeper));
+        assertTrue(appnode.checkFilesExist(MAGIC, WATCH_FILE));
         assertEquals(expectedFileName3, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
         expectedFile.delete();
         expectedFile = new File(expectedFileName4);
         expectedFile.createNewFile();
-        assertTrue(appnode.checkFilesExist(MAGIC, WATCH_FILE, configKeeper));
+        assertTrue(appnode.checkFilesExist(MAGIC, WATCH_FILE));
         assertEquals(expectedFileName4, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
         expectedFile.delete();
         expectedFile = new File(expectedFileName5);
         expectedFile.createNewFile();
-        assertFalse(appnode.checkFilesExist(MAGIC, WATCH_FILE, configKeeper));
+        assertFalse(appnode.checkFilesExist(MAGIC, WATCH_FILE));
         expectedFile.delete();
         new File("/tmp/check1").delete();
         new File("/tmp/check2").delete();
