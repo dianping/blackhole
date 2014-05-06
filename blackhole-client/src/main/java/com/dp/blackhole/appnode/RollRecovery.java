@@ -1,5 +1,6 @@
 package com.dp.blackhole.appnode;
 
+import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -91,18 +92,18 @@ public class RollRecovery implements Runnable{
         int len = 0;
         long transferBytes = 0;
         if (rolledFile.exists()) {
-            // recovery if raw rolledfile exists, using RandomAccessFile
+            // recovery if raw rolled file exists
             LOG.debug("roll file is " + rolledFile);
-            FileInputStream fis;
+            BufferedInputStream is;
             try {
-                fis = new FileInputStream(rolledFile);
+                is = new BufferedInputStream(new FileInputStream(rolledFile));
             } catch (FileNotFoundException e) {
                 stopRecoveryingCauseException("Oops! It not should be happen here.", e);
                 return;
             }
             try {
                 LOG.info("Begin to transfer...");
-                while ((len = fis.read(inbuf)) != -1) {
+                while ((len = is.read(inbuf)) != -1) {
                     out.write(inbuf, 0, len);
                     transferBytes += len;
                 }
@@ -112,12 +113,12 @@ public class RollRecovery implements Runnable{
                 LOG.error("Recover stream broken.", e);
                 Cat.logError("Recover stream broken.", e);
             } finally {
-                if (fis != null) {
+                if (is != null) {
                     try {
-                        fis.close();
+                        is.close();
                     } catch (IOException e) {
                     }
-                    fis = null;
+                    is = null;
                 }
                 stopRecoverying();
             }

@@ -13,6 +13,8 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,10 +39,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Appnode implements Runnable {
     private static final Log LOG = LogFactory.getLog(Appnode.class);
+    private static final int DEFAULT_DELAY_SECOND = 5;
     private ExecutorService pool;
     private ExecutorService recoveryThreadPool;
     private FileListener listener;
     private String hostname;
+    private final ScheduledThreadPoolExecutor scheduler;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
     private Map<String, RollRecovery> recoveryingMap = new ConcurrentHashMap<String, RollRecovery>();
@@ -48,12 +52,16 @@ public class Appnode implements Runnable {
     private GenClient<ByteBuffer, SimpleConnection, AgentProcessor> client;
     AgentProcessor processor;
     private SimpleConnection supervisor;
-    
+    private ConfigKeeper confKeeper;
     private int confLoopFactor = 1;
 
     public Appnode() {
         pool = Executors.newCachedThreadPool();
         recoveryThreadPool = Executors.newFixedThreadPool(2);
+        confKeeper = new ConfigKeeper();
+        scheduler = new ScheduledThreadPoolExecutor(1);
+        scheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
+        scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
     }
 
     public String getHost() {
@@ -62,10 +70,10 @@ public class Appnode implements Runnable {
     
     private void register(String appName, long regTimestamp) {
         Message msg = PBwrap.wrapAppReg(appName, hostname, regTimestamp);
-        send(msg);
+        send(msg, DEFAULT_DELAY_SECOND);
     }
 
-    public boolean checkFilesExist(String appName, String pathCandidateStr, ConfigKeeper confKeeper) {
+    public boolean checkFilesExist(String appName, String pathCandidateStr) {
         if (pathCandidateStr == null) {
             LOG.error("Oops, can not get WATCH_FILE from mapping for app " + appName);
             Cat.logError(new BlackholeClientException("Oops, can not get WATCH_FILE from mapping for app " + appName));
@@ -173,9 +181,9 @@ public class Appnode implements Runnable {
         appLogs.put(appName, appLog);
     }
 
-    private void requireConfigFromSupersivor() {
+    private void requireConfigFromSupersivor(int delaySecond) {
         Message msg = PBwrap.wrapConfReq();
-        send(msg);
+        send(msg, delaySecond);
     }
     
     public FileListener getListener() {
@@ -186,6 +194,7 @@ public class Appnode implements Runnable {
         pool.shutdownNow();
         recoveryThreadPool.shutdownNow();
         client.shutdown();
+        scheduler.shutdown();
     }
     
     /**
@@ -200,12 +209,6 @@ public class Appnode implements Runnable {
         send(message);
         AppLog applog = appLogs.get(app);
         appReaders.remove(applog);
-        try {
-            Thread.sleep(5 * 1000);
-        } catch (InterruptedException e) {
-            LOG.info("report failure sleep interrupted", e);
-            Cat.logError("report failure sleep interrupted", e);
-        }
         register(app, applog.getCreateTime());
     }
 
@@ -231,15 +234,31 @@ public class Appnode implements Runnable {
         }
     }
     
+    public void send(Message message, int delaySecond) {
+        scheduler.schedule(new SendTask(message), delaySecond, TimeUnit.SECONDS);
+    }
+
+    class SendTask implements Runnable {
+        private Message msg;
+
+        public SendTask(Message msg) {
+            this.msg = msg;
+        }
+
+        @Override
+        public void run() {
+            send(msg);
+        }
+    }
+
     public class AgentProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
         private HeartBeat heartbeat = null;
-        private ConfigKeeper confKeeper;
+
         
         @Override
         public void OnConnected(SimpleConnection connection) {
             supervisor = connection;
-            confKeeper = new ConfigKeeper();
-            requireConfigFromSupersivor();
+            requireConfigFromSupersivor(0);
         }
 
         @Override
@@ -267,7 +286,6 @@ public class Appnode implements Runnable {
                 heartbeat.shutdown();
                 heartbeat = null;
             }
-            confKeeper = null;
         }
         
         @Override
@@ -296,14 +314,8 @@ public class Appnode implements Runnable {
             Random random = new Random();
             switch (type) {
             case NOAVAILABLENODE:
-                try {
-                    Thread.sleep(60 * 1000);
-                } catch (InterruptedException e) {
-                    LOG.info("NOAVAILABLENODE sleep interrupted", e);
-                    Cat.logError("NOAVAILABLENODE sleep interrupted", e);
-                }
                 String app = msg.getNoAvailableNode().getAppName();
-                AppLog applog = appLogs.get(app);//TODO
+                AppLog applog = appLogs.get(app);
                 register(app, applog.getCreateTime());
                 break;
             case RECOVERY_ROLL:
@@ -358,15 +370,9 @@ public class Appnode implements Runnable {
                 if (confLoopFactor < 30) {
                     confLoopFactor = confLoopFactor << 1;
                 }
-                int randomSecond = confLoopFactor * (random.nextInt(21) + 40) * 1000;
-                LOG.info("Configurations not ready, sleep " + randomSecond/1000 + " second.");
-                try {
-                    Thread.sleep(randomSecond);
-                } catch (InterruptedException e) {
-                    LOG.info("NOAVAILABLECONF sleep interrupted", e);
-                    Cat.logError("NOAVAILABLECONF sleep interrupted", e);
-                }
-                requireConfigFromSupersivor();
+                int randomSecond = confLoopFactor * (random.nextInt(21) + 40);
+                LOG.info("Configurations not ready, sleep " + randomSecond + " second.");
+                requireConfigFromSupersivor(randomSecond);
                 break;
             case CONF_RES:
                 confLoopFactor = 1;
@@ -379,7 +385,7 @@ public class Appnode implements Runnable {
                     }
                     String pathCandidateStr = appConfRes.getWatchFile();
                     //check files existence
-                    if (!checkFilesExist(appName, pathCandidateStr, confKeeper)) {
+                    if (!checkFilesExist(appName, pathCandidateStr)) {
                         LOG.error("Log file discripted in configuration doesn't exist for " + appName);
                         Cat.logError(new BlackholeClientException("Log file discripted in configuration doesn't exist for " + appName));
                         continue;
@@ -400,25 +406,12 @@ public class Appnode implements Runnable {
                 if (heartbeat == null) {
                     LOG.error("Configurations are all incorrect, sleep 5 minutes...");
                     Cat.logError(new BlackholeClientException("Configurations are all incorrect, sleep 5 minutes..."));
-                    try {
-                        Thread.sleep(5 * 60 * 1000);
-                    } catch (InterruptedException e) {
-                        LOG.error("Oops, sleep interrupted", e);
-                        Cat.logError("Oops, sleep interrupted", e);
-                    }
+                    requireConfigFromSupersivor(5 * 60);
                 } else if (appLogs.size() < appConfResList.size()) {
-                    LOG.error("Not all configurations are incorrect, sleep 10 seconds..");
+                    LOG.error("Not all configurations are incorrect, sleep 5 seconds..");
                     Cat.logError(new BlackholeClientException("Not all configurations are incorrect, sleep 10 seconds.."));
-                    try {
-                        Thread.sleep(10 * 1000);
-                    } catch (InterruptedException e) {
-                        LOG.error("Oops, sleep interrupted", e);
-                        Cat.logError("Oops, sleep interrupted", e);
-                    }
-                } else {
-                    break;
+                    requireConfigFromSupersivor(DEFAULT_DELAY_SECOND);
                 }
-                requireConfigFromSupersivor();
                 break;
             default:
                 LOG.error("Illegal message type " + msg.getType());
