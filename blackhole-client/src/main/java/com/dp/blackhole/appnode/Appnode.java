@@ -92,9 +92,8 @@ public class Appnode implements Runnable {
                 break;
             } else {
                 if (i == pathCandidates.length - 1) {
-                    LOG.error("Appnode process start faild, because all of file " + Arrays.toString(pathCandidates) + " not found!");
-                    Cat.logError(new BlackholeClientException("Appnode process start faild, because all of file "
-                                    + pathCandidates + " not found!"));
+                    LOG.error("App: " + appName + ", Log: " + Arrays.toString(pathCandidates) + " not found!");
+                    Cat.logError(new BlackholeClientException("App: " + appName + ", Log: " + Arrays.toString(pathCandidates) + " not found!"));
                     return false;
                 }
             }
@@ -386,8 +385,6 @@ public class Appnode implements Runnable {
                     String pathCandidateStr = appConfRes.getWatchFile();
                     //check files existence
                     if (!checkFilesExist(appName, pathCandidateStr)) {
-                        LOG.error("Log file discripted in configuration doesn't exist for " + appName);
-                        Cat.logError(new BlackholeClientException("Log file discripted in configuration doesn't exist for " + appName));
                         continue;
                     }
                     confKeeper.addRawProperty(appName + "."
@@ -403,14 +400,9 @@ public class Appnode implements Runnable {
                         this.heartbeat.start();
                     }
                 }
-                if (heartbeat == null) {
-                    LOG.error("Configurations are all incorrect, sleep 5 minutes...");
-                    Cat.logError(new BlackholeClientException("Configurations are all incorrect, sleep 5 minutes..."));
+                if (appLogs.size() < appConfResList.size()) {
+                    LOG.warn("Not all configurations are correct, sleep 5 minutes...");
                     requireConfigFromSupersivor(5 * 60);
-                } else if (appLogs.size() < appConfResList.size()) {
-                    LOG.error("Not all configurations are incorrect, sleep 5 seconds..");
-                    Cat.logError(new BlackholeClientException("Not all configurations are incorrect, sleep 10 seconds.."));
-                    requireConfigFromSupersivor(DEFAULT_DELAY_SECOND);
                 }
                 break;
             default:
