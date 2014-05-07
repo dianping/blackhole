@@ -114,4 +114,23 @@ public class TestUtil {
         result = Util.getLatestRotateRollTsUnderTimeBuf(testValue, PEROID_OF_DAY, bufMs);
         assertEquals(1378310400000l, result);
     }
+    
+    @Test
+    public void testGetLionValueOfStringList() {
+        String[] hosts = new String[3];
+        hosts[0] = "test-somehost-web01.nh";
+        hosts[1] = "test-somehost-web02.nh";
+        hosts[2] = "test-somehost-web03.nh";
+        String expectString = "[\"test-somehost-web01.nh\",\"test-somehost-web02.nh\",\"test-somehost-web03.nh\"]";
+        assertEquals(expectString, Util.getLionValueOfStringList(hosts));
+    }
+    
+    @Test
+    public void testGetStringListOfLionValue() {
+        String lionValue = "[\"test-somehost-web01.nh\",\"test-somehost-web02.nh\",\"test-somehost-web03.nh\"]";
+        String[] hosts = Util.getStringListOfLionValue(lionValue);
+        for (int i = 0; i < hosts.length; i++) {
+            assertEquals("test-somehost-web0" + (i + 1) + ".nh", hosts[i]);
+        }
+    }
 }

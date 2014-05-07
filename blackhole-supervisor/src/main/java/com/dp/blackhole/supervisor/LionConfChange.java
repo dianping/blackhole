@@ -1,5 +1,7 @@
 package com.dp.blackhole.supervisor;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,10 +9,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
@@ -22,21 +26,33 @@ import com.dp.blackhole.conf.Context;
 public class LionConfChange {
     private static final Log LOG = LogFactory.getLog(LionConfChange.class);
 
-    final Map<String, List<String>> hostToAppNames = Collections.synchronizedMap(new HashMap<String, List<String>>());
+    public final Set<String> appSet = Collections.synchronizedSet(new HashSet<String>());
+    
+    private final Map<String, Set<String>> hostToAppNames = Collections.synchronizedMap(new HashMap<String, Set<String>>());
     private final Map<String, List<String>> appToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
-    private final Set<String> appSet = Collections.synchronizedSet(new HashSet<String>());
+    
+    private final Map<String, Set<String>> cmdbToAppNames = Collections.synchronizedMap(new HashMap<String, Set<String>>());
 
     private ConfigCache cache;
+    private int apiId;
     
-    LionConfChange(ConfigCache cache) {
+    LionConfChange(ConfigCache cache, int apiId) {
         this.cache = cache;
+        this.apiId = apiId;
+    }
+    
+    public Set<String> getAppNamesByHost(String host) {
+        return hostToAppNames.get(host);
+    }
+    
+    public Set<String> getAppNamesByCmdb(String cmdbApp) {
+        return cmdbToAppNames.get(cmdbApp);
     }
     
     public void initLion() {
         reloadConf();
         addWatchers();
     }
-
     private void reloadConf() {
         String appNamesString = definitelyGetProperty(ParamsKey.LionNode.APPS);
         String[] appNames = Util.getStringListOfLionValue(appNamesString);
@@ -56,6 +72,11 @@ public class LionConfChange {
                 LOG.error("Lose hosts for " + appNames[i]);
             }
             fillHostMap(appNames[i], hostsString);
+            String cmdbString = definitelyGetProperty(ParamsKey.LionNode.APP_CMDB_PREFIX + appNames[i]);
+            if (cmdbString == null) {
+                LOG.error("Lose CMDB mapping for " + appNames[i]);
+            }
+            fillCMDBMap(appNames[i], cmdbString);
         }
     }
 
@@ -117,12 +138,30 @@ public class LionConfChange {
                 if (host.length() == 0) {
                     continue;
                 }
-                List<String> appNamesInOneHost;
+                Set<String> appNamesInOneHost;
                 if ((appNamesInOneHost = hostToAppNames.get(host)) == null) {
-                    appNamesInOneHost = Collections.synchronizedList(new LinkedList<String>());
+                    appNamesInOneHost = new CopyOnWriteArraySet<String>();
                     hostToAppNames.put(host, appNamesInOneHost);
                 }
                 appNamesInOneHost.add(appName);
+            }
+        }
+    }
+    
+    private synchronized void fillCMDBMap(String appName, String cmdbValue) {
+        String[] cmdbApps = Util.getStringListOfLionValue(cmdbValue);
+        if (cmdbApps != null) {
+            for (int i = 0; i < cmdbApps.length; i++) {
+                String cmdb = cmdbApps[i].trim();
+                if (cmdb.length() == 0) {
+                    continue;
+                }
+                Set<String> appNamesInOneCMDB;
+                if ((appNamesInOneCMDB = cmdbToAppNames.get(cmdb)) == null) {
+                    appNamesInOneCMDB = new CopyOnWriteArraySet<String>();
+                    cmdbToAppNames.put(cmdb, appNamesInOneCMDB);
+                }
+                appNamesInOneCMDB.add(appName);
             }
         }
     }
@@ -175,10 +214,8 @@ public class LionConfChange {
                 ConfigKeeper.configMap.remove(appName);
                 if (hostsOfOneApp != null) {
                     for (String host : hostsOfOneApp) {
-                        List<String> appNamesInOneHost = hostToAppNames.get(host);
-                        int index = indexOf(appName, appNamesInOneHost);
-                        if (index != -1) {
-                            appNamesInOneHost.remove(index);
+                        Set<String> appNamesInOneHost = hostToAppNames.get(host);
+                        if (appNamesInOneHost.remove(appName)) {
                             LOG.info("remove "+ appName + " form hostToAppNames for " + host);
                         } else {
                             LOG.warn(appName + " in appNamesInOneHost had been removed before.");
@@ -187,15 +224,13 @@ public class LionConfChange {
                 }
             } else {
                 for (String server : appServers) {
-                    List<String> appNamesInOneHost = hostToAppNames.get(server);
-                    int index = indexOf(appName, appNamesInOneHost);
-                    if (index != -1) {
-                        appNamesInOneHost.remove(index);
+                    Set<String> appNamesInOneHost = hostToAppNames.get(server);
+                    if (appNamesInOneHost.remove(appName)) {
                         LOG.info("remove "+ appName + " form hostToAppNames for " + server);
                     } else {
                         LOG.error("Could not find app: " + appName + " in appNamesInOneHost. It should not happen.");
                     }
-                    index = indexOf(server, hostsOfOneApp);
+                    int index = indexOf(server, hostsOfOneApp);
                     if (index != -1) {
                         hostsOfOneApp.remove(index);
                         LOG.info("remove server " + server + " form appToHosts for " + appName);
@@ -220,28 +255,73 @@ public class LionConfChange {
         return -1;
     }
 
+    public String generateGetURL(String key) {
+        return ParamsKey.LionNode.DEFAULT_LION_HOST +
+                ParamsKey.LionNode.LION_GET_PATH +
+                generateURIPrefix() +
+                "&k=" + key;
+    }
+
+    public String generateSetURL(String key, String value) {
+        String encodedValue = "";
+        try {
+            encodedValue = URLEncoder.encode(value,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+        }
+        return ParamsKey.LionNode.DEFAULT_LION_HOST +
+                ParamsKey.LionNode.LION_SET_PATH +
+                generateURIPrefix() +
+                "&ef=1" +
+                "&k=" + key +
+                "&v=" + encodedValue;
+    }
+
+    private String generateURIPrefix() {
+        return "?&p=" + ParamsKey.LionNode.LION_PROJECT +
+                "&e=" + EnvZooKeeperConfig.getEnv() +
+                "&id=" + this.apiId;
+    }
+
     class AppsChangeListener implements ConfigChange {
     
         @Override
         public void onChange(String key, String value) {
             if (key.equals(ParamsKey.LionNode.APPS)) {
                 String[] appNames = Util.getStringListOfLionValue(value);
-                for (int i = 0; i < appNames.length; i++) {
-                    if (appSet.contains(appNames[i])) {
-                        continue;
+                if (appNames != null) {
+                    for (int i = 0; i < appNames.length; i++) {
+                        if (appSet.contains(appNames[i])) {
+                            continue;
+                        }
+                        LOG.info("Apps Change is triggered by "+ appNames[i]);
+                        appSet.add(appNames[i]);
+                        String watchKey = ParamsKey.LionNode.APP_CONF_PREFIX + appNames[i];
+                        addWatherForKey(watchKey);
+                        watchKey = ParamsKey.LionNode.APP_HOSTS_PREFIX + appNames[i];
+                        addWatherForKey(watchKey);
                     }
-                    LOG.info("Apps Change is triggered by "+ appNames[i]);
-                    appSet.add(appNames[i]);
-                    String watchKey = ParamsKey.LionNode.APP_CONF_PREFIX + appNames[i];
-                    addWatherForKey(watchKey);
-                    watchKey = ParamsKey.LionNode.APP_HOSTS_PREFIX + appNames[i];
-                    addWatherForKey(watchKey);
                 }
             }
         }
     
         private void addWatherForKey(String watchKey) {
             definitelyGetProperty(watchKey);
+        }
+    }
+    
+    class CMDBChangeListener implements ConfigChange {
+
+        @Override
+        public void onChange(String key, String value) {
+            if (key.startsWith(ParamsKey.LionNode.APP_CMDB_PREFIX)) {
+                for (String appName : appSet) {
+                    if (key.equals(ParamsKey.LionNode.APP_CMDB_PREFIX + appName)) {
+                        LOG.info("CMDB Change is triggered by " + appName);
+                        fillCMDBMap(appName, value);
+                        break;
+                    }
+                }
+            }
         }
     }
 
