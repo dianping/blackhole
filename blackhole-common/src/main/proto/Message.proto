@@ -55,6 +55,8 @@ message Message {
         OFFSET_COMMIT = 29;
         TOPICREPORT = 30;
         CONSUMERREGFAIL = 31;
+        MAKR_UNRECOVERABLE = 32;
+        LISTIDLE = 33;
     }
 
     required MessageType type = 1;

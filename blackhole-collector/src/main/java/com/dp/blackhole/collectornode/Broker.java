@@ -50,8 +50,11 @@ public class Broker {
         String hdfsbasedir = prop.getProperty("broker.hdfs.basedir");
         String suffix = prop.getProperty("broker.hdfs.file.suffix");
         long clockSyncBufMillis = Long.parseLong(prop.getProperty("broker.rollmanager.clockSyncBufMillis", "5000"));
+        int maxUploadThreads = Integer.parseInt(prop.getProperty("broker.rollmanager.maxUploadThreads", "20"));
+        int maxRecoveryThreads = Integer.parseInt(prop.getProperty("broker.rollmanager.maxRecoveryThreads", "10"));
+        int recoverySocketTimeout = Integer.parseInt(prop.getProperty("broker.rollmanager.recoverySocketTimeout", "600000"));
+
         boolean enableSecurity = Boolean.parseBoolean(prop.getProperty("broker.hdfs.security.enable", "true"));
-        
         if (enableSecurity) {
             String keytab = prop.getProperty("broker.blackhole.keytab");
             String principal = prop.getProperty("broker.blackhole.principal");
@@ -61,7 +64,7 @@ public class Broker {
             HDFSLogin(conf, "broker.blackhole.keytab", "broker.blackhole.principal");
         }
         
-        rollMgr.init(hdfsbasedir, suffix, recoveryPort, clockSyncBufMillis);
+        rollMgr.init(hdfsbasedir, suffix, recoveryPort, clockSyncBufMillis, maxUploadThreads, maxRecoveryThreads, recoverySocketTimeout);
         
         brokerService = new BrokerService(prop);
         brokerService.setDaemon(true);
@@ -148,12 +151,15 @@ public class Broker {
             }
             
             LOG.debug("received: " + message);
-            
+            RollID rollID = null;
             switch (message.getType()) {
             case UPLOAD_ROLL:
-                RollID rollID = null;;
                 rollID = message.getRollID();
                 rollMgr.doUpload(rollID);
+                break;
+            case MAKR_UNRECOVERABLE:
+                rollID = message.getRollID();
+                rollMgr.markUnrecoverable(rollID);
                 break;
             default:
                 LOG.error("response type is undefined");

@@ -37,8 +37,4 @@ public class AgentProtocol {
         }
         return head;
     }
-    
-    public long receiveOffset (DataInputStream in) throws IOException {
-        return in.readLong();
-    }
 }

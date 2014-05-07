@@ -1,9 +1,7 @@
 package com.dp.blackhole.cli;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -17,11 +15,11 @@ import org.apache.commons.logging.LogFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
+import com.dp.blackhole.network.HeartBeat;
 import com.dp.blackhole.network.SimpleConnection;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
-import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 
 public class Cli {
     private static final Log LOG = LogFactory.getLog(Cli.class);
@@ -104,11 +102,16 @@ public class Cli {
                     }
                     Message msg = PBwrap.wrapRemoveConf(appName, appServers);
                     send(msg);
+                } else if (cmd.equals("listidle")) {
+                    Message msg = PBwrap.wrapListIdle();
+                    send(msg);
+                    out.println("send message: " + msg);
                 } else if (cmd.equals("help")) {
                     out.println("Usage:");
                     out.println(" dumpstat              Display all of streams information.");
                     out.println(" dumpconf              Display all of app config information.");
                     out.println(" listapps              List all of application names.");
+                    out.println(" listidle              List all of idle hostname or ip.");
                     out.println(" dumpapp <appname>     Display the stream, stages of the application followed.");
                     out.println(" rmconf <appname>      Remove the configuration specified by appname which should be useless.");
                     out.println("                       (Just remove from supervisor memory rather than lion/ZK).");
@@ -162,11 +165,13 @@ public class Cli {
     }
     
     public class CliProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
-
+        private HeartBeat heartbeat = null;
         @Override
         public void OnConnected(SimpleConnection connection) {
             supervisor = connection;
             if (autoCmd == null) {
+                heartbeat = new HeartBeat(supervisor);
+                heartbeat.start();
                 return;
             }
             CliInnerProcessor processor = new CliInnerProcessor();
@@ -215,7 +220,7 @@ public class Cli {
 
     private void start() throws FileNotFoundException, IOException {
         Properties prop = new Properties();
-        prop.load(new FileReader(new File("config.properties")));
+        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
         
         processor = new CliProcessor();
         client = new GenClient<ByteBuffer, SimpleConnection, Cli.CliProcessor>(

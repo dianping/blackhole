@@ -67,7 +67,7 @@ public class AppLog {
     @Override
     public String toString() {
         return "AppLog [appName=" + appName + ", tailFile=" + tailFile
-                + ", createTime=" + createTime + ", maxLineSize=" + maxLineSize
-                + "]";
+                + ", createTime=" + createTime + ", rollPeriod=" + rollPeriod
+                + ", maxLineSize=" + maxLineSize + "]";
     }
 }

@@ -1,7 +1,6 @@
 package com.dp.blackhole.collectornode;
 
-import java.io.BufferedInputStream;
-import java.io.DataOutputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.zip.GZIPInputStream;
@@ -44,39 +43,15 @@ public class HDFSRecovery implements Runnable{
             Path tmpPath = new Path(tmpPathname);
             Path recoveryPath = new Path(recoveryPathname);
             if (!fs.exists(normalPath)) {   //When normal path not exists then do recovery.
-                long offset = 0;
+                LOG.debug("Begin to recovery " + normalPathname);
                 int len = 0;
                 byte[] buf = new byte[DEFAULT_BUFSIZE];
                 gout = new GZIPOutputStream(fs.create(recoveryPath));
-                if (fs.exists(tmpPath)) {   //When tmp path exists then extract some data from tmp file
-                    boolean tmpCanRead = true;
-                    try {
-                        gin = new GZIPInputStream(fs.open(tmpPath));
-                    } catch (IOException e) {
-                        LOG.error("Oops, can not open the tmp file, try to delete it.", e);
-                        HDFSUtil.retryDelete(fs, tmpPath);
-                        tmpCanRead = false;
-                    }
-                    while(tmpCanRead && (len = gin.read(buf)) != -1) {
-                        gout.write(buf, 0, len);
-                        offset += len;
-                    }
-                    if (tmpCanRead) {
-                        LOG.info("Reloaded tmp hdfs file " + tmpPath);
-                    } else {
-                        LOG.info("Skipped reloading of tmp hdfs file " + tmpPath);
-                    }
-                }
-                DataOutputStream out = new DataOutputStream(client.getOutputStream());
-                out.writeLong(offset);
-                LOG.info("Send an offset [" + offset + "] to client");
-                
-                BufferedInputStream in = new BufferedInputStream(client.getInputStream());
+                DataInputStream in = new DataInputStream(client.getInputStream());
                 while((len = in.read(buf)) != -1) {
                     gout.write(buf, 0, len);
                 }
                 LOG.info("Finished to write " + recoveryPath);
-                
                 gout.close();
                 gout = null;
                 

@@ -2,7 +2,6 @@ package com.dp.blackhole.appnode;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,7 +13,7 @@ import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
 
 public class SimRecoveryServer implements Runnable {
-    public static final int MAX_LINE = 9;
+    public static final int MAX_LINE = 10;
     private ServerSocket ss;
     private List<String> header;
     private List<String> receives;
@@ -48,7 +47,6 @@ public class SimRecoveryServer implements Runnable {
         Socket socket = null;
         InputStream in = null;
         DataInputStream din = null;
-        DataOutputStream dout = null;
         try {
             String line = null;
             socket = ss.accept();
@@ -68,14 +66,9 @@ public class SimRecoveryServer implements Runnable {
             String ts = String.valueOf(head.ts);
             header.add(ts); 
             
-            //similar get offset from hdfs file
-            long offset = getOffsetFromHDFSFile();
-            //send the offset to client
-            dout = new DataOutputStream(socket.getOutputStream());
-            dout.writeLong(offset);
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             while (!Thread.interrupted() && !shouldStop && (line = reader.readLine()) != null) {
-//                LOG.debug("server>" + line);
+//                System.out.println("server>" + line);
                 receives.add(line);
                 if (receives.size() == MAX_LINE) {
                     break;
@@ -95,9 +88,5 @@ public class SimRecoveryServer implements Runnable {
                 e.printStackTrace();
             }
         }
-    }
-
-    private long getOffsetFromHDFSFile() {
-        return 100l;
     }
 }
