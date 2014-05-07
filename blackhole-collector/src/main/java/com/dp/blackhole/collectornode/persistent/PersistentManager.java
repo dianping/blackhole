@@ -106,11 +106,11 @@ public class PersistentManager {
         }
         
         private List<ReportEntry> entrylist;
-        private Map<String, Long> knownTopicParitionOffsets;
+        private Map<String, Long> reportedOffsets;
         private long interval = 10000;
         
         public reporter() {
-            knownTopicParitionOffsets = new HashMap<String, Long>();
+            reportedOffsets = new HashMap<String, Long>();
         }
         
         private void report(String topic, String paritionId, long offset) {
@@ -125,16 +125,18 @@ public class PersistentManager {
                 for (Entry<String, Partition> partitionEntry : partitions.entrySet()) {
                     String partitionId = partitionEntry.getKey();
                     Partition p = partitionEntry.getValue();
-                    long currentEndOffset = p.getEndOffset();
+                    long endOffset = p.getEndOffset();
                     String topicPartition = topic+"@"+partitionId;
-                    Long knownOffset = knownTopicParitionOffsets.get(topicPartition);
-                    if (knownOffset != null) {
-                        if (knownOffset < currentEndOffset) {
-                            report(topic, partitionId, currentEndOffset);
+                    Long reportedOffset = reportedOffsets.get(topicPartition);
+                    if (reportedOffset != null) {
+                        // report as new data arrive
+                        if (endOffset > reportedOffset) {
+                            reportedOffsets.put(topicPartition, endOffset);
+                            report(topic, partitionId, endOffset);
                         }
                     } else {
-                        knownTopicParitionOffsets.put(topicPartition, currentEndOffset);
-                        report(topic, partitionId, currentEndOffset);
+                        reportedOffsets.put(topicPartition, endOffset);
+                        report(topic, partitionId, endOffset);
                     }
                 }
             }
