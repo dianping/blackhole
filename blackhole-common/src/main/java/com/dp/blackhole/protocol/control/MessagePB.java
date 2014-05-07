@@ -68,6 +68,8 @@ public final class MessagePB {
       OFFSET_COMMIT(28, 29),
       TOPICREPORT(29, 30),
       CONSUMERREGFAIL(30, 31),
+      MAKR_UNRECOVERABLE(31, 32),
+      LISTIDLE(32, 33),
       ;
       
       
@@ -106,6 +108,8 @@ public final class MessagePB {
           case 29: return OFFSET_COMMIT;
           case 30: return TOPICREPORT;
           case 31: return CONSUMERREGFAIL;
+          case 32: return MAKR_UNRECOVERABLE;
+          case 33: return LISTIDLE;
           default: return null;
         }
       }
@@ -136,7 +140,7 @@ public final class MessagePB {
       }
       
       private static final MessageType[] VALUES = {
-        HEARTBEART, APP_REG, COLLECTOR_REG, ASSIGN_COLLECTOR, READY_COLLECTOR, APP_ROLL, UPLOAD_ROLL, UPLOAD_SUCCESS, UPLOAD_FAIL, RECOVERY_ROLL, RECOVERY_SUCCESS, RECOVERY_FAIL, FAILURE, NOAVAILABLENODE, UNRECOVERABLE, MANUAL_RECOVERY_ROLL, DUMPSTAT, RETIRESTREAM, CONF_REQ, CONF_RES, NOAVAILABLECONF, DUMPCONF, DUMPREPLY, LISTAPPS, REMOVE_CONF, DUMP_APP, CONSUMER_REG, ASSIGN_CONSUMER, OFFSET_COMMIT, TOPICREPORT, CONSUMERREGFAIL, 
+        HEARTBEART, APP_REG, COLLECTOR_REG, ASSIGN_COLLECTOR, READY_COLLECTOR, APP_ROLL, UPLOAD_ROLL, UPLOAD_SUCCESS, UPLOAD_FAIL, RECOVERY_ROLL, RECOVERY_SUCCESS, RECOVERY_FAIL, FAILURE, NOAVAILABLENODE, UNRECOVERABLE, MANUAL_RECOVERY_ROLL, DUMPSTAT, RETIRESTREAM, CONF_REQ, CONF_RES, NOAVAILABLECONF, DUMPCONF, DUMPREPLY, LISTAPPS, REMOVE_CONF, DUMP_APP, CONSUMER_REG, ASSIGN_CONSUMER, OFFSET_COMMIT, TOPICREPORT, CONSUMERREGFAIL, MAKR_UNRECOVERABLE, LISTIDLE, 
       };
       public static MessageType valueOf(
           com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
@@ -1656,7 +1660,7 @@ public final class MessagePB {
       "oto\032\017DumpReply.proto\032\020RemoveConf.proto\032\020" +
       "ColNodeReg.proto\032\rDumpApp.proto\032\021Consume" +
       "rReg.proto\032\024AssignConsumer.proto\032\022Offset" +
-      "Commit.proto\032\021TopicReport.proto\"\364\n\n\007Mess" +
+      "Commit.proto\032\021TopicReport.proto\"\232\013\n\007Mess" +
       "age\022,\n\004type\030\001 \002(\0162\036.blackhole.Message.Me",
       "ssageType\022!\n\006appReg\030\002 \001(\0132\021.blackhole.Ap" +
       "pReg\0223\n\017assignCollector\030\003 \001(\0132\032.blackhol" +
@@ -1677,7 +1681,7 @@ public final class MessagePB {
       "eg\0221\n\016assignConsumer\030\021 \001(\0132\031.blackhole.A" +
       "ssignConsumer\022-\n\014offsetCommit\030\022 \001(\0132\027.bl" +
       "ackhole.OffsetCommit\022+\n\013topicReport\030\023 \001(" +
-      "\0132\026.blackhole.TopicReport\"\262\004\n\013MessageTyp",
+      "\0132\026.blackhole.TopicReport\"\330\004\n\013MessageTyp",
       "e\022\016\n\nHEARTBEART\020\001\022\013\n\007APP_REG\020\002\022\021\n\rCOLLEC" +
       "TOR_REG\020\003\022\024\n\020ASSIGN_COLLECTOR\020\004\022\023\n\017READY" +
       "_COLLECTOR\020\005\022\014\n\010APP_ROLL\020\006\022\017\n\013UPLOAD_ROL" +
@@ -1691,8 +1695,9 @@ public final class MessagePB {
       "MPREPLY\020\027\022\014\n\010LISTAPPS\020\030\022\017\n\013REMOVE_CONF\020\031" +
       "\022\014\n\010DUMP_APP\020\032\022\020\n\014CONSUMER_REG\020\033\022\023\n\017ASSI" +
       "GN_CONSUMER\020\034\022\021\n\rOFFSET_COMMIT\020\035\022\017\n\013TOPI" +
-      "CREPORT\020\036\022\023\n\017CONSUMERREGFAIL\020\037B.\n!com.dp" +
-      ".blackhole.protocol.controlB\tMessagePB"
+      "CREPORT\020\036\022\023\n\017CONSUMERREGFAIL\020\037\022\026\n\022MAKR_U" +
+      "NRECOVERABLE\020 \022\014\n\010LISTIDLE\020!B.\n!com.dp.b" +
+      "lackhole.protocol.controlB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

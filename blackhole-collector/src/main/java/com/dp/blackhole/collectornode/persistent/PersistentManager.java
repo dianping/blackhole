@@ -69,7 +69,7 @@ public class PersistentManager {
         // add new topic if not exist
         ConcurrentHashMap<String, Partition> map = storage.get(topic);
         if (map == null) {
-            ConcurrentHashMap newMap = new ConcurrentHashMap<String, Partition>();
+            ConcurrentHashMap<String, Partition> newMap = new ConcurrentHashMap<String, Partition>();
             storage.putIfAbsent(topic, newMap);
             map = storage.get(topic);
         }

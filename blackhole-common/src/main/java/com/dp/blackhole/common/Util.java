@@ -23,8 +23,6 @@ import java.util.zip.CRC32;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.network.SimpleConnection;
-
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -242,6 +240,20 @@ public class Util {
         return result;
     }
 
+    //["host01","host02"]
+    public static String getLionValueOfStringList(String[] hosts) {
+        StringBuilder lionStringBuilder = new StringBuilder();
+        lionStringBuilder.append('[');
+        for (int i = 0; i < hosts.length; i++) {
+            lionStringBuilder.append('"').append(hosts[i]).append('"');
+            if (i != hosts.length - 1) {
+                lionStringBuilder.append(',');
+            }
+        }
+        lionStringBuilder.append(']');
+        return lionStringBuilder.toString();
+    }
+
     public static String[][] getStringMapOfLionValue(String value) {
         if (value == null) {
             return null;
@@ -320,5 +332,4 @@ public class Util {
     public static String getPortFromBroker(String brokerString) {
         return brokerString.substring(brokerString.lastIndexOf(':') + 1);
     }
-
 }

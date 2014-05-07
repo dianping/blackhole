@@ -30,52 +30,59 @@ public class FileListener implements JNotifyListener{
     private Map<String, LogReader> readerMap;
     private Set<String> parentWathchPathSet;
     private Map<String, Integer> path2wd;
+    // Lock the path2wd map only to avoid non-atomic operation
     private Lock lock = new ReentrantLock();
 
     public FileListener() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         iJNotifyInstance = (IJNotify) Class.forName("net.contentobjects.jnotify.linux.JNotifyAdapterLinux").newInstance();
         readerMap = Collections.synchronizedMap(new HashMap<String, LogReader>());
+        //guarantee by synchronized
         parentWathchPathSet = new HashSet<String>();
         path2wd = new HashMap<String, Integer>();
     }
 
-    public boolean registerLogReader(final String watchPath, final LogReader reader) {
+    public synchronized boolean registerLogReader(final String watchPath, final LogReader reader) {
         int fwd, wd;
         if (!readerMap.containsKey(watchPath)) {
-            lock.lock();
-            try {
-                readerMap.put(watchPath, reader);
-                String parentPath = Util.getParentAbsolutePath(watchPath);
-                if (!parentWathchPathSet.contains(parentPath)) {
-                    parentWathchPathSet.add(parentPath);
-                    try {
-                        fwd = iJNotifyInstance.addWatch(parentPath, FILE_CREATED, false, this);
-                        path2wd.put(parentPath, fwd);
-                    } catch (JNotifyException e) {
-                        LOG.error("Failed to add watch for " + parentPath, e);
-                        Cat.logError("Failed to add watch for " + parentPath, e);
-                        readerMap.remove(watchPath);
-                        parentWathchPathSet.remove(parentPath);
-                        return false;
-                    }
-                    LOG.info("Registerring and monitoring parent path " + parentPath + " \"FILE_CREATE\"");
-                } else {
-                    LOG.info("Watch parent path " + parentPath + " has already exist in the Set");
-                }
+            readerMap.put(watchPath, reader);
+            String parentPath = Util.getParentAbsolutePath(watchPath);
+            if (!parentWathchPathSet.contains(parentPath)) {
+                parentWathchPathSet.add(parentPath);
                 try {
-                    wd = iJNotifyInstance.addWatch(watchPath, FILE_MODIFIED, false, this);
+                    fwd = iJNotifyInstance.addWatch(parentPath, FILE_CREATED, false, this);
                 } catch (JNotifyException e) {
-                    LOG.error("Failed to add watch for " + watchPath, e);
-                    Cat.logError("Failed to add watch for " + watchPath, e);
+                    LOG.error("Failed to add watch for " + parentPath, e);
+                    Cat.logError("Failed to add watch for " + parentPath, e);
                     readerMap.remove(watchPath);
+                    parentWathchPathSet.remove(parentPath);
                     return false;
                 }
-                LOG.info("Registerring and monitoring tail file " + watchPath + " \"FILE_MODIFIED\"");
-    
+                lock.lock();
+                try {
+                    path2wd.put(parentPath, fwd);
+                } finally {
+                    lock.unlock();
+                }
+                LOG.info("Registerring and monitoring parent path " + parentPath + " \"FILE_CREATE\"");
+            } else {
+                LOG.info("Watch parent path " + parentPath + " has already exist in the Set");
+            }
+            
+            try {
+                wd = iJNotifyInstance.addWatch(watchPath, FILE_MODIFIED, false, this);
+            } catch (JNotifyException e) {
+                LOG.error("Failed to add watch for " + watchPath, e);
+                Cat.logError("Failed to add watch for " + watchPath, e);
+                readerMap.remove(watchPath);
+                return false;
+            }
+            lock.lock();
+            try {
                 path2wd.put(watchPath, wd);
             } finally {
                 lock.unlock();
             }
+            LOG.info("Registerring and monitoring tail file " + watchPath + " \"FILE_MODIFIED\"");
         } else {
             LOG.info("Watch path " + watchPath + " has already exist in the Map");
         }
@@ -83,14 +90,12 @@ public class FileListener implements JNotifyListener{
     }
     
     public void unregisterLogReader(String watchPath) {
-        int wd;
+        Integer wd;
         lock.lock();
         try {
-            if (!path2wd.containsKey(watchPath)) {
+            if ((wd = path2wd.get(watchPath)) == null) {
                 return;
             } else {
-                LOG.info("Unregister watch path " + watchPath);
-                wd = path2wd.get(watchPath);
                 path2wd.remove(watchPath);
             }
         } finally {
@@ -98,6 +103,7 @@ public class FileListener implements JNotifyListener{
         }
         try {
             iJNotifyInstance.removeWatch(wd);
+            LOG.info("Unregister watch path " + watchPath);
         } catch (JNotifyException e) {
             LOG.fatal("Failed to remove wd " + wd + " for " + watchPath + 
                     ". Because the watch descriptor wd is not valid;" +
@@ -109,9 +115,6 @@ public class FileListener implements JNotifyListener{
                     " See \"inotify_rm_watch\" for more detail", e);
         }
         readerMap.remove(watchPath);
-        if (readerMap.isEmpty()) {
-            parentWathchPathSet.clear();
-        }
     }
 
     /**
@@ -126,6 +129,7 @@ public class FileListener implements JNotifyListener{
         LogReader reader;
         if ((reader = readerMap.get(createdFilePath)) != null) {
             LOG.info("rotate detected of " + createdFilePath);
+            //Here, we lock to removing the old and adding a new path as a atomic operation.
             lock.lock();
             reader.eventWriter.processRotate();
             try {
