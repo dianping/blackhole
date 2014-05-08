@@ -43,7 +43,7 @@ import com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
-import com.dp.blackhole.protocol.control.ReadyCollectorPB.ReadyCollector;
+import com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 import com.dp.blackhole.protocol.control.StreamIDPB.StreamID;
@@ -305,7 +305,7 @@ public class Supervisor {
     
     /*
      * mark the stream as inactive, mark all the stages as pending unless the uploading stage
-     * remove the relationship of the corresponding collectorNode and streams
+     * remove the relationship of the corresponding broker and streams
      */
     private void handleAppNodeFail(ConnectionDescription desc, long now) {
         SimpleConnection connection = desc.getConnection();
@@ -330,16 +330,16 @@ public class Supervisor {
                     }
                 }
                 
-                // remove corresponding collectorNodes's relationship with the stream
-                String collectorHost = stream.getCollectorHost();
-                SimpleConnection collectorConnection = brokersMapping.get(collectorHost);
-                if (collectorConnection != null) {
-                    ArrayList<Stream> associatedStreams = connectionStreamMap.get(collectorConnection);
+                // remove corresponding broker's relationship with the stream
+                String brokerHost = stream.getBrokerHost();
+                SimpleConnection brokerConnection = brokersMapping.get(brokerHost);
+                if (brokerConnection != null) {
+                    ArrayList<Stream> associatedStreams = connectionStreamMap.get(brokerConnection);
                     if (associatedStreams != null) {
                         synchronized (associatedStreams) {
                             associatedStreams.remove(stream);
                             if (associatedStreams.size() == 0) {
-                                connectionStreamMap.remove(collectorConnection);
+                                connectionStreamMap.remove(brokerConnection);
                             }
                         }
                     }
@@ -355,7 +355,7 @@ public class Supervisor {
      * 2. remove the relationship of the corresponding appNode and streams
      * 3. processing uploading and recovery stages
      */
-    private void handleCollectorNodeFail(ConnectionDescription desc, long now) {
+    private void handleBrokerNodeFail(ConnectionDescription desc, long now) {
         SimpleConnection connection = desc.getConnection();
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         // processing current stage on streams
@@ -374,16 +374,16 @@ public class Supervisor {
                     LOG.info("checking current stage: " + current);
                     
                     Issue e = new Issue();
-                    e.desc = "collector failed";
+                    e.desc = "broker failed";
                     e.ts = now;
                     current.issuelist.add(e);
 
-                    // do not reassign collector here, since logreader will find collector fail,
+                    // do not reassign broker here, since logreader will find broker fail,
                     // and do appReg again; otherwise two appReg for the same stream will send 
                     if (brokersMapping.size() == 0) {
                         current.status = Stage.PENDING;
                     } else {
-                        current.status = Stage.COLLECTORFAIL;
+                        current.status = Stage.BROKERFAIL;
                     }
                     LOG.info("after checking current stage: " + current);
                 }
@@ -487,10 +487,10 @@ public class Supervisor {
     }
     
     /*
-     * cancel the key, remove it from appNodes or collectorNodes, then revisit streams
+     * cancel the key, remove it from appNodes or brokers, then revisit streams
      * 1. appNode fail, mark the stream as inactive, mark all the stages as pending unless the uploading stage
-     * 2. collectorNode fail, reassign collector if it is current stage, mark the stream as pending when no available collector;
-     *  do recovery if the stage is not current stage, mark the stage as pending when no available collector
+     * 2. broker fail, reassign broker if it is current stage, mark the stream as pending when no available broker;
+     *  do recovery if the stage is not current stage, mark the stage as pending when no available broker
      */
     private void closeConnection(SimpleConnection connection) {
         LOG.info("close connection: " + connection);
@@ -508,8 +508,8 @@ public class Supervisor {
             handleAppNodeFail(desc, now);
         } else if (desc.getType() == ConnectionDescription.BROKER) {
             brokersMapping.remove(host);
-            LOG.info("close COLLECTORNODE: " + host);
-            handleCollectorNodeFail(desc, now);
+            LOG.info("close BROKER: " + host);
+            handleBrokerNodeFail(desc, now);
         } else if (desc.getType() == ConnectionDescription.CONSUMER) {
             LOG.info("close consumer: " + host);
             handleConsumerFail(desc, now);
@@ -570,7 +570,7 @@ public class Supervisor {
         }
         sb.append("\n");
         
-        sb.append("print collectorNodes:\n");
+        sb.append("print brokers:\n");
         for(SimpleConnection connection: brokersMapping.values()) {
             sb.append("<")
             .append(connection)
@@ -790,7 +790,7 @@ public class Supervisor {
                     Stage manualRecoveryStage = new Stage();
                     manualRecoveryStage.app = rollID.getAppName();
                     manualRecoveryStage.apphost = rollID.getAppServer();
-                    manualRecoveryStage.collectorhost = null;
+                    manualRecoveryStage.brokerhost = null;
                     manualRecoveryStage.cleanstart = false;
                     manualRecoveryStage.issuelist = new ArrayList<Issue>();
                     manualRecoveryStage.status = Stage.RECOVERYING;
@@ -826,10 +826,10 @@ public class Supervisor {
                             LOG.error("stage " + stage + " cannot be recovered");
                             stages.remove(stage);
                             stageConnectionMap.remove(stage);
-                            String collector = getCollector();
-                            if (collector != null) {
-                                SimpleConnection collectorConnection = brokersMapping.get(collector);
-                                if (collectorConnection != null) {
+                            String broker = getBroker();
+                            if (broker != null) {
+                                SimpleConnection brokerConnection = brokersMapping.get(broker);
+                                if (brokerConnection != null) {
                                     String appName = rollID.getAppName();
                                     String appServer = rollID.getAppServer();
                                     long rollTs = rollID.getRollTs();
@@ -843,7 +843,7 @@ public class Supervisor {
                                         period = context.getLong(ParamsKey.Appconf.ROLL_PERIOD);
                                     }
                                     Message message = PBwrap.wrapMarkUnrecoverable(appName, appServer, period, rollTs);
-                                    send(collectorConnection, message);
+                                    send(brokerConnection, message);
                                 }
                             }
                             break;
@@ -862,8 +862,8 @@ public class Supervisor {
     /*
      * failure happened only on stream
      * just log it in a issue, because:
-     * if it is a collector fail, the corresponding log reader should find it 
-     * and ask for a new collector; if it is a appnode fail, the appNode will
+     * if it is a broker fail, the corresponding log reader should find it 
+     * and ask for a new broker; if it is a agent fail, the appNode will
      * register the app again 
      */
     private void handleFailure(Failure failure) {
@@ -904,7 +904,7 @@ public class Supervisor {
             } else {
                 Issue i = new Issue();
                 i.ts = failure.getFailTs();
-                i.desc = "collector failed";
+                i.desc = "broker failed";
                 failstage.issuelist.add(i);
             }
         }
@@ -1040,7 +1040,7 @@ public class Supervisor {
         Stream stream = streamIdMap.get(id);
         if (stream != null) {
             if (msg.getRollTs() <= stream.getlastSuccessTs()) {
-                LOG.error("Receive a illegal roll ts (" + msg.getRollTs() + ") from collectornode(" + from.getHost() + ")");
+                LOG.error("Receive a illegal roll ts (" + msg.getRollTs() + ") from broker(" + from.getHost() + ")");
                 return;
             }
             ArrayList<Stage> stages = Streams.get(stream);
@@ -1091,11 +1091,11 @@ public class Supervisor {
                         }
                     }
                     // create next stage if stream is connected
-                    if (current.status != Stage.PENDING && current.status != Stage.COLLECTORFAIL) {
+                    if (current.status != Stage.PENDING && current.status != Stage.BROKERFAIL) {
                         Stage next = new Stage();
                         next.app = stream.app;
                         next.apphost = stream.appHost;
-                        next.collectorhost = current.collectorhost;
+                        next.brokerhost = current.brokerhost;
                         next.cleanstart = true;
                         next.rollTs = current.rollTs + stream.period * 1000;
                         next.status = Stage.APPENDING;
@@ -1121,15 +1121,15 @@ public class Supervisor {
 
     /*
      * do recovery of one stage of a stream
-     * if the stream is not active or no collector now,
+     * if the stream is not active or no broker now,
      * mark the stream as pending
      * else send recovery message
      */
     private String doRecovery(Stream stream, Stage stage) {
-        String collector = null;
-        collector = getCollector();   
+        String broker = null;
+        broker = getBroker();   
 
-        if (collector == null || !stream.isActive()) {
+        if (broker == null || !stream.isActive()) {
             stage.status = Stage.PENDING;
             stageConnectionMap.remove(stage);
         } else {
@@ -1139,27 +1139,27 @@ public class Supervisor {
                 return null;
             }
             
-            Message message = PBwrap.wrapRecoveryRoll(stream.app, collector, getRecoveryPort(collector), stage.rollTs);
+            Message message = PBwrap.wrapRecoveryRoll(stream.app, broker, getRecoveryPort(broker), stage.rollTs);
             send(c, message);
             
             stage.status = Stage.RECOVERYING;
-            stage.collectorhost = collector;
+            stage.brokerhost = broker;
             
-            SimpleConnection collectorConnection = brokersMapping.get(collector);
-            if (collectorConnection == null) {
+            SimpleConnection brokerConnection = brokersMapping.get(broker);
+            if (brokerConnection == null) {
                 LOG.error("");
             }
-            stageConnectionMap.put(stage, collectorConnection);
+            stageConnectionMap.put(stage, brokerConnection);
         }
 
-        return collector;
+        return broker;
     }
     
     /*
      * record the stream if it is a new stream;
      * do recovery if it is a old stream
      */
-    private void registerStream(ReadyCollector message, SimpleConnection from) {
+    private void registerStream(ReadyBroker message, SimpleConnection from) {
         long connectedTs = message.getConnectedTs();
         long currentTs = Util.getCurrentRollTs(connectedTs, message.getPeriod());
         
@@ -1171,7 +1171,7 @@ public class Supervisor {
             stream = new Stream();
             stream.app = message.getAppName();
             stream.appHost = message.getAppServer();
-            stream.setCollectorHost(message.getCollectorServer());
+            stream.setBrokerHost(message.getBrokerServer());
             stream.startTs = connectedTs;
             stream.period = message.getPeriod();
             stream.setlastSuccessTs(currentTs - stream.period * 1000);
@@ -1180,7 +1180,7 @@ public class Supervisor {
             Stage current = new Stage();
             current.app = stream.app;
             current.apphost = stream.appHost;
-            current.collectorhost = message.getCollectorServer();
+            current.brokerhost = message.getBrokerServer();
             current.cleanstart = false;
             current.issuelist = new ArrayList<Issue>();
             current.status = Stage.APPENDING;
@@ -1196,40 +1196,40 @@ public class Supervisor {
                 stream.updateActive(true);
             }
             
-            // update collectorHost on stream
-            stream.setCollectorHost(message.getCollectorServer());
+            // update broker on stream
+            stream.setBrokerHost(message.getBrokerServer());
 
             ArrayList<Stage> stages = Streams.get(stream);
             if (stages != null) {
                 synchronized (stages) {
-                    recoveryStages(stream, stages, connectedTs, currentTs, message.getCollectorServer());
+                    recoveryStages(stream, stages, connectedTs, currentTs, message.getBrokerServer());
                 }
             } else {
                 LOG.error("can not find stages of stream: " + stream);
             }
         }
         
-        // register connection with appNode and collectorNode
+        // register connection with appNode and broker
         recordConnectionStreamMapping(from, stream);
         SimpleConnection appConnection = agentsMapping.get(stream.appHost);
         recordConnectionStreamMapping(appConnection, stream);
     }
 
     /*
-     * 1. recovery appFail or collectFail stages (include current stage, but do no recovery)
+     * 1. recovery appFail or broker fail stages (include current stage, but do no recovery)
      * 2. recovery missed stages (include current stage, but do no recovery)
-     * 3. recovery current stage (realtime stream)with collector fail
+     * 3. recovery current stage (realtime stream)with broker fail
      */
-    private void recoveryStages(Stream stream, ArrayList<Stage> stages, long connectedTs, long currentTs, String newCollectorhost) {
+    private void recoveryStages(Stream stream, ArrayList<Stage> stages, long connectedTs, long currentTs, String newBrokerHost) {
         Issue issue = new Issue();
         issue.ts = connectedTs;
         issue.desc = "stream reconnected";
         
-        // recovery Pending and COLLECTORFAIL stages
+        // recovery Pending and BROKERFAIL stages
         for (int i=0 ; i < stages.size(); i++) {
             Stage stage = stages.get(i);
             LOG.info("processing pending stage: " + stage);
-            if (stage.status == Stage.PENDING || stage.status == Stage.COLLECTORFAIL) {
+            if (stage.status == Stage.PENDING || stage.status == Stage.BROKERFAIL) {
                 stage.issuelist.add(issue);
                 // do not recovery current stage
                 if (stage.rollTs != currentTs) {
@@ -1237,7 +1237,7 @@ public class Supervisor {
                 } else {
                     // fix current stage status
                     stage.status = Stage.APPENDING;
-                    stage.collectorhost = newCollectorhost;
+                    stage.brokerhost = newBrokerHost;
                 }
             }
         }
@@ -1266,7 +1266,7 @@ public class Supervisor {
                     doRecovery(stream, stage);
                 } else {
                     stage.status = Stage.APPENDING;
-                    stage.collectorhost = newCollectorhost;
+                    stage.brokerhost = newBrokerHost;
                 }
                 stages.add(stage);
             } else {
@@ -1333,7 +1333,7 @@ public class Supervisor {
     
     /*
      * 1. recored the connection in appNodes
-     * 2. assign a collect to the app
+     * 2. assign a broker to the app
      */
     private void registerApp(Message m, SimpleConnection from) {
         ConnectionDescription desc = connections.get(from);
@@ -1345,15 +1345,15 @@ public class Supervisor {
         LOG.info("AppNode " + from.getHost() + " registered");
         agentsMapping.put(from.getHost(), from);
         AppReg message = m.getAppReg();
-        assignCollector(message.getAppName(), from);
+        assignBroker(message.getAppName(), from);
     }
 
-    private String assignCollector(String app, SimpleConnection from) {
+    private String assignBroker(String app, SimpleConnection from) {
         String broker;
         String previousBroker = null;
         for (Stream stream : Streams.keySet()) {
             if (stream.app.equals(app)) {
-                previousBroker = stream.getCollectorHost();
+                previousBroker = stream.getBrokerHost();
                 break;
             }
         }
@@ -1362,12 +1362,12 @@ public class Supervisor {
         if (previousBroker!= null && brokers.contains(previousBroker)) {
             broker = previousBroker;
         } else {
-            broker = getCollector();
+            broker = getBroker();
         }
         
         Message message;
         if (broker != null) {
-            message = PBwrap.wrapAssignCollector(app, broker, getBrokerPort(broker));
+            message = PBwrap.wrapAssignBroker(app, broker, getBrokerPort(broker));
         } else {
             message = PBwrap.wrapNoAvailableNode(app);
         }
@@ -1376,7 +1376,7 @@ public class Supervisor {
         return broker;
     }
     
-    private void registerCollectorNode(ColNodeReg colNodeReg, SimpleConnection from) {
+    private void registerBroker(ColNodeReg colNodeReg, SimpleConnection from) {
         ConnectionDescription desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
@@ -1385,21 +1385,21 @@ public class Supervisor {
         desc.setType(ConnectionDescription.BROKER);
         desc.attach(new BrokerDesc(from.toString(), colNodeReg.getBrokerPort(), colNodeReg.getRecoveryPort()));
         brokersMapping.put(from.getHost(), from);
-        LOG.info("CollectorNode " + from.getHost() + " registered");
+        LOG.info("Broker " + from.getHost() + " registered");
     }
 
     /* 
-     * random return a collector
-     * if no collectorNodes now, return null
+     * random return a broker
+     * if no brokers now, return null
      */
-    private String getCollector() {
+    private String getBroker() {
         ArrayList<String> array = new ArrayList<String>(brokersMapping.keySet());
         if (array.size() == 0 ) {
             return null;
         }
         Random random = new Random();
-        String collector = array.get(random.nextInt(array.size()));
-        return collector;
+        String broker = array.get(random.nextInt(array.size()));
+        return broker;
     }
     
     
@@ -1441,14 +1441,14 @@ public class Supervisor {
             case HEARTBEART:
                 handleHeartBeat(from);
                 break;
-            case COLLECTOR_REG:
-                registerCollectorNode(msg.getColNodeReg(), from);
+            case BROKER_REG:
+                registerBroker(msg.getColNodeReg(), from);
                 break;
             case APP_REG:
                 registerApp(msg, from);
                 break;
-            case READY_COLLECTOR:
-                registerStream(msg.getReadyCollector(), from);
+            case READY_BROKER:
+                registerStream(msg.getReadyBroker(), from);
                 break;
             case APP_ROLL:
                 handleRolling(msg.getAppRoll(), from);

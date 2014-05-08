@@ -8,18 +8,18 @@ import com.dp.blackhole.common.Util;
 public class Stream {
     String app;
     String appHost;
-    private String collectorHost;
+    private String brokerHost;
     long period;
     long startTs;
     AtomicLong lastSuccessTs = new AtomicLong();
     AtomicBoolean active = new AtomicBoolean(true);
     
-    synchronized void setCollectorHost(String newCollectorHost) {
-        collectorHost = newCollectorHost;
+    synchronized void setBrokerHost(String newBrokerHost) {
+        brokerHost = newBrokerHost;
     }
     
-    synchronized String getCollectorHost() {
-        return collectorHost;
+    synchronized String getBrokerHost() {
+        return brokerHost;
     }
     
     void setlastSuccessTs(long ts) {

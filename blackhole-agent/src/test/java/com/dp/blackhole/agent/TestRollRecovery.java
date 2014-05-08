@@ -24,21 +24,21 @@ public class TestRollRecovery {
     private static List<String> header = new ArrayList<String>();
     private static List<String> receives = new ArrayList<String>();
     private Thread serverThread;
-    private static SimAppnode appnode;
+    private static SimAgent agent;
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        appnode = new SimAppnode();
+        agent = new SimAgent();
         ConfigKeeper confKeeper = new ConfigKeeper();
         confKeeper.addRawProperty(MAGIC + ".rollPeriod", "3600");
         confKeeper.addRawProperty(MAGIC + ".maxLineSize", "1024");
         //build a tmp file
-        file = SimAppnode.createTmpFile(MAGIC + "." + SimAppnode.FILE_SUFFIX, SimAppnode.expected);
-        file = SimAppnode.createTmpFile(MAGIC, SimAppnode.expected);
+        file = SimAgent.createTmpFile(MAGIC + "." + SimAgent.FILE_SUFFIX, SimAgent.expected);
+        file = SimAgent.createTmpFile(MAGIC, SimAgent.expected);
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        SimAppnode.deleteTmpFile(MAGIC);
+        SimAgent.deleteTmpFile(MAGIC);
     }
 
     @Before
@@ -56,7 +56,7 @@ public class TestRollRecovery {
 
     @Test
     public void test() {
-        RollRecovery recovery = new RollRecovery(appnode, SimAppnode.HOSTNAME, port, appLog, SimAppnode.rollTS);
+        RollRecovery recovery = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS);
         Thread thread = new Thread(recovery);
         thread.start();
         try {
@@ -68,8 +68,8 @@ public class TestRollRecovery {
         expectedHeader[0] = "2";
         expectedHeader[1] = MAGIC;
         expectedHeader[2] = "3600";
-        expectedHeader[3] = String.valueOf(SimAppnode.rollTS);
+        expectedHeader[3] = String.valueOf(SimAgent.rollTS);
         assertArrayEquals("head not match", expectedHeader, header.toArray());
-        assertEquals("loader function fail.", SimAppnode.expected, receives.get(receives.size()-1));
+        assertEquals("loader function fail.", SimAgent.expected, receives.get(receives.size()-1));
     }
 }

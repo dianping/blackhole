@@ -6,7 +6,7 @@ option java_outer_classname = "FailurePB";
 message Failure {
   enum NodeType {
     APP_NODE = 1;
-    COLLECTOR_NODE = 2;
+    BROKER_NODE = 2;
   }
 
   required string app = 1;

@@ -35,7 +35,7 @@
 		<module>blackhole-common</module>
 		<module>blackhole-supervisor</module>
 		<module>blackhole-cli</module>
-		<module>blackhole-collector</module>
+		<module>blackhole-broker</module>
 		<module>blackhole-check</module>
 		<module>blackhole-consumer</module>
 	</modules>
@@ -76,7 +76,7 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>blackhole-collector</artifactId>
+				<artifactId>blackhole-broker</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
