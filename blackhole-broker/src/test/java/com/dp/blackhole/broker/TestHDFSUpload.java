@@ -88,8 +88,8 @@ public class TestHDFSUpload {
         RollIdent rollIdent = new RollIdent();
         rollIdent.app = appName;
         rollIdent.period = 3600;
-        rollIdent.source = SimCollectornode.HOSTNAME;
-        rollIdent.ts = SimCollectornode.rollTS;
+        rollIdent.source = SimBroker.HOSTNAME;
+        rollIdent.ts = SimBroker.rollTS;
         return rollIdent;
     }
     

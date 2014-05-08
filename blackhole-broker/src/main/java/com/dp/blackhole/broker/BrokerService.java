@@ -170,7 +170,7 @@ public class BrokerService extends Thread {
         
         public void handleRegisterRequest(RegisterRequest request, DelegationIOConnection from) {
             clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT));
-            Message msg = PBwrap.wrapReadyCollector(request.topic, request.source, request.peroid, request.broker, Util.getTS());
+            Message msg = PBwrap.wrapReadyBroker(request.topic, request.source, request.peroid, request.broker, Util.getTS());
             Broker.getSupervisor().send(msg);
         }
         

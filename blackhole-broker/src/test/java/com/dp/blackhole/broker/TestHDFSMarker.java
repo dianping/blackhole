@@ -29,19 +29,19 @@ public class TestHDFSMarker {
 
     @After
     public void tearDown() throws Exception {
-        fs.delete(new Path(SimCollectornode.SCHEMA + SimCollectornode.BASE_PATH), true);
+        fs.delete(new Path(SimBroker.SCHEMA + SimBroker.BASE_PATH), true);
     }
 
     @Test
     public void testMark() throws IOException, InterruptedException {
-        new SimCollectornode(port);
-        HDFSMarker marker = new HDFSMarker(SimCollectornode.getRollMgr(), fs, SimCollectornode.getRollIdent(MAGIC));
-        SimCollectornode.getRollMgr().init("/tmp/hdfs", ".gz", port, 5000, 1, 1, 60000);
+        new SimBroker(port);
+        HDFSMarker marker = new HDFSMarker(SimBroker.getRollMgr(), fs, SimBroker.getRollIdent(MAGIC));
+        SimBroker.getRollMgr().init("/tmp/hdfs", ".gz", port, 5000, 1, 1, 60000);
         Thread thread = new Thread(marker);
         thread.start();
         thread.join();
-        Path exceptedMarkFile = new Path(SimCollectornode.SCHEMA + SimCollectornode.BASE_PATH 
-                + MAGIC + "/2013-01-01/15/" + "_" + SimCollectornode.HOSTNAME + "@"
+        Path exceptedMarkFile = new Path(SimBroker.SCHEMA + SimBroker.BASE_PATH 
+                + MAGIC + "/2013-01-01/15/" + "_" + SimBroker.HOSTNAME + "@"
                 + MAGIC + "_2013-01-01.15");
         assertTrue(fs.exists(exceptedMarkFile));
     }

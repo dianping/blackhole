@@ -94,11 +94,11 @@ public class TestAgent {
     }
 
     @Test
-    public void testAssignCollectorProcess() throws InterruptedException {
+    public void testAssignBrokerProcess() throws InterruptedException {
         agent.fillUpAppLogsFromConfig(MAGIC);
-        Message bad = getMessageOfAssignCollector(MAGIC + MAGIC);
+        Message bad = getMessageOfAssignBroker(MAGIC + MAGIC);
         assertFalse(agent.processor.processInternal(bad));
-        Message good = getMessageOfAssignCollector(MAGIC);
+        Message good = getMessageOfAssignBroker(MAGIC);
         assertTrue(agent.processor.processInternal(good));
     }
     
@@ -117,8 +117,8 @@ public class TestAgent {
         assertFalse(agent.processor.processInternal(unknow));
     }
 
-    private Message getMessageOfAssignCollector(String appName) {
-        return PBwrap.wrapAssignCollector(appName, SimAgent.HOSTNAME, SimAgent.COLPORT);
+    private Message getMessageOfAssignBroker(String appName) {
+        return PBwrap.wrapAssignBroker(appName, SimAgent.HOSTNAME, SimAgent.COLPORT);
     }
     
     private Message getMessageOfRecoveryRoll(String appName) {
@@ -126,6 +126,6 @@ public class TestAgent {
     }
 
     private Message getUnknowMessage() {
-        return PBwrap.wrapReadyCollector(MAGIC, SimAgent.HOSTNAME, 3600l, SimAgent.HOSTNAME, 1l);
+        return PBwrap.wrapReadyBroker(MAGIC, SimAgent.HOSTNAME, 3600l, SimAgent.HOSTNAME, 1l);
     }
 }

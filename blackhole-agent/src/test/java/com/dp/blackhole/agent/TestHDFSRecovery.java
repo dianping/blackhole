@@ -23,7 +23,7 @@ import org.junit.Test;
 import com.dp.blackhole.agent.AppLog;
 import com.dp.blackhole.agent.RollRecovery;
 import com.dp.blackhole.agent.SimAgent;
-import com.dp.blackhole.broker.SimCollectornode;
+import com.dp.blackhole.broker.SimBroker;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
 
@@ -37,7 +37,7 @@ public class TestHDFSRecovery {
     private FileSystem fs;
     private Path oldPath;
     private SimAgent agent;
-    private SimCollectornode collecotr;
+    private SimBroker collecotr;
 
     @Before
     public void setUp() throws Exception {
@@ -70,7 +70,7 @@ public class TestHDFSRecovery {
         confKeeper.addRawProperty(MAGIC+".rollPeriod", "3600");
         confKeeper.addRawProperty(MAGIC + ".maxLineSize", "1024");
         
-        collecotr = new SimCollectornode(port);
+        collecotr = new SimBroker(port);
         collecotr.start();
     }
 

@@ -168,12 +168,12 @@ public class RollManager {
     }
 
     public void reportFailure(String app, String appHost, long ts) {
-        Message message = PBwrap.wrapcollectorFailure(app, appHost, ts);
+        Message message = PBwrap.wrapBrokerFailure(app, appHost, ts);
         Broker.getSupervisor().send(message);
     }
     
     public void close() {
-        LOG.info("shutdown collector node");
+        LOG.info("shutdown broker node");
         uploadPool.shutdownNow();
         recoveryPool.shutdownNow();
         try {

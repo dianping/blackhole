@@ -29,7 +29,7 @@ import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
 import com.dp.blackhole.network.SimpleConnection;
-import com.dp.blackhole.protocol.control.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
@@ -324,7 +324,7 @@ public class Agent implements Runnable {
                     long rollTs = recoveryRoll.getRollTs();
                     String recoveryKey = appName + ":" + rollTs;
                     if ((rollRecovery = recoveryingMap.get(recoveryKey)) == null) {
-                        broker = recoveryRoll.getCollectorServer();
+                        broker = recoveryRoll.getBrokerServer();
                         int recoveryPort = recoveryRoll.getRecoveryPort();
                         rollRecovery = new RollRecovery(Agent.this,
                                 broker, recoveryPort, appLog, rollTs);
@@ -342,26 +342,26 @@ public class Agent implements Runnable {
                             + " from supervisor message not match with local"));
                 }
                 break;
-            case ASSIGN_COLLECTOR:
-                AssignCollector assignCollector = msg.getAssignCollector();
-                appName = assignCollector.getAppName();
+            case ASSIGN_BROKER:
+                AssignBroker assignBroker = msg.getAssignBroker();
+                appName = assignBroker.getAppName();
                 if ((appLog = appLogs.get(appName)) != null) {
                     if ((logReader = appReaders.get(appLog)) == null) {
-                        broker = assignCollector.getCollectorServer();
-                        int brokerPort = assignCollector.getBrokerPort();
+                        broker = assignBroker.getBrokerServer();
+                        int brokerPort = assignBroker.getBrokerPort();
                         logReader = new LogReader(Agent.this, hostname, broker, brokerPort,
                                 appLog);
                         appReaders.put(appLog, logReader);
                         pool.execute(logReader);
                         return true;
                     } else {
-                        LOG.info("duplicated assign collector message: "
-                                + assignCollector);
+                        LOG.info("duplicated assign broker message: "
+                                + assignBroker);
                     }
                 } else {
-                    LOG.error("AppName [" + assignCollector.getAppName()
+                    LOG.error("AppName [" + assignBroker.getAppName()
                             + "] from supervisor message not match with local");
-                    Cat.logError(new BlackholeClientException("ASSIGN_COLLECTOR: " + assignCollector.getAppName()
+                    Cat.logError(new BlackholeClientException("ASSIGN_BROKER: " + assignBroker.getAppName()
                             + " from supervisor message not match with local"));
                 }
                 break;

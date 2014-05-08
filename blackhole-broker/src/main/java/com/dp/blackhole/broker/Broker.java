@@ -82,8 +82,8 @@ public class Broker {
     }
     
     private void registerNode() {
-        send(PBwrap.wrapCollectorReg(servicePort, recoveryPort));
-        LOG.info("register collector node with supervisor");
+        send(PBwrap.wrapBrokerReg(servicePort, recoveryPort));
+        LOG.info("register broker node with supervisor");
     }
 
     private void HDFSLogin(Configuration conf, String keytab, String principle) throws IOException {        

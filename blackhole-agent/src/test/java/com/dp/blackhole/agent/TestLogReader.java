@@ -22,7 +22,7 @@ import com.dp.blackhole.agent.FileListener;
 import com.dp.blackhole.agent.LogReader;
 import com.dp.blackhole.broker.BrokerService;
 import com.dp.blackhole.broker.ByteBufferChannel;
-import com.dp.blackhole.broker.SimCollectornode;
+import com.dp.blackhole.broker.SimBroker;
 import com.dp.blackhole.broker.storage.Segment;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
@@ -55,8 +55,8 @@ public class TestLogReader {
         properties.setProperty("broker.service.port", "40001");
         properties.setProperty("broker.storage.dir", tmpDir);
         BrokerService pubservice = new BrokerService(properties);
-        new SimCollectornode(port);
-        SimCollectornode.getRollMgr().init("/tmp/hdfs", ".gz", 40020, 5000, 1, 1, 60000);
+        new SimBroker(port);
+        SimBroker.getRollMgr().init("/tmp/hdfs", ".gz", 40020, 5000, 1, 1, 60000);
         pubservice.start();
 
         //build a app log

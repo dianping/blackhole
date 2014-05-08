@@ -12,8 +12,8 @@ import com.dp.blackhole.broker.RollIdent;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 
-public class SimCollectornode extends Broker {
-    private static final Log LOG = LogFactory.getLog(SimCollectornode.class);
+public class SimBroker extends Broker {
+    private static final Log LOG = LogFactory.getLog(SimBroker.class);
     public static String HOSTNAME;
     public static long rollTS = 1357023691855l;
     public static final String SCHEMA = "file://";
@@ -28,7 +28,7 @@ public class SimCollectornode extends Broker {
             } catch (UnknownHostException e) {
             }
         }
-    public SimCollectornode(int port) throws IOException {
+    public SimBroker(int port) throws IOException {
         super();
         this.port = port;
     }
@@ -60,8 +60,8 @@ public class SimCollectornode extends Broker {
         RollIdent rollIdent = new RollIdent();
         rollIdent.app = appName;
         rollIdent.period = 3600;
-        rollIdent.source = SimCollectornode.HOSTNAME;
-        rollIdent.ts = SimCollectornode.rollTS;
+        rollIdent.source = SimBroker.HOSTNAME;
+        rollIdent.ts = SimBroker.rollTS;
         return rollIdent;
     }
 }

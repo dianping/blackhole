@@ -42,12 +42,12 @@ public final class RecoveryRollPB {
     public boolean hasAppName() { return hasAppName; }
     public java.lang.String getAppName() { return appName_; }
     
-    // required string collector_server = 2;
-    public static final int COLLECTOR_SERVER_FIELD_NUMBER = 2;
-    private boolean hasCollectorServer;
-    private java.lang.String collectorServer_ = "";
-    public boolean hasCollectorServer() { return hasCollectorServer; }
-    public java.lang.String getCollectorServer() { return collectorServer_; }
+    // required string broker_server = 2;
+    public static final int BROKER_SERVER_FIELD_NUMBER = 2;
+    private boolean hasBrokerServer;
+    private java.lang.String brokerServer_ = "";
+    public boolean hasBrokerServer() { return hasBrokerServer; }
+    public java.lang.String getBrokerServer() { return brokerServer_; }
     
     // required int64 roll_ts = 3;
     public static final int ROLL_TS_FIELD_NUMBER = 3;
@@ -67,7 +67,7 @@ public final class RecoveryRollPB {
     }
     public final boolean isInitialized() {
       if (!hasAppName) return false;
-      if (!hasCollectorServer) return false;
+      if (!hasBrokerServer) return false;
       if (!hasRollTs) return false;
       if (!hasRecoveryPort) return false;
       return true;
@@ -79,8 +79,8 @@ public final class RecoveryRollPB {
       if (hasAppName()) {
         output.writeString(1, getAppName());
       }
-      if (hasCollectorServer()) {
-        output.writeString(2, getCollectorServer());
+      if (hasBrokerServer()) {
+        output.writeString(2, getBrokerServer());
       }
       if (hasRollTs()) {
         output.writeInt64(3, getRollTs());
@@ -101,9 +101,9 @@ public final class RecoveryRollPB {
         size += com.google.protobuf.CodedOutputStream
           .computeStringSize(1, getAppName());
       }
-      if (hasCollectorServer()) {
+      if (hasBrokerServer()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(2, getCollectorServer());
+          .computeStringSize(2, getBrokerServer());
       }
       if (hasRollTs()) {
         size += com.google.protobuf.CodedOutputStream
@@ -274,8 +274,8 @@ public final class RecoveryRollPB {
         if (other.hasAppName()) {
           setAppName(other.getAppName());
         }
-        if (other.hasCollectorServer()) {
-          setCollectorServer(other.getCollectorServer());
+        if (other.hasBrokerServer()) {
+          setBrokerServer(other.getBrokerServer());
         }
         if (other.hasRollTs()) {
           setRollTs(other.getRollTs());
@@ -313,7 +313,7 @@ public final class RecoveryRollPB {
               break;
             }
             case 18: {
-              setCollectorServer(input.readString());
+              setBrokerServer(input.readString());
               break;
             }
             case 24: {
@@ -350,24 +350,24 @@ public final class RecoveryRollPB {
         return this;
       }
       
-      // required string collector_server = 2;
-      public boolean hasCollectorServer() {
-        return result.hasCollectorServer();
+      // required string broker_server = 2;
+      public boolean hasBrokerServer() {
+        return result.hasBrokerServer();
       }
-      public java.lang.String getCollectorServer() {
-        return result.getCollectorServer();
+      public java.lang.String getBrokerServer() {
+        return result.getBrokerServer();
       }
-      public Builder setCollectorServer(java.lang.String value) {
+      public Builder setBrokerServer(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasCollectorServer = true;
-        result.collectorServer_ = value;
+  result.hasBrokerServer = true;
+        result.brokerServer_ = value;
         return this;
       }
-      public Builder clearCollectorServer() {
-        result.hasCollectorServer = false;
-        result.collectorServer_ = getDefaultInstance().getCollectorServer();
+      public Builder clearBrokerServer() {
+        result.hasBrokerServer = false;
+        result.brokerServer_ = getDefaultInstance().getBrokerServer();
         return this;
       }
       
@@ -433,11 +433,11 @@ public final class RecoveryRollPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022RecoveryRoll.proto\022\tblackhole\"b\n\014Recov" +
-      "eryRoll\022\020\n\010app_name\030\001 \002(\t\022\030\n\020collector_s" +
-      "erver\030\002 \002(\t\022\017\n\007roll_ts\030\003 \002(\003\022\025\n\rrecovery" +
-      "_port\030\004 \002(\005B3\n!com.dp.blackhole.protocol" +
-      ".controlB\016RecoveryRollPB"
+      "\n\022RecoveryRoll.proto\022\tblackhole\"_\n\014Recov" +
+      "eryRoll\022\020\n\010app_name\030\001 \002(\t\022\025\n\rbroker_serv" +
+      "er\030\002 \002(\t\022\017\n\007roll_ts\030\003 \002(\003\022\025\n\rrecovery_po" +
+      "rt\030\004 \002(\005B3\n!com.dp.blackhole.protocol.co" +
+      "ntrolB\016RecoveryRollPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -449,7 +449,7 @@ public final class RecoveryRollPB {
           internal_static_blackhole_RecoveryRoll_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RecoveryRoll_descriptor,
-              new java.lang.String[] { "AppName", "CollectorServer", "RollTs", "RecoveryPort", },
+              new java.lang.String[] { "AppName", "BrokerServer", "RollTs", "RecoveryPort", },
               com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.class,
               com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.Builder.class);
           return null;

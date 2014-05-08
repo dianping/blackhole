@@ -2,7 +2,7 @@
 source /etc/profile
 cd `dirname $0`
 
-class=com.dp.blackhole.collectornode.Collectornode
+class=com.dp.blackhole.broker.Broker
 
 cd ..
 BLACKHOLE_HOME=`pwd`
