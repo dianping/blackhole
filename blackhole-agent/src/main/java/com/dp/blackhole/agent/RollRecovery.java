@@ -77,7 +77,7 @@ public class RollRecovery implements Runnable{
             return;
         }
 
-        // send recovery head, report fail in appnode if catch exception.
+        // send recovery head, report fail in agent if catch exception.
         DataOutputStream out = null;
         try {
             socket = new Socket(collectorServer, port);

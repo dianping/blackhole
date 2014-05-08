@@ -17,7 +17,7 @@ import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.conf.Context;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 
-public class TestAppnode {
+public class TestAgent {
     private static String MAGIC;
     static {
         try {
@@ -26,7 +26,7 @@ public class TestAppnode {
             e.printStackTrace();
         }
     }
-    private SimAppnode appnode;
+    private SimAgent agent;
 
     @Before
     public void setUp() throws Exception {
@@ -34,7 +34,7 @@ public class TestAppnode {
         File tailFile = new File("/tmp/" + MAGIC + ".log");
         tailFile.createNewFile();
         tailFile.deleteOnExit();
-        appnode = new SimAppnode();
+        agent = new SimAgent();
         ConfigKeeper.configMap.put(MAGIC, new Context(ParamsKey.Appconf.ROLL_PERIOD, "3600"));
         ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.MAX_LINE_SIZE, "1024");
         ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.WATCH_FILE, tailFile.getAbsolutePath());
@@ -67,27 +67,27 @@ public class TestAppnode {
         File expectedFile;
         expectedFile = new File(expectedFileName1);
         expectedFile.createNewFile();
-        assertTrue(appnode.checkFilesExist(MAGIC, WATCH_FILE));
+        assertTrue(agent.checkFilesExist(MAGIC, WATCH_FILE));
         assertEquals(expectedFileName1, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
         expectedFile.delete();
         expectedFile = new File(expectedFileName2);
         expectedFile.createNewFile();
-        assertTrue(appnode.checkFilesExist(MAGIC, WATCH_FILE));
+        assertTrue(agent.checkFilesExist(MAGIC, WATCH_FILE));
         assertEquals(expectedFileName2, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
         expectedFile.delete();
         expectedFile = new File(expectedFileName3);
         expectedFile.createNewFile();
-        assertTrue(appnode.checkFilesExist(MAGIC, WATCH_FILE));
+        assertTrue(agent.checkFilesExist(MAGIC, WATCH_FILE));
         assertEquals(expectedFileName3, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
         expectedFile.delete();
         expectedFile = new File(expectedFileName4);
         expectedFile.createNewFile();
-        assertTrue(appnode.checkFilesExist(MAGIC, WATCH_FILE));
+        assertTrue(agent.checkFilesExist(MAGIC, WATCH_FILE));
         assertEquals(expectedFileName4, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
         expectedFile.delete();
         expectedFile = new File(expectedFileName5);
         expectedFile.createNewFile();
-        assertFalse(appnode.checkFilesExist(MAGIC, WATCH_FILE));
+        assertFalse(agent.checkFilesExist(MAGIC, WATCH_FILE));
         expectedFile.delete();
         new File("/tmp/check1").delete();
         new File("/tmp/check2").delete();
@@ -95,37 +95,37 @@ public class TestAppnode {
 
     @Test
     public void testAssignCollectorProcess() throws InterruptedException {
-        appnode.fillUpAppLogsFromConfig(MAGIC);
+        agent.fillUpAppLogsFromConfig(MAGIC);
         Message bad = getMessageOfAssignCollector(MAGIC + MAGIC);
-        assertFalse(appnode.processor.processInternal(bad));
+        assertFalse(agent.processor.processInternal(bad));
         Message good = getMessageOfAssignCollector(MAGIC);
-        assertTrue(appnode.processor.processInternal(good));
+        assertTrue(agent.processor.processInternal(good));
     }
     
     @Test
     public void testRecoveryRollProcess() throws InterruptedException {
-        appnode.fillUpAppLogsFromConfig(MAGIC);
+        agent.fillUpAppLogsFromConfig(MAGIC);
         Message bad = getMessageOfRecoveryRoll(MAGIC + MAGIC);
-        assertFalse(appnode.processor.processInternal(bad));
+        assertFalse(agent.processor.processInternal(bad));
         Message good = getMessageOfRecoveryRoll(MAGIC);
-        assertTrue(appnode.processor.processInternal(good));
+        assertTrue(agent.processor.processInternal(good));
     }
     
     @Test
     public void testUnknowMessageProcess() throws InterruptedException {
         Message unknow = getUnknowMessage();
-        assertFalse(appnode.processor.processInternal(unknow));
+        assertFalse(agent.processor.processInternal(unknow));
     }
 
     private Message getMessageOfAssignCollector(String appName) {
-        return PBwrap.wrapAssignCollector(appName, SimAppnode.HOSTNAME, SimAppnode.COLPORT);
+        return PBwrap.wrapAssignCollector(appName, SimAgent.HOSTNAME, SimAgent.COLPORT);
     }
     
     private Message getMessageOfRecoveryRoll(String appName) {
-        return PBwrap.wrapRecoveryRoll(appName, SimAppnode.HOSTNAME, SimAppnode.COLPORT, SimAppnode.rollTS);
+        return PBwrap.wrapRecoveryRoll(appName, SimAgent.HOSTNAME, SimAgent.COLPORT, SimAgent.rollTS);
     }
 
     private Message getUnknowMessage() {
-        return PBwrap.wrapReadyCollector(MAGIC, SimAppnode.HOSTNAME, 3600l, SimAppnode.HOSTNAME, 1l);
+        return PBwrap.wrapReadyCollector(MAGIC, SimAgent.HOSTNAME, 3600l, SimAgent.HOSTNAME, 1l);
     }
 }

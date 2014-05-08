@@ -863,7 +863,7 @@ public class Supervisor {
      * failure happened only on stream
      * just log it in a issue, because:
      * if it is a collector fail, the corresponding log reader should find it 
-     * and ask for a new collector; if it is a appnode fail, the appNode will
+     * and ask for a new collector; if it is a agent fail, the appNode will
      * register the app again 
      */
     private void handleFailure(Failure failure) {

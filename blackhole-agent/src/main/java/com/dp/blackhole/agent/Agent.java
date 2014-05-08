@@ -414,8 +414,8 @@ public class Agent implements Runnable {
     }
     
     public static void main(String[] args) {
-        Agent appnode = new Agent();
-        Thread thread = new Thread(appnode);
+        Agent agent = new Agent();
+        Thread thread = new Thread(agent);
         thread.start();
     }
 }

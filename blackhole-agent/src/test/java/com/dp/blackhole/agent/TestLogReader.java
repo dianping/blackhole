@@ -68,14 +68,14 @@ public class TestLogReader {
     @After
     public void tearDown() throws Exception {
         loggerThread.interrupt();
-        SimAppnode.deleteTmpFile(MAGIC);
+        SimAgent.deleteTmpFile(MAGIC);
     }
 
     @Test
     public void testFileRotated() throws IOException {
         String localhost = Util.getLocalHost();
-        AppLog appLog = new AppLog(MAGIC, SimAppnode.TEST_ROLL_FILE, 3600, 1024);
-        SimAppnode appnode = new SimAppnode();
+        AppLog appLog = new AppLog(MAGIC, SimAgent.TEST_ROLL_FILE, 3600, 1024);
+        SimAgent agent = new SimAgent();
         FileListener listener;
         try {
             listener = new FileListener();
@@ -83,12 +83,12 @@ public class TestLogReader {
             System.err.println(e);
             return;
         }
-        appnode.setListener(listener);
+        agent.setListener(listener);
         loggerThread.start();
         Thread readerThread = null;
         try {
             Thread.sleep(500);
-            LogReader reader = new LogReader(appnode, SimAppnode.HOSTNAME, localhost,
+            LogReader reader = new LogReader(agent, SimAgent.HOSTNAME, localhost,
                     port, appLog);
             readerThread = new Thread(reader);
             Thread.sleep(1000);//ignore file first create

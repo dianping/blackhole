@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import com.dp.blackhole.agent.AppLog;
 import com.dp.blackhole.agent.RollRecovery;
-import com.dp.blackhole.agent.SimAppnode;
+import com.dp.blackhole.agent.SimAgent;
 import com.dp.blackhole.broker.SimCollectornode;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
@@ -36,14 +36,14 @@ public class TestHDFSRecovery {
     private File fileBroken;
     private FileSystem fs;
     private Path oldPath;
-    private SimAppnode appnode;
+    private SimAgent agent;
     private SimCollectornode collecotr;
 
     @Before
     public void setUp() throws Exception {
         APP_HOST = Util.getLocalHost();
         //build a tmp file
-        fileBroken = createBrokenTmpFile(MAGIC + "_broken_", SimAppnode.expected);
+        fileBroken = createBrokenTmpFile(MAGIC + "_broken_", SimAgent.expected);
         convertToGZIP(fileBroken);
         try {
             fs = (new Path("/tmp")).getFileSystem(new Configuration());
@@ -52,18 +52,18 @@ public class TestHDFSRecovery {
             throw e;
         }
         //file:///tmp/e9wjd83h/2013-01-01/15/localhost_e9wjd83h_2013-01-01.15  e9wjd83h is appname
-        oldPath = new Path(SimAppnode.SCHEMA + SimAppnode.BASE_PATH 
+        oldPath = new Path(SimAgent.SCHEMA + SimAgent.BASE_PATH 
                 + MAGIC + "/2013-01-01/15/" + APP_HOST + "@"
                 + MAGIC + "_2013-01-01.15.gz.tmp");
         LOG.debug("old path in hdfs is " + oldPath);
         fs.copyFromLocalFile(false, true, new Path(fileBroken.toURI()), oldPath);
         
         //create a good file and rename it for client
-        file = SimAppnode.createTmpFile(MAGIC, SimAppnode.expected);
-        SimAppnode.createTmpFile(MAGIC + "." + SimAppnode.FILE_SUFFIX, SimAppnode.expected);
-        SimAppnode.createTmpFile(APP_HOST + "@" + MAGIC + "_" + SimAppnode.FILE_SUFFIX, SimAppnode.expected);
+        file = SimAgent.createTmpFile(MAGIC, SimAgent.expected);
+        SimAgent.createTmpFile(MAGIC + "." + SimAgent.FILE_SUFFIX, SimAgent.expected);
+        SimAgent.createTmpFile(APP_HOST + "@" + MAGIC + "_" + SimAgent.FILE_SUFFIX, SimAgent.expected);
         
-        appnode = new SimAppnode();
+        agent = new SimAgent();
         
         //deploy some condition
         ConfigKeeper confKeeper = new ConfigKeeper();
@@ -77,23 +77,23 @@ public class TestHDFSRecovery {
     @After
     public void tearDown() throws Exception {
 //        serverThread.interrupt();
-        fs.delete(new Path(SimAppnode.SCHEMA + SimAppnode.BASE_PATH), true);
+        fs.delete(new Path(SimAgent.SCHEMA + SimAgent.BASE_PATH), true);
         fileBroken.delete();
         file.delete();
-        SimAppnode.deleteTmpFile(MAGIC);
+        SimAgent.deleteTmpFile(MAGIC);
     }
 
     @Test
     public void test() throws IOException, InterruptedException {
         AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), 3600, 1024);
-        RollRecovery clientTask = new RollRecovery(appnode, SimAppnode.HOSTNAME, port, appLog, SimAppnode.rollTS);
+        RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();
         convertToGZIP(file);
         String expectedMD5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(new FileInputStream(file));
         
 //        LOG.info("expected md5 is " + expectedMD5);
-        Path newPath = new Path(SimAppnode.SCHEMA + SimAppnode.BASE_PATH 
+        Path newPath = new Path(SimAgent.SCHEMA + SimAgent.BASE_PATH 
                 + MAGIC + "/2013-01-01/15/" + APP_HOST + "@"
                 + MAGIC + "_2013-01-01.15.gz");
         File fileGzip = new File(newPath.toUri());

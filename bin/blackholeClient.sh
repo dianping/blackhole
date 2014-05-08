@@ -2,7 +2,7 @@
 source /etc/profile
 cd `dirname $0`
 
-class=com.dp.blackhole.appnode.Appnode
+class=com.dp.blackhole.agent.Agent
 
 cd ..
 BLACKHOLE_HOME=`pwd`
