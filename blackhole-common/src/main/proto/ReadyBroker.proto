@@ -1,12 +1,12 @@
 package blackhole;
 
 option java_package = "com.dp.blackhole.protocol.control";
-option java_outer_classname = "ReadyCollectorPB";
+option java_outer_classname = "ReadyBrokerPB";
 
-message ReadyCollector {
+message ReadyBroker {
     required string app_name = 1;
     required string app_server = 2;
-    required string collector_server = 3;
+    required string broker_server = 3;
     required int64 period = 4;
     required int64 connectedTs = 5;
 }

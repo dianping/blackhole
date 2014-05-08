@@ -2,11 +2,10 @@
 source /etc/profile
 cd `dirname $0`
 
-class=com.dp.blackhole.collectornode.Collectornode
+class=com.dp.blackhole.agent.Agent
 
 cd ..
 BLACKHOLE_HOME=`pwd`
-HADOOP_HOME=/usr/local/hadoop/hadoop-release
 
 lastword=${class##*.}
 name=${lastword,,}
@@ -14,7 +13,8 @@ out=$BLACKHOLE_HOME/logs/$name.out
 pid=$BLACKHOLE_HOME/$name.pid
 psfile=$BLACKHOLE_HOME/blackhole.ps
 
-libs="$BLACKHOLE_HOME/conf:$HADOOP_HOME/conf"
+libs="$BLACKHOLE_HOME/conf"
+native=$BLACKHOLE_HOME/libs/native
 
 if [ "x$1" == "xstop" ]; then
     echo "stop $name"
@@ -34,6 +34,5 @@ for j in `ls $BLACKHOLE_HOME/libs/*.jar`; do
 done
 
 echo "starting $name"
-nohup java -Xmx1024m -cp $libs $class > $out 2>&1 &
+nohup java -Xmx128m -Djava.library.path=$native -cp $libs $class -f $BLACKHOLE_HOME/conf/app.conf > $out 2>&1 &
 echo $! > $pid
-

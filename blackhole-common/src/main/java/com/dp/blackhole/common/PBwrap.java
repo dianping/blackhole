@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.dp.blackhole.protocol.control.AppRegPB.AppReg;
 import com.dp.blackhole.protocol.control.AppRollPB.AppRoll;
-import com.dp.blackhole.protocol.control.AssignCollectorPB.AssignCollector;
+import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
 import com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes;
@@ -20,7 +20,7 @@ import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
-import com.dp.blackhole.protocol.control.ReadyCollectorPB.ReadyCollector;
+import com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker;
 import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
@@ -44,14 +44,14 @@ public class PBwrap {
         case APP_REG:
             msg.setAppReg((AppReg) message);
             break;
-        case COLLECTOR_REG:
+        case BROKER_REG:
             msg.setColNodeReg((ColNodeReg) message);
             break;
-        case ASSIGN_COLLECTOR:
-            msg.setAssignCollector((AssignCollector) message);
+        case ASSIGN_BROKER:
+            msg.setAssignBroker((AssignBroker) message);
             break;
-        case READY_COLLECTOR:
-            msg.setReadyCollector((ReadyCollector) message);
+        case READY_BROKER:
+            msg.setReadyBroker((ReadyBroker) message);
             break;
         case APP_ROLL:
             msg.setAppRoll((AppRoll) message);
@@ -131,29 +131,29 @@ public class PBwrap {
         return wrapMessage(MessageType.APP_REG, builder.build());
     }
     
-    public static Message wrapCollectorReg(int brokerPort, int recoveryPort) {
+    public static Message wrapBrokerReg(int brokerPort, int recoveryPort) {
         ColNodeReg.Builder builder = ColNodeReg.newBuilder();
         builder.setBrokerPort(brokerPort);
         builder.setRecoveryPort(recoveryPort);
-        return wrapMessage(MessageType.COLLECTOR_REG, builder.build());
+        return wrapMessage(MessageType.BROKER_REG, builder.build());
     }
     
-    public static Message wrapAssignCollector(String appName, String collectorServer, int port) {
-        AssignCollector.Builder builder = AssignCollector.newBuilder();
+    public static Message wrapAssignBroker(String appName, String brokerServer, int port) {
+        AssignBroker.Builder builder = AssignBroker.newBuilder();
         builder.setAppName(appName);
-        builder.setCollectorServer(collectorServer);
+        builder.setBrokerServer(brokerServer);
         builder.setBrokerPort(port);
-        return wrapMessage(MessageType.ASSIGN_COLLECTOR, builder.build());
+        return wrapMessage(MessageType.ASSIGN_BROKER, builder.build());
     }
     
-    public static Message wrapReadyCollector(String app_name, String app_server, long peroid, String collector_server, long connectedTs) {
-        ReadyCollector.Builder builder = ReadyCollector.newBuilder();
+    public static Message wrapReadyBroker(String app_name, String app_server, long peroid, String broker_server, long connectedTs) {
+        ReadyBroker.Builder builder = ReadyBroker.newBuilder();
         builder.setAppName(app_name);
         builder.setAppServer(app_server);
         builder.setPeriod(peroid);
-        builder.setCollectorServer(collector_server);
+        builder.setBrokerServer(broker_server);
         builder.setConnectedTs(connectedTs);
-        return wrapMessage(MessageType.READY_COLLECTOR, builder.build());
+        return wrapMessage(MessageType.READY_BROKER, builder.build());
     }
     
     public static Message wrapAppRoll(String appName, String appServer,long period, long rollTs) {
@@ -188,10 +188,10 @@ public class PBwrap {
         return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, appServer, 0, rollTs));
     }
     
-    public static Message wrapRecoveryRoll(String appName, String collectorServer, int port, long rollTs) {
+    public static Message wrapRecoveryRoll(String appName, String brokerServer, int port, long rollTs) {
         RecoveryRoll.Builder builder = RecoveryRoll.newBuilder();
         builder.setAppName(appName);
-        builder.setCollectorServer(collectorServer);
+        builder.setBrokerServer(brokerServer);
         builder.setRecoveryPort(port);
         builder.setRollTs(rollTs);
         return wrapMessage(MessageType.RECOVERY_ROLL, builder.build());
@@ -218,8 +218,8 @@ public class PBwrap {
        return wrapFailure(app, appHost, NodeType.APP_NODE, failTs);
     }
     
-    public static Message wrapcollectorFailure (String app, String appHost, long failTs) {
-        return wrapFailure(app, appHost, NodeType.COLLECTOR_NODE, failTs);
+    public static Message wrapBrokerFailure (String app, String appHost, long failTs) {
+        return wrapFailure(app, appHost, NodeType.BROKER_NODE, failTs);
     }
     
     public static Message wrapUnrecoverable(String appName, String appServer, long period, long rollTs) {

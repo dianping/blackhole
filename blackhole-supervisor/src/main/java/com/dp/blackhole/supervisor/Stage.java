@@ -10,15 +10,15 @@ public class Stage {
     public static final int UPLOADED = 3;
     public static final int RECOVERYING = 4;
 //    public static final int APPFAIL = 5;
-    public static final int COLLECTORFAIL = 6;
-//    public static final int NOCOLLECTOR = 7;
+    public static final int BROKERFAIL = 6;
+//    public static final int NOBROKER = 7;
     public static final int PENDING = 5;
     
     List<Issue> issuelist;
     
     String app;
     String apphost;
-    String collectorhost;
+    String brokerhost;
     boolean cleanstart;
     int status;
     long rollTs;
@@ -34,8 +34,8 @@ public class Stage {
             return "UPLOADED";
         case Stage.RECOVERYING:
             return "RECOVERYING";
-        case Stage.COLLECTORFAIL:
-            return "COLLECTORFAIL";
+        case Stage.BROKERFAIL:
+            return "BROKERFAIL";
         case Stage.PENDING:
             return "PENDING";
         default:

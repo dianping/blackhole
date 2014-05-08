@@ -14,8 +14,8 @@ import org.apache.commons.logging.LogFactory;
 import com.dp.blackhole.agent.Agent;
 import com.dp.blackhole.common.Util;
 
-public class SimAppnode extends Agent{
-    private static final Log LOG = LogFactory.getLog(SimAppnode.class);
+public class SimAgent extends Agent{
+    private static final Log LOG = LogFactory.getLog(SimAgent.class);
     public static final int COLPORT = 11113;
     public static String HOSTNAME;
     public static long rollTS = 1357023691855l;
@@ -32,7 +32,7 @@ public class SimAppnode extends Agent{
         }
     }
     
-    public SimAppnode() {
+    public SimAgent() {
         super();
         super.processor = new AgentProcessor();
     }

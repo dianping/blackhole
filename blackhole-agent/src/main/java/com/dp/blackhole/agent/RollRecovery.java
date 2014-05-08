@@ -22,16 +22,16 @@ import com.dp.blackhole.exception.BlackholeClientException;
 public class RollRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(RollRecovery.class);
     private static final int DEFAULT_BUFSIZE = 8192;
-    private String collectorServer;
+    private String brokerServer;
     private int port;
     private AppLog appLog;
     private final long rollTimestamp;
     private Socket socket;
     private byte[] inbuf;
     private Agent node;
-    public RollRecovery(Agent node, String collectorServer, int port, AppLog appLog, final long rollTimestamp) {
+    public RollRecovery(Agent node, String brokerServer, int port, AppLog appLog, final long rollTimestamp) {
         this.node = node;
-        this.collectorServer = collectorServer;
+        this.brokerServer = brokerServer;
         this.port = port;
         this.appLog = appLog;
         this.rollTimestamp = rollTimestamp;
@@ -77,10 +77,10 @@ public class RollRecovery implements Runnable{
             return;
         }
 
-        // send recovery head, report fail in appnode if catch exception.
+        // send recovery head, report fail in agent if catch exception.
         DataOutputStream out = null;
         try {
-            socket = new Socket(collectorServer, port);
+            socket = new Socket(brokerServer, port);
             out = new DataOutputStream(socket.getOutputStream());
             wrapSendRecoveryHead(out);
         } catch (IOException e) {

@@ -38,7 +38,7 @@ public final class FailurePB {
     public enum NodeType
         implements com.google.protobuf.ProtocolMessageEnum {
       APP_NODE(0, 1),
-      COLLECTOR_NODE(1, 2),
+      BROKER_NODE(1, 2),
       ;
       
       
@@ -47,7 +47,7 @@ public final class FailurePB {
       public static NodeType valueOf(int value) {
         switch (value) {
           case 1: return APP_NODE;
-          case 2: return COLLECTOR_NODE;
+          case 2: return BROKER_NODE;
           default: return null;
         }
       }
@@ -78,7 +78,7 @@ public final class FailurePB {
       }
       
       private static final NodeType[] VALUES = {
-        APP_NODE, COLLECTOR_NODE, 
+        APP_NODE, BROKER_NODE, 
       };
       public static NodeType valueOf(
           com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
@@ -510,12 +510,12 @@ public final class FailurePB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rFailure.proto\022\tblackhole\"\223\001\n\007Failure\022\013" +
+      "\n\rFailure.proto\022\tblackhole\"\220\001\n\007Failure\022\013" +
       "\n\003app\030\001 \002(\t\022)\n\004type\030\002 \002(\0162\033.blackhole.Fa" +
       "ilure.NodeType\022\022\n\napp_server\030\003 \002(\t\022\016\n\006fa" +
-      "ilTs\030\004 \002(\003\",\n\010NodeType\022\014\n\010APP_NODE\020\001\022\022\n\016" +
-      "COLLECTOR_NODE\020\002B.\n!com.dp.blackhole.pro" +
-      "tocol.controlB\tFailurePB"
+      "ilTs\030\004 \002(\003\")\n\010NodeType\022\014\n\010APP_NODE\020\001\022\017\n\013" +
+      "BROKER_NODE\020\002B.\n!com.dp.blackhole.protoc" +
+      "ol.controlB\tFailurePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
