@@ -52,7 +52,6 @@ public class LogReader implements Runnable{
             }
         } catch (IOException e) {
             LOG.warn("Failed to close socket.", e);
-            Cat.logError("Failed to close socket.", e);
         }
         node.getListener().unregisterLogReader(appLog.getTailFile());
     }
