@@ -31,7 +31,7 @@
 		</plugins>
 	</build>
 	<modules>
-		<module>blackhole-client</module>
+		<module>blackhole-agent</module>
 		<module>blackhole-common</module>
 		<module>blackhole-supervisor</module>
 		<module>blackhole-cli</module>
@@ -56,7 +56,7 @@
 		<dependencies>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>blackhole-client</artifactId>
+				<artifactId>blackhole-agent</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

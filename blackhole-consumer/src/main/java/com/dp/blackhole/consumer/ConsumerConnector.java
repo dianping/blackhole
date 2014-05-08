@@ -44,7 +44,7 @@ public class ConsumerConnector implements Runnable {
     public volatile boolean initialized = false;
     
     // consumerIdString->[fetcherrunable1, fetcherrunable2]
-    private Map<String, List<FetcherRunnable>> consumerThreadsMap;
+    private Map<String, List<Fetcher>> consumerThreadsMap;
     // registered consumers
     private ConcurrentHashMap<String, Consumer> consumers;   
     private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
@@ -86,11 +86,11 @@ public class ConsumerConnector implements Runnable {
     }
 
     public void commitOffsets() {
-        for (Entry<String, List<FetcherRunnable>> e : consumerThreadsMap.entrySet()) {
+        for (Entry<String, List<Fetcher>> e : consumerThreadsMap.entrySet()) {
             String id = e.getKey();
-            List<FetcherRunnable> fetches = e.getValue();
+            List<Fetcher> fetches = e.getValue();
 
-            for (FetcherRunnable f : fetches) {
+            for (Fetcher f : fetches) {
                 for (PartitionTopicInfo info : f.getpartitionInfos()) {
                     long lastChanged = info.getConsumedOffsetChanged().get();
                     if (lastChanged == 0) {
@@ -107,7 +107,7 @@ public class ConsumerConnector implements Runnable {
     
     @Override
     public void run() {
-        consumerThreadsMap = new ConcurrentHashMap<String, List<FetcherRunnable>>();
+        consumerThreadsMap = new ConcurrentHashMap<String, List<Fetcher>>();
         consumers = new ConcurrentHashMap<String, Consumer>();
         if (autoCommit) {
             LOG.info("starting auto committer every " + autoCommitIntervalMs + " ms");
@@ -150,8 +150,8 @@ public class ConsumerConnector implements Runnable {
     public void stop() throws InterruptedException {
         client.shutdown();
         scheduler.shutdown();
-        for (List<FetcherRunnable> fetchers : consumerThreadsMap.values()) {
-            for (FetcherRunnable f : fetchers) {
+        for (List<Fetcher> fetchers : consumerThreadsMap.values()) {
+            for (Fetcher f : fetchers) {
                 f.shutdown();
             }
         }
@@ -245,10 +245,10 @@ public class ConsumerConnector implements Runnable {
                 
                 String consumerId = assign.getConsumerIdString();
                 //First, shutdown thread and clear consumer queue.
-                List<FetcherRunnable> fetches = consumerThreadsMap.get(consumerId);
+                List<Fetcher> fetches = consumerThreadsMap.get(consumerId);
                 if (fetches != null) {
                     LOG.info("supervisor start to reassign partition, shutdown old FetcherRunnables");
-                    for (FetcherRunnable fetcherThread : fetches) {
+                    for (Fetcher fetcherThread : fetches) {
                         fetcherThread.shutdown();
                     }
                     consumerThreadsMap.remove(consumerId);
@@ -280,11 +280,11 @@ public class ConsumerConnector implements Runnable {
                 }
 
                 //start a fetcher thread for every broker, fetcher thread contains a NIO client
-                fetches = Collections.synchronizedList(new ArrayList<FetcherRunnable>());
+                fetches = Collections.synchronizedList(new ArrayList<Fetcher>());
                 for (Map.Entry<String, List<PartitionTopicInfo>> entry : brokerPartitionInfoMap.entrySet()) {
                     String brokerString = entry.getKey();
                     List<PartitionTopicInfo> pInfoList = entry.getValue();
-                    FetcherRunnable fetcherThread = new FetcherRunnable(consumerId, brokerString, pInfoList, c.getDataQueue(), configMap.get(consumerId));
+                    Fetcher fetcherThread = new Fetcher(consumerId, brokerString, pInfoList, c.getDataQueue(), configMap.get(consumerId));
                     fetches.add(fetcherThread);
                     fetcherThread.start();
                 }
