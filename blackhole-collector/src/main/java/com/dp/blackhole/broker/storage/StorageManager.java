@@ -1,4 +1,4 @@
-package com.dp.blackhole.collectornode.persistent;
+package com.dp.blackhole.broker.storage;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,11 +12,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.collectornode.BrokerService;
+import com.dp.blackhole.broker.BrokerService;
 import com.dp.blackhole.common.Util;
 
-public class PersistentManager {
-    private final Log Log = LogFactory.getLog(PersistentManager.class);
+public class StorageManager {
+    private final Log Log = LogFactory.getLog(StorageManager.class);
     
     private ConcurrentHashMap<String, ConcurrentHashMap<String, Partition>> storage;
     
@@ -24,7 +24,7 @@ public class PersistentManager {
     private int flushThreshold;
     private int splitThreshold;
     
-    public PersistentManager(String basedir, int splitThreshold, int flushThreshold) throws IOException {
+    public StorageManager(String basedir, int splitThreshold, int flushThreshold) throws IOException {
         this.basedir = basedir;
         this.splitThreshold = splitThreshold;
         this.flushThreshold = flushThreshold;

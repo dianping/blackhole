@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.dp.blackhole.broker.storage.Partition;
+import com.dp.blackhole.broker.storage.Segment;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.Message;

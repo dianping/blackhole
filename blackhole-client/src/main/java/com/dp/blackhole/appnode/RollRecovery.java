@@ -28,8 +28,8 @@ public class RollRecovery implements Runnable{
     private final long rollTimestamp;
     private Socket socket;
     private byte[] inbuf;
-    private Appnode node;
-    public RollRecovery(Appnode node, String collectorServer, int port, AppLog appLog, final long rollTimestamp) {
+    private Agent node;
+    public RollRecovery(Agent node, String collectorServer, int port, AppLog appLog, final long rollTimestamp) {
         this.node = node;
         this.collectorServer = collectorServer;
         this.port = port;

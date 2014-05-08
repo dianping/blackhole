@@ -11,10 +11,10 @@ import java.net.UnknownHostException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.appnode.Appnode;
+import com.dp.blackhole.appnode.Agent;
 import com.dp.blackhole.common.Util;
 
-public class SimAppnode extends Appnode{
+public class SimAppnode extends Agent{
     private static final Log LOG = LogFactory.getLog(SimAppnode.class);
     public static final int COLPORT = 11113;
     public static String HOSTNAME;

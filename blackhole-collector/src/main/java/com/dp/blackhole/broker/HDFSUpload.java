@@ -1,4 +1,4 @@
-package com.dp.blackhole.collectornode;
+package com.dp.blackhole.broker;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -14,9 +14,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.dp.blackhole.collectornode.persistent.Partition;
-import com.dp.blackhole.collectornode.persistent.PersistentManager;
-import com.dp.blackhole.collectornode.persistent.RollPartition;
+import com.dp.blackhole.broker.storage.Partition;
+import com.dp.blackhole.broker.storage.StorageManager;
+import com.dp.blackhole.broker.storage.RollPartition;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.FileMessageSet;
 import com.dp.blackhole.storage.MessageAndOffset;
@@ -25,7 +25,7 @@ public class HDFSUpload implements Runnable{
     private static final Log LOG = LogFactory.getLog(HDFSUpload.class);
     private static final String TMP_SUFFIX = ".tmp";
     private RollManager mgr;
-    private PersistentManager manager;
+    private StorageManager manager;
     private FileSystem fs;
     private RollIdent ident;
     private RollPartition roll;
@@ -33,7 +33,7 @@ public class HDFSUpload implements Runnable{
     private ByteBuffer newline;
     private int BufferSize = 4 * 1024 * 1024;
     
-    public HDFSUpload(RollManager mgr, PersistentManager manager, FileSystem fs, RollIdent ident, RollPartition roll) {
+    public HDFSUpload(RollManager mgr, StorageManager manager, FileSystem fs, RollIdent ident, RollPartition roll) {
         this.mgr = mgr;
         this.manager = manager;
         this.fs = fs;

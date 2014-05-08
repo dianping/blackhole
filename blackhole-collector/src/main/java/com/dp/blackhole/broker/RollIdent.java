@@ -1,4 +1,4 @@
-package com.dp.blackhole.collectornode;
+package com.dp.blackhole.broker;
 
 public class RollIdent {
     public String app;

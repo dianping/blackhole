@@ -1,4 +1,4 @@
-package com.dp.blackhole.collectornode;
+package com.dp.blackhole.broker;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,10 +11,10 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.collectornode.persistent.Partition;
-import com.dp.blackhole.collectornode.persistent.PersistentManager;
-import com.dp.blackhole.collectornode.persistent.PersistentManager.reporter.ReportEntry;
-import com.dp.blackhole.collectornode.persistent.RollPartition;
+import com.dp.blackhole.broker.storage.Partition;
+import com.dp.blackhole.broker.storage.StorageManager;
+import com.dp.blackhole.broker.storage.RollPartition;
+import com.dp.blackhole.broker.storage.StorageManager.reporter.ReportEntry;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.ConnectionFactory;
@@ -42,7 +42,7 @@ public class BrokerService extends Thread {
     private final Log LOG = LogFactory.getLog(BrokerService.class);
     
     GenServer<TransferWrap, DelegationIOConnection, EntityProcessor<TransferWrap, DelegationIOConnection>> server;
-    PersistentManager manager;
+    StorageManager manager;
     PublisherExecutor executor;
     private Map<DelegationIOConnection, ClientDesc> clients;
     Properties prop;
@@ -66,7 +66,7 @@ public class BrokerService extends Thread {
         int splitThreshold = Integer.parseInt(prop.getProperty("publisher.storage.splitThreshold", "536870912"));
         int flushThreshold = Integer.parseInt(prop.getProperty("publisher.storage.flushThreshold", "4194304"));
         clients = Collections.synchronizedMap(new HashMap<DelegationIOConnection, ClientDesc>());
-        manager = new PersistentManager(storagedir, splitThreshold, flushThreshold);
+        manager = new StorageManager(storagedir, splitThreshold, flushThreshold);
         executor = new PublisherExecutor();
         ConnectionFactory<DelegationIOConnection> factory = new DelegationIOConnection.DelegationIOConnectionFactory();
         TypedFactory wrappedFactory = new DataMessageTypeFactory();
@@ -78,7 +78,7 @@ public class BrokerService extends Thread {
         return executor;
     }
     
-    public PersistentManager getPersistentManager() {
+    public StorageManager getPersistentManager() {
         return manager;
     }
     

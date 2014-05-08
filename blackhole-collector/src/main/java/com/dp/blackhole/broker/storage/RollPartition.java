@@ -1,4 +1,4 @@
-package com.dp.blackhole.collectornode.persistent;
+package com.dp.blackhole.broker.storage;
 
 
 public class RollPartition {

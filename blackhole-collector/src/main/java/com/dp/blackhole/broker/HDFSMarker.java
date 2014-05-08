@@ -1,4 +1,4 @@
-package com.dp.blackhole.collectornode;
+package com.dp.blackhole.broker;
 
 import java.io.IOException;
 import org.apache.commons.logging.Log;

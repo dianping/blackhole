@@ -11,6 +11,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.dp.blackhole.broker.HDFSMarker;
+
 public class TestHDFSMarker {
     private final String MAGIC = "c344g53";
     private FileSystem fs;

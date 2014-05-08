@@ -7,6 +7,8 @@ import java.net.UnknownHostException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.broker.Broker;
+import com.dp.blackhole.broker.RollIdent;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 

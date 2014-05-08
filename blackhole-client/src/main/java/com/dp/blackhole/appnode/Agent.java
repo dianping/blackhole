@@ -37,8 +37,8 @@ import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-public class Appnode implements Runnable {
-    private static final Log LOG = LogFactory.getLog(Appnode.class);
+public class Agent implements Runnable {
+    private static final Log LOG = LogFactory.getLog(Agent.class);
     private static final int DEFAULT_DELAY_SECOND = 5;
     private ExecutorService pool;
     private ExecutorService recoveryThreadPool;
@@ -55,7 +55,7 @@ public class Appnode implements Runnable {
     private ConfigKeeper confKeeper;
     private int confLoopFactor = 1;
 
-    public Appnode() {
+    public Agent() {
         pool = Executors.newCachedThreadPool();
         recoveryThreadPool = Executors.newFixedThreadPool(2);
         confKeeper = new ConfigKeeper();
@@ -327,7 +327,7 @@ public class Appnode implements Runnable {
                     if ((rollRecovery = recoveryingMap.get(recoveryKey)) == null) {
                         broker = recoveryRoll.getCollectorServer();
                         int recoveryPort = recoveryRoll.getRecoveryPort();
-                        rollRecovery = new RollRecovery(Appnode.this,
+                        rollRecovery = new RollRecovery(Agent.this,
                                 broker, recoveryPort, appLog, rollTs);
                         recoveryingMap.put(recoveryKey, rollRecovery);
                         recoveryThreadPool.execute(rollRecovery);
@@ -350,7 +350,7 @@ public class Appnode implements Runnable {
                     if ((logReader = appReaders.get(appLog)) == null) {
                         broker = assignCollector.getCollectorServer();
                         int brokerPort = assignCollector.getBrokerPort();
-                        logReader = new LogReader(Appnode.this, hostname, broker, brokerPort,
+                        logReader = new LogReader(Agent.this, hostname, broker, brokerPort,
                                 appLog);
                         appReaders.put(appLog, logReader);
                         pool.execute(logReader);
@@ -422,7 +422,7 @@ public class Appnode implements Runnable {
     }
     
     public static void main(String[] args) {
-        Appnode appnode = new Appnode();
+        Agent appnode = new Agent();
         Thread thread = new Thread(appnode);
         thread.start();
     }

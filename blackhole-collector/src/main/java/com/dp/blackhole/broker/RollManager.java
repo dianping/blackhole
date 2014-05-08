@@ -1,4 +1,4 @@
-package com.dp.blackhole.collectornode;
+package com.dp.blackhole.broker;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.dp.blackhole.collectornode.persistent.RollPartition;
+import com.dp.blackhole.broker.storage.RollPartition;
 import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;

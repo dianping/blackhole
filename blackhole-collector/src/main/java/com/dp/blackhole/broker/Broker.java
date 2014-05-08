@@ -1,4 +1,4 @@
-package com.dp.blackhole.collectornode;
+package com.dp.blackhole.broker;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.SecurityUtil;
 
-import com.dp.blackhole.collectornode.persistent.PersistentManager.reporter.ReportEntry;
+import com.dp.blackhole.broker.storage.StorageManager.reporter.ReportEntry;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;

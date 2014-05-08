@@ -19,10 +19,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dp.blackhole.collectornode.HDFSUpload;
-import com.dp.blackhole.collectornode.persistent.Partition;
-import com.dp.blackhole.collectornode.persistent.PersistentManager;
-import com.dp.blackhole.collectornode.persistent.RollPartition;
+import com.dp.blackhole.broker.HDFSUpload;
+import com.dp.blackhole.broker.RollIdent;
+import com.dp.blackhole.broker.RollManager;
+import com.dp.blackhole.broker.storage.Partition;
+import com.dp.blackhole.broker.storage.StorageManager;
+import com.dp.blackhole.broker.storage.RollPartition;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.Message;
@@ -66,7 +68,7 @@ public class TestHDFSUpload {
         RollManager mgr = mock(RollManager.class);
         when(mgr.getRollHdfsPath(ident)).thenReturn(getRealFile()+".gz");
         
-        PersistentManager manager = mock(PersistentManager.class);
+        StorageManager manager = mock(StorageManager.class);
         when(manager.getPartition(ident.app, ident.source)).thenReturn(p);
         
         HDFSUpload writer = new HDFSUpload(mgr, manager, fs, ident, roll1);

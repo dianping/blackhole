@@ -33,8 +33,8 @@ import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.MessageAndOffset;
 import com.dp.blackhole.storage.MessageSet;
 
-public class FetcherRunnable extends Thread {
-    private final Log LOG = LogFactory.getLog(FetcherRunnable.class);
+public class Fetcher extends Thread {
+    private final Log LOG = LogFactory.getLog(Fetcher.class);
     
     private GenClient<TransferWrap, DelegationIOConnection, ConsumerProcessor> client;
     private String consumerId; 
@@ -47,7 +47,7 @@ public class FetcherRunnable extends Thread {
     private ScheduledExecutorService retryPool =
             Executors.newSingleThreadScheduledExecutor();
     
-    public FetcherRunnable(String consumerId, String broker, List<PartitionTopicInfo> partitionTopicInfos, LinkedBlockingQueue<FetchedDataChunk> queue, ConsumerConfig config) {
+    public Fetcher(String consumerId, String broker, List<PartitionTopicInfo> partitionTopicInfos, LinkedBlockingQueue<FetchedDataChunk> queue, ConsumerConfig config) {
         this.consumerId = consumerId;
         this.broker = broker;
         this.chunkQueue = queue;

@@ -29,14 +29,14 @@ public class LogReader implements Runnable{
     private static final int SYS_MAX_LINE_SIZE = 1024 * 512;
 
     private AppLog appLog;
-    private Appnode node;
+    private Agent node;
     private String localhost;
     private String broker;
     private int brokerPort;
     private Socket socket;
     EventWriter eventWriter;
     
-    public LogReader(Appnode node, String localhost, String broker, int port, AppLog appLog) {
+    public LogReader(Agent node, String localhost, String broker, int port, AppLog appLog) {
         this.node = node;
         this.localhost = localhost;
         this.broker = broker;
