@@ -171,7 +171,7 @@ public class LogReader implements Runnable{
                     final byte ch = inbuf[i];
                     switch (ch) {
                     case '\n':
-                        if (accept) {
+                        if (accept && lineBuf.size() != 0) {
                             handleLine(lineBuf.toByteArray());
                         }
                         accept = true;
