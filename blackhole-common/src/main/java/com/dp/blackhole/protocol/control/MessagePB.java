@@ -255,12 +255,12 @@ public final class MessagePB {
     public boolean hasRemoveConf() { return hasRemoveConf; }
     public com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf getRemoveConf() { return removeConf_; }
     
-    // optional .blackhole.ColNodeReg colNodeReg = 14;
-    public static final int COLNODEREG_FIELD_NUMBER = 14;
-    private boolean hasColNodeReg;
-    private com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg colNodeReg_;
-    public boolean hasColNodeReg() { return hasColNodeReg; }
-    public com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg getColNodeReg() { return colNodeReg_; }
+    // optional .blackhole.BrokerReg brokerReg = 14;
+    public static final int BROKERREG_FIELD_NUMBER = 14;
+    private boolean hasBrokerReg;
+    private com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg brokerReg_;
+    public boolean hasBrokerReg() { return hasBrokerReg; }
+    public com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg getBrokerReg() { return brokerReg_; }
     
     // optional .blackhole.DumpApp dumpApp = 15;
     public static final int DUMPAPP_FIELD_NUMBER = 15;
@@ -311,7 +311,7 @@ public final class MessagePB {
       confRes_ = com.dp.blackhole.protocol.control.ConfResPB.ConfRes.getDefaultInstance();
       dumpReply_ = com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.getDefaultInstance();
       removeConf_ = com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.getDefaultInstance();
-      colNodeReg_ = com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg.getDefaultInstance();
+      brokerReg_ = com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.getDefaultInstance();
       dumpApp_ = com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.getDefaultInstance();
       consumerReg_ = com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.getDefaultInstance();
       assignConsumer_ = com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.getDefaultInstance();
@@ -356,8 +356,8 @@ public final class MessagePB {
       if (hasRemoveConf()) {
         if (!getRemoveConf().isInitialized()) return false;
       }
-      if (hasColNodeReg()) {
-        if (!getColNodeReg().isInitialized()) return false;
+      if (hasBrokerReg()) {
+        if (!getBrokerReg().isInitialized()) return false;
       }
       if (hasDumpApp()) {
         if (!getDumpApp().isInitialized()) return false;
@@ -419,8 +419,8 @@ public final class MessagePB {
       if (hasRemoveConf()) {
         output.writeMessage(13, getRemoveConf());
       }
-      if (hasColNodeReg()) {
-        output.writeMessage(14, getColNodeReg());
+      if (hasBrokerReg()) {
+        output.writeMessage(14, getBrokerReg());
       }
       if (hasDumpApp()) {
         output.writeMessage(15, getDumpApp());
@@ -498,9 +498,9 @@ public final class MessagePB {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(13, getRemoveConf());
       }
-      if (hasColNodeReg()) {
+      if (hasBrokerReg()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(14, getColNodeReg());
+          .computeMessageSize(14, getBrokerReg());
       }
       if (hasDumpApp()) {
         size += com.google.protobuf.CodedOutputStream
@@ -719,8 +719,8 @@ public final class MessagePB {
         if (other.hasRemoveConf()) {
           mergeRemoveConf(other.getRemoveConf());
         }
-        if (other.hasColNodeReg()) {
-          mergeColNodeReg(other.getColNodeReg());
+        if (other.hasBrokerReg()) {
+          mergeBrokerReg(other.getBrokerReg());
         }
         if (other.hasDumpApp()) {
           mergeDumpApp(other.getDumpApp());
@@ -881,12 +881,12 @@ public final class MessagePB {
               break;
             }
             case 114: {
-              com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg.Builder subBuilder = com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg.newBuilder();
-              if (hasColNodeReg()) {
-                subBuilder.mergeFrom(getColNodeReg());
+              com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.Builder subBuilder = com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.newBuilder();
+              if (hasBrokerReg()) {
+                subBuilder.mergeFrom(getBrokerReg());
               }
               input.readMessage(subBuilder, extensionRegistry);
-              setColNodeReg(subBuilder.buildPartial());
+              setBrokerReg(subBuilder.buildPartial());
               break;
             }
             case 122: {
@@ -1404,40 +1404,40 @@ public final class MessagePB {
         return this;
       }
       
-      // optional .blackhole.ColNodeReg colNodeReg = 14;
-      public boolean hasColNodeReg() {
-        return result.hasColNodeReg();
+      // optional .blackhole.BrokerReg brokerReg = 14;
+      public boolean hasBrokerReg() {
+        return result.hasBrokerReg();
       }
-      public com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg getColNodeReg() {
-        return result.getColNodeReg();
+      public com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg getBrokerReg() {
+        return result.getBrokerReg();
       }
-      public Builder setColNodeReg(com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg value) {
+      public Builder setBrokerReg(com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg value) {
         if (value == null) {
           throw new NullPointerException();
         }
-        result.hasColNodeReg = true;
-        result.colNodeReg_ = value;
+        result.hasBrokerReg = true;
+        result.brokerReg_ = value;
         return this;
       }
-      public Builder setColNodeReg(com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg.Builder builderForValue) {
-        result.hasColNodeReg = true;
-        result.colNodeReg_ = builderForValue.build();
+      public Builder setBrokerReg(com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.Builder builderForValue) {
+        result.hasBrokerReg = true;
+        result.brokerReg_ = builderForValue.build();
         return this;
       }
-      public Builder mergeColNodeReg(com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg value) {
-        if (result.hasColNodeReg() &&
-            result.colNodeReg_ != com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg.getDefaultInstance()) {
-          result.colNodeReg_ =
-            com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg.newBuilder(result.colNodeReg_).mergeFrom(value).buildPartial();
+      public Builder mergeBrokerReg(com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg value) {
+        if (result.hasBrokerReg() &&
+            result.brokerReg_ != com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.getDefaultInstance()) {
+          result.brokerReg_ =
+            com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.newBuilder(result.brokerReg_).mergeFrom(value).buildPartial();
         } else {
-          result.colNodeReg_ = value;
+          result.brokerReg_ = value;
         }
-        result.hasColNodeReg = true;
+        result.hasBrokerReg = true;
         return this;
       }
-      public Builder clearColNodeReg() {
-        result.hasColNodeReg = false;
-        result.colNodeReg_ = com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg.getDefaultInstance();
+      public Builder clearBrokerReg() {
+        result.hasBrokerReg = false;
+        result.brokerReg_ = com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.getDefaultInstance();
         return this;
       }
       
@@ -1657,47 +1657,47 @@ public final class MessagePB {
       "overyRoll.proto\032\021ReadyBroker.proto\032\014Roll" +
       "ID.proto\032\rFailure.proto\032\025NoAvailableNode" +
       ".proto\032\016StreamID.proto\032\rConfRes.proto\032\017D" +
-      "umpReply.proto\032\020RemoveConf.proto\032\020ColNod" +
-      "eReg.proto\032\rDumpApp.proto\032\021ConsumerReg.p" +
-      "roto\032\024AssignConsumer.proto\032\022OffsetCommit" +
-      ".proto\032\021TopicReport.proto\"\205\013\n\007Message\022,\n" +
-      "\004type\030\001 \002(\0162\036.blackhole.Message.MessageT",
-      "ype\022!\n\006appReg\030\002 \001(\0132\021.blackhole.AppReg\022-" +
-      "\n\014assignBroker\030\003 \001(\0132\027.blackhole.AssignB" +
-      "roker\022#\n\007appRoll\030\004 \001(\0132\022.blackhole.AppRo" +
-      "ll\022-\n\014recoveryRoll\030\005 \001(\0132\027.blackhole.Rec" +
-      "overyRoll\022+\n\013readyBroker\030\006 \001(\0132\026.blackho" +
-      "le.ReadyBroker\022!\n\006rollID\030\007 \001(\0132\021.blackho" +
-      "le.RollID\022#\n\007failure\030\010 \001(\0132\022.blackhole.F" +
-      "ailure\0223\n\017noAvailableNode\030\t \001(\0132\032.blackh" +
-      "ole.NoAvailableNode\022%\n\010streamId\030\n \001(\0132\023." +
-      "blackhole.StreamID\022#\n\007confRes\030\013 \001(\0132\022.bl",
-      "ackhole.ConfRes\022\'\n\tdumpReply\030\014 \001(\0132\024.bla" +
-      "ckhole.DumpReply\022)\n\nremoveConf\030\r \001(\0132\025.b" +
-      "lackhole.RemoveConf\022)\n\ncolNodeReg\030\016 \001(\0132" +
-      "\025.blackhole.ColNodeReg\022#\n\007dumpApp\030\017 \001(\0132" +
-      "\022.blackhole.DumpApp\022+\n\013consumerReg\030\020 \001(\013" +
-      "2\026.blackhole.ConsumerReg\0221\n\016assignConsum" +
-      "er\030\021 \001(\0132\031.blackhole.AssignConsumer\022-\n\014o" +
-      "ffsetCommit\030\022 \001(\0132\027.blackhole.OffsetComm" +
-      "it\022+\n\013topicReport\030\023 \001(\0132\026.blackhole.Topi" +
-      "cReport\"\317\004\n\013MessageType\022\016\n\nHEARTBEART\020\001\022",
-      "\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021\n\rASSIGN_B" +
-      "ROKER\020\004\022\020\n\014READY_BROKER\020\005\022\014\n\010APP_ROLL\020\006\022" +
-      "\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_SUCCESS\020\010\022\017\n\013" +
-      "UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_ROLL\020\n\022\024\n\020RECO" +
-      "VERY_SUCCESS\020\013\022\021\n\rRECOVERY_FAIL\020\014\022\013\n\007FAI" +
-      "LURE\020\r\022\023\n\017NOAVAILABLENODE\020\016\022\021\n\rUNRECOVER" +
-      "ABLE\020\017\022\030\n\024MANUAL_RECOVERY_ROLL\020\020\022\014\n\010DUMP" +
-      "STAT\020\021\022\020\n\014RETIRESTREAM\020\022\022\014\n\010CONF_REQ\020\023\022\014" +
-      "\n\010CONF_RES\020\024\022\023\n\017NOAVAILABLECONF\020\025\022\014\n\010DUM" +
-      "PCONF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010LISTAPPS\020\030\022\017\n\013",
-      "REMOVE_CONF\020\031\022\014\n\010DUMP_APP\020\032\022\020\n\014CONSUMER_" +
-      "REG\020\033\022\023\n\017ASSIGN_CONSUMER\020\034\022\021\n\rOFFSET_COM" +
-      "MIT\020\035\022\017\n\013TOPICREPORT\020\036\022\023\n\017CONSUMERREGFAI" +
-      "L\020\037\022\026\n\022MAKR_UNRECOVERABLE\020 \022\014\n\010LISTIDLE\020" +
-      "!B.\n!com.dp.blackhole.protocol.controlB\t" +
-      "MessagePB"
+      "umpReply.proto\032\020RemoveConf.proto\032\017Broker" +
+      "Reg.proto\032\rDumpApp.proto\032\021ConsumerReg.pr" +
+      "oto\032\024AssignConsumer.proto\032\022OffsetCommit." +
+      "proto\032\021TopicReport.proto\"\203\013\n\007Message\022,\n\004" +
+      "type\030\001 \002(\0162\036.blackhole.Message.MessageTy",
+      "pe\022!\n\006appReg\030\002 \001(\0132\021.blackhole.AppReg\022-\n" +
+      "\014assignBroker\030\003 \001(\0132\027.blackhole.AssignBr" +
+      "oker\022#\n\007appRoll\030\004 \001(\0132\022.blackhole.AppRol" +
+      "l\022-\n\014recoveryRoll\030\005 \001(\0132\027.blackhole.Reco" +
+      "veryRoll\022+\n\013readyBroker\030\006 \001(\0132\026.blackhol" +
+      "e.ReadyBroker\022!\n\006rollID\030\007 \001(\0132\021.blackhol" +
+      "e.RollID\022#\n\007failure\030\010 \001(\0132\022.blackhole.Fa" +
+      "ilure\0223\n\017noAvailableNode\030\t \001(\0132\032.blackho" +
+      "le.NoAvailableNode\022%\n\010streamId\030\n \001(\0132\023.b" +
+      "lackhole.StreamID\022#\n\007confRes\030\013 \001(\0132\022.bla",
+      "ckhole.ConfRes\022\'\n\tdumpReply\030\014 \001(\0132\024.blac" +
+      "khole.DumpReply\022)\n\nremoveConf\030\r \001(\0132\025.bl" +
+      "ackhole.RemoveConf\022\'\n\tbrokerReg\030\016 \001(\0132\024." +
+      "blackhole.BrokerReg\022#\n\007dumpApp\030\017 \001(\0132\022.b" +
+      "lackhole.DumpApp\022+\n\013consumerReg\030\020 \001(\0132\026." +
+      "blackhole.ConsumerReg\0221\n\016assignConsumer\030" +
+      "\021 \001(\0132\031.blackhole.AssignConsumer\022-\n\014offs" +
+      "etCommit\030\022 \001(\0132\027.blackhole.OffsetCommit\022" +
+      "+\n\013topicReport\030\023 \001(\0132\026.blackhole.TopicRe" +
+      "port\"\317\004\n\013MessageType\022\016\n\nHEARTBEART\020\001\022\013\n\007",
+      "APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021\n\rASSIGN_BROK" +
+      "ER\020\004\022\020\n\014READY_BROKER\020\005\022\014\n\010APP_ROLL\020\006\022\017\n\013" +
+      "UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_SUCCESS\020\010\022\017\n\013UPL" +
+      "OAD_FAIL\020\t\022\021\n\rRECOVERY_ROLL\020\n\022\024\n\020RECOVER" +
+      "Y_SUCCESS\020\013\022\021\n\rRECOVERY_FAIL\020\014\022\013\n\007FAILUR" +
+      "E\020\r\022\023\n\017NOAVAILABLENODE\020\016\022\021\n\rUNRECOVERABL" +
+      "E\020\017\022\030\n\024MANUAL_RECOVERY_ROLL\020\020\022\014\n\010DUMPSTA" +
+      "T\020\021\022\020\n\014RETIRESTREAM\020\022\022\014\n\010CONF_REQ\020\023\022\014\n\010C" +
+      "ONF_RES\020\024\022\023\n\017NOAVAILABLECONF\020\025\022\014\n\010DUMPCO" +
+      "NF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010LISTAPPS\020\030\022\017\n\013REM",
+      "OVE_CONF\020\031\022\014\n\010DUMP_APP\020\032\022\020\n\014CONSUMER_REG" +
+      "\020\033\022\023\n\017ASSIGN_CONSUMER\020\034\022\021\n\rOFFSET_COMMIT" +
+      "\020\035\022\017\n\013TOPICREPORT\020\036\022\023\n\017CONSUMERREGFAIL\020\037" +
+      "\022\026\n\022MAKR_UNRECOVERABLE\020 \022\014\n\010LISTIDLE\020!B." +
+      "\n!com.dp.blackhole.protocol.controlB\tMes" +
+      "sagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1709,7 +1709,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "AppRoll", "RecoveryRoll", "ReadyBroker", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "ColNodeReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", },
+              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "AppRoll", "RecoveryRoll", "ReadyBroker", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", },
               com.dp.blackhole.protocol.control.MessagePB.Message.class,
               com.dp.blackhole.protocol.control.MessagePB.Message.Builder.class);
           return null;
@@ -1730,7 +1730,7 @@ public final class MessagePB {
           com.dp.blackhole.protocol.control.ConfResPB.getDescriptor(),
           com.dp.blackhole.protocol.control.DumpReplyPB.getDescriptor(),
           com.dp.blackhole.protocol.control.RemoveConfPB.getDescriptor(),
-          com.dp.blackhole.protocol.control.ColNodeRegPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.BrokerRegPB.getDescriptor(),
           com.dp.blackhole.protocol.control.DumpAppPB.getDescriptor(),
           com.dp.blackhole.protocol.control.ConsumerRegPB.getDescriptor(),
           com.dp.blackhole.protocol.control.AssignConsumerPB.getDescriptor(),

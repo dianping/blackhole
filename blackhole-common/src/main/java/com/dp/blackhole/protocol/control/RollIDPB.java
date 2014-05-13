@@ -49,7 +49,7 @@ public final class RollIDPB {
     public boolean hasAppServer() { return hasAppServer; }
     public java.lang.String getAppServer() { return appServer_; }
     
-    // optional int64 period = 3;
+    // required int64 period = 3;
     public static final int PERIOD_FIELD_NUMBER = 3;
     private boolean hasPeriod;
     private long period_ = 0L;
@@ -68,6 +68,7 @@ public final class RollIDPB {
     public final boolean isInitialized() {
       if (!hasAppName) return false;
       if (!hasAppServer) return false;
+      if (!hasPeriod) return false;
       if (!hasRollTs) return false;
       return true;
     }
@@ -370,7 +371,7 @@ public final class RollIDPB {
         return this;
       }
       
-      // optional int64 period = 3;
+      // required int64 period = 3;
       public boolean hasPeriod() {
         return result.hasPeriod();
       }
@@ -434,7 +435,7 @@ public final class RollIDPB {
     java.lang.String[] descriptorData = {
       "\n\014RollID.proto\022\tblackhole\"O\n\006RollID\022\020\n\010a" +
       "pp_name\030\001 \002(\t\022\022\n\napp_server\030\002 \002(\t\022\016\n\006per" +
-      "iod\030\003 \001(\003\022\017\n\007roll_ts\030\004 \002(\003B-\n!com.dp.bla" +
+      "iod\030\003 \002(\003\022\017\n\007roll_ts\030\004 \002(\003B-\n!com.dp.bla" +
       "ckhole.protocol.controlB\010RollIDPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =

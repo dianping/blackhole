@@ -8,7 +8,7 @@ import com.dp.blackhole.protocol.control.AppRegPB.AppReg;
 import com.dp.blackhole.protocol.control.AppRollPB.AppRoll;
 import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
-import com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg;
+import com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
@@ -45,7 +45,7 @@ public class PBwrap {
             msg.setAppReg((AppReg) message);
             break;
         case BROKER_REG:
-            msg.setColNodeReg((ColNodeReg) message);
+            msg.setBrokerReg((BrokerReg) message);
             break;
         case ASSIGN_BROKER:
             msg.setAssignBroker((AssignBroker) message);
@@ -132,7 +132,7 @@ public class PBwrap {
     }
     
     public static Message wrapBrokerReg(int brokerPort, int recoveryPort) {
-        ColNodeReg.Builder builder = ColNodeReg.newBuilder();
+        BrokerReg.Builder builder = BrokerReg.newBuilder();
         builder.setBrokerPort(brokerPort);
         builder.setRecoveryPort(recoveryPort);
         return wrapMessage(MessageType.BROKER_REG, builder.build());
@@ -169,9 +169,7 @@ public class PBwrap {
         RollID.Builder builder = RollID.newBuilder();
         builder.setAppName(appName);
         builder.setAppServer(appServer);
-        if (period != 0) {
-            builder.setPeriod(period);
-        }
+        builder.setPeriod(period);
         builder.setRollTs(rollTs);
         return builder.build();
     }
@@ -180,12 +178,12 @@ public class PBwrap {
         return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(appName, appServer, period, rollTs));
     }
     
-    public static Message wrapUploadSuccess(String appName, String appServer, long rollTs) {
-        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(appName, appServer, 0, rollTs));
+    public static Message wrapUploadSuccess(String appName, String appServer, long period, long rollTs) {
+        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(appName, appServer, period, rollTs));
     }
     
-    public static Message wrapUploadFail(String appName, String appServer, long rollTs) {
-        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, appServer, 0, rollTs));
+    public static Message wrapUploadFail(String appName, String appServer, long period, long rollTs) {
+        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, appServer, period, rollTs));
     }
     
     public static Message wrapRecoveryRoll(String appName, String brokerServer, int port, long rollTs) {
@@ -197,12 +195,12 @@ public class PBwrap {
         return wrapMessage(MessageType.RECOVERY_ROLL, builder.build());
     }
     
-    public static Message wrapRecoverySuccess(String appName, String appServer, long rollTs) {
-        return wrapMessage(MessageType.RECOVERY_SUCCESS, wrapRollID(appName, appServer, 0, rollTs));
+    public static Message wrapRecoverySuccess(String appName, String appServer, long period, long rollTs) {
+        return wrapMessage(MessageType.RECOVERY_SUCCESS, wrapRollID(appName, appServer, period, rollTs));
     }
     
-    public static Message wrapRecoveryFail(String appName, String appServer, long rollTs) {
-        return wrapMessage(MessageType.RECOVERY_FAIL, wrapRollID(appName, appServer, 0, rollTs));
+    public static Message wrapRecoveryFail(String appName, String appServer, long period, long rollTs) {
+        return wrapMessage(MessageType.RECOVERY_FAIL, wrapRollID(appName, appServer, period, rollTs));
     }
     
     public static Message wrapFailure (String app, String appHost, NodeType type, long failTs) {
@@ -226,8 +224,8 @@ public class PBwrap {
         return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, appServer, period, rollTs));
     }
     
-    public static Message wrapManualRecoveryRoll(String appName, String appServer, long rollTs) {
-        return wrapMessage(MessageType.MANUAL_RECOVERY_ROLL, wrapRollID(appName, appServer, 0, rollTs));
+    public static Message wrapManualRecoveryRoll(String appName, String appServer, long period, long rollTs) {
+        return wrapMessage(MessageType.MANUAL_RECOVERY_ROLL, wrapRollID(appName, appServer, period, rollTs));
     }
     
     public static Message wrapRetireStream(String appName, String appServer) {
