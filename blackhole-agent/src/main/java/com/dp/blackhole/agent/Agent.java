@@ -216,8 +216,8 @@ public class Agent implements Runnable {
         send(message);
     }
 
-    public void reportRecoveryFail(String appname, String appServer, final long rollTs) {
-        Message message = PBwrap.wrapRecoveryFail(appname, appServer, rollTs);
+    public void reportRecoveryFail(String appname, String appServer, long period, final long rollTs) {
+        Message message = PBwrap.wrapRecoveryFail(appname, appServer, period, rollTs);
         send(message);
     }
 

@@ -15,7 +15,7 @@ import "StreamID.proto";
 import "ConfRes.proto";
 import "DumpReply.proto";
 import "RemoveConf.proto";
-import "ColNodeReg.proto";
+import "BrokerReg.proto";
 import "DumpApp.proto";
 import "ConsumerReg.proto";
 import "AssignConsumer.proto";
@@ -72,7 +72,7 @@ message Message {
     optional ConfRes confRes = 11;
     optional DumpReply dumpReply = 12;
     optional RemoveConf removeConf = 13;
-    optional ColNodeReg colNodeReg =14;
+    optional BrokerReg brokerReg =14;
     optional DumpApp dumpApp = 15;
     optional ConsumerReg consumerReg = 16;
     optional AssignConsumer assignConsumer = 17;

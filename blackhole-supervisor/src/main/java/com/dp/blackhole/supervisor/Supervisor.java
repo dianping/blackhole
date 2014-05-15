@@ -34,7 +34,7 @@ import com.dp.blackhole.network.SimpleConnection;
 import com.dp.blackhole.protocol.control.AppRegPB.AppReg;
 import com.dp.blackhole.protocol.control.AppRollPB.AppRoll;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
-import com.dp.blackhole.protocol.control.ColNodeRegPB.ColNodeReg;
+import com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.DumpAppPB.DumpApp;
@@ -834,14 +834,6 @@ public class Supervisor {
                                     String appServer = rollID.getAppServer();
                                     long rollTs = rollID.getRollTs();
                                     long period = rollID.getPeriod();
-                                    if (period == 0) {
-                                        Context context = ConfigKeeper.configMap.get(appName);
-                                        if (context == null) {
-                                            LOG.error("Can not get app: " + appName + " from configMap");
-                                            break;
-                                        }
-                                        period = context.getLong(ParamsKey.Appconf.ROLL_PERIOD);
-                                    }
                                     Message message = PBwrap.wrapMarkUnrecoverable(appName, appServer, period, rollTs);
                                     send(brokerConnection, message);
                                 }
@@ -1376,14 +1368,14 @@ public class Supervisor {
         return broker;
     }
     
-    private void registerBroker(ColNodeReg colNodeReg, SimpleConnection from) {
+    private void registerBroker(BrokerReg brokerReg, SimpleConnection from) {
         ConnectionDescription desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
             return;
         }
         desc.setType(ConnectionDescription.BROKER);
-        desc.attach(new BrokerDesc(from.toString(), colNodeReg.getBrokerPort(), colNodeReg.getRecoveryPort()));
+        desc.attach(new BrokerDesc(from.toString(), brokerReg.getBrokerPort(), brokerReg.getRecoveryPort()));
         brokersMapping.put(from.getHost(), from);
         LOG.info("Broker " + from.getHost() + " registered");
     }
@@ -1427,7 +1419,7 @@ public class Supervisor {
             try {
                 msg = PBwrap.Buf2PB(request);
             } catch (InvalidProtocolBufferException e) {
-                LOG.error("InvalidProtocolBufferException catched: ", e);
+                LOG.error("InvalidProtocolBufferException catched, buf size: " + from.getEntity().array().length, e);
                 return;
             }
             
@@ -1442,7 +1434,7 @@ public class Supervisor {
                 handleHeartBeat(from);
                 break;
             case BROKER_REG:
-                registerBroker(msg.getColNodeReg(), from);
+                registerBroker(msg.getBrokerReg(), from);
                 break;
             case APP_REG:
                 registerApp(msg, from);
