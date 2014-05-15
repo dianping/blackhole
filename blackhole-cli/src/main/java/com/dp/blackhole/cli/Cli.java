@@ -59,8 +59,9 @@ public class Cli {
                     String[] tokens = getTokens(cmd);
                     String appName = tokens[1];
                     String appServer = tokens[2];
-                    long rollTs = Long.parseLong(tokens[3]); 
-                    Message msg = PBwrap.wrapManualRecoveryRoll(appName, appServer, rollTs);
+                    long period = Long.parseLong(tokens[3]);
+                    long rollTs = Long.parseLong(tokens[4]); 
+                    Message msg = PBwrap.wrapManualRecoveryRoll(appName, appServer, period, rollTs);
                     send(msg);
                     out.println("send message: " + msg);
                 } else if (cmd.startsWith("range")) {
@@ -74,7 +75,7 @@ public class Cli {
                     long recoveryStageCount = (endRollTs - startRollTs) / period / 1000;
                     for (int i = 0; i<= recoveryStageCount; i++) {
                         long rollTs = startRollTs + period * 1000 * (i);
-                        Message msg = PBwrap.wrapManualRecoveryRoll(appName, appServer, rollTs);
+                        Message msg = PBwrap.wrapManualRecoveryRoll(appName, appServer, period, rollTs);
                         send(msg);
                         out.println("send message: " + msg);
                     }

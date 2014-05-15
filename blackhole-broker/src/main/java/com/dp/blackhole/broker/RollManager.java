@@ -148,9 +148,9 @@ public class RollManager {
     public void reportRecovery(RollIdent ident, boolean recoverySuccess) {
         Message message;
         if (recoverySuccess == true) {
-            message = PBwrap.wrapRecoverySuccess(ident.app, ident.source, ident.ts);
+            message = PBwrap.wrapRecoverySuccess(ident.app, ident.source, ident.period, ident.ts);
         } else {
-            message = PBwrap.wrapRecoveryFail(ident.app, ident.source, ident.ts);
+            message = PBwrap.wrapRecoveryFail(ident.app, ident.source, ident.period, ident.ts);
         }
         Broker.getSupervisor().send(message);
     }
@@ -159,10 +159,10 @@ public class RollManager {
         rolls.remove(ident);
         
         if (uploadSuccess == true) {
-            Message message = PBwrap.wrapUploadSuccess(ident.app, ident.source, ident.ts);
+            Message message = PBwrap.wrapUploadSuccess(ident.app, ident.source, ident.period, ident.ts);
             Broker.getSupervisor().send(message);
         } else {
-            Message message = PBwrap.wrapUploadFail(ident.app, ident.source, ident.ts);
+            Message message = PBwrap.wrapUploadFail(ident.app, ident.source, ident.period, ident.ts);
             Broker.getSupervisor().send(message);
         }
     }

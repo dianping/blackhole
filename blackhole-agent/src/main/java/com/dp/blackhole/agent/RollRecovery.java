@@ -85,7 +85,7 @@ public class RollRecovery implements Runnable{
             wrapSendRecoveryHead(out);
         } catch (IOException e) {
             stopRecoveryingCauseException("Faild to build recovery stream or send protocol header.", e);
-            node.reportRecoveryFail(appLog.getAppName(), node.getHost(), rollTimestamp);
+            node.reportRecoveryFail(appLog.getAppName(), node.getHost(), period, rollTimestamp);
             return;
         }
 
