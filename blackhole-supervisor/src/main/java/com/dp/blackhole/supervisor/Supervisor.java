@@ -1425,7 +1425,7 @@ public class Supervisor {
         public void process(ByteBuffer request, SimpleConnection from) {
             Message msg = null;
             try {
-                msg = PBwrap.Buf2PB(from.getEntity());
+                msg = PBwrap.Buf2PB(request);
             } catch (InvalidProtocolBufferException e) {
                 LOG.error("InvalidProtocolBufferException catched: ", e);
                 return;
