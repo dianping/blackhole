@@ -1419,7 +1419,7 @@ public class Supervisor {
             try {
                 msg = PBwrap.Buf2PB(request);
             } catch (InvalidProtocolBufferException e) {
-                LOG.error("InvalidProtocolBufferException catched, buf size: " + from.getEntity().array().length, e);
+                LOG.error("InvalidProtocolBufferException catched ", e);
                 return;
             }
             
