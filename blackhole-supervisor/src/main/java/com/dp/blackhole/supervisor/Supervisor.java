@@ -1515,6 +1515,10 @@ public class Supervisor {
                     Thread.sleep(5000);
                     long now = Util.getTS();
                     for (Entry<SimpleConnection, ConnectionDescription> entry : connections.entrySet()) {
+                        if (entry.getValue().getType() != ConnectionDescription.AGENT &&
+                                entry.getValue().getType() != ConnectionDescription.BROKER) {
+                            continue;
+                        }
                         SimpleConnection conn = entry.getKey();
                         if (now - entry.getValue().getLastHeartBeat() > THRESHOLD) {
                             LOG.info("failed to get heartbeat for 15 seconds, close connection " + conn);
