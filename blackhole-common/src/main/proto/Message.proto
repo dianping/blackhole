@@ -57,6 +57,7 @@ message Message {
         CONSUMERREGFAIL = 31;
         MAKR_UNRECOVERABLE = 32;
         LISTIDLE = 33;
+        TRIGGER_CONF_REQ = 34;
     }
 
     required MessageType type = 1;

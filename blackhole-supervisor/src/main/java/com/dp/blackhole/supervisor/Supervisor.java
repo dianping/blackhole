@@ -1515,8 +1515,10 @@ public class Supervisor {
                     Thread.sleep(5000);
                     long now = Util.getTS();
                     for (Entry<SimpleConnection, ConnectionDescription> entry : connections.entrySet()) {
-                        if (entry.getValue().getType() != ConnectionDescription.AGENT &&
-                                entry.getValue().getType() != ConnectionDescription.BROKER) {
+                        int connType = entry.getValue().getType();
+                        if (connType != ConnectionDescription.AGENT &&
+                                connType != ConnectionDescription.BROKER &&
+                                connType != ConnectionDescription.CONSUMER) {
                             continue;
                         }
                         SimpleConnection conn = entry.getKey();
