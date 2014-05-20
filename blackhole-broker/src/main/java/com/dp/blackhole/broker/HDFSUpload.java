@@ -82,10 +82,10 @@ public class HDFSUpload implements Runnable{
                     gzChannel.write(newline);
                     newline.clear();
                 }
-                gzChannel.close();
                 buffer.clear();
                 start += realRead;
             }
+            gzChannel.close();
                 
             Path dst = new Path(dfsPath);
             if (!HDFSUtil.retryRename(fs, tmp, dst)) {
