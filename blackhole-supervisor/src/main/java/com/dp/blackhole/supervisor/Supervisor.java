@@ -1515,8 +1515,14 @@ public class Supervisor {
                     Thread.sleep(5000);
                     long now = Util.getTS();
                     for (Entry<SimpleConnection, ConnectionDescription> entry : connections.entrySet()) {
+                        ConnectionDescription dsc = entry.getValue();
+                        if (dsc.getType() != ConnectionDescription.AGENT &&
+                            dsc.getType() != ConnectionDescription.BROKER &&
+                            dsc.getType() != ConnectionDescription.CONSUMER) {
+                            continue;
+                        }
                         SimpleConnection conn = entry.getKey();
-                        if (now - entry.getValue().getLastHeartBeat() > THRESHOLD) {
+                        if (now - dsc.getLastHeartBeat() > THRESHOLD) {
                             LOG.info("failed to get heartbeat for 15 seconds, close connection " + conn);
                             conn.close();
                             closeConnection(conn);
@@ -1530,8 +1536,6 @@ public class Supervisor {
         }
     }
        
-//    private void init() throws IOException, ClosedChannelException, LionException {
-
     private void init() throws IOException, LionException {
         Properties prop = new Properties();
         prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));

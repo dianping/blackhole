@@ -266,6 +266,10 @@ public class Agent implements Runnable {
             supervisor.close();
             supervisor = null;
             
+            for(Runnable task : scheduler.getQueue()) {
+                scheduler.remove(task);
+            }
+
             // close connected streams
             LOG.info("shutdown app node");
             for (java.util.Map.Entry<AppLog, LogReader> e : appReaders.entrySet()) {
@@ -404,6 +408,10 @@ public class Agent implements Runnable {
                     LOG.warn("Not all configurations are correct, sleep 5 minutes...");
                     requireConfigFromSupersivor(5 * 60);
                 }
+                break;
+            case TRIGGER_CONF_REQ:
+                LOG.info("receive trigger_conf_req");
+                requireConfigFromSupersivor(DEFAULT_DELAY_SECOND);
                 break;
             default:
                 LOG.error("Illegal message type " + msg.getType());
