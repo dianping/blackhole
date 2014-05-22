@@ -27,12 +27,12 @@ import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.supervisor.LionConfChange;
 
-public class HttpScalaoutHandler extends HttpAbstractHandler implements HttpRequestHandler {
-    private static Logger LOG = Logger.getLogger(HttpScalaoutHandler.class);
+public class HttpScaleoutHandler extends HttpAbstractHandler implements HttpRequestHandler {
+    private static Logger LOG = Logger.getLogger(HttpScaleoutHandler.class);
     private LionConfChange lionConfChange;
     private HttpClientSingle httpClient;
     
-    public HttpScalaoutHandler(LionConfChange lionConfChange, HttpClientSingle httpClient) {
+    public HttpScaleoutHandler(LionConfChange lionConfChange, HttpClientSingle httpClient) {
         this.lionConfChange = lionConfChange;
         this.httpClient = httpClient;
     }
@@ -47,13 +47,18 @@ public class HttpScalaoutHandler extends HttpAbstractHandler implements HttpRequ
         LOG.debug("Frontend: Handling Search; Line = " + request.getRequestLine());
         if (method.equals("GET")) {//TODO how to post
             final String target = request.getRequestLine().getUri();
-            Pattern p = Pattern.compile("/scaleout\\?app=(.*)&host=(.*)$");
+            Pattern p = Pattern.compile("/scaleout\\?app=(.*)&hosts=(.*)$");
             Matcher m = p.matcher(target);
             if (m.find()) {
                 String app = m.group(1);
-                String hostname = m.group(2);
-                LOG.debug("Handle scalaout request, app: " + app + " host: " + hostname);
-                final HttpResult Content = getContent(app, hostname);
+                String hostnameString = m.group(2);
+                String[] hostnames = hostnameString.split(",");
+                if (hostnames.length == 0) {
+                    response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
+                    return;
+                }
+                LOG.debug("Handle scaleout request, app: " + app + " host: " + Arrays.toString(hostnames));
+                final HttpResult Content = getContent(app, hostnames);
                 EntityTemplate body = new EntityTemplate(new ContentProducer() {
                     public void writeTo(final OutputStream outstream)
                             throws IOException {
@@ -79,7 +84,7 @@ public class HttpScalaoutHandler extends HttpAbstractHandler implements HttpRequ
     }
     
     @Override
-    public HttpResult getContent(String cmdbApp, String hostname) {
+    public HttpResult getContent(String cmdbApp, String[] hostnames) {
         Set<String> topicList = lionConfChange.getAppNamesByCmdb(cmdbApp);
         if (topicList == null || topicList.size() == 0) {
             return new HttpResult(HttpResult.NONEED, "It contains no mapping for the cmdbapp " + cmdbApp);
@@ -103,10 +108,12 @@ public class HttpScalaoutHandler extends HttpAbstractHandler implements HttpRequ
             String[] newHosts = null;
             //change it (add the given hostname)
             if (oldHosts == null) {
-                newHosts =  new String[]{hostname};
+                newHosts = hostnames;
             } else {
-                newHosts = Arrays.copyOf(oldHosts, oldHosts.length + 1);
-                newHosts[newHosts.length - 1] = hostname;
+                newHosts = Arrays.copyOf(oldHosts, oldHosts.length + hostnames.length);
+                for (int i = 0; i < hostnames.length; i++) {
+                    newHosts[oldHosts.length + i] = hostnames[i];
+                }
             }
 
             String newHostsLionString = Util.getLionValueOfStringList(newHosts);
