@@ -38,7 +38,7 @@ public class TestHttpService {
     private final static String nullResp = "<null>";
     private RequestListener listener;
     private int webServicePort = 28080;
-    private final static String newHost = "new-host.nh";
+    private final static String newHosts = "new-host1.nh,new-host2.nh";
     
     @Mock
     LionConfChange mockLion;
@@ -124,8 +124,8 @@ public class TestHttpService {
         simulateLionGetUrl(nginxapp, nginxResp, nginxNewValue);
         simulateLionGetUrl(errorapp, errorResp, null);
         simulateLionGetUrl(nullapp, nullResp, null);
-        String rightUrl = "http://localhost:" + webServicePort + "/scaleout?app=cmdbapp&host=" + newHost;
-        String errorUrl = "http://localhost:" + webServicePort + "/scaleout?app=noneed&host=" + newHost;
+        String rightUrl = "http://localhost:" + webServicePort + "/scaleout?app=cmdbapp&hosts=" + newHosts;
+        String errorUrl = "http://localhost:" + webServicePort + "/scaleout?app=noneed&hosts=" + newHosts;
         HttpClientSingle myTestClient = new HttpClientSingle(2000, 2000);
         String response = httpClientExec(myTestClient, rightUrl);
         assertEquals("0|", response);

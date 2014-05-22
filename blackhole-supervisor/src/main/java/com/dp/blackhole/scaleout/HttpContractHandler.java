@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -27,12 +29,12 @@ import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.supervisor.LionConfChange;
 
-public class HttpScalaoutHandler extends HttpAbstractHandler implements HttpRequestHandler {
-    private static Logger LOG = Logger.getLogger(HttpScalaoutHandler.class);
+public class HttpContractHandler extends HttpAbstractHandler implements HttpRequestHandler {
+    private static Logger LOG = Logger.getLogger(HttpContractHandler.class);
     private LionConfChange lionConfChange;
     private HttpClientSingle httpClient;
     
-    public HttpScalaoutHandler(LionConfChange lionConfChange, HttpClientSingle httpClient) {
+    public HttpContractHandler(LionConfChange lionConfChange, HttpClientSingle httpClient) {
         this.lionConfChange = lionConfChange;
         this.httpClient = httpClient;
     }
@@ -44,16 +46,21 @@ public class HttpScalaoutHandler extends HttpAbstractHandler implements HttpRequ
         String method = request.getRequestLine().getMethod()
                 .toUpperCase(Locale.ENGLISH);
 
-        LOG.debug("Frontend: Handling Search; Line = " + request.getRequestLine());
+        LOG.debug("Frontend: Handling contract; Line = " + request.getRequestLine());
         if (method.equals("GET")) {//TODO how to post
             final String target = request.getRequestLine().getUri();
-            Pattern p = Pattern.compile("/scaleout\\?app=(.*)&host=(.*)$");
+            Pattern p = Pattern.compile("/contract\\?app=(.*)&hosts=(.*)$");
             Matcher m = p.matcher(target);
             if (m.find()) {
                 String app = m.group(1);
-                String hostname = m.group(2);
-                LOG.debug("Handle scalaout request, app: " + app + " host: " + hostname);
-                final HttpResult Content = getContent(app, hostname);
+                String hostnameString = m.group(2);
+                String[] hostnames = hostnameString.split(",");
+                if (hostnames.length == 0) {
+                    response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
+                    return;
+                }
+                LOG.debug("Handle contract request, app: " + app + " host: " + Arrays.toString(hostnames));
+                final HttpResult Content = getContent(app, hostnames);
                 EntityTemplate body = new EntityTemplate(new ContentProducer() {
                     public void writeTo(final OutputStream outstream)
                             throws IOException {
@@ -79,7 +86,7 @@ public class HttpScalaoutHandler extends HttpAbstractHandler implements HttpRequ
     }
     
     @Override
-    public HttpResult getContent(String cmdbApp, String hostname) {
+    public HttpResult getContent(String cmdbApp, String[] hostnames) {
         Set<String> topicList = lionConfChange.getAppNamesByCmdb(cmdbApp);
         if (topicList == null || topicList.size() == 0) {
             return new HttpResult(HttpResult.NONEED, "It contains no mapping for the cmdbapp " + cmdbApp);
@@ -100,16 +107,25 @@ public class HttpScalaoutHandler extends HttpAbstractHandler implements HttpRequ
             }
             String[] oldHosts = Util.getStringListOfLionValue(response);
 
-            String[] newHosts = null;
+            ArrayList<String> newHostList = new ArrayList<String>();
             //change it (add the given hostname)
             if (oldHosts == null) {
-                newHosts =  new String[]{hostname};
+                LOG.error("Faild to contract hosts cause there is no host in lion for topic " + topic);
+                continue;
             } else {
-                newHosts = Arrays.copyOf(oldHosts, oldHosts.length + 1);
-                newHosts[newHosts.length - 1] = hostname;
+                
+                Set<String> contractSet = new HashSet<String>();
+                for (String contractHost : hostnames) {
+                    contractSet.add(contractHost);
+                }
+                for (String old : oldHosts) {
+                    if (!contractSet.contains(old)) {
+                        newHostList.add(old);
+                    }
+                }
             }
-
-            String newHostsLionString = Util.getLionValueOfStringList(newHosts);
+            String[] newHosts = new String[newHostList.size()];
+            String newHostsLionString = Util.getLionValueOfStringList(newHostList.toArray(newHosts));
             url = lionConfChange.generateSetURL(watchKey, newHostsLionString);
             response = getResponseText(url);
             if (response == null) {
