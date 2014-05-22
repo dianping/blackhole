@@ -2,6 +2,8 @@ package com.dp.blackhole.supervisor;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -289,16 +291,21 @@ public class LionConfChange {
             if (key.equals(ParamsKey.LionNode.APPS)) {
                 String[] appNames = Util.getStringListOfLionValue(value);
                 if (appNames != null) {
-                    for (int i = 0; i < appNames.length; i++) {
-                        if (appSet.contains(appNames[i])) {
-                            continue;
+                    Set<String> newAppSet = new HashSet<String>(Arrays.asList(appNames));
+                    for (String newApp : newAppSet) {
+                        if (!appSet.contains(newApp)) {
+                            LOG.info("Apps Change is triggered by "+ newApp);
+                            appSet.add(newApp);
+                            String watchKey = ParamsKey.LionNode.APP_CONF_PREFIX + newApp;
+                            addWatherForKey(watchKey);
+                            watchKey = ParamsKey.LionNode.APP_HOSTS_PREFIX + newApp;
+                            addWatherForKey(watchKey);
                         }
-                        LOG.info("Apps Change is triggered by "+ appNames[i]);
-                        appSet.add(appNames[i]);
-                        String watchKey = ParamsKey.LionNode.APP_CONF_PREFIX + appNames[i];
-                        addWatherForKey(watchKey);
-                        watchKey = ParamsKey.LionNode.APP_HOSTS_PREFIX + appNames[i];
-                        addWatherForKey(watchKey);
+                    }
+                    for (String oldApp : appSet) {
+                        if (!newAppSet.contains(oldApp)) {
+                            removeConf(oldApp, new ArrayList<String>());
+                        }
                     }
                 }
             }
