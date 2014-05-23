@@ -139,4 +139,56 @@ public class Util {
             return Util.retryExists(succ);
         }
     }
+    
+    public static String[] getStringListOfLionValue(String rawValue) {
+        if (rawValue == null) {
+            return null;
+        }
+        String value = rawValue.trim();
+        if (value.charAt(0) != '[' || value.charAt(value.length() - 1) != ']') {
+            return null;
+        }
+        String[] tmp = value.substring(1, value.length() - 1).split(",");
+        String[] result = new String[tmp.length];
+        for (int i = 0; i < tmp.length; i++) {
+            result[i] = tmp[i].trim().substring(1, tmp[i].trim().length() -1 );
+        }
+        return result;
+    }
+
+    //["host01","host02"]
+    public static String getLionValueOfStringList(String[] hosts) {
+        StringBuilder lionStringBuilder = new StringBuilder();
+        lionStringBuilder.append('[');
+        for (int i = 0; i < hosts.length; i++) {
+            lionStringBuilder.append('"').append(hosts[i]).append('"');
+            if (i != hosts.length - 1) {
+                lionStringBuilder.append(',');
+            }
+        }
+        lionStringBuilder.append(']');
+        return lionStringBuilder.toString();
+    }
+
+    public static String[][] getStringMapOfLionValue(String rawValue) {
+        if (rawValue == null) {
+            return null;
+        }
+        String value = rawValue.trim();
+        if (value.charAt(0) != '{' || value.charAt(value.length() - 1) != '}') {
+            return null;
+        }
+        String[] tmp = value.substring(1, value.length() - 1).split(",");
+        if (tmp.length == 0) {
+            return null;
+        }
+        String[][] result = new String[tmp.length][2];
+        for (int i = 0; i < tmp.length; i++) {
+            String[] tmp2 = tmp[i].trim().split(":");
+            for (int j = 0; j < 2; j++) {
+                result[i][j] = tmp2[j].trim().substring(1, tmp2[j].trim().length() -1);
+            }
+        }
+        return result;
+    }
 }
