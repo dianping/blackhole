@@ -7,7 +7,6 @@ public class RollIdent {
     public long period;
     public List<String> sources;
     public long ts;
-    public boolean firstDeploy;
     public int timeout;
     
     @Override
