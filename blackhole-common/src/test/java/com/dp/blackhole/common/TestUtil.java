@@ -75,6 +75,21 @@ public class TestUtil {
         File file = Util.findRealFileByIdent("/tmp/893jfc842.log", "2013-01-01.15");
         assertNotNull(file);
     }
+
+    @Test
+    public void testFindGZFileByIdent() throws IOException {
+        File gzFile = new File("/tmp/hostname__appname.893jfc842.log.2013-01-01.15.gz");
+        gzFile.createNewFile();
+        File file = Util.findGZFileByIdent("/tmp/893jfc842.log", "2013-01-01.15");
+        assertNotNull(file);
+        gzFile.delete();
+        gzFile = new File("/tmp/hostname__893jfc842.log.2013-01-01.15.gz");
+        gzFile.createNewFile();
+        file = Util.findGZFileByIdent("/tmp/893jfc842.log", "2013-01-01.15");
+        assertNotNull(file);
+        gzFile.delete();
+    }
+
     @Test
     public void testGetCurrentRollTs() {
         long same = 1386950400000l;     //2013-12-14 00:00:00

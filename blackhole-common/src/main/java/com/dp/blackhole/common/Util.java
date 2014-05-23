@@ -72,7 +72,7 @@ public class Util {
                 public boolean accept(File dir, String name) {
                     String gzFileRegex = "[_a-z0-9-\\.]+"
                             + "__"
-                            + "[_a-z0-9-\\.]+"
+                            + "[_a-z0-9-\\.]*"
                             + appTailFile.substring(indexOfLastSlash + 1)
                             + "\\."
                             + rollIdent
