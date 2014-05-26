@@ -823,7 +823,7 @@ public class Supervisor {
                 synchronized (stages) {
                     for (Stage stage : stages) {
                         if (stage.rollTs == rollID.getRollTs()) {
-                            LOG.error("stage " + stage + " cannot be recovered");
+                            LOG.warn("stage " + stage + " cannot be recovered");
                             stages.remove(stage);
                             stageConnectionMap.remove(stage);
                             String broker = getBroker();
