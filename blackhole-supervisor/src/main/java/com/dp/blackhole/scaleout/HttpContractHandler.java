@@ -165,14 +165,19 @@ public class HttpContractHandler extends HttpAbstractHandler implements HttpRequ
             LOG.error("Oops, got an exception in reading http response content." + e.getMessage());
             return null;
         } finally {
-            try {
-                if (is != null) {
+            if (is != null) {
+                try {
                     is.close();
+                } catch (IOException e) {
                 }
-                if (bufferedReader != null) {
+                is = null;
+            }
+            if (bufferedReader != null) {
+                try {
                     bufferedReader.close();
+                } catch (IOException e) {
                 }
-            } catch (IOException e) {
+                bufferedReader = null;
             }
         }
         return responseBuilder.toString();

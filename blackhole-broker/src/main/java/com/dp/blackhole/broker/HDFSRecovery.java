@@ -3,7 +3,6 @@ package com.dp.blackhole.broker;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
@@ -34,7 +33,6 @@ public class HDFSRecovery implements Runnable{
     @Override
     public void run() {
         GZIPOutputStream gout = null;
-        GZIPInputStream gin = null;
         try {
             String normalPathname = mgr.getRollHdfsPath(ident);
             String tmpPathname = normalPathname + TMP_SUFFIX;
@@ -83,25 +81,25 @@ public class HDFSRecovery implements Runnable{
         } catch (IOException e) {
             LOG.error("Oops, got an exception:", e);
         } finally {
-            try {
-                if (gin != null) {
-                    gin.close();
-                    gin = null;
-                }
-                if (gout != null) {
+            if (gout != null) {
+                try {
                     gout.close();
-                    gout = null;
+                } catch (IOException e) {
+                    LOG.warn("Cound not close the gzip output stream", e);
                 }
-                if (client != null && !client.isClosed()) {
+                gout = null;
+            }
+            if (client != null && !client.isClosed()) {
+                try {
                     client.close();
-                    client = null;
+                } catch (IOException e) {
+                    LOG.warn("Cound not close the socket from " + client.getInetAddress(), e);
                 }
-            } catch (IOException e) {
-                LOG.warn("Cound not close the gzip output stream", e);
+                client = null;
             }
             if (!recoverySuccess) {
                 try {
-                    Thread.sleep(3 * 1000);
+                    Thread.sleep(10 * 1000);
                 } catch (InterruptedException e) {}
             }
             mgr.reportRecovery(ident, recoverySuccess);
