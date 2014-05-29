@@ -1425,7 +1425,8 @@ public class Supervisor {
             
             if (msg.getType() != MessageType.HEARTBEART 
                     && msg.getType() != MessageType.TOPICREPORT
-                    && msg.getType() != MessageType.OFFSET_COMMIT) {
+                    && msg.getType() != MessageType.OFFSET_COMMIT
+                    && msg.getType() != MessageType.CONF_REQ) {
                 LOG.debug("received: " + msg);
             }
             

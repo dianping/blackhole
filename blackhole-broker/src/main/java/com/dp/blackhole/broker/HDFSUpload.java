@@ -63,7 +63,7 @@ public class HDFSUpload implements Runnable{
             
             long start = roll.startOffset;
             long end = roll.startOffset + roll.length;
-    
+            LOG.debug("Uploading " + ident + " in partition: " + p + " [" + start + "~" + end + "]");
             while (start < end) {
                 int limit = (int) (end -start);
                 limit = (limit > BufferSize) ?  BufferSize : limit;
