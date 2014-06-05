@@ -103,22 +103,21 @@ public class RollRecovery implements Runnable{
 
         int len = 0;
         long transferBytes = 0;
-        LOG.info("Transfer file is " + transferFile);
         BufferedInputStream is;
         try {
             is = new BufferedInputStream(new FileInputStream(transferFile));
         } catch (FileNotFoundException e) {
-            stopRecoveryingCauseException("Oops! It not should be happen here.", e);
+            stopRecoveryingCauseException(transferFile + " missing. It not should be happen here.", e);
             return;
         }
         try {
-            LOG.info("Begin to transfer...");
+            LOG.info(transferFile + " is transferring...");
             while ((len = is.read(inbuf)) != -1) {
                 out.write(inbuf, 0, len);
                 transferBytes += len;
             }
             out.flush();
-            LOG.info("File transfered, including [" + transferBytes + "] bytes.");
+            LOG.info(transferFile + " transfered, including [" + transferBytes + "] bytes.");
         } catch (IOException e) {
             LOG.error("Recover stream broken.", e);
             Cat.logError("Recover stream broken.", e);

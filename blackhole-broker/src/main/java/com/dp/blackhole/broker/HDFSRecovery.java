@@ -63,7 +63,7 @@ public class HDFSRecovery implements Runnable{
                 out.close();
                 out = null;
                 if (uploadSize != fileSize) {
-                    throw new IOException("Recovery not finished.");
+                    throw new IOException(recoveryPathname + " recoverying not finished.");
                 }
                 LOG.info("Finished to write " + recoveryPath);
                 
