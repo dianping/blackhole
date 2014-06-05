@@ -50,8 +50,9 @@ public class ConsumerGroupDesc {
         PartitionInfo info = partitions.get(partition);
         if (info == null) {
             LOG.error("can not find PartitionInfo by partition: " + "[" + topic +"]" + partition + " ,request from " + consumerId);
+        } else {
+            info.setEndOffset(offset);
         }
-        info.setEndOffset(offset);
     }
     
     // TODO
