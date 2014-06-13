@@ -58,9 +58,12 @@ public class ConsumerConnector implements Runnable {
     private int autoCommitIntervalMs;
     private boolean sentReg;
     
-    private Map<String, ConsumerConfig> configMap = Collections.synchronizedMap(new HashMap<String, ConsumerConfig>());
+    private Map<String, ConsumerConfig> configMap;
     
     private ConsumerConnector() {
+        configMap = Collections.synchronizedMap(new HashMap<String, ConsumerConfig>());
+        consumerThreadsMap = new ConcurrentHashMap<String, List<Fetcher>>();
+        consumers = new ConcurrentHashMap<String, Consumer>();
     }
     
     public synchronized void init() throws LionException {
@@ -107,8 +110,6 @@ public class ConsumerConnector implements Runnable {
     
     @Override
     public void run() {
-        consumerThreadsMap = new ConcurrentHashMap<String, List<Fetcher>>();
-        consumers = new ConcurrentHashMap<String, Consumer>();
         if (autoCommit) {
             LOG.info("starting auto committer every " + autoCommitIntervalMs + " ms");
             scheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
@@ -182,6 +183,8 @@ public class ConsumerConnector implements Runnable {
         LOG.debug("send message: " + message);
         if (supervisor != null) {
             supervisor.send(PBwrap.PB2Buf(message));
+        } else {
+            LOG.warn("message: " + message + " is not sent, supervisor not connected");
         }
     }
     
