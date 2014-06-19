@@ -114,7 +114,7 @@ public class Segment {
     }
 
     long append(MessageSet messages) throws IOException {
-        int written = (int) messages.write(channel, 0 ,messages.getSize());
+        long written = messages.write(channel, 0 ,messages.getSize());
         unflushSize += written;
         endOffset.addAndGet(written);
         if (unflushSize > flushThreshold) {

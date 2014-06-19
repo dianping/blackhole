@@ -65,9 +65,9 @@ public class HDFSUpload implements Runnable{
             long end = roll.startOffset + roll.length;
     
             while (start < end) {
-                int limit = (int) (end -start);
-                limit = (limit > BufferSize) ?  BufferSize : limit;
-                        
+                long size = end -start;
+                int limit = (int) ((size > BufferSize) ?  BufferSize : size);
+                
                 FileMessageSet fms = p.read(start, limit);
                 fetchFileMessageSet(channel, fms);
                 

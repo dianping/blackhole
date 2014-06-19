@@ -5,7 +5,7 @@ import java.nio.channels.GatheringByteChannel;
 
 public interface MessageSet {
 
-    public long write(GatheringByteChannel channel, int offset, int length) throws IOException; 
+    public int write(GatheringByteChannel channel, long offset, int length) throws IOException; 
 
     public int getSize();
 }
