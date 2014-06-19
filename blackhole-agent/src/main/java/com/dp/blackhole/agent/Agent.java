@@ -40,11 +40,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
 public class Agent implements Runnable {
     private static final Log LOG = LogFactory.getLog(Agent.class);
     private static final int DEFAULT_DELAY_SECOND = 5;
+    private final ConfigKeeper confKeeper = new ConfigKeeper();
     private ExecutorService pool;
     private ExecutorService recoveryThreadPool;
     private FileListener listener;
     private String hostname;
-    private final ScheduledThreadPoolExecutor scheduler;
+    private ScheduledThreadPoolExecutor scheduler;
     private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
     private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
     private Map<String, RollRecovery> recoveryingMap = new ConcurrentHashMap<String, RollRecovery>();
@@ -52,14 +53,13 @@ public class Agent implements Runnable {
     private GenClient<ByteBuffer, SimpleConnection, AgentProcessor> client;
     AgentProcessor processor;
     private SimpleConnection supervisor;
-    private ConfigKeeper confKeeper;
     private int confLoopFactor = 1;
 
     public Agent() {
         pool = Executors.newCachedThreadPool();
         recoveryThreadPool = Executors.newFixedThreadPool(2);
-        confKeeper = new ConfigKeeper();
         scheduler = new ScheduledThreadPoolExecutor(1);
+        
         scheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
         scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
     }
@@ -192,8 +192,9 @@ public class Agent implements Runnable {
     public void shutdown() {
         pool.shutdownNow();
         recoveryThreadPool.shutdownNow();
+        scheduler.shutdownNow();
+        
         client.shutdown();
-        scheduler.shutdown();
     }
     
     /**
@@ -263,11 +264,14 @@ public class Agent implements Runnable {
         @Override
         public void OnDisconnected(SimpleConnection connection) {
             confLoopFactor = 1;
-            supervisor.close();
-            supervisor = null;
+            
+            if (connection != null) {
+                connection.close();
+            }
+            connection = null;
             
             for(Runnable task : scheduler.getQueue()) {
-                scheduler.remove(task);
+                scheduler.remove(task);//TODO not cancel clean
             }
 
             // close connected streams
@@ -384,6 +388,7 @@ public class Agent implements Runnable {
                 for (AppConfRes appConfRes : appConfResList) {
                     appName = appConfRes.getAppName();
                     if (appLogs.containsKey(appName)) {
+                        LOG.info("app: " + appName + " has already in used.");
                         continue;
                     }
                     String pathCandidateStr = appConfRes.getWatchFile();
@@ -408,10 +413,6 @@ public class Agent implements Runnable {
                     LOG.warn("Not all configurations are correct, sleep 5 minutes...");
                     requireConfigFromSupersivor(5 * 60);
                 }
-                break;
-            case TRIGGER_CONF_REQ:
-                LOG.info("receive trigger_conf_req");
-                requireConfigFromSupersivor(DEFAULT_DELAY_SECOND);
                 break;
             default:
                 LOG.error("Illegal message type " + msg.getType());

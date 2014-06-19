@@ -1,0 +1,8 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "RestartPB";
+
+message Restart {
+    repeated string app_servers = 1;
+}

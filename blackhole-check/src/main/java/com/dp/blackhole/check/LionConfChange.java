@@ -145,7 +145,10 @@ public class LionConfChange {
         if (hosts != null) {
             List<String> list = new CopyOnWriteArrayList<String>();
             for (int i = 0; i < hosts.length; i++) {
-                list.add(hosts[i]);
+                String host = hosts[i].trim();
+                if (host.length() != 0) {
+                    list.add(host);
+                }
             }
             appToHosts.put(appName, list);
             for (int i = 0; i < hosts.length; i++) {
