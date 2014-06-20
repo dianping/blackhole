@@ -273,6 +273,9 @@ public class Supervisor {
         if (streams != null) {
             for (Stream stream : streams) {
                 ArrayList<Stage> stages = Streams.get(stream);
+                if (stages.size() == 0) {
+                    continue;
+                }
                 synchronized (stages) {
                     Stage current = stages.get(stages.size() -1);
                     if (!current.isCurrent()) {
@@ -893,6 +896,10 @@ public class Supervisor {
         Stream stream = streamIdMap.get(id);
         
         if (stream != null) {
+            if (msg.getRollTs() <= stream.getlastSuccessTs()) {
+                LOG.error("Receive a illegal roll ts (" + msg.getRollTs() + ") from broker(" + from.getHost() + ")");
+                return;
+            }
             ArrayList<Stage> stages = Streams.get(stream);
             if (stages != null) {
                 synchronized (stages) {
@@ -904,7 +911,7 @@ public class Supervisor {
                     }
                     if (current == null) {
                         if (stages.size() > 0) {
-                            LOG.error("Stages may missed from stage:" + stages.get(stages.size() - 1)
+                            LOG.warn("Stages may missed from stage:" + stages.get(stages.size() - 1)
                                     + " to stage:" + msg.getRollTs());
                         } else {
                             LOG.warn("There are no stages in stream " + stream);

@@ -21,6 +21,7 @@ public class Cli extends Node {
     private static final Log LOG = LogFactory.getLog(Cli.class);
     private String[] args;
     private String autoCmd;
+    private static long terminatePeriod;
 
     class CliProcessor extends Thread {
         BufferedReader in;
@@ -147,9 +148,9 @@ public class Cli extends Node {
     class CloseTimer extends Thread {
         @Override
         public void run() {
-            LOG.info("Currently Cli JVM will be terminated after 10 sec.");
+            LOG.info("Currently Cli JVM will be terminated after " + terminatePeriod + " sec.");
             try {
-                Thread.sleep(10000);
+                Thread.sleep(terminatePeriod);
             } catch (InterruptedException e) {
                 LOG.warn(e.getMessage());
             }
@@ -191,7 +192,7 @@ public class Cli extends Node {
         
         String serverhost = prop.getProperty("supervisor.host");
         int serverport = Integer.parseInt(prop.getProperty("supervisor.port"));
-        
+        terminatePeriod = Long.parseLong(prop.getProperty("cli.terminate.period", "1000")); 
         init(serverhost, serverport);
         
         if (args.length > 0 && args[0].equals("auto")) {
