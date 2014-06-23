@@ -8,10 +8,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -28,7 +28,7 @@ import com.dianping.lion.client.LionException;
 public class LionConfChange {
     private static final Log LOG = LogFactory.getLog(LionConfChange.class);
 
-    public Set<String> appSet = Collections.synchronizedSet(new HashSet<String>());
+    public Set<String> appSet = new CopyOnWriteArraySet<String>();
     
     private final Map<String, Set<String>> hostToAppNames = Collections.synchronizedMap(new HashMap<String, Set<String>>());
     private final Map<String, List<String>> appToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
@@ -143,7 +143,7 @@ public class LionConfChange {
     private synchronized void fillHostMap(String appName, String hostsValue) {
         String[] hosts = Util.getStringListOfLionValue(hostsValue);
         if (hosts != null) {
-            List<String> list = Collections.synchronizedList(new LinkedList<String>());
+            List<String> list = new CopyOnWriteArrayList<String>();
             for (int i = 0; i < hosts.length; i++) {
                 list.add(hosts[i]);
             }

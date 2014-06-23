@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -280,7 +281,7 @@ public class ConsumerConnector implements Runnable {
                 }
 
                 //start a fetcher thread for every broker, fetcher thread contains a NIO client
-                fetches = Collections.synchronizedList(new ArrayList<Fetcher>());
+                fetches = new CopyOnWriteArrayList<Fetcher>();
                 for (Map.Entry<String, List<PartitionTopicInfo>> entry : brokerPartitionInfoMap.entrySet()) {
                     String brokerString = entry.getKey();
                     List<PartitionTopicInfo> pInfoList = entry.getValue();

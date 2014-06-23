@@ -223,7 +223,7 @@ public class RollManager {
                     roll.ts = head.ts;
 
                     HDFSRecovery recovery = new HDFSRecovery(
-                            RollManager.this, fs, socket, roll);
+                            RollManager.this, fs, socket, roll, head.size, head.hasCompressed);
                     recoveryPool.execute(recovery);
 
                 } catch (IOException e) {

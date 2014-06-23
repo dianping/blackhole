@@ -8,7 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
-import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,6 +63,9 @@ public class RollRecovery implements Runnable{
     public void run() {
         // check local file existence 
         long period = appLog.getRollPeriod();
+        long fileSize = 0;
+        File transferFile = null;
+        boolean hasCompressed = false;
         SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         String rollIdent = unitFormat.format(rollTimestamp);
         LOG.info("Recoverying " + rollIdent + " " + appLog);
@@ -82,7 +84,17 @@ public class RollRecovery implements Runnable{
         try {
             socket = new Socket(brokerServer, port);
             out = new DataOutputStream(socket.getOutputStream());
-            wrapSendRecoveryHead(out);
+            if (rolledFile.exists()) {
+                transferFile = rolledFile;
+                fileSize = rolledFile.length();
+            } else if (gzFile != null && gzFile.exists()) {
+                fileSize = gzFile.length();
+                transferFile = gzFile;
+                hasCompressed = true;
+            } else {
+                throw new IOException("Can not found both " + rolledFile + " and gzFile");
+            }
+            wrapSendRecoveryHead(out, fileSize, hasCompressed);
         } catch (IOException e) {
             stopRecoveryingCauseException("Faild to build recovery stream or send protocol header.", e);
             node.reportRecoveryFail(appLog.getAppName(), node.getHost(), period, rollTimestamp);
@@ -91,76 +103,37 @@ public class RollRecovery implements Runnable{
 
         int len = 0;
         long transferBytes = 0;
-        if (rolledFile.exists()) {
-            // recovery if raw rolled file exists
-            LOG.debug("roll file is " + rolledFile);
-            BufferedInputStream is;
-            try {
-                is = new BufferedInputStream(new FileInputStream(rolledFile));
-            } catch (FileNotFoundException e) {
-                stopRecoveryingCauseException("Oops! It not should be happen here.", e);
-                return;
-            }
-            try {
-                LOG.info("Begin to transfer...");
-                while ((len = is.read(inbuf)) != -1) {
-                    out.write(inbuf, 0, len);
-                    transferBytes += len;
-                }
-                out.flush();
-                LOG.info("Roll file transfered, including [" + transferBytes + "] bytes.");
-            } catch (IOException e) {
-                LOG.error("Recover stream broken.", e);
-                Cat.logError("Recover stream broken.", e);
-            } finally {
-                if (is != null) {
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                    }
-                    is = null;
-                }
-                stopRecoverying();
-            }
-        } else if (gzFile != null && gzFile.exists()) {
-            // recovery if and only if gz file exists, using GZInputstream
-            LOG.info("Can not found " + rolledFile + ", trying gz file.");
-            GZIPInputStream gin = null;
-            try {
-                gin = new GZIPInputStream(new FileInputStream(gzFile));
-            } catch (IOException e) {
-                stopRecoveryingCauseException("Create GZIP stream fail.", e);
-                return;
-            }
-            try {
-                while((len = gin.read(inbuf)) != -1) {
-                    out.write(inbuf, 0, len);
-                    transferBytes += len;
-                }
-                out.flush();
-                LOG.info("Roll file transfered, including [" + transferBytes + "] bytes.");
-            } catch (IOException e) {
-                LOG.error("Recover stream broken.", e);
-                Cat.logError("Recover stream broken.", e);
-            } finally {
-                if (gin != null) {
-                    try {
-                        gin.close();
-                    } catch (IOException e) {
-                    }
-                    gin = null;
-                }
-                stopRecoverying();
-            }
-        } else {
-            LOG.error("Oops! It not should be happen here.");
-            Cat.logError(new BlackholeClientException("Oops! It not should be happen here."));
-            stopRecoverying();
+        BufferedInputStream is;
+        try {
+            is = new BufferedInputStream(new FileInputStream(transferFile));
+        } catch (FileNotFoundException e) {
+            stopRecoveryingCauseException(transferFile + " missing. It not should be happen here.", e);
             return;
+        }
+        try {
+            LOG.info(transferFile + " is transferring...");
+            while ((len = is.read(inbuf)) != -1) {
+                out.write(inbuf, 0, len);
+                transferBytes += len;
+            }
+            out.flush();
+            LOG.info(transferFile + " transfered, including [" + transferBytes + "] bytes.");
+        } catch (IOException e) {
+            LOG.error("Recover stream broken.", e);
+            Cat.logError("Recover stream broken.", e);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                }
+                is = null;
+            }
+            stopRecoverying();
         }
     }
 
-    private AgentProtocol wrapSendRecoveryHead(DataOutputStream out)
+    private AgentProtocol wrapSendRecoveryHead(DataOutputStream out, long fileSize, boolean hasCompressed)
             throws IOException {
         AgentProtocol protocol = new AgentProtocol();
         AgentHead head = protocol.new AgentHead();
@@ -168,6 +141,8 @@ public class RollRecovery implements Runnable{
         head.app = appLog.getAppName();
         head.peroid = appLog.getRollPeriod();
         head.ts = rollTimestamp;
+        head.size = fileSize;
+        head.hasCompressed = hasCompressed;
         protocol.sendHead(out, head);
         return protocol;
     }
