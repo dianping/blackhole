@@ -72,7 +72,7 @@ public class Util {
                 public boolean accept(File dir, String name) {
                     String gzFileRegex = "[_a-z0-9-\\.]+"
                             + "__"
-                            + "[_a-z0-9-\\.]+"
+                            + "[_a-z0-9-\\.]*"
                             + appTailFile.substring(indexOfLastSlash + 1)
                             + "\\."
                             + rollIdent
@@ -225,17 +225,18 @@ public class Util {
         return content.substring(content.indexOf('=') + 1);
     }
 
-    public static String[] getStringListOfLionValue(String value) {
-        if (value == null) {
+    public static String[] getStringListOfLionValue(String rawValue) {
+        if (rawValue == null) {
             return null;
         }
+        String value = rawValue.trim();
         if (value.charAt(0) != '[' || value.charAt(value.length() - 1) != ']') {
             return null;
         }
         String[] tmp = value.substring(1, value.length() - 1).split(",");
         String[] result = new String[tmp.length];
         for (int i = 0; i < tmp.length; i++) {
-            result[i] = tmp[i].substring(1, tmp[i].length() -1 );
+            result[i] = tmp[i].trim().substring(1, tmp[i].trim().length() -1 );
         }
         return result;
     }
@@ -254,10 +255,11 @@ public class Util {
         return lionStringBuilder.toString();
     }
 
-    public static String[][] getStringMapOfLionValue(String value) {
-        if (value == null) {
+    public static String[][] getStringMapOfLionValue(String rawValue) {
+        if (rawValue == null) {
             return null;
         }
+        String value = rawValue.trim();
         if (value.charAt(0) != '{' || value.charAt(value.length() - 1) != '}') {
             return null;
         }
@@ -267,9 +269,9 @@ public class Util {
         }
         String[][] result = new String[tmp.length][2];
         for (int i = 0; i < tmp.length; i++) {
-            String[] tmp2 = tmp[i].split(":");
+            String[] tmp2 = tmp[i].trim().split(":");
             for (int j = 0; j < 2; j++) {
-                result[i][j] = tmp2[j].trim().substring(1, tmp2[j].length() -1);
+                result[i][j] = tmp2[j].trim().substring(1, tmp2[j].trim().length() -1);
             }
         }
         return result;

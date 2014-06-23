@@ -4,5 +4,5 @@ public abstract class HttpAbstractHandler {
     public static final String SUCCESS = "SUCCESS";
     public static final String NONEED = "NONEED";
     public static final String FAILURE = "FAILURE";
-    public abstract HttpResult getContent(String args1, String args2);
+    public abstract HttpResult getContent(String args1, String[] args2);
 }

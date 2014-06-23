@@ -2,8 +2,8 @@ package com.dp.blackhole.broker;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
@@ -22,19 +22,22 @@ public class HDFSRecovery implements Runnable{
     private Socket client;
     private boolean recoverySuccess;
     private RollIdent ident;
+    private long fileSize;
+    private boolean hasCompressed;
 
-    public HDFSRecovery(RollManager mgr, FileSystem fs, Socket socket, RollIdent roll) {
+    public HDFSRecovery(RollManager mgr, FileSystem fs, Socket socket, RollIdent roll, long fileSize, boolean hasCompressed) {
         this.mgr = mgr;
         this.fs = fs;
         this.ident = roll;
         this.recoverySuccess = false;
         this.client = socket;
+        this.fileSize = fileSize;
+        this.hasCompressed = hasCompressed;
     }
     
     @Override
     public void run() {
-        GZIPOutputStream gout = null;
-        GZIPInputStream gin = null;
+        OutputStream out = null;
         try {
             String normalPathname = mgr.getRollHdfsPath(ident);
             String tmpPathname = normalPathname + TMP_SUFFIX;
@@ -45,15 +48,24 @@ public class HDFSRecovery implements Runnable{
             if (!fs.exists(normalPath)) {   //When normal path not exists then do recovery.
                 LOG.debug("Begin to recovery " + normalPathname);
                 int len = 0;
+                int uploadSize = 0;
                 byte[] buf = new byte[DEFAULT_BUFSIZE];
-                gout = new GZIPOutputStream(fs.create(recoveryPath));
+                if (hasCompressed) {
+                    out = fs.create(recoveryPath);
+                } else {
+                    out = new GZIPOutputStream(fs.create(recoveryPath));
+                }
                 DataInputStream in = new DataInputStream(client.getInputStream());
                 while((len = in.read(buf)) != -1) {
-                    gout.write(buf, 0, len);
+                    out.write(buf, 0, len);
+                    uploadSize += len;
+                }
+                out.close();
+                out = null;
+                if (uploadSize != fileSize) {
+                    throw new IOException(recoveryPathname + " recoverying not finished.");
                 }
                 LOG.info("Finished to write " + recoveryPath);
-                gout.close();
-                gout = null;
                 
                 if (HDFSUtil.retryRename(fs, recoveryPath, normalPath)) {
                     LOG.info("Finished to rename to " + normalPathname);
@@ -83,25 +95,25 @@ public class HDFSRecovery implements Runnable{
         } catch (IOException e) {
             LOG.error("Oops, got an exception:", e);
         } finally {
-            try {
-                if (gin != null) {
-                    gin.close();
-                    gin = null;
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    LOG.warn("Cound not close the gzip output stream", e);
                 }
-                if (gout != null) {
-                    gout.close();
-                    gout = null;
-                }
-                if (client != null && !client.isClosed()) {
+                out = null;
+            }
+            if (client != null && !client.isClosed()) {
+                try {
                     client.close();
-                    client = null;
+                } catch (IOException e) {
+                    LOG.warn("Cound not close the socket from " + client.getInetAddress(), e);
                 }
-            } catch (IOException e) {
-                LOG.warn("Cound not close the gzip output stream", e);
+                client = null;
             }
             if (!recoverySuccess) {
                 try {
-                    Thread.sleep(3 * 1000);
+                    Thread.sleep(10 * 1000);
                 } catch (InterruptedException e) {}
             }
             mgr.reportRecovery(ident, recoverySuccess);

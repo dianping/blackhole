@@ -238,4 +238,11 @@ public class Partition {
             lock.writeLock().unlock();
         }
     }
+
+    @Override
+    public String toString() {
+        return "Partition [topic=" + topic + ", id=" + id + ", dir=" + dir
+                + ", splitThreshold=" + splitThreshold
+                + ", flushThreshold=" + flushThreshold + "]";
+    }
 }
