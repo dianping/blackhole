@@ -54,7 +54,8 @@ public class RequestListener extends Thread {
         
         // Set up request handlers
         HttpRequestHandlerRegistry reqistry = new HttpRequestHandlerRegistry();
-        reqistry.register("/scaleout*", new HttpScalaoutHandler(lionConfChange, cmdbHttpClient));
+        reqistry.register("/scaleout*", new HttpScaleoutHandler(lionConfChange, cmdbHttpClient));
+        reqistry.register("/contract*", new HttpContractHandler(lionConfChange, cmdbHttpClient));
         reqistry.register("*", new HttpFallbackHandler());
         
         // Set up the HTTP service

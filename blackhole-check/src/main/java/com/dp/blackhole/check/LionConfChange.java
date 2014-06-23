@@ -1,10 +1,11 @@
-package com.dp.blackhole.supervisor;
+package com.dp.blackhole.check;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +13,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,35 +24,37 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
-import com.dp.blackhole.common.ParamsKey;
-import com.dp.blackhole.common.Util;
-import com.dp.blackhole.conf.ConfigKeeper;
-import com.dp.blackhole.conf.Context;
 
 public class LionConfChange {
     private static final Log LOG = LogFactory.getLog(LionConfChange.class);
 
-    public final Set<String> appSet = new CopyOnWriteArraySet<String>();
+    public Set<String> appSet = new CopyOnWriteArraySet<String>();
     
     private final Map<String, Set<String>> hostToAppNames = Collections.synchronizedMap(new HashMap<String, Set<String>>());
     private final Map<String, List<String>> appToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
-    
-    private final Map<String, Set<String>> cmdbToAppNames = Collections.synchronizedMap(new HashMap<String, Set<String>>());
-
+    private Set<String> appBlacklist;
     private ConfigCache cache;
     private int apiId;
+    private final ScheduledThreadPoolExecutor scheduler;
     
     LionConfChange(ConfigCache cache, int apiId) {
         this.cache = cache;
         this.apiId = apiId;
+        scheduler = new ScheduledThreadPoolExecutor(1);
+        scheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
+        scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
     }
     
+    public Map<String, List<String>> getAppToHosts() {
+        return appToHosts;
+    }
+
     public Set<String> getAppNamesByHost(String host) {
         return hostToAppNames.get(host);
     }
     
-    public Set<String> getAppNamesByCmdb(String cmdbApp) {
-        return cmdbToAppNames.get(cmdbApp);
+    public Set<String> getAppBlacklist() {
+        return appBlacklist;
     }
     
     public void initLion() {
@@ -56,14 +62,24 @@ public class LionConfChange {
         addWatchers();
     }
     private void reloadConf() {
+        String blacklistString = definitelyGetProperty(ParamsKey.LionNode.BLACKLIST);
+        String[] blacklistArray = Util.getStringListOfLionValue(blacklistString);
+        if (blacklistArray == null) {
+            LOG.info("There are no legacy configurations of blacklist.");
+            return;
+        }
+        synchronized (this) {
+            appBlacklist = new HashSet<String>(Arrays.asList(blacklistArray));
+        }
+        
         String appNamesString = definitelyGetProperty(ParamsKey.LionNode.APPS);
         String[] appNames = Util.getStringListOfLionValue(appNamesString);
         if (appNames == null || appNames.length == 0) {
-            LOG.info("There are no legacy configurations.");
+            LOG.info("There are no legacy configurations of app.");
             return;
         }
         for (int i = 0; i < appNames.length; i++) {
-            appSet.add(appNames[i]);
+            appSet.add(appNames[i]);//all with blacklist
             String confString = definitelyGetProperty(ParamsKey.LionNode.APP_CONF_PREFIX + appNames[i]);
             if (confString == null) {
                 LOG.error("Lose configurations for " + appNames[i]);
@@ -74,15 +90,12 @@ public class LionConfChange {
                 LOG.error("Lose hosts for " + appNames[i]);
             }
             fillHostMap(appNames[i], hostsString);
-            String cmdbString = definitelyGetProperty(ParamsKey.LionNode.APP_CMDB_PREFIX + appNames[i]);
-            if (cmdbString == null) {
-                LOG.error("Lose CMDB mapping for " + appNames[i]);
-            }
-            fillCMDBMap(appNames[i], cmdbString);
         }
     }
 
     private void addWatchers() {
+        AppBlacklistChangeListener appBlacklistListener = new AppBlacklistChangeListener();
+        cache.addChange(appBlacklistListener);
         AppsChangeListener appsListener = new AppsChangeListener();
         cache.addChange(appsListener);
         AppConfChangeListener appConfListener = new AppConfChangeListener();
@@ -150,24 +163,6 @@ public class LionConfChange {
         }
     }
     
-    private synchronized void fillCMDBMap(String appName, String cmdbValue) {
-        String[] cmdbApps = Util.getStringListOfLionValue(cmdbValue);
-        if (cmdbApps != null) {
-            for (int i = 0; i < cmdbApps.length; i++) {
-                String cmdb = cmdbApps[i].trim();
-                if (cmdb.length() == 0) {
-                    continue;
-                }
-                Set<String> appNamesInOneCMDB;
-                if ((appNamesInOneCMDB = cmdbToAppNames.get(cmdb)) == null) {
-                    appNamesInOneCMDB = new CopyOnWriteArraySet<String>();
-                    cmdbToAppNames.put(cmdb, appNamesInOneCMDB);
-                }
-                appNamesInOneCMDB.add(appName);
-            }
-        }
-    }
-
     public String dumpconf() {
         StringBuilder sb = new StringBuilder();
         sb.append("dumpconf:\n");
@@ -207,6 +202,19 @@ public class LionConfChange {
         return sb.toString();
     }
     
+    private int indexOf(String needToRemove, List<String> list) {
+        if (list == null) {
+            return -1;
+        }
+        int index = 0;
+        for (String element : list) {
+            if (needToRemove.equals(element))
+                return index;
+            index++;
+        }
+        return -1;
+    }
+    
     public void removeConf(String appName, List<String> appServers) {
         if (appSet.contains(appName)) {
             List<String> hostsOfOneApp = appToHosts.get(appName);
@@ -244,19 +252,6 @@ public class LionConfChange {
         }
     }
     
-    private int indexOf(String needToRemove, List<String> list) {
-        if (list == null) {
-            return -1;
-        }
-        int index = 0;
-        for (String element : list) {
-            if (needToRemove.equals(element))
-                return index;
-            index++;
-        }
-        return -1;
-    }
-
     public String generateGetURL(String key) {
         return ParamsKey.LionNode.DEFAULT_LION_HOST +
                 ParamsKey.LionNode.LION_GET_PATH +
@@ -283,6 +278,22 @@ public class LionConfChange {
                 "&e=" + EnvZooKeeperConfig.getEnv() +
                 "&id=" + this.apiId;
     }
+    
+    class AppBlacklistChangeListener implements ConfigChange {
+
+        @Override
+        public void onChange(String key, String value) {
+            if (key.equals(ParamsKey.LionNode.BLACKLIST)) {
+                String[] blacklistArray = Util.getStringListOfLionValue(value);
+                if (blacklistArray != null) {
+                    LOG.info("black list has been changed.");
+                    synchronized (this) {
+                        appBlacklist = new HashSet<String>(Arrays.asList(blacklistArray));
+                    }
+                }
+            }
+        }
+    }
 
     class AppsChangeListener implements ConfigChange {
     
@@ -294,7 +305,7 @@ public class LionConfChange {
                     Set<String> newAppSet = new HashSet<String>(Arrays.asList(appNames));
                     for (String newApp : newAppSet) {
                         if (!appSet.contains(newApp)) {
-                            LOG.info("Apps Change is triggered by "+ newApp);
+                            LOG.info("App changed: " + newApp + " added.");
                             appSet.add(newApp);
                             String watchKey = ParamsKey.LionNode.APP_CONF_PREFIX + newApp;
                             addWatherForKey(watchKey);
@@ -305,6 +316,10 @@ public class LionConfChange {
                     for (String oldApp : appSet) {
                         if (!newAppSet.contains(oldApp)) {
                             removeConf(oldApp, new ArrayList<String>());
+                            //remove checker
+                            LOG.info("App changed: " + oldApp + " removed.");
+                            ScheduledFuture<?> scheduledFuture = CheckDone.threadMap.get(oldApp);
+                            scheduledFuture.cancel(false);
                         }
                     }
                 }
@@ -313,22 +328,6 @@ public class LionConfChange {
     
         private void addWatherForKey(String watchKey) {
             definitelyGetProperty(watchKey);
-        }
-    }
-    
-    class CMDBChangeListener implements ConfigChange {
-
-        @Override
-        public void onChange(String key, String value) {
-            if (key.startsWith(ParamsKey.LionNode.APP_CMDB_PREFIX)) {
-                for (String appName : appSet) {
-                    if (key.equals(ParamsKey.LionNode.APP_CMDB_PREFIX + appName)) {
-                        LOG.info("CMDB Change is triggered by " + appName);
-                        fillCMDBMap(appName, value);
-                        break;
-                    }
-                }
-            }
         }
     }
 
@@ -341,9 +340,45 @@ public class LionConfChange {
                     if (key.equals(ParamsKey.LionNode.APP_HOSTS_PREFIX + appName)) {
                         LOG.info("App Hosts Change is triggered by " + appName);
                         fillHostMap(appName, value);
+                        //add checker
+                        if(!CheckDone.threadMap.containsKey(appName)) {
+                            addChecker(appName);
+                        }
                         break;
                     }
                 }
+            }
+        }
+        
+        private void addChecker(String appName) {
+            Context context = ConfigKeeper.configMap.get(appName);
+            if (context == null) {
+                LOG.error("Can not get app: " + appName + " from configMap now, try in 10 seconds later.");
+                scheduler.schedule(new AddCheckerLater(appName), 10, TimeUnit.SECONDS);
+                return;
+            }
+            RollIdent ident = new RollIdent();
+            ident.period = Long.parseLong(context.getString(ParamsKey.Appconf.ROLL_PERIOD));
+            ident.app = appName;
+            ident.sources = appToHosts.get(appName);
+            ident.ts = Util.getCurrWholeTs(new Date().getTime(), ident.period);
+            ident.timeout = -1;
+            CheckDone checker = new CheckDone(ident);
+            LOG.info("create a checkdone thread " + checker.toString());
+            ScheduledFuture<?> scheduledFuture = CheckDone.checkerThreadPool.scheduleWithFixedDelay(checker, 0, CheckDone.checkperiod, TimeUnit.SECONDS);
+            CheckDone.threadMap.put(ident.app, scheduledFuture);
+        }
+        
+        class AddCheckerLater implements Runnable {
+
+            private String appName;
+            public AddCheckerLater(String appName) {
+                this.appName = appName;
+            }
+            
+            @Override
+            public void run() {
+                addChecker(appName);
             }
         }
     }

@@ -75,6 +75,21 @@ public class TestUtil {
         File file = Util.findRealFileByIdent("/tmp/893jfc842.log", "2013-01-01.15");
         assertNotNull(file);
     }
+
+    @Test
+    public void testFindGZFileByIdent() throws IOException {
+        File gzFile = new File("/tmp/hostname__appname.893jfc842.log.2013-01-01.15.gz");
+        gzFile.createNewFile();
+        File file = Util.findGZFileByIdent("/tmp/893jfc842.log", "2013-01-01.15");
+        assertNotNull(file);
+        gzFile.delete();
+        gzFile = new File("/tmp/hostname__893jfc842.log.2013-01-01.15.gz");
+        gzFile.createNewFile();
+        file = Util.findGZFileByIdent("/tmp/893jfc842.log", "2013-01-01.15");
+        assertNotNull(file);
+        gzFile.delete();
+    }
+
     @Test
     public void testGetCurrentRollTs() {
         long same = 1386950400000l;     //2013-12-14 00:00:00
@@ -127,7 +142,7 @@ public class TestUtil {
     
     @Test
     public void testGetStringListOfLionValue() {
-        String lionValue = "[\"test-somehost-web01.nh\",\"test-somehost-web02.nh\",\"test-somehost-web03.nh\"]";
+        String lionValue = "[ \"test-somehost-web01.nh\" , \"test-somehost-web02.nh\" , \"test-somehost-web03.nh\" ]";
         String[] hosts = Util.getStringListOfLionValue(lionValue);
         for (int i = 0; i < hosts.length; i++) {
             assertEquals("test-somehost-web0" + (i + 1) + ".nh", hosts[i]);

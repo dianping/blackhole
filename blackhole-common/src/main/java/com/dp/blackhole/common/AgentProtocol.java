@@ -13,6 +13,8 @@ public class AgentProtocol {
         public String app;
         public long peroid;
         public long ts;
+        public long size;
+        public boolean hasCompressed;
     }
     
     public DataOutputStream sendHead (DataOutputStream out, AgentHead head) throws IOException {
@@ -23,8 +25,10 @@ public class AgentProtocol {
 
         if (head.type == RECOVERY) {
             out.writeLong(head.ts);
+            out.writeLong(head.size);
+            out.writeBoolean(head.hasCompressed);
         }
-        
+
         return out;
     }
     
@@ -34,6 +38,8 @@ public class AgentProtocol {
         head.peroid = in.readLong();
         if (head.type == RECOVERY) {
             head.ts = in.readLong();
+            head.size = in.readLong();
+            head.hasCompressed = in.readBoolean();
         }
         return head;
     }
