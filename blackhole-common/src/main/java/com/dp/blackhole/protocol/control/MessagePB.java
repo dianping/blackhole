@@ -70,7 +70,7 @@ public final class MessagePB {
       CONSUMERREGFAIL(30, 31),
       MAKR_UNRECOVERABLE(31, 32),
       LISTIDLE(32, 33),
-      TRIGGER_CONF_REQ(33, 34),
+      RESTART(33, 34),
       ;
       
       
@@ -111,7 +111,7 @@ public final class MessagePB {
           case 31: return CONSUMERREGFAIL;
           case 32: return MAKR_UNRECOVERABLE;
           case 33: return LISTIDLE;
-          case 34: return TRIGGER_CONF_REQ;
+          case 34: return RESTART;
           default: return null;
         }
       }
@@ -142,7 +142,7 @@ public final class MessagePB {
       }
       
       private static final MessageType[] VALUES = {
-        HEARTBEART, APP_REG, BROKER_REG, ASSIGN_BROKER, READY_BROKER, APP_ROLL, UPLOAD_ROLL, UPLOAD_SUCCESS, UPLOAD_FAIL, RECOVERY_ROLL, RECOVERY_SUCCESS, RECOVERY_FAIL, FAILURE, NOAVAILABLENODE, UNRECOVERABLE, MANUAL_RECOVERY_ROLL, DUMPSTAT, RETIRESTREAM, CONF_REQ, CONF_RES, NOAVAILABLECONF, DUMPCONF, DUMPREPLY, LISTAPPS, REMOVE_CONF, DUMP_APP, CONSUMER_REG, ASSIGN_CONSUMER, OFFSET_COMMIT, TOPICREPORT, CONSUMERREGFAIL, MAKR_UNRECOVERABLE, LISTIDLE, TRIGGER_CONF_REQ, 
+        HEARTBEART, APP_REG, BROKER_REG, ASSIGN_BROKER, READY_BROKER, APP_ROLL, UPLOAD_ROLL, UPLOAD_SUCCESS, UPLOAD_FAIL, RECOVERY_ROLL, RECOVERY_SUCCESS, RECOVERY_FAIL, FAILURE, NOAVAILABLENODE, UNRECOVERABLE, MANUAL_RECOVERY_ROLL, DUMPSTAT, RETIRESTREAM, CONF_REQ, CONF_RES, NOAVAILABLECONF, DUMPCONF, DUMPREPLY, LISTAPPS, REMOVE_CONF, DUMP_APP, CONSUMER_REG, ASSIGN_CONSUMER, OFFSET_COMMIT, TOPICREPORT, CONSUMERREGFAIL, MAKR_UNRECOVERABLE, LISTIDLE, RESTART, 
       };
       public static MessageType valueOf(
           com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
@@ -299,6 +299,13 @@ public final class MessagePB {
     public boolean hasTopicReport() { return hasTopicReport; }
     public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport getTopicReport() { return topicReport_; }
     
+    // optional .blackhole.Restart restart = 21;
+    public static final int RESTART_FIELD_NUMBER = 21;
+    private boolean hasRestart;
+    private com.dp.blackhole.protocol.control.RestartPB.Restart restart_;
+    public boolean hasRestart() { return hasRestart; }
+    public com.dp.blackhole.protocol.control.RestartPB.Restart getRestart() { return restart_; }
+    
     private void initFields() {
       type_ = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance();
@@ -319,6 +326,7 @@ public final class MessagePB {
       assignConsumer_ = com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.getDefaultInstance();
       offsetCommit_ = com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.getDefaultInstance();
       topicReport_ = com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.getDefaultInstance();
+      restart_ = com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance();
     }
     public final boolean isInitialized() {
       if (!hasType) return false;
@@ -439,6 +447,9 @@ public final class MessagePB {
       if (hasTopicReport()) {
         output.writeMessage(19, getTopicReport());
       }
+      if (hasRestart()) {
+        output.writeMessage(21, getRestart());
+      }
       getUnknownFields().writeTo(output);
     }
     
@@ -523,6 +534,10 @@ public final class MessagePB {
       if (hasTopicReport()) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(19, getTopicReport());
+      }
+      if (hasRestart()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(21, getRestart());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -739,6 +754,9 @@ public final class MessagePB {
         if (other.hasTopicReport()) {
           mergeTopicReport(other.getTopicReport());
         }
+        if (other.hasRestart()) {
+          mergeRestart(other.getRestart());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -934,6 +952,15 @@ public final class MessagePB {
               }
               input.readMessage(subBuilder, extensionRegistry);
               setTopicReport(subBuilder.buildPartial());
+              break;
+            }
+            case 170: {
+              com.dp.blackhole.protocol.control.RestartPB.Restart.Builder subBuilder = com.dp.blackhole.protocol.control.RestartPB.Restart.newBuilder();
+              if (hasRestart()) {
+                subBuilder.mergeFrom(getRestart());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setRestart(subBuilder.buildPartial());
               break;
             }
           }
@@ -1628,6 +1655,43 @@ public final class MessagePB {
         return this;
       }
       
+      // optional .blackhole.Restart restart = 21;
+      public boolean hasRestart() {
+        return result.hasRestart();
+      }
+      public com.dp.blackhole.protocol.control.RestartPB.Restart getRestart() {
+        return result.getRestart();
+      }
+      public Builder setRestart(com.dp.blackhole.protocol.control.RestartPB.Restart value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        result.hasRestart = true;
+        result.restart_ = value;
+        return this;
+      }
+      public Builder setRestart(com.dp.blackhole.protocol.control.RestartPB.Restart.Builder builderForValue) {
+        result.hasRestart = true;
+        result.restart_ = builderForValue.build();
+        return this;
+      }
+      public Builder mergeRestart(com.dp.blackhole.protocol.control.RestartPB.Restart value) {
+        if (result.hasRestart() &&
+            result.restart_ != com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance()) {
+          result.restart_ =
+            com.dp.blackhole.protocol.control.RestartPB.Restart.newBuilder(result.restart_).mergeFrom(value).buildPartial();
+        } else {
+          result.restart_ = value;
+        }
+        result.hasRestart = true;
+        return this;
+      }
+      public Builder clearRestart() {
+        result.hasRestart = false;
+        result.restart_ = com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance();
+        return this;
+      }
+      
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
     
@@ -1662,44 +1726,45 @@ public final class MessagePB {
       "umpReply.proto\032\020RemoveConf.proto\032\017Broker" +
       "Reg.proto\032\rDumpApp.proto\032\021ConsumerReg.pr" +
       "oto\032\024AssignConsumer.proto\032\022OffsetCommit." +
-      "proto\032\021TopicReport.proto\"\231\013\n\007Message\022,\n\004" +
-      "type\030\001 \002(\0162\036.blackhole.Message.MessageTy",
-      "pe\022!\n\006appReg\030\002 \001(\0132\021.blackhole.AppReg\022-\n" +
-      "\014assignBroker\030\003 \001(\0132\027.blackhole.AssignBr" +
-      "oker\022#\n\007appRoll\030\004 \001(\0132\022.blackhole.AppRol" +
-      "l\022-\n\014recoveryRoll\030\005 \001(\0132\027.blackhole.Reco" +
-      "veryRoll\022+\n\013readyBroker\030\006 \001(\0132\026.blackhol" +
-      "e.ReadyBroker\022!\n\006rollID\030\007 \001(\0132\021.blackhol" +
-      "e.RollID\022#\n\007failure\030\010 \001(\0132\022.blackhole.Fa" +
-      "ilure\0223\n\017noAvailableNode\030\t \001(\0132\032.blackho" +
-      "le.NoAvailableNode\022%\n\010streamId\030\n \001(\0132\023.b" +
-      "lackhole.StreamID\022#\n\007confRes\030\013 \001(\0132\022.bla",
-      "ckhole.ConfRes\022\'\n\tdumpReply\030\014 \001(\0132\024.blac" +
-      "khole.DumpReply\022)\n\nremoveConf\030\r \001(\0132\025.bl" +
-      "ackhole.RemoveConf\022\'\n\tbrokerReg\030\016 \001(\0132\024." +
-      "blackhole.BrokerReg\022#\n\007dumpApp\030\017 \001(\0132\022.b" +
-      "lackhole.DumpApp\022+\n\013consumerReg\030\020 \001(\0132\026." +
-      "blackhole.ConsumerReg\0221\n\016assignConsumer\030" +
-      "\021 \001(\0132\031.blackhole.AssignConsumer\022-\n\014offs" +
-      "etCommit\030\022 \001(\0132\027.blackhole.OffsetCommit\022" +
-      "+\n\013topicReport\030\023 \001(\0132\026.blackhole.TopicRe" +
-      "port\"\345\004\n\013MessageType\022\016\n\nHEARTBEART\020\001\022\013\n\007",
-      "APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021\n\rASSIGN_BROK" +
-      "ER\020\004\022\020\n\014READY_BROKER\020\005\022\014\n\010APP_ROLL\020\006\022\017\n\013" +
-      "UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_SUCCESS\020\010\022\017\n\013UPL" +
-      "OAD_FAIL\020\t\022\021\n\rRECOVERY_ROLL\020\n\022\024\n\020RECOVER" +
-      "Y_SUCCESS\020\013\022\021\n\rRECOVERY_FAIL\020\014\022\013\n\007FAILUR" +
-      "E\020\r\022\023\n\017NOAVAILABLENODE\020\016\022\021\n\rUNRECOVERABL" +
-      "E\020\017\022\030\n\024MANUAL_RECOVERY_ROLL\020\020\022\014\n\010DUMPSTA" +
-      "T\020\021\022\020\n\014RETIRESTREAM\020\022\022\014\n\010CONF_REQ\020\023\022\014\n\010C" +
-      "ONF_RES\020\024\022\023\n\017NOAVAILABLECONF\020\025\022\014\n\010DUMPCO" +
-      "NF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010LISTAPPS\020\030\022\017\n\013REM",
-      "OVE_CONF\020\031\022\014\n\010DUMP_APP\020\032\022\020\n\014CONSUMER_REG" +
-      "\020\033\022\023\n\017ASSIGN_CONSUMER\020\034\022\021\n\rOFFSET_COMMIT" +
-      "\020\035\022\017\n\013TOPICREPORT\020\036\022\023\n\017CONSUMERREGFAIL\020\037" +
-      "\022\026\n\022MAKR_UNRECOVERABLE\020 \022\014\n\010LISTIDLE\020!\022\024" +
-      "\n\020TRIGGER_CONF_REQ\020\"B.\n!com.dp.blackhole" +
-      ".protocol.controlB\tMessagePB"
+      "proto\032\021TopicReport.proto\032\rRestart.proto\"" +
+      "\265\013\n\007Message\022,\n\004type\030\001 \002(\0162\036.blackhole.Me",
+      "ssage.MessageType\022!\n\006appReg\030\002 \001(\0132\021.blac" +
+      "khole.AppReg\022-\n\014assignBroker\030\003 \001(\0132\027.bla" +
+      "ckhole.AssignBroker\022#\n\007appRoll\030\004 \001(\0132\022.b" +
+      "lackhole.AppRoll\022-\n\014recoveryRoll\030\005 \001(\0132\027" +
+      ".blackhole.RecoveryRoll\022+\n\013readyBroker\030\006" +
+      " \001(\0132\026.blackhole.ReadyBroker\022!\n\006rollID\030\007" +
+      " \001(\0132\021.blackhole.RollID\022#\n\007failure\030\010 \001(\013" +
+      "2\022.blackhole.Failure\0223\n\017noAvailableNode\030" +
+      "\t \001(\0132\032.blackhole.NoAvailableNode\022%\n\010str" +
+      "eamId\030\n \001(\0132\023.blackhole.StreamID\022#\n\007conf",
+      "Res\030\013 \001(\0132\022.blackhole.ConfRes\022\'\n\tdumpRep" +
+      "ly\030\014 \001(\0132\024.blackhole.DumpReply\022)\n\nremove" +
+      "Conf\030\r \001(\0132\025.blackhole.RemoveConf\022\'\n\tbro" +
+      "kerReg\030\016 \001(\0132\024.blackhole.BrokerReg\022#\n\007du" +
+      "mpApp\030\017 \001(\0132\022.blackhole.DumpApp\022+\n\013consu" +
+      "merReg\030\020 \001(\0132\026.blackhole.ConsumerReg\0221\n\016" +
+      "assignConsumer\030\021 \001(\0132\031.blackhole.AssignC" +
+      "onsumer\022-\n\014offsetCommit\030\022 \001(\0132\027.blackhol" +
+      "e.OffsetCommit\022+\n\013topicReport\030\023 \001(\0132\026.bl" +
+      "ackhole.TopicReport\022#\n\007restart\030\025 \001(\0132\022.b",
+      "lackhole.Restart\"\334\004\n\013MessageType\022\016\n\nHEAR" +
+      "TBEART\020\001\022\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021\n" +
+      "\rASSIGN_BROKER\020\004\022\020\n\014READY_BROKER\020\005\022\014\n\010AP" +
+      "P_ROLL\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_SUCC" +
+      "ESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_ROLL\020" +
+      "\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOVERY_FAIL" +
+      "\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAILABLENODE\020\016\022\021\n\r" +
+      "UNRECOVERABLE\020\017\022\030\n\024MANUAL_RECOVERY_ROLL\020" +
+      "\020\022\014\n\010DUMPSTAT\020\021\022\020\n\014RETIRESTREAM\020\022\022\014\n\010CON" +
+      "F_REQ\020\023\022\014\n\010CONF_RES\020\024\022\023\n\017NOAVAILABLECONF",
+      "\020\025\022\014\n\010DUMPCONF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010LISTA" +
+      "PPS\020\030\022\017\n\013REMOVE_CONF\020\031\022\014\n\010DUMP_APP\020\032\022\020\n\014" +
+      "CONSUMER_REG\020\033\022\023\n\017ASSIGN_CONSUMER\020\034\022\021\n\rO" +
+      "FFSET_COMMIT\020\035\022\017\n\013TOPICREPORT\020\036\022\023\n\017CONSU" +
+      "MERREGFAIL\020\037\022\026\n\022MAKR_UNRECOVERABLE\020 \022\014\n\010" +
+      "LISTIDLE\020!\022\013\n\007RESTART\020\"B.\n!com.dp.blackh" +
+      "ole.protocol.controlB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1711,7 +1776,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "AppRoll", "RecoveryRoll", "ReadyBroker", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", },
+              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "AppRoll", "RecoveryRoll", "ReadyBroker", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", },
               com.dp.blackhole.protocol.control.MessagePB.Message.class,
               com.dp.blackhole.protocol.control.MessagePB.Message.Builder.class);
           return null;
@@ -1738,6 +1803,7 @@ public final class MessagePB {
           com.dp.blackhole.protocol.control.AssignConsumerPB.getDescriptor(),
           com.dp.blackhole.protocol.control.OffsetCommitPB.getDescriptor(),
           com.dp.blackhole.protocol.control.TopicReportPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.RestartPB.getDescriptor(),
         }, assigner);
   }
   
