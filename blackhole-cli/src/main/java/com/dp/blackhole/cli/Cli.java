@@ -107,6 +107,15 @@ public class Cli {
                     Message msg = PBwrap.wrapListIdle();
                     send(msg);
                     out.println("send message: " + msg);
+                } else if (cmd.startsWith("restart")) {
+                    String[] tokens = getTokens(cmd);
+                    ArrayList<String> appServers = new ArrayList<String>();
+                    for (int i = 1; i < tokens.length; i++) {
+                        appServers.add(tokens[i]);
+                    }
+                    Message msg = PBwrap.wrapRestart(appServers);
+                    send(msg);
+                    out.println("send message: " + msg);
                 } else if (cmd.equals("help")) {
                     out.println("Usage:");
                     out.println(" dumpstat              Display all of streams information.");
@@ -117,7 +126,7 @@ public class Cli {
                     out.println(" rmconf <appname>      Remove the configuration specified by appname which should be useless.");
                     out.println("                       (Just remove from supervisor memory rather than lion/ZK).");
                     out.println(" retire <appname> <appserver>      Retire the stream specified by appname and appserver.");
-                    out.println(" recovery <appname> <appserver> <rolltimestamp>");
+                    out.println(" recovery <appname> <appserver> <period> <rolltimestamp>");
                     out.println("                       Recovery the stream specified by appname, appserver and roll ts.");
                     out.println(" range <appname> <appserver> <period> <start rolltimestamp> <end rolltimestamp>");
                     out.println("                       Recovery a range of streams specified period from start timestamp to end timestamp.");
