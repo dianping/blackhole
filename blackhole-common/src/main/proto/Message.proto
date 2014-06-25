@@ -21,6 +21,7 @@ import "ConsumerReg.proto";
 import "AssignConsumer.proto";
 import "OffsetCommit.proto";
 import "TopicReport.proto";
+import "Restart.proto";
 
 message Message {
     enum MessageType {
@@ -57,7 +58,7 @@ message Message {
         CONSUMERREGFAIL = 31;
         MAKR_UNRECOVERABLE = 32;
         LISTIDLE = 33;
-        TRIGGER_CONF_REQ = 34;
+        RESTART = 34;
     }
 
     required MessageType type = 1;
@@ -79,4 +80,5 @@ message Message {
     optional AssignConsumer assignConsumer = 17;
     optional OffsetCommit offsetCommit = 18;
     optional TopicReport topicReport = 19;
+    optional Restart restart = 21;
 }

@@ -23,6 +23,7 @@ import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
 import com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker;
 import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
+import com.dp.blackhole.protocol.control.RestartPB.Restart;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 import com.dp.blackhole.protocol.control.StreamIDPB.StreamID;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
@@ -108,6 +109,10 @@ public class PBwrap {
             break;
         case OFFSET_COMMIT:
             msg.setOffsetCommit((OffsetCommit) message);
+            break;
+        case RESTART:
+            msg.setRestart((Restart) message);
+            break;
         default:
         }
         return msg.build();
@@ -375,5 +380,11 @@ public class PBwrap {
     public static ByteBuffer PB2Buf(Message msg) {
         ByteBuffer buf = ByteBuffer.wrap(msg.toByteArray());
         return buf;
+    }
+    
+    public static Message wrapRestart(ArrayList<String> appServers) {
+        Restart.Builder builder = Restart.newBuilder();
+        builder.addAllAppServers(appServers);
+        return wrapMessage(MessageType.RESTART, builder.build());
     }
 }

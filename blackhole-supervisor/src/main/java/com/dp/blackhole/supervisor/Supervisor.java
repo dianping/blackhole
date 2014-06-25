@@ -45,6 +45,7 @@ import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
 import com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
+import com.dp.blackhole.protocol.control.RestartPB.Restart;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 import com.dp.blackhole.protocol.control.StreamIDPB.StreamID;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
@@ -681,9 +682,9 @@ public class Supervisor {
         sb.append("############################## dump ##############################\n");
         SortedSet<String> idleHosts = new TreeSet<String>();
         for(SimpleConnection conn : connectionStreamMap.keySet()) {
-            ConnectionDescription desc = connections.get(from);
+            ConnectionDescription desc = connections.get(conn);
             if (desc == null) {
-                LOG.error("can not find ConnectionDesc by connection " + from);
+                LOG.error("can not find ConnectionDesc by connection " + conn);
                 return;
             }
             if (desc.getType() != ConnectionDescription.AGENT &&desc.getType() != ConnectionDescription.BROKER) {
@@ -703,6 +704,19 @@ public class Supervisor {
         String listIdle = sb.toString();
         Message message = PBwrap.wrapDumpReply(listIdle);
         send(from, message);
+    }
+
+    private void sendRestart(Restart restart) {
+        List<String> appServers = restart.getAppServersList();
+        for (String agentHost : appServers) {
+            SimpleConnection agent = agentsMapping.get(agentHost);
+            if (agent != null) {
+                agent.close();
+                closeConnection(agent);
+            } else {
+                LOG.info("Can not find stream which from " + agentHost);
+            }
+        }
     }
 
     public void removeConf(RemoveConf removeConf, SimpleConnection from) {
@@ -1499,6 +1513,9 @@ public class Supervisor {
             case LISTIDLE:
                 listIdle(from);
                 break;
+            case RESTART:
+                sendRestart(msg.getRestart());
+                break;
             default:
                 LOG.warn("unknown message: " + msg.toString());
             }
@@ -1660,5 +1677,4 @@ public class Supervisor {
         Supervisor supervisor = new Supervisor();
         supervisor.init();
     }
-
 }
