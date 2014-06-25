@@ -93,7 +93,7 @@ public class FetchReply extends DelegationTypedWrappable {
         }
         if (!head.hasRemaining() && (messages != null) && (size != 0)) {
             for (int i=0; i< 16; i++) {
-                int num = (int) messages.write(channel, sent, size -sent);
+                int num = messages.write(channel, sent, size -sent);
                 written += num;
                 sent += num;
                 if (num != 0) {

@@ -99,7 +99,7 @@ public class ByteBufferMessageSet implements MessageSet{
     }
 
     @Override
-    public long write(GatheringByteChannel channel, int offset, int length)
+    public int write(GatheringByteChannel channel, long offset, int length)
             throws IOException {
         int written = 0;
         while (buffer.hasRemaining()) {
@@ -110,7 +110,6 @@ public class ByteBufferMessageSet implements MessageSet{
 
     @Override
     public int getSize() {
-        // TODO Auto-generated method stub
         return buffer.capacity();
     }
     

@@ -16,17 +16,22 @@ public class Consumer {
     private String group;
     private String consumerId;
     private ConsumerConfig config;
+    private ConsumerConnector connector;
     
     public Consumer(String topic, String group, ConsumerConfig config) throws LionException {
-        ConsumerConnector connector = ConsumerConnector.getInstance();
-        if (!connector.initialized) {
-            connector.init();
-        }
         this.topic = topic;
         this.group = group;
         this.config = config;
         consumerId = generateConsumerId(this.group);
         queue = new LinkedBlockingQueue<FetchedDataChunk>(this.config.getMaxQueuedChunks());
+        
+        connector = ConsumerConnector.getInstance();
+        if (!connector.initialized) {
+            connector.init();
+        }
+    }
+    
+    public void start() {
         connector.registerConsumer(topic, group, consumerId ,this);
     }
     
