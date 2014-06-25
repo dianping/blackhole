@@ -150,7 +150,7 @@ public class Partition {
             lock.writeLock().unlock();
         }
         
-        roll.length = (int) (endoffset - roll.startOffset);
+        roll.length = endoffset - roll.startOffset;
         ret = roll;
         roll = new RollPartition(this, endoffset);
         return ret;

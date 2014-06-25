@@ -21,9 +21,13 @@ public class FileMessageSet implements MessageSet{
     }
 
     @Override
-    public long write(GatheringByteChannel target, int _offset, int length)
+    public int write(GatheringByteChannel target, long _offset, int length)
             throws IOException {
-        return channel.transferTo(offset + _offset, length, target);
+        long written =  channel.transferTo(offset + _offset, length, target);
+        if (written > Integer.MAX_VALUE) {
+            throw new RuntimeException("MessageSet.write is limited to Integer.Max");
+        }
+        return (int)written;
     }
 
     @Override
