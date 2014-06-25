@@ -180,6 +180,9 @@ public class Supervisor {
                             } else {
                                 lengthBuf.flip();
                                 int length = lengthBuf.getInt();
+                                if (length > 32 * 1024) {
+                                    LOG.warn("Message length is abnormal, length is " + length + " from " + connection.getHost());
+                                }
                                 lengthBuf.clear();
                                 connection.createDatabuffer(length);
                             }
