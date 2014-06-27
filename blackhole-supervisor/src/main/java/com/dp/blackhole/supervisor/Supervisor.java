@@ -271,6 +271,7 @@ public class Supervisor {
             LOG.warn("can't find partition by partitionId: " + topic + "." + partitionId);
             return;
         }
+        LOG.info(pinfo + " is offline");
         pinfo.markOffline(true);
     }
     
@@ -1191,10 +1192,12 @@ public class Supervisor {
         
         PartitionInfo pinfo = partitionInfos.get(partitionId);
         if (pinfo == null) {
+            LOG.info("new partition online: " + pinfo);
             pinfo = new PartitionInfo(partitionId, message.getBrokerServer());
             partitionInfos.put(partitionId, pinfo);
         } else {
             if (pinfo.isOffline()) {
+                LOG.info("partition back to online: " + pinfo);
                 pinfo.markOffline(false);
             }
         }
@@ -1209,6 +1212,7 @@ public class Supervisor {
             if (!topic.equals(group.getTopic())) {
                 continue;
             }
+            LOG.info("reassign consumer of topic: " + topic);
             tryAssignConsumer(null, group, groupDesc);
         }
     }

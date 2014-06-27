@@ -3,6 +3,8 @@ package com.dp.blackhole.supervisor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.dp.blackhole.common.Util;
+
 public class PartitionInfo {
     private String id;
     private String host;
@@ -47,4 +49,8 @@ public class PartitionInfo {
         return offline.get();
     }
     
+    @Override
+    public String toString() {
+        return Util.toAtomString("partitioninfo", id, host, endOffset, offline);
+    }
 }
