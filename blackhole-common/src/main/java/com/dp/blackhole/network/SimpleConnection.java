@@ -182,7 +182,7 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
     @Override
     public void send(ByteBuffer entity) {
         if (!isActive()) {
-            LOG.error("connection closed, message sending abort");
+            LOG.error("connection closed, message sending abort: " + this.toString());
             return;
         }
         
