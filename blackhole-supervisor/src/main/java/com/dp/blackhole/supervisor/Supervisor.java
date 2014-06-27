@@ -100,71 +100,26 @@ public class Supervisor {
         desc.updateHeartBeat();
     }
     
-    private void handleTopicReport(TopicReport report, SimpleConnection from) {
-        HashSet<String> TopicsNeedtoReassign = new HashSet<String>();
-        
-        ConnectionDescription desc = connections.get(from);
-        if (desc == null) {
-            LOG.error("can not find ConnectionDesc by connection " + from);
-            return;
-        }
-        BrokerDesc brokerDesc = (BrokerDesc) desc.getAttachment();
+    private void handleTopicReport(TopicReport report, SimpleConnection from) { 
         for (TopicEntry entry : report.getEntriesList()) {
             String topic = entry.getTopic();
             String partitionId = entry.getPartitionId();
             
-            // record topic and partitions on the broker
-            brokerDesc.update(topic, partitionId);
-            
-            // update partitionInfo, if the partition was offline or new created,
-            // consumers may need to reassigned
+            // update partition offset
             ConcurrentHashMap<String, PartitionInfo> partitionInfos = topics.get(topic);
             if (partitionInfos == null) {
-                partitionInfos = new ConcurrentHashMap<String, PartitionInfo>();
-                topics.put(topic, partitionInfos);
+                LOG.warn("topic: " + topic +" can't be found in topics, while exists in topic report");
+                continue;
             }
             PartitionInfo partitionInfo = partitionInfos.get(partitionId);
             if (partitionInfo == null) {
-                partitionInfo = new PartitionInfo(partitionId, from.getHost(), entry.getOffset());
-                partitionInfos.put(partitionId, partitionInfo);
-                TopicsNeedtoReassign.add(topic);
+                LOG.warn("partitionid: " + topic+ "." + partitionId +" can't be found in partitionInfos, while exists in topic report");
+                continue;
             } else {
                 if (partitionInfo.isOffline()) {
-                    partitionInfo.markOffline(false);
-                    TopicsNeedtoReassign.add(topic);
+                    continue;
                 }
                 partitionInfo.setEndOffset(entry.getOffset());
-            } 
-        }
-        
-        if (!TopicsNeedtoReassign.isEmpty()) {
-            for (Entry<ConsumerGroup, ConsumerGroupDesc> entry : consumerGroups.entrySet()) {
-                ConsumerGroup group = entry.getKey();
-                ConsumerGroupDesc groupDesc = entry.getValue();
-                String topic = group.getTopic();
-                // TODO disable at present, first reassign with online partitions in topics
-//                Map<String, PartitionInfo> groupPartitions = groupDesc.getPartitions();
-                if (TopicsNeedtoReassign.contains(topic)) {
-//                    ConcurrentHashMap<String, PartitionInfo> partitionInfos = topics.get(topic);
-//                    if (partitionInfos == null) {
-//                        LOG.error("can not get partitionInfos from topic: " + topic);
-//                        continue;
-//                    }
-                    // update available partitions
-//                    for (PartitionInfo p : partitionInfos.values()) {
-//                        String id = p.getId();
-//                        if (p.isOffline()) {
-//                            if (groupPartitions.containsKey(id)) {
-//                                groupPartitions.remove(id);
-//                            }
-//                        } else {
-//                            if (!groupPartitions.containsKey(id)) {
-//                                groupPartitions.put(id, new PartitionInfo(p));
-//                            }
-//                        }
-//                    }
-                    tryAssignConsumer(null, group, groupDesc);
-                }
             }
         }
     }
@@ -304,6 +259,21 @@ public class Supervisor {
         groupDesc.updateOffset(id, topic, partition, offset);
     }
     
+    private void markPartitionOffline(String topic, String partitionId) {
+        ConcurrentHashMap<String, PartitionInfo> partitions = topics.get(topic);
+        if (partitions == null) {
+            LOG.warn("can't find partition by topic: " + topic + "." + partitionId);
+            return;
+        }
+        
+        PartitionInfo pinfo = partitions.get(partitionId);
+        if (pinfo == null) {
+            LOG.warn("can't find partition by partitionId: " + topic + "." + partitionId);
+            return;
+        }
+        pinfo.markOffline(true);
+    }
+    
     /*
      * mark the stream as inactive, mark all the stages as pending unless the uploading stage
      * remove the relationship of the corresponding broker and streams
@@ -343,8 +313,13 @@ public class Supervisor {
                                 connectionStreamMap.remove(brokerConnection);
                             }
                         }
-                    }
+                    } 
                 }
+                
+                // mark partitions as offline
+                String topic = stream.app;
+                String partitionId = stream.appHost;
+                markPartitionOffline(topic, partitionId);
             }
         } else {
             LOG.warn("can not get associate streams from connectionStreamMap by connection: " + connection);
@@ -407,6 +382,11 @@ public class Supervisor {
                         }
                     }
                 }
+                 
+                // mark partitions as offline
+                String topic = stream.app;
+                String partitionId = stream.appHost;
+                markPartitionOffline(topic, partitionId);
             }
         } else {
             LOG.warn("can not get associate streams from connectionStreamMap by connection: " + connection);
@@ -433,28 +413,6 @@ public class Supervisor {
                             doRecovery(stream, stage);
                         }
                     }
-                }
-            }
-        }
-        
-        // mark partitions as offline
-        BrokerDesc brokerDesc = (BrokerDesc) desc.getAttachment();
-        for (Entry<String, ArrayList<String>> entry : brokerDesc.getPartitions().entrySet()) {
-            String topic = entry.getKey();
-            ArrayList<String> plist = entry.getValue();
-            ConcurrentHashMap<String, PartitionInfo> pinfos = topics.get(topic);
-            if (pinfos == null) {
-                LOG.error("can not find partitionInfo map by topic " + topic);
-                continue;
-            }
-            synchronized (plist) {
-                for (String pid : plist) {
-                    PartitionInfo pinfo = pinfos.get(pid);
-                    if (pinfo == null) {
-                        LOG.error("can not find PartitionInfo by partitionid " + pid);
-                        continue;
-                    }
-                    pinfo.markOffline(true);
                 }
             }
         }
@@ -1172,8 +1130,9 @@ public class Supervisor {
         StreamId id = new StreamId(message.getAppName(), message.getAppServer());
         Stream stream = streamIdMap.get(id);
         
+        // processing stream affairs
         if (stream == null) {
-            // new stream
+            // record new stream
             stream = new Stream();
             stream.app = message.getAppName();
             stream.appHost = message.getAppServer();
@@ -1219,6 +1178,39 @@ public class Supervisor {
         recordConnectionStreamMapping(from, stream);
         SimpleConnection appConnection = agentsMapping.get(stream.appHost);
         recordConnectionStreamMapping(appConnection, stream);
+        
+        // process partition affairs
+        String topic = message.getAppName();
+        String partitionId = message.getAppServer();
+        
+        ConcurrentHashMap<String, PartitionInfo> partitionInfos = topics.get(topic);
+        if (partitionInfos == null) {
+            partitionInfos = new ConcurrentHashMap<String, PartitionInfo>();
+            topics.put(topic, partitionInfos);
+        }
+        
+        PartitionInfo pinfo = partitionInfos.get(partitionId);
+        if (pinfo == null) {
+            pinfo = new PartitionInfo(partitionId, message.getBrokerServer());
+            partitionInfos.put(partitionId, pinfo);
+        } else {
+            if (pinfo.isOffline()) {
+                pinfo.markOffline(false);
+            }
+        }
+        //reassign consumer
+        reassignConsumers(topic);
+    }
+
+    private void reassignConsumers(String topic) {
+        for (Entry<ConsumerGroup, ConsumerGroupDesc> entry : consumerGroups.entrySet()) {
+            ConsumerGroup group = entry.getKey();
+            ConsumerGroupDesc groupDesc = entry.getValue();
+            if (!topic.equals(group.getTopic())) {
+                continue;
+            }
+            tryAssignConsumer(null, group, groupDesc);
+        }
     }
 
     /*
@@ -1355,21 +1347,7 @@ public class Supervisor {
     }
 
     private String assignBroker(String app, SimpleConnection from) {
-        String broker;
-        String previousBroker = null;
-        for (Stream stream : Streams.keySet()) {
-            if (stream.app.equals(app)) {
-                previousBroker = stream.getBrokerHost();
-                break;
-            }
-        }
-
-        Collection<String> brokers = brokersMapping.keySet();
-        if (previousBroker!= null && brokers.contains(previousBroker)) {
-            broker = previousBroker;
-        } else {
-            broker = getBroker();
-        }
+        String broker = getBroker();
         
         Message message;
         if (broker != null) {

@@ -9,10 +9,10 @@ public class PartitionInfo {
     private AtomicLong endOffset;
     private AtomicBoolean offline;
     
-    public PartitionInfo(String id, String host, long endOffset) {
+    public PartitionInfo(String id, String host) {
         this.id = id;
         this.host = host;
-        this.endOffset = new AtomicLong(endOffset);
+        this.endOffset = new AtomicLong(-1);
         this.offline = new AtomicBoolean(false);
     }
     
