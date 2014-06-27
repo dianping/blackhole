@@ -148,4 +148,19 @@ public class TestUtil {
             assertEquals("test-somehost-web0" + (i + 1) + ".nh", hosts[i]);
         }
     }
+    
+    @Test
+    public void testToAtomString() {
+        String test1 = Util.toAtomString(null);
+        String expect1 = null;
+        assertEquals(test1, expect1);
+        
+        String test2 = Util.toAtomString("id", "name");
+        String expect2 = "{id,name}";
+        assertEquals(test2, expect2);
+        
+        String test3 = Util.toAtomString("id", 123);
+        String expect3 = "{id,123}";
+        assertEquals(test3, expect3);
+    }
 }

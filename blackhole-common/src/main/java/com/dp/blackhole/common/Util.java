@@ -334,4 +334,19 @@ public class Util {
     public static String getPortFromBroker(String brokerString) {
         return brokerString.substring(brokerString.lastIndexOf(':') + 1);
     }
+    
+    public static String toAtomString(Object... args) {
+        if (args == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append('{');
+        for (Object o : args) {
+            sb.append(o.toString())
+            .append(',');
+        }
+        sb.deleteCharAt(sb.length()-1);
+        sb.append('}');
+        return sb.toString();
+    }
 }
