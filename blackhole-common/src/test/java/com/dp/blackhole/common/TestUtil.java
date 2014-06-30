@@ -151,15 +151,15 @@ public class TestUtil {
     
     @Test
     public void testToAtomString() {
-        String test1 = Util.toAtomString(null);
+        String test1 = Util.toTupleString(null);
         String expect1 = null;
         assertEquals(test1, expect1);
         
-        String test2 = Util.toAtomString("id", "name");
+        String test2 = Util.toTupleString("id", "name");
         String expect2 = "{id,name}";
         assertEquals(test2, expect2);
         
-        String test3 = Util.toAtomString("id", 123);
+        String test3 = Util.toTupleString("id", 123);
         String expect3 = "{id,123}";
         assertEquals(test3, expect3);
     }

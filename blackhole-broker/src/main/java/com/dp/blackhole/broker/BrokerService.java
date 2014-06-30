@@ -83,9 +83,8 @@ public class BrokerService extends Thread {
     
     public void disconnectClients() {
         for (DelegationIOConnection client : clients.keySet()) {
-            client.close();
+            server.closeConnection(client);
         }
-        clients.clear();
     }
     
     public class PublisherExecutor implements

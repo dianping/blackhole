@@ -229,9 +229,7 @@ public class Agent implements Runnable {
     
     public void send(Message message) {
         LOG.debug("send: " + message);
-        if (supervisor != null) {
-            supervisor.send(PBwrap.PB2Buf(message));
-        }
+        Util.send(supervisor, message);
     }
     
     public void send(Message message, int delaySecond) {
@@ -254,7 +252,6 @@ public class Agent implements Runnable {
     public class AgentProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
         private HeartBeat heartbeat = null;
 
-        
         @Override
         public void OnConnected(SimpleConnection connection) {
             supervisor = connection;
@@ -265,10 +262,7 @@ public class Agent implements Runnable {
         public void OnDisconnected(SimpleConnection connection) {
             confLoopFactor = 1;
             
-            if (connection != null) {
-                connection.close();
-            }
-            connection = null;
+            supervisor = null;
             
             for(Runnable task : scheduler.getQueue()) {
                 scheduler.remove(task);//TODO not cancel clean
