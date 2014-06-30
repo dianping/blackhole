@@ -126,6 +126,9 @@ public class DelegationIOConnection implements NonblockingConnection<TransferWra
             }
             // start to write one buffer until socket writebuffer full
             written += messageTosend.write(channel);
+            if (!messageTosend.complete()) {
+                break;
+            }
         }
         return written;
     }
