@@ -62,8 +62,8 @@ public class BrokerService extends Thread {
     public BrokerService(Properties prop) throws IOException {
         this.prop = prop;
         String storagedir = prop.getProperty("broker.storage.dir");
-        int splitThreshold = Integer.parseInt(prop.getProperty("publisher.storage.splitThreshold", "536870912"));
-        int flushThreshold = Integer.parseInt(prop.getProperty("publisher.storage.flushThreshold", "4194304"));
+        int splitThreshold = Integer.parseInt(prop.getProperty("broker.storage.splitThreshold", "536870912"));
+        int flushThreshold = Integer.parseInt(prop.getProperty("broker.storage.flushThreshold", "4194304"));
         clients = new ConcurrentHashMap<DelegationIOConnection, BrokerService.ClientDesc>();
         manager = new StorageManager(storagedir, splitThreshold, flushThreshold);
         executor = new PublisherExecutor();
