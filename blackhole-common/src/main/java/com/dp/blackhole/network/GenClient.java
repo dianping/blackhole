@@ -222,7 +222,9 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
     }
 
     private void connect() throws IOException, ClosedChannelException {
-        socketChannel = SocketChannel.open();
+        if (socketChannel == null || !socketChannel.isOpen()) {
+            socketChannel = SocketChannel.open();
+        }
         socketChannel.configureBlocking(false);
         SocketAddress server = new InetSocketAddress(host, port);
         socketChannel.connect(server);

@@ -1191,8 +1191,8 @@ public class Supervisor {
         
         PartitionInfo pinfo = partitionInfos.get(partitionId);
         if (pinfo == null) {
-            LOG.info("new partition online: " + pinfo);
             pinfo = new PartitionInfo(partitionId, message.getBrokerServer());
+            LOG.info("new partition online: " + pinfo);
             partitionInfos.put(partitionId, pinfo);
         } else {
             if (pinfo.isOffline()) {
