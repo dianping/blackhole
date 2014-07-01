@@ -85,6 +85,7 @@ public class RollManager {
             return false;
         }
         
+        LOG.info("start to upload roll " + ident);
         HDFSUpload upload = new HDFSUpload(this, Broker.getBrokerService().getPersistentManager(), fs, ident, roll);
         uploadPool.execute(upload);
         return true;
@@ -96,6 +97,8 @@ public class RollManager {
         ident.source = rollID.getAppServer();
         ident.period = rollID.getPeriod();
         ident.ts = rollID.getRollTs();
+        
+        LOG.info("start to mark unrecoverable roll " + ident);
         HDFSMarker marker = new HDFSMarker(this, fs, ident);
         uploadPool.execute(marker);
     }
@@ -221,7 +224,9 @@ public class RollManager {
                     roll.source = Util.getRemoteHost(socket);
                     roll.period = head.peroid;
                     roll.ts = head.ts;
-
+                    
+                    LOG.info("start to recovery roll " + roll);
+                    
                     HDFSRecovery recovery = new HDFSRecovery(
                             RollManager.this, fs, socket, roll, head.size, head.hasCompressed);
                     recoveryPool.execute(recovery);
