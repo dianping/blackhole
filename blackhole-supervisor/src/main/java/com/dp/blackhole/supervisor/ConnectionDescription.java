@@ -47,4 +47,24 @@ public class ConnectionDescription {
     public void attach(NodeDesc desc) {
         attachment = desc;
     }
+    
+    @Override
+    public String toString() {
+        String typeName = "";
+        switch (this.type) {
+        case AGENT:
+            typeName = "AGENT";
+            break;
+        case BROKER:
+            typeName = "BROKER";
+            break;
+        case CONSUMER:
+            typeName = "CONSUMER";
+            break;
+        default:
+            typeName = "UNKNOW";
+            break;
+        }
+        return connection.toString() + " type: " + typeName;
+    }
 }
