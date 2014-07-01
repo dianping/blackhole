@@ -186,7 +186,7 @@ public class Supervisor {
                 LOG.error("consumer already exists: " + consumer);
                 return;
             }
-            consumeMap.put(consumer, null);
+            consumeMap.put(consumer, new ArrayList<String>());
         }
         
         // calc online partitions
