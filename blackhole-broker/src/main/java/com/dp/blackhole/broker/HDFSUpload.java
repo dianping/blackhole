@@ -56,7 +56,7 @@ public class HDFSUpload implements Runnable{
             Path tmp = new Path(dfsPath + TMP_SUFFIX);
             gzChannel =  Channels.newChannel(new GZIPOutputStream(fs.create(tmp)));
             
-            Partition p = manager.getPartition(ident.app, ident.source);
+            Partition p = manager.getPartition(ident.app, ident.source, false);
     
             ByteBuffer buffer = ByteBuffer.allocate(BufferSize);
             ByteBufferChannel channel = new ByteBufferChannel(buffer);
