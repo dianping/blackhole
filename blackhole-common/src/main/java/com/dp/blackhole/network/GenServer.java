@@ -118,22 +118,24 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         channel.register(selector, SelectionKey.OP_READ, connection);
     }
     
-    public synchronized void closeConnection(Connection connection) {
-        if (!connection.isActive()) {
-            LOG.info("connection " + connection + "already closed" );
-            return;
+    public void closeConnection(Connection connection) {
+        synchronized (connection) {
+            if (!connection.isActive()) {
+                LOG.info("connection " + connection + "already closed" );
+                return;
+            }
+            
+            SelectionKey key = connection.getChannel().keyFor(selector);
+            LOG.info("close connection: " + connection);
+            key.attach(null);
+            key.cancel();
+            
+            if (connection != null) {
+                connection.close();
+            }
+            
+            entityQueue.add(new EntityEvent(EntityEvent.DISCONNECTED, null, connection));
         }
-        
-        SelectionKey key = connection.getChannel().keyFor(selector);
-        LOG.info("close connection: " + connection);
-        key.attach(null);
-        key.cancel();
-        
-        if (connection != null) {
-            connection.close();
-        }
-        
-        entityQueue.add(new EntityEvent(EntityEvent.DISCONNECTED, null, connection));
     }
 
     public void shutdown() {
