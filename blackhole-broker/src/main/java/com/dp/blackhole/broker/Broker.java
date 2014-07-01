@@ -14,6 +14,7 @@ import org.apache.hadoop.security.SecurityUtil;
 
 import com.dp.blackhole.broker.storage.StorageManager.reporter.ReportEntry;
 import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
@@ -103,9 +104,7 @@ public class Broker {
         if (msg.getType() != MessageType.TOPICREPORT) {
             LOG.debug("send: " + msg);
         }
-        if (supervisor != null) {
-            supervisor.send(PBwrap.PB2Buf(msg));
-        }
+        Util.send(supervisor, msg);
     }
     
     public static Broker getSupervisor() {
@@ -133,7 +132,6 @@ public class Broker {
 
         @Override
         public void OnDisconnected(SimpleConnection connection) {
-            supervisor.close();
             supervisor = null;
             brokerService.disconnectClients();
             heartbeat.shutdown();

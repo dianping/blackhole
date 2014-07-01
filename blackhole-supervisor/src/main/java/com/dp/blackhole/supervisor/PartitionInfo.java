@@ -51,6 +51,6 @@ public class PartitionInfo {
     
     @Override
     public String toString() {
-        return Util.toAtomString("partitioninfo", id, host, endOffset, offline);
+        return Util.toTupleString("partitioninfo", id, host, endOffset, offline);
     }
 }

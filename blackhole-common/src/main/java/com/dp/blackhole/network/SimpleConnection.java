@@ -147,6 +147,9 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
                     break;
                 }
             }
+            if (writeBuffer.hasRemaining()) {
+                break;
+            }
         }
         return written;
     }

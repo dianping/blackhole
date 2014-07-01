@@ -65,10 +65,13 @@ public class StorageManager {
         
     }
 
-    public Partition getPartition(String topic, String partitionId) throws IOException {
+    public Partition getPartition(String topic, String partitionId, boolean createIfNonexist) throws IOException {
         // add new topic if not exist
         ConcurrentHashMap<String, Partition> map = storage.get(topic);
         if (map == null) {
+            if (!createIfNonexist) {
+                return null;
+            }
             ConcurrentHashMap<String, Partition> newMap = new ConcurrentHashMap<String, Partition>();
             storage.putIfAbsent(topic, newMap);
             map = storage.get(topic);
@@ -77,6 +80,9 @@ public class StorageManager {
         // add new partition if not exist
         Partition partition = map.get(partitionId);
         if (partition == null) {
+            if (!createIfNonexist) {
+                return null;
+            }
             Partition newPartition = new Partition(basedir, topic, partitionId, splitThreshold, flushThreshold);
             map.putIfAbsent(partitionId, newPartition);
             partition = map.get(partitionId);
