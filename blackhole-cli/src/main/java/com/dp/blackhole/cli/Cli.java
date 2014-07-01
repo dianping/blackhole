@@ -28,6 +28,7 @@ public class Cli {
     private CliProcessor processor;
     private SimpleConnection supervisor;
     private GenClient<ByteBuffer, SimpleConnection, CliProcessor> client;
+    private static long terminatePeriod;
 
     class CliInnerProcessor extends Thread {
         BufferedReader in;
@@ -164,9 +165,9 @@ public class Cli {
     class CloseTimer extends Thread {
         @Override
         public void run() {
-            LOG.info("Currently Cli JVM will be terminated after 10 sec.");
+            LOG.info("Currently Cli JVM will be terminated after " + terminatePeriod + " sec.");
             try {
-                Thread.sleep(10000);
+                Thread.sleep(terminatePeriod);
             } catch (InterruptedException e) {
                 LOG.warn(e.getMessage());
             }
@@ -205,8 +206,6 @@ public class Cli {
                 return;
             }
             
-            LOG.debug("received: " + message);
-            
             switch (message.getType()) {
             case DUMPREPLY:
                 DumpReply dumpReply = message.getDumpReply();
@@ -229,7 +228,7 @@ public class Cli {
     private void start() throws FileNotFoundException, IOException {
         Properties prop = new Properties();
         prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
-        
+        terminatePeriod = Long.parseLong(prop.getProperty("cli.terminate.period", "1000"));
         processor = new CliProcessor();
         client = new GenClient<ByteBuffer, SimpleConnection, Cli.CliProcessor>(
                 processor,

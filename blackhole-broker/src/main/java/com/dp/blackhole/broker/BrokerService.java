@@ -55,7 +55,7 @@ public class BrokerService extends Thread {
         try {
             server.init(prop, "Publisher", "broker.service.port");
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Failed to init GenServer", e);
         }
     }
     
@@ -183,7 +183,7 @@ public class BrokerService extends Thread {
                 RollPartition roll = p.markRotate();
                 Broker.getRollMgr().doRegister(request.topic, request.partitionId, request.rollPeriod, roll);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error("Got an IOE", e);
             }
         }
         

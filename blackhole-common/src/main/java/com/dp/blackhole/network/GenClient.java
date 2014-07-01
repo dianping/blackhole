@@ -62,9 +62,9 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
                 connect();
                 loopInternal();
             } catch (ClosedChannelException e) {
-                e.printStackTrace();
+                LOG.error("Channel cloesd", e);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error("Oops, got an IOE", e);
             } finally {
                 try {
                     if (running) {
@@ -222,7 +222,9 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
     }
 
     private void connect() throws IOException, ClosedChannelException {
-        socketChannel = SocketChannel.open();
+        if (socketChannel == null || !socketChannel.isOpen()) {
+            socketChannel = SocketChannel.open();
+        }
         socketChannel.configureBlocking(false);
         SocketAddress server = new InetSocketAddress(host, port);
         socketChannel.connect(server);

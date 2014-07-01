@@ -542,8 +542,10 @@ public class Supervisor {
         sb.append("print connectionStreamMap:\n");
         for(Entry<SimpleConnection, ArrayList<Stream>> entry : connectionStreamMap.entrySet()) {
             SimpleConnection conn = entry.getKey();
-            sb.append(conn)
-            .append("\n");
+            ConnectionDescription desc = connections.get(conn);
+            if (desc != null) {
+                sb.append(desc).append("\n");
+            }
             ArrayList<Stream> streams = entry.getValue();
             synchronized (streams) {
                 for (Stream stream : streams) {
@@ -1191,8 +1193,8 @@ public class Supervisor {
         
         PartitionInfo pinfo = partitionInfos.get(partitionId);
         if (pinfo == null) {
-            LOG.info("new partition online: " + pinfo);
             pinfo = new PartitionInfo(partitionId, message.getBrokerServer());
+            LOG.info("new partition online: " + pinfo);
             partitionInfos.put(partitionId, pinfo);
         } else {
             if (pinfo.isOffline()) {
