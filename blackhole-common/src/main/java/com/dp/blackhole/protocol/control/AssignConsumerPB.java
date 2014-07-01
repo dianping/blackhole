@@ -8,270 +8,672 @@ public final class AssignConsumerPB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  public interface AssignConsumerOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required string group = 1;
+    /**
+     * <code>required string group = 1;</code>
+     */
+    boolean hasGroup();
+    /**
+     * <code>required string group = 1;</code>
+     */
+    java.lang.String getGroup();
+    /**
+     * <code>required string group = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getGroupBytes();
+
+    // required string topic = 2;
+    /**
+     * <code>required string topic = 2;</code>
+     */
+    boolean hasTopic();
+    /**
+     * <code>required string topic = 2;</code>
+     */
+    java.lang.String getTopic();
+    /**
+     * <code>required string topic = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getTopicBytes();
+
+    // required string consumerIdString = 3;
+    /**
+     * <code>required string consumerIdString = 3;</code>
+     */
+    boolean hasConsumerIdString();
+    /**
+     * <code>required string consumerIdString = 3;</code>
+     */
+    java.lang.String getConsumerIdString();
+    /**
+     * <code>required string consumerIdString = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getConsumerIdStringBytes();
+
+    // repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;
+    /**
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+     */
+    java.util.List<com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset> 
+        getPartitionOffsetsList();
+    /**
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+     */
+    com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset getPartitionOffsets(int index);
+    /**
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+     */
+    int getPartitionOffsetsCount();
+    /**
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+     */
+    java.util.List<? extends com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder> 
+        getPartitionOffsetsOrBuilderList();
+    /**
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+     */
+    com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder getPartitionOffsetsOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code blackhole.AssignConsumer}
+   */
   public static final class AssignConsumer extends
-      com.google.protobuf.GeneratedMessage {
+      com.google.protobuf.GeneratedMessage
+      implements AssignConsumerOrBuilder {
     // Use AssignConsumer.newBuilder() to construct.
-    private AssignConsumer() {
-      initFields();
+    private AssignConsumer(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private AssignConsumer(boolean noInit) {}
-    
+    private AssignConsumer(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final AssignConsumer defaultInstance;
     public static AssignConsumer getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public AssignConsumer getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AssignConsumer(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              group_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              topic_ = input.readBytes();
+              break;
+            }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              consumerIdString_ = input.readBytes();
+              break;
+            }
+            case 34: {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                partitionOffsets_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset>();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              partitionOffsets_.add(input.readMessage(com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+          partitionOffsets_ = java.util.Collections.unmodifiableList(partitionOffsets_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.AssignConsumerPB.internal_static_blackhole_AssignConsumer_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.AssignConsumerPB.internal_static_blackhole_AssignConsumer_fieldAccessorTable;
+      return com.dp.blackhole.protocol.control.AssignConsumerPB.internal_static_blackhole_AssignConsumer_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.class, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.Builder.class);
     }
-    
-    public static final class PartitionOffset extends
-        com.google.protobuf.GeneratedMessage {
-      // Use PartitionOffset.newBuilder() to construct.
-      private PartitionOffset() {
-        initFields();
+
+    public static com.google.protobuf.Parser<AssignConsumer> PARSER =
+        new com.google.protobuf.AbstractParser<AssignConsumer>() {
+      public AssignConsumer parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AssignConsumer(input, extensionRegistry);
       }
-      private PartitionOffset(boolean noInit) {}
-      
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AssignConsumer> getParserForType() {
+      return PARSER;
+    }
+
+    public interface PartitionOffsetOrBuilder
+        extends com.google.protobuf.MessageOrBuilder {
+
+      // required string brokerString = 1;
+      /**
+       * <code>required string brokerString = 1;</code>
+       */
+      boolean hasBrokerString();
+      /**
+       * <code>required string brokerString = 1;</code>
+       */
+      java.lang.String getBrokerString();
+      /**
+       * <code>required string brokerString = 1;</code>
+       */
+      com.google.protobuf.ByteString
+          getBrokerStringBytes();
+
+      // required string partitionName = 2;
+      /**
+       * <code>required string partitionName = 2;</code>
+       */
+      boolean hasPartitionName();
+      /**
+       * <code>required string partitionName = 2;</code>
+       */
+      java.lang.String getPartitionName();
+      /**
+       * <code>required string partitionName = 2;</code>
+       */
+      com.google.protobuf.ByteString
+          getPartitionNameBytes();
+
+      // required int64 offset = 3;
+      /**
+       * <code>required int64 offset = 3;</code>
+       */
+      boolean hasOffset();
+      /**
+       * <code>required int64 offset = 3;</code>
+       */
+      long getOffset();
+    }
+    /**
+     * Protobuf type {@code blackhole.AssignConsumer.PartitionOffset}
+     */
+    public static final class PartitionOffset extends
+        com.google.protobuf.GeneratedMessage
+        implements PartitionOffsetOrBuilder {
+      // Use PartitionOffset.newBuilder() to construct.
+      private PartitionOffset(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private PartitionOffset(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
       private static final PartitionOffset defaultInstance;
       public static PartitionOffset getDefaultInstance() {
         return defaultInstance;
       }
-      
+
       public PartitionOffset getDefaultInstanceForType() {
         return defaultInstance;
       }
-      
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private PartitionOffset(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                bitField0_ |= 0x00000001;
+                brokerString_ = input.readBytes();
+                break;
+              }
+              case 18: {
+                bitField0_ |= 0x00000002;
+                partitionName_ = input.readBytes();
+                break;
+              }
+              case 24: {
+                bitField0_ |= 0x00000004;
+                offset_ = input.readInt64();
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.dp.blackhole.protocol.control.AssignConsumerPB.internal_static_blackhole_AssignConsumer_PartitionOffset_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.dp.blackhole.protocol.control.AssignConsumerPB.internal_static_blackhole_AssignConsumer_PartitionOffset_fieldAccessorTable;
+        return com.dp.blackhole.protocol.control.AssignConsumerPB.internal_static_blackhole_AssignConsumer_PartitionOffset_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.class, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder.class);
       }
-      
+
+      public static com.google.protobuf.Parser<PartitionOffset> PARSER =
+          new com.google.protobuf.AbstractParser<PartitionOffset>() {
+        public PartitionOffset parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new PartitionOffset(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<PartitionOffset> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
       // required string brokerString = 1;
       public static final int BROKERSTRING_FIELD_NUMBER = 1;
-      private boolean hasBrokerString;
-      private java.lang.String brokerString_ = "";
-      public boolean hasBrokerString() { return hasBrokerString; }
-      public java.lang.String getBrokerString() { return brokerString_; }
-      
+      private java.lang.Object brokerString_;
+      /**
+       * <code>required string brokerString = 1;</code>
+       */
+      public boolean hasBrokerString() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string brokerString = 1;</code>
+       */
+      public java.lang.String getBrokerString() {
+        java.lang.Object ref = brokerString_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            brokerString_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string brokerString = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getBrokerStringBytes() {
+        java.lang.Object ref = brokerString_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          brokerString_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
       // required string partitionName = 2;
       public static final int PARTITIONNAME_FIELD_NUMBER = 2;
-      private boolean hasPartitionName;
-      private java.lang.String partitionName_ = "";
-      public boolean hasPartitionName() { return hasPartitionName; }
-      public java.lang.String getPartitionName() { return partitionName_; }
-      
+      private java.lang.Object partitionName_;
+      /**
+       * <code>required string partitionName = 2;</code>
+       */
+      public boolean hasPartitionName() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required string partitionName = 2;</code>
+       */
+      public java.lang.String getPartitionName() {
+        java.lang.Object ref = partitionName_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            partitionName_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string partitionName = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getPartitionNameBytes() {
+        java.lang.Object ref = partitionName_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          partitionName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
       // required int64 offset = 3;
       public static final int OFFSET_FIELD_NUMBER = 3;
-      private boolean hasOffset;
-      private long offset_ = 0L;
-      public boolean hasOffset() { return hasOffset; }
-      public long getOffset() { return offset_; }
-      
-      private void initFields() {
+      private long offset_;
+      /**
+       * <code>required int64 offset = 3;</code>
+       */
+      public boolean hasOffset() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
       }
+      /**
+       * <code>required int64 offset = 3;</code>
+       */
+      public long getOffset() {
+        return offset_;
+      }
+
+      private void initFields() {
+        brokerString_ = "";
+        partitionName_ = "";
+        offset_ = 0L;
+      }
+      private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
-        if (!hasBrokerString) return false;
-        if (!hasPartitionName) return false;
-        if (!hasOffset) return false;
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized != -1) return isInitialized == 1;
+
+        if (!hasBrokerString()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasPartitionName()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasOffset()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
         return true;
       }
-      
+
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
         getSerializedSize();
-        if (hasBrokerString()) {
-          output.writeString(1, getBrokerString());
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeBytes(1, getBrokerStringBytes());
         }
-        if (hasPartitionName()) {
-          output.writeString(2, getPartitionName());
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeBytes(2, getPartitionNameBytes());
         }
-        if (hasOffset()) {
-          output.writeInt64(3, getOffset());
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          output.writeInt64(3, offset_);
         }
         getUnknownFields().writeTo(output);
       }
-      
+
       private int memoizedSerializedSize = -1;
       public int getSerializedSize() {
         int size = memoizedSerializedSize;
         if (size != -1) return size;
-      
+
         size = 0;
-        if (hasBrokerString()) {
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeStringSize(1, getBrokerString());
+            .computeBytesSize(1, getBrokerStringBytes());
         }
-        if (hasPartitionName()) {
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeStringSize(2, getPartitionName());
+            .computeBytesSize(2, getPartitionNameBytes());
         }
-        if (hasOffset()) {
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeInt64Size(3, getOffset());
+            .computeInt64Size(3, offset_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
         return size;
       }
-      
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
       public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset parseFrom(
           com.google.protobuf.ByteString data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset parseFrom(
           com.google.protobuf.ByteString data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset parseFrom(byte[] data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset parseFrom(
           byte[] data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset parseFrom(java.io.InputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
       public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset parseDelimitedFrom(java.io.InputStream input)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input);
       }
       public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
       }
       public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
-      
+
       public static Builder newBuilder() { return Builder.create(); }
       public Builder newBuilderForType() { return newBuilder(); }
       public static Builder newBuilder(com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset prototype) {
         return newBuilder().mergeFrom(prototype);
       }
       public Builder toBuilder() { return newBuilder(this); }
-      
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code blackhole.AssignConsumer.PartitionOffset}
+       */
       public static final class Builder extends
-          com.google.protobuf.GeneratedMessage.Builder<Builder> {
-        private com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset result;
-        
+          com.google.protobuf.GeneratedMessage.Builder<Builder>
+         implements com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return com.dp.blackhole.protocol.control.AssignConsumerPB.internal_static_blackhole_AssignConsumer_PartitionOffset_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return com.dp.blackhole.protocol.control.AssignConsumerPB.internal_static_blackhole_AssignConsumer_PartitionOffset_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.class, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder.class);
+        }
+
         // Construct using com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.newBuilder()
-        private Builder() {}
-        
-        private static Builder create() {
-          Builder builder = new Builder();
-          builder.result = new com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset();
-          return builder;
+        private Builder() {
+          maybeForceBuilderInitialization();
         }
-        
-        protected com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset internalGetResult() {
-          return result;
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
         }
-        
-        public Builder clear() {
-          if (result == null) {
-            throw new IllegalStateException(
-              "Cannot call clear() after build().");
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
           }
-          result = new com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset();
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          brokerString_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          partitionName_ = "";
+          bitField0_ = (bitField0_ & ~0x00000002);
+          offset_ = 0L;
+          bitField0_ = (bitField0_ & ~0x00000004);
           return this;
         }
-        
+
         public Builder clone() {
-          return create().mergeFrom(result);
+          return create().mergeFrom(buildPartial());
         }
-        
+
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.getDescriptor();
+          return com.dp.blackhole.protocol.control.AssignConsumerPB.internal_static_blackhole_AssignConsumer_PartitionOffset_descriptor;
         }
-        
+
         public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset getDefaultInstanceForType() {
           return com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.getDefaultInstance();
         }
-        
-        public boolean isInitialized() {
-          return result.isInitialized();
-        }
+
         public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset build() {
-          if (result != null && !isInitialized()) {
+          com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset result = buildPartial();
+          if (!result.isInitialized()) {
             throw newUninitializedMessageException(result);
           }
-          return buildPartial();
+          return result;
         }
-        
-        private com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset buildParsed()
-            throws com.google.protobuf.InvalidProtocolBufferException {
-          if (!isInitialized()) {
-            throw newUninitializedMessageException(
-              result).asInvalidProtocolBufferException();
-          }
-          return buildPartial();
-        }
-        
+
         public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset buildPartial() {
-          if (result == null) {
-            throw new IllegalStateException(
-              "build() has already been called on this Builder.");
+          com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset result = new com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
           }
-          com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset returnMe = result;
-          result = null;
-          return returnMe;
+          result.brokerString_ = brokerString_;
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.partitionName_ = partitionName_;
+          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+            to_bitField0_ |= 0x00000004;
+          }
+          result.offset_ = offset_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
         }
-        
+
         public Builder mergeFrom(com.google.protobuf.Message other) {
           if (other instanceof com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset) {
             return mergeFrom((com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset)other);
@@ -280,14 +682,18 @@ public final class AssignConsumerPB {
             return this;
           }
         }
-        
+
         public Builder mergeFrom(com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset other) {
           if (other == com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.getDefaultInstance()) return this;
           if (other.hasBrokerString()) {
-            setBrokerString(other.getBrokerString());
+            bitField0_ |= 0x00000001;
+            brokerString_ = other.brokerString_;
+            onChanged();
           }
           if (other.hasPartitionName()) {
-            setPartitionName(other.getPartitionName());
+            bitField0_ |= 0x00000002;
+            partitionName_ = other.partitionName_;
+            onChanged();
           }
           if (other.hasOffset()) {
             setOffset(other.getOffset());
@@ -295,353 +701,656 @@ public final class AssignConsumerPB {
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
         }
-        
+
+        public final boolean isInitialized() {
+          if (!hasBrokerString()) {
+            
+            return false;
+          }
+          if (!hasPartitionName()) {
+            
+            return false;
+          }
+          if (!hasOffset()) {
+            
+            return false;
+          }
+          return true;
+        }
+
         public Builder mergeFrom(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder(
-              this.getUnknownFields());
-          while (true) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                this.setUnknownFields(unknownFields.build());
-                return this;
-              default: {
-                if (!parseUnknownField(input, unknownFields,
-                                       extensionRegistry, tag)) {
-                  this.setUnknownFields(unknownFields.build());
-                  return this;
-                }
-                break;
-              }
-              case 10: {
-                setBrokerString(input.readString());
-                break;
-              }
-              case 18: {
-                setPartitionName(input.readString());
-                break;
-              }
-              case 24: {
-                setOffset(input.readInt64());
-                break;
-              }
+          com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
             }
           }
+          return this;
         }
-        
-        
+        private int bitField0_;
+
         // required string brokerString = 1;
+        private java.lang.Object brokerString_ = "";
+        /**
+         * <code>required string brokerString = 1;</code>
+         */
         public boolean hasBrokerString() {
-          return result.hasBrokerString();
+          return ((bitField0_ & 0x00000001) == 0x00000001);
         }
+        /**
+         * <code>required string brokerString = 1;</code>
+         */
         public java.lang.String getBrokerString() {
-          return result.getBrokerString();
+          java.lang.Object ref = brokerString_;
+          if (!(ref instanceof java.lang.String)) {
+            java.lang.String s = ((com.google.protobuf.ByteString) ref)
+                .toStringUtf8();
+            brokerString_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
         }
-        public Builder setBrokerString(java.lang.String value) {
+        /**
+         * <code>required string brokerString = 1;</code>
+         */
+        public com.google.protobuf.ByteString
+            getBrokerStringBytes() {
+          java.lang.Object ref = brokerString_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            brokerString_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string brokerString = 1;</code>
+         */
+        public Builder setBrokerString(
+            java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  result.hasBrokerString = true;
-          result.brokerString_ = value;
+  bitField0_ |= 0x00000001;
+          brokerString_ = value;
+          onChanged();
           return this;
         }
+        /**
+         * <code>required string brokerString = 1;</code>
+         */
         public Builder clearBrokerString() {
-          result.hasBrokerString = false;
-          result.brokerString_ = getDefaultInstance().getBrokerString();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          brokerString_ = getDefaultInstance().getBrokerString();
+          onChanged();
           return this;
         }
-        
-        // required string partitionName = 2;
-        public boolean hasPartitionName() {
-          return result.hasPartitionName();
-        }
-        public java.lang.String getPartitionName() {
-          return result.getPartitionName();
-        }
-        public Builder setPartitionName(java.lang.String value) {
+        /**
+         * <code>required string brokerString = 1;</code>
+         */
+        public Builder setBrokerStringBytes(
+            com.google.protobuf.ByteString value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  result.hasPartitionName = true;
-          result.partitionName_ = value;
+  bitField0_ |= 0x00000001;
+          brokerString_ = value;
+          onChanged();
           return this;
         }
+
+        // required string partitionName = 2;
+        private java.lang.Object partitionName_ = "";
+        /**
+         * <code>required string partitionName = 2;</code>
+         */
+        public boolean hasPartitionName() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        /**
+         * <code>required string partitionName = 2;</code>
+         */
+        public java.lang.String getPartitionName() {
+          java.lang.Object ref = partitionName_;
+          if (!(ref instanceof java.lang.String)) {
+            java.lang.String s = ((com.google.protobuf.ByteString) ref)
+                .toStringUtf8();
+            partitionName_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string partitionName = 2;</code>
+         */
+        public com.google.protobuf.ByteString
+            getPartitionNameBytes() {
+          java.lang.Object ref = partitionName_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            partitionName_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string partitionName = 2;</code>
+         */
+        public Builder setPartitionName(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          partitionName_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string partitionName = 2;</code>
+         */
         public Builder clearPartitionName() {
-          result.hasPartitionName = false;
-          result.partitionName_ = getDefaultInstance().getPartitionName();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          partitionName_ = getDefaultInstance().getPartitionName();
+          onChanged();
           return this;
         }
-        
+        /**
+         * <code>required string partitionName = 2;</code>
+         */
+        public Builder setPartitionNameBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          partitionName_ = value;
+          onChanged();
+          return this;
+        }
+
         // required int64 offset = 3;
+        private long offset_ ;
+        /**
+         * <code>required int64 offset = 3;</code>
+         */
         public boolean hasOffset() {
-          return result.hasOffset();
+          return ((bitField0_ & 0x00000004) == 0x00000004);
         }
+        /**
+         * <code>required int64 offset = 3;</code>
+         */
         public long getOffset() {
-          return result.getOffset();
+          return offset_;
         }
+        /**
+         * <code>required int64 offset = 3;</code>
+         */
         public Builder setOffset(long value) {
-          result.hasOffset = true;
-          result.offset_ = value;
+          bitField0_ |= 0x00000004;
+          offset_ = value;
+          onChanged();
           return this;
         }
+        /**
+         * <code>required int64 offset = 3;</code>
+         */
         public Builder clearOffset() {
-          result.hasOffset = false;
-          result.offset_ = 0L;
+          bitField0_ = (bitField0_ & ~0x00000004);
+          offset_ = 0L;
+          onChanged();
           return this;
         }
-        
+
         // @@protoc_insertion_point(builder_scope:blackhole.AssignConsumer.PartitionOffset)
       }
-      
+
       static {
         defaultInstance = new PartitionOffset(true);
-        com.dp.blackhole.protocol.control.AssignConsumerPB.internalForceInit();
         defaultInstance.initFields();
       }
-      
+
       // @@protoc_insertion_point(class_scope:blackhole.AssignConsumer.PartitionOffset)
     }
-    
+
+    private int bitField0_;
     // required string group = 1;
     public static final int GROUP_FIELD_NUMBER = 1;
-    private boolean hasGroup;
-    private java.lang.String group_ = "";
-    public boolean hasGroup() { return hasGroup; }
-    public java.lang.String getGroup() { return group_; }
-    
+    private java.lang.Object group_;
+    /**
+     * <code>required string group = 1;</code>
+     */
+    public boolean hasGroup() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string group = 1;</code>
+     */
+    public java.lang.String getGroup() {
+      java.lang.Object ref = group_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          group_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string group = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getGroupBytes() {
+      java.lang.Object ref = group_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        group_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     // required string topic = 2;
     public static final int TOPIC_FIELD_NUMBER = 2;
-    private boolean hasTopic;
-    private java.lang.String topic_ = "";
-    public boolean hasTopic() { return hasTopic; }
-    public java.lang.String getTopic() { return topic_; }
-    
+    private java.lang.Object topic_;
+    /**
+     * <code>required string topic = 2;</code>
+     */
+    public boolean hasTopic() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required string topic = 2;</code>
+     */
+    public java.lang.String getTopic() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          topic_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string topic = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTopicBytes() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        topic_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     // required string consumerIdString = 3;
     public static final int CONSUMERIDSTRING_FIELD_NUMBER = 3;
-    private boolean hasConsumerIdString;
-    private java.lang.String consumerIdString_ = "";
-    public boolean hasConsumerIdString() { return hasConsumerIdString; }
-    public java.lang.String getConsumerIdString() { return consumerIdString_; }
-    
+    private java.lang.Object consumerIdString_;
+    /**
+     * <code>required string consumerIdString = 3;</code>
+     */
+    public boolean hasConsumerIdString() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required string consumerIdString = 3;</code>
+     */
+    public java.lang.String getConsumerIdString() {
+      java.lang.Object ref = consumerIdString_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          consumerIdString_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string consumerIdString = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getConsumerIdStringBytes() {
+      java.lang.Object ref = consumerIdString_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        consumerIdString_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     // repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;
     public static final int PARTITIONOFFSETS_FIELD_NUMBER = 4;
-    private java.util.List<com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset> partitionOffsets_ =
-      java.util.Collections.emptyList();
+    private java.util.List<com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset> partitionOffsets_;
+    /**
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+     */
     public java.util.List<com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset> getPartitionOffsetsList() {
       return partitionOffsets_;
     }
-    public int getPartitionOffsetsCount() { return partitionOffsets_.size(); }
+    /**
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+     */
+    public java.util.List<? extends com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder> 
+        getPartitionOffsetsOrBuilderList() {
+      return partitionOffsets_;
+    }
+    /**
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+     */
+    public int getPartitionOffsetsCount() {
+      return partitionOffsets_.size();
+    }
+    /**
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+     */
     public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset getPartitionOffsets(int index) {
       return partitionOffsets_.get(index);
     }
-    
-    private void initFields() {
+    /**
+     * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+     */
+    public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder getPartitionOffsetsOrBuilder(
+        int index) {
+      return partitionOffsets_.get(index);
     }
+
+    private void initFields() {
+      group_ = "";
+      topic_ = "";
+      consumerIdString_ = "";
+      partitionOffsets_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      if (!hasGroup) return false;
-      if (!hasTopic) return false;
-      if (!hasConsumerIdString) return false;
-      for (com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset element : getPartitionOffsetsList()) {
-        if (!element.isInitialized()) return false;
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasGroup()) {
+        memoizedIsInitialized = 0;
+        return false;
       }
+      if (!hasTopic()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasConsumerIdString()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      for (int i = 0; i < getPartitionOffsetsCount(); i++) {
+        if (!getPartitionOffsets(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasGroup()) {
-        output.writeString(1, getGroup());
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getGroupBytes());
       }
-      if (hasTopic()) {
-        output.writeString(2, getTopic());
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, getTopicBytes());
       }
-      if (hasConsumerIdString()) {
-        output.writeString(3, getConsumerIdString());
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, getConsumerIdStringBytes());
       }
-      for (com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset element : getPartitionOffsetsList()) {
-        output.writeMessage(4, element);
+      for (int i = 0; i < partitionOffsets_.size(); i++) {
+        output.writeMessage(4, partitionOffsets_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
-      if (hasGroup()) {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getGroup());
+          .computeBytesSize(1, getGroupBytes());
       }
-      if (hasTopic()) {
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(2, getTopic());
+          .computeBytesSize(2, getTopicBytes());
       }
-      if (hasConsumerIdString()) {
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(3, getConsumerIdString());
+          .computeBytesSize(3, getConsumerIdStringBytes());
       }
-      for (com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset element : getPartitionOffsetsList()) {
+      for (int i = 0; i < partitionOffsets_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, element);
+          .computeMessageSize(4, partitionOffsets_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-    
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
     public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code blackhole.AssignConsumer}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> {
-      private com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer result;
-      
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumerOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.dp.blackhole.protocol.control.AssignConsumerPB.internal_static_blackhole_AssignConsumer_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.dp.blackhole.protocol.control.AssignConsumerPB.internal_static_blackhole_AssignConsumer_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.class, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.Builder.class);
+      }
+
       // Construct using com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.newBuilder()
-      private Builder() {}
-      
-      private static Builder create() {
-        Builder builder = new Builder();
-        builder.result = new com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer();
-        return builder;
+      private Builder() {
+        maybeForceBuilderInitialization();
       }
-      
-      protected com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer internalGetResult() {
-        return result;
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
       }
-      
-      public Builder clear() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "Cannot call clear() after build().");
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getPartitionOffsetsFieldBuilder();
         }
-        result = new com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer();
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        group_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        topic_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        consumerIdString_ = "";
+        bitField0_ = (bitField0_ & ~0x00000004);
+        if (partitionOffsetsBuilder_ == null) {
+          partitionOffsets_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+        } else {
+          partitionOffsetsBuilder_.clear();
+        }
         return this;
       }
-      
+
       public Builder clone() {
-        return create().mergeFrom(result);
+        return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.getDescriptor();
+        return com.dp.blackhole.protocol.control.AssignConsumerPB.internal_static_blackhole_AssignConsumer_descriptor;
       }
-      
+
       public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.getDefaultInstance();
       }
-      
-      public boolean isInitialized() {
-        return result.isInitialized();
-      }
+
       public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer build() {
-        if (result != null && !isInitialized()) {
+        com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer result = buildPartial();
+        if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return buildPartial();
+        return result;
       }
-      
-      private com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        if (!isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return buildPartial();
-      }
-      
+
       public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer buildPartial() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "build() has already been called on this Builder.");
+        com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer result = new com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
         }
-        if (result.partitionOffsets_ != java.util.Collections.EMPTY_LIST) {
-          result.partitionOffsets_ =
-            java.util.Collections.unmodifiableList(result.partitionOffsets_);
+        result.group_ = group_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
         }
-        com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer returnMe = result;
-        result = null;
-        return returnMe;
+        result.topic_ = topic_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.consumerIdString_ = consumerIdString_;
+        if (partitionOffsetsBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+            partitionOffsets_ = java.util.Collections.unmodifiableList(partitionOffsets_);
+            bitField0_ = (bitField0_ & ~0x00000008);
+          }
+          result.partitionOffsets_ = partitionOffsets_;
+        } else {
+          result.partitionOffsets_ = partitionOffsetsBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer) {
           return mergeFrom((com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer)other);
@@ -650,198 +1359,568 @@ public final class AssignConsumerPB {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer other) {
         if (other == com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.getDefaultInstance()) return this;
         if (other.hasGroup()) {
-          setGroup(other.getGroup());
+          bitField0_ |= 0x00000001;
+          group_ = other.group_;
+          onChanged();
         }
         if (other.hasTopic()) {
-          setTopic(other.getTopic());
+          bitField0_ |= 0x00000002;
+          topic_ = other.topic_;
+          onChanged();
         }
         if (other.hasConsumerIdString()) {
-          setConsumerIdString(other.getConsumerIdString());
+          bitField0_ |= 0x00000004;
+          consumerIdString_ = other.consumerIdString_;
+          onChanged();
         }
-        if (!other.partitionOffsets_.isEmpty()) {
-          if (result.partitionOffsets_.isEmpty()) {
-            result.partitionOffsets_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset>();
+        if (partitionOffsetsBuilder_ == null) {
+          if (!other.partitionOffsets_.isEmpty()) {
+            if (partitionOffsets_.isEmpty()) {
+              partitionOffsets_ = other.partitionOffsets_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+            } else {
+              ensurePartitionOffsetsIsMutable();
+              partitionOffsets_.addAll(other.partitionOffsets_);
+            }
+            onChanged();
           }
-          result.partitionOffsets_.addAll(other.partitionOffsets_);
+        } else {
+          if (!other.partitionOffsets_.isEmpty()) {
+            if (partitionOffsetsBuilder_.isEmpty()) {
+              partitionOffsetsBuilder_.dispose();
+              partitionOffsetsBuilder_ = null;
+              partitionOffsets_ = other.partitionOffsets_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+              partitionOffsetsBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getPartitionOffsetsFieldBuilder() : null;
+            } else {
+              partitionOffsetsBuilder_.addAllMessages(other.partitionOffsets_);
+            }
+          }
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
+      public final boolean isInitialized() {
+        if (!hasGroup()) {
+          
+          return false;
+        }
+        if (!hasTopic()) {
+          
+          return false;
+        }
+        if (!hasConsumerIdString()) {
+          
+          return false;
+        }
+        for (int i = 0; i < getPartitionOffsetsCount(); i++) {
+          if (!getPartitionOffsets(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        return true;
+      }
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              setGroup(input.readString());
-              break;
-            }
-            case 18: {
-              setTopic(input.readString());
-              break;
-            }
-            case 26: {
-              setConsumerIdString(input.readString());
-              break;
-            }
-            case 34: {
-              com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder subBuilder = com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addPartitionOffsets(subBuilder.buildPartial());
-              break;
-            }
+        com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
-      
+      private int bitField0_;
+
       // required string group = 1;
+      private java.lang.Object group_ = "";
+      /**
+       * <code>required string group = 1;</code>
+       */
       public boolean hasGroup() {
-        return result.hasGroup();
+        return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required string group = 1;</code>
+       */
       public java.lang.String getGroup() {
-        return result.getGroup();
+        java.lang.Object ref = group_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          group_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
-      public Builder setGroup(java.lang.String value) {
+      /**
+       * <code>required string group = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getGroupBytes() {
+        java.lang.Object ref = group_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          group_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string group = 1;</code>
+       */
+      public Builder setGroup(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasGroup = true;
-        result.group_ = value;
+  bitField0_ |= 0x00000001;
+        group_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required string group = 1;</code>
+       */
       public Builder clearGroup() {
-        result.hasGroup = false;
-        result.group_ = getDefaultInstance().getGroup();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        group_ = getDefaultInstance().getGroup();
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>required string group = 1;</code>
+       */
+      public Builder setGroupBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        group_ = value;
+        onChanged();
+        return this;
+      }
+
       // required string topic = 2;
+      private java.lang.Object topic_ = "";
+      /**
+       * <code>required string topic = 2;</code>
+       */
       public boolean hasTopic() {
-        return result.hasTopic();
+        return ((bitField0_ & 0x00000002) == 0x00000002);
       }
+      /**
+       * <code>required string topic = 2;</code>
+       */
       public java.lang.String getTopic() {
-        return result.getTopic();
+        java.lang.Object ref = topic_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          topic_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
-      public Builder setTopic(java.lang.String value) {
+      /**
+       * <code>required string topic = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTopicBytes() {
+        java.lang.Object ref = topic_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          topic_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string topic = 2;</code>
+       */
+      public Builder setTopic(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasTopic = true;
-        result.topic_ = value;
+  bitField0_ |= 0x00000002;
+        topic_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required string topic = 2;</code>
+       */
       public Builder clearTopic() {
-        result.hasTopic = false;
-        result.topic_ = getDefaultInstance().getTopic();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        topic_ = getDefaultInstance().getTopic();
+        onChanged();
         return this;
       }
-      
-      // required string consumerIdString = 3;
-      public boolean hasConsumerIdString() {
-        return result.hasConsumerIdString();
-      }
-      public java.lang.String getConsumerIdString() {
-        return result.getConsumerIdString();
-      }
-      public Builder setConsumerIdString(java.lang.String value) {
+      /**
+       * <code>required string topic = 2;</code>
+       */
+      public Builder setTopicBytes(
+          com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasConsumerIdString = true;
-        result.consumerIdString_ = value;
+  bitField0_ |= 0x00000002;
+        topic_ = value;
+        onChanged();
         return this;
       }
+
+      // required string consumerIdString = 3;
+      private java.lang.Object consumerIdString_ = "";
+      /**
+       * <code>required string consumerIdString = 3;</code>
+       */
+      public boolean hasConsumerIdString() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required string consumerIdString = 3;</code>
+       */
+      public java.lang.String getConsumerIdString() {
+        java.lang.Object ref = consumerIdString_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          consumerIdString_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string consumerIdString = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getConsumerIdStringBytes() {
+        java.lang.Object ref = consumerIdString_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          consumerIdString_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string consumerIdString = 3;</code>
+       */
+      public Builder setConsumerIdString(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        consumerIdString_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string consumerIdString = 3;</code>
+       */
       public Builder clearConsumerIdString() {
-        result.hasConsumerIdString = false;
-        result.consumerIdString_ = getDefaultInstance().getConsumerIdString();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        consumerIdString_ = getDefaultInstance().getConsumerIdString();
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>required string consumerIdString = 3;</code>
+       */
+      public Builder setConsumerIdStringBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        consumerIdString_ = value;
+        onChanged();
+        return this;
+      }
+
       // repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;
+      private java.util.List<com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset> partitionOffsets_ =
+        java.util.Collections.emptyList();
+      private void ensurePartitionOffsetsIsMutable() {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+          partitionOffsets_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset>(partitionOffsets_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder> partitionOffsetsBuilder_;
+
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
       public java.util.List<com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset> getPartitionOffsetsList() {
-        return java.util.Collections.unmodifiableList(result.partitionOffsets_);
+        if (partitionOffsetsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(partitionOffsets_);
+        } else {
+          return partitionOffsetsBuilder_.getMessageList();
+        }
       }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
       public int getPartitionOffsetsCount() {
-        return result.getPartitionOffsetsCount();
+        if (partitionOffsetsBuilder_ == null) {
+          return partitionOffsets_.size();
+        } else {
+          return partitionOffsetsBuilder_.getCount();
+        }
       }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
       public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset getPartitionOffsets(int index) {
-        return result.getPartitionOffsets(index);
-      }
-      public Builder setPartitionOffsets(int index, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset value) {
-        if (value == null) {
-          throw new NullPointerException();
+        if (partitionOffsetsBuilder_ == null) {
+          return partitionOffsets_.get(index);
+        } else {
+          return partitionOffsetsBuilder_.getMessage(index);
         }
-        result.partitionOffsets_.set(index, value);
+      }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
+      public Builder setPartitionOffsets(
+          int index, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset value) {
+        if (partitionOffsetsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensurePartitionOffsetsIsMutable();
+          partitionOffsets_.set(index, value);
+          onChanged();
+        } else {
+          partitionOffsetsBuilder_.setMessage(index, value);
+        }
         return this;
       }
-      public Builder setPartitionOffsets(int index, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder builderForValue) {
-        result.partitionOffsets_.set(index, builderForValue.build());
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
+      public Builder setPartitionOffsets(
+          int index, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder builderForValue) {
+        if (partitionOffsetsBuilder_ == null) {
+          ensurePartitionOffsetsIsMutable();
+          partitionOffsets_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          partitionOffsetsBuilder_.setMessage(index, builderForValue.build());
+        }
         return this;
       }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
       public Builder addPartitionOffsets(com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset value) {
-        if (value == null) {
-          throw new NullPointerException();
+        if (partitionOffsetsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensurePartitionOffsetsIsMutable();
+          partitionOffsets_.add(value);
+          onChanged();
+        } else {
+          partitionOffsetsBuilder_.addMessage(value);
         }
-        if (result.partitionOffsets_.isEmpty()) {
-          result.partitionOffsets_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset>();
-        }
-        result.partitionOffsets_.add(value);
         return this;
       }
-      public Builder addPartitionOffsets(com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder builderForValue) {
-        if (result.partitionOffsets_.isEmpty()) {
-          result.partitionOffsets_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset>();
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
+      public Builder addPartitionOffsets(
+          int index, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset value) {
+        if (partitionOffsetsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensurePartitionOffsetsIsMutable();
+          partitionOffsets_.add(index, value);
+          onChanged();
+        } else {
+          partitionOffsetsBuilder_.addMessage(index, value);
         }
-        result.partitionOffsets_.add(builderForValue.build());
         return this;
       }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
+      public Builder addPartitionOffsets(
+          com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder builderForValue) {
+        if (partitionOffsetsBuilder_ == null) {
+          ensurePartitionOffsetsIsMutable();
+          partitionOffsets_.add(builderForValue.build());
+          onChanged();
+        } else {
+          partitionOffsetsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
+      public Builder addPartitionOffsets(
+          int index, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder builderForValue) {
+        if (partitionOffsetsBuilder_ == null) {
+          ensurePartitionOffsetsIsMutable();
+          partitionOffsets_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          partitionOffsetsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
       public Builder addAllPartitionOffsets(
           java.lang.Iterable<? extends com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset> values) {
-        if (result.partitionOffsets_.isEmpty()) {
-          result.partitionOffsets_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset>();
+        if (partitionOffsetsBuilder_ == null) {
+          ensurePartitionOffsetsIsMutable();
+          super.addAll(values, partitionOffsets_);
+          onChanged();
+        } else {
+          partitionOffsetsBuilder_.addAllMessages(values);
         }
-        super.addAll(values, result.partitionOffsets_);
         return this;
       }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
       public Builder clearPartitionOffsets() {
-        result.partitionOffsets_ = java.util.Collections.emptyList();
+        if (partitionOffsetsBuilder_ == null) {
+          partitionOffsets_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+          onChanged();
+        } else {
+          partitionOffsetsBuilder_.clear();
+        }
         return this;
       }
-      
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
+      public Builder removePartitionOffsets(int index) {
+        if (partitionOffsetsBuilder_ == null) {
+          ensurePartitionOffsetsIsMutable();
+          partitionOffsets_.remove(index);
+          onChanged();
+        } else {
+          partitionOffsetsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
+      public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder getPartitionOffsetsBuilder(
+          int index) {
+        return getPartitionOffsetsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
+      public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder getPartitionOffsetsOrBuilder(
+          int index) {
+        if (partitionOffsetsBuilder_ == null) {
+          return partitionOffsets_.get(index);  } else {
+          return partitionOffsetsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
+      public java.util.List<? extends com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder> 
+           getPartitionOffsetsOrBuilderList() {
+        if (partitionOffsetsBuilder_ != null) {
+          return partitionOffsetsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(partitionOffsets_);
+        }
+      }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
+      public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder addPartitionOffsetsBuilder() {
+        return getPartitionOffsetsFieldBuilder().addBuilder(
+            com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
+      public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder addPartitionOffsetsBuilder(
+          int index) {
+        return getPartitionOffsetsFieldBuilder().addBuilder(
+            index, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .blackhole.AssignConsumer.PartitionOffset partitionOffsets = 4;</code>
+       */
+      public java.util.List<com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder> 
+           getPartitionOffsetsBuilderList() {
+        return getPartitionOffsetsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder> 
+          getPartitionOffsetsFieldBuilder() {
+        if (partitionOffsetsBuilder_ == null) {
+          partitionOffsetsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffsetOrBuilder>(
+                  partitionOffsets_,
+                  ((bitField0_ & 0x00000008) == 0x00000008),
+                  getParentForChildren(),
+                  isClean());
+          partitionOffsets_ = null;
+        }
+        return partitionOffsetsBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.AssignConsumer)
     }
-    
+
     static {
       defaultInstance = new AssignConsumer(true);
-      com.dp.blackhole.protocol.control.AssignConsumerPB.internalForceInit();
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:blackhole.AssignConsumer)
   }
-  
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_AssignConsumer_descriptor;
   private static
@@ -852,7 +1931,7 @@ public final class AssignConsumerPB {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_AssignConsumer_PartitionOffset_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -880,17 +1959,13 @@ public final class AssignConsumerPB {
           internal_static_blackhole_AssignConsumer_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_AssignConsumer_descriptor,
-              new java.lang.String[] { "Group", "Topic", "ConsumerIdString", "PartitionOffsets", },
-              com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.class,
-              com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.Builder.class);
+              new java.lang.String[] { "Group", "Topic", "ConsumerIdString", "PartitionOffsets", });
           internal_static_blackhole_AssignConsumer_PartitionOffset_descriptor =
             internal_static_blackhole_AssignConsumer_descriptor.getNestedTypes().get(0);
           internal_static_blackhole_AssignConsumer_PartitionOffset_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_AssignConsumer_PartitionOffset_descriptor,
-              new java.lang.String[] { "BrokerString", "PartitionName", "Offset", },
-              com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.class,
-              com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset.Builder.class);
+              new java.lang.String[] { "BrokerString", "PartitionName", "Offset", });
           return null;
         }
       };
@@ -899,8 +1974,6 @@ public final class AssignConsumerPB {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-  
-  public static void internalForceInit() {}
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }
