@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
@@ -192,7 +193,6 @@ public class Cli {
 
         @Override
         public void OnDisconnected(SimpleConnection connection) {
-            supervisor.close();
             supervisor = null;
         }
 
@@ -222,9 +222,7 @@ public class Cli {
     }
     
     public void send(Message msg) {
-        if (supervisor != null) {
-            supervisor.send(PBwrap.PB2Buf(msg));
-        }
+        Util.send(supervisor, msg);
     }
 
     private void start() throws FileNotFoundException, IOException {

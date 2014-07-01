@@ -62,8 +62,8 @@ public class BrokerService extends Thread {
     public BrokerService(Properties prop) throws IOException {
         this.prop = prop;
         String storagedir = prop.getProperty("broker.storage.dir");
-        int splitThreshold = Integer.parseInt(prop.getProperty("publisher.storage.splitThreshold", "536870912"));
-        int flushThreshold = Integer.parseInt(prop.getProperty("publisher.storage.flushThreshold", "4194304"));
+        int splitThreshold = Integer.parseInt(prop.getProperty("broker.storage.splitThreshold", "536870912"));
+        int flushThreshold = Integer.parseInt(prop.getProperty("broker.storage.flushThreshold", "4194304"));
         clients = new ConcurrentHashMap<DelegationIOConnection, BrokerService.ClientDesc>();
         manager = new StorageManager(storagedir, splitThreshold, flushThreshold);
         executor = new PublisherExecutor();
@@ -83,19 +83,23 @@ public class BrokerService extends Thread {
     
     public void disconnectClients() {
         for (DelegationIOConnection client : clients.keySet()) {
-            client.close();
+            server.closeConnection(client);
         }
-        clients.clear();
     }
     
     public class PublisherExecutor implements
             EntityProcessor<TransferWrap, DelegationIOConnection> {
-
+        
+        private void closeClientOfErrorRequest(DelegationIOConnection from, Object request) {
+            LOG.info("can't find topic/partition with " + request + " from " + from +" ,close connection");
+            server.closeConnection(from);
+        }
+        
         public void handleProduceRequest(ProduceRequest request,
                 DelegationIOConnection from) {
             try {
                 Partition p = manager.getPartition(request.topic,
-                        request.partitionId);
+                        request.partitionId, true);
                 p.append(request.getMesssageSet());
             } catch (IOException e) {
                 LOG.error("IOE catched", e);
@@ -107,7 +111,11 @@ public class BrokerService extends Thread {
             Partition p = null;
             FileMessageSet messages = null;
             try {
-                p = manager.getPartition(request.topic, request.partitionId);
+                p = manager.getPartition(request.topic, request.partitionId, false);
+                if (p == null) {
+                    closeClientOfErrorRequest(from, request);
+                    return;
+                }
                 messages = p.read(request.offset, request.limit);
             } catch (IOException e) {
                 LOG.error("IOE catched", e);
@@ -131,7 +139,11 @@ public class BrokerService extends Thread {
                 Partition p = null;
                 FileMessageSet messages = null;
                 try {
-                    p = manager.getPartition(f.topic, f.partitionId);
+                    p = manager.getPartition(f.topic, f.partitionId, false);
+                    if (p == null) {
+                        closeClientOfErrorRequest(from, request);
+                        return;
+                    }
                     messages = p.read(f.offset, f.limit);
                 } catch (IOException e) {
                     LOG.error("IOE catched", e);
@@ -149,7 +161,11 @@ public class BrokerService extends Thread {
                 DelegationIOConnection from) {
             Partition p = null;
             try {
-                p = manager.getPartition(request.topic, request.partition);
+                p = manager.getPartition(request.topic, request.partition, false);
+                if (p == null) {
+                    closeClientOfErrorRequest(from, request);
+                    return;
+                }
             } catch (IOException e) {
                 LOG.error("IOE catched", e);
             }
@@ -159,7 +175,11 @@ public class BrokerService extends Thread {
         public void handleRotateRequest(RotateRequest request, DelegationIOConnection from) {
             Partition p = null;
             try {
-                p = manager.getPartition(request.topic, request.partitionId);
+                p = manager.getPartition(request.topic, request.partitionId, false);
+                if (p == null) {
+                    closeClientOfErrorRequest(from, request);
+                    return;
+                }
                 RollPartition roll = p.markRotate();
                 Broker.getRollMgr().doRegister(request.topic, request.partitionId, request.rollPeriod, roll);
             } catch (IOException e) {

@@ -22,6 +22,7 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
@@ -182,11 +183,7 @@ public class ConsumerConnector implements Runnable {
     
     private void send(Message message) {
         LOG.debug("send message: " + message);
-        if (supervisor != null) {
-            supervisor.send(PBwrap.PB2Buf(message));
-        } else {
-            LOG.warn("message: " + message + " is not sent, supervisor not connected");
-        }
+        Util.send(supervisor, message);
     }
     
     public class ConsumerProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
@@ -209,7 +206,6 @@ public class ConsumerConnector implements Runnable {
         @Override
         public void OnDisconnected(SimpleConnection connection) {
             LOG.info("ConsumerConnector disconnected");
-            supervisor.close();
             supervisor = null;
             heartbeat.shutdown();
             heartbeat = null;

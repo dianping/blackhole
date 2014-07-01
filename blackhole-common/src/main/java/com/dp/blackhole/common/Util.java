@@ -23,6 +23,10 @@ import java.util.zip.CRC32;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.network.NonblockingConnection;
+import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.protocol.control.MessagePB.Message;
+
 public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -335,7 +339,7 @@ public class Util {
         return brokerString.substring(brokerString.lastIndexOf(':') + 1);
     }
     
-    public static String toAtomString(Object... args) {
+    public static String toTupleString(Object... args) {
         if (args == null) {
             return null;
         }
@@ -348,5 +352,13 @@ public class Util {
         sb.deleteCharAt(sb.length()-1);
         sb.append('}');
         return sb.toString();
+    }
+    
+    public static void send(SimpleConnection connection, Message message) {
+        if (connection != null) {
+            connection.send(PBwrap.PB2Buf(message));
+        } else {
+            LOG.info("peer is not connected, message sending abort " + message);
+        }
     }
 }

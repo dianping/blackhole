@@ -1,6 +1,7 @@
 package com.dp.blackhole.network;
 
 import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 
 public class HeartBeat extends Thread {
@@ -25,7 +26,7 @@ public class HeartBeat extends Thread {
         while (running) {
             try {
                 sleep(interval);
-                connection.send(PBwrap.PB2Buf(heartbeat));
+                Util.send(connection, heartbeat);
             } catch (InterruptedException e) {
             }
         }
