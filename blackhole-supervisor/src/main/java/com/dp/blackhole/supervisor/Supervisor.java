@@ -542,8 +542,10 @@ public class Supervisor {
         sb.append("print connectionStreamMap:\n");
         for(Entry<SimpleConnection, ArrayList<Stream>> entry : connectionStreamMap.entrySet()) {
             SimpleConnection conn = entry.getKey();
-            sb.append(conn)
-            .append("\n");
+            ConnectionDescription desc = connections.get(conn);
+            if (desc != null) {
+                sb.append(desc).append("\n");
+            }
             ArrayList<Stream> streams = entry.getValue();
             synchronized (streams) {
                 for (Stream stream : streams) {

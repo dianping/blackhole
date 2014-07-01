@@ -7,11 +7,17 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.dp.blackhole.storage.FileMessageSet;
 import com.dp.blackhole.storage.Message;
 import com.dp.blackhole.storage.MessageSet;
 
 public class Segment {
+
+    public static final Log LOG = LogFactory.getLog(Segment.class);
+    
     FileChannel channel;
     String file;
     private long startOffset;
@@ -46,8 +52,7 @@ public class Segment {
         try {
             channel.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error("Oops, failed to close channel", e);
         }
     }
     
@@ -169,8 +174,7 @@ public class Segment {
         try {
             channel.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error("Oops, failed to close channel", e);
         }
         File f = new File(file);
         f.delete();
