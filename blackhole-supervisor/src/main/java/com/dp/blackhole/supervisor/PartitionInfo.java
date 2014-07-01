@@ -25,6 +25,10 @@ public class PartitionInfo {
         this.offline = new AtomicBoolean(false);
     }
     
+    public void updateHost(String newHost) {
+        this.host = newHost;
+    }
+    
     public void setEndOffset(long endOffset) {
         this.endOffset.set(endOffset);
     }
