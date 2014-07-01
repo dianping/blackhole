@@ -88,7 +88,7 @@ public class Supervisor {
         default:
             LOG.debug("send message to " + connection + " :" +msg);
         }
-        connection.send(PBwrap.PB2Buf(msg));
+        Util.send(connection, msg);
     }
     
     private void handleHeartBeat(SimpleConnection from) {
@@ -670,8 +670,7 @@ public class Supervisor {
         for (String agentHost : appServers) {
             SimpleConnection agent = agentsMapping.get(agentHost);
             if (agent != null) {
-                agent.close();
-                closeConnection(agent);
+                server.closeConnection(agent);
             } else {
                 LOG.info("Can not find stream which from " + agentHost);
             }
@@ -1524,8 +1523,7 @@ public class Supervisor {
                         SimpleConnection conn = entry.getKey();
                         if (now - dsc.getLastHeartBeat() > THRESHOLD) {
                             LOG.info("failed to get heartbeat for 15 seconds, close connection " + conn);
-                            conn.close();
-                            closeConnection(conn);
+                            server.closeConnection(conn);
                         }
                     }
                 } catch (InterruptedException e) {

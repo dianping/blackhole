@@ -149,8 +149,6 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
             return;
         }
         
-        entityQueue.add(new EntityEvent(EntityEvent.DISCONNECTED, null, connection));
-        
         SelectionKey key = connection.getChannel().keyFor(selector);
         LOG.info("close connection: " + connection);
         key.attach(null);
@@ -159,6 +157,8 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         if (connection != null) {
             connection.close();
         }
+        
+        entityQueue.add(new EntityEvent(EntityEvent.DISCONNECTED, null, connection));
     }
 
     public void shutdown() {
