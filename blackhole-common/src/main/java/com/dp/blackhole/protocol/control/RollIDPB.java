@@ -8,258 +8,532 @@ public final class RollIDPB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  public interface RollIDOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required string app_name = 1;
+    /**
+     * <code>required string app_name = 1;</code>
+     */
+    boolean hasAppName();
+    /**
+     * <code>required string app_name = 1;</code>
+     */
+    java.lang.String getAppName();
+    /**
+     * <code>required string app_name = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getAppNameBytes();
+
+    // required string app_server = 2;
+    /**
+     * <code>required string app_server = 2;</code>
+     */
+    boolean hasAppServer();
+    /**
+     * <code>required string app_server = 2;</code>
+     */
+    java.lang.String getAppServer();
+    /**
+     * <code>required string app_server = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getAppServerBytes();
+
+    // required int64 period = 3;
+    /**
+     * <code>required int64 period = 3;</code>
+     */
+    boolean hasPeriod();
+    /**
+     * <code>required int64 period = 3;</code>
+     */
+    long getPeriod();
+
+    // required int64 roll_ts = 4;
+    /**
+     * <code>required int64 roll_ts = 4;</code>
+     */
+    boolean hasRollTs();
+    /**
+     * <code>required int64 roll_ts = 4;</code>
+     */
+    long getRollTs();
+  }
+  /**
+   * Protobuf type {@code blackhole.RollID}
+   */
   public static final class RollID extends
-      com.google.protobuf.GeneratedMessage {
+      com.google.protobuf.GeneratedMessage
+      implements RollIDOrBuilder {
     // Use RollID.newBuilder() to construct.
-    private RollID() {
-      initFields();
+    private RollID(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private RollID(boolean noInit) {}
-    
+    private RollID(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final RollID defaultInstance;
     public static RollID getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public RollID getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RollID(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              appName_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              appServer_ = input.readBytes();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              period_ = input.readInt64();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              rollTs_ = input.readInt64();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.RollIDPB.internal_static_blackhole_RollID_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.RollIDPB.internal_static_blackhole_RollID_fieldAccessorTable;
+      return com.dp.blackhole.protocol.control.RollIDPB.internal_static_blackhole_RollID_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.dp.blackhole.protocol.control.RollIDPB.RollID.class, com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<RollID> PARSER =
+        new com.google.protobuf.AbstractParser<RollID>() {
+      public RollID parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RollID(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RollID> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
     // required string app_name = 1;
     public static final int APP_NAME_FIELD_NUMBER = 1;
-    private boolean hasAppName;
-    private java.lang.String appName_ = "";
-    public boolean hasAppName() { return hasAppName; }
-    public java.lang.String getAppName() { return appName_; }
-    
+    private java.lang.Object appName_;
+    /**
+     * <code>required string app_name = 1;</code>
+     */
+    public boolean hasAppName() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string app_name = 1;</code>
+     */
+    public java.lang.String getAppName() {
+      java.lang.Object ref = appName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          appName_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string app_name = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAppNameBytes() {
+      java.lang.Object ref = appName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        appName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     // required string app_server = 2;
     public static final int APP_SERVER_FIELD_NUMBER = 2;
-    private boolean hasAppServer;
-    private java.lang.String appServer_ = "";
-    public boolean hasAppServer() { return hasAppServer; }
-    public java.lang.String getAppServer() { return appServer_; }
-    
+    private java.lang.Object appServer_;
+    /**
+     * <code>required string app_server = 2;</code>
+     */
+    public boolean hasAppServer() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required string app_server = 2;</code>
+     */
+    public java.lang.String getAppServer() {
+      java.lang.Object ref = appServer_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          appServer_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string app_server = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAppServerBytes() {
+      java.lang.Object ref = appServer_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        appServer_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     // required int64 period = 3;
     public static final int PERIOD_FIELD_NUMBER = 3;
-    private boolean hasPeriod;
-    private long period_ = 0L;
-    public boolean hasPeriod() { return hasPeriod; }
-    public long getPeriod() { return period_; }
-    
+    private long period_;
+    /**
+     * <code>required int64 period = 3;</code>
+     */
+    public boolean hasPeriod() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int64 period = 3;</code>
+     */
+    public long getPeriod() {
+      return period_;
+    }
+
     // required int64 roll_ts = 4;
     public static final int ROLL_TS_FIELD_NUMBER = 4;
-    private boolean hasRollTs;
-    private long rollTs_ = 0L;
-    public boolean hasRollTs() { return hasRollTs; }
-    public long getRollTs() { return rollTs_; }
-    
-    private void initFields() {
+    private long rollTs_;
+    /**
+     * <code>required int64 roll_ts = 4;</code>
+     */
+    public boolean hasRollTs() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
+    /**
+     * <code>required int64 roll_ts = 4;</code>
+     */
+    public long getRollTs() {
+      return rollTs_;
+    }
+
+    private void initFields() {
+      appName_ = "";
+      appServer_ = "";
+      period_ = 0L;
+      rollTs_ = 0L;
+    }
+    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      if (!hasAppName) return false;
-      if (!hasAppServer) return false;
-      if (!hasPeriod) return false;
-      if (!hasRollTs) return false;
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasAppName()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasAppServer()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasPeriod()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasRollTs()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasAppName()) {
-        output.writeString(1, getAppName());
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getAppNameBytes());
       }
-      if (hasAppServer()) {
-        output.writeString(2, getAppServer());
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, getAppServerBytes());
       }
-      if (hasPeriod()) {
-        output.writeInt64(3, getPeriod());
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt64(3, period_);
       }
-      if (hasRollTs()) {
-        output.writeInt64(4, getRollTs());
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt64(4, rollTs_);
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
-      if (hasAppName()) {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getAppName());
+          .computeBytesSize(1, getAppNameBytes());
       }
-      if (hasAppServer()) {
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(2, getAppServer());
+          .computeBytesSize(2, getAppServerBytes());
       }
-      if (hasPeriod()) {
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, getPeriod());
+          .computeInt64Size(3, period_);
       }
-      if (hasRollTs()) {
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(4, getRollTs());
+          .computeInt64Size(4, rollTs_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-    
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.RollIDPB.RollID prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code blackhole.RollID}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> {
-      private com.dp.blackhole.protocol.control.RollIDPB.RollID result;
-      
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.dp.blackhole.protocol.control.RollIDPB.RollIDOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.dp.blackhole.protocol.control.RollIDPB.internal_static_blackhole_RollID_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.dp.blackhole.protocol.control.RollIDPB.internal_static_blackhole_RollID_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.dp.blackhole.protocol.control.RollIDPB.RollID.class, com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder.class);
+      }
+
       // Construct using com.dp.blackhole.protocol.control.RollIDPB.RollID.newBuilder()
-      private Builder() {}
-      
-      private static Builder create() {
-        Builder builder = new Builder();
-        builder.result = new com.dp.blackhole.protocol.control.RollIDPB.RollID();
-        return builder;
+      private Builder() {
+        maybeForceBuilderInitialization();
       }
-      
-      protected com.dp.blackhole.protocol.control.RollIDPB.RollID internalGetResult() {
-        return result;
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
       }
-      
-      public Builder clear() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "Cannot call clear() after build().");
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
         }
-        result = new com.dp.blackhole.protocol.control.RollIDPB.RollID();
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        appName_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        appServer_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        period_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        rollTs_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
-      
+
       public Builder clone() {
-        return create().mergeFrom(result);
+        return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.RollIDPB.RollID.getDescriptor();
+        return com.dp.blackhole.protocol.control.RollIDPB.internal_static_blackhole_RollID_descriptor;
       }
-      
+
       public com.dp.blackhole.protocol.control.RollIDPB.RollID getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.RollIDPB.RollID.getDefaultInstance();
       }
-      
-      public boolean isInitialized() {
-        return result.isInitialized();
-      }
+
       public com.dp.blackhole.protocol.control.RollIDPB.RollID build() {
-        if (result != null && !isInitialized()) {
+        com.dp.blackhole.protocol.control.RollIDPB.RollID result = buildPartial();
+        if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return buildPartial();
+        return result;
       }
-      
-      private com.dp.blackhole.protocol.control.RollIDPB.RollID buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        if (!isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return buildPartial();
-      }
-      
+
       public com.dp.blackhole.protocol.control.RollIDPB.RollID buildPartial() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "build() has already been called on this Builder.");
+        com.dp.blackhole.protocol.control.RollIDPB.RollID result = new com.dp.blackhole.protocol.control.RollIDPB.RollID(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
         }
-        com.dp.blackhole.protocol.control.RollIDPB.RollID returnMe = result;
-        result = null;
-        return returnMe;
+        result.appName_ = appName_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.appServer_ = appServer_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.period_ = period_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.rollTs_ = rollTs_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.RollIDPB.RollID) {
           return mergeFrom((com.dp.blackhole.protocol.control.RollIDPB.RollID)other);
@@ -268,14 +542,18 @@ public final class RollIDPB {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.dp.blackhole.protocol.control.RollIDPB.RollID other) {
         if (other == com.dp.blackhole.protocol.control.RollIDPB.RollID.getDefaultInstance()) return this;
         if (other.hasAppName()) {
-          setAppName(other.getAppName());
+          bitField0_ |= 0x00000001;
+          appName_ = other.appName_;
+          onChanged();
         }
         if (other.hasAppServer()) {
-          setAppServer(other.getAppServer());
+          bitField0_ |= 0x00000002;
+          appServer_ = other.appServer_;
+          onChanged();
         }
         if (other.hasPeriod()) {
           setPeriod(other.getPeriod());
@@ -286,145 +564,277 @@ public final class RollIDPB {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
+      public final boolean isInitialized() {
+        if (!hasAppName()) {
+          
+          return false;
+        }
+        if (!hasAppServer()) {
+          
+          return false;
+        }
+        if (!hasPeriod()) {
+          
+          return false;
+        }
+        if (!hasRollTs()) {
+          
+          return false;
+        }
+        return true;
+      }
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              setAppName(input.readString());
-              break;
-            }
-            case 18: {
-              setAppServer(input.readString());
-              break;
-            }
-            case 24: {
-              setPeriod(input.readInt64());
-              break;
-            }
-            case 32: {
-              setRollTs(input.readInt64());
-              break;
-            }
+        com.dp.blackhole.protocol.control.RollIDPB.RollID parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.dp.blackhole.protocol.control.RollIDPB.RollID) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
-      
+      private int bitField0_;
+
       // required string app_name = 1;
+      private java.lang.Object appName_ = "";
+      /**
+       * <code>required string app_name = 1;</code>
+       */
       public boolean hasAppName() {
-        return result.hasAppName();
+        return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required string app_name = 1;</code>
+       */
       public java.lang.String getAppName() {
-        return result.getAppName();
+        java.lang.Object ref = appName_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          appName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
-      public Builder setAppName(java.lang.String value) {
+      /**
+       * <code>required string app_name = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAppNameBytes() {
+        java.lang.Object ref = appName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          appName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string app_name = 1;</code>
+       */
+      public Builder setAppName(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppName = true;
-        result.appName_ = value;
+  bitField0_ |= 0x00000001;
+        appName_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required string app_name = 1;</code>
+       */
       public Builder clearAppName() {
-        result.hasAppName = false;
-        result.appName_ = getDefaultInstance().getAppName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        appName_ = getDefaultInstance().getAppName();
+        onChanged();
         return this;
       }
-      
-      // required string app_server = 2;
-      public boolean hasAppServer() {
-        return result.hasAppServer();
-      }
-      public java.lang.String getAppServer() {
-        return result.getAppServer();
-      }
-      public Builder setAppServer(java.lang.String value) {
+      /**
+       * <code>required string app_name = 1;</code>
+       */
+      public Builder setAppNameBytes(
+          com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppServer = true;
-        result.appServer_ = value;
+  bitField0_ |= 0x00000001;
+        appName_ = value;
+        onChanged();
         return this;
       }
+
+      // required string app_server = 2;
+      private java.lang.Object appServer_ = "";
+      /**
+       * <code>required string app_server = 2;</code>
+       */
+      public boolean hasAppServer() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required string app_server = 2;</code>
+       */
+      public java.lang.String getAppServer() {
+        java.lang.Object ref = appServer_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          appServer_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string app_server = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAppServerBytes() {
+        java.lang.Object ref = appServer_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          appServer_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string app_server = 2;</code>
+       */
+      public Builder setAppServer(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        appServer_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string app_server = 2;</code>
+       */
       public Builder clearAppServer() {
-        result.hasAppServer = false;
-        result.appServer_ = getDefaultInstance().getAppServer();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        appServer_ = getDefaultInstance().getAppServer();
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>required string app_server = 2;</code>
+       */
+      public Builder setAppServerBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        appServer_ = value;
+        onChanged();
+        return this;
+      }
+
       // required int64 period = 3;
+      private long period_ ;
+      /**
+       * <code>required int64 period = 3;</code>
+       */
       public boolean hasPeriod() {
-        return result.hasPeriod();
+        return ((bitField0_ & 0x00000004) == 0x00000004);
       }
+      /**
+       * <code>required int64 period = 3;</code>
+       */
       public long getPeriod() {
-        return result.getPeriod();
+        return period_;
       }
+      /**
+       * <code>required int64 period = 3;</code>
+       */
       public Builder setPeriod(long value) {
-        result.hasPeriod = true;
-        result.period_ = value;
+        bitField0_ |= 0x00000004;
+        period_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required int64 period = 3;</code>
+       */
       public Builder clearPeriod() {
-        result.hasPeriod = false;
-        result.period_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        period_ = 0L;
+        onChanged();
         return this;
       }
-      
+
       // required int64 roll_ts = 4;
+      private long rollTs_ ;
+      /**
+       * <code>required int64 roll_ts = 4;</code>
+       */
       public boolean hasRollTs() {
-        return result.hasRollTs();
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
+      /**
+       * <code>required int64 roll_ts = 4;</code>
+       */
       public long getRollTs() {
-        return result.getRollTs();
+        return rollTs_;
       }
+      /**
+       * <code>required int64 roll_ts = 4;</code>
+       */
       public Builder setRollTs(long value) {
-        result.hasRollTs = true;
-        result.rollTs_ = value;
+        bitField0_ |= 0x00000008;
+        rollTs_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required int64 roll_ts = 4;</code>
+       */
       public Builder clearRollTs() {
-        result.hasRollTs = false;
-        result.rollTs_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        rollTs_ = 0L;
+        onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:blackhole.RollID)
     }
-    
+
     static {
       defaultInstance = new RollID(true);
-      com.dp.blackhole.protocol.control.RollIDPB.internalForceInit();
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:blackhole.RollID)
   }
-  
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_RollID_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_RollID_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -448,9 +858,7 @@ public final class RollIDPB {
           internal_static_blackhole_RollID_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RollID_descriptor,
-              new java.lang.String[] { "AppName", "AppServer", "Period", "RollTs", },
-              com.dp.blackhole.protocol.control.RollIDPB.RollID.class,
-              com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder.class);
+              new java.lang.String[] { "AppName", "AppServer", "Period", "RollTs", });
           return null;
         }
       };
@@ -459,8 +867,6 @@ public final class RollIDPB {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-  
-  public static void internalForceInit() {}
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }

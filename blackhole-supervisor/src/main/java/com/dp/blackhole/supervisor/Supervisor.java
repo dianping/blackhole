@@ -1494,6 +1494,7 @@ public class Supervisor {
                 break;
             case OFFSET_COMMIT:
                 handleOffsetCommit(msg.getOffsetCommit());
+                break;
             case LISTIDLE:
                 listIdle(from);
                 break;
