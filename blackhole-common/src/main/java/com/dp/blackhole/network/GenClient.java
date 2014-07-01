@@ -62,9 +62,9 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
                 connect();
                 loopInternal();
             } catch (ClosedChannelException e) {
-                e.printStackTrace();
+                LOG.error("Channel cloesd", e);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error("Oops, got an IOE", e);
             } finally {
                 try {
                     if (running) {

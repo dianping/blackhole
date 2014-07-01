@@ -185,8 +185,7 @@ public class StorageManager {
                 try {
                     Thread.sleep(interval);
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    Log.error(e.getMessage());
                 }
                 cleanup();
             }
