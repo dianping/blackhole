@@ -69,7 +69,7 @@ public class TestHDFSUpload {
         when(mgr.getRollHdfsPath(ident)).thenReturn(getRealFile()+".gz");
         
         StorageManager manager = mock(StorageManager.class);
-        when(manager.getPartition(ident.app, ident.source)).thenReturn(p);
+        when(manager.getPartition(ident.app, ident.source, false)).thenReturn(p);
         
         HDFSUpload writer = new HDFSUpload(mgr, manager, fs, ident, roll1);
         Thread thread = new Thread(writer);
