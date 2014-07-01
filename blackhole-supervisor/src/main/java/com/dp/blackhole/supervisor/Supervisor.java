@@ -186,7 +186,7 @@ public class Supervisor {
                 LOG.error("consumer already exists: " + consumer);
                 return;
             }
-            consumeMap.put(consumer, null);
+            consumeMap.put(consumer, new ArrayList<String>());
         }
         
         // calc online partitions
@@ -1189,6 +1189,7 @@ public class Supervisor {
         if (partitionInfos == null) {
             partitionInfos = new ConcurrentHashMap<String, PartitionInfo>();
             topics.put(topic, partitionInfos);
+            LOG.info("new topic added: " + topic);
         }
         
         PartitionInfo pinfo = partitionInfos.get(partitionId);
