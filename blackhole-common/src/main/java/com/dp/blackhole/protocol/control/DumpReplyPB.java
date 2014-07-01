@@ -8,353 +8,213 @@ public final class DumpReplyPB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface DumpReplyOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-
-    // required string reply = 1;
-    /**
-     * <code>required string reply = 1;</code>
-     */
-    boolean hasReply();
-    /**
-     * <code>required string reply = 1;</code>
-     */
-    java.lang.String getReply();
-    /**
-     * <code>required string reply = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getReplyBytes();
-  }
-  /**
-   * Protobuf type {@code blackhole.DumpReply}
-   */
   public static final class DumpReply extends
-      com.google.protobuf.GeneratedMessage
-      implements DumpReplyOrBuilder {
+      com.google.protobuf.GeneratedMessage {
     // Use DumpReply.newBuilder() to construct.
-    private DumpReply(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-      super(builder);
-      this.unknownFields = builder.getUnknownFields();
+    private DumpReply() {
+      initFields();
     }
-    private DumpReply(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private DumpReply(boolean noInit) {}
+    
     private static final DumpReply defaultInstance;
     public static DumpReply getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public DumpReply getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private DumpReply(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              reply_ = input.readBytes();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.DumpReplyPB.internal_static_blackhole_DumpReply_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.DumpReplyPB.internal_static_blackhole_DumpReply_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.class, com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.Builder.class);
+      return com.dp.blackhole.protocol.control.DumpReplyPB.internal_static_blackhole_DumpReply_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<DumpReply> PARSER =
-        new com.google.protobuf.AbstractParser<DumpReply>() {
-      public DumpReply parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DumpReply(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<DumpReply> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
+    
     // required string reply = 1;
     public static final int REPLY_FIELD_NUMBER = 1;
-    private java.lang.Object reply_;
-    /**
-     * <code>required string reply = 1;</code>
-     */
-    public boolean hasReply() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required string reply = 1;</code>
-     */
-    public java.lang.String getReply() {
-      java.lang.Object ref = reply_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          reply_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>required string reply = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getReplyBytes() {
-      java.lang.Object ref = reply_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        reply_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
+    private boolean hasReply;
+    private java.lang.String reply_ = "";
+    public boolean hasReply() { return hasReply; }
+    public java.lang.String getReply() { return reply_; }
+    
     private void initFields() {
-      reply_ = "";
     }
-    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-
-      if (!hasReply()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      memoizedIsInitialized = 1;
+      if (!hasReply) return false;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getReplyBytes());
+      if (hasReply()) {
+        output.writeString(1, getReply());
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      if (hasReply()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getReplyBytes());
+          .computeStringSize(1, getReply());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
+    
     public static com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code blackhole.DumpReply}
-     */
+    
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.dp.blackhole.protocol.control.DumpReplyPB.DumpReplyOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.dp.blackhole.protocol.control.DumpReplyPB.internal_static_blackhole_DumpReply_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.dp.blackhole.protocol.control.DumpReplyPB.internal_static_blackhole_DumpReply_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.class, com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.Builder.class);
-      }
-
+        com.google.protobuf.GeneratedMessage.Builder<Builder> {
+      private com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply result;
+      
       // Construct using com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
+      private Builder() {}
+      
       private static Builder create() {
-        return new Builder();
+        Builder builder = new Builder();
+        builder.result = new com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply();
+        return builder;
       }
-
+      
+      protected com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply internalGetResult() {
+        return result;
+      }
+      
       public Builder clear() {
-        super.clear();
-        reply_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
+        if (result == null) {
+          throw new IllegalStateException(
+            "Cannot call clear() after build().");
+        }
+        result = new com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply();
         return this;
       }
-
+      
       public Builder clone() {
-        return create().mergeFrom(buildPartial());
+        return create().mergeFrom(result);
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.DumpReplyPB.internal_static_blackhole_DumpReply_descriptor;
+        return com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.getDescriptor();
       }
-
+      
       public com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.getDefaultInstance();
       }
-
+      
+      public boolean isInitialized() {
+        return result.isInitialized();
+      }
       public com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply build() {
-        com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply result = buildPartial();
-        if (!result.isInitialized()) {
+        if (result != null && !isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return result;
+        return buildPartial();
       }
-
-      public com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply buildPartial() {
-        com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply result = new com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
+      
+      private com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        if (!isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
         }
-        result.reply_ = reply_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
+        return buildPartial();
       }
-
+      
+      public com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply buildPartial() {
+        if (result == null) {
+          throw new IllegalStateException(
+            "build() has already been called on this Builder.");
+        }
+        com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply returnMe = result;
+        result = null;
+        return returnMe;
+      }
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply) {
           return mergeFrom((com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply)other);
@@ -363,136 +223,85 @@ public final class DumpReplyPB {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply other) {
         if (other == com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.getDefaultInstance()) return this;
         if (other.hasReply()) {
-          bitField0_ |= 0x00000001;
-          reply_ = other.reply_;
-          onChanged();
+          setReply(other.getReply());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
-      public final boolean isInitialized() {
-        if (!hasReply()) {
-          
-          return false;
-        }
-        return true;
-      }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              setReply(input.readString());
+              break;
+            }
           }
         }
-        return this;
       }
-      private int bitField0_;
-
+      
+      
       // required string reply = 1;
-      private java.lang.Object reply_ = "";
-      /**
-       * <code>required string reply = 1;</code>
-       */
       public boolean hasReply() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
+        return result.hasReply();
       }
-      /**
-       * <code>required string reply = 1;</code>
-       */
       public java.lang.String getReply() {
-        java.lang.Object ref = reply_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          reply_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+        return result.getReply();
       }
-      /**
-       * <code>required string reply = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getReplyBytes() {
-        java.lang.Object ref = reply_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          reply_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string reply = 1;</code>
-       */
-      public Builder setReply(
-          java.lang.String value) {
+      public Builder setReply(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
-        reply_ = value;
-        onChanged();
+  result.hasReply = true;
+        result.reply_ = value;
         return this;
       }
-      /**
-       * <code>required string reply = 1;</code>
-       */
       public Builder clearReply() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        reply_ = getDefaultInstance().getReply();
-        onChanged();
+        result.hasReply = false;
+        result.reply_ = getDefaultInstance().getReply();
         return this;
       }
-      /**
-       * <code>required string reply = 1;</code>
-       */
-      public Builder setReplyBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        reply_ = value;
-        onChanged();
-        return this;
-      }
-
+      
       // @@protoc_insertion_point(builder_scope:blackhole.DumpReply)
     }
-
+    
     static {
       defaultInstance = new DumpReply(true);
+      com.dp.blackhole.protocol.control.DumpReplyPB.internalForceInit();
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:blackhole.DumpReply)
   }
-
+  
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_DumpReply_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_DumpReply_fieldAccessorTable;
-
+  
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -515,7 +324,9 @@ public final class DumpReplyPB {
           internal_static_blackhole_DumpReply_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_DumpReply_descriptor,
-              new java.lang.String[] { "Reply", });
+              new java.lang.String[] { "Reply", },
+              com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.class,
+              com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.Builder.class);
           return null;
         }
       };
@@ -524,6 +335,8 @@ public final class DumpReplyPB {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-
+  
+  public static void internalForceInit() {}
+  
   // @@protoc_insertion_point(outer_class_scope)
 }

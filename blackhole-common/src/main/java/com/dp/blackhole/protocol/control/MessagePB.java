@@ -8,916 +8,74 @@ public final class MessagePB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface MessageOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-
-    // required .blackhole.Message.MessageType type = 1;
-    /**
-     * <code>required .blackhole.Message.MessageType type = 1;</code>
-     */
-    boolean hasType();
-    /**
-     * <code>required .blackhole.Message.MessageType type = 1;</code>
-     */
-    com.dp.blackhole.protocol.control.MessagePB.Message.MessageType getType();
-
-    // optional .blackhole.AppReg appReg = 2;
-    /**
-     * <code>optional .blackhole.AppReg appReg = 2;</code>
-     */
-    boolean hasAppReg();
-    /**
-     * <code>optional .blackhole.AppReg appReg = 2;</code>
-     */
-    com.dp.blackhole.protocol.control.AppRegPB.AppReg getAppReg();
-    /**
-     * <code>optional .blackhole.AppReg appReg = 2;</code>
-     */
-    com.dp.blackhole.protocol.control.AppRegPB.AppRegOrBuilder getAppRegOrBuilder();
-
-    // optional .blackhole.AssignBroker assignBroker = 3;
-    /**
-     * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-     */
-    boolean hasAssignBroker();
-    /**
-     * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-     */
-    com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker getAssignBroker();
-    /**
-     * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-     */
-    com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBrokerOrBuilder getAssignBrokerOrBuilder();
-
-    // optional .blackhole.AppRoll appRoll = 4;
-    /**
-     * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-     */
-    boolean hasAppRoll();
-    /**
-     * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-     */
-    com.dp.blackhole.protocol.control.AppRollPB.AppRoll getAppRoll();
-    /**
-     * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-     */
-    com.dp.blackhole.protocol.control.AppRollPB.AppRollOrBuilder getAppRollOrBuilder();
-
-    // optional .blackhole.RecoveryRoll recoveryRoll = 5;
-    /**
-     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-     */
-    boolean hasRecoveryRoll();
-    /**
-     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-     */
-    com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll getRecoveryRoll();
-    /**
-     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-     */
-    com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRollOrBuilder getRecoveryRollOrBuilder();
-
-    // optional .blackhole.ReadyBroker readyBroker = 6;
-    /**
-     * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-     */
-    boolean hasReadyBroker();
-    /**
-     * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-     */
-    com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker getReadyBroker();
-    /**
-     * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-     */
-    com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBrokerOrBuilder getReadyBrokerOrBuilder();
-
-    // optional .blackhole.RollID rollID = 7;
-    /**
-     * <code>optional .blackhole.RollID rollID = 7;</code>
-     */
-    boolean hasRollID();
-    /**
-     * <code>optional .blackhole.RollID rollID = 7;</code>
-     */
-    com.dp.blackhole.protocol.control.RollIDPB.RollID getRollID();
-    /**
-     * <code>optional .blackhole.RollID rollID = 7;</code>
-     */
-    com.dp.blackhole.protocol.control.RollIDPB.RollIDOrBuilder getRollIDOrBuilder();
-
-    // optional .blackhole.Failure failure = 8;
-    /**
-     * <code>optional .blackhole.Failure failure = 8;</code>
-     */
-    boolean hasFailure();
-    /**
-     * <code>optional .blackhole.Failure failure = 8;</code>
-     */
-    com.dp.blackhole.protocol.control.FailurePB.Failure getFailure();
-    /**
-     * <code>optional .blackhole.Failure failure = 8;</code>
-     */
-    com.dp.blackhole.protocol.control.FailurePB.FailureOrBuilder getFailureOrBuilder();
-
-    // optional .blackhole.NoAvailableNode noAvailableNode = 9;
-    /**
-     * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-     */
-    boolean hasNoAvailableNode();
-    /**
-     * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-     */
-    com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode getNoAvailableNode();
-    /**
-     * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-     */
-    com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNodeOrBuilder getNoAvailableNodeOrBuilder();
-
-    // optional .blackhole.StreamID streamId = 10;
-    /**
-     * <code>optional .blackhole.StreamID streamId = 10;</code>
-     */
-    boolean hasStreamId();
-    /**
-     * <code>optional .blackhole.StreamID streamId = 10;</code>
-     */
-    com.dp.blackhole.protocol.control.StreamIDPB.StreamID getStreamId();
-    /**
-     * <code>optional .blackhole.StreamID streamId = 10;</code>
-     */
-    com.dp.blackhole.protocol.control.StreamIDPB.StreamIDOrBuilder getStreamIdOrBuilder();
-
-    // optional .blackhole.ConfRes confRes = 11;
-    /**
-     * <code>optional .blackhole.ConfRes confRes = 11;</code>
-     */
-    boolean hasConfRes();
-    /**
-     * <code>optional .blackhole.ConfRes confRes = 11;</code>
-     */
-    com.dp.blackhole.protocol.control.ConfResPB.ConfRes getConfRes();
-    /**
-     * <code>optional .blackhole.ConfRes confRes = 11;</code>
-     */
-    com.dp.blackhole.protocol.control.ConfResPB.ConfResOrBuilder getConfResOrBuilder();
-
-    // optional .blackhole.DumpReply dumpReply = 12;
-    /**
-     * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-     */
-    boolean hasDumpReply();
-    /**
-     * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-     */
-    com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply getDumpReply();
-    /**
-     * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-     */
-    com.dp.blackhole.protocol.control.DumpReplyPB.DumpReplyOrBuilder getDumpReplyOrBuilder();
-
-    // optional .blackhole.RemoveConf removeConf = 13;
-    /**
-     * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-     */
-    boolean hasRemoveConf();
-    /**
-     * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-     */
-    com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf getRemoveConf();
-    /**
-     * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-     */
-    com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConfOrBuilder getRemoveConfOrBuilder();
-
-    // optional .blackhole.BrokerReg brokerReg = 14;
-    /**
-     * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-     */
-    boolean hasBrokerReg();
-    /**
-     * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-     */
-    com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg getBrokerReg();
-    /**
-     * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-     */
-    com.dp.blackhole.protocol.control.BrokerRegPB.BrokerRegOrBuilder getBrokerRegOrBuilder();
-
-    // optional .blackhole.DumpApp dumpApp = 15;
-    /**
-     * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-     */
-    boolean hasDumpApp();
-    /**
-     * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-     */
-    com.dp.blackhole.protocol.control.DumpAppPB.DumpApp getDumpApp();
-    /**
-     * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-     */
-    com.dp.blackhole.protocol.control.DumpAppPB.DumpAppOrBuilder getDumpAppOrBuilder();
-
-    // optional .blackhole.ConsumerReg consumerReg = 16;
-    /**
-     * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-     */
-    boolean hasConsumerReg();
-    /**
-     * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-     */
-    com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg getConsumerReg();
-    /**
-     * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-     */
-    com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerRegOrBuilder getConsumerRegOrBuilder();
-
-    // optional .blackhole.AssignConsumer assignConsumer = 17;
-    /**
-     * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-     */
-    boolean hasAssignConsumer();
-    /**
-     * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-     */
-    com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer getAssignConsumer();
-    /**
-     * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-     */
-    com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumerOrBuilder getAssignConsumerOrBuilder();
-
-    // optional .blackhole.OffsetCommit offsetCommit = 18;
-    /**
-     * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-     */
-    boolean hasOffsetCommit();
-    /**
-     * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-     */
-    com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit getOffsetCommit();
-    /**
-     * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-     */
-    com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommitOrBuilder getOffsetCommitOrBuilder();
-
-    // optional .blackhole.TopicReport topicReport = 19;
-    /**
-     * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-     */
-    boolean hasTopicReport();
-    /**
-     * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-     */
-    com.dp.blackhole.protocol.control.TopicReportPB.TopicReport getTopicReport();
-    /**
-     * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-     */
-    com.dp.blackhole.protocol.control.TopicReportPB.TopicReportOrBuilder getTopicReportOrBuilder();
-
-    // optional .blackhole.Restart restart = 20;
-    /**
-     * <code>optional .blackhole.Restart restart = 20;</code>
-     */
-    boolean hasRestart();
-    /**
-     * <code>optional .blackhole.Restart restart = 20;</code>
-     */
-    com.dp.blackhole.protocol.control.RestartPB.Restart getRestart();
-    /**
-     * <code>optional .blackhole.Restart restart = 20;</code>
-     */
-    com.dp.blackhole.protocol.control.RestartPB.RestartOrBuilder getRestartOrBuilder();
-  }
-  /**
-   * Protobuf type {@code blackhole.Message}
-   */
   public static final class Message extends
-      com.google.protobuf.GeneratedMessage
-      implements MessageOrBuilder {
+      com.google.protobuf.GeneratedMessage {
     // Use Message.newBuilder() to construct.
-    private Message(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-      super(builder);
-      this.unknownFields = builder.getUnknownFields();
+    private Message() {
+      initFields();
     }
-    private Message(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private Message(boolean noInit) {}
+    
     private static final Message defaultInstance;
     public static Message getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public Message getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private Message(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-              int rawValue = input.readEnum();
-              com.dp.blackhole.protocol.control.MessagePB.Message.MessageType value = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(1, rawValue);
-              } else {
-                bitField0_ |= 0x00000001;
-                type_ = value;
-              }
-              break;
-            }
-            case 18: {
-              com.dp.blackhole.protocol.control.AppRegPB.AppReg.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000002) == 0x00000002)) {
-                subBuilder = appReg_.toBuilder();
-              }
-              appReg_ = input.readMessage(com.dp.blackhole.protocol.control.AppRegPB.AppReg.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(appReg_);
-                appReg_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000002;
-              break;
-            }
-            case 26: {
-              com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000004) == 0x00000004)) {
-                subBuilder = assignBroker_.toBuilder();
-              }
-              assignBroker_ = input.readMessage(com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(assignBroker_);
-                assignBroker_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000004;
-              break;
-            }
-            case 34: {
-              com.dp.blackhole.protocol.control.AppRollPB.AppRoll.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000008) == 0x00000008)) {
-                subBuilder = appRoll_.toBuilder();
-              }
-              appRoll_ = input.readMessage(com.dp.blackhole.protocol.control.AppRollPB.AppRoll.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(appRoll_);
-                appRoll_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000008;
-              break;
-            }
-            case 42: {
-              com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000010) == 0x00000010)) {
-                subBuilder = recoveryRoll_.toBuilder();
-              }
-              recoveryRoll_ = input.readMessage(com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(recoveryRoll_);
-                recoveryRoll_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000010;
-              break;
-            }
-            case 50: {
-              com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000020) == 0x00000020)) {
-                subBuilder = readyBroker_.toBuilder();
-              }
-              readyBroker_ = input.readMessage(com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(readyBroker_);
-                readyBroker_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000020;
-              break;
-            }
-            case 58: {
-              com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000040) == 0x00000040)) {
-                subBuilder = rollID_.toBuilder();
-              }
-              rollID_ = input.readMessage(com.dp.blackhole.protocol.control.RollIDPB.RollID.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(rollID_);
-                rollID_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000040;
-              break;
-            }
-            case 66: {
-              com.dp.blackhole.protocol.control.FailurePB.Failure.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000080) == 0x00000080)) {
-                subBuilder = failure_.toBuilder();
-              }
-              failure_ = input.readMessage(com.dp.blackhole.protocol.control.FailurePB.Failure.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(failure_);
-                failure_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000080;
-              break;
-            }
-            case 74: {
-              com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000100) == 0x00000100)) {
-                subBuilder = noAvailableNode_.toBuilder();
-              }
-              noAvailableNode_ = input.readMessage(com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(noAvailableNode_);
-                noAvailableNode_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000100;
-              break;
-            }
-            case 82: {
-              com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000200) == 0x00000200)) {
-                subBuilder = streamId_.toBuilder();
-              }
-              streamId_ = input.readMessage(com.dp.blackhole.protocol.control.StreamIDPB.StreamID.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(streamId_);
-                streamId_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000200;
-              break;
-            }
-            case 90: {
-              com.dp.blackhole.protocol.control.ConfResPB.ConfRes.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000400) == 0x00000400)) {
-                subBuilder = confRes_.toBuilder();
-              }
-              confRes_ = input.readMessage(com.dp.blackhole.protocol.control.ConfResPB.ConfRes.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(confRes_);
-                confRes_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000400;
-              break;
-            }
-            case 98: {
-              com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000800) == 0x00000800)) {
-                subBuilder = dumpReply_.toBuilder();
-              }
-              dumpReply_ = input.readMessage(com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(dumpReply_);
-                dumpReply_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000800;
-              break;
-            }
-            case 106: {
-              com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.Builder subBuilder = null;
-              if (((bitField0_ & 0x00001000) == 0x00001000)) {
-                subBuilder = removeConf_.toBuilder();
-              }
-              removeConf_ = input.readMessage(com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(removeConf_);
-                removeConf_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00001000;
-              break;
-            }
-            case 114: {
-              com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.Builder subBuilder = null;
-              if (((bitField0_ & 0x00002000) == 0x00002000)) {
-                subBuilder = brokerReg_.toBuilder();
-              }
-              brokerReg_ = input.readMessage(com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(brokerReg_);
-                brokerReg_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00002000;
-              break;
-            }
-            case 122: {
-              com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.Builder subBuilder = null;
-              if (((bitField0_ & 0x00004000) == 0x00004000)) {
-                subBuilder = dumpApp_.toBuilder();
-              }
-              dumpApp_ = input.readMessage(com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(dumpApp_);
-                dumpApp_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00004000;
-              break;
-            }
-            case 130: {
-              com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.Builder subBuilder = null;
-              if (((bitField0_ & 0x00008000) == 0x00008000)) {
-                subBuilder = consumerReg_.toBuilder();
-              }
-              consumerReg_ = input.readMessage(com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(consumerReg_);
-                consumerReg_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00008000;
-              break;
-            }
-            case 138: {
-              com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.Builder subBuilder = null;
-              if (((bitField0_ & 0x00010000) == 0x00010000)) {
-                subBuilder = assignConsumer_.toBuilder();
-              }
-              assignConsumer_ = input.readMessage(com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(assignConsumer_);
-                assignConsumer_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00010000;
-              break;
-            }
-            case 146: {
-              com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.Builder subBuilder = null;
-              if (((bitField0_ & 0x00020000) == 0x00020000)) {
-                subBuilder = offsetCommit_.toBuilder();
-              }
-              offsetCommit_ = input.readMessage(com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(offsetCommit_);
-                offsetCommit_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00020000;
-              break;
-            }
-            case 154: {
-              com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.Builder subBuilder = null;
-              if (((bitField0_ & 0x00040000) == 0x00040000)) {
-                subBuilder = topicReport_.toBuilder();
-              }
-              topicReport_ = input.readMessage(com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(topicReport_);
-                topicReport_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00040000;
-              break;
-            }
-            case 162: {
-              com.dp.blackhole.protocol.control.RestartPB.Restart.Builder subBuilder = null;
-              if (((bitField0_ & 0x00080000) == 0x00080000)) {
-                subBuilder = restart_.toBuilder();
-              }
-              restart_ = input.readMessage(com.dp.blackhole.protocol.control.RestartPB.Restart.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(restart_);
-                restart_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00080000;
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.MessagePB.internal_static_blackhole_Message_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.MessagePB.internal_static_blackhole_Message_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.dp.blackhole.protocol.control.MessagePB.Message.class, com.dp.blackhole.protocol.control.MessagePB.Message.Builder.class);
+      return com.dp.blackhole.protocol.control.MessagePB.internal_static_blackhole_Message_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<Message> PARSER =
-        new com.google.protobuf.AbstractParser<Message>() {
-      public Message parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Message(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Message> getParserForType() {
-      return PARSER;
-    }
-
-    /**
-     * Protobuf enum {@code blackhole.Message.MessageType}
-     */
+    
     public enum MessageType
         implements com.google.protobuf.ProtocolMessageEnum {
-      /**
-       * <code>HEARTBEART = 1;</code>
-       */
       HEARTBEART(0, 1),
-      /**
-       * <code>APP_REG = 2;</code>
-       */
       APP_REG(1, 2),
-      /**
-       * <code>BROKER_REG = 3;</code>
-       */
       BROKER_REG(2, 3),
-      /**
-       * <code>ASSIGN_BROKER = 4;</code>
-       */
       ASSIGN_BROKER(3, 4),
-      /**
-       * <code>READY_BROKER = 5;</code>
-       */
       READY_BROKER(4, 5),
-      /**
-       * <code>APP_ROLL = 6;</code>
-       */
       APP_ROLL(5, 6),
-      /**
-       * <code>UPLOAD_ROLL = 7;</code>
-       */
       UPLOAD_ROLL(6, 7),
-      /**
-       * <code>UPLOAD_SUCCESS = 8;</code>
-       */
       UPLOAD_SUCCESS(7, 8),
-      /**
-       * <code>UPLOAD_FAIL = 9;</code>
-       */
       UPLOAD_FAIL(8, 9),
-      /**
-       * <code>RECOVERY_ROLL = 10;</code>
-       */
       RECOVERY_ROLL(9, 10),
-      /**
-       * <code>RECOVERY_SUCCESS = 11;</code>
-       */
       RECOVERY_SUCCESS(10, 11),
-      /**
-       * <code>RECOVERY_FAIL = 12;</code>
-       */
       RECOVERY_FAIL(11, 12),
-      /**
-       * <code>FAILURE = 13;</code>
-       */
       FAILURE(12, 13),
-      /**
-       * <code>NOAVAILABLENODE = 14;</code>
-       */
       NOAVAILABLENODE(13, 14),
-      /**
-       * <code>UNRECOVERABLE = 15;</code>
-       */
       UNRECOVERABLE(14, 15),
-      /**
-       * <code>MANUAL_RECOVERY_ROLL = 16;</code>
-       */
       MANUAL_RECOVERY_ROLL(15, 16),
-      /**
-       * <code>DUMPSTAT = 17;</code>
-       */
       DUMPSTAT(16, 17),
-      /**
-       * <code>RETIRESTREAM = 18;</code>
-       */
       RETIRESTREAM(17, 18),
-      /**
-       * <code>CONF_REQ = 19;</code>
-       */
       CONF_REQ(18, 19),
-      /**
-       * <code>CONF_RES = 20;</code>
-       */
       CONF_RES(19, 20),
-      /**
-       * <code>NOAVAILABLECONF = 21;</code>
-       */
       NOAVAILABLECONF(20, 21),
-      /**
-       * <code>DUMPCONF = 22;</code>
-       */
       DUMPCONF(21, 22),
-      /**
-       * <code>DUMPREPLY = 23;</code>
-       */
       DUMPREPLY(22, 23),
-      /**
-       * <code>LISTAPPS = 24;</code>
-       */
       LISTAPPS(23, 24),
-      /**
-       * <code>REMOVE_CONF = 25;</code>
-       */
       REMOVE_CONF(24, 25),
-      /**
-       * <code>DUMP_APP = 26;</code>
-       */
       DUMP_APP(25, 26),
-      /**
-       * <code>CONSUMER_REG = 27;</code>
-       */
       CONSUMER_REG(26, 27),
-      /**
-       * <code>ASSIGN_CONSUMER = 28;</code>
-       */
       ASSIGN_CONSUMER(27, 28),
-      /**
-       * <code>OFFSET_COMMIT = 29;</code>
-       */
       OFFSET_COMMIT(28, 29),
-      /**
-       * <code>TOPICREPORT = 30;</code>
-       */
       TOPICREPORT(29, 30),
-      /**
-       * <code>CONSUMERREGFAIL = 31;</code>
-       */
       CONSUMERREGFAIL(30, 31),
-      /**
-       * <code>MAKR_UNRECOVERABLE = 32;</code>
-       */
       MAKR_UNRECOVERABLE(31, 32),
-      /**
-       * <code>LISTIDLE = 33;</code>
-       */
       LISTIDLE(32, 33),
-      /**
-       * <code>RESTART = 34;</code>
-       */
       RESTART(33, 34),
       ;
-
-      /**
-       * <code>HEARTBEART = 1;</code>
-       */
-      public static final int HEARTBEART_VALUE = 1;
-      /**
-       * <code>APP_REG = 2;</code>
-       */
-      public static final int APP_REG_VALUE = 2;
-      /**
-       * <code>BROKER_REG = 3;</code>
-       */
-      public static final int BROKER_REG_VALUE = 3;
-      /**
-       * <code>ASSIGN_BROKER = 4;</code>
-       */
-      public static final int ASSIGN_BROKER_VALUE = 4;
-      /**
-       * <code>READY_BROKER = 5;</code>
-       */
-      public static final int READY_BROKER_VALUE = 5;
-      /**
-       * <code>APP_ROLL = 6;</code>
-       */
-      public static final int APP_ROLL_VALUE = 6;
-      /**
-       * <code>UPLOAD_ROLL = 7;</code>
-       */
-      public static final int UPLOAD_ROLL_VALUE = 7;
-      /**
-       * <code>UPLOAD_SUCCESS = 8;</code>
-       */
-      public static final int UPLOAD_SUCCESS_VALUE = 8;
-      /**
-       * <code>UPLOAD_FAIL = 9;</code>
-       */
-      public static final int UPLOAD_FAIL_VALUE = 9;
-      /**
-       * <code>RECOVERY_ROLL = 10;</code>
-       */
-      public static final int RECOVERY_ROLL_VALUE = 10;
-      /**
-       * <code>RECOVERY_SUCCESS = 11;</code>
-       */
-      public static final int RECOVERY_SUCCESS_VALUE = 11;
-      /**
-       * <code>RECOVERY_FAIL = 12;</code>
-       */
-      public static final int RECOVERY_FAIL_VALUE = 12;
-      /**
-       * <code>FAILURE = 13;</code>
-       */
-      public static final int FAILURE_VALUE = 13;
-      /**
-       * <code>NOAVAILABLENODE = 14;</code>
-       */
-      public static final int NOAVAILABLENODE_VALUE = 14;
-      /**
-       * <code>UNRECOVERABLE = 15;</code>
-       */
-      public static final int UNRECOVERABLE_VALUE = 15;
-      /**
-       * <code>MANUAL_RECOVERY_ROLL = 16;</code>
-       */
-      public static final int MANUAL_RECOVERY_ROLL_VALUE = 16;
-      /**
-       * <code>DUMPSTAT = 17;</code>
-       */
-      public static final int DUMPSTAT_VALUE = 17;
-      /**
-       * <code>RETIRESTREAM = 18;</code>
-       */
-      public static final int RETIRESTREAM_VALUE = 18;
-      /**
-       * <code>CONF_REQ = 19;</code>
-       */
-      public static final int CONF_REQ_VALUE = 19;
-      /**
-       * <code>CONF_RES = 20;</code>
-       */
-      public static final int CONF_RES_VALUE = 20;
-      /**
-       * <code>NOAVAILABLECONF = 21;</code>
-       */
-      public static final int NOAVAILABLECONF_VALUE = 21;
-      /**
-       * <code>DUMPCONF = 22;</code>
-       */
-      public static final int DUMPCONF_VALUE = 22;
-      /**
-       * <code>DUMPREPLY = 23;</code>
-       */
-      public static final int DUMPREPLY_VALUE = 23;
-      /**
-       * <code>LISTAPPS = 24;</code>
-       */
-      public static final int LISTAPPS_VALUE = 24;
-      /**
-       * <code>REMOVE_CONF = 25;</code>
-       */
-      public static final int REMOVE_CONF_VALUE = 25;
-      /**
-       * <code>DUMP_APP = 26;</code>
-       */
-      public static final int DUMP_APP_VALUE = 26;
-      /**
-       * <code>CONSUMER_REG = 27;</code>
-       */
-      public static final int CONSUMER_REG_VALUE = 27;
-      /**
-       * <code>ASSIGN_CONSUMER = 28;</code>
-       */
-      public static final int ASSIGN_CONSUMER_VALUE = 28;
-      /**
-       * <code>OFFSET_COMMIT = 29;</code>
-       */
-      public static final int OFFSET_COMMIT_VALUE = 29;
-      /**
-       * <code>TOPICREPORT = 30;</code>
-       */
-      public static final int TOPICREPORT_VALUE = 30;
-      /**
-       * <code>CONSUMERREGFAIL = 31;</code>
-       */
-      public static final int CONSUMERREGFAIL_VALUE = 31;
-      /**
-       * <code>MAKR_UNRECOVERABLE = 32;</code>
-       */
-      public static final int MAKR_UNRECOVERABLE_VALUE = 32;
-      /**
-       * <code>LISTIDLE = 33;</code>
-       */
-      public static final int LISTIDLE_VALUE = 33;
-      /**
-       * <code>RESTART = 34;</code>
-       */
-      public static final int RESTART_VALUE = 34;
-
-
+      
+      
       public final int getNumber() { return value; }
-
+      
       public static MessageType valueOf(int value) {
         switch (value) {
           case 1: return HEARTBEART;
@@ -957,7 +115,7 @@ public final class MessagePB {
           default: return null;
         }
       }
-
+      
       public static com.google.protobuf.Internal.EnumLiteMap<MessageType>
           internalGetValueMap() {
         return internalValueMap;
@@ -966,10 +124,10 @@ public final class MessagePB {
           internalValueMap =
             new com.google.protobuf.Internal.EnumLiteMap<MessageType>() {
               public MessageType findValueByNumber(int number) {
-                return MessageType.valueOf(number);
-              }
+                return MessageType.valueOf(number)
+      ;        }
             };
-
+      
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
         return getDescriptor().getValues().get(index);
@@ -982,9 +140,10 @@ public final class MessagePB {
           getDescriptor() {
         return com.dp.blackhole.protocol.control.MessagePB.Message.getDescriptor().getEnumTypes().get(0);
       }
-
-      private static final MessageType[] VALUES = values();
-
+      
+      private static final MessageType[] VALUES = {
+        HEARTBEART, APP_REG, BROKER_REG, ASSIGN_BROKER, READY_BROKER, APP_ROLL, UPLOAD_ROLL, UPLOAD_SUCCESS, UPLOAD_FAIL, RECOVERY_ROLL, RECOVERY_SUCCESS, RECOVERY_FAIL, FAILURE, NOAVAILABLENODE, UNRECOVERABLE, MANUAL_RECOVERY_ROLL, DUMPSTAT, RETIRESTREAM, CONF_REQ, CONF_RES, NOAVAILABLECONF, DUMPCONF, DUMPREPLY, LISTAPPS, REMOVE_CONF, DUMP_APP, CONSUMER_REG, ASSIGN_CONSUMER, OFFSET_COMMIT, TOPICREPORT, CONSUMERREGFAIL, MAKR_UNRECOVERABLE, LISTIDLE, RESTART, 
+      };
       public static MessageType valueOf(
           com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
         if (desc.getType() != getDescriptor()) {
@@ -993,453 +152,160 @@ public final class MessagePB {
         }
         return VALUES[desc.getIndex()];
       }
-
       private final int index;
       private final int value;
-
       private MessageType(int index, int value) {
         this.index = index;
         this.value = value;
       }
-
+      
+      static {
+        com.dp.blackhole.protocol.control.MessagePB.getDescriptor();
+      }
+      
       // @@protoc_insertion_point(enum_scope:blackhole.Message.MessageType)
     }
-
-    private int bitField0_;
+    
     // required .blackhole.Message.MessageType type = 1;
     public static final int TYPE_FIELD_NUMBER = 1;
+    private boolean hasType;
     private com.dp.blackhole.protocol.control.MessagePB.Message.MessageType type_;
-    /**
-     * <code>required .blackhole.Message.MessageType type = 1;</code>
-     */
-    public boolean hasType() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required .blackhole.Message.MessageType type = 1;</code>
-     */
-    public com.dp.blackhole.protocol.control.MessagePB.Message.MessageType getType() {
-      return type_;
-    }
-
+    public boolean hasType() { return hasType; }
+    public com.dp.blackhole.protocol.control.MessagePB.Message.MessageType getType() { return type_; }
+    
     // optional .blackhole.AppReg appReg = 2;
     public static final int APPREG_FIELD_NUMBER = 2;
+    private boolean hasAppReg;
     private com.dp.blackhole.protocol.control.AppRegPB.AppReg appReg_;
-    /**
-     * <code>optional .blackhole.AppReg appReg = 2;</code>
-     */
-    public boolean hasAppReg() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>optional .blackhole.AppReg appReg = 2;</code>
-     */
-    public com.dp.blackhole.protocol.control.AppRegPB.AppReg getAppReg() {
-      return appReg_;
-    }
-    /**
-     * <code>optional .blackhole.AppReg appReg = 2;</code>
-     */
-    public com.dp.blackhole.protocol.control.AppRegPB.AppRegOrBuilder getAppRegOrBuilder() {
-      return appReg_;
-    }
-
+    public boolean hasAppReg() { return hasAppReg; }
+    public com.dp.blackhole.protocol.control.AppRegPB.AppReg getAppReg() { return appReg_; }
+    
     // optional .blackhole.AssignBroker assignBroker = 3;
     public static final int ASSIGNBROKER_FIELD_NUMBER = 3;
+    private boolean hasAssignBroker;
     private com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker assignBroker_;
-    /**
-     * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-     */
-    public boolean hasAssignBroker() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    /**
-     * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-     */
-    public com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker getAssignBroker() {
-      return assignBroker_;
-    }
-    /**
-     * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-     */
-    public com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBrokerOrBuilder getAssignBrokerOrBuilder() {
-      return assignBroker_;
-    }
-
+    public boolean hasAssignBroker() { return hasAssignBroker; }
+    public com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker getAssignBroker() { return assignBroker_; }
+    
     // optional .blackhole.AppRoll appRoll = 4;
     public static final int APPROLL_FIELD_NUMBER = 4;
+    private boolean hasAppRoll;
     private com.dp.blackhole.protocol.control.AppRollPB.AppRoll appRoll_;
-    /**
-     * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-     */
-    public boolean hasAppRoll() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    /**
-     * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-     */
-    public com.dp.blackhole.protocol.control.AppRollPB.AppRoll getAppRoll() {
-      return appRoll_;
-    }
-    /**
-     * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-     */
-    public com.dp.blackhole.protocol.control.AppRollPB.AppRollOrBuilder getAppRollOrBuilder() {
-      return appRoll_;
-    }
-
+    public boolean hasAppRoll() { return hasAppRoll; }
+    public com.dp.blackhole.protocol.control.AppRollPB.AppRoll getAppRoll() { return appRoll_; }
+    
     // optional .blackhole.RecoveryRoll recoveryRoll = 5;
     public static final int RECOVERYROLL_FIELD_NUMBER = 5;
+    private boolean hasRecoveryRoll;
     private com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll recoveryRoll_;
-    /**
-     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-     */
-    public boolean hasRecoveryRoll() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
-    }
-    /**
-     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-     */
-    public com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll getRecoveryRoll() {
-      return recoveryRoll_;
-    }
-    /**
-     * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-     */
-    public com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRollOrBuilder getRecoveryRollOrBuilder() {
-      return recoveryRoll_;
-    }
-
+    public boolean hasRecoveryRoll() { return hasRecoveryRoll; }
+    public com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll getRecoveryRoll() { return recoveryRoll_; }
+    
     // optional .blackhole.ReadyBroker readyBroker = 6;
     public static final int READYBROKER_FIELD_NUMBER = 6;
+    private boolean hasReadyBroker;
     private com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker readyBroker_;
-    /**
-     * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-     */
-    public boolean hasReadyBroker() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
-    }
-    /**
-     * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-     */
-    public com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker getReadyBroker() {
-      return readyBroker_;
-    }
-    /**
-     * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-     */
-    public com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBrokerOrBuilder getReadyBrokerOrBuilder() {
-      return readyBroker_;
-    }
-
+    public boolean hasReadyBroker() { return hasReadyBroker; }
+    public com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker getReadyBroker() { return readyBroker_; }
+    
     // optional .blackhole.RollID rollID = 7;
     public static final int ROLLID_FIELD_NUMBER = 7;
+    private boolean hasRollID;
     private com.dp.blackhole.protocol.control.RollIDPB.RollID rollID_;
-    /**
-     * <code>optional .blackhole.RollID rollID = 7;</code>
-     */
-    public boolean hasRollID() {
-      return ((bitField0_ & 0x00000040) == 0x00000040);
-    }
-    /**
-     * <code>optional .blackhole.RollID rollID = 7;</code>
-     */
-    public com.dp.blackhole.protocol.control.RollIDPB.RollID getRollID() {
-      return rollID_;
-    }
-    /**
-     * <code>optional .blackhole.RollID rollID = 7;</code>
-     */
-    public com.dp.blackhole.protocol.control.RollIDPB.RollIDOrBuilder getRollIDOrBuilder() {
-      return rollID_;
-    }
-
+    public boolean hasRollID() { return hasRollID; }
+    public com.dp.blackhole.protocol.control.RollIDPB.RollID getRollID() { return rollID_; }
+    
     // optional .blackhole.Failure failure = 8;
     public static final int FAILURE_FIELD_NUMBER = 8;
+    private boolean hasFailure;
     private com.dp.blackhole.protocol.control.FailurePB.Failure failure_;
-    /**
-     * <code>optional .blackhole.Failure failure = 8;</code>
-     */
-    public boolean hasFailure() {
-      return ((bitField0_ & 0x00000080) == 0x00000080);
-    }
-    /**
-     * <code>optional .blackhole.Failure failure = 8;</code>
-     */
-    public com.dp.blackhole.protocol.control.FailurePB.Failure getFailure() {
-      return failure_;
-    }
-    /**
-     * <code>optional .blackhole.Failure failure = 8;</code>
-     */
-    public com.dp.blackhole.protocol.control.FailurePB.FailureOrBuilder getFailureOrBuilder() {
-      return failure_;
-    }
-
+    public boolean hasFailure() { return hasFailure; }
+    public com.dp.blackhole.protocol.control.FailurePB.Failure getFailure() { return failure_; }
+    
     // optional .blackhole.NoAvailableNode noAvailableNode = 9;
     public static final int NOAVAILABLENODE_FIELD_NUMBER = 9;
+    private boolean hasNoAvailableNode;
     private com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode noAvailableNode_;
-    /**
-     * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-     */
-    public boolean hasNoAvailableNode() {
-      return ((bitField0_ & 0x00000100) == 0x00000100);
-    }
-    /**
-     * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-     */
-    public com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode getNoAvailableNode() {
-      return noAvailableNode_;
-    }
-    /**
-     * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-     */
-    public com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNodeOrBuilder getNoAvailableNodeOrBuilder() {
-      return noAvailableNode_;
-    }
-
+    public boolean hasNoAvailableNode() { return hasNoAvailableNode; }
+    public com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode getNoAvailableNode() { return noAvailableNode_; }
+    
     // optional .blackhole.StreamID streamId = 10;
     public static final int STREAMID_FIELD_NUMBER = 10;
+    private boolean hasStreamId;
     private com.dp.blackhole.protocol.control.StreamIDPB.StreamID streamId_;
-    /**
-     * <code>optional .blackhole.StreamID streamId = 10;</code>
-     */
-    public boolean hasStreamId() {
-      return ((bitField0_ & 0x00000200) == 0x00000200);
-    }
-    /**
-     * <code>optional .blackhole.StreamID streamId = 10;</code>
-     */
-    public com.dp.blackhole.protocol.control.StreamIDPB.StreamID getStreamId() {
-      return streamId_;
-    }
-    /**
-     * <code>optional .blackhole.StreamID streamId = 10;</code>
-     */
-    public com.dp.blackhole.protocol.control.StreamIDPB.StreamIDOrBuilder getStreamIdOrBuilder() {
-      return streamId_;
-    }
-
+    public boolean hasStreamId() { return hasStreamId; }
+    public com.dp.blackhole.protocol.control.StreamIDPB.StreamID getStreamId() { return streamId_; }
+    
     // optional .blackhole.ConfRes confRes = 11;
     public static final int CONFRES_FIELD_NUMBER = 11;
+    private boolean hasConfRes;
     private com.dp.blackhole.protocol.control.ConfResPB.ConfRes confRes_;
-    /**
-     * <code>optional .blackhole.ConfRes confRes = 11;</code>
-     */
-    public boolean hasConfRes() {
-      return ((bitField0_ & 0x00000400) == 0x00000400);
-    }
-    /**
-     * <code>optional .blackhole.ConfRes confRes = 11;</code>
-     */
-    public com.dp.blackhole.protocol.control.ConfResPB.ConfRes getConfRes() {
-      return confRes_;
-    }
-    /**
-     * <code>optional .blackhole.ConfRes confRes = 11;</code>
-     */
-    public com.dp.blackhole.protocol.control.ConfResPB.ConfResOrBuilder getConfResOrBuilder() {
-      return confRes_;
-    }
-
+    public boolean hasConfRes() { return hasConfRes; }
+    public com.dp.blackhole.protocol.control.ConfResPB.ConfRes getConfRes() { return confRes_; }
+    
     // optional .blackhole.DumpReply dumpReply = 12;
     public static final int DUMPREPLY_FIELD_NUMBER = 12;
+    private boolean hasDumpReply;
     private com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply dumpReply_;
-    /**
-     * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-     */
-    public boolean hasDumpReply() {
-      return ((bitField0_ & 0x00000800) == 0x00000800);
-    }
-    /**
-     * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-     */
-    public com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply getDumpReply() {
-      return dumpReply_;
-    }
-    /**
-     * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-     */
-    public com.dp.blackhole.protocol.control.DumpReplyPB.DumpReplyOrBuilder getDumpReplyOrBuilder() {
-      return dumpReply_;
-    }
-
+    public boolean hasDumpReply() { return hasDumpReply; }
+    public com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply getDumpReply() { return dumpReply_; }
+    
     // optional .blackhole.RemoveConf removeConf = 13;
     public static final int REMOVECONF_FIELD_NUMBER = 13;
+    private boolean hasRemoveConf;
     private com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf removeConf_;
-    /**
-     * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-     */
-    public boolean hasRemoveConf() {
-      return ((bitField0_ & 0x00001000) == 0x00001000);
-    }
-    /**
-     * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-     */
-    public com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf getRemoveConf() {
-      return removeConf_;
-    }
-    /**
-     * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-     */
-    public com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConfOrBuilder getRemoveConfOrBuilder() {
-      return removeConf_;
-    }
-
+    public boolean hasRemoveConf() { return hasRemoveConf; }
+    public com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf getRemoveConf() { return removeConf_; }
+    
     // optional .blackhole.BrokerReg brokerReg = 14;
     public static final int BROKERREG_FIELD_NUMBER = 14;
+    private boolean hasBrokerReg;
     private com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg brokerReg_;
-    /**
-     * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-     */
-    public boolean hasBrokerReg() {
-      return ((bitField0_ & 0x00002000) == 0x00002000);
-    }
-    /**
-     * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-     */
-    public com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg getBrokerReg() {
-      return brokerReg_;
-    }
-    /**
-     * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-     */
-    public com.dp.blackhole.protocol.control.BrokerRegPB.BrokerRegOrBuilder getBrokerRegOrBuilder() {
-      return brokerReg_;
-    }
-
+    public boolean hasBrokerReg() { return hasBrokerReg; }
+    public com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg getBrokerReg() { return brokerReg_; }
+    
     // optional .blackhole.DumpApp dumpApp = 15;
     public static final int DUMPAPP_FIELD_NUMBER = 15;
+    private boolean hasDumpApp;
     private com.dp.blackhole.protocol.control.DumpAppPB.DumpApp dumpApp_;
-    /**
-     * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-     */
-    public boolean hasDumpApp() {
-      return ((bitField0_ & 0x00004000) == 0x00004000);
-    }
-    /**
-     * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-     */
-    public com.dp.blackhole.protocol.control.DumpAppPB.DumpApp getDumpApp() {
-      return dumpApp_;
-    }
-    /**
-     * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-     */
-    public com.dp.blackhole.protocol.control.DumpAppPB.DumpAppOrBuilder getDumpAppOrBuilder() {
-      return dumpApp_;
-    }
-
+    public boolean hasDumpApp() { return hasDumpApp; }
+    public com.dp.blackhole.protocol.control.DumpAppPB.DumpApp getDumpApp() { return dumpApp_; }
+    
     // optional .blackhole.ConsumerReg consumerReg = 16;
     public static final int CONSUMERREG_FIELD_NUMBER = 16;
+    private boolean hasConsumerReg;
     private com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg consumerReg_;
-    /**
-     * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-     */
-    public boolean hasConsumerReg() {
-      return ((bitField0_ & 0x00008000) == 0x00008000);
-    }
-    /**
-     * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-     */
-    public com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg getConsumerReg() {
-      return consumerReg_;
-    }
-    /**
-     * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-     */
-    public com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerRegOrBuilder getConsumerRegOrBuilder() {
-      return consumerReg_;
-    }
-
+    public boolean hasConsumerReg() { return hasConsumerReg; }
+    public com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg getConsumerReg() { return consumerReg_; }
+    
     // optional .blackhole.AssignConsumer assignConsumer = 17;
     public static final int ASSIGNCONSUMER_FIELD_NUMBER = 17;
+    private boolean hasAssignConsumer;
     private com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer assignConsumer_;
-    /**
-     * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-     */
-    public boolean hasAssignConsumer() {
-      return ((bitField0_ & 0x00010000) == 0x00010000);
-    }
-    /**
-     * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-     */
-    public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer getAssignConsumer() {
-      return assignConsumer_;
-    }
-    /**
-     * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-     */
-    public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumerOrBuilder getAssignConsumerOrBuilder() {
-      return assignConsumer_;
-    }
-
+    public boolean hasAssignConsumer() { return hasAssignConsumer; }
+    public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer getAssignConsumer() { return assignConsumer_; }
+    
     // optional .blackhole.OffsetCommit offsetCommit = 18;
     public static final int OFFSETCOMMIT_FIELD_NUMBER = 18;
+    private boolean hasOffsetCommit;
     private com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit offsetCommit_;
-    /**
-     * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-     */
-    public boolean hasOffsetCommit() {
-      return ((bitField0_ & 0x00020000) == 0x00020000);
-    }
-    /**
-     * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-     */
-    public com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit getOffsetCommit() {
-      return offsetCommit_;
-    }
-    /**
-     * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-     */
-    public com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommitOrBuilder getOffsetCommitOrBuilder() {
-      return offsetCommit_;
-    }
-
+    public boolean hasOffsetCommit() { return hasOffsetCommit; }
+    public com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit getOffsetCommit() { return offsetCommit_; }
+    
     // optional .blackhole.TopicReport topicReport = 19;
     public static final int TOPICREPORT_FIELD_NUMBER = 19;
+    private boolean hasTopicReport;
     private com.dp.blackhole.protocol.control.TopicReportPB.TopicReport topicReport_;
-    /**
-     * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-     */
-    public boolean hasTopicReport() {
-      return ((bitField0_ & 0x00040000) == 0x00040000);
-    }
-    /**
-     * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-     */
-    public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport getTopicReport() {
-      return topicReport_;
-    }
-    /**
-     * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-     */
-    public com.dp.blackhole.protocol.control.TopicReportPB.TopicReportOrBuilder getTopicReportOrBuilder() {
-      return topicReport_;
-    }
-
+    public boolean hasTopicReport() { return hasTopicReport; }
+    public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport getTopicReport() { return topicReport_; }
+    
     // optional .blackhole.Restart restart = 20;
     public static final int RESTART_FIELD_NUMBER = 20;
+    private boolean hasRestart;
     private com.dp.blackhole.protocol.control.RestartPB.Restart restart_;
-    /**
-     * <code>optional .blackhole.Restart restart = 20;</code>
-     */
-    public boolean hasRestart() {
-      return ((bitField0_ & 0x00080000) == 0x00080000);
-    }
-    /**
-     * <code>optional .blackhole.Restart restart = 20;</code>
-     */
-    public com.dp.blackhole.protocol.control.RestartPB.Restart getRestart() {
-      return restart_;
-    }
-    /**
-     * <code>optional .blackhole.Restart restart = 20;</code>
-     */
-    public com.dp.blackhole.protocol.control.RestartPB.RestartOrBuilder getRestartOrBuilder() {
-      return restart_;
-    }
-
+    public boolean hasRestart() { return hasRestart; }
+    public com.dp.blackhole.protocol.control.RestartPB.Restart getRestart() { return restart_; }
+    
     private void initFields() {
       type_ = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance();
@@ -1462,719 +328,364 @@ public final class MessagePB {
       topicReport_ = com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.getDefaultInstance();
       restart_ = com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance();
     }
-    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-
-      if (!hasType()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
+      if (!hasType) return false;
       if (hasAppReg()) {
-        if (!getAppReg().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getAppReg().isInitialized()) return false;
       }
       if (hasAssignBroker()) {
-        if (!getAssignBroker().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getAssignBroker().isInitialized()) return false;
       }
       if (hasAppRoll()) {
-        if (!getAppRoll().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getAppRoll().isInitialized()) return false;
       }
       if (hasRecoveryRoll()) {
-        if (!getRecoveryRoll().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getRecoveryRoll().isInitialized()) return false;
       }
       if (hasReadyBroker()) {
-        if (!getReadyBroker().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getReadyBroker().isInitialized()) return false;
       }
       if (hasRollID()) {
-        if (!getRollID().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getRollID().isInitialized()) return false;
       }
       if (hasFailure()) {
-        if (!getFailure().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getFailure().isInitialized()) return false;
       }
       if (hasNoAvailableNode()) {
-        if (!getNoAvailableNode().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getNoAvailableNode().isInitialized()) return false;
       }
       if (hasStreamId()) {
-        if (!getStreamId().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getStreamId().isInitialized()) return false;
       }
       if (hasConfRes()) {
-        if (!getConfRes().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getConfRes().isInitialized()) return false;
       }
       if (hasDumpReply()) {
-        if (!getDumpReply().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getDumpReply().isInitialized()) return false;
       }
       if (hasRemoveConf()) {
-        if (!getRemoveConf().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getRemoveConf().isInitialized()) return false;
       }
       if (hasBrokerReg()) {
-        if (!getBrokerReg().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getBrokerReg().isInitialized()) return false;
       }
       if (hasDumpApp()) {
-        if (!getDumpApp().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getDumpApp().isInitialized()) return false;
       }
       if (hasConsumerReg()) {
-        if (!getConsumerReg().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getConsumerReg().isInitialized()) return false;
       }
       if (hasAssignConsumer()) {
-        if (!getAssignConsumer().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getAssignConsumer().isInitialized()) return false;
       }
       if (hasOffsetCommit()) {
-        if (!getOffsetCommit().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getOffsetCommit().isInitialized()) return false;
       }
       if (hasTopicReport()) {
-        if (!getTopicReport().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
+        if (!getTopicReport().isInitialized()) return false;
       }
-      memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeEnum(1, type_.getNumber());
+      if (hasType()) {
+        output.writeEnum(1, getType().getNumber());
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeMessage(2, appReg_);
+      if (hasAppReg()) {
+        output.writeMessage(2, getAppReg());
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeMessage(3, assignBroker_);
+      if (hasAssignBroker()) {
+        output.writeMessage(3, getAssignBroker());
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeMessage(4, appRoll_);
+      if (hasAppRoll()) {
+        output.writeMessage(4, getAppRoll());
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeMessage(5, recoveryRoll_);
+      if (hasRecoveryRoll()) {
+        output.writeMessage(5, getRecoveryRoll());
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        output.writeMessage(6, readyBroker_);
+      if (hasReadyBroker()) {
+        output.writeMessage(6, getReadyBroker());
       }
-      if (((bitField0_ & 0x00000040) == 0x00000040)) {
-        output.writeMessage(7, rollID_);
+      if (hasRollID()) {
+        output.writeMessage(7, getRollID());
       }
-      if (((bitField0_ & 0x00000080) == 0x00000080)) {
-        output.writeMessage(8, failure_);
+      if (hasFailure()) {
+        output.writeMessage(8, getFailure());
       }
-      if (((bitField0_ & 0x00000100) == 0x00000100)) {
-        output.writeMessage(9, noAvailableNode_);
+      if (hasNoAvailableNode()) {
+        output.writeMessage(9, getNoAvailableNode());
       }
-      if (((bitField0_ & 0x00000200) == 0x00000200)) {
-        output.writeMessage(10, streamId_);
+      if (hasStreamId()) {
+        output.writeMessage(10, getStreamId());
       }
-      if (((bitField0_ & 0x00000400) == 0x00000400)) {
-        output.writeMessage(11, confRes_);
+      if (hasConfRes()) {
+        output.writeMessage(11, getConfRes());
       }
-      if (((bitField0_ & 0x00000800) == 0x00000800)) {
-        output.writeMessage(12, dumpReply_);
+      if (hasDumpReply()) {
+        output.writeMessage(12, getDumpReply());
       }
-      if (((bitField0_ & 0x00001000) == 0x00001000)) {
-        output.writeMessage(13, removeConf_);
+      if (hasRemoveConf()) {
+        output.writeMessage(13, getRemoveConf());
       }
-      if (((bitField0_ & 0x00002000) == 0x00002000)) {
-        output.writeMessage(14, brokerReg_);
+      if (hasBrokerReg()) {
+        output.writeMessage(14, getBrokerReg());
       }
-      if (((bitField0_ & 0x00004000) == 0x00004000)) {
-        output.writeMessage(15, dumpApp_);
+      if (hasDumpApp()) {
+        output.writeMessage(15, getDumpApp());
       }
-      if (((bitField0_ & 0x00008000) == 0x00008000)) {
-        output.writeMessage(16, consumerReg_);
+      if (hasConsumerReg()) {
+        output.writeMessage(16, getConsumerReg());
       }
-      if (((bitField0_ & 0x00010000) == 0x00010000)) {
-        output.writeMessage(17, assignConsumer_);
+      if (hasAssignConsumer()) {
+        output.writeMessage(17, getAssignConsumer());
       }
-      if (((bitField0_ & 0x00020000) == 0x00020000)) {
-        output.writeMessage(18, offsetCommit_);
+      if (hasOffsetCommit()) {
+        output.writeMessage(18, getOffsetCommit());
       }
-      if (((bitField0_ & 0x00040000) == 0x00040000)) {
-        output.writeMessage(19, topicReport_);
+      if (hasTopicReport()) {
+        output.writeMessage(19, getTopicReport());
       }
-      if (((bitField0_ & 0x00080000) == 0x00080000)) {
-        output.writeMessage(20, restart_);
+      if (hasRestart()) {
+        output.writeMessage(20, getRestart());
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      if (hasType()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1, type_.getNumber());
+          .computeEnumSize(1, getType().getNumber());
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+      if (hasAppReg()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, appReg_);
+          .computeMessageSize(2, getAppReg());
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+      if (hasAssignBroker()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, assignBroker_);
+          .computeMessageSize(3, getAssignBroker());
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+      if (hasAppRoll()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, appRoll_);
+          .computeMessageSize(4, getAppRoll());
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (hasRecoveryRoll()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, recoveryRoll_);
+          .computeMessageSize(5, getRecoveryRoll());
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+      if (hasReadyBroker()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(6, readyBroker_);
+          .computeMessageSize(6, getReadyBroker());
       }
-      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+      if (hasRollID()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(7, rollID_);
+          .computeMessageSize(7, getRollID());
       }
-      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+      if (hasFailure()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(8, failure_);
+          .computeMessageSize(8, getFailure());
       }
-      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+      if (hasNoAvailableNode()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(9, noAvailableNode_);
+          .computeMessageSize(9, getNoAvailableNode());
       }
-      if (((bitField0_ & 0x00000200) == 0x00000200)) {
+      if (hasStreamId()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(10, streamId_);
+          .computeMessageSize(10, getStreamId());
       }
-      if (((bitField0_ & 0x00000400) == 0x00000400)) {
+      if (hasConfRes()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(11, confRes_);
+          .computeMessageSize(11, getConfRes());
       }
-      if (((bitField0_ & 0x00000800) == 0x00000800)) {
+      if (hasDumpReply()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(12, dumpReply_);
+          .computeMessageSize(12, getDumpReply());
       }
-      if (((bitField0_ & 0x00001000) == 0x00001000)) {
+      if (hasRemoveConf()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(13, removeConf_);
+          .computeMessageSize(13, getRemoveConf());
       }
-      if (((bitField0_ & 0x00002000) == 0x00002000)) {
+      if (hasBrokerReg()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(14, brokerReg_);
+          .computeMessageSize(14, getBrokerReg());
       }
-      if (((bitField0_ & 0x00004000) == 0x00004000)) {
+      if (hasDumpApp()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(15, dumpApp_);
+          .computeMessageSize(15, getDumpApp());
       }
-      if (((bitField0_ & 0x00008000) == 0x00008000)) {
+      if (hasConsumerReg()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(16, consumerReg_);
+          .computeMessageSize(16, getConsumerReg());
       }
-      if (((bitField0_ & 0x00010000) == 0x00010000)) {
+      if (hasAssignConsumer()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(17, assignConsumer_);
+          .computeMessageSize(17, getAssignConsumer());
       }
-      if (((bitField0_ & 0x00020000) == 0x00020000)) {
+      if (hasOffsetCommit()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(18, offsetCommit_);
+          .computeMessageSize(18, getOffsetCommit());
       }
-      if (((bitField0_ & 0x00040000) == 0x00040000)) {
+      if (hasTopicReport()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(19, topicReport_);
+          .computeMessageSize(19, getTopicReport());
       }
-      if (((bitField0_ & 0x00080000) == 0x00080000)) {
+      if (hasRestart()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(20, restart_);
+          .computeMessageSize(20, getRestart());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
+    
     public static com.dp.blackhole.protocol.control.MessagePB.Message parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.MessagePB.Message parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.MessagePB.Message parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.MessagePB.Message parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.MessagePB.Message parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.MessagePB.Message parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.MessagePB.Message parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static com.dp.blackhole.protocol.control.MessagePB.Message parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static com.dp.blackhole.protocol.control.MessagePB.Message parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.MessagePB.Message parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.MessagePB.Message prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code blackhole.Message}
-     */
+    
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.dp.blackhole.protocol.control.MessagePB.MessageOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.dp.blackhole.protocol.control.MessagePB.internal_static_blackhole_Message_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.dp.blackhole.protocol.control.MessagePB.internal_static_blackhole_Message_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.dp.blackhole.protocol.control.MessagePB.Message.class, com.dp.blackhole.protocol.control.MessagePB.Message.Builder.class);
-      }
-
+        com.google.protobuf.GeneratedMessage.Builder<Builder> {
+      private com.dp.blackhole.protocol.control.MessagePB.Message result;
+      
       // Construct using com.dp.blackhole.protocol.control.MessagePB.Message.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getAppRegFieldBuilder();
-          getAssignBrokerFieldBuilder();
-          getAppRollFieldBuilder();
-          getRecoveryRollFieldBuilder();
-          getReadyBrokerFieldBuilder();
-          getRollIDFieldBuilder();
-          getFailureFieldBuilder();
-          getNoAvailableNodeFieldBuilder();
-          getStreamIdFieldBuilder();
-          getConfResFieldBuilder();
-          getDumpReplyFieldBuilder();
-          getRemoveConfFieldBuilder();
-          getBrokerRegFieldBuilder();
-          getDumpAppFieldBuilder();
-          getConsumerRegFieldBuilder();
-          getAssignConsumerFieldBuilder();
-          getOffsetCommitFieldBuilder();
-          getTopicReportFieldBuilder();
-          getRestartFieldBuilder();
-        }
-      }
+      private Builder() {}
+      
       private static Builder create() {
-        return new Builder();
+        Builder builder = new Builder();
+        builder.result = new com.dp.blackhole.protocol.control.MessagePB.Message();
+        return builder;
       }
-
+      
+      protected com.dp.blackhole.protocol.control.MessagePB.Message internalGetResult() {
+        return result;
+      }
+      
       public Builder clear() {
-        super.clear();
-        type_ = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.HEARTBEART;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        if (appRegBuilder_ == null) {
-          appReg_ = com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance();
-        } else {
-          appRegBuilder_.clear();
+        if (result == null) {
+          throw new IllegalStateException(
+            "Cannot call clear() after build().");
         }
-        bitField0_ = (bitField0_ & ~0x00000002);
-        if (assignBrokerBuilder_ == null) {
-          assignBroker_ = com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.getDefaultInstance();
-        } else {
-          assignBrokerBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000004);
-        if (appRollBuilder_ == null) {
-          appRoll_ = com.dp.blackhole.protocol.control.AppRollPB.AppRoll.getDefaultInstance();
-        } else {
-          appRollBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000008);
-        if (recoveryRollBuilder_ == null) {
-          recoveryRoll_ = com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.getDefaultInstance();
-        } else {
-          recoveryRollBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000010);
-        if (readyBrokerBuilder_ == null) {
-          readyBroker_ = com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.getDefaultInstance();
-        } else {
-          readyBrokerBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000020);
-        if (rollIDBuilder_ == null) {
-          rollID_ = com.dp.blackhole.protocol.control.RollIDPB.RollID.getDefaultInstance();
-        } else {
-          rollIDBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000040);
-        if (failureBuilder_ == null) {
-          failure_ = com.dp.blackhole.protocol.control.FailurePB.Failure.getDefaultInstance();
-        } else {
-          failureBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000080);
-        if (noAvailableNodeBuilder_ == null) {
-          noAvailableNode_ = com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.getDefaultInstance();
-        } else {
-          noAvailableNodeBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000100);
-        if (streamIdBuilder_ == null) {
-          streamId_ = com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance();
-        } else {
-          streamIdBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000200);
-        if (confResBuilder_ == null) {
-          confRes_ = com.dp.blackhole.protocol.control.ConfResPB.ConfRes.getDefaultInstance();
-        } else {
-          confResBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000400);
-        if (dumpReplyBuilder_ == null) {
-          dumpReply_ = com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.getDefaultInstance();
-        } else {
-          dumpReplyBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000800);
-        if (removeConfBuilder_ == null) {
-          removeConf_ = com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.getDefaultInstance();
-        } else {
-          removeConfBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00001000);
-        if (brokerRegBuilder_ == null) {
-          brokerReg_ = com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.getDefaultInstance();
-        } else {
-          brokerRegBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00002000);
-        if (dumpAppBuilder_ == null) {
-          dumpApp_ = com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.getDefaultInstance();
-        } else {
-          dumpAppBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00004000);
-        if (consumerRegBuilder_ == null) {
-          consumerReg_ = com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.getDefaultInstance();
-        } else {
-          consumerRegBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00008000);
-        if (assignConsumerBuilder_ == null) {
-          assignConsumer_ = com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.getDefaultInstance();
-        } else {
-          assignConsumerBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00010000);
-        if (offsetCommitBuilder_ == null) {
-          offsetCommit_ = com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.getDefaultInstance();
-        } else {
-          offsetCommitBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00020000);
-        if (topicReportBuilder_ == null) {
-          topicReport_ = com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.getDefaultInstance();
-        } else {
-          topicReportBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00040000);
-        if (restartBuilder_ == null) {
-          restart_ = com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance();
-        } else {
-          restartBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00080000);
+        result = new com.dp.blackhole.protocol.control.MessagePB.Message();
         return this;
       }
-
+      
       public Builder clone() {
-        return create().mergeFrom(buildPartial());
+        return create().mergeFrom(result);
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.MessagePB.internal_static_blackhole_Message_descriptor;
+        return com.dp.blackhole.protocol.control.MessagePB.Message.getDescriptor();
       }
-
+      
       public com.dp.blackhole.protocol.control.MessagePB.Message getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.MessagePB.Message.getDefaultInstance();
       }
-
+      
+      public boolean isInitialized() {
+        return result.isInitialized();
+      }
       public com.dp.blackhole.protocol.control.MessagePB.Message build() {
-        com.dp.blackhole.protocol.control.MessagePB.Message result = buildPartial();
-        if (!result.isInitialized()) {
+        if (result != null && !isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return result;
+        return buildPartial();
       }
-
+      
+      private com.dp.blackhole.protocol.control.MessagePB.Message buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        if (!isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return buildPartial();
+      }
+      
       public com.dp.blackhole.protocol.control.MessagePB.Message buildPartial() {
-        com.dp.blackhole.protocol.control.MessagePB.Message result = new com.dp.blackhole.protocol.control.MessagePB.Message(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
+        if (result == null) {
+          throw new IllegalStateException(
+            "build() has already been called on this Builder.");
         }
-        result.type_ = type_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        if (appRegBuilder_ == null) {
-          result.appReg_ = appReg_;
-        } else {
-          result.appReg_ = appRegBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        if (assignBrokerBuilder_ == null) {
-          result.assignBroker_ = assignBroker_;
-        } else {
-          result.assignBroker_ = assignBrokerBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        if (appRollBuilder_ == null) {
-          result.appRoll_ = appRoll_;
-        } else {
-          result.appRoll_ = appRollBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-          to_bitField0_ |= 0x00000010;
-        }
-        if (recoveryRollBuilder_ == null) {
-          result.recoveryRoll_ = recoveryRoll_;
-        } else {
-          result.recoveryRoll_ = recoveryRollBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
-          to_bitField0_ |= 0x00000020;
-        }
-        if (readyBrokerBuilder_ == null) {
-          result.readyBroker_ = readyBroker_;
-        } else {
-          result.readyBroker_ = readyBrokerBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
-          to_bitField0_ |= 0x00000040;
-        }
-        if (rollIDBuilder_ == null) {
-          result.rollID_ = rollID_;
-        } else {
-          result.rollID_ = rollIDBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
-          to_bitField0_ |= 0x00000080;
-        }
-        if (failureBuilder_ == null) {
-          result.failure_ = failure_;
-        } else {
-          result.failure_ = failureBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
-          to_bitField0_ |= 0x00000100;
-        }
-        if (noAvailableNodeBuilder_ == null) {
-          result.noAvailableNode_ = noAvailableNode_;
-        } else {
-          result.noAvailableNode_ = noAvailableNodeBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
-          to_bitField0_ |= 0x00000200;
-        }
-        if (streamIdBuilder_ == null) {
-          result.streamId_ = streamId_;
-        } else {
-          result.streamId_ = streamIdBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000400) == 0x00000400)) {
-          to_bitField0_ |= 0x00000400;
-        }
-        if (confResBuilder_ == null) {
-          result.confRes_ = confRes_;
-        } else {
-          result.confRes_ = confResBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000800) == 0x00000800)) {
-          to_bitField0_ |= 0x00000800;
-        }
-        if (dumpReplyBuilder_ == null) {
-          result.dumpReply_ = dumpReply_;
-        } else {
-          result.dumpReply_ = dumpReplyBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00001000) == 0x00001000)) {
-          to_bitField0_ |= 0x00001000;
-        }
-        if (removeConfBuilder_ == null) {
-          result.removeConf_ = removeConf_;
-        } else {
-          result.removeConf_ = removeConfBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00002000) == 0x00002000)) {
-          to_bitField0_ |= 0x00002000;
-        }
-        if (brokerRegBuilder_ == null) {
-          result.brokerReg_ = brokerReg_;
-        } else {
-          result.brokerReg_ = brokerRegBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00004000) == 0x00004000)) {
-          to_bitField0_ |= 0x00004000;
-        }
-        if (dumpAppBuilder_ == null) {
-          result.dumpApp_ = dumpApp_;
-        } else {
-          result.dumpApp_ = dumpAppBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00008000) == 0x00008000)) {
-          to_bitField0_ |= 0x00008000;
-        }
-        if (consumerRegBuilder_ == null) {
-          result.consumerReg_ = consumerReg_;
-        } else {
-          result.consumerReg_ = consumerRegBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00010000) == 0x00010000)) {
-          to_bitField0_ |= 0x00010000;
-        }
-        if (assignConsumerBuilder_ == null) {
-          result.assignConsumer_ = assignConsumer_;
-        } else {
-          result.assignConsumer_ = assignConsumerBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00020000) == 0x00020000)) {
-          to_bitField0_ |= 0x00020000;
-        }
-        if (offsetCommitBuilder_ == null) {
-          result.offsetCommit_ = offsetCommit_;
-        } else {
-          result.offsetCommit_ = offsetCommitBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00040000) == 0x00040000)) {
-          to_bitField0_ |= 0x00040000;
-        }
-        if (topicReportBuilder_ == null) {
-          result.topicReport_ = topicReport_;
-        } else {
-          result.topicReport_ = topicReportBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00080000) == 0x00080000)) {
-          to_bitField0_ |= 0x00080000;
-        }
-        if (restartBuilder_ == null) {
-          result.restart_ = restart_;
-        } else {
-          result.restart_ = restartBuilder_.build();
-        }
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
+        com.dp.blackhole.protocol.control.MessagePB.Message returnMe = result;
+        result = null;
+        return returnMe;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.MessagePB.Message) {
           return mergeFrom((com.dp.blackhole.protocol.control.MessagePB.Message)other);
@@ -2183,7 +694,7 @@ public final class MessagePB {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(com.dp.blackhole.protocol.control.MessagePB.Message other) {
         if (other == com.dp.blackhole.protocol.control.MessagePB.Message.getDefaultInstance()) return this;
         if (other.hasType()) {
@@ -2249,2418 +760,956 @@ public final class MessagePB {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
-      public final boolean isInitialized() {
-        if (!hasType()) {
-          
-          return false;
-        }
-        if (hasAppReg()) {
-          if (!getAppReg().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasAssignBroker()) {
-          if (!getAssignBroker().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasAppRoll()) {
-          if (!getAppRoll().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasRecoveryRoll()) {
-          if (!getRecoveryRoll().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasReadyBroker()) {
-          if (!getReadyBroker().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasRollID()) {
-          if (!getRollID().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasFailure()) {
-          if (!getFailure().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasNoAvailableNode()) {
-          if (!getNoAvailableNode().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasStreamId()) {
-          if (!getStreamId().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasConfRes()) {
-          if (!getConfRes().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasDumpReply()) {
-          if (!getDumpReply().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasRemoveConf()) {
-          if (!getRemoveConf().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasBrokerReg()) {
-          if (!getBrokerReg().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasDumpApp()) {
-          if (!getDumpApp().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasConsumerReg()) {
-          if (!getConsumerReg().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasAssignConsumer()) {
-          if (!getAssignConsumer().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasOffsetCommit()) {
-          if (!getOffsetCommit().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasTopicReport()) {
-          if (!getTopicReport().isInitialized()) {
-            
-            return false;
-          }
-        }
-        return true;
-      }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.dp.blackhole.protocol.control.MessagePB.Message parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.dp.blackhole.protocol.control.MessagePB.Message) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                return this;
+              }
+              break;
+            }
+            case 8: {
+              int rawValue = input.readEnum();
+              com.dp.blackhole.protocol.control.MessagePB.Message.MessageType value = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(1, rawValue);
+              } else {
+                setType(value);
+              }
+              break;
+            }
+            case 18: {
+              com.dp.blackhole.protocol.control.AppRegPB.AppReg.Builder subBuilder = com.dp.blackhole.protocol.control.AppRegPB.AppReg.newBuilder();
+              if (hasAppReg()) {
+                subBuilder.mergeFrom(getAppReg());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setAppReg(subBuilder.buildPartial());
+              break;
+            }
+            case 26: {
+              com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.Builder subBuilder = com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.newBuilder();
+              if (hasAssignBroker()) {
+                subBuilder.mergeFrom(getAssignBroker());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setAssignBroker(subBuilder.buildPartial());
+              break;
+            }
+            case 34: {
+              com.dp.blackhole.protocol.control.AppRollPB.AppRoll.Builder subBuilder = com.dp.blackhole.protocol.control.AppRollPB.AppRoll.newBuilder();
+              if (hasAppRoll()) {
+                subBuilder.mergeFrom(getAppRoll());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setAppRoll(subBuilder.buildPartial());
+              break;
+            }
+            case 42: {
+              com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.Builder subBuilder = com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.newBuilder();
+              if (hasRecoveryRoll()) {
+                subBuilder.mergeFrom(getRecoveryRoll());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setRecoveryRoll(subBuilder.buildPartial());
+              break;
+            }
+            case 50: {
+              com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.Builder subBuilder = com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.newBuilder();
+              if (hasReadyBroker()) {
+                subBuilder.mergeFrom(getReadyBroker());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setReadyBroker(subBuilder.buildPartial());
+              break;
+            }
+            case 58: {
+              com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder subBuilder = com.dp.blackhole.protocol.control.RollIDPB.RollID.newBuilder();
+              if (hasRollID()) {
+                subBuilder.mergeFrom(getRollID());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setRollID(subBuilder.buildPartial());
+              break;
+            }
+            case 66: {
+              com.dp.blackhole.protocol.control.FailurePB.Failure.Builder subBuilder = com.dp.blackhole.protocol.control.FailurePB.Failure.newBuilder();
+              if (hasFailure()) {
+                subBuilder.mergeFrom(getFailure());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setFailure(subBuilder.buildPartial());
+              break;
+            }
+            case 74: {
+              com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.Builder subBuilder = com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.newBuilder();
+              if (hasNoAvailableNode()) {
+                subBuilder.mergeFrom(getNoAvailableNode());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setNoAvailableNode(subBuilder.buildPartial());
+              break;
+            }
+            case 82: {
+              com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder subBuilder = com.dp.blackhole.protocol.control.StreamIDPB.StreamID.newBuilder();
+              if (hasStreamId()) {
+                subBuilder.mergeFrom(getStreamId());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setStreamId(subBuilder.buildPartial());
+              break;
+            }
+            case 90: {
+              com.dp.blackhole.protocol.control.ConfResPB.ConfRes.Builder subBuilder = com.dp.blackhole.protocol.control.ConfResPB.ConfRes.newBuilder();
+              if (hasConfRes()) {
+                subBuilder.mergeFrom(getConfRes());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setConfRes(subBuilder.buildPartial());
+              break;
+            }
+            case 98: {
+              com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.Builder subBuilder = com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.newBuilder();
+              if (hasDumpReply()) {
+                subBuilder.mergeFrom(getDumpReply());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setDumpReply(subBuilder.buildPartial());
+              break;
+            }
+            case 106: {
+              com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.Builder subBuilder = com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.newBuilder();
+              if (hasRemoveConf()) {
+                subBuilder.mergeFrom(getRemoveConf());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setRemoveConf(subBuilder.buildPartial());
+              break;
+            }
+            case 114: {
+              com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.Builder subBuilder = com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.newBuilder();
+              if (hasBrokerReg()) {
+                subBuilder.mergeFrom(getBrokerReg());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setBrokerReg(subBuilder.buildPartial());
+              break;
+            }
+            case 122: {
+              com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.Builder subBuilder = com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.newBuilder();
+              if (hasDumpApp()) {
+                subBuilder.mergeFrom(getDumpApp());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setDumpApp(subBuilder.buildPartial());
+              break;
+            }
+            case 130: {
+              com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.Builder subBuilder = com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.newBuilder();
+              if (hasConsumerReg()) {
+                subBuilder.mergeFrom(getConsumerReg());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setConsumerReg(subBuilder.buildPartial());
+              break;
+            }
+            case 138: {
+              com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.Builder subBuilder = com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.newBuilder();
+              if (hasAssignConsumer()) {
+                subBuilder.mergeFrom(getAssignConsumer());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setAssignConsumer(subBuilder.buildPartial());
+              break;
+            }
+            case 146: {
+              com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.Builder subBuilder = com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.newBuilder();
+              if (hasOffsetCommit()) {
+                subBuilder.mergeFrom(getOffsetCommit());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setOffsetCommit(subBuilder.buildPartial());
+              break;
+            }
+            case 154: {
+              com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.Builder subBuilder = com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.newBuilder();
+              if (hasTopicReport()) {
+                subBuilder.mergeFrom(getTopicReport());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setTopicReport(subBuilder.buildPartial());
+              break;
+            }
+            case 162: {
+              com.dp.blackhole.protocol.control.RestartPB.Restart.Builder subBuilder = com.dp.blackhole.protocol.control.RestartPB.Restart.newBuilder();
+              if (hasRestart()) {
+                subBuilder.mergeFrom(getRestart());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setRestart(subBuilder.buildPartial());
+              break;
+            }
           }
         }
-        return this;
       }
-      private int bitField0_;
-
+      
+      
       // required .blackhole.Message.MessageType type = 1;
-      private com.dp.blackhole.protocol.control.MessagePB.Message.MessageType type_ = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.HEARTBEART;
-      /**
-       * <code>required .blackhole.Message.MessageType type = 1;</code>
-       */
       public boolean hasType() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
+        return result.hasType();
       }
-      /**
-       * <code>required .blackhole.Message.MessageType type = 1;</code>
-       */
       public com.dp.blackhole.protocol.control.MessagePB.Message.MessageType getType() {
-        return type_;
+        return result.getType();
       }
-      /**
-       * <code>required .blackhole.Message.MessageType type = 1;</code>
-       */
       public Builder setType(com.dp.blackhole.protocol.control.MessagePB.Message.MessageType value) {
         if (value == null) {
           throw new NullPointerException();
         }
-        bitField0_ |= 0x00000001;
-        type_ = value;
-        onChanged();
+        result.hasType = true;
+        result.type_ = value;
         return this;
       }
-      /**
-       * <code>required .blackhole.Message.MessageType type = 1;</code>
-       */
       public Builder clearType() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        type_ = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.HEARTBEART;
-        onChanged();
+        result.hasType = false;
+        result.type_ = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.HEARTBEART;
         return this;
       }
-
+      
       // optional .blackhole.AppReg appReg = 2;
-      private com.dp.blackhole.protocol.control.AppRegPB.AppReg appReg_ = com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.AppRegPB.AppReg, com.dp.blackhole.protocol.control.AppRegPB.AppReg.Builder, com.dp.blackhole.protocol.control.AppRegPB.AppRegOrBuilder> appRegBuilder_;
-      /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
-       */
       public boolean hasAppReg() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
+        return result.hasAppReg();
       }
-      /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
-       */
       public com.dp.blackhole.protocol.control.AppRegPB.AppReg getAppReg() {
-        if (appRegBuilder_ == null) {
-          return appReg_;
-        } else {
-          return appRegBuilder_.getMessage();
-        }
+        return result.getAppReg();
       }
-      /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
-       */
       public Builder setAppReg(com.dp.blackhole.protocol.control.AppRegPB.AppReg value) {
-        if (appRegBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          appReg_ = value;
-          onChanged();
-        } else {
-          appRegBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00000002;
+        result.hasAppReg = true;
+        result.appReg_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
-       */
-      public Builder setAppReg(
-          com.dp.blackhole.protocol.control.AppRegPB.AppReg.Builder builderForValue) {
-        if (appRegBuilder_ == null) {
-          appReg_ = builderForValue.build();
-          onChanged();
-        } else {
-          appRegBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000002;
+      public Builder setAppReg(com.dp.blackhole.protocol.control.AppRegPB.AppReg.Builder builderForValue) {
+        result.hasAppReg = true;
+        result.appReg_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
-       */
       public Builder mergeAppReg(com.dp.blackhole.protocol.control.AppRegPB.AppReg value) {
-        if (appRegBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002) &&
-              appReg_ != com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance()) {
-            appReg_ =
-              com.dp.blackhole.protocol.control.AppRegPB.AppReg.newBuilder(appReg_).mergeFrom(value).buildPartial();
-          } else {
-            appReg_ = value;
-          }
-          onChanged();
+        if (result.hasAppReg() &&
+            result.appReg_ != com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance()) {
+          result.appReg_ =
+            com.dp.blackhole.protocol.control.AppRegPB.AppReg.newBuilder(result.appReg_).mergeFrom(value).buildPartial();
         } else {
-          appRegBuilder_.mergeFrom(value);
+          result.appReg_ = value;
         }
-        bitField0_ |= 0x00000002;
+        result.hasAppReg = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
-       */
       public Builder clearAppReg() {
-        if (appRegBuilder_ == null) {
-          appReg_ = com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance();
-          onChanged();
-        } else {
-          appRegBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000002);
+        result.hasAppReg = false;
+        result.appReg_ = com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
-       */
-      public com.dp.blackhole.protocol.control.AppRegPB.AppReg.Builder getAppRegBuilder() {
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return getAppRegFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
-       */
-      public com.dp.blackhole.protocol.control.AppRegPB.AppRegOrBuilder getAppRegOrBuilder() {
-        if (appRegBuilder_ != null) {
-          return appRegBuilder_.getMessageOrBuilder();
-        } else {
-          return appReg_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.AppReg appReg = 2;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.AppRegPB.AppReg, com.dp.blackhole.protocol.control.AppRegPB.AppReg.Builder, com.dp.blackhole.protocol.control.AppRegPB.AppRegOrBuilder> 
-          getAppRegFieldBuilder() {
-        if (appRegBuilder_ == null) {
-          appRegBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.AppRegPB.AppReg, com.dp.blackhole.protocol.control.AppRegPB.AppReg.Builder, com.dp.blackhole.protocol.control.AppRegPB.AppRegOrBuilder>(
-                  appReg_,
-                  getParentForChildren(),
-                  isClean());
-          appReg_ = null;
-        }
-        return appRegBuilder_;
-      }
-
+      
       // optional .blackhole.AssignBroker assignBroker = 3;
-      private com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker assignBroker_ = com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker, com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.Builder, com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBrokerOrBuilder> assignBrokerBuilder_;
-      /**
-       * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-       */
       public boolean hasAssignBroker() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return result.hasAssignBroker();
       }
-      /**
-       * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-       */
       public com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker getAssignBroker() {
-        if (assignBrokerBuilder_ == null) {
-          return assignBroker_;
-        } else {
-          return assignBrokerBuilder_.getMessage();
-        }
+        return result.getAssignBroker();
       }
-      /**
-       * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-       */
       public Builder setAssignBroker(com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker value) {
-        if (assignBrokerBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          assignBroker_ = value;
-          onChanged();
-        } else {
-          assignBrokerBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00000004;
+        result.hasAssignBroker = true;
+        result.assignBroker_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-       */
-      public Builder setAssignBroker(
-          com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.Builder builderForValue) {
-        if (assignBrokerBuilder_ == null) {
-          assignBroker_ = builderForValue.build();
-          onChanged();
-        } else {
-          assignBrokerBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000004;
+      public Builder setAssignBroker(com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.Builder builderForValue) {
+        result.hasAssignBroker = true;
+        result.assignBroker_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-       */
       public Builder mergeAssignBroker(com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker value) {
-        if (assignBrokerBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004) &&
-              assignBroker_ != com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.getDefaultInstance()) {
-            assignBroker_ =
-              com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.newBuilder(assignBroker_).mergeFrom(value).buildPartial();
-          } else {
-            assignBroker_ = value;
-          }
-          onChanged();
+        if (result.hasAssignBroker() &&
+            result.assignBroker_ != com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.getDefaultInstance()) {
+          result.assignBroker_ =
+            com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.newBuilder(result.assignBroker_).mergeFrom(value).buildPartial();
         } else {
-          assignBrokerBuilder_.mergeFrom(value);
+          result.assignBroker_ = value;
         }
-        bitField0_ |= 0x00000004;
+        result.hasAssignBroker = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-       */
       public Builder clearAssignBroker() {
-        if (assignBrokerBuilder_ == null) {
-          assignBroker_ = com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.getDefaultInstance();
-          onChanged();
-        } else {
-          assignBrokerBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000004);
+        result.hasAssignBroker = false;
+        result.assignBroker_ = com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-       */
-      public com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.Builder getAssignBrokerBuilder() {
-        bitField0_ |= 0x00000004;
-        onChanged();
-        return getAssignBrokerFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-       */
-      public com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBrokerOrBuilder getAssignBrokerOrBuilder() {
-        if (assignBrokerBuilder_ != null) {
-          return assignBrokerBuilder_.getMessageOrBuilder();
-        } else {
-          return assignBroker_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.AssignBroker assignBroker = 3;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker, com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.Builder, com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBrokerOrBuilder> 
-          getAssignBrokerFieldBuilder() {
-        if (assignBrokerBuilder_ == null) {
-          assignBrokerBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker, com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.Builder, com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBrokerOrBuilder>(
-                  assignBroker_,
-                  getParentForChildren(),
-                  isClean());
-          assignBroker_ = null;
-        }
-        return assignBrokerBuilder_;
-      }
-
+      
       // optional .blackhole.AppRoll appRoll = 4;
-      private com.dp.blackhole.protocol.control.AppRollPB.AppRoll appRoll_ = com.dp.blackhole.protocol.control.AppRollPB.AppRoll.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.AppRollPB.AppRoll, com.dp.blackhole.protocol.control.AppRollPB.AppRoll.Builder, com.dp.blackhole.protocol.control.AppRollPB.AppRollOrBuilder> appRollBuilder_;
-      /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-       */
       public boolean hasAppRoll() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
+        return result.hasAppRoll();
       }
-      /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-       */
       public com.dp.blackhole.protocol.control.AppRollPB.AppRoll getAppRoll() {
-        if (appRollBuilder_ == null) {
-          return appRoll_;
-        } else {
-          return appRollBuilder_.getMessage();
-        }
+        return result.getAppRoll();
       }
-      /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-       */
       public Builder setAppRoll(com.dp.blackhole.protocol.control.AppRollPB.AppRoll value) {
-        if (appRollBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          appRoll_ = value;
-          onChanged();
-        } else {
-          appRollBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00000008;
+        result.hasAppRoll = true;
+        result.appRoll_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-       */
-      public Builder setAppRoll(
-          com.dp.blackhole.protocol.control.AppRollPB.AppRoll.Builder builderForValue) {
-        if (appRollBuilder_ == null) {
-          appRoll_ = builderForValue.build();
-          onChanged();
-        } else {
-          appRollBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000008;
+      public Builder setAppRoll(com.dp.blackhole.protocol.control.AppRollPB.AppRoll.Builder builderForValue) {
+        result.hasAppRoll = true;
+        result.appRoll_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-       */
       public Builder mergeAppRoll(com.dp.blackhole.protocol.control.AppRollPB.AppRoll value) {
-        if (appRollBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008) &&
-              appRoll_ != com.dp.blackhole.protocol.control.AppRollPB.AppRoll.getDefaultInstance()) {
-            appRoll_ =
-              com.dp.blackhole.protocol.control.AppRollPB.AppRoll.newBuilder(appRoll_).mergeFrom(value).buildPartial();
-          } else {
-            appRoll_ = value;
-          }
-          onChanged();
+        if (result.hasAppRoll() &&
+            result.appRoll_ != com.dp.blackhole.protocol.control.AppRollPB.AppRoll.getDefaultInstance()) {
+          result.appRoll_ =
+            com.dp.blackhole.protocol.control.AppRollPB.AppRoll.newBuilder(result.appRoll_).mergeFrom(value).buildPartial();
         } else {
-          appRollBuilder_.mergeFrom(value);
+          result.appRoll_ = value;
         }
-        bitField0_ |= 0x00000008;
+        result.hasAppRoll = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-       */
       public Builder clearAppRoll() {
-        if (appRollBuilder_ == null) {
-          appRoll_ = com.dp.blackhole.protocol.control.AppRollPB.AppRoll.getDefaultInstance();
-          onChanged();
-        } else {
-          appRollBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000008);
+        result.hasAppRoll = false;
+        result.appRoll_ = com.dp.blackhole.protocol.control.AppRollPB.AppRoll.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-       */
-      public com.dp.blackhole.protocol.control.AppRollPB.AppRoll.Builder getAppRollBuilder() {
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return getAppRollFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-       */
-      public com.dp.blackhole.protocol.control.AppRollPB.AppRollOrBuilder getAppRollOrBuilder() {
-        if (appRollBuilder_ != null) {
-          return appRollBuilder_.getMessageOrBuilder();
-        } else {
-          return appRoll_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.AppRoll appRoll = 4;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.AppRollPB.AppRoll, com.dp.blackhole.protocol.control.AppRollPB.AppRoll.Builder, com.dp.blackhole.protocol.control.AppRollPB.AppRollOrBuilder> 
-          getAppRollFieldBuilder() {
-        if (appRollBuilder_ == null) {
-          appRollBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.AppRollPB.AppRoll, com.dp.blackhole.protocol.control.AppRollPB.AppRoll.Builder, com.dp.blackhole.protocol.control.AppRollPB.AppRollOrBuilder>(
-                  appRoll_,
-                  getParentForChildren(),
-                  isClean());
-          appRoll_ = null;
-        }
-        return appRollBuilder_;
-      }
-
+      
       // optional .blackhole.RecoveryRoll recoveryRoll = 5;
-      private com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll recoveryRoll_ = com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll, com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.Builder, com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRollOrBuilder> recoveryRollBuilder_;
-      /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-       */
       public boolean hasRecoveryRoll() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
+        return result.hasRecoveryRoll();
       }
-      /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-       */
       public com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll getRecoveryRoll() {
-        if (recoveryRollBuilder_ == null) {
-          return recoveryRoll_;
-        } else {
-          return recoveryRollBuilder_.getMessage();
-        }
+        return result.getRecoveryRoll();
       }
-      /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-       */
       public Builder setRecoveryRoll(com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll value) {
-        if (recoveryRollBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          recoveryRoll_ = value;
-          onChanged();
-        } else {
-          recoveryRollBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00000010;
+        result.hasRecoveryRoll = true;
+        result.recoveryRoll_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-       */
-      public Builder setRecoveryRoll(
-          com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.Builder builderForValue) {
-        if (recoveryRollBuilder_ == null) {
-          recoveryRoll_ = builderForValue.build();
-          onChanged();
-        } else {
-          recoveryRollBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000010;
+      public Builder setRecoveryRoll(com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.Builder builderForValue) {
+        result.hasRecoveryRoll = true;
+        result.recoveryRoll_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-       */
       public Builder mergeRecoveryRoll(com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll value) {
-        if (recoveryRollBuilder_ == null) {
-          if (((bitField0_ & 0x00000010) == 0x00000010) &&
-              recoveryRoll_ != com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.getDefaultInstance()) {
-            recoveryRoll_ =
-              com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.newBuilder(recoveryRoll_).mergeFrom(value).buildPartial();
-          } else {
-            recoveryRoll_ = value;
-          }
-          onChanged();
+        if (result.hasRecoveryRoll() &&
+            result.recoveryRoll_ != com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.getDefaultInstance()) {
+          result.recoveryRoll_ =
+            com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.newBuilder(result.recoveryRoll_).mergeFrom(value).buildPartial();
         } else {
-          recoveryRollBuilder_.mergeFrom(value);
+          result.recoveryRoll_ = value;
         }
-        bitField0_ |= 0x00000010;
+        result.hasRecoveryRoll = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-       */
       public Builder clearRecoveryRoll() {
-        if (recoveryRollBuilder_ == null) {
-          recoveryRoll_ = com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.getDefaultInstance();
-          onChanged();
-        } else {
-          recoveryRollBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000010);
+        result.hasRecoveryRoll = false;
+        result.recoveryRoll_ = com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-       */
-      public com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.Builder getRecoveryRollBuilder() {
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return getRecoveryRollFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-       */
-      public com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRollOrBuilder getRecoveryRollOrBuilder() {
-        if (recoveryRollBuilder_ != null) {
-          return recoveryRollBuilder_.getMessageOrBuilder();
-        } else {
-          return recoveryRoll_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.RecoveryRoll recoveryRoll = 5;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll, com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.Builder, com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRollOrBuilder> 
-          getRecoveryRollFieldBuilder() {
-        if (recoveryRollBuilder_ == null) {
-          recoveryRollBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll, com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.Builder, com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRollOrBuilder>(
-                  recoveryRoll_,
-                  getParentForChildren(),
-                  isClean());
-          recoveryRoll_ = null;
-        }
-        return recoveryRollBuilder_;
-      }
-
+      
       // optional .blackhole.ReadyBroker readyBroker = 6;
-      private com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker readyBroker_ = com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker, com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.Builder, com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBrokerOrBuilder> readyBrokerBuilder_;
-      /**
-       * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-       */
       public boolean hasReadyBroker() {
-        return ((bitField0_ & 0x00000020) == 0x00000020);
+        return result.hasReadyBroker();
       }
-      /**
-       * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-       */
       public com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker getReadyBroker() {
-        if (readyBrokerBuilder_ == null) {
-          return readyBroker_;
-        } else {
-          return readyBrokerBuilder_.getMessage();
-        }
+        return result.getReadyBroker();
       }
-      /**
-       * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-       */
       public Builder setReadyBroker(com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker value) {
-        if (readyBrokerBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          readyBroker_ = value;
-          onChanged();
-        } else {
-          readyBrokerBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00000020;
+        result.hasReadyBroker = true;
+        result.readyBroker_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-       */
-      public Builder setReadyBroker(
-          com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.Builder builderForValue) {
-        if (readyBrokerBuilder_ == null) {
-          readyBroker_ = builderForValue.build();
-          onChanged();
-        } else {
-          readyBrokerBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000020;
+      public Builder setReadyBroker(com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.Builder builderForValue) {
+        result.hasReadyBroker = true;
+        result.readyBroker_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-       */
       public Builder mergeReadyBroker(com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker value) {
-        if (readyBrokerBuilder_ == null) {
-          if (((bitField0_ & 0x00000020) == 0x00000020) &&
-              readyBroker_ != com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.getDefaultInstance()) {
-            readyBroker_ =
-              com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.newBuilder(readyBroker_).mergeFrom(value).buildPartial();
-          } else {
-            readyBroker_ = value;
-          }
-          onChanged();
+        if (result.hasReadyBroker() &&
+            result.readyBroker_ != com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.getDefaultInstance()) {
+          result.readyBroker_ =
+            com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.newBuilder(result.readyBroker_).mergeFrom(value).buildPartial();
         } else {
-          readyBrokerBuilder_.mergeFrom(value);
+          result.readyBroker_ = value;
         }
-        bitField0_ |= 0x00000020;
+        result.hasReadyBroker = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-       */
       public Builder clearReadyBroker() {
-        if (readyBrokerBuilder_ == null) {
-          readyBroker_ = com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.getDefaultInstance();
-          onChanged();
-        } else {
-          readyBrokerBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000020);
+        result.hasReadyBroker = false;
+        result.readyBroker_ = com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-       */
-      public com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.Builder getReadyBrokerBuilder() {
-        bitField0_ |= 0x00000020;
-        onChanged();
-        return getReadyBrokerFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-       */
-      public com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBrokerOrBuilder getReadyBrokerOrBuilder() {
-        if (readyBrokerBuilder_ != null) {
-          return readyBrokerBuilder_.getMessageOrBuilder();
-        } else {
-          return readyBroker_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.ReadyBroker readyBroker = 6;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker, com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.Builder, com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBrokerOrBuilder> 
-          getReadyBrokerFieldBuilder() {
-        if (readyBrokerBuilder_ == null) {
-          readyBrokerBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker, com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.Builder, com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBrokerOrBuilder>(
-                  readyBroker_,
-                  getParentForChildren(),
-                  isClean());
-          readyBroker_ = null;
-        }
-        return readyBrokerBuilder_;
-      }
-
+      
       // optional .blackhole.RollID rollID = 7;
-      private com.dp.blackhole.protocol.control.RollIDPB.RollID rollID_ = com.dp.blackhole.protocol.control.RollIDPB.RollID.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.RollIDPB.RollID, com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder, com.dp.blackhole.protocol.control.RollIDPB.RollIDOrBuilder> rollIDBuilder_;
-      /**
-       * <code>optional .blackhole.RollID rollID = 7;</code>
-       */
       public boolean hasRollID() {
-        return ((bitField0_ & 0x00000040) == 0x00000040);
+        return result.hasRollID();
       }
-      /**
-       * <code>optional .blackhole.RollID rollID = 7;</code>
-       */
       public com.dp.blackhole.protocol.control.RollIDPB.RollID getRollID() {
-        if (rollIDBuilder_ == null) {
-          return rollID_;
-        } else {
-          return rollIDBuilder_.getMessage();
-        }
+        return result.getRollID();
       }
-      /**
-       * <code>optional .blackhole.RollID rollID = 7;</code>
-       */
       public Builder setRollID(com.dp.blackhole.protocol.control.RollIDPB.RollID value) {
-        if (rollIDBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          rollID_ = value;
-          onChanged();
-        } else {
-          rollIDBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00000040;
+        result.hasRollID = true;
+        result.rollID_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.RollID rollID = 7;</code>
-       */
-      public Builder setRollID(
-          com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder builderForValue) {
-        if (rollIDBuilder_ == null) {
-          rollID_ = builderForValue.build();
-          onChanged();
-        } else {
-          rollIDBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000040;
+      public Builder setRollID(com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder builderForValue) {
+        result.hasRollID = true;
+        result.rollID_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.RollID rollID = 7;</code>
-       */
       public Builder mergeRollID(com.dp.blackhole.protocol.control.RollIDPB.RollID value) {
-        if (rollIDBuilder_ == null) {
-          if (((bitField0_ & 0x00000040) == 0x00000040) &&
-              rollID_ != com.dp.blackhole.protocol.control.RollIDPB.RollID.getDefaultInstance()) {
-            rollID_ =
-              com.dp.blackhole.protocol.control.RollIDPB.RollID.newBuilder(rollID_).mergeFrom(value).buildPartial();
-          } else {
-            rollID_ = value;
-          }
-          onChanged();
+        if (result.hasRollID() &&
+            result.rollID_ != com.dp.blackhole.protocol.control.RollIDPB.RollID.getDefaultInstance()) {
+          result.rollID_ =
+            com.dp.blackhole.protocol.control.RollIDPB.RollID.newBuilder(result.rollID_).mergeFrom(value).buildPartial();
         } else {
-          rollIDBuilder_.mergeFrom(value);
+          result.rollID_ = value;
         }
-        bitField0_ |= 0x00000040;
+        result.hasRollID = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.RollID rollID = 7;</code>
-       */
       public Builder clearRollID() {
-        if (rollIDBuilder_ == null) {
-          rollID_ = com.dp.blackhole.protocol.control.RollIDPB.RollID.getDefaultInstance();
-          onChanged();
-        } else {
-          rollIDBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000040);
+        result.hasRollID = false;
+        result.rollID_ = com.dp.blackhole.protocol.control.RollIDPB.RollID.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.RollID rollID = 7;</code>
-       */
-      public com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder getRollIDBuilder() {
-        bitField0_ |= 0x00000040;
-        onChanged();
-        return getRollIDFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.RollID rollID = 7;</code>
-       */
-      public com.dp.blackhole.protocol.control.RollIDPB.RollIDOrBuilder getRollIDOrBuilder() {
-        if (rollIDBuilder_ != null) {
-          return rollIDBuilder_.getMessageOrBuilder();
-        } else {
-          return rollID_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.RollID rollID = 7;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.RollIDPB.RollID, com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder, com.dp.blackhole.protocol.control.RollIDPB.RollIDOrBuilder> 
-          getRollIDFieldBuilder() {
-        if (rollIDBuilder_ == null) {
-          rollIDBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.RollIDPB.RollID, com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder, com.dp.blackhole.protocol.control.RollIDPB.RollIDOrBuilder>(
-                  rollID_,
-                  getParentForChildren(),
-                  isClean());
-          rollID_ = null;
-        }
-        return rollIDBuilder_;
-      }
-
+      
       // optional .blackhole.Failure failure = 8;
-      private com.dp.blackhole.protocol.control.FailurePB.Failure failure_ = com.dp.blackhole.protocol.control.FailurePB.Failure.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.FailurePB.Failure, com.dp.blackhole.protocol.control.FailurePB.Failure.Builder, com.dp.blackhole.protocol.control.FailurePB.FailureOrBuilder> failureBuilder_;
-      /**
-       * <code>optional .blackhole.Failure failure = 8;</code>
-       */
       public boolean hasFailure() {
-        return ((bitField0_ & 0x00000080) == 0x00000080);
+        return result.hasFailure();
       }
-      /**
-       * <code>optional .blackhole.Failure failure = 8;</code>
-       */
       public com.dp.blackhole.protocol.control.FailurePB.Failure getFailure() {
-        if (failureBuilder_ == null) {
-          return failure_;
-        } else {
-          return failureBuilder_.getMessage();
-        }
+        return result.getFailure();
       }
-      /**
-       * <code>optional .blackhole.Failure failure = 8;</code>
-       */
       public Builder setFailure(com.dp.blackhole.protocol.control.FailurePB.Failure value) {
-        if (failureBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          failure_ = value;
-          onChanged();
-        } else {
-          failureBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00000080;
+        result.hasFailure = true;
+        result.failure_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.Failure failure = 8;</code>
-       */
-      public Builder setFailure(
-          com.dp.blackhole.protocol.control.FailurePB.Failure.Builder builderForValue) {
-        if (failureBuilder_ == null) {
-          failure_ = builderForValue.build();
-          onChanged();
-        } else {
-          failureBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000080;
+      public Builder setFailure(com.dp.blackhole.protocol.control.FailurePB.Failure.Builder builderForValue) {
+        result.hasFailure = true;
+        result.failure_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.Failure failure = 8;</code>
-       */
       public Builder mergeFailure(com.dp.blackhole.protocol.control.FailurePB.Failure value) {
-        if (failureBuilder_ == null) {
-          if (((bitField0_ & 0x00000080) == 0x00000080) &&
-              failure_ != com.dp.blackhole.protocol.control.FailurePB.Failure.getDefaultInstance()) {
-            failure_ =
-              com.dp.blackhole.protocol.control.FailurePB.Failure.newBuilder(failure_).mergeFrom(value).buildPartial();
-          } else {
-            failure_ = value;
-          }
-          onChanged();
+        if (result.hasFailure() &&
+            result.failure_ != com.dp.blackhole.protocol.control.FailurePB.Failure.getDefaultInstance()) {
+          result.failure_ =
+            com.dp.blackhole.protocol.control.FailurePB.Failure.newBuilder(result.failure_).mergeFrom(value).buildPartial();
         } else {
-          failureBuilder_.mergeFrom(value);
+          result.failure_ = value;
         }
-        bitField0_ |= 0x00000080;
+        result.hasFailure = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.Failure failure = 8;</code>
-       */
       public Builder clearFailure() {
-        if (failureBuilder_ == null) {
-          failure_ = com.dp.blackhole.protocol.control.FailurePB.Failure.getDefaultInstance();
-          onChanged();
-        } else {
-          failureBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000080);
+        result.hasFailure = false;
+        result.failure_ = com.dp.blackhole.protocol.control.FailurePB.Failure.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.Failure failure = 8;</code>
-       */
-      public com.dp.blackhole.protocol.control.FailurePB.Failure.Builder getFailureBuilder() {
-        bitField0_ |= 0x00000080;
-        onChanged();
-        return getFailureFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.Failure failure = 8;</code>
-       */
-      public com.dp.blackhole.protocol.control.FailurePB.FailureOrBuilder getFailureOrBuilder() {
-        if (failureBuilder_ != null) {
-          return failureBuilder_.getMessageOrBuilder();
-        } else {
-          return failure_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.Failure failure = 8;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.FailurePB.Failure, com.dp.blackhole.protocol.control.FailurePB.Failure.Builder, com.dp.blackhole.protocol.control.FailurePB.FailureOrBuilder> 
-          getFailureFieldBuilder() {
-        if (failureBuilder_ == null) {
-          failureBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.FailurePB.Failure, com.dp.blackhole.protocol.control.FailurePB.Failure.Builder, com.dp.blackhole.protocol.control.FailurePB.FailureOrBuilder>(
-                  failure_,
-                  getParentForChildren(),
-                  isClean());
-          failure_ = null;
-        }
-        return failureBuilder_;
-      }
-
+      
       // optional .blackhole.NoAvailableNode noAvailableNode = 9;
-      private com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode noAvailableNode_ = com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode, com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.Builder, com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNodeOrBuilder> noAvailableNodeBuilder_;
-      /**
-       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-       */
       public boolean hasNoAvailableNode() {
-        return ((bitField0_ & 0x00000100) == 0x00000100);
+        return result.hasNoAvailableNode();
       }
-      /**
-       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-       */
       public com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode getNoAvailableNode() {
-        if (noAvailableNodeBuilder_ == null) {
-          return noAvailableNode_;
-        } else {
-          return noAvailableNodeBuilder_.getMessage();
-        }
+        return result.getNoAvailableNode();
       }
-      /**
-       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-       */
       public Builder setNoAvailableNode(com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode value) {
-        if (noAvailableNodeBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          noAvailableNode_ = value;
-          onChanged();
-        } else {
-          noAvailableNodeBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00000100;
+        result.hasNoAvailableNode = true;
+        result.noAvailableNode_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-       */
-      public Builder setNoAvailableNode(
-          com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.Builder builderForValue) {
-        if (noAvailableNodeBuilder_ == null) {
-          noAvailableNode_ = builderForValue.build();
-          onChanged();
-        } else {
-          noAvailableNodeBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000100;
+      public Builder setNoAvailableNode(com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.Builder builderForValue) {
+        result.hasNoAvailableNode = true;
+        result.noAvailableNode_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-       */
       public Builder mergeNoAvailableNode(com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode value) {
-        if (noAvailableNodeBuilder_ == null) {
-          if (((bitField0_ & 0x00000100) == 0x00000100) &&
-              noAvailableNode_ != com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.getDefaultInstance()) {
-            noAvailableNode_ =
-              com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.newBuilder(noAvailableNode_).mergeFrom(value).buildPartial();
-          } else {
-            noAvailableNode_ = value;
-          }
-          onChanged();
+        if (result.hasNoAvailableNode() &&
+            result.noAvailableNode_ != com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.getDefaultInstance()) {
+          result.noAvailableNode_ =
+            com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.newBuilder(result.noAvailableNode_).mergeFrom(value).buildPartial();
         } else {
-          noAvailableNodeBuilder_.mergeFrom(value);
+          result.noAvailableNode_ = value;
         }
-        bitField0_ |= 0x00000100;
+        result.hasNoAvailableNode = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-       */
       public Builder clearNoAvailableNode() {
-        if (noAvailableNodeBuilder_ == null) {
-          noAvailableNode_ = com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.getDefaultInstance();
-          onChanged();
-        } else {
-          noAvailableNodeBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000100);
+        result.hasNoAvailableNode = false;
+        result.noAvailableNode_ = com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-       */
-      public com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.Builder getNoAvailableNodeBuilder() {
-        bitField0_ |= 0x00000100;
-        onChanged();
-        return getNoAvailableNodeFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-       */
-      public com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNodeOrBuilder getNoAvailableNodeOrBuilder() {
-        if (noAvailableNodeBuilder_ != null) {
-          return noAvailableNodeBuilder_.getMessageOrBuilder();
-        } else {
-          return noAvailableNode_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.NoAvailableNode noAvailableNode = 9;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode, com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.Builder, com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNodeOrBuilder> 
-          getNoAvailableNodeFieldBuilder() {
-        if (noAvailableNodeBuilder_ == null) {
-          noAvailableNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode, com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.Builder, com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNodeOrBuilder>(
-                  noAvailableNode_,
-                  getParentForChildren(),
-                  isClean());
-          noAvailableNode_ = null;
-        }
-        return noAvailableNodeBuilder_;
-      }
-
+      
       // optional .blackhole.StreamID streamId = 10;
-      private com.dp.blackhole.protocol.control.StreamIDPB.StreamID streamId_ = com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.StreamIDPB.StreamID, com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder, com.dp.blackhole.protocol.control.StreamIDPB.StreamIDOrBuilder> streamIdBuilder_;
-      /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
-       */
       public boolean hasStreamId() {
-        return ((bitField0_ & 0x00000200) == 0x00000200);
+        return result.hasStreamId();
       }
-      /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
-       */
       public com.dp.blackhole.protocol.control.StreamIDPB.StreamID getStreamId() {
-        if (streamIdBuilder_ == null) {
-          return streamId_;
-        } else {
-          return streamIdBuilder_.getMessage();
-        }
+        return result.getStreamId();
       }
-      /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
-       */
       public Builder setStreamId(com.dp.blackhole.protocol.control.StreamIDPB.StreamID value) {
-        if (streamIdBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          streamId_ = value;
-          onChanged();
-        } else {
-          streamIdBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00000200;
+        result.hasStreamId = true;
+        result.streamId_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
-       */
-      public Builder setStreamId(
-          com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder builderForValue) {
-        if (streamIdBuilder_ == null) {
-          streamId_ = builderForValue.build();
-          onChanged();
-        } else {
-          streamIdBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000200;
+      public Builder setStreamId(com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder builderForValue) {
+        result.hasStreamId = true;
+        result.streamId_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
-       */
       public Builder mergeStreamId(com.dp.blackhole.protocol.control.StreamIDPB.StreamID value) {
-        if (streamIdBuilder_ == null) {
-          if (((bitField0_ & 0x00000200) == 0x00000200) &&
-              streamId_ != com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance()) {
-            streamId_ =
-              com.dp.blackhole.protocol.control.StreamIDPB.StreamID.newBuilder(streamId_).mergeFrom(value).buildPartial();
-          } else {
-            streamId_ = value;
-          }
-          onChanged();
+        if (result.hasStreamId() &&
+            result.streamId_ != com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance()) {
+          result.streamId_ =
+            com.dp.blackhole.protocol.control.StreamIDPB.StreamID.newBuilder(result.streamId_).mergeFrom(value).buildPartial();
         } else {
-          streamIdBuilder_.mergeFrom(value);
+          result.streamId_ = value;
         }
-        bitField0_ |= 0x00000200;
+        result.hasStreamId = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
-       */
       public Builder clearStreamId() {
-        if (streamIdBuilder_ == null) {
-          streamId_ = com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance();
-          onChanged();
-        } else {
-          streamIdBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000200);
+        result.hasStreamId = false;
+        result.streamId_ = com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
-       */
-      public com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder getStreamIdBuilder() {
-        bitField0_ |= 0x00000200;
-        onChanged();
-        return getStreamIdFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
-       */
-      public com.dp.blackhole.protocol.control.StreamIDPB.StreamIDOrBuilder getStreamIdOrBuilder() {
-        if (streamIdBuilder_ != null) {
-          return streamIdBuilder_.getMessageOrBuilder();
-        } else {
-          return streamId_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.StreamIDPB.StreamID, com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder, com.dp.blackhole.protocol.control.StreamIDPB.StreamIDOrBuilder> 
-          getStreamIdFieldBuilder() {
-        if (streamIdBuilder_ == null) {
-          streamIdBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.StreamIDPB.StreamID, com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder, com.dp.blackhole.protocol.control.StreamIDPB.StreamIDOrBuilder>(
-                  streamId_,
-                  getParentForChildren(),
-                  isClean());
-          streamId_ = null;
-        }
-        return streamIdBuilder_;
-      }
-
+      
       // optional .blackhole.ConfRes confRes = 11;
-      private com.dp.blackhole.protocol.control.ConfResPB.ConfRes confRes_ = com.dp.blackhole.protocol.control.ConfResPB.ConfRes.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.ConfResPB.ConfRes, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.Builder, com.dp.blackhole.protocol.control.ConfResPB.ConfResOrBuilder> confResBuilder_;
-      /**
-       * <code>optional .blackhole.ConfRes confRes = 11;</code>
-       */
       public boolean hasConfRes() {
-        return ((bitField0_ & 0x00000400) == 0x00000400);
+        return result.hasConfRes();
       }
-      /**
-       * <code>optional .blackhole.ConfRes confRes = 11;</code>
-       */
       public com.dp.blackhole.protocol.control.ConfResPB.ConfRes getConfRes() {
-        if (confResBuilder_ == null) {
-          return confRes_;
-        } else {
-          return confResBuilder_.getMessage();
-        }
+        return result.getConfRes();
       }
-      /**
-       * <code>optional .blackhole.ConfRes confRes = 11;</code>
-       */
       public Builder setConfRes(com.dp.blackhole.protocol.control.ConfResPB.ConfRes value) {
-        if (confResBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          confRes_ = value;
-          onChanged();
-        } else {
-          confResBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00000400;
+        result.hasConfRes = true;
+        result.confRes_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.ConfRes confRes = 11;</code>
-       */
-      public Builder setConfRes(
-          com.dp.blackhole.protocol.control.ConfResPB.ConfRes.Builder builderForValue) {
-        if (confResBuilder_ == null) {
-          confRes_ = builderForValue.build();
-          onChanged();
-        } else {
-          confResBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000400;
+      public Builder setConfRes(com.dp.blackhole.protocol.control.ConfResPB.ConfRes.Builder builderForValue) {
+        result.hasConfRes = true;
+        result.confRes_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.ConfRes confRes = 11;</code>
-       */
       public Builder mergeConfRes(com.dp.blackhole.protocol.control.ConfResPB.ConfRes value) {
-        if (confResBuilder_ == null) {
-          if (((bitField0_ & 0x00000400) == 0x00000400) &&
-              confRes_ != com.dp.blackhole.protocol.control.ConfResPB.ConfRes.getDefaultInstance()) {
-            confRes_ =
-              com.dp.blackhole.protocol.control.ConfResPB.ConfRes.newBuilder(confRes_).mergeFrom(value).buildPartial();
-          } else {
-            confRes_ = value;
-          }
-          onChanged();
+        if (result.hasConfRes() &&
+            result.confRes_ != com.dp.blackhole.protocol.control.ConfResPB.ConfRes.getDefaultInstance()) {
+          result.confRes_ =
+            com.dp.blackhole.protocol.control.ConfResPB.ConfRes.newBuilder(result.confRes_).mergeFrom(value).buildPartial();
         } else {
-          confResBuilder_.mergeFrom(value);
+          result.confRes_ = value;
         }
-        bitField0_ |= 0x00000400;
+        result.hasConfRes = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.ConfRes confRes = 11;</code>
-       */
       public Builder clearConfRes() {
-        if (confResBuilder_ == null) {
-          confRes_ = com.dp.blackhole.protocol.control.ConfResPB.ConfRes.getDefaultInstance();
-          onChanged();
-        } else {
-          confResBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000400);
+        result.hasConfRes = false;
+        result.confRes_ = com.dp.blackhole.protocol.control.ConfResPB.ConfRes.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.ConfRes confRes = 11;</code>
-       */
-      public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.Builder getConfResBuilder() {
-        bitField0_ |= 0x00000400;
-        onChanged();
-        return getConfResFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.ConfRes confRes = 11;</code>
-       */
-      public com.dp.blackhole.protocol.control.ConfResPB.ConfResOrBuilder getConfResOrBuilder() {
-        if (confResBuilder_ != null) {
-          return confResBuilder_.getMessageOrBuilder();
-        } else {
-          return confRes_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.ConfRes confRes = 11;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.ConfResPB.ConfRes, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.Builder, com.dp.blackhole.protocol.control.ConfResPB.ConfResOrBuilder> 
-          getConfResFieldBuilder() {
-        if (confResBuilder_ == null) {
-          confResBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.ConfResPB.ConfRes, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.Builder, com.dp.blackhole.protocol.control.ConfResPB.ConfResOrBuilder>(
-                  confRes_,
-                  getParentForChildren(),
-                  isClean());
-          confRes_ = null;
-        }
-        return confResBuilder_;
-      }
-
+      
       // optional .blackhole.DumpReply dumpReply = 12;
-      private com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply dumpReply_ = com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply, com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.Builder, com.dp.blackhole.protocol.control.DumpReplyPB.DumpReplyOrBuilder> dumpReplyBuilder_;
-      /**
-       * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-       */
       public boolean hasDumpReply() {
-        return ((bitField0_ & 0x00000800) == 0x00000800);
+        return result.hasDumpReply();
       }
-      /**
-       * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-       */
       public com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply getDumpReply() {
-        if (dumpReplyBuilder_ == null) {
-          return dumpReply_;
-        } else {
-          return dumpReplyBuilder_.getMessage();
-        }
+        return result.getDumpReply();
       }
-      /**
-       * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-       */
       public Builder setDumpReply(com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply value) {
-        if (dumpReplyBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          dumpReply_ = value;
-          onChanged();
-        } else {
-          dumpReplyBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00000800;
+        result.hasDumpReply = true;
+        result.dumpReply_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-       */
-      public Builder setDumpReply(
-          com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.Builder builderForValue) {
-        if (dumpReplyBuilder_ == null) {
-          dumpReply_ = builderForValue.build();
-          onChanged();
-        } else {
-          dumpReplyBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000800;
+      public Builder setDumpReply(com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.Builder builderForValue) {
+        result.hasDumpReply = true;
+        result.dumpReply_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-       */
       public Builder mergeDumpReply(com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply value) {
-        if (dumpReplyBuilder_ == null) {
-          if (((bitField0_ & 0x00000800) == 0x00000800) &&
-              dumpReply_ != com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.getDefaultInstance()) {
-            dumpReply_ =
-              com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.newBuilder(dumpReply_).mergeFrom(value).buildPartial();
-          } else {
-            dumpReply_ = value;
-          }
-          onChanged();
+        if (result.hasDumpReply() &&
+            result.dumpReply_ != com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.getDefaultInstance()) {
+          result.dumpReply_ =
+            com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.newBuilder(result.dumpReply_).mergeFrom(value).buildPartial();
         } else {
-          dumpReplyBuilder_.mergeFrom(value);
+          result.dumpReply_ = value;
         }
-        bitField0_ |= 0x00000800;
+        result.hasDumpReply = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-       */
       public Builder clearDumpReply() {
-        if (dumpReplyBuilder_ == null) {
-          dumpReply_ = com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.getDefaultInstance();
-          onChanged();
-        } else {
-          dumpReplyBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000800);
+        result.hasDumpReply = false;
+        result.dumpReply_ = com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-       */
-      public com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.Builder getDumpReplyBuilder() {
-        bitField0_ |= 0x00000800;
-        onChanged();
-        return getDumpReplyFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-       */
-      public com.dp.blackhole.protocol.control.DumpReplyPB.DumpReplyOrBuilder getDumpReplyOrBuilder() {
-        if (dumpReplyBuilder_ != null) {
-          return dumpReplyBuilder_.getMessageOrBuilder();
-        } else {
-          return dumpReply_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.DumpReply dumpReply = 12;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply, com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.Builder, com.dp.blackhole.protocol.control.DumpReplyPB.DumpReplyOrBuilder> 
-          getDumpReplyFieldBuilder() {
-        if (dumpReplyBuilder_ == null) {
-          dumpReplyBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply, com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.Builder, com.dp.blackhole.protocol.control.DumpReplyPB.DumpReplyOrBuilder>(
-                  dumpReply_,
-                  getParentForChildren(),
-                  isClean());
-          dumpReply_ = null;
-        }
-        return dumpReplyBuilder_;
-      }
-
+      
       // optional .blackhole.RemoveConf removeConf = 13;
-      private com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf removeConf_ = com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf, com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.Builder, com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConfOrBuilder> removeConfBuilder_;
-      /**
-       * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-       */
       public boolean hasRemoveConf() {
-        return ((bitField0_ & 0x00001000) == 0x00001000);
+        return result.hasRemoveConf();
       }
-      /**
-       * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-       */
       public com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf getRemoveConf() {
-        if (removeConfBuilder_ == null) {
-          return removeConf_;
-        } else {
-          return removeConfBuilder_.getMessage();
-        }
+        return result.getRemoveConf();
       }
-      /**
-       * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-       */
       public Builder setRemoveConf(com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf value) {
-        if (removeConfBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          removeConf_ = value;
-          onChanged();
-        } else {
-          removeConfBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00001000;
+        result.hasRemoveConf = true;
+        result.removeConf_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-       */
-      public Builder setRemoveConf(
-          com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.Builder builderForValue) {
-        if (removeConfBuilder_ == null) {
-          removeConf_ = builderForValue.build();
-          onChanged();
-        } else {
-          removeConfBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00001000;
+      public Builder setRemoveConf(com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.Builder builderForValue) {
+        result.hasRemoveConf = true;
+        result.removeConf_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-       */
       public Builder mergeRemoveConf(com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf value) {
-        if (removeConfBuilder_ == null) {
-          if (((bitField0_ & 0x00001000) == 0x00001000) &&
-              removeConf_ != com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.getDefaultInstance()) {
-            removeConf_ =
-              com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.newBuilder(removeConf_).mergeFrom(value).buildPartial();
-          } else {
-            removeConf_ = value;
-          }
-          onChanged();
+        if (result.hasRemoveConf() &&
+            result.removeConf_ != com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.getDefaultInstance()) {
+          result.removeConf_ =
+            com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.newBuilder(result.removeConf_).mergeFrom(value).buildPartial();
         } else {
-          removeConfBuilder_.mergeFrom(value);
+          result.removeConf_ = value;
         }
-        bitField0_ |= 0x00001000;
+        result.hasRemoveConf = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-       */
       public Builder clearRemoveConf() {
-        if (removeConfBuilder_ == null) {
-          removeConf_ = com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.getDefaultInstance();
-          onChanged();
-        } else {
-          removeConfBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00001000);
+        result.hasRemoveConf = false;
+        result.removeConf_ = com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-       */
-      public com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.Builder getRemoveConfBuilder() {
-        bitField0_ |= 0x00001000;
-        onChanged();
-        return getRemoveConfFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-       */
-      public com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConfOrBuilder getRemoveConfOrBuilder() {
-        if (removeConfBuilder_ != null) {
-          return removeConfBuilder_.getMessageOrBuilder();
-        } else {
-          return removeConf_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.RemoveConf removeConf = 13;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf, com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.Builder, com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConfOrBuilder> 
-          getRemoveConfFieldBuilder() {
-        if (removeConfBuilder_ == null) {
-          removeConfBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf, com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.Builder, com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConfOrBuilder>(
-                  removeConf_,
-                  getParentForChildren(),
-                  isClean());
-          removeConf_ = null;
-        }
-        return removeConfBuilder_;
-      }
-
+      
       // optional .blackhole.BrokerReg brokerReg = 14;
-      private com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg brokerReg_ = com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg, com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.Builder, com.dp.blackhole.protocol.control.BrokerRegPB.BrokerRegOrBuilder> brokerRegBuilder_;
-      /**
-       * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-       */
       public boolean hasBrokerReg() {
-        return ((bitField0_ & 0x00002000) == 0x00002000);
+        return result.hasBrokerReg();
       }
-      /**
-       * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-       */
       public com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg getBrokerReg() {
-        if (brokerRegBuilder_ == null) {
-          return brokerReg_;
-        } else {
-          return brokerRegBuilder_.getMessage();
-        }
+        return result.getBrokerReg();
       }
-      /**
-       * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-       */
       public Builder setBrokerReg(com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg value) {
-        if (brokerRegBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          brokerReg_ = value;
-          onChanged();
-        } else {
-          brokerRegBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00002000;
+        result.hasBrokerReg = true;
+        result.brokerReg_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-       */
-      public Builder setBrokerReg(
-          com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.Builder builderForValue) {
-        if (brokerRegBuilder_ == null) {
-          brokerReg_ = builderForValue.build();
-          onChanged();
-        } else {
-          brokerRegBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00002000;
+      public Builder setBrokerReg(com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.Builder builderForValue) {
+        result.hasBrokerReg = true;
+        result.brokerReg_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-       */
       public Builder mergeBrokerReg(com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg value) {
-        if (brokerRegBuilder_ == null) {
-          if (((bitField0_ & 0x00002000) == 0x00002000) &&
-              brokerReg_ != com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.getDefaultInstance()) {
-            brokerReg_ =
-              com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.newBuilder(brokerReg_).mergeFrom(value).buildPartial();
-          } else {
-            brokerReg_ = value;
-          }
-          onChanged();
+        if (result.hasBrokerReg() &&
+            result.brokerReg_ != com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.getDefaultInstance()) {
+          result.brokerReg_ =
+            com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.newBuilder(result.brokerReg_).mergeFrom(value).buildPartial();
         } else {
-          brokerRegBuilder_.mergeFrom(value);
+          result.brokerReg_ = value;
         }
-        bitField0_ |= 0x00002000;
+        result.hasBrokerReg = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-       */
       public Builder clearBrokerReg() {
-        if (brokerRegBuilder_ == null) {
-          brokerReg_ = com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.getDefaultInstance();
-          onChanged();
-        } else {
-          brokerRegBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00002000);
+        result.hasBrokerReg = false;
+        result.brokerReg_ = com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-       */
-      public com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.Builder getBrokerRegBuilder() {
-        bitField0_ |= 0x00002000;
-        onChanged();
-        return getBrokerRegFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-       */
-      public com.dp.blackhole.protocol.control.BrokerRegPB.BrokerRegOrBuilder getBrokerRegOrBuilder() {
-        if (brokerRegBuilder_ != null) {
-          return brokerRegBuilder_.getMessageOrBuilder();
-        } else {
-          return brokerReg_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.BrokerReg brokerReg = 14;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg, com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.Builder, com.dp.blackhole.protocol.control.BrokerRegPB.BrokerRegOrBuilder> 
-          getBrokerRegFieldBuilder() {
-        if (brokerRegBuilder_ == null) {
-          brokerRegBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg, com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg.Builder, com.dp.blackhole.protocol.control.BrokerRegPB.BrokerRegOrBuilder>(
-                  brokerReg_,
-                  getParentForChildren(),
-                  isClean());
-          brokerReg_ = null;
-        }
-        return brokerRegBuilder_;
-      }
-
+      
       // optional .blackhole.DumpApp dumpApp = 15;
-      private com.dp.blackhole.protocol.control.DumpAppPB.DumpApp dumpApp_ = com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.DumpAppPB.DumpApp, com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.Builder, com.dp.blackhole.protocol.control.DumpAppPB.DumpAppOrBuilder> dumpAppBuilder_;
-      /**
-       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-       */
       public boolean hasDumpApp() {
-        return ((bitField0_ & 0x00004000) == 0x00004000);
+        return result.hasDumpApp();
       }
-      /**
-       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-       */
       public com.dp.blackhole.protocol.control.DumpAppPB.DumpApp getDumpApp() {
-        if (dumpAppBuilder_ == null) {
-          return dumpApp_;
-        } else {
-          return dumpAppBuilder_.getMessage();
-        }
+        return result.getDumpApp();
       }
-      /**
-       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-       */
       public Builder setDumpApp(com.dp.blackhole.protocol.control.DumpAppPB.DumpApp value) {
-        if (dumpAppBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          dumpApp_ = value;
-          onChanged();
-        } else {
-          dumpAppBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00004000;
+        result.hasDumpApp = true;
+        result.dumpApp_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-       */
-      public Builder setDumpApp(
-          com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.Builder builderForValue) {
-        if (dumpAppBuilder_ == null) {
-          dumpApp_ = builderForValue.build();
-          onChanged();
-        } else {
-          dumpAppBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00004000;
+      public Builder setDumpApp(com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.Builder builderForValue) {
+        result.hasDumpApp = true;
+        result.dumpApp_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-       */
       public Builder mergeDumpApp(com.dp.blackhole.protocol.control.DumpAppPB.DumpApp value) {
-        if (dumpAppBuilder_ == null) {
-          if (((bitField0_ & 0x00004000) == 0x00004000) &&
-              dumpApp_ != com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.getDefaultInstance()) {
-            dumpApp_ =
-              com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.newBuilder(dumpApp_).mergeFrom(value).buildPartial();
-          } else {
-            dumpApp_ = value;
-          }
-          onChanged();
+        if (result.hasDumpApp() &&
+            result.dumpApp_ != com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.getDefaultInstance()) {
+          result.dumpApp_ =
+            com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.newBuilder(result.dumpApp_).mergeFrom(value).buildPartial();
         } else {
-          dumpAppBuilder_.mergeFrom(value);
+          result.dumpApp_ = value;
         }
-        bitField0_ |= 0x00004000;
+        result.hasDumpApp = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-       */
       public Builder clearDumpApp() {
-        if (dumpAppBuilder_ == null) {
-          dumpApp_ = com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.getDefaultInstance();
-          onChanged();
-        } else {
-          dumpAppBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00004000);
+        result.hasDumpApp = false;
+        result.dumpApp_ = com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-       */
-      public com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.Builder getDumpAppBuilder() {
-        bitField0_ |= 0x00004000;
-        onChanged();
-        return getDumpAppFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-       */
-      public com.dp.blackhole.protocol.control.DumpAppPB.DumpAppOrBuilder getDumpAppOrBuilder() {
-        if (dumpAppBuilder_ != null) {
-          return dumpAppBuilder_.getMessageOrBuilder();
-        } else {
-          return dumpApp_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.DumpApp dumpApp = 15;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.DumpAppPB.DumpApp, com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.Builder, com.dp.blackhole.protocol.control.DumpAppPB.DumpAppOrBuilder> 
-          getDumpAppFieldBuilder() {
-        if (dumpAppBuilder_ == null) {
-          dumpAppBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.DumpAppPB.DumpApp, com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.Builder, com.dp.blackhole.protocol.control.DumpAppPB.DumpAppOrBuilder>(
-                  dumpApp_,
-                  getParentForChildren(),
-                  isClean());
-          dumpApp_ = null;
-        }
-        return dumpAppBuilder_;
-      }
-
+      
       // optional .blackhole.ConsumerReg consumerReg = 16;
-      private com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg consumerReg_ = com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg, com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.Builder, com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerRegOrBuilder> consumerRegBuilder_;
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-       */
       public boolean hasConsumerReg() {
-        return ((bitField0_ & 0x00008000) == 0x00008000);
+        return result.hasConsumerReg();
       }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-       */
       public com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg getConsumerReg() {
-        if (consumerRegBuilder_ == null) {
-          return consumerReg_;
-        } else {
-          return consumerRegBuilder_.getMessage();
-        }
+        return result.getConsumerReg();
       }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-       */
       public Builder setConsumerReg(com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg value) {
-        if (consumerRegBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          consumerReg_ = value;
-          onChanged();
-        } else {
-          consumerRegBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00008000;
+        result.hasConsumerReg = true;
+        result.consumerReg_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-       */
-      public Builder setConsumerReg(
-          com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.Builder builderForValue) {
-        if (consumerRegBuilder_ == null) {
-          consumerReg_ = builderForValue.build();
-          onChanged();
-        } else {
-          consumerRegBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00008000;
+      public Builder setConsumerReg(com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.Builder builderForValue) {
+        result.hasConsumerReg = true;
+        result.consumerReg_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-       */
       public Builder mergeConsumerReg(com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg value) {
-        if (consumerRegBuilder_ == null) {
-          if (((bitField0_ & 0x00008000) == 0x00008000) &&
-              consumerReg_ != com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.getDefaultInstance()) {
-            consumerReg_ =
-              com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.newBuilder(consumerReg_).mergeFrom(value).buildPartial();
-          } else {
-            consumerReg_ = value;
-          }
-          onChanged();
+        if (result.hasConsumerReg() &&
+            result.consumerReg_ != com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.getDefaultInstance()) {
+          result.consumerReg_ =
+            com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.newBuilder(result.consumerReg_).mergeFrom(value).buildPartial();
         } else {
-          consumerRegBuilder_.mergeFrom(value);
+          result.consumerReg_ = value;
         }
-        bitField0_ |= 0x00008000;
+        result.hasConsumerReg = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-       */
       public Builder clearConsumerReg() {
-        if (consumerRegBuilder_ == null) {
-          consumerReg_ = com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.getDefaultInstance();
-          onChanged();
-        } else {
-          consumerRegBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00008000);
+        result.hasConsumerReg = false;
+        result.consumerReg_ = com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-       */
-      public com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.Builder getConsumerRegBuilder() {
-        bitField0_ |= 0x00008000;
-        onChanged();
-        return getConsumerRegFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-       */
-      public com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerRegOrBuilder getConsumerRegOrBuilder() {
-        if (consumerRegBuilder_ != null) {
-          return consumerRegBuilder_.getMessageOrBuilder();
-        } else {
-          return consumerReg_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.ConsumerReg consumerReg = 16;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg, com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.Builder, com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerRegOrBuilder> 
-          getConsumerRegFieldBuilder() {
-        if (consumerRegBuilder_ == null) {
-          consumerRegBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg, com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg.Builder, com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerRegOrBuilder>(
-                  consumerReg_,
-                  getParentForChildren(),
-                  isClean());
-          consumerReg_ = null;
-        }
-        return consumerRegBuilder_;
-      }
-
+      
       // optional .blackhole.AssignConsumer assignConsumer = 17;
-      private com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer assignConsumer_ = com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.Builder, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumerOrBuilder> assignConsumerBuilder_;
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-       */
       public boolean hasAssignConsumer() {
-        return ((bitField0_ & 0x00010000) == 0x00010000);
+        return result.hasAssignConsumer();
       }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-       */
       public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer getAssignConsumer() {
-        if (assignConsumerBuilder_ == null) {
-          return assignConsumer_;
-        } else {
-          return assignConsumerBuilder_.getMessage();
-        }
+        return result.getAssignConsumer();
       }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-       */
       public Builder setAssignConsumer(com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer value) {
-        if (assignConsumerBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          assignConsumer_ = value;
-          onChanged();
-        } else {
-          assignConsumerBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00010000;
+        result.hasAssignConsumer = true;
+        result.assignConsumer_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-       */
-      public Builder setAssignConsumer(
-          com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.Builder builderForValue) {
-        if (assignConsumerBuilder_ == null) {
-          assignConsumer_ = builderForValue.build();
-          onChanged();
-        } else {
-          assignConsumerBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00010000;
+      public Builder setAssignConsumer(com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.Builder builderForValue) {
+        result.hasAssignConsumer = true;
+        result.assignConsumer_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-       */
       public Builder mergeAssignConsumer(com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer value) {
-        if (assignConsumerBuilder_ == null) {
-          if (((bitField0_ & 0x00010000) == 0x00010000) &&
-              assignConsumer_ != com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.getDefaultInstance()) {
-            assignConsumer_ =
-              com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.newBuilder(assignConsumer_).mergeFrom(value).buildPartial();
-          } else {
-            assignConsumer_ = value;
-          }
-          onChanged();
+        if (result.hasAssignConsumer() &&
+            result.assignConsumer_ != com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.getDefaultInstance()) {
+          result.assignConsumer_ =
+            com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.newBuilder(result.assignConsumer_).mergeFrom(value).buildPartial();
         } else {
-          assignConsumerBuilder_.mergeFrom(value);
+          result.assignConsumer_ = value;
         }
-        bitField0_ |= 0x00010000;
+        result.hasAssignConsumer = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-       */
       public Builder clearAssignConsumer() {
-        if (assignConsumerBuilder_ == null) {
-          assignConsumer_ = com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.getDefaultInstance();
-          onChanged();
-        } else {
-          assignConsumerBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00010000);
+        result.hasAssignConsumer = false;
+        result.assignConsumer_ = com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-       */
-      public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.Builder getAssignConsumerBuilder() {
-        bitField0_ |= 0x00010000;
-        onChanged();
-        return getAssignConsumerFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-       */
-      public com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumerOrBuilder getAssignConsumerOrBuilder() {
-        if (assignConsumerBuilder_ != null) {
-          return assignConsumerBuilder_.getMessageOrBuilder();
-        } else {
-          return assignConsumer_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.AssignConsumer assignConsumer = 17;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.Builder, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumerOrBuilder> 
-          getAssignConsumerFieldBuilder() {
-        if (assignConsumerBuilder_ == null) {
-          assignConsumerBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.Builder, com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumerOrBuilder>(
-                  assignConsumer_,
-                  getParentForChildren(),
-                  isClean());
-          assignConsumer_ = null;
-        }
-        return assignConsumerBuilder_;
-      }
-
+      
       // optional .blackhole.OffsetCommit offsetCommit = 18;
-      private com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit offsetCommit_ = com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit, com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.Builder, com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommitOrBuilder> offsetCommitBuilder_;
-      /**
-       * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-       */
       public boolean hasOffsetCommit() {
-        return ((bitField0_ & 0x00020000) == 0x00020000);
+        return result.hasOffsetCommit();
       }
-      /**
-       * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-       */
       public com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit getOffsetCommit() {
-        if (offsetCommitBuilder_ == null) {
-          return offsetCommit_;
-        } else {
-          return offsetCommitBuilder_.getMessage();
-        }
+        return result.getOffsetCommit();
       }
-      /**
-       * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-       */
       public Builder setOffsetCommit(com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit value) {
-        if (offsetCommitBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          offsetCommit_ = value;
-          onChanged();
-        } else {
-          offsetCommitBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00020000;
+        result.hasOffsetCommit = true;
+        result.offsetCommit_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-       */
-      public Builder setOffsetCommit(
-          com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.Builder builderForValue) {
-        if (offsetCommitBuilder_ == null) {
-          offsetCommit_ = builderForValue.build();
-          onChanged();
-        } else {
-          offsetCommitBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00020000;
+      public Builder setOffsetCommit(com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.Builder builderForValue) {
+        result.hasOffsetCommit = true;
+        result.offsetCommit_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-       */
       public Builder mergeOffsetCommit(com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit value) {
-        if (offsetCommitBuilder_ == null) {
-          if (((bitField0_ & 0x00020000) == 0x00020000) &&
-              offsetCommit_ != com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.getDefaultInstance()) {
-            offsetCommit_ =
-              com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.newBuilder(offsetCommit_).mergeFrom(value).buildPartial();
-          } else {
-            offsetCommit_ = value;
-          }
-          onChanged();
+        if (result.hasOffsetCommit() &&
+            result.offsetCommit_ != com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.getDefaultInstance()) {
+          result.offsetCommit_ =
+            com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.newBuilder(result.offsetCommit_).mergeFrom(value).buildPartial();
         } else {
-          offsetCommitBuilder_.mergeFrom(value);
+          result.offsetCommit_ = value;
         }
-        bitField0_ |= 0x00020000;
+        result.hasOffsetCommit = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-       */
       public Builder clearOffsetCommit() {
-        if (offsetCommitBuilder_ == null) {
-          offsetCommit_ = com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.getDefaultInstance();
-          onChanged();
-        } else {
-          offsetCommitBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00020000);
+        result.hasOffsetCommit = false;
+        result.offsetCommit_ = com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-       */
-      public com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.Builder getOffsetCommitBuilder() {
-        bitField0_ |= 0x00020000;
-        onChanged();
-        return getOffsetCommitFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-       */
-      public com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommitOrBuilder getOffsetCommitOrBuilder() {
-        if (offsetCommitBuilder_ != null) {
-          return offsetCommitBuilder_.getMessageOrBuilder();
-        } else {
-          return offsetCommit_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.OffsetCommit offsetCommit = 18;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit, com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.Builder, com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommitOrBuilder> 
-          getOffsetCommitFieldBuilder() {
-        if (offsetCommitBuilder_ == null) {
-          offsetCommitBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit, com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.Builder, com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommitOrBuilder>(
-                  offsetCommit_,
-                  getParentForChildren(),
-                  isClean());
-          offsetCommit_ = null;
-        }
-        return offsetCommitBuilder_;
-      }
-
+      
       // optional .blackhole.TopicReport topicReport = 19;
-      private com.dp.blackhole.protocol.control.TopicReportPB.TopicReport topicReport_ = com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.TopicReportPB.TopicReport, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.Builder, com.dp.blackhole.protocol.control.TopicReportPB.TopicReportOrBuilder> topicReportBuilder_;
-      /**
-       * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-       */
       public boolean hasTopicReport() {
-        return ((bitField0_ & 0x00040000) == 0x00040000);
+        return result.hasTopicReport();
       }
-      /**
-       * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-       */
       public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport getTopicReport() {
-        if (topicReportBuilder_ == null) {
-          return topicReport_;
-        } else {
-          return topicReportBuilder_.getMessage();
-        }
+        return result.getTopicReport();
       }
-      /**
-       * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-       */
       public Builder setTopicReport(com.dp.blackhole.protocol.control.TopicReportPB.TopicReport value) {
-        if (topicReportBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          topicReport_ = value;
-          onChanged();
-        } else {
-          topicReportBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00040000;
+        result.hasTopicReport = true;
+        result.topicReport_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-       */
-      public Builder setTopicReport(
-          com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.Builder builderForValue) {
-        if (topicReportBuilder_ == null) {
-          topicReport_ = builderForValue.build();
-          onChanged();
-        } else {
-          topicReportBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00040000;
+      public Builder setTopicReport(com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.Builder builderForValue) {
+        result.hasTopicReport = true;
+        result.topicReport_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-       */
       public Builder mergeTopicReport(com.dp.blackhole.protocol.control.TopicReportPB.TopicReport value) {
-        if (topicReportBuilder_ == null) {
-          if (((bitField0_ & 0x00040000) == 0x00040000) &&
-              topicReport_ != com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.getDefaultInstance()) {
-            topicReport_ =
-              com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.newBuilder(topicReport_).mergeFrom(value).buildPartial();
-          } else {
-            topicReport_ = value;
-          }
-          onChanged();
+        if (result.hasTopicReport() &&
+            result.topicReport_ != com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.getDefaultInstance()) {
+          result.topicReport_ =
+            com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.newBuilder(result.topicReport_).mergeFrom(value).buildPartial();
         } else {
-          topicReportBuilder_.mergeFrom(value);
+          result.topicReport_ = value;
         }
-        bitField0_ |= 0x00040000;
+        result.hasTopicReport = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-       */
       public Builder clearTopicReport() {
-        if (topicReportBuilder_ == null) {
-          topicReport_ = com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.getDefaultInstance();
-          onChanged();
-        } else {
-          topicReportBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00040000);
+        result.hasTopicReport = false;
+        result.topicReport_ = com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-       */
-      public com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.Builder getTopicReportBuilder() {
-        bitField0_ |= 0x00040000;
-        onChanged();
-        return getTopicReportFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-       */
-      public com.dp.blackhole.protocol.control.TopicReportPB.TopicReportOrBuilder getTopicReportOrBuilder() {
-        if (topicReportBuilder_ != null) {
-          return topicReportBuilder_.getMessageOrBuilder();
-        } else {
-          return topicReport_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.TopicReport topicReport = 19;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.TopicReportPB.TopicReport, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.Builder, com.dp.blackhole.protocol.control.TopicReportPB.TopicReportOrBuilder> 
-          getTopicReportFieldBuilder() {
-        if (topicReportBuilder_ == null) {
-          topicReportBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.TopicReportPB.TopicReport, com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.Builder, com.dp.blackhole.protocol.control.TopicReportPB.TopicReportOrBuilder>(
-                  topicReport_,
-                  getParentForChildren(),
-                  isClean());
-          topicReport_ = null;
-        }
-        return topicReportBuilder_;
-      }
-
+      
       // optional .blackhole.Restart restart = 20;
-      private com.dp.blackhole.protocol.control.RestartPB.Restart restart_ = com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.RestartPB.Restart, com.dp.blackhole.protocol.control.RestartPB.Restart.Builder, com.dp.blackhole.protocol.control.RestartPB.RestartOrBuilder> restartBuilder_;
-      /**
-       * <code>optional .blackhole.Restart restart = 20;</code>
-       */
       public boolean hasRestart() {
-        return ((bitField0_ & 0x00080000) == 0x00080000);
+        return result.hasRestart();
       }
-      /**
-       * <code>optional .blackhole.Restart restart = 20;</code>
-       */
       public com.dp.blackhole.protocol.control.RestartPB.Restart getRestart() {
-        if (restartBuilder_ == null) {
-          return restart_;
-        } else {
-          return restartBuilder_.getMessage();
-        }
+        return result.getRestart();
       }
-      /**
-       * <code>optional .blackhole.Restart restart = 20;</code>
-       */
       public Builder setRestart(com.dp.blackhole.protocol.control.RestartPB.Restart value) {
-        if (restartBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          restart_ = value;
-          onChanged();
-        } else {
-          restartBuilder_.setMessage(value);
+        if (value == null) {
+          throw new NullPointerException();
         }
-        bitField0_ |= 0x00080000;
+        result.hasRestart = true;
+        result.restart_ = value;
         return this;
       }
-      /**
-       * <code>optional .blackhole.Restart restart = 20;</code>
-       */
-      public Builder setRestart(
-          com.dp.blackhole.protocol.control.RestartPB.Restart.Builder builderForValue) {
-        if (restartBuilder_ == null) {
-          restart_ = builderForValue.build();
-          onChanged();
-        } else {
-          restartBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00080000;
+      public Builder setRestart(com.dp.blackhole.protocol.control.RestartPB.Restart.Builder builderForValue) {
+        result.hasRestart = true;
+        result.restart_ = builderForValue.build();
         return this;
       }
-      /**
-       * <code>optional .blackhole.Restart restart = 20;</code>
-       */
       public Builder mergeRestart(com.dp.blackhole.protocol.control.RestartPB.Restart value) {
-        if (restartBuilder_ == null) {
-          if (((bitField0_ & 0x00080000) == 0x00080000) &&
-              restart_ != com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance()) {
-            restart_ =
-              com.dp.blackhole.protocol.control.RestartPB.Restart.newBuilder(restart_).mergeFrom(value).buildPartial();
-          } else {
-            restart_ = value;
-          }
-          onChanged();
+        if (result.hasRestart() &&
+            result.restart_ != com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance()) {
+          result.restart_ =
+            com.dp.blackhole.protocol.control.RestartPB.Restart.newBuilder(result.restart_).mergeFrom(value).buildPartial();
         } else {
-          restartBuilder_.mergeFrom(value);
+          result.restart_ = value;
         }
-        bitField0_ |= 0x00080000;
+        result.hasRestart = true;
         return this;
       }
-      /**
-       * <code>optional .blackhole.Restart restart = 20;</code>
-       */
       public Builder clearRestart() {
-        if (restartBuilder_ == null) {
-          restart_ = com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance();
-          onChanged();
-        } else {
-          restartBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00080000);
+        result.hasRestart = false;
+        result.restart_ = com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance();
         return this;
       }
-      /**
-       * <code>optional .blackhole.Restart restart = 20;</code>
-       */
-      public com.dp.blackhole.protocol.control.RestartPB.Restart.Builder getRestartBuilder() {
-        bitField0_ |= 0x00080000;
-        onChanged();
-        return getRestartFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .blackhole.Restart restart = 20;</code>
-       */
-      public com.dp.blackhole.protocol.control.RestartPB.RestartOrBuilder getRestartOrBuilder() {
-        if (restartBuilder_ != null) {
-          return restartBuilder_.getMessageOrBuilder();
-        } else {
-          return restart_;
-        }
-      }
-      /**
-       * <code>optional .blackhole.Restart restart = 20;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.RestartPB.Restart, com.dp.blackhole.protocol.control.RestartPB.Restart.Builder, com.dp.blackhole.protocol.control.RestartPB.RestartOrBuilder> 
-          getRestartFieldBuilder() {
-        if (restartBuilder_ == null) {
-          restartBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.RestartPB.Restart, com.dp.blackhole.protocol.control.RestartPB.Restart.Builder, com.dp.blackhole.protocol.control.RestartPB.RestartOrBuilder>(
-                  restart_,
-                  getParentForChildren(),
-                  isClean());
-          restart_ = null;
-        }
-        return restartBuilder_;
-      }
-
+      
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
-
+    
     static {
       defaultInstance = new Message(true);
+      com.dp.blackhole.protocol.control.MessagePB.internalForceInit();
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:blackhole.Message)
   }
-
+  
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_Message_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_Message_fieldAccessorTable;
-
+  
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -4727,7 +1776,9 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "AppRoll", "RecoveryRoll", "ReadyBroker", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", });
+              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "AppRoll", "RecoveryRoll", "ReadyBroker", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", },
+              com.dp.blackhole.protocol.control.MessagePB.Message.class,
+              com.dp.blackhole.protocol.control.MessagePB.Message.Builder.class);
           return null;
         }
       };
@@ -4755,6 +1806,8 @@ public final class MessagePB {
           com.dp.blackhole.protocol.control.RestartPB.getDescriptor(),
         }, assigner);
   }
-
+  
+  public static void internalForceInit() {}
+  
   // @@protoc_insertion_point(outer_class_scope)
 }

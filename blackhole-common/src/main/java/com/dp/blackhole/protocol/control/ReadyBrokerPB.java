@@ -8,613 +8,273 @@ public final class ReadyBrokerPB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface ReadyBrokerOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-
-    // required string app_name = 1;
-    /**
-     * <code>required string app_name = 1;</code>
-     */
-    boolean hasAppName();
-    /**
-     * <code>required string app_name = 1;</code>
-     */
-    java.lang.String getAppName();
-    /**
-     * <code>required string app_name = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getAppNameBytes();
-
-    // required string app_server = 2;
-    /**
-     * <code>required string app_server = 2;</code>
-     */
-    boolean hasAppServer();
-    /**
-     * <code>required string app_server = 2;</code>
-     */
-    java.lang.String getAppServer();
-    /**
-     * <code>required string app_server = 2;</code>
-     */
-    com.google.protobuf.ByteString
-        getAppServerBytes();
-
-    // required string broker_server = 3;
-    /**
-     * <code>required string broker_server = 3;</code>
-     */
-    boolean hasBrokerServer();
-    /**
-     * <code>required string broker_server = 3;</code>
-     */
-    java.lang.String getBrokerServer();
-    /**
-     * <code>required string broker_server = 3;</code>
-     */
-    com.google.protobuf.ByteString
-        getBrokerServerBytes();
-
-    // required int64 period = 4;
-    /**
-     * <code>required int64 period = 4;</code>
-     */
-    boolean hasPeriod();
-    /**
-     * <code>required int64 period = 4;</code>
-     */
-    long getPeriod();
-
-    // required int64 connectedTs = 5;
-    /**
-     * <code>required int64 connectedTs = 5;</code>
-     */
-    boolean hasConnectedTs();
-    /**
-     * <code>required int64 connectedTs = 5;</code>
-     */
-    long getConnectedTs();
-  }
-  /**
-   * Protobuf type {@code blackhole.ReadyBroker}
-   */
   public static final class ReadyBroker extends
-      com.google.protobuf.GeneratedMessage
-      implements ReadyBrokerOrBuilder {
+      com.google.protobuf.GeneratedMessage {
     // Use ReadyBroker.newBuilder() to construct.
-    private ReadyBroker(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-      super(builder);
-      this.unknownFields = builder.getUnknownFields();
+    private ReadyBroker() {
+      initFields();
     }
-    private ReadyBroker(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private ReadyBroker(boolean noInit) {}
+    
     private static final ReadyBroker defaultInstance;
     public static ReadyBroker getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public ReadyBroker getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private ReadyBroker(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              appName_ = input.readBytes();
-              break;
-            }
-            case 18: {
-              bitField0_ |= 0x00000002;
-              appServer_ = input.readBytes();
-              break;
-            }
-            case 26: {
-              bitField0_ |= 0x00000004;
-              brokerServer_ = input.readBytes();
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000008;
-              period_ = input.readInt64();
-              break;
-            }
-            case 40: {
-              bitField0_ |= 0x00000010;
-              connectedTs_ = input.readInt64();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.ReadyBrokerPB.internal_static_blackhole_ReadyBroker_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.ReadyBrokerPB.internal_static_blackhole_ReadyBroker_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.class, com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.Builder.class);
+      return com.dp.blackhole.protocol.control.ReadyBrokerPB.internal_static_blackhole_ReadyBroker_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<ReadyBroker> PARSER =
-        new com.google.protobuf.AbstractParser<ReadyBroker>() {
-      public ReadyBroker parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ReadyBroker(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<ReadyBroker> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
+    
     // required string app_name = 1;
     public static final int APP_NAME_FIELD_NUMBER = 1;
-    private java.lang.Object appName_;
-    /**
-     * <code>required string app_name = 1;</code>
-     */
-    public boolean hasAppName() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required string app_name = 1;</code>
-     */
-    public java.lang.String getAppName() {
-      java.lang.Object ref = appName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          appName_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>required string app_name = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getAppNameBytes() {
-      java.lang.Object ref = appName_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        appName_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
+    private boolean hasAppName;
+    private java.lang.String appName_ = "";
+    public boolean hasAppName() { return hasAppName; }
+    public java.lang.String getAppName() { return appName_; }
+    
     // required string app_server = 2;
     public static final int APP_SERVER_FIELD_NUMBER = 2;
-    private java.lang.Object appServer_;
-    /**
-     * <code>required string app_server = 2;</code>
-     */
-    public boolean hasAppServer() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>required string app_server = 2;</code>
-     */
-    public java.lang.String getAppServer() {
-      java.lang.Object ref = appServer_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          appServer_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>required string app_server = 2;</code>
-     */
-    public com.google.protobuf.ByteString
-        getAppServerBytes() {
-      java.lang.Object ref = appServer_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        appServer_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
+    private boolean hasAppServer;
+    private java.lang.String appServer_ = "";
+    public boolean hasAppServer() { return hasAppServer; }
+    public java.lang.String getAppServer() { return appServer_; }
+    
     // required string broker_server = 3;
     public static final int BROKER_SERVER_FIELD_NUMBER = 3;
-    private java.lang.Object brokerServer_;
-    /**
-     * <code>required string broker_server = 3;</code>
-     */
-    public boolean hasBrokerServer() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    /**
-     * <code>required string broker_server = 3;</code>
-     */
-    public java.lang.String getBrokerServer() {
-      java.lang.Object ref = brokerServer_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          brokerServer_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>required string broker_server = 3;</code>
-     */
-    public com.google.protobuf.ByteString
-        getBrokerServerBytes() {
-      java.lang.Object ref = brokerServer_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        brokerServer_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
+    private boolean hasBrokerServer;
+    private java.lang.String brokerServer_ = "";
+    public boolean hasBrokerServer() { return hasBrokerServer; }
+    public java.lang.String getBrokerServer() { return brokerServer_; }
+    
     // required int64 period = 4;
     public static final int PERIOD_FIELD_NUMBER = 4;
-    private long period_;
-    /**
-     * <code>required int64 period = 4;</code>
-     */
-    public boolean hasPeriod() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    /**
-     * <code>required int64 period = 4;</code>
-     */
-    public long getPeriod() {
-      return period_;
-    }
-
+    private boolean hasPeriod;
+    private long period_ = 0L;
+    public boolean hasPeriod() { return hasPeriod; }
+    public long getPeriod() { return period_; }
+    
     // required int64 connectedTs = 5;
     public static final int CONNECTEDTS_FIELD_NUMBER = 5;
-    private long connectedTs_;
-    /**
-     * <code>required int64 connectedTs = 5;</code>
-     */
-    public boolean hasConnectedTs() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
-    }
-    /**
-     * <code>required int64 connectedTs = 5;</code>
-     */
-    public long getConnectedTs() {
-      return connectedTs_;
-    }
-
+    private boolean hasConnectedTs;
+    private long connectedTs_ = 0L;
+    public boolean hasConnectedTs() { return hasConnectedTs; }
+    public long getConnectedTs() { return connectedTs_; }
+    
     private void initFields() {
-      appName_ = "";
-      appServer_ = "";
-      brokerServer_ = "";
-      period_ = 0L;
-      connectedTs_ = 0L;
     }
-    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-
-      if (!hasAppName()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasAppServer()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasBrokerServer()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasPeriod()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasConnectedTs()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      memoizedIsInitialized = 1;
+      if (!hasAppName) return false;
+      if (!hasAppServer) return false;
+      if (!hasBrokerServer) return false;
+      if (!hasPeriod) return false;
+      if (!hasConnectedTs) return false;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getAppNameBytes());
+      if (hasAppName()) {
+        output.writeString(1, getAppName());
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getAppServerBytes());
+      if (hasAppServer()) {
+        output.writeString(2, getAppServer());
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, getBrokerServerBytes());
+      if (hasBrokerServer()) {
+        output.writeString(3, getBrokerServer());
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeInt64(4, period_);
+      if (hasPeriod()) {
+        output.writeInt64(4, getPeriod());
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeInt64(5, connectedTs_);
+      if (hasConnectedTs()) {
+        output.writeInt64(5, getConnectedTs());
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      if (hasAppName()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getAppNameBytes());
+          .computeStringSize(1, getAppName());
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+      if (hasAppServer()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getAppServerBytes());
+          .computeStringSize(2, getAppServer());
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+      if (hasBrokerServer()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, getBrokerServerBytes());
+          .computeStringSize(3, getBrokerServer());
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+      if (hasPeriod()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(4, period_);
+          .computeInt64Size(4, getPeriod());
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (hasConnectedTs()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(5, connectedTs_);
+          .computeInt64Size(5, getConnectedTs());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
+    
     public static com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code blackhole.ReadyBroker}
-     */
+    
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBrokerOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return com.dp.blackhole.protocol.control.ReadyBrokerPB.internal_static_blackhole_ReadyBroker_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return com.dp.blackhole.protocol.control.ReadyBrokerPB.internal_static_blackhole_ReadyBroker_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.class, com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.Builder.class);
-      }
-
+        com.google.protobuf.GeneratedMessage.Builder<Builder> {
+      private com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker result;
+      
       // Construct using com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
+      private Builder() {}
+      
       private static Builder create() {
-        return new Builder();
+        Builder builder = new Builder();
+        builder.result = new com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker();
+        return builder;
       }
-
+      
+      protected com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker internalGetResult() {
+        return result;
+      }
+      
       public Builder clear() {
-        super.clear();
-        appName_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
-        appServer_ = "";
-        bitField0_ = (bitField0_ & ~0x00000002);
-        brokerServer_ = "";
-        bitField0_ = (bitField0_ & ~0x00000004);
-        period_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000008);
-        connectedTs_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000010);
+        if (result == null) {
+          throw new IllegalStateException(
+            "Cannot call clear() after build().");
+        }
+        result = new com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker();
         return this;
       }
-
+      
       public Builder clone() {
-        return create().mergeFrom(buildPartial());
+        return create().mergeFrom(result);
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.ReadyBrokerPB.internal_static_blackhole_ReadyBroker_descriptor;
+        return com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.getDescriptor();
       }
-
+      
       public com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.getDefaultInstance();
       }
-
+      
+      public boolean isInitialized() {
+        return result.isInitialized();
+      }
       public com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker build() {
-        com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker result = buildPartial();
-        if (!result.isInitialized()) {
+        if (result != null && !isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return result;
+        return buildPartial();
       }
-
+      
+      private com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        if (!isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return buildPartial();
+      }
+      
       public com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker buildPartial() {
-        com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker result = new com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
+        if (result == null) {
+          throw new IllegalStateException(
+            "build() has already been called on this Builder.");
         }
-        result.appName_ = appName_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.appServer_ = appServer_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        result.brokerServer_ = brokerServer_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        result.period_ = period_;
-        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-          to_bitField0_ |= 0x00000010;
-        }
-        result.connectedTs_ = connectedTs_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
+        com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker returnMe = result;
+        result = null;
+        return returnMe;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker) {
           return mergeFrom((com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker)other);
@@ -623,23 +283,17 @@ public final class ReadyBrokerPB {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker other) {
         if (other == com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.getDefaultInstance()) return this;
         if (other.hasAppName()) {
-          bitField0_ |= 0x00000001;
-          appName_ = other.appName_;
-          onChanged();
+          setAppName(other.getAppName());
         }
         if (other.hasAppServer()) {
-          bitField0_ |= 0x00000002;
-          appServer_ = other.appServer_;
-          onChanged();
+          setAppServer(other.getAppServer());
         }
         if (other.hasBrokerServer()) {
-          bitField0_ |= 0x00000004;
-          brokerServer_ = other.brokerServer_;
-          onChanged();
+          setBrokerServer(other.getBrokerServer());
         }
         if (other.hasPeriod()) {
           setPeriod(other.getPeriod());
@@ -650,355 +304,170 @@ public final class ReadyBrokerPB {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
-      public final boolean isInitialized() {
-        if (!hasAppName()) {
-          
-          return false;
-        }
-        if (!hasAppServer()) {
-          
-          return false;
-        }
-        if (!hasBrokerServer()) {
-          
-          return false;
-        }
-        if (!hasPeriod()) {
-          
-          return false;
-        }
-        if (!hasConnectedTs()) {
-          
-          return false;
-        }
-        return true;
-      }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              setAppName(input.readString());
+              break;
+            }
+            case 18: {
+              setAppServer(input.readString());
+              break;
+            }
+            case 26: {
+              setBrokerServer(input.readString());
+              break;
+            }
+            case 32: {
+              setPeriod(input.readInt64());
+              break;
+            }
+            case 40: {
+              setConnectedTs(input.readInt64());
+              break;
+            }
           }
         }
-        return this;
       }
-      private int bitField0_;
-
+      
+      
       // required string app_name = 1;
-      private java.lang.Object appName_ = "";
-      /**
-       * <code>required string app_name = 1;</code>
-       */
       public boolean hasAppName() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
+        return result.hasAppName();
       }
-      /**
-       * <code>required string app_name = 1;</code>
-       */
       public java.lang.String getAppName() {
-        java.lang.Object ref = appName_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          appName_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+        return result.getAppName();
       }
-      /**
-       * <code>required string app_name = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getAppNameBytes() {
-        java.lang.Object ref = appName_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          appName_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string app_name = 1;</code>
-       */
-      public Builder setAppName(
-          java.lang.String value) {
+      public Builder setAppName(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
-        appName_ = value;
-        onChanged();
+  result.hasAppName = true;
+        result.appName_ = value;
         return this;
       }
-      /**
-       * <code>required string app_name = 1;</code>
-       */
       public Builder clearAppName() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        appName_ = getDefaultInstance().getAppName();
-        onChanged();
+        result.hasAppName = false;
+        result.appName_ = getDefaultInstance().getAppName();
         return this;
       }
-      /**
-       * <code>required string app_name = 1;</code>
-       */
-      public Builder setAppNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        appName_ = value;
-        onChanged();
-        return this;
-      }
-
+      
       // required string app_server = 2;
-      private java.lang.Object appServer_ = "";
-      /**
-       * <code>required string app_server = 2;</code>
-       */
       public boolean hasAppServer() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
+        return result.hasAppServer();
       }
-      /**
-       * <code>required string app_server = 2;</code>
-       */
       public java.lang.String getAppServer() {
-        java.lang.Object ref = appServer_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          appServer_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+        return result.getAppServer();
       }
-      /**
-       * <code>required string app_server = 2;</code>
-       */
-      public com.google.protobuf.ByteString
-          getAppServerBytes() {
-        java.lang.Object ref = appServer_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          appServer_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string app_server = 2;</code>
-       */
-      public Builder setAppServer(
-          java.lang.String value) {
+      public Builder setAppServer(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
-        appServer_ = value;
-        onChanged();
+  result.hasAppServer = true;
+        result.appServer_ = value;
         return this;
       }
-      /**
-       * <code>required string app_server = 2;</code>
-       */
       public Builder clearAppServer() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        appServer_ = getDefaultInstance().getAppServer();
-        onChanged();
+        result.hasAppServer = false;
+        result.appServer_ = getDefaultInstance().getAppServer();
         return this;
       }
-      /**
-       * <code>required string app_server = 2;</code>
-       */
-      public Builder setAppServerBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        appServer_ = value;
-        onChanged();
-        return this;
-      }
-
+      
       // required string broker_server = 3;
-      private java.lang.Object brokerServer_ = "";
-      /**
-       * <code>required string broker_server = 3;</code>
-       */
       public boolean hasBrokerServer() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return result.hasBrokerServer();
       }
-      /**
-       * <code>required string broker_server = 3;</code>
-       */
       public java.lang.String getBrokerServer() {
-        java.lang.Object ref = brokerServer_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          brokerServer_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+        return result.getBrokerServer();
       }
-      /**
-       * <code>required string broker_server = 3;</code>
-       */
-      public com.google.protobuf.ByteString
-          getBrokerServerBytes() {
-        java.lang.Object ref = brokerServer_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          brokerServer_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string broker_server = 3;</code>
-       */
-      public Builder setBrokerServer(
-          java.lang.String value) {
+      public Builder setBrokerServer(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
-        brokerServer_ = value;
-        onChanged();
+  result.hasBrokerServer = true;
+        result.brokerServer_ = value;
         return this;
       }
-      /**
-       * <code>required string broker_server = 3;</code>
-       */
       public Builder clearBrokerServer() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        brokerServer_ = getDefaultInstance().getBrokerServer();
-        onChanged();
+        result.hasBrokerServer = false;
+        result.brokerServer_ = getDefaultInstance().getBrokerServer();
         return this;
       }
-      /**
-       * <code>required string broker_server = 3;</code>
-       */
-      public Builder setBrokerServerBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        brokerServer_ = value;
-        onChanged();
-        return this;
-      }
-
+      
       // required int64 period = 4;
-      private long period_ ;
-      /**
-       * <code>required int64 period = 4;</code>
-       */
       public boolean hasPeriod() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
+        return result.hasPeriod();
       }
-      /**
-       * <code>required int64 period = 4;</code>
-       */
       public long getPeriod() {
-        return period_;
+        return result.getPeriod();
       }
-      /**
-       * <code>required int64 period = 4;</code>
-       */
       public Builder setPeriod(long value) {
-        bitField0_ |= 0x00000008;
-        period_ = value;
-        onChanged();
+        result.hasPeriod = true;
+        result.period_ = value;
         return this;
       }
-      /**
-       * <code>required int64 period = 4;</code>
-       */
       public Builder clearPeriod() {
-        bitField0_ = (bitField0_ & ~0x00000008);
-        period_ = 0L;
-        onChanged();
+        result.hasPeriod = false;
+        result.period_ = 0L;
         return this;
       }
-
+      
       // required int64 connectedTs = 5;
-      private long connectedTs_ ;
-      /**
-       * <code>required int64 connectedTs = 5;</code>
-       */
       public boolean hasConnectedTs() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
+        return result.hasConnectedTs();
       }
-      /**
-       * <code>required int64 connectedTs = 5;</code>
-       */
       public long getConnectedTs() {
-        return connectedTs_;
+        return result.getConnectedTs();
       }
-      /**
-       * <code>required int64 connectedTs = 5;</code>
-       */
       public Builder setConnectedTs(long value) {
-        bitField0_ |= 0x00000010;
-        connectedTs_ = value;
-        onChanged();
+        result.hasConnectedTs = true;
+        result.connectedTs_ = value;
         return this;
       }
-      /**
-       * <code>required int64 connectedTs = 5;</code>
-       */
       public Builder clearConnectedTs() {
-        bitField0_ = (bitField0_ & ~0x00000010);
-        connectedTs_ = 0L;
-        onChanged();
+        result.hasConnectedTs = false;
+        result.connectedTs_ = 0L;
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:blackhole.ReadyBroker)
     }
-
+    
     static {
       defaultInstance = new ReadyBroker(true);
+      com.dp.blackhole.protocol.control.ReadyBrokerPB.internalForceInit();
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:blackhole.ReadyBroker)
   }
-
+  
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_ReadyBroker_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_ReadyBroker_fieldAccessorTable;
-
+  
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -1023,7 +492,9 @@ public final class ReadyBrokerPB {
           internal_static_blackhole_ReadyBroker_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ReadyBroker_descriptor,
-              new java.lang.String[] { "AppName", "AppServer", "BrokerServer", "Period", "ConnectedTs", });
+              new java.lang.String[] { "AppName", "AppServer", "BrokerServer", "Period", "ConnectedTs", },
+              com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.class,
+              com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.Builder.class);
           return null;
         }
       };
@@ -1032,6 +503,8 @@ public final class ReadyBrokerPB {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-
+  
+  public static void internalForceInit() {}
+  
   // @@protoc_insertion_point(outer_class_scope)
 }
