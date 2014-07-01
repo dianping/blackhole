@@ -1131,6 +1131,7 @@ public class Supervisor {
         
         StreamId id = new StreamId(message.getAppName(), message.getAppServer());
         Stream stream = streamIdMap.get(id);
+        String brokerHost = message.getBrokerServer();
         
         // processing stream affairs
         if (stream == null) {
@@ -1199,8 +1200,9 @@ public class Supervisor {
             partitionInfos.put(partitionId, pinfo);
         } else {
             if (pinfo.isOffline()) {
-                LOG.info("partition back to online: " + pinfo);
+                pinfo.updateHost(brokerHost);
                 pinfo.markOffline(false);
+                LOG.info("partition back to online: " + pinfo);
             }
         }
         //reassign consumer
@@ -1494,6 +1496,7 @@ public class Supervisor {
                 break;
             case OFFSET_COMMIT:
                 handleOffsetCommit(msg.getOffsetCommit());
+                break;
             case LISTIDLE:
                 listIdle(from);
                 break;

@@ -80,5 +80,5 @@ message Message {
     optional AssignConsumer assignConsumer = 17;
     optional OffsetCommit offsetCommit = 18;
     optional TopicReport topicReport = 19;
-    optional Restart restart = 21;
+    optional Restart restart = 20;
 }
