@@ -642,14 +642,16 @@ public class Supervisor {
         sb.append("list idle hosts:\n");
         sb.append("############################## dump ##############################\n");
         SortedSet<String> idleHosts = new TreeSet<String>();
-        for(SimpleConnection conn : connectionStreamMap.keySet()) {
-            ConnectionDescription desc = connections.get(conn);
+        for(ConnectionDescription desc : connections.values()) {
             if (desc == null) {
-                LOG.error("can not find ConnectionDesc by connection " + conn);
+                LOG.error("can not find ConnectionDesc by connection " + desc);
                 return;
             }
-            if (desc.getType() != ConnectionDescription.AGENT &&desc.getType() != ConnectionDescription.BROKER) {
-                idleHosts.add(conn.getHost());
+            if (desc.getType() != ConnectionDescription.AGENT &&
+                desc.getType() != ConnectionDescription.BROKER &&
+                desc.getType() != ConnectionDescription.CONSUMER &&
+                desc.getConnection() != from) {
+                idleHosts.add(desc.getConnection().getHost());
             }
         }
         int count = 0;
