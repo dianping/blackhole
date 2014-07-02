@@ -237,12 +237,6 @@ public class ConsumerConnector implements Runnable {
             case ASSIGN_CONSUMER:
                 AssignConsumer assign = msg.getAssignConsumer();
                 
-                // halt when assigned no partition
-                if (assign.getPartitionOffsetsList().isEmpty()) {
-                    LOG.info("received no PartitionOffsetsList");
-                    return false;
-                }
-                
                 String consumerId = assign.getConsumerIdString();
                 //First, shutdown thread and clear consumer queue.
                 List<Fetcher> fetches = consumerThreadsMap.get(consumerId);
@@ -258,6 +252,12 @@ public class ConsumerConnector implements Runnable {
                     c.clearQueue();
                 } else {
                     LOG.fatal("unkown consumerId: " + consumerId);
+                    return false;
+                }
+                
+                // halt when assigned no partition
+                if (assign.getPartitionOffsetsList().isEmpty()) {
+                    LOG.info("received no PartitionOffsetsList");
                     return false;
                 }
 
