@@ -271,8 +271,8 @@ public class Supervisor {
             LOG.warn("can't find partition by partitionId: " + topic + "." + partitionId);
             return;
         }
-        LOG.info(pinfo + " is offline");
         pinfo.markOffline(true);
+        LOG.info(pinfo + " is offline");
     }
     
     /*
@@ -662,6 +662,7 @@ public class Supervisor {
                 sb.append("\n");
             }
         }
+        sb.append("\n").append("idle hosts count: " + idleHosts.size());
         sb.append("\n").append("##################################################################");
         
         String listIdle = sb.toString();
