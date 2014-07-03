@@ -184,6 +184,8 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
                 } catch (InterruptedException ie) {
                     LOG.info("handler thread interrupted");
                     running = false;
+                } catch (Throwable t) {
+                    LOG.error("exception catched when processing event", t);
                 }
             }
         }
