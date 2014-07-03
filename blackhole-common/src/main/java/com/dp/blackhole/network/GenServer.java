@@ -27,9 +27,7 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
     private Selector selector;
     volatile private boolean running = true;
     private ArrayList<Handler> handlers = null;
-    private int handlerCount = 1;
-    
-    private BlockingQueue<EntityEvent> entityQueue;
+    private int handlerCount;
     
     private class EntityEvent {
         static final int CONNECTED = 1;
@@ -90,7 +88,8 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         
         if (connection.readComplete()) {
             Entity entity = connection.getEntity();
-            entityQueue.add(new EntityEvent(EntityEvent.RECEIVED, entity, connection));
+            Handler handler = getHandler(connection);
+            handler.addEvent(new EntityEvent(EntityEvent.RECEIVED, entity, connection));
             connection.readyforRead();
         }
     }
@@ -114,7 +113,8 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         }
         channel.configureBlocking(false);
         Connection connection = factory.makeConnection(channel, selector, wrappedFactory);
-        entityQueue.add(new EntityEvent(EntityEvent.CONNECTED, null, connection));
+        Handler handler = getHandler(connection);
+        handler.addEvent(new EntityEvent(EntityEvent.CONNECTED, null, connection));
         channel.register(selector, SelectionKey.OP_READ, connection);
     }
     
@@ -134,7 +134,8 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
                 connection.close();
             }
             
-            entityQueue.add(new EntityEvent(EntityEvent.DISCONNECTED, null, connection));
+            Handler handler = getHandler(connection);
+            handler.addEvent(new EntityEvent(EntityEvent.DISCONNECTED, null, connection));
         }
     }
 
@@ -142,11 +143,22 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         running = false;  
     }
     
+    private Handler getHandler(Connection connection) {
+        int index = (connection.hashCode() & Integer.MAX_VALUE) % handlerCount;
+        return handlers.get(index);
+    }
+    
     private class Handler extends Thread {
+        private BlockingQueue<EntityEvent> entityQueue;
 
         public Handler(int instanceNumber) {
+            entityQueue = new LinkedBlockingQueue<EntityEvent>();
             this.setDaemon(true);
             this.setName("process handler thread-"+instanceNumber);
+        }
+        
+        public void addEvent(EntityEvent event) {
+            entityQueue.add(event);
         }
         
         @Override
@@ -172,6 +184,8 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
                 } catch (InterruptedException ie) {
                     LOG.info("handler thread interrupted");
                     running = false;
+                } catch (Throwable t) {
+                    LOG.error("exception catched when processing event", t);
                 }
             }
         }
@@ -187,9 +201,7 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         ss.bind(new InetSocketAddress(port));
         selector = Selector.open();
         ssc.register(selector, SelectionKey.OP_ACCEPT);
-
-        entityQueue = new LinkedBlockingQueue<EntityEvent>();
-
+        
         // start message handler thread
         handlers = new ArrayList<Handler>(handlerCount);
         for (int i=0; i < handlerCount; i++) {

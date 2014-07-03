@@ -252,7 +252,7 @@ public class Supervisor {
         ConsumerGroup group = new ConsumerGroup(groupId, topic);
         ConsumerGroupDesc groupDesc = consumerGroups.get(group);
         if (groupDesc == null) {
-            LOG.error("can not find consumer group " + group);
+            LOG.warn("can not find consumer group " + group);
             return;
         }
         
