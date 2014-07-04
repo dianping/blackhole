@@ -124,14 +124,15 @@ public class Cli {
                     out.println(" dumpconf              Display all of app config information.");
                     out.println(" listapps              List all of application names.");
                     out.println(" listidle              List all of idle hostname or ip.");
-                    out.println(" dumpapp <appname>     Display the stream, stages of the application followed.");
-                    out.println(" rmconf <appname>      Remove the configuration specified by appname which should be useless.");
+                    out.println(" dumpapp <Appname>     Display the stream, stages of the application followed.");
+                    out.println(" rmconf <Appname>      Remove the configuration specified by appname which should be useless.");
                     out.println("                       (Just remove from supervisor memory rather than lion/ZK).");
-                    out.println(" retire <appname> <appserver>      Retire the stream specified by appname and appserver.");
-                    out.println(" recovery <appname> <appserver> <period> <rolltimestamp>");
-                    out.println("                       Recovery the stream specified by appname, appserver and roll ts.");
-                    out.println(" range <appname> <appserver> <period> <start rolltimestamp> <end rolltimestamp>");
+                    out.println(" retire <Appname> <AgentHost>      Retire the stream specified by appname and agentHost.");
+                    out.println(" recovery <Appname> <appserver> <period> <rolltimestamp>");
+                    out.println("                       Recovery the stream specified by appname, agentHost and roll ts.");
+                    out.println(" range <Appname> <AgentHost> <period> <start rolltimestamp> <end rolltimestamp>");
                     out.println("                       Recovery a range of streams specified period from start timestamp to end timestamp.");
+                    out.println(" restart [AgentHosts]  Restart a set of agents in one command. The agents are splitted by \" \"");
                     out.println(" quit                  Quit the command line interface.");
                     out.println(" help                  Display help information.");
                 } else if (cmd.equals("quit")) {
