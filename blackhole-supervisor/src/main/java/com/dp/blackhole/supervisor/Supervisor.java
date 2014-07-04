@@ -243,6 +243,10 @@ public class Supervisor {
     }
 
     private void handleOffsetCommit(OffsetCommit offsetCommit) {
+        // disable temporarily
+        if (true) {
+            return;
+        }
         String id = offsetCommit.getConsumerIdString();
         String groupId = id.split("-")[0];
         String topic = offsetCommit.getTopic();
