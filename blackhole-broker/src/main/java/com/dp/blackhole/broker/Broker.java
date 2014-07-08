@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.SecurityUtil;
 
+import com.dp.blackhole.broker.ftp.FTPConfigrationLoader;
 import com.dp.blackhole.broker.storage.StorageManager.reporter.ReportEntry;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
@@ -63,6 +64,14 @@ public class Broker {
             conf.set("broker.blackhole.keytab", keytab);
             conf.set("broker.blackhole.principal", principal);
             HDFSLogin(conf, "broker.blackhole.keytab", "broker.blackhole.principal");
+        }
+        
+        boolean enableFTP = Boolean.parseBoolean(prop.getProperty("broker.storage.ftp.enable", "false"));
+        if (enableFTP) {
+            long ftpConfigrationCheckInterval = Long.parseLong(prop.getProperty("broker.storage.ftp.configCheckIntervalMilli", "600000"));
+            FTPConfigrationLoader ftpConfigrationLoader =  new FTPConfigrationLoader(ftpConfigrationCheckInterval);
+            Thread thread = new Thread(ftpConfigrationLoader);
+            thread.start();
         }
         
         rollMgr.init(hdfsbasedir, suffix, recoveryPort, clockSyncBufMillis, maxUploadThreads, maxRecoveryThreads, recoverySocketTimeout);

@@ -1,5 +1,4 @@
-package com.dp.blackhole.broker;
-
+package com.dp.blackhole.broker.ftp;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -10,50 +9,61 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.zip.GZIPOutputStream;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
+import org.apache.commons.net.ftp.FTPClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockftpserver.fake.FakeFtpServer;
+import org.mockftpserver.fake.UserAccount;
+import org.mockftpserver.fake.filesystem.DirectoryEntry;
+import org.mockftpserver.fake.filesystem.FileEntry;
+import org.mockftpserver.fake.filesystem.FileSystem;
+import org.mockftpserver.fake.filesystem.UnixFakeFileSystem;
 
-import com.dp.blackhole.broker.HDFSUpload;
 import com.dp.blackhole.broker.RollIdent;
 import com.dp.blackhole.broker.RollManager;
+import com.dp.blackhole.broker.SimBroker;
 import com.dp.blackhole.broker.storage.Partition;
-import com.dp.blackhole.broker.storage.StorageManager;
 import com.dp.blackhole.broker.storage.RollPartition;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.Message;
 
-public class TestHDFSUpload {
-    private final String MAGIC = "TestHDFSUpload_" + Util.getTS();
+public class TestFTPUpload {
+    private FakeFtpServer fakeFtpServer;
+    private final String MAGIC = "TestFTPUpload_" + Util.getTS();
+    private final String FTP_BASE_DIR = "/tmp/ftp";
     private File expect;
-    private FileSystem fs;
-
+    
     @Before
     public void setUp() throws Exception {
         //build a expect file
         expect = createExpectFile(getExpectFile()+".gz");
-        Configuration conf = new Configuration();
-        fs = FileSystem.get(conf);
-    } 
+        fakeFtpServer = new FakeFtpServer();
+        fakeFtpServer.setServerControlPort(0);  // use any free port
+
+        
+        FileSystem fileSystem = new UnixFakeFileSystem();
+        fileSystem.add(new DirectoryEntry(FTP_BASE_DIR));
+        fileSystem.add(new FileEntry(FTP_BASE_DIR + "/test", "test"));
+        fakeFtpServer.setFileSystem(fileSystem);
+        fakeFtpServer.addUserAccount(new UserAccount("foo", "bar", FTP_BASE_DIR));
+        
+        fakeFtpServer.start();
+    }
 
     @After
     public void tearDown() throws Exception {
-        File testdir = new File("/tmp/testHDFSUpload");
-        if (testdir.exists()) {
-            Util.rmr(testdir);
-        }
+        fakeFtpServer.stop();
         expect.delete();
-        new File(getRealFile()+".gz").delete();
     }
 
     @Test
-    public void testUploadWhole() throws InterruptedException, IOException {
+    public void testUploadWhole() throws IOException, InterruptedException {
         RollIdent ident = getRollIdent(MAGIC);
         
         Partition p = createPartition();
@@ -66,22 +76,34 @@ public class TestHDFSUpload {
         appendData(p);
         
         RollManager mgr = mock(RollManager.class);
-        when(mgr.getRollHdfsPath(ident)).thenReturn(getRealFile()+".gz");
+        when(mgr.getRollFtpPath(FTP_BASE_DIR, ident)).thenReturn(getRealFile()+".gz");
         
-        StorageManager manager = mock(StorageManager.class);
-        when(manager.getPartition(ident.app, ident.source, false)).thenReturn(p);
-        
-        HDFSUpload writer = new HDFSUpload(mgr, manager, fs, ident, roll1);
+        FTPConfigration configration = new FTPConfigration("localhost", fakeFtpServer.getServerControlPort(), "foo", "bar", FTP_BASE_DIR);
+        FTPUpload writer = new FTPUpload(mgr, configration, ident, roll1, p);
         Thread thread = new Thread(writer);
         thread.start();
         thread.join();
         
         FileInputStream fis = new FileInputStream(expect);
         String expectedMD5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+        
+        FTPClient ftpClient = new FTPClient();
+        ftpClient.connect("localhost", fakeFtpServer.getServerControlPort());
+        ftpClient.login("foo", "bar");
+        
+        File file = new File("/tmp/real_" + MAGIC + ".gz");
+        OutputStream outputStream = new FileOutputStream(file);
+        
         String actualFile = getRealFile();
-        String actualMDS = org.apache.commons.codec.digest.DigestUtils.md5Hex(new FileInputStream(actualFile+".gz"));
+        boolean success = ftpClient.retrieveFile(actualFile+".gz", outputStream);
+        assertTrue(success);
+        outputStream.close();
+        ftpClient.disconnect();
+        
+        String actualMDS = org.apache.commons.codec.digest.DigestUtils.md5Hex(new FileInputStream(file));
         assertEquals("md5sum not equals", expectedMD5, actualMDS);
         fis.close();
+        file.delete();
     }
     
     public RollIdent getRollIdent(String appName) {
@@ -118,11 +140,11 @@ public class TestHDFSUpload {
     }
     
     public String getRealFile() {
-        return "/tmp/real_" + MAGIC;
+        return FTP_BASE_DIR + "/real_" + MAGIC;
     }
     
     public Partition createPartition() throws IOException {
-        File testdir = new File("/tmp/testHDFSUpload");
+        File testdir = new File("/tmp/testFTPUpload");
         if (testdir.exists()) {
             Util.rmr(testdir);
         }

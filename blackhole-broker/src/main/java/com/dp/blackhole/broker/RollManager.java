@@ -18,7 +18,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.dp.blackhole.broker.ftp.FTPConfigration;
+import com.dp.blackhole.broker.ftp.FTPConfigrationLoader;
+import com.dp.blackhole.broker.ftp.FTPUpload;
+import com.dp.blackhole.broker.storage.Partition;
 import com.dp.blackhole.broker.storage.RollPartition;
+import com.dp.blackhole.broker.storage.StorageManager;
 import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
@@ -86,8 +91,22 @@ public class RollManager {
         }
         
         LOG.info("start to upload roll " + ident);
-        HDFSUpload upload = new HDFSUpload(this, Broker.getBrokerService().getPersistentManager(), fs, ident, roll);
+        StorageManager manager = Broker.getBrokerService().getPersistentManager();
+        HDFSUpload upload = new HDFSUpload(this, manager, fs, ident, roll);
         uploadPool.execute(upload);
+        //start a ftp uploader which need uploading to work with HDFS in parallel.
+        FTPConfigration ftpConf;
+        if ((ftpConf = FTPConfigrationLoader.getFTPConfigration(ident.app)) != null) {
+            Partition p;
+            try {
+                p = manager.getPartition(ident.app, ident.source, false);
+                FTPUpload ftpUpload = new FTPUpload(this, ftpConf, ident, roll, p);
+                Thread ftpThread = new Thread(ftpUpload);
+                ftpThread.start();
+            } catch (IOException e) {
+                LOG.error("Can not get a partition to upload with FTP of ident: " + ident, e);
+            }
+        }
         return true;
     }
 
@@ -126,26 +145,30 @@ public class RollManager {
      * Path format:
      * hdfsbasedir/appname/2013-11-01/14/08/machine01@appname_2013-11-01.14.08.gz.tmp
      */
-    private String getRollHdfsPathPrefix(RollIdent ident, boolean hidden) {
+    private String getRollPath(String haseDir, RollIdent ident, boolean hidden) {
         String format;
         format = Util.getFormatFromPeroid(ident.period);
         Date roll = new Date(ident.ts);
         SimpleDateFormat dm= new SimpleDateFormat(format);
         if (hidden) {
-            return hdfsbase + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
+            return haseDir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
                 "_" + ident.source + '@' + ident.app + "_" + dm.format(roll);
         } else {
-            return hdfsbase + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
+            return haseDir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
                 ident.source + '@' + ident.app + "_" + dm.format(roll);
         }
     }
 
     public String getRollHdfsPath(RollIdent ident) {
-        return getRollHdfsPathPrefix(ident, false) + suffix;
+        return getRollPath(hdfsbase, ident, false) + suffix;
     }
     
     public String getMarkHdfsPath(RollIdent ident) {
-        return getRollHdfsPathPrefix(ident, true);
+        return getRollPath(hdfsbase, ident, true);
+    }
+    
+    public String getRollFtpPath(String baseDir, RollIdent ident) {
+        return getRollPath(baseDir, ident, false) + suffix;
     }
     
     public void reportRecovery(RollIdent ident, boolean recoverySuccess) {
