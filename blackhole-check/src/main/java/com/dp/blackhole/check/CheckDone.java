@@ -99,6 +99,12 @@ public class CheckDone implements Runnable{
                             LOG.fatal("expectedFile is null. It should not be happen.");
                         }
                     } else if (calendar.get(Calendar.MINUTE) >= alartTime) {
+                        synchronized (lionConfChange) {
+                            if (lionConfChange.getAlarmBlackList().contains(ident.app)) {
+                                timeChecker.unregisterTimeChecker(ident, ident.ts);
+                                break;
+                            }
+                        }
                         LOG.error("Alarm, [" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + " unfinished, add to TimeChecker.");
                         timeChecker.registerTimeChecker(ident, ident.ts);
                     } else {

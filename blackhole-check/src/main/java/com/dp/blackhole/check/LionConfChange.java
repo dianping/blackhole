@@ -33,6 +33,7 @@ public class LionConfChange {
     private final Map<String, Set<String>> hostToAppNames = Collections.synchronizedMap(new HashMap<String, Set<String>>());
     private final Map<String, List<String>> appToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
     private Set<String> appBlacklist;
+    private Set<String> alarmBlackList;
     private ConfigCache cache;
     private int apiId;
     private final ScheduledThreadPoolExecutor scheduler;
@@ -57,19 +58,30 @@ public class LionConfChange {
         return appBlacklist;
     }
     
+    public Set<String> getAlarmBlackList() {
+        return alarmBlackList;
+    }
+
     public void initLion() {
         reloadConf();
         addWatchers();
     }
     private void reloadConf() {
         String blacklistString = definitelyGetProperty(ParamsKey.LionNode.BLACKLIST);
+        String alarmBlacklistString = definitelyGetProperty(ParamsKey.LionNode.ALARM_BLACKLIST);
         String[] blacklistArray = Util.getStringListOfLionValue(blacklistString);
         if (blacklistArray == null) {
             LOG.info("There are no legacy configurations of blacklist.");
             return;
         }
+        String[] alarmBlacklistArray = Util.getStringListOfLionValue(alarmBlacklistString);
+        if (alarmBlacklistArray == null) {
+            LOG.info("There are no legacy configurations of alarm blacklist.");
+            return;
+        }
         synchronized (this) {
             appBlacklist = new HashSet<String>(Arrays.asList(blacklistArray));
+            alarmBlackList = new HashSet<String>(Arrays.asList(alarmBlacklistArray));
         }
         
         String appNamesString = definitelyGetProperty(ParamsKey.LionNode.APPS);
@@ -96,6 +108,8 @@ public class LionConfChange {
     private void addWatchers() {
         AppBlacklistChangeListener appBlacklistListener = new AppBlacklistChangeListener();
         cache.addChange(appBlacklistListener);
+        AlarmBlacklistChangeListener alarmBlacklistChangeListener = new AlarmBlacklistChangeListener();
+        cache.addChange(alarmBlacklistChangeListener);
         AppsChangeListener appsListener = new AppsChangeListener();
         cache.addChange(appsListener);
         AppConfChangeListener appConfListener = new AppConfChangeListener();
@@ -292,6 +306,22 @@ public class LionConfChange {
                     LOG.info("black list has been changed.");
                     synchronized (this) {
                         appBlacklist = new HashSet<String>(Arrays.asList(blacklistArray));
+                    }
+                }
+            }
+        }
+    }
+    
+    class AlarmBlacklistChangeListener implements ConfigChange {
+
+        @Override
+        public void onChange(String key, String value) {
+            if (key.equals(ParamsKey.LionNode.ALARM_BLACKLIST)) {
+                String[] alarmBlacklistArray = Util.getStringListOfLionValue(value);
+                if (alarmBlacklistArray != null) {
+                    LOG.info("alarm black list has been changed.");
+                    synchronized (this) {
+                        alarmBlackList = new HashSet<String>(Arrays.asList(alarmBlacklistArray));
                     }
                 }
             }
