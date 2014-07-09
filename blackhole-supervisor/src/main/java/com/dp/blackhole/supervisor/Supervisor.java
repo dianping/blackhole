@@ -666,7 +666,8 @@ public class Supervisor {
                 sb.append("\n");
             }
         }
-        sb.append("\n").append("idle hosts count: " + idleHosts.size());
+        sb.append("\n\n").append("idle hosts count: " + idleHosts.size());
+        sb.append("\n").append("Total of connected hosts: " + connections.size());
         sb.append("\n").append("##################################################################");
         
         String listIdle = sb.toString();
