@@ -76,7 +76,8 @@ public class TestFTPUpload {
         appendData(p);
         
         RollManager mgr = mock(RollManager.class);
-        when(mgr.getRollFtpPath(FTP_BASE_DIR, ident)).thenReturn(getRealFile()+".gz");
+        when(mgr.getParentPath(FTP_BASE_DIR, ident)).thenReturn("/tmp/ftp/" + MAGIC + "/2013-01-01/15");
+        when(mgr.getCompressedFileName(ident)).thenReturn("localhost@" + MAGIC + "_2013-01-01.15.gz");
         
         FTPConfigration configration = new FTPConfigration("localhost", fakeFtpServer.getServerControlPort(), "foo", "bar", FTP_BASE_DIR);
         FTPUpload writer = new FTPUpload(mgr, configration, ident, roll1, p);
@@ -95,7 +96,7 @@ public class TestFTPUpload {
         OutputStream outputStream = new FileOutputStream(file);
         
         String actualFile = getRealFile();
-        boolean success = ftpClient.retrieveFile(actualFile+".gz", outputStream);
+        boolean success = ftpClient.retrieveFile(actualFile, outputStream);
         assertTrue(success);
         outputStream.close();
         ftpClient.disconnect();
@@ -140,7 +141,7 @@ public class TestFTPUpload {
     }
     
     public String getRealFile() {
-        return FTP_BASE_DIR + "/real_" + MAGIC;
+        return FTP_BASE_DIR + "/" + MAGIC + "/2013-01-01/15/localhost@" + MAGIC + "_2013-01-01.15.gz";
     }
     
     public Partition createPartition() throws IOException {

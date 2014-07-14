@@ -100,6 +100,7 @@ public class RollManager {
             Partition p;
             try {
                 p = manager.getPartition(ident.app, ident.source, false);
+                LOG.info("start to ftp " + ident);
                 FTPUpload ftpUpload = new FTPUpload(this, ftpConf, ident, roll, p);
                 Thread ftpThread = new Thread(ftpUpload);
                 ftpThread.start();
@@ -142,33 +143,45 @@ public class RollManager {
     }
     
     /*
-     * Path format:
-     * hdfsbasedir/appname/2013-11-01/14/08/machine01@appname_2013-11-01.14.08.gz.tmp
+     * hdfsbasedir/appname/2013-11-01/14/08/
      */
-    private String getRollPath(String haseDir, RollIdent ident, boolean hidden) {
+    public String getParentPath(String baseDir, RollIdent ident) {
         String format;
         format = Util.getFormatFromPeroid(ident.period);
         Date roll = new Date(ident.ts);
-        SimpleDateFormat dm= new SimpleDateFormat(format);
+        SimpleDateFormat dm = new SimpleDateFormat(format);
+        return baseDir + "/" + ident.app + '/' + getDatepathbyFormat(dm.format(roll));
+    }
+    
+    /*
+     * machine01@appname_2013-11-01.14.08
+     */
+    public String getFileName(RollIdent ident, boolean hidden) {
+        String format;
+        format = Util.getFormatFromPeroid(ident.period);
+        Date roll = new Date(ident.ts);
+        SimpleDateFormat dm = new SimpleDateFormat(format);
         if (hidden) {
-            return haseDir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
-                "_" + ident.source + '@' + ident.app + "_" + dm.format(roll);
+            return "_" + ident.source + '@' + ident.app + "_" + dm.format(roll);
         } else {
-            return haseDir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
-                ident.source + '@' + ident.app + "_" + dm.format(roll);
+            return ident.source + '@' + ident.app + "_" + dm.format(roll);
         }
     }
+    
+    public String getCompressedFileName(RollIdent ident) {
+        return getFileName(ident, false) + suffix;
+    }
 
+    /*
+     * Path format:
+     * hdfsbasedir/appname/2013-11-01/14/08/machine01@appname_2013-11-01.14.08.gz
+     */
     public String getRollHdfsPath(RollIdent ident) {
-        return getRollPath(hdfsbase, ident, false) + suffix;
+        return getParentPath(hdfsbase, ident) + getCompressedFileName(ident);
     }
     
     public String getMarkHdfsPath(RollIdent ident) {
-        return getRollPath(hdfsbase, ident, true);
-    }
-    
-    public String getRollFtpPath(String baseDir, RollIdent ident) {
-        return getRollPath(baseDir, ident, false) + suffix;
+        return getParentPath(hdfsbase, ident) + getFileName(ident, true);
     }
     
     public void reportRecovery(RollIdent ident, boolean recoverySuccess) {

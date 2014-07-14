@@ -40,13 +40,14 @@ public class FTPUpload implements Runnable {
         this.ident = ident;
         this.roll = roll;
         this.partition = partition;
-        this.newline = ByteBuffer.wrap("\n".getBytes(Charset.forName("UTF-8" )));
+        this.newline = ByteBuffer.wrap("\n".getBytes(Charset.forName("UTF-8")));
     }
     
     @Override
     public void run() {
         FTPClient ftp = new FTPClient();
         String remoteTempFilename = null;
+        OutputStream out = null;
         try {
             int reply;
             ftp.connect(configration.getUrl(), configration.getPort());
@@ -57,10 +58,17 @@ public class FTPUpload implements Runnable {
                 LOG.error("FTPReply is " + reply + ", disconnected.");
                 return;
             }
-            ftp.changeWorkingDirectory(configration.getRootDir());
-            String remoteFilename = mgr.getRollFtpPath(configration.getRootDir(), ident);
+            ftp.setFileTransferMode(FTPClient.BINARY_FILE_TYPE);
+            ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
+            if(!ftp.changeWorkingDirectory("/")) {
+                throw new IOException("Can not change to " + configration.getRootDir());
+            }
+            String remoteDir = mgr.getParentPath(configration.getRootDir(), ident);
+            ftpCreateDirectoryTree(ftp, remoteDir);
+            LOG.debug("Current FTP working directory is: " + ftp.printWorkingDirectory());
+            String remoteFilename = mgr.getCompressedFileName(ident);
             remoteTempFilename = remoteFilename + ".tmp";
-            OutputStream out = new GZIPOutputStream(ftp.appendFileStream(remoteTempFilename));
+            out = new GZIPOutputStream(ftp.storeFileStream(remoteTempFilename));
             
             remoteWrite(out);
             
@@ -70,7 +78,7 @@ public class FTPUpload implements Runnable {
             if(!ftp.rename(remoteTempFilename, remoteFilename)) {
                 throw new IOException("Unfinished rename.");
             }
-            
+            LOG.debug(remoteFilename + " uploaded.");
             ftp.logout();
         } catch (IOException e) {
             LOG.error("Oops, got an excepion.", e);
@@ -81,10 +89,16 @@ public class FTPUpload implements Runnable {
                 }
             }
         } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                }
+            }
             if (ftp.isConnected()) {
                 try {
                     ftp.disconnect();
-                } catch (IOException e2) {
+                } catch (IOException e) {
                 }
             }
         }
@@ -136,5 +150,42 @@ public class FTPUpload implements Runnable {
             read += messages.write(channel, start + read, limit - read);
         }
         return read;
+    }
+
+    /**
+     * utility to create an arbitrary directory hierarchy on the remote ftp
+     * server
+     * 
+     * @param client
+     * @param dirTree
+     *            the directory tree only delimited with / chars. No file name!
+     * @throws Exception
+     */
+    private void ftpCreateDirectoryTree(FTPClient client, String dirTree) throws IOException {
+        boolean dirExists = true;
+        // tokenize the string and attempt to change into each directory level.
+        // If you cannot, then start creating.
+        String[] directories = dirTree.split("/");
+        for (String dir : directories) {
+            if (!dir.isEmpty()) {
+                if (dirExists) {
+                    dirExists = client.changeWorkingDirectory(dir);
+                }
+                if (!dirExists) {
+                    if (!client.makeDirectory(dir)) {
+                        throw new IOException(
+                                "Unable to create remote directory '" + dir
+                                        + "'.  error='"
+                                        + client.getReplyString() + "'");
+                    }
+                    if (!client.changeWorkingDirectory(dir)) {
+                        throw new IOException(
+                                "Unable to change into newly created remote directory '"
+                                        + dir + "'.  error='"
+                                        + client.getReplyString() + "'");
+                    }
+                }
+            }
+        }
     }
 }
