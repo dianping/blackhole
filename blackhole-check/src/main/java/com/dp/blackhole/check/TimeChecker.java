@@ -14,10 +14,12 @@ public class TimeChecker extends Thread {
     private final static Log LOG = LogFactory.getLog(TimeChecker.class);
     private boolean running = true;
     private long sleepDuration;
+    private LionConfChange lionConfChange;
     private Map<RollIdent, List<Long>> checkerMap;
 
-    public TimeChecker(long sleepDuration) {
+    public TimeChecker(long sleepDuration, LionConfChange lionConfChange) {
         this.sleepDuration = sleepDuration;
+        this.lionConfChange = lionConfChange;
         checkerMap = new HashMap<RollIdent, List<Long>>();
     }
     
@@ -57,6 +59,10 @@ public class TimeChecker extends Thread {
     public synchronized void check() {
         for (Map.Entry<RollIdent, List<Long>> entry : checkerMap.entrySet()) {
             RollIdent ident = entry.getKey();
+            if (lionConfChange.getAppBlacklist().contains(ident.app)) {
+                checkerMap.remove(ident);
+                continue;
+            }
             List<Long> checkTsList = entry.getValue();
             Path expectedFile = null;
             Path hiddenFile = null;

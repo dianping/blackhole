@@ -54,11 +54,11 @@ public class LionConfChange {
         return hostToAppNames.get(host);
     }
     
-    public Set<String> getAppBlacklist() {
+    public synchronized Set<String> getAppBlacklist() {
         return appBlacklist;
     }
     
-    public Set<String> getAlarmBlackList() {
+    public synchronized Set<String> getAlarmBlackList() {
         return alarmBlackList;
     }
 
