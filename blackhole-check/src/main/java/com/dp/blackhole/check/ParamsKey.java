@@ -15,6 +15,7 @@ public abstract class ParamsKey {
         public final static String LION_PROJECT = "blackhole";
         public final static String APPS = "blackhole.apps";
         public final static String BLACKLIST = "blackhole.check.blacklist";
+        public final static String ALARM_BLACKLIST = "blackhole.check.blacklist.alarm";
         public final static String APP_HOSTS_PREFIX = "blackhole.hosts.";
         public final static String APP_CONF_PREFIX = "blackhole.conf.";
         public final static String APP_CMDB_PREFIX = "blackhole.cmdb.";

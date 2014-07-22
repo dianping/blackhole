@@ -48,7 +48,7 @@ public class HDFSRecovery implements Runnable{
             if (!fs.exists(normalPath)) {   //When normal path not exists then do recovery.
                 LOG.debug("Begin to recovery " + normalPathname);
                 int len = 0;
-                int uploadSize = 0;
+                long uploadSize = 0L;
                 byte[] buf = new byte[DEFAULT_BUFSIZE];
                 if (hasCompressed) {
                     out = fs.create(recoveryPath);

@@ -126,6 +126,7 @@ public class RollRecovery implements Runnable{
                 try {
                     is.close();
                 } catch (IOException e) {
+                    LOG.error("Can not close input stream.", e);
                 }
                 is = null;
             }
