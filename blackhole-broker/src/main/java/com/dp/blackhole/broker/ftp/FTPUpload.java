@@ -67,18 +67,18 @@ public class FTPUpload implements Runnable {
             ftpCreateDirectoryTree(ftp, remoteDir);
             LOG.debug("Current FTP working directory is: " + ftp.printWorkingDirectory());
             String remoteFilename = mgr.getCompressedFileName(ident);
-            remoteTempFilename = remoteFilename + ".tmp";
+            remoteTempFilename = "." + remoteFilename + ".tmp";
             out = new GZIPOutputStream(ftp.storeFileStream(remoteTempFilename));
             
             remoteWrite(out);
             
             if (!ftp.completePendingCommand()) {
-                throw new IOException("Unfinished upload.");
+                throw new IOException("Unfinished upload " + remoteFilename);
             }
             if(!ftp.rename(remoteTempFilename, remoteFilename)) {
-                throw new IOException("Unfinished rename.");
+                throw new IOException("Unfinished rename to " + remoteFilename);
             }
-            LOG.debug(remoteFilename + " uploaded.");
+            LOG.info(remoteFilename + " uploaded.");
             ftp.logout();
         } catch (IOException e) {
             LOG.error("Oops, got an excepion.", e);
