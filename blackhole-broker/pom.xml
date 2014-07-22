@@ -27,5 +27,11 @@
 			<version>1.8.0</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.mockftpserver</groupId>
+			<artifactId>MockFtpServer</artifactId>
+			<version>2.4</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>
