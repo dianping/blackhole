@@ -243,7 +243,7 @@ public class Supervisor {
     }
 
     private void handleOffsetCommit(OffsetCommit offsetCommit) {
-        // disable temporarily
+        //TODO disable temporarily
         if (true) {
             return;
         }
