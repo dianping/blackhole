@@ -17,6 +17,7 @@ import org.apache.hadoop.fs.Path;
 import com.dp.blackhole.broker.storage.Partition;
 import com.dp.blackhole.broker.storage.StorageManager;
 import com.dp.blackhole.broker.storage.RollPartition;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.FileMessageSet;
 import com.dp.blackhole.storage.MessageAndOffset;
@@ -69,6 +70,10 @@ public class HDFSUpload implements Runnable{
                 int limit = (int) ((size > BufferSize) ?  BufferSize : size);
                 
                 FileMessageSet fms = p.read(start, limit);
+                if (fms == null) {
+                    throw new IOException("can't get FileMessageSet from partition " + p + " with "
+                            + Util.toTupleString(start, end, limit) + " when Uploading " + ident);
+                }
                 fetchFileMessageSet(channel, fms);
                 
                 buffer.flip();
