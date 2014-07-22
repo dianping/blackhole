@@ -43,10 +43,8 @@ public class CheckDone implements Runnable{
     @Override
     public void run() {
         //pass blacklist
-        synchronized (lionConfChange) {
-            if (lionConfChange.getAppBlacklist().contains(ident.app)) {
-                return;
-            }
+        if (lionConfChange.getAppBlacklist().contains(ident.app)) {
+            return;
         }
         //reload sources
         List<String> sources = lionConfChange.getAppToHosts().get(ident.app);
@@ -99,7 +97,9 @@ public class CheckDone implements Runnable{
                             LOG.fatal("expectedFile is null. It should not be happen.");
                         }
                     } else if (calendar.get(Calendar.MINUTE) >= alartTime) {
-                        LOG.error("Alarm, [" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + " unfinished, add to TimeChecker.");
+                        if (!lionConfChange.getAlarmBlackList().contains(ident.app)) {
+                            LOG.error("Alarm, [" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + " unfinished, add to TimeChecker.");
+                        }
                         timeChecker.registerTimeChecker(ident, ident.ts);
                     } else {
                         break;
@@ -167,7 +167,7 @@ public class CheckDone implements Runnable{
         checkerThreadPool = Executors.newScheduledThreadPool(Integer.parseInt(prop.getProperty("MAX_THREAD_NUM", "10")));
         sleepDuration = Long.parseLong(prop.getProperty("TIMECHECKER_PROID", "120000"));
         threadMap = Collections.synchronizedMap(new HashMap<String, ScheduledFuture<?>>());
-        timeChecker = new TimeChecker(sleepDuration);
+        timeChecker = new TimeChecker(sleepDuration, lionConfChange);
     }
 
     private static void fillRollIdent(Properties prop) throws LionException {
