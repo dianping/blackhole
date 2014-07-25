@@ -16,8 +16,8 @@ public class Stage {
     
     List<Issue> issuelist;
     
-    String app;
-    String apphost;
+    String topic;
+    String sourceIdentify;
     String brokerhost;
     boolean cleanstart;
     int status;
@@ -44,7 +44,7 @@ public class Stage {
     }
     
     public String toString() {
-        String summary = app + "@" + apphost + "," + getStatusString(status) + "," + Util.formatTs(rollTs);
+        String summary = topic + "@" + sourceIdentify + "," + getStatusString(status) + "," + Util.formatTs(rollTs);
         if (!cleanstart) {
             summary = summary + ",not cleanstart";
         }
@@ -65,8 +65,8 @@ public class Stage {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((app == null) ? 0 : app.hashCode());
-        result = prime * result + ((apphost == null) ? 0 : apphost.hashCode());
+        result = prime * result + ((topic == null) ? 0 : topic.hashCode());
+        result = prime * result + ((sourceIdentify == null) ? 0 : sourceIdentify.hashCode());
         result = prime * result + (int) (rollTs ^ (rollTs >>> 32));
         return result;
     }
@@ -80,15 +80,15 @@ public class Stage {
         if (getClass() != obj.getClass())
             return false;
         Stage other = (Stage) obj;
-        if (app == null) {
-            if (other.app != null)
+        if (topic == null) {
+            if (other.topic != null)
                 return false;
-        } else if (!app.equals(other.app))
+        } else if (!topic.equals(other.topic))
             return false;
-        if (apphost == null) {
-            if (other.apphost != null)
+        if (sourceIdentify == null) {
+            if (other.sourceIdentify != null)
                 return false;
-        } else if (!apphost.equals(other.apphost))
+        } else if (!sourceIdentify.equals(other.sourceIdentify))
             return false;
         if (rollTs != other.rollTs)
             return false;

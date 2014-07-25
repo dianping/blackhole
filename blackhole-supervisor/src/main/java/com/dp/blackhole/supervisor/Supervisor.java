@@ -1,6 +1,9 @@
 package com.dp.blackhole.supervisor;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
@@ -20,15 +22,17 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-import com.dianping.lion.EnvZooKeeperConfig;
-import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.conf.Context;
+import com.dp.blackhole.http.HttpClientSingle;
+import com.dp.blackhole.http.RequestListener;
 import com.dp.blackhole.network.ConnectionFactory;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenServer;
@@ -38,6 +42,7 @@ import com.dp.blackhole.protocol.control.AppRollPB.AppRoll;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
 import com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
+import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
 import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.DumpAppPB.DumpApp;
 import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
@@ -48,12 +53,11 @@ import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
 import com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.protocol.control.RestartPB.Restart;
+import com.dp.blackhole.protocol.control.RollCleanPB.RollClean;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 import com.dp.blackhole.protocol.control.StreamIDPB.StreamID;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry;
-import com.dp.blackhole.scaleout.HttpClientSingle;
-import com.dp.blackhole.scaleout.RequestListener;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Supervisor {
@@ -66,7 +70,7 @@ public class Supervisor {
 
     private ConcurrentHashMap<Stream, ArrayList<Stage>> Streams;
     private ConcurrentHashMap<StreamId, Stream> streamIdMap;
-    private LionConfChange lionConfChange;
+    private ConfigManager configManager;
     
     private ConcurrentHashMap<String, ConcurrentHashMap<String ,PartitionInfo>> topics;
     private ConcurrentHashMap<ConsumerGroup, ConsumerGroupDesc> consumerGroups;
@@ -75,6 +79,30 @@ public class Supervisor {
     private ConcurrentHashMap<String, SimpleConnection> agentsMapping;
     private ConcurrentHashMap<String, SimpleConnection> brokersMapping;
     
+    private HttpClientSingle paasQuery;
+    
+    public boolean isActiveStream(String topic, String sourceIdentify) {
+        StreamId streamId = new StreamId(topic, sourceIdentify);
+        Stream stream = streamIdMap.get(streamId);
+        return stream == null ? false : stream.isActive();
+    }
+    
+    public boolean isEmptyStream(String topic, String sourceIdentify) {
+        StreamId streamId = new StreamId(topic, sourceIdentify);
+        Stream stream = streamIdMap.get(streamId);
+        if (stream == null) {
+            return true;
+        }
+        List<Stage> stages = Streams.get(stream);
+        return ((stages == null || stages.size() == 0) ? true : false);
+    }
+    
+    public boolean isCleanStream(String topic, String sourceIdentify) {
+        StreamId streamId = new StreamId(topic, sourceIdentify);
+        Stream stream = streamIdMap.get(streamId);
+        return ((stream == null) ? true : false);
+    }
+
     private void send(SimpleConnection connection, Message msg) {
         if (connection == null || !connection.isActive()) {
             LOG.error("connection is null or closed, message sending abort: " + msg);
@@ -91,6 +119,12 @@ public class Supervisor {
             LOG.debug("send message to " + connection + " :" +msg);
         }
         Util.send(connection, msg);
+    }
+    
+    public void cachedSend(Map<SimpleConnection, Message> toBeSend) {
+        for (Map.Entry<SimpleConnection, Message> entry : toBeSend.entrySet()) {
+            send(entry.getKey(), entry.getValue());
+        }
     }
     
     private void handleHeartBeat(SimpleConnection from) {
@@ -314,8 +348,8 @@ public class Supervisor {
                 }
                 
                 // mark partitions as offline
-                String topic = stream.app;
-                String partitionId = stream.appHost;
+                String topic = stream.topic;
+                String partitionId = stream.sourceIdentify;
                 markPartitionOffline(topic, partitionId);
             }
         } else {
@@ -325,7 +359,7 @@ public class Supervisor {
     
     /*
      * 1. process current stage on associated streams
-     * 2. remove the relationship of the corresponding appNode and streams
+     * 2. remove the relationship of the corresponding agent and streams
      * 3. processing uploading and recovery stages
      */
     private void handleBrokerNodeFail(ConnectionDescription desc, long now) {
@@ -362,27 +396,27 @@ public class Supervisor {
                 }
                    
                 // remove corresponding appNodes's relationship with the stream
-                String appHost = stream.appHost;
-                SimpleConnection appConnection = agentsMapping.get(appHost);
-                if (appConnection == null) {
-                    LOG.error("can not find appConnection by host " + appHost);
+                String agentHost = stream.sourceIdentify;
+                SimpleConnection agentConnection = agentsMapping.get(agentHost);
+                if (agentConnection == null) {
+                    LOG.error("can not find agentConnection by host " + agentHost);
                     continue;
                 }
-                if (appConnection != null) {
-                    ArrayList<Stream> associatedStreams = connectionStreamMap.get(appConnection);
+                if (agentConnection != null) {
+                    ArrayList<Stream> associatedStreams = connectionStreamMap.get(agentConnection);
                     if (associatedStreams != null) {
                         synchronized (associatedStreams) {
                             associatedStreams.remove(stream);
                             if (associatedStreams.size() == 0) {
-                                connectionStreamMap.remove(appConnection);
+                                connectionStreamMap.remove(agentConnection);
                             }
                         }
                     }
                 }
                  
                 // mark partitions as offline
-                String topic = stream.app;
-                String partitionId = stream.appHost;
+                String topic = stream.topic;
+                String partitionId = stream.sourceIdentify;
                 markPartitionOffline(topic, partitionId);
             }
         } else {
@@ -397,7 +431,7 @@ public class Supervisor {
                 if (stage.status == Stage.PENDING) {
                     continue;
                 }
-                StreamId id = new StreamId(stage.app, stage.apphost);
+                StreamId id = new StreamId(stage.topic, stage.sourceIdentify);
                 Stream stream = streamIdMap.get(id);
                 if (stream == null) {
                     LOG.error("can not find stream by streamid: " + id);
@@ -455,8 +489,8 @@ public class Supervisor {
     }
     
     /*
-     * cancel the key, remove it from appNodes or brokers, then revisit streams
-     * 1. appNode fail, mark the stream as inactive, mark all the stages as pending unless the uploading stage
+     * cancel the key, remove it from agent or brokers, then revisit streams
+     * 1. agent fail, mark the stream as inactive, mark all the stages as pending unless the uploading stage
      * 2. broker fail, reassign broker if it is current stage, mark the stream as pending when no available broker;
      *  do recovery if the stage is not current stage, mark the stage as pending when no available broker
      */
@@ -529,7 +563,7 @@ public class Supervisor {
         }
         sb.append("\n");
         
-        sb.append("print appNodes:\n");
+        sb.append("print agents:\n");
         for(SimpleConnection connection: agentsMapping.values()) {
             sb.append("<")
             .append(connection)
@@ -571,15 +605,15 @@ public class Supervisor {
         send(from, message);
     }
     
-    private void dumpapp(DumpApp dumpApp, SimpleConnection from) {
-        String appName = dumpApp.getAppName();
+    private void dumpTopic(DumpApp dumpApp, SimpleConnection from) {
+        String topic = dumpApp.getTopic();
         StringBuilder sb = new StringBuilder();
-        sb.append("dumpapp:\n");
+        sb.append("dump topic:\n");
         sb.append("############################## dump ##############################\n");
         sb.append("print streamIdMap:\n");
         Set<Stream> printStreams = new HashSet<Stream>();
         for (StreamId streamId : streamIdMap.keySet()) {
-            if (streamId.belongTo(appName)) {
+            if (streamId.belongTo(topic)) {
                 Stream stream = streamIdMap.get(streamId);
                 printStreams.add(stream);
                 sb.append("<")
@@ -589,14 +623,14 @@ public class Supervisor {
             }
         }
         sb.append("\n");
-        Map<String, PartitionInfo> partitionMap = topics.get(appName);
+        Map<String, PartitionInfo> partitionMap = topics.get(topic);
         sb.append("print Streams:\n");
         for (Stream stream : printStreams) {
             sb.append("[stream]\n")
             .append(stream)
             .append("\n").append("[partition]\n");
             if (partitionMap != null) {
-                PartitionInfo partitionInfo = partitionMap.get(stream.appHost);
+                PartitionInfo partitionInfo = partitionMap.get(stream.sourceIdentify);
                 if (partitionInfo != null) {
                     sb.append(partitionInfo).append("\n");
                 }
@@ -617,7 +651,7 @@ public class Supervisor {
     }
     
     public void dumpconf(SimpleConnection from) {
-        String dumpconf = lionConfChange.dumpconf();
+        String dumpconf = configManager.dumpconf();
         Message message = PBwrap.wrapDumpReply(dumpconf);
         send(from, message);
     }
@@ -658,10 +692,10 @@ public class Supervisor {
         send(from, message);
     }
 
-    public void listApps(SimpleConnection from) {
+    public void listTopics(SimpleConnection from) {
         StringBuilder sb = new StringBuilder();
-        SortedSet<String> appNameSet = new TreeSet<String>();
-        sb.append("list apps:\n");
+        SortedSet<String> topicSet = new TreeSet<String>();
+        sb.append("list topics:\n");
         sb.append("############################## dump ##############################\n");
         
         for(Entry<StreamId, Stream> entry : streamIdMap.entrySet()) {
@@ -670,12 +704,12 @@ public class Supervisor {
             if (endIndex == -1) {
                 continue;
             }
-            String appName = streamIdString.substring(0, endIndex);
-            appNameSet.add(appName);            
+            String topic = streamIdString.substring(0, endIndex);
+            topicSet.add(topic);            
         }
-        for (String appNameInOrder : appNameSet) {
+        for (String topicInOrder : topicSet) {
             sb.append("<")
-            .append(appNameInOrder)
+            .append(topicInOrder)
             .append(">")
             .append("\n");
         }
@@ -745,8 +779,8 @@ public class Supervisor {
     }
 
     private void sendRestart(Restart restart) {
-        List<String> appServers = restart.getAppServersList();
-        for (String agentHost : appServers) {
+        List<String> agentServers = restart.getAgentServersList();
+        for (String agentHost : agentServers) {
             SimpleConnection agent = agentsMapping.get(agentHost);
             if (agent != null) {
                 server.closeConnection(agent);
@@ -757,13 +791,17 @@ public class Supervisor {
     }
 
     public void removeConf(RemoveConf removeConf, SimpleConnection from) {
-        String appName = removeConf.getAppName();
-        List<String> appServers = removeConf.getAppServersList();
-        lionConfChange.removeConf(appName, appServers);
+        String topic = removeConf.getTopic();
+        List<String> agentServers = removeConf.getAgentServersList();
+        configManager.removeConf(topic, agentServers);
     }
 
     private void handleRetireStream(StreamID streamId) {
-        StreamId id = new StreamId(streamId.getAppName(), streamId.getAppServer());
+        StreamId id = new StreamId(streamId.getTopic(), streamId.getAgentServer());
+        retireStreamInternal(id);
+    }
+
+    private void retireStreamInternal(StreamId id) {
         Stream stream = streamIdMap.get(id);
         
         if (stream == null) {
@@ -776,7 +814,7 @@ public class Supervisor {
             return;
         } else {
             if (brokersMapping.isEmpty()) {
-                LOG.error("only inactive app can be retired");
+                LOG.error("only inactive stream can be retired");
                 return;
             }
             
@@ -807,14 +845,13 @@ public class Supervisor {
                     }
                 }
             }
-            
             // remove stream from Streams
             Streams.remove(stream);
         }
     }
     
     private void handleManualRecoveryRoll(RollID rollID) {
-        StreamId id = new StreamId(rollID.getAppName(), rollID.getAppServer());
+        StreamId id = new StreamId(rollID.getTopic(), rollID.getSourceIdentify());
         Stream stream = streamIdMap.get(id);
 
         if (stream != null) {
@@ -839,8 +876,8 @@ public class Supervisor {
                     }
                     // create the stage
                     Stage manualRecoveryStage = new Stage();
-                    manualRecoveryStage.app = rollID.getAppName();
-                    manualRecoveryStage.apphost = rollID.getAppServer();
+                    manualRecoveryStage.topic = rollID.getTopic();
+                    manualRecoveryStage.sourceIdentify = rollID.getSourceIdentify();
                     manualRecoveryStage.brokerhost = null;
                     manualRecoveryStage.cleanstart = false;
                     manualRecoveryStage.issuelist = new ArrayList<Issue>();
@@ -865,7 +902,7 @@ public class Supervisor {
     }
 
     private void handleUnrecoverable(RollID rollID) {
-        StreamId id = new StreamId(rollID.getAppName(), rollID.getAppServer());
+        StreamId id = new StreamId(rollID.getTopic(), rollID.getSourceIdentify());
         Stream stream = streamIdMap.get(id);
 
         if (stream != null) {
@@ -881,11 +918,11 @@ public class Supervisor {
                             if (broker != null) {
                                 SimpleConnection brokerConnection = brokersMapping.get(broker);
                                 if (brokerConnection != null) {
-                                    String appName = rollID.getAppName();
-                                    String appServer = rollID.getAppServer();
+                                    String topic = rollID.getTopic();
+                                    String sourceIdentify = rollID.getSourceIdentify();
                                     long rollTs = rollID.getRollTs();
                                     long period = rollID.getPeriod();
-                                    Message message = PBwrap.wrapMarkUnrecoverable(appName, appServer, period, rollTs);
+                                    Message message = PBwrap.wrapMarkUnrecoverable(topic, sourceIdentify, period, rollTs);
                                     send(brokerConnection, message);
                                 }
                             }
@@ -906,11 +943,11 @@ public class Supervisor {
      * failure happened only on stream
      * just log it in a issue, because:
      * if it is a broker fail, the corresponding log reader should find it 
-     * and ask for a new broker; if it is a agent fail, the appNode will
-     * register the app again 
+     * and ask for a new broker; if it is a agent fail, the agent will
+     * register the topic again 
      */
     private void handleFailure(Failure failure) {
-        StreamId id = new StreamId(failure.getApp(), failure.getAppServer());
+        StreamId id = new StreamId(failure.getTopic(), failure.getSourceIdentify());
         Stream stream = streamIdMap.get(id);
         
         if (stream == null) {
@@ -957,7 +994,7 @@ public class Supervisor {
      * try to do recovery again when last recovery failed
      */
     private void handleRecoveryFail(RollID rollID) {
-        StreamId id = new StreamId(rollID.getAppName(), rollID.getAppServer());
+        StreamId id = new StreamId(rollID.getTopic(), rollID.getSourceIdentify());
         Stream stream = streamIdMap.get(id);
         
         if (stream != null) {
@@ -966,7 +1003,7 @@ public class Supervisor {
                 synchronized (stages) {
                     for (Stage stage : stages) {
                         if (stage.rollTs == rollID.getRollTs()) {
-                            doRecovery(stream, stage);
+                            doRecovery(stream, stage, rollID.getIsFinal());
                             break;
                         }
                     }
@@ -983,10 +1020,16 @@ public class Supervisor {
      * mark the stage as uploaded , print summary and remove it from Streams
      */
     private void handleRecoverySuccess(RollID rollID) {
-        StreamId id = new StreamId(rollID.getAppName(), rollID.getAppServer());
+        StreamId id = new StreamId(rollID.getTopic(), rollID.getSourceIdentify());
         Stream stream = streamIdMap.get(id);
 
         if (stream != null) {
+            if (rollID.getIsFinal()) {
+                LOG.info("Final upload suceessed. to retire this stream.");
+                stream.updateActive(false);
+                retireStreamInternal(id);
+                return;
+            }
             stream.setGreatlastSuccessTs(rollID.getRollTs());
             ArrayList<Stage> stages = Streams.get(stream);
             if (stages != null) {
@@ -1014,7 +1057,7 @@ public class Supervisor {
      * add issue to the stage, and do recovery
      */
     private void handleUploadFail(RollID rollID) {
-        StreamId id = new StreamId(rollID.getAppName(), rollID.getAppServer());
+        StreamId id = new StreamId(rollID.getTopic(), rollID.getSourceIdentify());
         Stream stream = streamIdMap.get(id);
 
         if (stream != null) {
@@ -1027,7 +1070,7 @@ public class Supervisor {
                     for (Stage stage : stages) {
                         if (stage.rollTs == rollID.getRollTs()) {
                             stage.issuelist.add(e);
-                            doRecovery(stream, stage);
+                            doRecovery(stream, stage, rollID.getIsFinal());
                             break;
                         }
                     }
@@ -1045,10 +1088,16 @@ public class Supervisor {
      * make the uploaded stage as uploaded and remove it from Streams
      */
     private void handleUploadSuccess(RollID rollID, SimpleConnection from) {
-        StreamId id = new StreamId(rollID.getAppName(), rollID.getAppServer());
+        StreamId id = new StreamId(rollID.getTopic(), rollID.getSourceIdentify());
         Stream stream = streamIdMap.get(id);
         
         if (stream != null) {
+            if (rollID.getIsFinal()) {
+                LOG.info("Final upload suceessed. to retire this stream.");
+                stream.updateActive(false);
+                retireStreamInternal(id);
+                return;
+            }
             stream.setGreatlastSuccessTs(rollID.getRollTs()); 
        
             ArrayList<Stage> stages = Streams.get(stream);
@@ -1079,7 +1128,7 @@ public class Supervisor {
      * create next stage as new current stage
      */
     private void handleRolling(AppRoll msg, SimpleConnection from) {
-        StreamId id = new StreamId(msg.getAppName(), msg.getAppServer());
+        StreamId id = new StreamId(msg.getTopic(), msg.getSourceIdentify());
         Stream stream = streamIdMap.get(id);
         if (stream != null) {
             if (msg.getRollTs() <= stream.getlastSuccessTs()) {
@@ -1136,8 +1185,8 @@ public class Supervisor {
                     // create next stage if stream is connected
                     if (current.status != Stage.PENDING && current.status != Stage.BROKERFAIL) {
                         Stage next = new Stage();
-                        next.app = stream.app;
-                        next.apphost = stream.appHost;
+                        next.topic = stream.topic;
+                        next.sourceIdentify = stream.sourceIdentify;
                         next.brokerhost = current.brokerhost;
                         next.cleanstart = true;
                         next.rollTs = current.rollTs + stream.period * 1000;
@@ -1155,20 +1204,24 @@ public class Supervisor {
         }
     }
 
-    private String doUpload(Stream stream, Stage current, SimpleConnection from) {
-        Message message = PBwrap.wrapUploadRoll(current.app, current.apphost, stream.period, current.rollTs);
+    private String doUpload(Stream stream, Stage current, SimpleConnection from, boolean isFinal) {
+        Message message = PBwrap.wrapUploadRoll(current.topic, current.sourceIdentify, stream.period, current.rollTs, isFinal);
         send(from, message);
         stageConnectionMap.put(current, from);
         return from.getHost();
     }
-
+    
+    private String doUpload(Stream stream, Stage current, SimpleConnection from) {
+        return doUpload(stream, current, from, false);
+    }
+    
     /*
      * do recovery of one stage of a stream
      * if the stream is not active or no broker now,
      * mark the stream as pending
      * else send recovery message
      */
-    private String doRecovery(Stream stream, Stage stage) {
+    private String doRecovery(Stream stream, Stage stage, boolean isFinal) {
         String broker = null;
         broker = getBroker();   
 
@@ -1176,13 +1229,20 @@ public class Supervisor {
             stage.status = Stage.PENDING;
             stageConnectionMap.remove(stage);
         } else {
-            SimpleConnection c = agentsMapping.get(stream.appHost);
+            SimpleConnection c = agentsMapping.get(stream.sourceIdentify);
             if (c == null) {
-                LOG.error("can not find connection by host: " + stream.appHost);
+                LOG.error("can not find connection by host: " + stream.sourceIdentify);
                 return null;
             }
             
-            Message message = PBwrap.wrapRecoveryRoll(stream.app, broker, getRecoveryPort(broker), stage.rollTs);
+            Message message = PBwrap.wrapRecoveryRoll(
+                        stream.topic,
+                        broker,
+                        getRecoveryPort(broker),
+                        stage.rollTs,
+                        Util.getInstanceIdFromSourceIdentify(stream.sourceIdentify),
+                        isFinal
+                );
             send(c, message);
             
             stage.status = Stage.RECOVERYING;
@@ -1198,15 +1258,19 @@ public class Supervisor {
         return broker;
     }
     
+    private String doRecovery(Stream stream, Stage stage) {
+        return doRecovery(stream, stage, false);
+    }
+    
     /*
      * record the stream if it is a new stream;
      * do recovery if it is a old stream
      */
-    private void registerStream(ReadyBroker message, SimpleConnection from) {
+    private void handleReadyStream(ReadyBroker message, SimpleConnection from) {
         long connectedTs = message.getConnectedTs();
         long currentTs = Util.getCurrentRollTs(connectedTs, message.getPeriod());
         
-        StreamId id = new StreamId(message.getAppName(), message.getAppServer());
+        StreamId id = new StreamId(message.getTopic(), message.getSourceIdentify());
         Stream stream = streamIdMap.get(id);
         String brokerHost = message.getBrokerServer();
         
@@ -1214,8 +1278,8 @@ public class Supervisor {
         if (stream == null) {
             // record new stream
             stream = new Stream();
-            stream.app = message.getAppName();
-            stream.appHost = message.getAppServer();
+            stream.topic = message.getTopic();
+            stream.sourceIdentify = message.getSourceIdentify();
             stream.setBrokerHost(message.getBrokerServer());
             stream.startTs = connectedTs;
             stream.period = message.getPeriod();
@@ -1223,8 +1287,8 @@ public class Supervisor {
             
             ArrayList<Stage> stages = new ArrayList<Stage>();
             Stage current = new Stage();
-            current.app = stream.app;
-            current.apphost = stream.appHost;
+            current.topic = stream.topic;
+            current.sourceIdentify = stream.sourceIdentify;
             current.brokerhost = message.getBrokerServer();
             current.cleanstart = false;
             current.issuelist = new ArrayList<Issue>();
@@ -1254,14 +1318,14 @@ public class Supervisor {
             }
         }
         
-        // register connection with appNode and broker
+        // register connection with agent and broker
         recordConnectionStreamMapping(from, stream);
-        SimpleConnection appConnection = agentsMapping.get(stream.appHost);
-        recordConnectionStreamMapping(appConnection, stream);
+        SimpleConnection agentConnection = agentsMapping.get(stream.sourceIdentify);
+        recordConnectionStreamMapping(agentConnection, stream);
         
         // process partition affairs
-        String topic = message.getAppName();
-        String partitionId = message.getAppServer();
+        String topic = message.getTopic();
+        String partitionId = message.getSourceIdentify();
         
         ConcurrentHashMap<String, PartitionInfo> partitionInfos = topics.get(topic);
         if (partitionInfos == null) {
@@ -1396,8 +1460,8 @@ public class Supervisor {
         ArrayList<Stage> missedStages = new ArrayList<Stage>();
         for (int i = 0; i< missedStageCount; i++) {
             Stage stage = new Stage();
-            stage.app = stream.app;
-            stage.apphost = stream.appHost;
+            stage.topic = stream.topic;
+            stage.sourceIdentify = stream.sourceIdentify;
             if (i == missedStageCount-1) {
                 stage.isCurrent = true;
             } else {
@@ -1413,37 +1477,38 @@ public class Supervisor {
     }
     
     /*
-     * 1. recored the connection in appNodes
-     * 2. assign a broker to the app
+     * 1. recored the connection in agent
+     * 2. assign a broker to the topic
      */
-    private void registerApp(Message m, SimpleConnection from) {
+    private void handleTopicReg(Message m, SimpleConnection from) {
         ConnectionDescription desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
             return;
         }
         desc.setType(ConnectionDescription.AGENT);
-        LOG.info("AppNode " + from.getHost() + " registered");
-        agentsMapping.put(from.getHost(), from);
+        agentsMapping.putIfAbsent(from.getHost(), from);
         AppReg message = m.getAppReg();
-        assignBroker(message.getAppName(), from);
+        String sourceIdentify = message.getSourceIdentify();
+        LOG.info("Topic " + message.getTopic() + " registered from " + sourceIdentify);
+        assignBroker(message.getTopic(), from, Util.getInstanceIdFromSourceIdentify(sourceIdentify));
     }
 
-    private String assignBroker(String app, SimpleConnection from) {
+    private String assignBroker(String topic, SimpleConnection from, String instanceId) {
         String broker = getBroker();
         
         Message message;
         if (broker != null) {
-            message = PBwrap.wrapAssignBroker(app, broker, getBrokerPort(broker));
+            message = PBwrap.wrapAssignBroker(topic, broker, getBrokerPort(broker), instanceId);
         } else {
-            message = PBwrap.wrapNoAvailableNode(app);
+            message = PBwrap.wrapNoAvailableNode(topic, instanceId);
         }
 
         send(from, message);
         return broker;
     }
     
-    private void registerBroker(BrokerReg brokerReg, SimpleConnection from) {
+    private void handleBrokerReg(BrokerReg brokerReg, SimpleConnection from) {
         ConnectionDescription desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
@@ -1468,7 +1533,35 @@ public class Supervisor {
         String broker = array.get(random.nextInt(array.size()));
         return broker;
     }
-    
+
+    public void handleRollClean(RollClean rollClean, SimpleConnection from) {
+        boolean isLastTime = true;
+        StreamId id = new StreamId(rollClean.getTopic(), rollClean.getSourceIdentify());
+        Stream stream = streamIdMap.get(id);
+        if (stream != null) {
+            ArrayList<Stage> stages = Streams.get(stream);
+            if (stages != null && stages.size() != 0) {
+                synchronized (stages) {
+                    Stage current = stages.get(stages.size() - 1);
+                    if (current.cleanstart == false || current.issuelist.size() != 0) {
+                        current.isCurrent = false;
+                        doRecovery(stream, current, isLastTime);
+                    } else {
+                        if (current.status != Stage.UPLOADING) {
+                            current.status = Stage.UPLOADING;
+                            current.isCurrent = false;
+                            doUpload(stream, current, from, isLastTime);
+                        }
+                    }
+                }
+            } else {
+                LOG.info("no stages of stream: " + stream + ", clean it up.");
+            }
+        } else {
+            LOG.info("stream: " + id + " has been clean up.");
+            //TODO remove it
+        }
+    }
     
     public class SupervisorExecutor implements EntityProcessor<ByteBuffer, SimpleConnection> {
 
@@ -1504,11 +1597,11 @@ public class Supervisor {
                 break;
             case BROKER_REG:
                 LOG.debug("received: " + msg);
-                registerBroker(msg.getBrokerReg(), from);
+                handleBrokerReg(msg.getBrokerReg(), from);
                 break;
             case APP_REG:
                 LOG.debug("received: " + msg);
-                registerApp(msg, from);
+                handleTopicReg(msg, from);
                 break;
             case CONSUMER_REG:
                 LOG.debug("received: " + msg);
@@ -1516,7 +1609,7 @@ public class Supervisor {
                 break;
             case READY_BROKER:
                 LOG.debug("received: " + msg);
-                registerStream(msg.getReadyBroker(), from);
+                handleReadyStream(msg.getReadyBroker(), from);
                 break;
             case APP_ROLL:
                 LOG.debug("received: " + msg);
@@ -1562,25 +1655,28 @@ public class Supervisor {
                 handleRetireStream(msg.getStreamId());
                 break;
             case CONF_REQ:
-                findConfs(from);
+                handleConfReq(from);
                 break;
             case DUMPCONF:
                 dumpconf(from);
                 break;
             case LISTAPPS:
-                listApps(from);
+                listTopics(from);
                 break;
             case REMOVE_CONF:
                 removeConf(msg.getRemoveConf(), from);
                 break;
             case DUMP_APP:
-                dumpapp(msg.getDumpApp(), from);
+                dumpTopic(msg.getDumpApp(), from);
                 break;
             case LISTIDLE:
                 listIdle(from);
                 break;
             case RESTART:
                 sendRestart(msg.getRestart());
+                break;
+            case ROLL_CLEAN:
+                handleRollClean(msg.getRollClean(), from);
                 break;
             case DUMP_CONSUMER_GROUP:
                 dumpConsumerGroup(msg.getDumpConsumerGroup(), from);
@@ -1626,36 +1722,33 @@ public class Supervisor {
     }
        
     private void init() throws IOException, LionException {
-        Properties prop = new Properties();
-        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
-
         connectionStreamMap = new ConcurrentHashMap<SimpleConnection, ArrayList<Stream>>();
         stageConnectionMap = new ConcurrentHashMap<Stage, SimpleConnection>();
 
         Streams = new ConcurrentHashMap<Stream, ArrayList<Stage>>();
         streamIdMap = new ConcurrentHashMap<StreamId, Stream>();
-
-        //initLion(or initZooKeeper)
-        connectAppConfKeeper(prop);
-        
-        //initWebService
-        int webServicePort = Integer.parseInt(prop.getProperty("supervisor.webservice.port"));
-        int connectionTimeout = Integer.parseInt(prop.getProperty("supervisor.webservice.connectionTimeout", "30000"));
-        int socketTimeout = Integer.parseInt(prop.getProperty("supervisor.webservice.socketTimeout", "10000"));
-        RequestListener httpService = new RequestListener(
-                webServicePort, 
-                lionConfChange,
-                new HttpClientSingle(connectionTimeout, socketTimeout)
-        );
-        httpService.setDaemon(true);
-        httpService.start();
-        
         topics = new ConcurrentHashMap<String, ConcurrentHashMap<String,PartitionInfo>>();
         consumerGroups = new ConcurrentHashMap<ConsumerGroup, ConsumerGroupDesc>();
         
         connections = new ConcurrentHashMap<SimpleConnection, ConnectionDescription>();
         agentsMapping = new ConcurrentHashMap<String, SimpleConnection>();
         brokersMapping = new ConcurrentHashMap<String, SimpleConnection>();
+        
+        //initConfManager(or lion/zookeeper)
+        configManager = new ConfigManager(this);
+        configManager.initConfig();
+        
+        //initWebService
+        RequestListener httpService = new RequestListener(
+                configManager.webServicePort, 
+                configManager,
+                new HttpClientSingle(configManager.connectionTimeout, configManager.socketTimeout)
+        );
+        httpService.setDaemon(true);
+        httpService.start();
+        
+        //create a http client for PaaS
+        paasQuery = new HttpClientSingle(configManager.connectionTimeout, configManager.socketTimeout);
         
         // start heart beat checker thread
         LiveChecker checker = new LiveChecker();
@@ -1667,48 +1760,134 @@ public class Supervisor {
         server = new GenServer<ByteBuffer, SimpleConnection, EntityProcessor<ByteBuffer, SimpleConnection>>
             (executor, factory, null);
 
-        server.init(prop, "supervisor", "supervisor.port");
+        server.init("supervisor", configManager.supervisorPort, configManager.numHandler);
     }
 
-    private void connectAppConfKeeper(Properties prop) throws IOException, LionException {
-        ConfigCache configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-        int apiId = Integer.parseInt(prop.getProperty("supervisor.lionapi.id"));
-        lionConfChange = new LionConfChange(configCache, apiId);
-        lionConfChange.initLion();
-    }
-    
-    public void findConfs(SimpleConnection from) {
+    public void handleConfReq(SimpleConnection from) {
         Message message;
-        Set<String> appNamesInOneHost;
-        if ((appNamesInOneHost = lionConfChange.getAppNamesByHost(from.getHost())) == null) {
+        List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
+        Set<String> topics = configManager.getTopicsByHost(from.getHost());
+        if (topics == null || topics.size() == 0) {
+            LOG.info("There is no blackhole topic for " + from.getHost());
             message = PBwrap.wrapNoAvailableConf();
             send(from, message);
             return;
         }
-        List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
-        for (String appName : appNamesInOneHost) {
-            Context context = ConfigKeeper.configMap.get(appName);
+        for (String topic : topics) {
+            Context context = ConfigKeeper.configMap.get(topic);
             if (context == null) {
-                LOG.error("Can not get app: " + appName + " from configMap");
+                LOG.error("Can not get topic: " + topic + " from configMap");
                 message = PBwrap.wrapNoAvailableConf();
                 send(from, message);
                 return;
             }
-            String watchFile = context.getString(ParamsKey.Appconf.WATCH_FILE);
+            String period = context.getString(ParamsKey.TopicConf.ROLL_PERIOD);
+            String maxLineSize = context.getString(ParamsKey.TopicConf.MAX_LINE_SIZE);
+            String watchFile = context.getString(ParamsKey.TopicConf.WATCH_FILE);
             if (watchFile == null) {
                 message = PBwrap.wrapNoAvailableConf();
                 send(from, message);
                 return;
             }
-            String period = context.getString(ParamsKey.Appconf.ROLL_PERIOD);
-            String maxLineSize = context.getString(ParamsKey.Appconf.MAX_LINE_SIZE);
-            AppConfRes appConfRes = PBwrap.wrapAppConfRes(appName, watchFile, period, maxLineSize);
+            AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile, period, maxLineSize);
             appConfResList.add(appConfRes);
         }
-        message = PBwrap.wrapConfRes(appConfResList);
-        send(from, message);  
+        message = PBwrap.wrapConfRes(appConfResList, null);
+        send(from, message);
+    }
+
+    public void handleImportNewTopic(String topic) {
+        // TODO Auto-generated method stub
+        String cmdbApp = configManager.getCmdbAppByTopic(topic);
+        if (cmdbApp == null) {
+            LOG.error("Oops, no cmdb app assign to topic " + topic);
+            return;
+        }
+        List<String> cmdbApps = new ArrayList<String>();
+        cmdbApps.add(cmdbApp);
+        try {
+            Map<String, List<String>> hostToInstances = findInstancesByCmdbApps(cmdbApps);
+            triggerConfRes(topic, hostToInstances);
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     
+    private Map<String, List<String>> findInstancesByCmdbApps(
+            List<String> cmdbApps) throws UnsupportedEncodingException {
+        Map<String, List<String>> hostToInstances = new HashMap<String, List<String>>();
+        if (cmdbApps.size() == 0) {
+            return hostToInstances;
+        }
+        //HTTP get the json
+        StringBuilder catalogURLBuild = new StringBuilder();
+        catalogURLBuild.append(configManager.getPaaSInstanceURLPerfix);
+        for (String app : cmdbApps) {
+            catalogURLBuild.append(app).append(",");
+        }
+        catalogURLBuild.deleteCharAt(catalogURLBuild.length() - 1);
+        String response = paasQuery.getResponseText(catalogURLBuild.toString());
+        if (response == null) {
+            //TODO check
+        }
+        String jsonStr = java.net.URLDecoder.decode(response, "utf-8");
+        JSONObject rootObject = new JSONObject(jsonStr);
+        JSONArray catalogArray = rootObject.getJSONArray("catalog");
+        for (int i = 0; i < catalogArray.length(); i++) {
+            JSONObject layoutObject = catalogArray.getJSONObject(i);
+            String app = (String)layoutObject.get("app");
+            JSONArray layoutArray = layoutObject.getJSONArray("layout");
+            for (int j = 0; j < layoutArray.length(); j++) {
+                JSONObject hostIdObject = layoutArray.getJSONObject(j);
+                String ip = (String) hostIdObject.get("ip");
+                InetAddress host;
+                try {
+                    host = InetAddress.getByName(ip);
+                } catch (UnknownHostException e) {
+                    LOG.error("Receive a unknown host " + ip, e);
+                    continue;
+                }
+                String agentHost = host.getHostName();
+                List<String> instances;
+                if ((instances = hostToInstances.get(agentHost)) == null) {
+                    instances = new ArrayList<String>();
+                    hostToInstances.put(agentHost, instances);
+                }
+                JSONArray idArray = hostIdObject.getJSONArray("id");
+                for (int k = 0; k < idArray.length(); k++) {
+                    LOG.debug("PaaS catalog app: " + app + ", ip: " + ip + ", id: " + idArray.getString(k));
+                    instances.add(idArray.getString(k));
+                }
+            }
+        }
+        return hostToInstances;
+    }
+
+    private void triggerConfRes(String topic, Map<String, List<String>> hostToInstances) {
+        Message message;
+        for (Map.Entry<String, List<String>> entry : hostToInstances.entrySet()) {
+            SimpleConnection agent = getConnectionByHostname(entry.getKey());
+            if (agent == null) {
+                LOG.info("Can not find any agents connected by " + entry.getKey());
+                continue;
+            }
+            Context context = ConfigKeeper.configMap.get(topic);
+            if (context == null) {
+                LOG.error("Can not get topic: " + topic + " from configMap");
+                continue;
+            }
+            String period = context.getString(ParamsKey.TopicConf.ROLL_PERIOD);
+            String maxLineSize = context.getString(ParamsKey.TopicConf.MAX_LINE_SIZE);
+            String watchFile = context.getString(ParamsKey.TopicConf.WATCH_FILE);
+            LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, period, maxLineSize, entry.getValue());
+            List<LxcConfRes> lxcConfResList = new ArrayList<LxcConfRes>();
+            lxcConfResList.add(lxcConfRes);
+            message = PBwrap.wrapConfRes(null, lxcConfResList);
+            send(agent, message);
+        }
+    }
+
     private int getBrokerPort(String host) {
         SimpleConnection connection = brokersMapping.get(host);
         if (connection == null) {
@@ -1739,6 +1918,22 @@ public class Supervisor {
         List<NodeDesc> nodeDescs = desc.getAttachments();
         BrokerDesc brokerDesc = (BrokerDesc) nodeDescs.get(0);
         return brokerDesc.getRecoveryPort();
+    }
+    
+    /**
+     * Attention, this method is not fast, it will traverse all map elements
+     * @param hostname
+     * @return
+     */
+    public SimpleConnection getConnectionByHostname(String hostname) {
+        synchronized (connections) {
+            for (SimpleConnection simpleConnection : connections.keySet()) {
+                if (simpleConnection.getHost().equals(hostname)) {
+                    return simpleConnection;
+                }
+            }
+        }
+        return null;
     }
     
     /**

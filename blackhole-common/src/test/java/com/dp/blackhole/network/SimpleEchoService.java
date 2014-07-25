@@ -11,7 +11,6 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
-import java.util.Properties;
 
 import org.junit.Test;
 
@@ -42,9 +41,7 @@ public class SimpleEchoService {
         public void startService() throws IOException {
             GenServer<ByteBuffer, SimpleConnection, echoProcessor> server = 
                     new GenServer(new echoProcessor(), new SimpleConnection.SimpleConnectionFactory(), null);
-            Properties prop = new Properties();
-            prop.setProperty("GenServer.port", "2223");
-            server.init(prop, "echo", "GenServer.port");
+            server.init("echo", 2223, 1);
         }
         
         @Override

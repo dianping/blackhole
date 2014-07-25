@@ -65,7 +65,22 @@ public class RollManager {
         RollIdent ident = getRollIdent(app, source, period);
         if (rolls.get(ident) == null) {
             rolls.put(ident, roll);
-            Message message = PBwrap.wrapAppRoll(ident.app, ident.source, ident.period, ident.ts);
+            Message message = PBwrap.wrapAppRoll(ident.topic, ident.sourceIdentify, ident.period, ident.ts);
+            Broker.getSupervisor().send(message);
+            ret = true;
+        } else {
+            LOG.fatal("register a exists roll: " + ident);
+            ret =false;
+        }
+        return ret;
+    }
+    
+    public boolean doClean(String app, String source, long period, RollPartition roll) {
+        boolean ret;
+        RollIdent ident = getRollIdent(app, source, period);
+        if (rolls.get(ident) == null) {
+            rolls.put(ident, roll);
+            Message message = PBwrap.wrapRollClean(ident.topic, ident.sourceIdentify, ident.period);
             Broker.getSupervisor().send(message);
             ret = true;
         } else {
@@ -77,10 +92,11 @@ public class RollManager {
     
     public boolean doUpload(RollID rollID) {
         RollIdent ident = new RollIdent();
-        ident.app = rollID.getAppName();
-        ident.source = rollID.getAppServer();
+        ident.topic = rollID.getTopic();
+        ident.sourceIdentify = rollID.getSourceIdentify();
         ident.period = rollID.getPeriod();
         ident.ts = rollID.getRollTs();
+        ident.isFinal = rollID.getIsFinal();
         
         RollPartition roll = rolls.get(ident);
         
@@ -96,10 +112,10 @@ public class RollManager {
         uploadPool.execute(upload);
         //start a ftp uploader which need uploading to work with HDFS in parallel.
         FTPConfigration ftpConf;
-        if ((ftpConf = FTPConfigrationLoader.getFTPConfigration(ident.app)) != null) {
+        if ((ftpConf = FTPConfigrationLoader.getFTPConfigration(ident.topic)) != null) {
             Partition p;
             try {
-                p = manager.getPartition(ident.app, ident.source, false);
+                p = manager.getPartition(ident.topic, ident.sourceIdentify, false);
                 LOG.info("start to ftp " + ident);
                 FTPUpload ftpUpload = new FTPUpload(this, ftpConf, ident, roll, p);
                 Thread ftpThread = new Thread(ftpUpload);
@@ -113,8 +129,8 @@ public class RollManager {
 
     public void markUnrecoverable(RollID rollID) {
         RollIdent ident = new RollIdent();
-        ident.app = rollID.getAppName();
-        ident.source = rollID.getAppServer();
+        ident.topic = rollID.getTopic();
+        ident.sourceIdentify = rollID.getSourceIdentify();
         ident.period = rollID.getPeriod();
         ident.ts = rollID.getRollTs();
         
@@ -126,8 +142,8 @@ public class RollManager {
     private RollIdent getRollIdent(String app, String source, long period) {
         Date time = new Date(Util.getLatestRotateRollTsUnderTimeBuf(Util.getTS(), period, clockSyncBufMillis));
         RollIdent roll = new RollIdent();
-        roll.app = app;
-        roll.source = source;
+        roll.topic = app;
+        roll.sourceIdentify = source;
         roll.period = period;
         roll.ts = time.getTime();
         return roll;
@@ -150,7 +166,7 @@ public class RollManager {
         format = Util.getFormatFromPeroid(ident.period);
         Date roll = new Date(ident.ts);
         SimpleDateFormat dm = new SimpleDateFormat(format);
-        return baseDir + "/" + ident.app + '/' + getDatepathbyFormat(dm.format(roll));
+        return baseDir + "/" + ident.topic + '/' + getDatepathbyFormat(dm.format(roll));
     }
     
     /*
@@ -162,9 +178,9 @@ public class RollManager {
         Date roll = new Date(ident.ts);
         SimpleDateFormat dm = new SimpleDateFormat(format);
         if (hidden) {
-            return "_" + ident.source + '@' + ident.app + "_" + dm.format(roll);
+            return "_" + ident.sourceIdentify + '@' + ident.topic + "_" + dm.format(roll);
         } else {
-            return ident.source + '@' + ident.app + "_" + dm.format(roll);
+            return ident.sourceIdentify + '@' + ident.topic + "_" + dm.format(roll);
         }
     }
     
@@ -187,9 +203,9 @@ public class RollManager {
     public void reportRecovery(RollIdent ident, boolean recoverySuccess) {
         Message message;
         if (recoverySuccess == true) {
-            message = PBwrap.wrapRecoverySuccess(ident.app, ident.source, ident.period, ident.ts);
+            message = PBwrap.wrapRecoverySuccess(ident.topic, ident.sourceIdentify, ident.period, ident.ts, ident.isFinal);
         } else {
-            message = PBwrap.wrapRecoveryFail(ident.app, ident.source, ident.period, ident.ts);
+            message = PBwrap.wrapRecoveryFail(ident.topic, ident.sourceIdentify, ident.period, ident.ts, ident.isFinal);
         }
         Broker.getSupervisor().send(message);
     }
@@ -198,10 +214,10 @@ public class RollManager {
         rolls.remove(ident);
         
         if (uploadSuccess == true) {
-            Message message = PBwrap.wrapUploadSuccess(ident.app, ident.source, ident.period, ident.ts);
+            Message message = PBwrap.wrapUploadSuccess(ident.topic, ident.sourceIdentify, ident.period, ident.ts, ident.isFinal);
             Broker.getSupervisor().send(message);
         } else {
-            Message message = PBwrap.wrapUploadFail(ident.app, ident.source, ident.period, ident.ts);
+            Message message = PBwrap.wrapUploadFail(ident.topic, ident.sourceIdentify, ident.period, ident.ts, ident.isFinal);
             Broker.getSupervisor().send(message);
         }
     }
@@ -256,10 +272,14 @@ public class RollManager {
                     protocol.recieveHead(in, head);
                         
                     RollIdent roll = new RollIdent();
-                    roll.app = head.app;
-                    roll.source = Util.getRemoteHost(socket);
+                    roll.topic = head.app;
+                    roll.sourceIdentify = Util.getRemoteHost(socket);
+                    if (head.instanceId != null) {
+                        roll.sourceIdentify += "#" + head.instanceId;
+                    }
                     roll.period = head.peroid;
                     roll.ts = head.ts;
+                    roll.isFinal = head.isFinal;
                     
                     LOG.info("start to recovery roll " + roll);
                     

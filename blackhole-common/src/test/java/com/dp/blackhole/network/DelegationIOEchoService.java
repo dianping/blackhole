@@ -83,11 +83,8 @@ public class DelegationIOEchoService {
                     new echoProcessor(),
                     new DelegationIOConnection.DelegationIOConnectionFactory(),
                     new wappedObjectType());
-            Properties prop = new Properties();
-            prop.setProperty("GenServer.handler.count", "1");
-            prop.setProperty("GenServer.port", "2222");
             try {
-                server.init(prop, "echo", "GenServer.port");
+                server.init("echo", 2222, 1);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

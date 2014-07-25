@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.dp.blackhole.common.Util;
 
 public class Stream {
-    String app;
-    String appHost;
+    String topic;
+    String sourceIdentify;
     private String brokerHost;
     long period;
     long startTs;
@@ -55,8 +55,8 @@ public class Stream {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((app == null) ? 0 : app.hashCode());
-        result = prime * result + ((appHost == null) ? 0 : appHost.hashCode());
+        result = prime * result + ((topic == null) ? 0 : topic.hashCode());
+        result = prime * result + ((sourceIdentify == null) ? 0 : sourceIdentify.hashCode());
         result = prime * result + (int) (period ^ (period >>> 32));
         result = prime * result + (int) (startTs ^ (startTs >>> 32));
         return result;
@@ -70,15 +70,15 @@ public class Stream {
         if (getClass() != obj.getClass())
             return false;
         Stream other = (Stream) obj;
-        if (app == null) {
-            if (other.app != null)
+        if (topic == null) {
+            if (other.topic != null)
                 return false;
-        } else if (!app.equals(other.app))
+        } else if (!topic.equals(other.topic))
             return false;
-        if (appHost == null) {
-            if (other.appHost != null)
+        if (sourceIdentify == null) {
+            if (other.sourceIdentify != null)
                 return false;
-        } else if (!appHost.equals(other.appHost))
+        } else if (!sourceIdentify.equals(other.sourceIdentify))
             return false;
         if (period != other.period)
             return false;
@@ -89,6 +89,6 @@ public class Stream {
     
     @Override
     public String toString() {
-        return app+"@"+appHost+",period:" + period+ ",starttime:"+Util.formatTs(startTs)+",lastSuccessTs:"+lastSuccessTs.get()+",isActive:"+isActive();
+        return topic+"@"+sourceIdentify+",period:" + period+ ",starttime:"+Util.formatTs(startTs)+",lastSuccessTs:"+lastSuccessTs.get()+",isActive:"+isActive();
     } 
 }

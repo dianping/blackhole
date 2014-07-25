@@ -2,11 +2,11 @@ package com.dp.blackhole.supervisor;
 
 public class StreamId {
     private String app;
-    private String appHost;
+    private String sourceIdentify;
     
-    public StreamId(String app, String appHost) {
+    public StreamId(String app, String sourceIdentify) {
         this.app = app;
-        this.appHost = appHost;
+        this.sourceIdentify = sourceIdentify;
     }
 
     @Override
@@ -14,7 +14,7 @@ public class StreamId {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((app == null) ? 0 : app.hashCode());
-        result = prime * result + ((appHost == null) ? 0 : appHost.hashCode());
+        result = prime * result + ((sourceIdentify == null) ? 0 : sourceIdentify.hashCode());
         return result;
     }
 
@@ -32,17 +32,17 @@ public class StreamId {
                 return false;
         } else if (!app.equals(other.app))
             return false;
-        if (appHost == null) {
-            if (other.appHost != null)
+        if (sourceIdentify == null) {
+            if (other.sourceIdentify != null)
                 return false;
-        } else if (!appHost.equals(other.appHost))
+        } else if (!sourceIdentify.equals(other.sourceIdentify))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return app + "@" + appHost;
+        return app + "@" + sourceIdentify;
     }
     
     public boolean belongTo(String appName) {

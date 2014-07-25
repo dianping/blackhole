@@ -9,7 +9,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -216,14 +215,12 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
        
-    public void init(Properties prop, String name, String servicePort) throws IOException {
-        handlerCount = Integer.parseInt(prop.getProperty("GenServer.handler.count", "3"));
-        int port = Integer.parseInt(prop.getProperty(servicePort));
-        
+    public void init(String name, int servicePort, int numHandler) throws IOException {
+        handlerCount = numHandler;
         serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.configureBlocking(false);
         ServerSocket ss = serverSocketChannel.socket();
-        ss.bind(new InetSocketAddress(port));
+        ss.bind(new InetSocketAddress(servicePort));
         selector = Selector.open();
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
         
@@ -235,7 +232,7 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
             handler.start();
         }
         
-        LOG.info("GenServer " + name + " started at port:" + port);
+        LOG.info("GenServer " + name + " started at port:" + servicePort);
         
         loop();
     }
