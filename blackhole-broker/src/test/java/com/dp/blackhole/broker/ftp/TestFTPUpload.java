@@ -109,9 +109,9 @@ public class TestFTPUpload {
     
     public RollIdent getRollIdent(String appName) {
         RollIdent rollIdent = new RollIdent();
-        rollIdent.app = appName;
+        rollIdent.topic = appName;
         rollIdent.period = 3600;
-        rollIdent.source = SimBroker.HOSTNAME;
+        rollIdent.sourceIdentify = SimBroker.HOSTNAME;
         rollIdent.ts = SimBroker.rollTS;
         return rollIdent;
     }

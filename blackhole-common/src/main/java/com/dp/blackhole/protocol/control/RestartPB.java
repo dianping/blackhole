@@ -35,16 +35,16 @@ public final class RestartPB {
       return com.dp.blackhole.protocol.control.RestartPB.internal_static_blackhole_Restart_fieldAccessorTable;
     }
     
-    // repeated string app_servers = 1;
-    public static final int APP_SERVERS_FIELD_NUMBER = 1;
-    private java.util.List<java.lang.String> appServers_ =
+    // repeated string agent_servers = 1;
+    public static final int AGENT_SERVERS_FIELD_NUMBER = 1;
+    private java.util.List<java.lang.String> agentServers_ =
       java.util.Collections.emptyList();
-    public java.util.List<java.lang.String> getAppServersList() {
-      return appServers_;
+    public java.util.List<java.lang.String> getAgentServersList() {
+      return agentServers_;
     }
-    public int getAppServersCount() { return appServers_.size(); }
-    public java.lang.String getAppServers(int index) {
-      return appServers_.get(index);
+    public int getAgentServersCount() { return agentServers_.size(); }
+    public java.lang.String getAgentServers(int index) {
+      return agentServers_.get(index);
     }
     
     private void initFields() {
@@ -56,7 +56,7 @@ public final class RestartPB {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (java.lang.String element : getAppServersList()) {
+      for (java.lang.String element : getAgentServersList()) {
         output.writeString(1, element);
       }
       getUnknownFields().writeTo(output);
@@ -70,12 +70,12 @@ public final class RestartPB {
       size = 0;
       {
         int dataSize = 0;
-        for (java.lang.String element : getAppServersList()) {
+        for (java.lang.String element : getAgentServersList()) {
           dataSize += com.google.protobuf.CodedOutputStream
             .computeStringSizeNoTag(element);
         }
         size += dataSize;
-        size += 1 * getAppServersList().size();
+        size += 1 * getAgentServersList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -219,9 +219,9 @@ public final class RestartPB {
           throw new IllegalStateException(
             "build() has already been called on this Builder.");
         }
-        if (result.appServers_ != java.util.Collections.EMPTY_LIST) {
-          result.appServers_ =
-            java.util.Collections.unmodifiableList(result.appServers_);
+        if (result.agentServers_ != java.util.Collections.EMPTY_LIST) {
+          result.agentServers_ =
+            java.util.Collections.unmodifiableList(result.agentServers_);
         }
         com.dp.blackhole.protocol.control.RestartPB.Restart returnMe = result;
         result = null;
@@ -239,11 +239,11 @@ public final class RestartPB {
       
       public Builder mergeFrom(com.dp.blackhole.protocol.control.RestartPB.Restart other) {
         if (other == com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance()) return this;
-        if (!other.appServers_.isEmpty()) {
-          if (result.appServers_.isEmpty()) {
-            result.appServers_ = new java.util.ArrayList<java.lang.String>();
+        if (!other.agentServers_.isEmpty()) {
+          if (result.agentServers_.isEmpty()) {
+            result.agentServers_ = new java.util.ArrayList<java.lang.String>();
           }
-          result.appServers_.addAll(other.appServers_);
+          result.agentServers_.addAll(other.agentServers_);
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -271,7 +271,7 @@ public final class RestartPB {
               break;
             }
             case 10: {
-              addAppServers(input.readString());
+              addAgentServers(input.readString());
               break;
             }
           }
@@ -279,43 +279,43 @@ public final class RestartPB {
       }
       
       
-      // repeated string app_servers = 1;
-      public java.util.List<java.lang.String> getAppServersList() {
-        return java.util.Collections.unmodifiableList(result.appServers_);
+      // repeated string agent_servers = 1;
+      public java.util.List<java.lang.String> getAgentServersList() {
+        return java.util.Collections.unmodifiableList(result.agentServers_);
       }
-      public int getAppServersCount() {
-        return result.getAppServersCount();
+      public int getAgentServersCount() {
+        return result.getAgentServersCount();
       }
-      public java.lang.String getAppServers(int index) {
-        return result.getAppServers(index);
+      public java.lang.String getAgentServers(int index) {
+        return result.getAgentServers(index);
       }
-      public Builder setAppServers(int index, java.lang.String value) {
+      public Builder setAgentServers(int index, java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.appServers_.set(index, value);
+  result.agentServers_.set(index, value);
         return this;
       }
-      public Builder addAppServers(java.lang.String value) {
+      public Builder addAgentServers(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  if (result.appServers_.isEmpty()) {
-          result.appServers_ = new java.util.ArrayList<java.lang.String>();
+  if (result.agentServers_.isEmpty()) {
+          result.agentServers_ = new java.util.ArrayList<java.lang.String>();
         }
-        result.appServers_.add(value);
+        result.agentServers_.add(value);
         return this;
       }
-      public Builder addAllAppServers(
+      public Builder addAllAgentServers(
           java.lang.Iterable<? extends java.lang.String> values) {
-        if (result.appServers_.isEmpty()) {
-          result.appServers_ = new java.util.ArrayList<java.lang.String>();
+        if (result.agentServers_.isEmpty()) {
+          result.agentServers_ = new java.util.ArrayList<java.lang.String>();
         }
-        super.addAll(values, result.appServers_);
+        super.addAll(values, result.agentServers_);
         return this;
       }
-      public Builder clearAppServers() {
-        result.appServers_ = java.util.Collections.emptyList();
+      public Builder clearAgentServers() {
+        result.agentServers_ = java.util.Collections.emptyList();
         return this;
       }
       
@@ -345,9 +345,9 @@ public final class RestartPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rRestart.proto\022\tblackhole\"\036\n\007Restart\022\023\n" +
-      "\013app_servers\030\001 \003(\tB.\n!com.dp.blackhole.p" +
-      "rotocol.controlB\tRestartPB"
+      "\n\rRestart.proto\022\tblackhole\" \n\007Restart\022\025\n" +
+      "\ragent_servers\030\001 \003(\tB.\n!com.dp.blackhole" +
+      ".protocol.controlB\tRestartPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -359,7 +359,7 @@ public final class RestartPB {
           internal_static_blackhole_Restart_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Restart_descriptor,
-              new java.lang.String[] { "AppServers", },
+              new java.lang.String[] { "AgentServers", },
               com.dp.blackhole.protocol.control.RestartPB.Restart.class,
               com.dp.blackhole.protocol.control.RestartPB.Restart.Builder.class);
           return null;

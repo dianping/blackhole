@@ -35,19 +35,19 @@ public final class RollIDPB {
       return com.dp.blackhole.protocol.control.RollIDPB.internal_static_blackhole_RollID_fieldAccessorTable;
     }
     
-    // required string app_name = 1;
-    public static final int APP_NAME_FIELD_NUMBER = 1;
-    private boolean hasAppName;
-    private java.lang.String appName_ = "";
-    public boolean hasAppName() { return hasAppName; }
-    public java.lang.String getAppName() { return appName_; }
+    // required string topic = 1;
+    public static final int TOPIC_FIELD_NUMBER = 1;
+    private boolean hasTopic;
+    private java.lang.String topic_ = "";
+    public boolean hasTopic() { return hasTopic; }
+    public java.lang.String getTopic() { return topic_; }
     
-    // required string app_server = 2;
-    public static final int APP_SERVER_FIELD_NUMBER = 2;
-    private boolean hasAppServer;
-    private java.lang.String appServer_ = "";
-    public boolean hasAppServer() { return hasAppServer; }
-    public java.lang.String getAppServer() { return appServer_; }
+    // required string source_identify = 2;
+    public static final int SOURCE_IDENTIFY_FIELD_NUMBER = 2;
+    private boolean hasSourceIdentify;
+    private java.lang.String sourceIdentify_ = "";
+    public boolean hasSourceIdentify() { return hasSourceIdentify; }
+    public java.lang.String getSourceIdentify() { return sourceIdentify_; }
     
     // required int64 period = 3;
     public static final int PERIOD_FIELD_NUMBER = 3;
@@ -63,11 +63,18 @@ public final class RollIDPB {
     public boolean hasRollTs() { return hasRollTs; }
     public long getRollTs() { return rollTs_; }
     
+    // optional bool is_final = 5;
+    public static final int IS_FINAL_FIELD_NUMBER = 5;
+    private boolean hasIsFinal;
+    private boolean isFinal_ = false;
+    public boolean hasIsFinal() { return hasIsFinal; }
+    public boolean getIsFinal() { return isFinal_; }
+    
     private void initFields() {
     }
     public final boolean isInitialized() {
-      if (!hasAppName) return false;
-      if (!hasAppServer) return false;
+      if (!hasTopic) return false;
+      if (!hasSourceIdentify) return false;
       if (!hasPeriod) return false;
       if (!hasRollTs) return false;
       return true;
@@ -76,17 +83,20 @@ public final class RollIDPB {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasAppName()) {
-        output.writeString(1, getAppName());
+      if (hasTopic()) {
+        output.writeString(1, getTopic());
       }
-      if (hasAppServer()) {
-        output.writeString(2, getAppServer());
+      if (hasSourceIdentify()) {
+        output.writeString(2, getSourceIdentify());
       }
       if (hasPeriod()) {
         output.writeInt64(3, getPeriod());
       }
       if (hasRollTs()) {
         output.writeInt64(4, getRollTs());
+      }
+      if (hasIsFinal()) {
+        output.writeBool(5, getIsFinal());
       }
       getUnknownFields().writeTo(output);
     }
@@ -97,13 +107,13 @@ public final class RollIDPB {
       if (size != -1) return size;
     
       size = 0;
-      if (hasAppName()) {
+      if (hasTopic()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getAppName());
+          .computeStringSize(1, getTopic());
       }
-      if (hasAppServer()) {
+      if (hasSourceIdentify()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(2, getAppServer());
+          .computeStringSize(2, getSourceIdentify());
       }
       if (hasPeriod()) {
         size += com.google.protobuf.CodedOutputStream
@@ -112,6 +122,10 @@ public final class RollIDPB {
       if (hasRollTs()) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(4, getRollTs());
+      }
+      if (hasIsFinal()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, getIsFinal());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -271,17 +285,20 @@ public final class RollIDPB {
       
       public Builder mergeFrom(com.dp.blackhole.protocol.control.RollIDPB.RollID other) {
         if (other == com.dp.blackhole.protocol.control.RollIDPB.RollID.getDefaultInstance()) return this;
-        if (other.hasAppName()) {
-          setAppName(other.getAppName());
+        if (other.hasTopic()) {
+          setTopic(other.getTopic());
         }
-        if (other.hasAppServer()) {
-          setAppServer(other.getAppServer());
+        if (other.hasSourceIdentify()) {
+          setSourceIdentify(other.getSourceIdentify());
         }
         if (other.hasPeriod()) {
           setPeriod(other.getPeriod());
         }
         if (other.hasRollTs()) {
           setRollTs(other.getRollTs());
+        }
+        if (other.hasIsFinal()) {
+          setIsFinal(other.getIsFinal());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -309,11 +326,11 @@ public final class RollIDPB {
               break;
             }
             case 10: {
-              setAppName(input.readString());
+              setTopic(input.readString());
               break;
             }
             case 18: {
-              setAppServer(input.readString());
+              setSourceIdentify(input.readString());
               break;
             }
             case 24: {
@@ -324,50 +341,54 @@ public final class RollIDPB {
               setRollTs(input.readInt64());
               break;
             }
+            case 40: {
+              setIsFinal(input.readBool());
+              break;
+            }
           }
         }
       }
       
       
-      // required string app_name = 1;
-      public boolean hasAppName() {
-        return result.hasAppName();
+      // required string topic = 1;
+      public boolean hasTopic() {
+        return result.hasTopic();
       }
-      public java.lang.String getAppName() {
-        return result.getAppName();
+      public java.lang.String getTopic() {
+        return result.getTopic();
       }
-      public Builder setAppName(java.lang.String value) {
+      public Builder setTopic(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppName = true;
-        result.appName_ = value;
+  result.hasTopic = true;
+        result.topic_ = value;
         return this;
       }
-      public Builder clearAppName() {
-        result.hasAppName = false;
-        result.appName_ = getDefaultInstance().getAppName();
+      public Builder clearTopic() {
+        result.hasTopic = false;
+        result.topic_ = getDefaultInstance().getTopic();
         return this;
       }
       
-      // required string app_server = 2;
-      public boolean hasAppServer() {
-        return result.hasAppServer();
+      // required string source_identify = 2;
+      public boolean hasSourceIdentify() {
+        return result.hasSourceIdentify();
       }
-      public java.lang.String getAppServer() {
-        return result.getAppServer();
+      public java.lang.String getSourceIdentify() {
+        return result.getSourceIdentify();
       }
-      public Builder setAppServer(java.lang.String value) {
+      public Builder setSourceIdentify(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppServer = true;
-        result.appServer_ = value;
+  result.hasSourceIdentify = true;
+        result.sourceIdentify_ = value;
         return this;
       }
-      public Builder clearAppServer() {
-        result.hasAppServer = false;
-        result.appServer_ = getDefaultInstance().getAppServer();
+      public Builder clearSourceIdentify() {
+        result.hasSourceIdentify = false;
+        result.sourceIdentify_ = getDefaultInstance().getSourceIdentify();
         return this;
       }
       
@@ -407,6 +428,24 @@ public final class RollIDPB {
         return this;
       }
       
+      // optional bool is_final = 5;
+      public boolean hasIsFinal() {
+        return result.hasIsFinal();
+      }
+      public boolean getIsFinal() {
+        return result.getIsFinal();
+      }
+      public Builder setIsFinal(boolean value) {
+        result.hasIsFinal = true;
+        result.isFinal_ = value;
+        return this;
+      }
+      public Builder clearIsFinal() {
+        result.hasIsFinal = false;
+        result.isFinal_ = false;
+        return this;
+      }
+      
       // @@protoc_insertion_point(builder_scope:blackhole.RollID)
     }
     
@@ -433,10 +472,11 @@ public final class RollIDPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014RollID.proto\022\tblackhole\"O\n\006RollID\022\020\n\010a" +
-      "pp_name\030\001 \002(\t\022\022\n\napp_server\030\002 \002(\t\022\016\n\006per" +
-      "iod\030\003 \002(\003\022\017\n\007roll_ts\030\004 \002(\003B-\n!com.dp.bla" +
-      "ckhole.protocol.controlB\010RollIDPB"
+      "\n\014RollID.proto\022\tblackhole\"c\n\006RollID\022\r\n\005t" +
+      "opic\030\001 \002(\t\022\027\n\017source_identify\030\002 \002(\t\022\016\n\006p" +
+      "eriod\030\003 \002(\003\022\017\n\007roll_ts\030\004 \002(\003\022\020\n\010is_final" +
+      "\030\005 \001(\010B-\n!com.dp.blackhole.protocol.cont" +
+      "rolB\010RollIDPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -448,7 +488,7 @@ public final class RollIDPB {
           internal_static_blackhole_RollID_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RollID_descriptor,
-              new java.lang.String[] { "AppName", "AppServer", "Period", "RollTs", },
+              new java.lang.String[] { "Topic", "SourceIdentify", "Period", "RollTs", "IsFinal", },
               com.dp.blackhole.protocol.control.RollIDPB.RollID.class,
               com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder.class);
           return null;

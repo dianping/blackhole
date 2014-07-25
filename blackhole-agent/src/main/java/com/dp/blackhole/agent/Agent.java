@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dianping.cat.Cat;
+import com.dp.blackhole.agent.TopicMeta.MetaKey;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
@@ -32,8 +33,12 @@ import com.dp.blackhole.network.SimpleConnection;
 import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
+import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
+import com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean;
+import com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup;
+import com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit;
 import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -46,16 +51,26 @@ public class Agent implements Runnable {
     private FileListener listener;
     private String hostname;
     private ScheduledThreadPoolExecutor scheduler;
-    private static Map<String, AppLog> appLogs = new ConcurrentHashMap<String, AppLog>();
-    private static Map<AppLog, LogReader> appReaders = new ConcurrentHashMap<AppLog, LogReader>();
+    private static Map<MetaKey, TopicMeta> logMetas = new ConcurrentHashMap<MetaKey, TopicMeta>();
+    private static Map<TopicMeta, LogReader> topicReaders = new ConcurrentHashMap<TopicMeta, LogReader>();
     private Map<String, RollRecovery> recoveryingMap = new ConcurrentHashMap<String, RollRecovery>();
     
     private GenClient<ByteBuffer, SimpleConnection, AgentProcessor> client;
     AgentProcessor processor;
     private SimpleConnection supervisor;
     private int confLoopFactor = 1;
-
+    private final String baseDir;
+    private boolean paasModel = false;
+    
     public Agent() {
+        this(null);
+    }
+    
+    public Agent(String baseDir) {
+        this.baseDir = baseDir;
+        if (baseDir != null) {
+            paasModel = true;
+        }
         pool = Executors.newCachedThreadPool();
         recoveryThreadPool = Executors.newFixedThreadPool(2);
         scheduler = new ScheduledThreadPoolExecutor(1);
@@ -68,15 +83,24 @@ public class Agent implements Runnable {
         return hostname;
     }
     
-    private void register(String appName, long regTimestamp) {
-        Message msg = PBwrap.wrapAppReg(appName, hostname, regTimestamp);
+    public String getBaseDir() {
+        return baseDir;
+    }
+
+    public boolean isPaasModel() {
+        return paasModel;
+    }
+
+    private void register(MetaKey metaKey, long regTimestamp) {
+        Message msg = PBwrap.wrapTopicReg(metaKey.getTopic(),
+                Util.getSourceIdentify(hostname, metaKey.getInstanceId()), regTimestamp);
         send(msg, DEFAULT_DELAY_SECOND);
     }
 
-    public boolean checkFilesExist(String appName, String pathCandidateStr) {
+    public boolean checkFilesExist(String topic, String pathCandidateStr) {
         if (pathCandidateStr == null) {
-            LOG.error("Oops, can not get WATCH_FILE from mapping for app " + appName);
-            Cat.logError(new BlackholeClientException("Oops, can not get WATCH_FILE from mapping for app " + appName));
+            LOG.error("Oops, can not get WATCH_FILE from mapping for topic " + topic);
+            Cat.logError(new BlackholeClientException("Oops, can not get WATCH_FILE from mapping for topic " + topic));
             return false;
         }
         String[] pathCandidates = pathCandidateStr.split("\\s+");
@@ -84,47 +108,37 @@ public class Agent implements Runnable {
             File fileForTest = new File(pathCandidates[i]);
             if (fileForTest.exists()) {
                 LOG.info("Check file " + pathCandidates[i] + " ok.");
-                confKeeper.addRawProperty(appName + "."
-                        + ParamsKey.Appconf.WATCH_FILE, pathCandidates[i]);
-                break;
-            } else if (isCompatibleWithOldVersion(appName, fileForTest, getHost(), confKeeper)) {
-                LOG.info("It's an old version of log printer. Ok");
+                confKeeper.addRawProperty(topic + "."
+                        + ParamsKey.TopicConf.WATCH_FILE, pathCandidates[i]);
                 break;
             } else {
                 if (i == pathCandidates.length - 1) {
-                    LOG.error("App: " + appName + ", Log: " + Arrays.toString(pathCandidates) + " not found!");
-                    Cat.logError(new BlackholeClientException("App: " + appName + ", Log: " + Arrays.toString(pathCandidates) + " not found!"));
+                    LOG.error("Topic: " + topic + ", Log: " + Arrays.toString(pathCandidates) + " not found!");
+                    Cat.logError(new BlackholeClientException("App: " + topic + ", Log: " + Arrays.toString(pathCandidates) + " not found!"));
                     return false;
                 }
             }
         }
         return true;
     }
-
-    private boolean isCompatibleWithOldVersion(String appName, final File fileForTest, String hostname, ConfigKeeper confKeeper) {
-        if (fileForTest.getParent() == null || !fileForTest.getParentFile().exists()) {
+    
+    public boolean checkFilesExist(String topic, String watchFile, String instanceId) {
+        if (watchFile == null) {
+            //TODO file by regulation
             return false;
         }
-        int index = fileForTest.getName().indexOf('.');
-        if (index == -1) {
-            LOG.error("Invaild fileName " + fileForTest.getName());
-            Cat.logError(new BlackholeClientException("Invaild fileName " + fileForTest.getName()));
+        String realWatchFile = baseDir + "/" + instanceId + watchFile;
+        File fileForTest = new File(realWatchFile);
+        if (fileForTest.exists()) {
+            LOG.info("Check file " + realWatchFile + " ok.");
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.WATCH_FILE, realWatchFile);
+            return true;
+        } else {
+            LOG.error("Topic: " + topic + ", Log: " + realWatchFile + " not found!");
+            Cat.logError(new BlackholeClientException("Topic: " + topic + ", Log: " + realWatchFile + " not found!"));
             return false;
         }
-        String specifiedName = fileForTest.getName().substring(0, index);
-        if (specifiedName == null) {
-            return false;
-        }
-        if (hostname.contains(specifiedName)) {
-            String oldVersionPath = fileForTest.getParent() + "/" + hostname + fileForTest.getName().substring(index);
-            if (new File(oldVersionPath).exists()) {
-                confKeeper.addRawProperty(appName + "."
-                        + ParamsKey.Appconf.WATCH_FILE, oldVersionPath);
-                LOG.debug("WATCH_FILE change to " + oldVersionPath);
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -172,12 +186,13 @@ public class Agent implements Runnable {
         }
     }
     
-    public void fillUpAppLogsFromConfig(String appName) {
-        String path = ConfigKeeper.configMap.get(appName).getString(ParamsKey.Appconf.WATCH_FILE);
-        long rollPeroid = ConfigKeeper.configMap.get(appName).getLong(ParamsKey.Appconf.ROLL_PERIOD);
-        int maxLineSize = ConfigKeeper.configMap.get(appName).getInteger(ParamsKey.Appconf.MAX_LINE_SIZE, 512000);
-        AppLog appLog = new AppLog(appName, path, rollPeroid, maxLineSize);
-        appLogs.put(appName, appLog);
+    public void fillUpAppLogsFromConfig(MetaKey metaKey) {
+        String topic = metaKey.getTopic();
+        String path = ConfigKeeper.configMap.get(topic).getString(ParamsKey.TopicConf.WATCH_FILE);
+        long rollPeroid = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROLL_PERIOD);
+        int maxLineSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MAX_LINE_SIZE, 512000);
+        TopicMeta topicMeta = new TopicMeta(metaKey, path, rollPeroid, maxLineSize);
+        logMetas.put(metaKey, topicMeta);
     }
 
     private void requireConfigFromSupersivor(int delaySecond) {
@@ -204,26 +219,26 @@ public class Agent implements Runnable {
         this.listener = listener;
     }
 
-    public void reportFailure(String app, String appHost, final long ts) {
-        Message message = PBwrap.wrapAppFailure(app, appHost, ts);
+    public void reportFailure(MetaKey metaKey, String agentServer, final long ts) {
+        Message message = PBwrap.wrapAppFailure(metaKey.getTopic(), Util.getSourceIdentify(agentServer, metaKey.getInstanceId()), ts);
         send(message);
-        AppLog applog = appLogs.get(app);
-        appReaders.remove(applog);
-        register(app, applog.getCreateTime());
+        TopicMeta applog = logMetas.get(metaKey);
+        topicReaders.remove(applog);
+        register(metaKey, applog.getCreateTime());
     }
 
-    public void reportUnrecoverable(String appname, String appHost, final long period, final long rollTs) {
-        Message message = PBwrap.wrapUnrecoverable(appname, appHost, period, rollTs);
-        send(message);
-    }
-
-    public void reportRecoveryFail(String appname, String appServer, long period, final long rollTs) {
-        Message message = PBwrap.wrapRecoveryFail(appname, appServer, period, rollTs);
+    public void reportUnrecoverable(MetaKey metaKey, String agentServer, final long period, final long rollTs) {
+        Message message = PBwrap.wrapUnrecoverable(metaKey.getTopic(), Util.getSourceIdentify(agentServer, metaKey.getInstanceId()), period, rollTs);
         send(message);
     }
 
-    public void removeRecoverying(String appname, final long rollTs) {
-        String recoveryKey = appname + ":" + rollTs;
+    public void reportRecoveryFail(MetaKey metaKey, String agentServer, long period, final long rollTs, boolean isFinal) {
+        Message message = PBwrap.wrapRecoveryFail(metaKey.getTopic(), Util.getSourceIdentify(agentServer, metaKey.getInstanceId()), period, rollTs, isFinal);
+        send(message);
+    }
+
+    public void removeRecoverying(MetaKey metaKey, final long rollTs) {
+        String recoveryKey = metaKey.toString() + ":" + rollTs;
         recoveryingMap.remove(recoveryKey);
     }
     
@@ -255,7 +270,9 @@ public class Agent implements Runnable {
         @Override
         public void OnConnected(SimpleConnection connection) {
             supervisor = connection;
-            requireConfigFromSupersivor(0);
+            if (!paasModel) {
+                requireConfigFromSupersivor(0);
+            }
         }
 
         @Override
@@ -270,17 +287,17 @@ public class Agent implements Runnable {
 
             // close connected streams
             LOG.info("shutdown app node");
-            for (java.util.Map.Entry<AppLog, LogReader> e : appReaders.entrySet()) {
+            for (java.util.Map.Entry<TopicMeta, LogReader> e : topicReaders.entrySet()) {
                 LogReader reader = e.getValue();
                 reader.stop();
-                appReaders.remove(e.getKey());
+                topicReaders.remove(e.getKey());
             }
             for (Map.Entry<String, RollRecovery> e : recoveryingMap.entrySet()) {
                 RollRecovery recovery = e.getValue();
                 recovery.stop();
                 recoveryingMap.remove(e.getKey());
             }
-            appLogs.clear();
+            logMetas.clear();
             ConfigKeeper.configMap.clear();
             
             if (heartbeat != null) {
@@ -305,9 +322,11 @@ public class Agent implements Runnable {
         }
 
         boolean processInternal(Message msg) {
-            String appName;
+            String topic;
             String broker;
-            AppLog appLog = null;
+            String instanceId;
+            MetaKey metaKey;
+            TopicMeta topicMeta = null;
             LogReader logReader = null;
             RollRecovery rollRecovery = null;
             
@@ -315,21 +334,26 @@ public class Agent implements Runnable {
             Random random = new Random();
             switch (type) {
             case NOAVAILABLENODE:
-                String app = msg.getNoAvailableNode().getAppName();
-                AppLog applog = appLogs.get(app);
-                register(app, applog.getCreateTime());
+                topic = msg.getNoAvailableNode().getTopic();
+                instanceId = msg.getNoAvailableNode().getInstanceId();
+                metaKey = new MetaKey(topic, instanceId);
+                TopicMeta applog = logMetas.get(metaKey);
+                register(metaKey, applog.getCreateTime());
                 break;
             case RECOVERY_ROLL:
                 RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
-                appName = recoveryRoll.getAppName();
-                if ((appLog = appLogs.get(appName)) != null) {
+                topic = recoveryRoll.getTopic();
+                instanceId = recoveryRoll.getInstanceId();
+                metaKey = new MetaKey(topic, instanceId);
+                boolean isFinal = recoveryRoll.getIsFinal();
+                if ((topicMeta = logMetas.get(metaKey)) != null) {
                     long rollTs = recoveryRoll.getRollTs();
-                    String recoveryKey = appName + ":" + rollTs;
+                    String recoveryKey = metaKey.toString() + ":" + rollTs;
                     if ((rollRecovery = recoveryingMap.get(recoveryKey)) == null) {
                         broker = recoveryRoll.getBrokerServer();
                         int recoveryPort = recoveryRoll.getRecoveryPort();
                         rollRecovery = new RollRecovery(Agent.this,
-                                broker, recoveryPort, appLog, rollTs);
+                                broker, recoveryPort, topicMeta, rollTs, isFinal);
                         recoveryingMap.put(recoveryKey, rollRecovery);
                         recoveryThreadPool.execute(rollRecovery);
                         return true;
@@ -338,32 +362,32 @@ public class Agent implements Runnable {
                                 + recoveryRoll);
                     }
                 } else {
-                    LOG.error("AppName [" + recoveryRoll.getAppName()
+                    LOG.error("AppName [" + recoveryRoll.getTopic()
                             + "] from supervisor message not match with local");
-                    Cat.logError(new BlackholeClientException("RECOVERY_ROLL: " + recoveryRoll.getAppName()
+                    Cat.logError(new BlackholeClientException("RECOVERY_ROLL: " + recoveryRoll.getTopic()
                             + " from supervisor message not match with local"));
                 }
                 break;
             case ASSIGN_BROKER:
                 AssignBroker assignBroker = msg.getAssignBroker();
-                appName = assignBroker.getAppName();
-                if ((appLog = appLogs.get(appName)) != null) {
-                    if ((logReader = appReaders.get(appLog)) == null) {
+                topic = assignBroker.getTopic();
+                instanceId = assignBroker.getInstanceId();
+                metaKey = new MetaKey(topic, instanceId);
+                if ((topicMeta = logMetas.get(metaKey)) != null) {
+                    if ((logReader = topicReaders.get(topicMeta)) == null) {
                         broker = assignBroker.getBrokerServer();
                         int brokerPort = assignBroker.getBrokerPort();
-                        logReader = new LogReader(Agent.this, hostname, broker, brokerPort,
-                                appLog);
-                        appReaders.put(appLog, logReader);
+                        logReader = new LogReader(Agent.this, hostname, broker, brokerPort, topicMeta);
+                        topicReaders.put(topicMeta, logReader);
                         pool.execute(logReader);
                         return true;
                     } else {
-                        LOG.info("duplicated assign broker message: "
-                                + assignBroker);
+                        LOG.info("duplicated assign broker message: " + assignBroker);
                     }
                 } else {
-                    LOG.error("AppName [" + assignBroker.getAppName()
+                    LOG.error("AppName [" + assignBroker.getTopic()
                             + "] from supervisor message not match with local");
-                    Cat.logError(new BlackholeClientException("ASSIGN_BROKER: " + assignBroker.getAppName()
+                    Cat.logError(new BlackholeClientException("ASSIGN_BROKER: " + assignBroker.getTopic()
                             + " from supervisor message not match with local"));
                 }
                 break;
@@ -378,34 +402,113 @@ public class Agent implements Runnable {
             case CONF_RES:
                 confLoopFactor = 1;
                 ConfRes confRes = msg.getConfRes();
-                List<AppConfRes> appConfResList = confRes.getAppConfResList();
-                for (AppConfRes appConfRes : appConfResList) {
-                    appName = appConfRes.getAppName();
-                    if (appLogs.containsKey(appName)) {
-                        LOG.info("app: " + appName + " has already in used.");
-                        continue;
+                if (isPaasModel()) {
+                    List<LxcConfRes> lxcConfResList = confRes.getLxcConfResList();
+                    for (LxcConfRes lxcConfRes : lxcConfResList) {
+                        topic = lxcConfRes.getTopic();
+                        List<String> ids = lxcConfRes.getInstanceIdsList();
+                        for (String id : ids) {
+                            metaKey = new MetaKey(topic, id);
+                            if (logMetas.containsKey(metaKey)) {
+                                LOG.info(metaKey + " has already in used.");
+                                continue;
+                            }
+                            //check files existence
+                            if (!checkFilesExist(topic, lxcConfRes.getWatchFile(), id)) {
+                                continue;
+                            }
+                            confKeeper.addRawProperty(topic + "."
+                                    + ParamsKey.TopicConf.ROLL_PERIOD, lxcConfRes.getPeriod());
+                            confKeeper.addRawProperty(topic + "."
+                                    + ParamsKey.TopicConf.MAX_LINE_SIZE, lxcConfRes.getMaxLineSize());
+                            fillUpAppLogsFromConfig(metaKey);
+                            register(metaKey, Util.getTS());
+                            if (this.heartbeat == null || !this.heartbeat.isAlive()) {
+                                this.heartbeat = new HeartBeat(supervisor);
+                                this.heartbeat.setDaemon(true);
+                                this.heartbeat.start();
+                            }
+                        }
                     }
-                    String pathCandidateStr = appConfRes.getWatchFile();
-                    //check files existence
-                    if (!checkFilesExist(appName, pathCandidateStr)) {
-                        continue;
-                    }
-                    confKeeper.addRawProperty(appName + "."
-                            + ParamsKey.Appconf.ROLL_PERIOD, appConfRes.getPeriod());
-                    confKeeper.addRawProperty(appName + "."
-                            + ParamsKey.Appconf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
                     
-                    fillUpAppLogsFromConfig(appName);
-                    register(appName, Util.getTS());
-                    if (this.heartbeat == null || !this.heartbeat.isAlive()) {
-                        this.heartbeat = new HeartBeat(supervisor);
-                        this.heartbeat.setDaemon(true);
-                        this.heartbeat.start();
+                } else {
+                    List<AppConfRes> appConfResList = confRes.getAppConfResList();
+                    for (AppConfRes appConfRes : appConfResList) {
+                        topic = appConfRes.getTopic();
+                        metaKey = new MetaKey(topic, null);
+                        if (logMetas.containsKey(metaKey)) {
+                            LOG.info(metaKey + " has already in used.");
+                            continue;
+                        }
+                        //check files existence
+                        if (!checkFilesExist(topic, appConfRes.getWatchFile())) {
+                            continue;
+                        }
+                        confKeeper.addRawProperty(topic + "."
+                                + ParamsKey.TopicConf.ROLL_PERIOD, appConfRes.getPeriod());
+                        confKeeper.addRawProperty(topic + "."
+                                + ParamsKey.TopicConf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
+                        
+                        fillUpAppLogsFromConfig(metaKey);
+                        register(metaKey, Util.getTS());
+                        if (this.heartbeat == null || !this.heartbeat.isAlive()) {
+                            this.heartbeat = new HeartBeat(supervisor);
+                            this.heartbeat.setDaemon(true);
+                            this.heartbeat.start();
+                        }
+                    }
+                    if (logMetas.size() < appConfResList.size()) {
+                        LOG.error("Not all configurations are correct, sleep 5 minutes...");
+                        requireConfigFromSupersivor(5 * 60);
+                    }
+                    break;
+                }
+            case QUIT:
+                Quit quit = msg.getQuit();
+                List<InstanceGroup> instanceGroupQuitList = quit.getInstanceGroupList();
+                for (InstanceGroup instanceGroup : instanceGroupQuitList) {
+                    topic = instanceGroup.getTopic();
+                    List<String> ids = instanceGroup.getInstanceIdsList();
+                    for (String id : ids) {
+                        metaKey = new MetaKey(topic, id);
+                        if ((topicMeta = logMetas.get(metaKey)) != null) {
+                            // set a stream status to dying, and send a special rotate message.
+                            if (topicMeta.setDying()) {
+                                if ((logReader = topicReaders.get(topicMeta)) != null) {
+                                    logReader.eventWriter.processLastRotate();
+                                } else {
+                                    LOG.info(topicMeta + " has already stopped.");
+                                }
+                            } else {
+                                LOG.info(metaKey + " was dying.");
+                            }
+                        }
                     }
                 }
-                if (appLogs.size() < appConfResList.size()) {
-                    LOG.warn("Not all configurations are correct, sleep 5 minutes...");
-                    requireConfigFromSupersivor(5 * 60);
+                break;
+            case CLEAN:
+                Clean clean = msg.getClean();
+                List<InstanceGroup> instanceGroupCleanList = clean.getInstanceGroupList();
+                for (InstanceGroup instanceGroup : instanceGroupCleanList) {
+                    topic = instanceGroup.getTopic();
+                    List<String> ids = instanceGroup.getInstanceIdsList();
+                    for (String id : ids) {
+                        metaKey = new MetaKey(topic, id);
+                        if ((topicMeta = logMetas.get(metaKey)) != null) {
+                            // set a stream status to dying, and send a special rotate message.
+                            if (topicMeta.isDying()) {
+                                if ((logReader = topicReaders.get(topicMeta)) != null) {
+                                    logReader.stop();
+                                    topicReaders.remove(topicMeta);
+                                    logMetas.remove(metaKey);
+                                } else {
+                                    LOG.info(topicMeta + " has already stopped.");
+                                }
+                            } else {
+                                LOG.info(metaKey + " was dying.");
+                            }
+                        }
+                    }
                 }
                 break;
             default:

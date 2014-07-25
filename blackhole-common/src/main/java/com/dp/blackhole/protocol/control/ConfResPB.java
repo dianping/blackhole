@@ -62,12 +62,12 @@ public final class ConfResPB {
         return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable;
       }
       
-      // required string app_name = 1;
-      public static final int APP_NAME_FIELD_NUMBER = 1;
-      private boolean hasAppName;
-      private java.lang.String appName_ = "";
-      public boolean hasAppName() { return hasAppName; }
-      public java.lang.String getAppName() { return appName_; }
+      // required string topic = 1;
+      public static final int TOPIC_FIELD_NUMBER = 1;
+      private boolean hasTopic;
+      private java.lang.String topic_ = "";
+      public boolean hasTopic() { return hasTopic; }
+      public java.lang.String getTopic() { return topic_; }
       
       // required string watch_file = 2;
       public static final int WATCH_FILE_FIELD_NUMBER = 2;
@@ -76,24 +76,24 @@ public final class ConfResPB {
       public boolean hasWatchFile() { return hasWatchFile; }
       public java.lang.String getWatchFile() { return watchFile_; }
       
-      // required string period = 3 [default = "3600"];
+      // required string period = 3;
       public static final int PERIOD_FIELD_NUMBER = 3;
       private boolean hasPeriod;
-      private java.lang.String period_ = "3600";
+      private java.lang.String period_ = "";
       public boolean hasPeriod() { return hasPeriod; }
       public java.lang.String getPeriod() { return period_; }
       
-      // optional string max_line_size = 4 [default = "65536"];
+      // optional string max_line_size = 4 [default = "512000"];
       public static final int MAX_LINE_SIZE_FIELD_NUMBER = 4;
       private boolean hasMaxLineSize;
-      private java.lang.String maxLineSize_ = "65536";
+      private java.lang.String maxLineSize_ = "512000";
       public boolean hasMaxLineSize() { return hasMaxLineSize; }
       public java.lang.String getMaxLineSize() { return maxLineSize_; }
       
       private void initFields() {
       }
       public final boolean isInitialized() {
-        if (!hasAppName) return false;
+        if (!hasTopic) return false;
         if (!hasWatchFile) return false;
         if (!hasPeriod) return false;
         return true;
@@ -102,8 +102,8 @@ public final class ConfResPB {
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
         getSerializedSize();
-        if (hasAppName()) {
-          output.writeString(1, getAppName());
+        if (hasTopic()) {
+          output.writeString(1, getTopic());
         }
         if (hasWatchFile()) {
           output.writeString(2, getWatchFile());
@@ -123,9 +123,9 @@ public final class ConfResPB {
         if (size != -1) return size;
       
         size = 0;
-        if (hasAppName()) {
+        if (hasTopic()) {
           size += com.google.protobuf.CodedOutputStream
-            .computeStringSize(1, getAppName());
+            .computeStringSize(1, getTopic());
         }
         if (hasWatchFile()) {
           size += com.google.protobuf.CodedOutputStream
@@ -297,8 +297,8 @@ public final class ConfResPB {
         
         public Builder mergeFrom(com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes other) {
           if (other == com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.getDefaultInstance()) return this;
-          if (other.hasAppName()) {
-            setAppName(other.getAppName());
+          if (other.hasTopic()) {
+            setTopic(other.getTopic());
           }
           if (other.hasWatchFile()) {
             setWatchFile(other.getWatchFile());
@@ -335,7 +335,7 @@ public final class ConfResPB {
                 break;
               }
               case 10: {
-                setAppName(input.readString());
+                setTopic(input.readString());
                 break;
               }
               case 18: {
@@ -355,24 +355,24 @@ public final class ConfResPB {
         }
         
         
-        // required string app_name = 1;
-        public boolean hasAppName() {
-          return result.hasAppName();
+        // required string topic = 1;
+        public boolean hasTopic() {
+          return result.hasTopic();
         }
-        public java.lang.String getAppName() {
-          return result.getAppName();
+        public java.lang.String getTopic() {
+          return result.getTopic();
         }
-        public Builder setAppName(java.lang.String value) {
+        public Builder setTopic(java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppName = true;
-          result.appName_ = value;
+  result.hasTopic = true;
+          result.topic_ = value;
           return this;
         }
-        public Builder clearAppName() {
-          result.hasAppName = false;
-          result.appName_ = getDefaultInstance().getAppName();
+        public Builder clearTopic() {
+          result.hasTopic = false;
+          result.topic_ = getDefaultInstance().getTopic();
           return this;
         }
         
@@ -397,7 +397,7 @@ public final class ConfResPB {
           return this;
         }
         
-        // required string period = 3 [default = "3600"];
+        // required string period = 3;
         public boolean hasPeriod() {
           return result.hasPeriod();
         }
@@ -418,7 +418,7 @@ public final class ConfResPB {
           return this;
         }
         
-        // optional string max_line_size = 4 [default = "65536"];
+        // optional string max_line_size = 4 [default = "512000"];
         public boolean hasMaxLineSize() {
           return result.hasMaxLineSize();
         }
@@ -451,6 +451,499 @@ public final class ConfResPB {
       // @@protoc_insertion_point(class_scope:blackhole.ConfRes.AppConfRes)
     }
     
+    public static final class LxcConfRes extends
+        com.google.protobuf.GeneratedMessage {
+      // Use LxcConfRes.newBuilder() to construct.
+      private LxcConfRes() {
+        initFields();
+      }
+      private LxcConfRes(boolean noInit) {}
+      
+      private static final LxcConfRes defaultInstance;
+      public static LxcConfRes getDefaultInstance() {
+        return defaultInstance;
+      }
+      
+      public LxcConfRes getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+      
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_LxcConfRes_descriptor;
+      }
+      
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.dp.blackhole.protocol.control.ConfResPB.internal_static_blackhole_ConfRes_LxcConfRes_fieldAccessorTable;
+      }
+      
+      // required string topic = 1;
+      public static final int TOPIC_FIELD_NUMBER = 1;
+      private boolean hasTopic;
+      private java.lang.String topic_ = "";
+      public boolean hasTopic() { return hasTopic; }
+      public java.lang.String getTopic() { return topic_; }
+      
+      // optional string watch_file = 2;
+      public static final int WATCH_FILE_FIELD_NUMBER = 2;
+      private boolean hasWatchFile;
+      private java.lang.String watchFile_ = "";
+      public boolean hasWatchFile() { return hasWatchFile; }
+      public java.lang.String getWatchFile() { return watchFile_; }
+      
+      // required string period = 3;
+      public static final int PERIOD_FIELD_NUMBER = 3;
+      private boolean hasPeriod;
+      private java.lang.String period_ = "";
+      public boolean hasPeriod() { return hasPeriod; }
+      public java.lang.String getPeriod() { return period_; }
+      
+      // optional string max_line_size = 4 [default = "512000"];
+      public static final int MAX_LINE_SIZE_FIELD_NUMBER = 4;
+      private boolean hasMaxLineSize;
+      private java.lang.String maxLineSize_ = "512000";
+      public boolean hasMaxLineSize() { return hasMaxLineSize; }
+      public java.lang.String getMaxLineSize() { return maxLineSize_; }
+      
+      // repeated string instance_ids = 5;
+      public static final int INSTANCE_IDS_FIELD_NUMBER = 5;
+      private java.util.List<java.lang.String> instanceIds_ =
+        java.util.Collections.emptyList();
+      public java.util.List<java.lang.String> getInstanceIdsList() {
+        return instanceIds_;
+      }
+      public int getInstanceIdsCount() { return instanceIds_.size(); }
+      public java.lang.String getInstanceIds(int index) {
+        return instanceIds_.get(index);
+      }
+      
+      private void initFields() {
+      }
+      public final boolean isInitialized() {
+        if (!hasTopic) return false;
+        if (!hasPeriod) return false;
+        return true;
+      }
+      
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (hasTopic()) {
+          output.writeString(1, getTopic());
+        }
+        if (hasWatchFile()) {
+          output.writeString(2, getWatchFile());
+        }
+        if (hasPeriod()) {
+          output.writeString(3, getPeriod());
+        }
+        if (hasMaxLineSize()) {
+          output.writeString(4, getMaxLineSize());
+        }
+        for (java.lang.String element : getInstanceIdsList()) {
+          output.writeString(5, element);
+        }
+        getUnknownFields().writeTo(output);
+      }
+      
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+      
+        size = 0;
+        if (hasTopic()) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeStringSize(1, getTopic());
+        }
+        if (hasWatchFile()) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeStringSize(2, getWatchFile());
+        }
+        if (hasPeriod()) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeStringSize(3, getPeriod());
+        }
+        if (hasMaxLineSize()) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeStringSize(4, getMaxLineSize());
+        }
+        {
+          int dataSize = 0;
+          for (java.lang.String element : getInstanceIdsList()) {
+            dataSize += com.google.protobuf.CodedOutputStream
+              .computeStringSizeNoTag(element);
+          }
+          size += dataSize;
+          size += 1 * getInstanceIdsList().size();
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+      
+      public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return newBuilder().mergeFrom(data).buildParsed();
+      }
+      public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return newBuilder().mergeFrom(data, extensionRegistry)
+                 .buildParsed();
+      }
+      public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return newBuilder().mergeFrom(data).buildParsed();
+      }
+      public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return newBuilder().mergeFrom(data, extensionRegistry)
+                 .buildParsed();
+      }
+      public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return newBuilder().mergeFrom(input).buildParsed();
+      }
+      public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return newBuilder().mergeFrom(input, extensionRegistry)
+                 .buildParsed();
+      }
+      public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        Builder builder = newBuilder();
+        if (builder.mergeDelimitedFrom(input)) {
+          return builder.buildParsed();
+        } else {
+          return null;
+        }
+      }
+      public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        Builder builder = newBuilder();
+        if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+          return builder.buildParsed();
+        } else {
+          return null;
+        }
+      }
+      public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return newBuilder().mergeFrom(input).buildParsed();
+      }
+      public static com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return newBuilder().mergeFrom(input, extensionRegistry)
+                 .buildParsed();
+      }
+      
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+      
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder> {
+        private com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes result;
+        
+        // Construct using com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes.newBuilder()
+        private Builder() {}
+        
+        private static Builder create() {
+          Builder builder = new Builder();
+          builder.result = new com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes();
+          return builder;
+        }
+        
+        protected com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes internalGetResult() {
+          return result;
+        }
+        
+        public Builder clear() {
+          if (result == null) {
+            throw new IllegalStateException(
+              "Cannot call clear() after build().");
+          }
+          result = new com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes();
+          return this;
+        }
+        
+        public Builder clone() {
+          return create().mergeFrom(result);
+        }
+        
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes.getDescriptor();
+        }
+        
+        public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes getDefaultInstanceForType() {
+          return com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes.getDefaultInstance();
+        }
+        
+        public boolean isInitialized() {
+          return result.isInitialized();
+        }
+        public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes build() {
+          if (result != null && !isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return buildPartial();
+        }
+        
+        private com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes buildParsed()
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          if (!isInitialized()) {
+            throw newUninitializedMessageException(
+              result).asInvalidProtocolBufferException();
+          }
+          return buildPartial();
+        }
+        
+        public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes buildPartial() {
+          if (result == null) {
+            throw new IllegalStateException(
+              "build() has already been called on this Builder.");
+          }
+          if (result.instanceIds_ != java.util.Collections.EMPTY_LIST) {
+            result.instanceIds_ =
+              java.util.Collections.unmodifiableList(result.instanceIds_);
+          }
+          com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes returnMe = result;
+          result = null;
+          return returnMe;
+        }
+        
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes) {
+            return mergeFrom((com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+        
+        public Builder mergeFrom(com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes other) {
+          if (other == com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes.getDefaultInstance()) return this;
+          if (other.hasTopic()) {
+            setTopic(other.getTopic());
+          }
+          if (other.hasWatchFile()) {
+            setWatchFile(other.getWatchFile());
+          }
+          if (other.hasPeriod()) {
+            setPeriod(other.getPeriod());
+          }
+          if (other.hasMaxLineSize()) {
+            setMaxLineSize(other.getMaxLineSize());
+          }
+          if (!other.instanceIds_.isEmpty()) {
+            if (result.instanceIds_.isEmpty()) {
+              result.instanceIds_ = new java.util.ArrayList<java.lang.String>();
+            }
+            result.instanceIds_.addAll(other.instanceIds_);
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+        
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder(
+              this.getUnknownFields());
+          while (true) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                this.setUnknownFields(unknownFields.build());
+                return this;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  this.setUnknownFields(unknownFields.build());
+                  return this;
+                }
+                break;
+              }
+              case 10: {
+                setTopic(input.readString());
+                break;
+              }
+              case 18: {
+                setWatchFile(input.readString());
+                break;
+              }
+              case 26: {
+                setPeriod(input.readString());
+                break;
+              }
+              case 34: {
+                setMaxLineSize(input.readString());
+                break;
+              }
+              case 42: {
+                addInstanceIds(input.readString());
+                break;
+              }
+            }
+          }
+        }
+        
+        
+        // required string topic = 1;
+        public boolean hasTopic() {
+          return result.hasTopic();
+        }
+        public java.lang.String getTopic() {
+          return result.getTopic();
+        }
+        public Builder setTopic(java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  result.hasTopic = true;
+          result.topic_ = value;
+          return this;
+        }
+        public Builder clearTopic() {
+          result.hasTopic = false;
+          result.topic_ = getDefaultInstance().getTopic();
+          return this;
+        }
+        
+        // optional string watch_file = 2;
+        public boolean hasWatchFile() {
+          return result.hasWatchFile();
+        }
+        public java.lang.String getWatchFile() {
+          return result.getWatchFile();
+        }
+        public Builder setWatchFile(java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  result.hasWatchFile = true;
+          result.watchFile_ = value;
+          return this;
+        }
+        public Builder clearWatchFile() {
+          result.hasWatchFile = false;
+          result.watchFile_ = getDefaultInstance().getWatchFile();
+          return this;
+        }
+        
+        // required string period = 3;
+        public boolean hasPeriod() {
+          return result.hasPeriod();
+        }
+        public java.lang.String getPeriod() {
+          return result.getPeriod();
+        }
+        public Builder setPeriod(java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  result.hasPeriod = true;
+          result.period_ = value;
+          return this;
+        }
+        public Builder clearPeriod() {
+          result.hasPeriod = false;
+          result.period_ = getDefaultInstance().getPeriod();
+          return this;
+        }
+        
+        // optional string max_line_size = 4 [default = "512000"];
+        public boolean hasMaxLineSize() {
+          return result.hasMaxLineSize();
+        }
+        public java.lang.String getMaxLineSize() {
+          return result.getMaxLineSize();
+        }
+        public Builder setMaxLineSize(java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  result.hasMaxLineSize = true;
+          result.maxLineSize_ = value;
+          return this;
+        }
+        public Builder clearMaxLineSize() {
+          result.hasMaxLineSize = false;
+          result.maxLineSize_ = getDefaultInstance().getMaxLineSize();
+          return this;
+        }
+        
+        // repeated string instance_ids = 5;
+        public java.util.List<java.lang.String> getInstanceIdsList() {
+          return java.util.Collections.unmodifiableList(result.instanceIds_);
+        }
+        public int getInstanceIdsCount() {
+          return result.getInstanceIdsCount();
+        }
+        public java.lang.String getInstanceIds(int index) {
+          return result.getInstanceIds(index);
+        }
+        public Builder setInstanceIds(int index, java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  result.instanceIds_.set(index, value);
+          return this;
+        }
+        public Builder addInstanceIds(java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  if (result.instanceIds_.isEmpty()) {
+            result.instanceIds_ = new java.util.ArrayList<java.lang.String>();
+          }
+          result.instanceIds_.add(value);
+          return this;
+        }
+        public Builder addAllInstanceIds(
+            java.lang.Iterable<? extends java.lang.String> values) {
+          if (result.instanceIds_.isEmpty()) {
+            result.instanceIds_ = new java.util.ArrayList<java.lang.String>();
+          }
+          super.addAll(values, result.instanceIds_);
+          return this;
+        }
+        public Builder clearInstanceIds() {
+          result.instanceIds_ = java.util.Collections.emptyList();
+          return this;
+        }
+        
+        // @@protoc_insertion_point(builder_scope:blackhole.ConfRes.LxcConfRes)
+      }
+      
+      static {
+        defaultInstance = new LxcConfRes(true);
+        com.dp.blackhole.protocol.control.ConfResPB.internalForceInit();
+        defaultInstance.initFields();
+      }
+      
+      // @@protoc_insertion_point(class_scope:blackhole.ConfRes.LxcConfRes)
+    }
+    
     // repeated .blackhole.ConfRes.AppConfRes appConfRes = 1;
     public static final int APPCONFRES_FIELD_NUMBER = 1;
     private java.util.List<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes> appConfRes_ =
@@ -463,10 +956,25 @@ public final class ConfResPB {
       return appConfRes_.get(index);
     }
     
+    // repeated .blackhole.ConfRes.LxcConfRes lxcConfRes = 2;
+    public static final int LXCCONFRES_FIELD_NUMBER = 2;
+    private java.util.List<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes> lxcConfRes_ =
+      java.util.Collections.emptyList();
+    public java.util.List<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes> getLxcConfResList() {
+      return lxcConfRes_;
+    }
+    public int getLxcConfResCount() { return lxcConfRes_.size(); }
+    public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes getLxcConfRes(int index) {
+      return lxcConfRes_.get(index);
+    }
+    
     private void initFields() {
     }
     public final boolean isInitialized() {
       for (com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes element : getAppConfResList()) {
+        if (!element.isInitialized()) return false;
+      }
+      for (com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes element : getLxcConfResList()) {
         if (!element.isInitialized()) return false;
       }
       return true;
@@ -477,6 +985,9 @@ public final class ConfResPB {
       getSerializedSize();
       for (com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes element : getAppConfResList()) {
         output.writeMessage(1, element);
+      }
+      for (com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes element : getLxcConfResList()) {
+        output.writeMessage(2, element);
       }
       getUnknownFields().writeTo(output);
     }
@@ -490,6 +1001,10 @@ public final class ConfResPB {
       for (com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes element : getAppConfResList()) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, element);
+      }
+      for (com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes element : getLxcConfResList()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, element);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -637,6 +1152,10 @@ public final class ConfResPB {
           result.appConfRes_ =
             java.util.Collections.unmodifiableList(result.appConfRes_);
         }
+        if (result.lxcConfRes_ != java.util.Collections.EMPTY_LIST) {
+          result.lxcConfRes_ =
+            java.util.Collections.unmodifiableList(result.lxcConfRes_);
+        }
         com.dp.blackhole.protocol.control.ConfResPB.ConfRes returnMe = result;
         result = null;
         return returnMe;
@@ -658,6 +1177,12 @@ public final class ConfResPB {
             result.appConfRes_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes>();
           }
           result.appConfRes_.addAll(other.appConfRes_);
+        }
+        if (!other.lxcConfRes_.isEmpty()) {
+          if (result.lxcConfRes_.isEmpty()) {
+            result.lxcConfRes_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes>();
+          }
+          result.lxcConfRes_.addAll(other.lxcConfRes_);
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -688,6 +1213,12 @@ public final class ConfResPB {
               com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder subBuilder = com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.newBuilder();
               input.readMessage(subBuilder, extensionRegistry);
               addAppConfRes(subBuilder.buildPartial());
+              break;
+            }
+            case 18: {
+              com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes.Builder subBuilder = com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes.newBuilder();
+              input.readMessage(subBuilder, extensionRegistry);
+              addLxcConfRes(subBuilder.buildPartial());
               break;
             }
           }
@@ -746,6 +1277,57 @@ public final class ConfResPB {
         return this;
       }
       
+      // repeated .blackhole.ConfRes.LxcConfRes lxcConfRes = 2;
+      public java.util.List<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes> getLxcConfResList() {
+        return java.util.Collections.unmodifiableList(result.lxcConfRes_);
+      }
+      public int getLxcConfResCount() {
+        return result.getLxcConfResCount();
+      }
+      public com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes getLxcConfRes(int index) {
+        return result.getLxcConfRes(index);
+      }
+      public Builder setLxcConfRes(int index, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        result.lxcConfRes_.set(index, value);
+        return this;
+      }
+      public Builder setLxcConfRes(int index, com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes.Builder builderForValue) {
+        result.lxcConfRes_.set(index, builderForValue.build());
+        return this;
+      }
+      public Builder addLxcConfRes(com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        if (result.lxcConfRes_.isEmpty()) {
+          result.lxcConfRes_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes>();
+        }
+        result.lxcConfRes_.add(value);
+        return this;
+      }
+      public Builder addLxcConfRes(com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes.Builder builderForValue) {
+        if (result.lxcConfRes_.isEmpty()) {
+          result.lxcConfRes_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes>();
+        }
+        result.lxcConfRes_.add(builderForValue.build());
+        return this;
+      }
+      public Builder addAllLxcConfRes(
+          java.lang.Iterable<? extends com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes> values) {
+        if (result.lxcConfRes_.isEmpty()) {
+          result.lxcConfRes_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes>();
+        }
+        super.addAll(values, result.lxcConfRes_);
+        return this;
+      }
+      public Builder clearLxcConfRes() {
+        result.lxcConfRes_ = java.util.Collections.emptyList();
+        return this;
+      }
+      
       // @@protoc_insertion_point(builder_scope:blackhole.ConfRes)
     }
     
@@ -768,6 +1350,11 @@ public final class ConfResPB {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_blackhole_ConfRes_LxcConfRes_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_blackhole_ConfRes_LxcConfRes_fieldAccessorTable;
   
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -777,13 +1364,17 @@ public final class ConfResPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rConfRes.proto\022\tblackhole\"\244\001\n\007ConfRes\0221" +
+      "\n\rConfRes.proto\022\tblackhole\"\305\002\n\007ConfRes\0221" +
       "\n\nappConfRes\030\001 \003(\0132\035.blackhole.ConfRes.A" +
-      "ppConfRes\032f\n\nAppConfRes\022\020\n\010app_name\030\001 \002(" +
-      "\t\022\022\n\nwatch_file\030\002 \002(\t\022\024\n\006period\030\003 \002(\t:\0043" +
-      "600\022\034\n\rmax_line_size\030\004 \001(\t:\00565536B.\n!com" +
-      ".dp.blackhole.protocol.controlB\tConfResP" +
-      "B"
+      "ppConfRes\0221\n\nlxcConfRes\030\002 \003(\0132\035.blackhol" +
+      "e.ConfRes.LxcConfRes\032^\n\nAppConfRes\022\r\n\005to" +
+      "pic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \002(\t\022\016\n\006period\030" +
+      "\003 \002(\t\022\035\n\rmax_line_size\030\004 \001(\t:\006512000\032t\n\n" +
+      "LxcConfRes\022\r\n\005topic\030\001 \002(\t\022\022\n\nwatch_file\030" +
+      "\002 \001(\t\022\016\n\006period\030\003 \002(\t\022\035\n\rmax_line_size\030\004" +
+      " \001(\t:\006512000\022\024\n\014instance_ids\030\005 \003(\tB.\n!co" +
+      "m.dp.blackhole.protocol.controlB\tConfRes",
+      "PB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -795,7 +1386,7 @@ public final class ConfResPB {
           internal_static_blackhole_ConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_descriptor,
-              new java.lang.String[] { "AppConfRes", },
+              new java.lang.String[] { "AppConfRes", "LxcConfRes", },
               com.dp.blackhole.protocol.control.ConfResPB.ConfRes.class,
               com.dp.blackhole.protocol.control.ConfResPB.ConfRes.Builder.class);
           internal_static_blackhole_ConfRes_AppConfRes_descriptor =
@@ -803,9 +1394,17 @@ public final class ConfResPB {
           internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_AppConfRes_descriptor,
-              new java.lang.String[] { "AppName", "WatchFile", "Period", "MaxLineSize", },
+              new java.lang.String[] { "Topic", "WatchFile", "Period", "MaxLineSize", },
               com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.class,
               com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder.class);
+          internal_static_blackhole_ConfRes_LxcConfRes_descriptor =
+            internal_static_blackhole_ConfRes_descriptor.getNestedTypes().get(1);
+          internal_static_blackhole_ConfRes_LxcConfRes_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_blackhole_ConfRes_LxcConfRes_descriptor,
+              new java.lang.String[] { "Topic", "WatchFile", "Period", "MaxLineSize", "InstanceIds", },
+              com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes.class,
+              com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes.Builder.class);
           return null;
         }
       };

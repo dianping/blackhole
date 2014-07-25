@@ -22,6 +22,8 @@ import "AssignConsumer.proto";
 import "OffsetCommit.proto";
 import "TopicReport.proto";
 import "Restart.proto";
+import "QuitAndClean.proto";
+import "RollClean.proto";
 
 message Message {
     enum MessageType {
@@ -59,6 +61,9 @@ message Message {
         MAKR_UNRECOVERABLE = 32;
         LISTIDLE = 33;
         RESTART = 34;
+        QUIT = 35;
+        CLEAN = 36;
+        ROLL_CLEAN = 37;
     }
 
     required MessageType type = 1;
@@ -81,4 +86,7 @@ message Message {
     optional OffsetCommit offsetCommit = 18;
     optional TopicReport topicReport = 19;
     optional Restart restart = 20;
+    optional Quit quit = 21;
+    optional Clean clean = 22;
+    optional RollClean rollClean = 23;
 }

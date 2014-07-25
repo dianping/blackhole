@@ -1,4 +1,4 @@
-package com.dp.blackhole.scaleout;
+package com.dp.blackhole.http;
 
 public class HttpResult {
     public static final String SUCCESS = "0";

@@ -23,18 +23,20 @@ public class RollRecovery implements Runnable{
     private static final int DEFAULT_BUFSIZE = 8192;
     private String brokerServer;
     private int port;
-    private AppLog appLog;
+    private TopicMeta topicMeta;
     private final long rollTimestamp;
     private Socket socket;
     private byte[] inbuf;
     private Agent node;
-    public RollRecovery(Agent node, String brokerServer, int port, AppLog appLog, final long rollTimestamp) {
+    private boolean isFinal;
+    public RollRecovery(Agent node, String brokerServer, int port, TopicMeta topicMeta, final long rollTimestamp, boolean isFinal) {
         this.node = node;
         this.brokerServer = brokerServer;
         this.port = port;
-        this.appLog = appLog;
+        this.topicMeta = topicMeta;
         this.rollTimestamp = rollTimestamp;
         this.inbuf = new byte[DEFAULT_BUFSIZE];
+        this.isFinal = isFinal;
     }
 
     public void stop() {
@@ -50,7 +52,7 @@ public class RollRecovery implements Runnable{
 
     private void stopRecoverying() {
         stop();
-        node.removeRecoverying(appLog.getAppName(), rollTimestamp);
+        node.removeRecoverying(topicMeta.getMetaKey(), rollTimestamp);
     }
 
     private void stopRecoveryingCauseException(String desc, Exception e) {
@@ -62,20 +64,20 @@ public class RollRecovery implements Runnable{
     @Override
     public void run() {
         // check local file existence 
-        long period = appLog.getRollPeriod();
+        long period = topicMeta.getRollPeriod();
         long fileSize = 0;
         File transferFile = null;
         boolean hasCompressed = false;
         SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         String rollIdent = unitFormat.format(rollTimestamp);
-        LOG.info("Recoverying " + rollIdent + " " + appLog);
-        File rolledFile = Util.findRealFileByIdent(appLog.getTailFile(), rollIdent);
-        File gzFile = Util.findGZFileByIdent(appLog.getTailFile(), rollIdent);
+        LOG.info("Recoverying " + rollIdent + " " + topicMeta);
+        File rolledFile = Util.findRealFileByIdent(topicMeta.getTailFile(), rollIdent);
+        File gzFile = Util.findGZFileByIdent(topicMeta.getTailFile(), rollIdent);
         if (!rolledFile.exists() && (gzFile == null || !gzFile.exists())) {
             LOG.error("Can not found both " + rolledFile + " and gzFile");
             Cat.logError(new BlackholeClientException("Can not found both " + rolledFile + " and gzFile"));
             stopRecoverying();
-            node.reportUnrecoverable(appLog.getAppName(), node.getHost(), period, rollTimestamp);
+            node.reportUnrecoverable(topicMeta.getMetaKey(), node.getHost(), period, rollTimestamp);
             return;
         }
 
@@ -94,10 +96,10 @@ public class RollRecovery implements Runnable{
             } else {
                 throw new IOException("Can not found both " + rolledFile + " and gzFile");
             }
-            wrapSendRecoveryHead(out, fileSize, hasCompressed);
+            wrapSendRecoveryHead(out, fileSize, hasCompressed, isFinal);
         } catch (IOException e) {
             stopRecoveryingCauseException("Faild to build recovery stream or send protocol header.", e);
-            node.reportRecoveryFail(appLog.getAppName(), node.getHost(), period, rollTimestamp);
+            node.reportRecoveryFail(topicMeta.getMetaKey(), node.getHost(), period, rollTimestamp, isFinal);
             return;
         }
 
@@ -134,16 +136,22 @@ public class RollRecovery implements Runnable{
         }
     }
 
-    private AgentProtocol wrapSendRecoveryHead(DataOutputStream out, long fileSize, boolean hasCompressed)
+    private AgentProtocol wrapSendRecoveryHead(DataOutputStream out, long fileSize, boolean hasCompressed, boolean isFinal)
             throws IOException {
         AgentProtocol protocol = new AgentProtocol();
         AgentHead head = protocol.new AgentHead();
-        head.type = AgentProtocol.RECOVERY;
-        head.app = appLog.getAppName();
-        head.peroid = appLog.getRollPeriod();
+        head.instanceId = topicMeta.getInstanceId();
+        if (head.instanceId == null) {
+            head.type = AgentProtocol.RECOVERY;
+        } else {
+            head.type = AgentProtocol.RECOVERY_IN_PAAS;
+        }
+        head.app = topicMeta.getTopic();
+        head.peroid = topicMeta.getRollPeriod();
         head.ts = rollTimestamp;
         head.size = fileSize;
         head.hasCompressed = hasCompressed;
+        head.isFinal = isFinal;
         protocol.sendHead(out, head);
         return protocol;
     }

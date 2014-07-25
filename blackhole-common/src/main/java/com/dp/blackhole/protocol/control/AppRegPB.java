@@ -35,19 +35,19 @@ public final class AppRegPB {
       return com.dp.blackhole.protocol.control.AppRegPB.internal_static_blackhole_AppReg_fieldAccessorTable;
     }
     
-    // required string app_server = 1;
-    public static final int APP_SERVER_FIELD_NUMBER = 1;
-    private boolean hasAppServer;
-    private java.lang.String appServer_ = "";
-    public boolean hasAppServer() { return hasAppServer; }
-    public java.lang.String getAppServer() { return appServer_; }
+    // required string source_identify = 1;
+    public static final int SOURCE_IDENTIFY_FIELD_NUMBER = 1;
+    private boolean hasSourceIdentify;
+    private java.lang.String sourceIdentify_ = "";
+    public boolean hasSourceIdentify() { return hasSourceIdentify; }
+    public java.lang.String getSourceIdentify() { return sourceIdentify_; }
     
-    // required string app_name = 2;
-    public static final int APP_NAME_FIELD_NUMBER = 2;
-    private boolean hasAppName;
-    private java.lang.String appName_ = "";
-    public boolean hasAppName() { return hasAppName; }
-    public java.lang.String getAppName() { return appName_; }
+    // required string topic = 2;
+    public static final int TOPIC_FIELD_NUMBER = 2;
+    private boolean hasTopic;
+    private java.lang.String topic_ = "";
+    public boolean hasTopic() { return hasTopic; }
+    public java.lang.String getTopic() { return topic_; }
     
     // required int64 reg_ts = 3;
     public static final int REG_TS_FIELD_NUMBER = 3;
@@ -59,8 +59,8 @@ public final class AppRegPB {
     private void initFields() {
     }
     public final boolean isInitialized() {
-      if (!hasAppServer) return false;
-      if (!hasAppName) return false;
+      if (!hasSourceIdentify) return false;
+      if (!hasTopic) return false;
       if (!hasRegTs) return false;
       return true;
     }
@@ -68,11 +68,11 @@ public final class AppRegPB {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasAppServer()) {
-        output.writeString(1, getAppServer());
+      if (hasSourceIdentify()) {
+        output.writeString(1, getSourceIdentify());
       }
-      if (hasAppName()) {
-        output.writeString(2, getAppName());
+      if (hasTopic()) {
+        output.writeString(2, getTopic());
       }
       if (hasRegTs()) {
         output.writeInt64(3, getRegTs());
@@ -86,13 +86,13 @@ public final class AppRegPB {
       if (size != -1) return size;
     
       size = 0;
-      if (hasAppServer()) {
+      if (hasSourceIdentify()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getAppServer());
+          .computeStringSize(1, getSourceIdentify());
       }
-      if (hasAppName()) {
+      if (hasTopic()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(2, getAppName());
+          .computeStringSize(2, getTopic());
       }
       if (hasRegTs()) {
         size += com.google.protobuf.CodedOutputStream
@@ -256,11 +256,11 @@ public final class AppRegPB {
       
       public Builder mergeFrom(com.dp.blackhole.protocol.control.AppRegPB.AppReg other) {
         if (other == com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance()) return this;
-        if (other.hasAppServer()) {
-          setAppServer(other.getAppServer());
+        if (other.hasSourceIdentify()) {
+          setSourceIdentify(other.getSourceIdentify());
         }
-        if (other.hasAppName()) {
-          setAppName(other.getAppName());
+        if (other.hasTopic()) {
+          setTopic(other.getTopic());
         }
         if (other.hasRegTs()) {
           setRegTs(other.getRegTs());
@@ -291,11 +291,11 @@ public final class AppRegPB {
               break;
             }
             case 10: {
-              setAppServer(input.readString());
+              setSourceIdentify(input.readString());
               break;
             }
             case 18: {
-              setAppName(input.readString());
+              setTopic(input.readString());
               break;
             }
             case 24: {
@@ -307,45 +307,45 @@ public final class AppRegPB {
       }
       
       
-      // required string app_server = 1;
-      public boolean hasAppServer() {
-        return result.hasAppServer();
+      // required string source_identify = 1;
+      public boolean hasSourceIdentify() {
+        return result.hasSourceIdentify();
       }
-      public java.lang.String getAppServer() {
-        return result.getAppServer();
+      public java.lang.String getSourceIdentify() {
+        return result.getSourceIdentify();
       }
-      public Builder setAppServer(java.lang.String value) {
+      public Builder setSourceIdentify(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppServer = true;
-        result.appServer_ = value;
+  result.hasSourceIdentify = true;
+        result.sourceIdentify_ = value;
         return this;
       }
-      public Builder clearAppServer() {
-        result.hasAppServer = false;
-        result.appServer_ = getDefaultInstance().getAppServer();
+      public Builder clearSourceIdentify() {
+        result.hasSourceIdentify = false;
+        result.sourceIdentify_ = getDefaultInstance().getSourceIdentify();
         return this;
       }
       
-      // required string app_name = 2;
-      public boolean hasAppName() {
-        return result.hasAppName();
+      // required string topic = 2;
+      public boolean hasTopic() {
+        return result.hasTopic();
       }
-      public java.lang.String getAppName() {
-        return result.getAppName();
+      public java.lang.String getTopic() {
+        return result.getTopic();
       }
-      public Builder setAppName(java.lang.String value) {
+      public Builder setTopic(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppName = true;
-        result.appName_ = value;
+  result.hasTopic = true;
+        result.topic_ = value;
         return this;
       }
-      public Builder clearAppName() {
-        result.hasAppName = false;
-        result.appName_ = getDefaultInstance().getAppName();
+      public Builder clearTopic() {
+        result.hasTopic = false;
+        result.topic_ = getDefaultInstance().getTopic();
         return this;
       }
       
@@ -393,10 +393,10 @@ public final class AppRegPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014AppReg.proto\022\tblackhole\">\n\006AppReg\022\022\n\na" +
-      "pp_server\030\001 \002(\t\022\020\n\010app_name\030\002 \002(\t\022\016\n\006reg" +
-      "_ts\030\003 \002(\003B-\n!com.dp.blackhole.protocol.c" +
-      "ontrolB\010AppRegPB"
+      "\n\014AppReg.proto\022\tblackhole\"@\n\006AppReg\022\027\n\017s" +
+      "ource_identify\030\001 \002(\t\022\r\n\005topic\030\002 \002(\t\022\016\n\006r" +
+      "eg_ts\030\003 \002(\003B-\n!com.dp.blackhole.protocol" +
+      ".controlB\010AppRegPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -408,7 +408,7 @@ public final class AppRegPB {
           internal_static_blackhole_AppReg_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_AppReg_descriptor,
-              new java.lang.String[] { "AppServer", "AppName", "RegTs", },
+              new java.lang.String[] { "SourceIdentify", "Topic", "RegTs", },
               com.dp.blackhole.protocol.control.AppRegPB.AppReg.class,
               com.dp.blackhole.protocol.control.AppRegPB.AppReg.Builder.class);
           return null;

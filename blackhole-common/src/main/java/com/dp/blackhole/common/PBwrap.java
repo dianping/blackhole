@@ -11,6 +11,7 @@ import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
 import com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
+import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
 import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.DumpAppPB.DumpApp;
 import com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply;
@@ -20,10 +21,14 @@ import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
+import com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean;
+import com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup;
+import com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit;
 import com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker;
 import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.protocol.control.RestartPB.Restart;
+import com.dp.blackhole.protocol.control.RollCleanPB.RollClean;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 import com.dp.blackhole.protocol.control.StreamIDPB.StreamID;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
@@ -113,6 +118,15 @@ public class PBwrap {
         case RESTART:
             msg.setRestart((Restart) message);
             break;
+        case QUIT:
+            msg.setQuit((Quit) message);
+            break;
+        case CLEAN:
+            msg.setClean((Clean) message);
+            break;
+        case ROLL_CLEAN:
+            msg.setRollClean((RollClean) message);
+            break;
         default:
         }
         return msg.build();
@@ -122,16 +136,19 @@ public class PBwrap {
         return wrapMessage(MessageType.HEARTBEART, null);
     }
     
-    public static Message wrapNoAvailableNode(String app) {
+    public static Message wrapNoAvailableNode(String topic, String instanceId) {
         NoAvailableNode.Builder builder = NoAvailableNode.newBuilder();
-        builder.setAppName(app);
+        builder.setTopic(topic);
+        if (instanceId != null) {
+            builder.setInstanceId(instanceId);
+        }
         return wrapMessage(MessageType.NOAVAILABLENODE, builder.build());
     }
     
-    public static Message wrapAppReg(String appName, String appServer, long regTs) {
+    public static Message wrapTopicReg(String topic, String sourceIdentify, long regTs) {
         AppReg.Builder builder = AppReg.newBuilder();
-        builder.setAppName(appName);
-        builder.setAppServer(appServer);
+        builder.setTopic(topic);
+        builder.setSourceIdentify(sourceIdentify);
         builder.setRegTs(regTs);
         return wrapMessage(MessageType.APP_REG, builder.build());
     }
@@ -143,100 +160,108 @@ public class PBwrap {
         return wrapMessage(MessageType.BROKER_REG, builder.build());
     }
     
-    public static Message wrapAssignBroker(String appName, String brokerServer, int port) {
+    public static Message wrapAssignBroker(String topic, String brokerServer, int port, String instanceId) {
         AssignBroker.Builder builder = AssignBroker.newBuilder();
-        builder.setAppName(appName);
+        builder.setTopic(topic);
         builder.setBrokerServer(brokerServer);
         builder.setBrokerPort(port);
+        if (instanceId != null) {
+            builder.setInstanceId(instanceId);
+        }
         return wrapMessage(MessageType.ASSIGN_BROKER, builder.build());
     }
     
-    public static Message wrapReadyBroker(String app_name, String app_server, long peroid, String broker_server, long connectedTs) {
+    public static Message wrapReadyBroker(String topic, String sourceIdentify, long peroid, String broker_server, long connectedTs) {
         ReadyBroker.Builder builder = ReadyBroker.newBuilder();
-        builder.setAppName(app_name);
-        builder.setAppServer(app_server);
+        builder.setTopic(topic);
+        builder.setSourceIdentify(sourceIdentify);
         builder.setPeriod(peroid);
         builder.setBrokerServer(broker_server);
         builder.setConnectedTs(connectedTs);
         return wrapMessage(MessageType.READY_BROKER, builder.build());
     }
     
-    public static Message wrapAppRoll(String appName, String appServer,long period, long rollTs) {
+    public static Message wrapAppRoll(String topic, String sourceIdentify, long period, long rollTs) {
         AppRoll.Builder builder = AppRoll.newBuilder();
-        builder.setAppName(appName);
-        builder.setAppServer(appServer);
+        builder.setTopic(topic);
+        builder.setSourceIdentify(sourceIdentify);
         builder.setPeriod(period);
         builder.setRollTs(rollTs);
         return wrapMessage(MessageType.APP_ROLL, builder.build());
     }
     
-    public static RollID wrapRollID(String appName, String appServer, long period, long rollTs) {
+    public static RollID wrapRollID(String topic, String sourceIdentify, long period, long rollTs, boolean isFinal) {
         RollID.Builder builder = RollID.newBuilder();
-        builder.setAppName(appName);
-        builder.setAppServer(appServer);
+        builder.setTopic(topic);
+        builder.setSourceIdentify(sourceIdentify);
         builder.setPeriod(period);
         builder.setRollTs(rollTs);
+        builder.setIsFinal(isFinal);
         return builder.build();
     }
     
-    public static Message wrapUploadRoll(String appName, String appServer, long period, long rollTs) {
-        return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(appName, appServer, period, rollTs));
+    public static Message wrapUploadRoll(String appName, String sourceIdentify, long period, long rollTs, boolean isFinal) {
+        return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(appName, sourceIdentify, period, rollTs, isFinal));
     }
     
-    public static Message wrapUploadSuccess(String appName, String appServer, long period, long rollTs) {
-        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(appName, appServer, period, rollTs));
+    public static Message wrapUploadSuccess(String appName, String appServer, long period, long rollTs, boolean isFinal) {
+        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(appName, appServer, period, rollTs, isFinal));
     }
     
-    public static Message wrapUploadFail(String appName, String appServer, long period, long rollTs) {
-        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, appServer, period, rollTs));
+    public static Message wrapUploadFail(String appName, String sourceIdentify, long period, long rollTs, boolean isFinal) {
+        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, sourceIdentify, period, rollTs, isFinal));
     }
     
-    public static Message wrapRecoveryRoll(String appName, String brokerServer, int port, long rollTs) {
+    public static Message wrapRecoveryRoll(String topic, String brokerServer, int port, long rollTs, String instanceId, boolean isFinal) {
         RecoveryRoll.Builder builder = RecoveryRoll.newBuilder();
-        builder.setAppName(appName);
+        builder.setTopic(topic);
         builder.setBrokerServer(brokerServer);
         builder.setRecoveryPort(port);
         builder.setRollTs(rollTs);
+        if (instanceId != null) {
+            builder.setInstanceId(instanceId);
+        }
+        builder.setIsFinal(isFinal);
         return wrapMessage(MessageType.RECOVERY_ROLL, builder.build());
     }
     
-    public static Message wrapRecoverySuccess(String appName, String appServer, long period, long rollTs) {
-        return wrapMessage(MessageType.RECOVERY_SUCCESS, wrapRollID(appName, appServer, period, rollTs));
+    public static Message wrapRecoverySuccess(String appName, String sourceIdentify, long period, long rollTs, boolean isFinal) {
+        return wrapMessage(MessageType.RECOVERY_SUCCESS, wrapRollID(appName, sourceIdentify, period, rollTs, isFinal));
     }
     
-    public static Message wrapRecoveryFail(String appName, String appServer, long period, long rollTs) {
-        return wrapMessage(MessageType.RECOVERY_FAIL, wrapRollID(appName, appServer, period, rollTs));
+    public static Message wrapRecoveryFail(String appName, String sourceIdentify, long period, long rollTs, boolean isFinal) {
+        return wrapMessage(MessageType.RECOVERY_FAIL, wrapRollID(appName, sourceIdentify, period, rollTs, isFinal));
     }
     
-    public static Message wrapFailure (String app, String appHost, NodeType type, long failTs) {
+    public static Message wrapFailure (String topic, String sourceIdentify, NodeType type, long failTs) {
         Failure.Builder builder = Failure.newBuilder();
-        builder.setApp(app);
+        builder.setTopic(topic);
         builder.setType(type);
-        builder.setAppServer(appHost);
+        builder.setSourceIdentify(sourceIdentify);
         builder.setFailTs(failTs);
         return wrapMessage(MessageType.FAILURE, builder.build());
     }
     
-    public static Message wrapAppFailure (String app, String appHost, long failTs) {
-       return wrapFailure(app, appHost, NodeType.APP_NODE, failTs);
+    public static Message wrapAppFailure (String app, String sourceIdentify, long failTs) {
+       return wrapFailure(app, sourceIdentify, NodeType.APP_NODE, failTs);
     }
     
-    public static Message wrapBrokerFailure (String app, String appHost, long failTs) {
-        return wrapFailure(app, appHost, NodeType.BROKER_NODE, failTs);
+    public static Message wrapBrokerFailure (String app, String sourceIdentify, long failTs) {
+        return wrapFailure(app, sourceIdentify, NodeType.BROKER_NODE, failTs);
     }
     
-    public static Message wrapUnrecoverable(String appName, String appServer, long period, long rollTs) {
-        return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, appServer, period, rollTs));
+    public static Message wrapUnrecoverable(String appName, String sourceIdentify, long period, long rollTs) {
+        return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, sourceIdentify, period, rollTs, false));
     }
     
-    public static Message wrapManualRecoveryRoll(String appName, String appServer, long period, long rollTs) {
-        return wrapMessage(MessageType.MANUAL_RECOVERY_ROLL, wrapRollID(appName, appServer, period, rollTs));
+    public static Message wrapManualRecoveryRoll(String appName, String sourceIdentify, long period, long rollTs) {
+        return wrapMessage(MessageType.MANUAL_RECOVERY_ROLL, wrapRollID(appName, sourceIdentify, period, rollTs, false));
     }
     
-    public static Message wrapRetireStream(String appName, String appServer) {
+    public static Message wrapRetireStream(String topic, String agentServer) {
         StreamID.Builder builder = StreamID.newBuilder();
-        builder.setAppName(appName);
-        builder.setAppServer(appServer);
+        builder.setTopic(topic);
+        builder.setAgentServer(agentServer);
         return wrapMessage(MessageType.RETIRESTREAM, builder.build());
     }
     
@@ -248,22 +273,37 @@ public class PBwrap {
         return wrapMessage(MessageType.CONF_REQ, null);
     }
     
-    public static AppConfRes wrapAppConfRes (String appName, String watchFile, String period, String maxLineSize) {
+    public static AppConfRes wrapAppConfRes (String topic, String watchFile, String period, String maxLineSize) {
         AppConfRes.Builder builder = AppConfRes.newBuilder();
-        builder.setAppName(appName);
+        builder.setTopic(topic);
+        builder.setPeriod(period);
         builder.setWatchFile(watchFile);
-        if (period != null) {
-            builder.setPeriod(period);
-        }
         if (maxLineSize != null) {
             builder.setMaxLineSize(maxLineSize);
         }
         return builder.build();
     }
     
-    public static Message wrapConfRes (List<AppConfRes> appConfResList) {
+    public static LxcConfRes wrapLxcConfRes (String topic, String watchFile, String period, String maxLineSize, List<String> ids) {
+        LxcConfRes.Builder builder = LxcConfRes.newBuilder();
+        builder.setTopic(topic);
+        builder.setPeriod(period);
+        builder.setWatchFile(watchFile);
+        if (maxLineSize != null) {
+            builder.setMaxLineSize(maxLineSize);
+        }
+        builder.addAllInstanceIds(ids);
+        return builder.build();
+    }
+    
+    public static Message wrapConfRes (List<AppConfRes> appConfResList, List<LxcConfRes> lxcConfResList) {
         ConfRes.Builder builder = ConfRes.newBuilder();
-        builder.addAllAppConfRes(appConfResList);
+        if (appConfResList != null) {
+            builder.addAllAppConfRes(appConfResList);
+        }
+        if (lxcConfResList != null) {
+            builder.addAllLxcConfRes(lxcConfResList);
+        }
         return wrapMessage(MessageType.CONF_RES, builder.build());
     }
     
@@ -289,21 +329,21 @@ public class PBwrap {
         return wrapMessage(MessageType.LISTIDLE, null);
     }
 
-    public static Message wrapRemoveConf(String appName, ArrayList<String> appServers) {
+    public static Message wrapRemoveConf(String topic, ArrayList<String> agentServers) {
         RemoveConf.Builder builder = RemoveConf.newBuilder();
-        builder.setAppName(appName);
-        builder.addAllAppServers(appServers);
+        builder.setTopic(topic);
+        builder.addAllAgentServers(agentServers);
         return wrapMessage(MessageType.REMOVE_CONF, builder.build());
     }
     
-    public static Message wrapDumpApp(String appName) {
+    public static Message wrapDumpApp(String topic) {
         DumpApp.Builder builder = DumpApp.newBuilder();
-        builder.setAppName(appName);
+        builder.setTopic(topic);
         return wrapMessage(MessageType.DUMP_APP, builder.build());
     }
 
-    public static Message wrapMarkUnrecoverable(String appName, String appServer, long period, long rollTs) {
-        return wrapMessage(MessageType.MAKR_UNRECOVERABLE, wrapRollID(appName, appServer, period, rollTs));
+    public static Message wrapMarkUnrecoverable(String appName, String sourceIdentify, long period, long rollTs) {
+        return wrapMessage(MessageType.MAKR_UNRECOVERABLE, wrapRollID(appName, sourceIdentify, period, rollTs, false));
     }
 
     /**
@@ -382,9 +422,36 @@ public class PBwrap {
         return buf;
     }
     
-    public static Message wrapRestart(ArrayList<String> appServers) {
+    public static Message wrapRestart(ArrayList<String> agentServers) {
         Restart.Builder builder = Restart.newBuilder();
-        builder.addAllAppServers(appServers);
+        builder.addAllAgentServers(agentServers);
         return wrapMessage(MessageType.RESTART, builder.build());
+    }
+    
+    public static InstanceGroup wrapInstanceGroup(String topic, List<String> ids) {
+        InstanceGroup.Builder builder = InstanceGroup.newBuilder();
+        builder.setTopic(topic);
+        builder.addAllInstanceIds(ids);
+        return builder.build();
+    }
+    
+    public static Message wrapQuit(List<InstanceGroup> instanceGroup) {
+        Quit.Builder builder = Quit.newBuilder();
+        builder.addAllInstanceGroup(instanceGroup);
+        return wrapMessage(MessageType.QUIT, builder.build());
+    }
+    
+    public static Message wrapClean(List<InstanceGroup> instanceGroup) {
+        Clean.Builder builder = Clean.newBuilder();
+        builder.addAllInstanceGroup(instanceGroup);
+        return wrapMessage(MessageType.CLEAN, builder.build());
+    }
+    
+    public static Message wrapRollClean(String topic, String sourceIdentify, long period) {
+        AppRoll.Builder builder = AppRoll.newBuilder();
+        builder.setTopic(topic);
+        builder.setSourceIdentify(sourceIdentify);
+        builder.setPeriod(period);
+        return wrapMessage(MessageType.ROLL_CLEAN, builder.build());
     }
 }

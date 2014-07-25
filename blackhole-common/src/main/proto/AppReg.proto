@@ -4,7 +4,7 @@ option java_package = "com.dp.blackhole.protocol.control";
 option java_outer_classname = "AppRegPB";
 
 message AppReg{
-    required string app_server = 1;
-    required string app_name = 2;
+    required string source_identify = 1;
+    required string topic = 2;
     required int64 reg_ts = 3;
 }

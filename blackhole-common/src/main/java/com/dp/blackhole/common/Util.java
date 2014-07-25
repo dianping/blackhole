@@ -23,7 +23,6 @@ import java.util.zip.CRC32;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.network.NonblockingConnection;
 import com.dp.blackhole.network.SimpleConnection;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 
@@ -244,6 +243,13 @@ public class Util {
         }
         return result;
     }
+    
+    public static String getStringOfLionValue(String rawValue) {
+        if (rawValue == null) {
+            return null;
+        }
+        return rawValue.trim();
+    }
 
     //["host01","host02"]
     public static String getLionValueOfStringList(String[] hosts) {
@@ -360,5 +366,27 @@ public class Util {
         } else {
             LOG.info("peer is not connected, message sending abort " + message);
         }
+    }
+    
+    public static String getSourceIdentify(String agentServer, String instanceId) {
+        if (instanceId == null) {
+            return agentServer;
+        } else {
+            return agentServer + "#" + instanceId;
+        }
+    }
+    
+    public static String getInstanceIdFromSourceIdentify(String sourceIdentify) {
+        String[] splits = sourceIdentify.split("#");
+        if (splits.length == 2) {
+            return splits[1];
+        } else {
+            return null;
+        }
+    }
+    
+    public static String getAgentHostFromSourceIdentify(String sourceIdentify) {
+        String[] splits = sourceIdentify.split("#");
+        return splits[0];
     }
 }
