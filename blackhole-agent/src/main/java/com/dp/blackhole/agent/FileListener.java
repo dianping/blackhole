@@ -141,7 +141,7 @@ public class FileListener implements JNotifyListener{
                     LOG.fatal("Failed to get wd by file " + createdFilePath);
                     Cat.logError(new BlackholeClientException("Failed to get wd by file " + createdFilePath));
                 }
-                int newWd = iJNotifyInstance.addWatch(createdFilePath, FILE_MODIFIED, false, this);
+                Integer newWd = iJNotifyInstance.addWatch(createdFilePath, FILE_MODIFIED, false, this);
                 path2wd.put(createdFilePath, newWd);
                 LOG.info("Re-monitoring "+ createdFilePath + " \"FILE_MODIFIED\" for rotate.");
             } catch (JNotifyException e) {
