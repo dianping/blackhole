@@ -71,6 +71,9 @@ public final class MessagePB {
       MAKR_UNRECOVERABLE(31, 32),
       LISTIDLE(32, 33),
       RESTART(33, 34),
+      QUIT(34, 35),
+      CLEAN(35, 36),
+      ROLL_CLEAN(36, 37),
       ;
       
       
@@ -112,6 +115,9 @@ public final class MessagePB {
           case 32: return MAKR_UNRECOVERABLE;
           case 33: return LISTIDLE;
           case 34: return RESTART;
+          case 35: return QUIT;
+          case 36: return CLEAN;
+          case 37: return ROLL_CLEAN;
           default: return null;
         }
       }
@@ -142,7 +148,7 @@ public final class MessagePB {
       }
       
       private static final MessageType[] VALUES = {
-        HEARTBEART, APP_REG, BROKER_REG, ASSIGN_BROKER, READY_BROKER, APP_ROLL, UPLOAD_ROLL, UPLOAD_SUCCESS, UPLOAD_FAIL, RECOVERY_ROLL, RECOVERY_SUCCESS, RECOVERY_FAIL, FAILURE, NOAVAILABLENODE, UNRECOVERABLE, MANUAL_RECOVERY_ROLL, DUMPSTAT, RETIRESTREAM, CONF_REQ, CONF_RES, NOAVAILABLECONF, DUMPCONF, DUMPREPLY, LISTAPPS, REMOVE_CONF, DUMP_APP, CONSUMER_REG, ASSIGN_CONSUMER, OFFSET_COMMIT, TOPICREPORT, CONSUMERREGFAIL, MAKR_UNRECOVERABLE, LISTIDLE, RESTART, 
+        HEARTBEART, APP_REG, BROKER_REG, ASSIGN_BROKER, READY_BROKER, APP_ROLL, UPLOAD_ROLL, UPLOAD_SUCCESS, UPLOAD_FAIL, RECOVERY_ROLL, RECOVERY_SUCCESS, RECOVERY_FAIL, FAILURE, NOAVAILABLENODE, UNRECOVERABLE, MANUAL_RECOVERY_ROLL, DUMPSTAT, RETIRESTREAM, CONF_REQ, CONF_RES, NOAVAILABLECONF, DUMPCONF, DUMPREPLY, LISTAPPS, REMOVE_CONF, DUMP_APP, CONSUMER_REG, ASSIGN_CONSUMER, OFFSET_COMMIT, TOPICREPORT, CONSUMERREGFAIL, MAKR_UNRECOVERABLE, LISTIDLE, RESTART, QUIT, CLEAN, ROLL_CLEAN, 
       };
       public static MessageType valueOf(
           com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
@@ -306,6 +312,27 @@ public final class MessagePB {
     public boolean hasRestart() { return hasRestart; }
     public com.dp.blackhole.protocol.control.RestartPB.Restart getRestart() { return restart_; }
     
+    // optional .blackhole.Quit quit = 21;
+    public static final int QUIT_FIELD_NUMBER = 21;
+    private boolean hasQuit;
+    private com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit quit_;
+    public boolean hasQuit() { return hasQuit; }
+    public com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit getQuit() { return quit_; }
+    
+    // optional .blackhole.Clean clean = 22;
+    public static final int CLEAN_FIELD_NUMBER = 22;
+    private boolean hasClean;
+    private com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean clean_;
+    public boolean hasClean() { return hasClean; }
+    public com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean getClean() { return clean_; }
+    
+    // optional .blackhole.RollClean rollClean = 23;
+    public static final int ROLLCLEAN_FIELD_NUMBER = 23;
+    private boolean hasRollClean;
+    private com.dp.blackhole.protocol.control.RollCleanPB.RollClean rollClean_;
+    public boolean hasRollClean() { return hasRollClean; }
+    public com.dp.blackhole.protocol.control.RollCleanPB.RollClean getRollClean() { return rollClean_; }
+    
     private void initFields() {
       type_ = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance();
@@ -327,6 +354,9 @@ public final class MessagePB {
       offsetCommit_ = com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.getDefaultInstance();
       topicReport_ = com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.getDefaultInstance();
       restart_ = com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance();
+      quit_ = com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.getDefaultInstance();
+      clean_ = com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.getDefaultInstance();
+      rollClean_ = com.dp.blackhole.protocol.control.RollCleanPB.RollClean.getDefaultInstance();
     }
     public final boolean isInitialized() {
       if (!hasType) return false;
@@ -383,6 +413,15 @@ public final class MessagePB {
       }
       if (hasTopicReport()) {
         if (!getTopicReport().isInitialized()) return false;
+      }
+      if (hasQuit()) {
+        if (!getQuit().isInitialized()) return false;
+      }
+      if (hasClean()) {
+        if (!getClean().isInitialized()) return false;
+      }
+      if (hasRollClean()) {
+        if (!getRollClean().isInitialized()) return false;
       }
       return true;
     }
@@ -449,6 +488,15 @@ public final class MessagePB {
       }
       if (hasRestart()) {
         output.writeMessage(20, getRestart());
+      }
+      if (hasQuit()) {
+        output.writeMessage(21, getQuit());
+      }
+      if (hasClean()) {
+        output.writeMessage(22, getClean());
+      }
+      if (hasRollClean()) {
+        output.writeMessage(23, getRollClean());
       }
       getUnknownFields().writeTo(output);
     }
@@ -538,6 +586,18 @@ public final class MessagePB {
       if (hasRestart()) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(20, getRestart());
+      }
+      if (hasQuit()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(21, getQuit());
+      }
+      if (hasClean()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(22, getClean());
+      }
+      if (hasRollClean()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(23, getRollClean());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -757,6 +817,15 @@ public final class MessagePB {
         if (other.hasRestart()) {
           mergeRestart(other.getRestart());
         }
+        if (other.hasQuit()) {
+          mergeQuit(other.getQuit());
+        }
+        if (other.hasClean()) {
+          mergeClean(other.getClean());
+        }
+        if (other.hasRollClean()) {
+          mergeRollClean(other.getRollClean());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -961,6 +1030,33 @@ public final class MessagePB {
               }
               input.readMessage(subBuilder, extensionRegistry);
               setRestart(subBuilder.buildPartial());
+              break;
+            }
+            case 170: {
+              com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.Builder subBuilder = com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.newBuilder();
+              if (hasQuit()) {
+                subBuilder.mergeFrom(getQuit());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setQuit(subBuilder.buildPartial());
+              break;
+            }
+            case 178: {
+              com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.Builder subBuilder = com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.newBuilder();
+              if (hasClean()) {
+                subBuilder.mergeFrom(getClean());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setClean(subBuilder.buildPartial());
+              break;
+            }
+            case 186: {
+              com.dp.blackhole.protocol.control.RollCleanPB.RollClean.Builder subBuilder = com.dp.blackhole.protocol.control.RollCleanPB.RollClean.newBuilder();
+              if (hasRollClean()) {
+                subBuilder.mergeFrom(getRollClean());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setRollClean(subBuilder.buildPartial());
               break;
             }
           }
@@ -1692,6 +1788,117 @@ public final class MessagePB {
         return this;
       }
       
+      // optional .blackhole.Quit quit = 21;
+      public boolean hasQuit() {
+        return result.hasQuit();
+      }
+      public com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit getQuit() {
+        return result.getQuit();
+      }
+      public Builder setQuit(com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        result.hasQuit = true;
+        result.quit_ = value;
+        return this;
+      }
+      public Builder setQuit(com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.Builder builderForValue) {
+        result.hasQuit = true;
+        result.quit_ = builderForValue.build();
+        return this;
+      }
+      public Builder mergeQuit(com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit value) {
+        if (result.hasQuit() &&
+            result.quit_ != com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.getDefaultInstance()) {
+          result.quit_ =
+            com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.newBuilder(result.quit_).mergeFrom(value).buildPartial();
+        } else {
+          result.quit_ = value;
+        }
+        result.hasQuit = true;
+        return this;
+      }
+      public Builder clearQuit() {
+        result.hasQuit = false;
+        result.quit_ = com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.getDefaultInstance();
+        return this;
+      }
+      
+      // optional .blackhole.Clean clean = 22;
+      public boolean hasClean() {
+        return result.hasClean();
+      }
+      public com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean getClean() {
+        return result.getClean();
+      }
+      public Builder setClean(com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        result.hasClean = true;
+        result.clean_ = value;
+        return this;
+      }
+      public Builder setClean(com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.Builder builderForValue) {
+        result.hasClean = true;
+        result.clean_ = builderForValue.build();
+        return this;
+      }
+      public Builder mergeClean(com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean value) {
+        if (result.hasClean() &&
+            result.clean_ != com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.getDefaultInstance()) {
+          result.clean_ =
+            com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.newBuilder(result.clean_).mergeFrom(value).buildPartial();
+        } else {
+          result.clean_ = value;
+        }
+        result.hasClean = true;
+        return this;
+      }
+      public Builder clearClean() {
+        result.hasClean = false;
+        result.clean_ = com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.getDefaultInstance();
+        return this;
+      }
+      
+      // optional .blackhole.RollClean rollClean = 23;
+      public boolean hasRollClean() {
+        return result.hasRollClean();
+      }
+      public com.dp.blackhole.protocol.control.RollCleanPB.RollClean getRollClean() {
+        return result.getRollClean();
+      }
+      public Builder setRollClean(com.dp.blackhole.protocol.control.RollCleanPB.RollClean value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        result.hasRollClean = true;
+        result.rollClean_ = value;
+        return this;
+      }
+      public Builder setRollClean(com.dp.blackhole.protocol.control.RollCleanPB.RollClean.Builder builderForValue) {
+        result.hasRollClean = true;
+        result.rollClean_ = builderForValue.build();
+        return this;
+      }
+      public Builder mergeRollClean(com.dp.blackhole.protocol.control.RollCleanPB.RollClean value) {
+        if (result.hasRollClean() &&
+            result.rollClean_ != com.dp.blackhole.protocol.control.RollCleanPB.RollClean.getDefaultInstance()) {
+          result.rollClean_ =
+            com.dp.blackhole.protocol.control.RollCleanPB.RollClean.newBuilder(result.rollClean_).mergeFrom(value).buildPartial();
+        } else {
+          result.rollClean_ = value;
+        }
+        result.hasRollClean = true;
+        return this;
+      }
+      public Builder clearRollClean() {
+        result.hasRollClean = false;
+        result.rollClean_ = com.dp.blackhole.protocol.control.RollCleanPB.RollClean.getDefaultInstance();
+        return this;
+      }
+      
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
     
@@ -1726,45 +1933,50 @@ public final class MessagePB {
       "umpReply.proto\032\020RemoveConf.proto\032\017Broker" +
       "Reg.proto\032\rDumpApp.proto\032\021ConsumerReg.pr" +
       "oto\032\024AssignConsumer.proto\032\022OffsetCommit." +
-      "proto\032\021TopicReport.proto\032\rRestart.proto\"" +
-      "\265\013\n\007Message\022,\n\004type\030\001 \002(\0162\036.blackhole.Me",
-      "ssage.MessageType\022!\n\006appReg\030\002 \001(\0132\021.blac" +
-      "khole.AppReg\022-\n\014assignBroker\030\003 \001(\0132\027.bla" +
-      "ckhole.AssignBroker\022#\n\007appRoll\030\004 \001(\0132\022.b" +
-      "lackhole.AppRoll\022-\n\014recoveryRoll\030\005 \001(\0132\027" +
-      ".blackhole.RecoveryRoll\022+\n\013readyBroker\030\006" +
-      " \001(\0132\026.blackhole.ReadyBroker\022!\n\006rollID\030\007" +
-      " \001(\0132\021.blackhole.RollID\022#\n\007failure\030\010 \001(\013" +
-      "2\022.blackhole.Failure\0223\n\017noAvailableNode\030" +
-      "\t \001(\0132\032.blackhole.NoAvailableNode\022%\n\010str" +
-      "eamId\030\n \001(\0132\023.blackhole.StreamID\022#\n\007conf",
-      "Res\030\013 \001(\0132\022.blackhole.ConfRes\022\'\n\tdumpRep" +
-      "ly\030\014 \001(\0132\024.blackhole.DumpReply\022)\n\nremove" +
-      "Conf\030\r \001(\0132\025.blackhole.RemoveConf\022\'\n\tbro" +
-      "kerReg\030\016 \001(\0132\024.blackhole.BrokerReg\022#\n\007du" +
-      "mpApp\030\017 \001(\0132\022.blackhole.DumpApp\022+\n\013consu" +
-      "merReg\030\020 \001(\0132\026.blackhole.ConsumerReg\0221\n\016" +
-      "assignConsumer\030\021 \001(\0132\031.blackhole.AssignC" +
-      "onsumer\022-\n\014offsetCommit\030\022 \001(\0132\027.blackhol" +
-      "e.OffsetCommit\022+\n\013topicReport\030\023 \001(\0132\026.bl" +
-      "ackhole.TopicReport\022#\n\007restart\030\024 \001(\0132\022.b",
-      "lackhole.Restart\"\334\004\n\013MessageType\022\016\n\nHEAR" +
-      "TBEART\020\001\022\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021\n" +
-      "\rASSIGN_BROKER\020\004\022\020\n\014READY_BROKER\020\005\022\014\n\010AP" +
-      "P_ROLL\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_SUCC" +
-      "ESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_ROLL\020" +
-      "\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOVERY_FAIL" +
-      "\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAILABLENODE\020\016\022\021\n\r" +
-      "UNRECOVERABLE\020\017\022\030\n\024MANUAL_RECOVERY_ROLL\020" +
-      "\020\022\014\n\010DUMPSTAT\020\021\022\020\n\014RETIRESTREAM\020\022\022\014\n\010CON" +
-      "F_REQ\020\023\022\014\n\010CONF_RES\020\024\022\023\n\017NOAVAILABLECONF",
-      "\020\025\022\014\n\010DUMPCONF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010LISTA" +
-      "PPS\020\030\022\017\n\013REMOVE_CONF\020\031\022\014\n\010DUMP_APP\020\032\022\020\n\014" +
-      "CONSUMER_REG\020\033\022\023\n\017ASSIGN_CONSUMER\020\034\022\021\n\rO" +
-      "FFSET_COMMIT\020\035\022\017\n\013TOPICREPORT\020\036\022\023\n\017CONSU" +
-      "MERREGFAIL\020\037\022\026\n\022MAKR_UNRECOVERABLE\020 \022\014\n\010" +
-      "LISTIDLE\020!\022\013\n\007RESTART\020\"B.\n!com.dp.blackh" +
-      "ole.protocol.controlB\tMessagePB"
+      "proto\032\021TopicReport.proto\032\rRestart.proto\032" +
+      "\022QuitAndClean.proto\032\017RollClean.proto\"\303\014\n",
+      "\007Message\022,\n\004type\030\001 \002(\0162\036.blackhole.Messa" +
+      "ge.MessageType\022!\n\006appReg\030\002 \001(\0132\021.blackho" +
+      "le.AppReg\022-\n\014assignBroker\030\003 \001(\0132\027.blackh" +
+      "ole.AssignBroker\022#\n\007appRoll\030\004 \001(\0132\022.blac" +
+      "khole.AppRoll\022-\n\014recoveryRoll\030\005 \001(\0132\027.bl" +
+      "ackhole.RecoveryRoll\022+\n\013readyBroker\030\006 \001(" +
+      "\0132\026.blackhole.ReadyBroker\022!\n\006rollID\030\007 \001(" +
+      "\0132\021.blackhole.RollID\022#\n\007failure\030\010 \001(\0132\022." +
+      "blackhole.Failure\0223\n\017noAvailableNode\030\t \001" +
+      "(\0132\032.blackhole.NoAvailableNode\022%\n\010stream",
+      "Id\030\n \001(\0132\023.blackhole.StreamID\022#\n\007confRes" +
+      "\030\013 \001(\0132\022.blackhole.ConfRes\022\'\n\tdumpReply\030" +
+      "\014 \001(\0132\024.blackhole.DumpReply\022)\n\nremoveCon" +
+      "f\030\r \001(\0132\025.blackhole.RemoveConf\022\'\n\tbroker" +
+      "Reg\030\016 \001(\0132\024.blackhole.BrokerReg\022#\n\007dumpA" +
+      "pp\030\017 \001(\0132\022.blackhole.DumpApp\022+\n\013consumer" +
+      "Reg\030\020 \001(\0132\026.blackhole.ConsumerReg\0221\n\016ass" +
+      "ignConsumer\030\021 \001(\0132\031.blackhole.AssignCons" +
+      "umer\022-\n\014offsetCommit\030\022 \001(\0132\027.blackhole.O" +
+      "ffsetCommit\022+\n\013topicReport\030\023 \001(\0132\026.black",
+      "hole.TopicReport\022#\n\007restart\030\024 \001(\0132\022.blac" +
+      "khole.Restart\022\035\n\004quit\030\025 \001(\0132\017.blackhole." +
+      "Quit\022\037\n\005clean\030\026 \001(\0132\020.blackhole.Clean\022\'\n" +
+      "\trollClean\030\027 \001(\0132\024.blackhole.RollClean\"\201" +
+      "\005\n\013MessageType\022\016\n\nHEARTBEART\020\001\022\013\n\007APP_RE" +
+      "G\020\002\022\016\n\nBROKER_REG\020\003\022\021\n\rASSIGN_BROKER\020\004\022\020" +
+      "\n\014READY_BROKER\020\005\022\014\n\010APP_ROLL\020\006\022\017\n\013UPLOAD" +
+      "_ROLL\020\007\022\022\n\016UPLOAD_SUCCESS\020\010\022\017\n\013UPLOAD_FA" +
+      "IL\020\t\022\021\n\rRECOVERY_ROLL\020\n\022\024\n\020RECOVERY_SUCC" +
+      "ESS\020\013\022\021\n\rRECOVERY_FAIL\020\014\022\013\n\007FAILURE\020\r\022\023\n",
+      "\017NOAVAILABLENODE\020\016\022\021\n\rUNRECOVERABLE\020\017\022\030\n" +
+      "\024MANUAL_RECOVERY_ROLL\020\020\022\014\n\010DUMPSTAT\020\021\022\020\n" +
+      "\014RETIRESTREAM\020\022\022\014\n\010CONF_REQ\020\023\022\014\n\010CONF_RE" +
+      "S\020\024\022\023\n\017NOAVAILABLECONF\020\025\022\014\n\010DUMPCONF\020\026\022\r" +
+      "\n\tDUMPREPLY\020\027\022\014\n\010LISTAPPS\020\030\022\017\n\013REMOVE_CO" +
+      "NF\020\031\022\014\n\010DUMP_APP\020\032\022\020\n\014CONSUMER_REG\020\033\022\023\n\017" +
+      "ASSIGN_CONSUMER\020\034\022\021\n\rOFFSET_COMMIT\020\035\022\017\n\013" +
+      "TOPICREPORT\020\036\022\023\n\017CONSUMERREGFAIL\020\037\022\026\n\022MA" +
+      "KR_UNRECOVERABLE\020 \022\014\n\010LISTIDLE\020!\022\013\n\007REST" +
+      "ART\020\"\022\010\n\004QUIT\020#\022\t\n\005CLEAN\020$\022\016\n\nROLL_CLEAN",
+      "\020%B.\n!com.dp.blackhole.protocol.controlB" +
+      "\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1776,7 +1988,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "AppRoll", "RecoveryRoll", "ReadyBroker", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", },
+              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "AppRoll", "RecoveryRoll", "ReadyBroker", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", "Quit", "Clean", "RollClean", },
               com.dp.blackhole.protocol.control.MessagePB.Message.class,
               com.dp.blackhole.protocol.control.MessagePB.Message.Builder.class);
           return null;
@@ -1804,6 +2016,8 @@ public final class MessagePB {
           com.dp.blackhole.protocol.control.OffsetCommitPB.getDescriptor(),
           com.dp.blackhole.protocol.control.TopicReportPB.getDescriptor(),
           com.dp.blackhole.protocol.control.RestartPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.QuitAndCleanPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.RollCleanPB.getDescriptor(),
         }, assigner);
   }
   

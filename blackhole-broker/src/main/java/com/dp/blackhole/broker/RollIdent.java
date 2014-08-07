@@ -1,17 +1,21 @@
 package com.dp.blackhole.broker;
 
 public class RollIdent {
-    public String app;
+    public String topic;
     public long period;
-    public String source;
+    public String sourceIdentify;
     public long ts;
+    public boolean isFinal;
+    
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((app == null) ? 0 : app.hashCode());
+        result = prime * result + (isFinal ? 1231 : 1237);
         result = prime * result + (int) (period ^ (period >>> 32));
-        result = prime * result + ((source == null) ? 0 : source.hashCode());
+        result = prime * result
+                + ((sourceIdentify == null) ? 0 : sourceIdentify.hashCode());
+        result = prime * result + ((topic == null) ? 0 : topic.hashCode());
         result = prime * result + (int) (ts ^ (ts >>> 32));
         return result;
     }
@@ -24,17 +28,19 @@ public class RollIdent {
         if (getClass() != obj.getClass())
             return false;
         RollIdent other = (RollIdent) obj;
-        if (app == null) {
-            if (other.app != null)
-                return false;
-        } else if (!app.equals(other.app))
+        if (isFinal != other.isFinal)
             return false;
         if (period != other.period)
             return false;
-        if (source == null) {
-            if (other.source != null)
+        if (sourceIdentify == null) {
+            if (other.sourceIdentify != null)
                 return false;
-        } else if (!source.equals(other.source))
+        } else if (!sourceIdentify.equals(other.sourceIdentify))
+            return false;
+        if (topic == null) {
+            if (other.topic != null)
+                return false;
+        } else if (!topic.equals(other.topic))
             return false;
         if (ts != other.ts)
             return false;
@@ -43,6 +49,6 @@ public class RollIdent {
 
     @Override
     public String toString() {
-        return app + "@" + source + "," + period + "," + ts; 
+        return topic + "@" + sourceIdentify + "," + period + "," + ts + ",final:" + isFinal; 
     }
 }

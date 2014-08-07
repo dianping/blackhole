@@ -17,9 +17,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.dp.blackhole.agent.AppLog;
+import com.dp.blackhole.agent.TopicMeta;
 import com.dp.blackhole.agent.FileListener;
 import com.dp.blackhole.agent.LogReader;
+import com.dp.blackhole.agent.TopicMeta.MetaKey;
 import com.dp.blackhole.broker.BrokerService;
 import com.dp.blackhole.broker.ByteBufferChannel;
 import com.dp.blackhole.broker.SimBroker;
@@ -74,7 +75,8 @@ public class TestLogReader {
     @Test
     public void testFileRotated() throws IOException {
         String localhost = Util.getLocalHost();
-        AppLog appLog = new AppLog(MAGIC, SimAgent.TEST_ROLL_FILE, 3600, 1024);
+        MetaKey metaKey = new MetaKey(MAGIC, null);
+        TopicMeta appLog = new TopicMeta(metaKey, SimAgent.TEST_ROLL_FILE, 3600, 1024);
         SimAgent agent = new SimAgent();
         FileListener listener;
         try {

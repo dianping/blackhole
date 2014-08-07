@@ -26,6 +26,7 @@ import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.data.DataMessageTypeFactory;
 import com.dp.blackhole.protocol.data.FetchReply;
 import com.dp.blackhole.protocol.data.FetchRequest;
+import com.dp.blackhole.protocol.data.LastRotateRequest;
 import com.dp.blackhole.protocol.data.MultiFetchReply;
 import com.dp.blackhole.protocol.data.MultiFetchRequest;
 import com.dp.blackhole.protocol.data.OffsetReply;
@@ -44,7 +45,8 @@ public class BrokerService extends Thread {
     StorageManager manager;
     PublisherExecutor executor;
     private Map<DelegationIOConnection, ClientDesc> clients;
-    Properties prop;
+    int servicePort;
+    int numHandler;
     
     public static void reportPartitionInfo(List<ReportEntry> entrylist) {
         Broker.getSupervisor().reportPartitionInfo(entrylist);
@@ -53,17 +55,18 @@ public class BrokerService extends Thread {
     @Override
     public void run() {
         try {
-            server.init(prop, "Publisher", "broker.service.port");
+            server.init("Publisher", servicePort, numHandler);
         } catch (IOException e) {
             LOG.error("Failed to init GenServer", e);
         }
     }
     
     public BrokerService(Properties prop) throws IOException {
-        this.prop = prop;
         String storagedir = prop.getProperty("broker.storage.dir");
         int splitThreshold = Integer.parseInt(prop.getProperty("broker.storage.splitThreshold", "536870912"));
         int flushThreshold = Integer.parseInt(prop.getProperty("broker.storage.flushThreshold", "4194304"));
+        numHandler = Integer.parseInt(prop.getProperty("GenServer.handler.count", "3"));
+        servicePort = Integer.parseInt(prop.getProperty("broker.service.port"));
         clients = new ConcurrentHashMap<DelegationIOConnection, BrokerService.ClientDesc>();
         manager = new StorageManager(storagedir, splitThreshold, flushThreshold);
         executor = new PublisherExecutor();
@@ -190,12 +193,27 @@ public class BrokerService extends Thread {
         public void handleRegisterRequest(RegisterRequest request, DelegationIOConnection from) {
             clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT));
             try {
-                manager.getPartition(request.topic, request.source, true);
+                manager.getPartition(request.topic, request.sourceIdentify, true);
             } catch (IOException e) {
                 LOG.error("Got an IOE", e);
             }
-            Message msg = PBwrap.wrapReadyBroker(request.topic, request.source, request.peroid, request.broker, Util.getTS());
+            Message msg = PBwrap.wrapReadyBroker(request.topic, request.sourceIdentify, request.peroid, request.broker, Util.getTS());
             Broker.getSupervisor().send(msg);
+        }
+        
+        public void handleLastRotateRequest(LastRotateRequest request, DelegationIOConnection from) {
+            Partition p = null;
+            try {
+                p = manager.getPartition(request.topic, request.partitionId, false);
+                if (p == null) {
+                    closeClientOfErrorRequest(from, request);
+                    return;
+                }
+                RollPartition roll = p.markRotate();
+                Broker.getRollMgr().doClean(request.topic, request.partitionId, request.rollPeriod, roll);
+            } catch (IOException e) {
+                LOG.error("Got an IOE", e);
+            }
         }
         
         @Override
@@ -218,6 +236,9 @@ public class BrokerService extends Thread {
                 break;
             case DataMessageTypeFactory.RegisterRequest:
                 handleRegisterRequest((RegisterRequest) request.unwrap(), from);
+                break;
+            case DataMessageTypeFactory.LastRotateRequest:
+                handleLastRotateRequest((LastRotateRequest) request.unwrap(), from);
                 break;
             default:
                 LOG.error("unknown message type: " + request.getType());

@@ -28,7 +28,7 @@ public class LogReader implements Runnable{
     private static final int IN_BUF = 1024 * 8;
     private static final int SYS_MAX_LINE_SIZE = 1024 * 512;
 
-    private AppLog appLog;
+    private TopicMeta topicMeta;
     private Agent node;
     private String localhost;
     private String broker;
@@ -36,12 +36,12 @@ public class LogReader implements Runnable{
     private Socket socket;
     EventWriter eventWriter;
     
-    public LogReader(Agent node, String localhost, String broker, int port, AppLog appLog) {
+    public LogReader(Agent node, String localhost, String broker, int port, TopicMeta topicMeta) {
         this.node = node;
         this.localhost = localhost;
         this.broker = broker;
         this.brokerPort = port;
-        this.appLog = appLog;
+        this.topicMeta = topicMeta;
     }
 
     public void stop() {
@@ -53,38 +53,34 @@ public class LogReader implements Runnable{
         } catch (IOException e) {
             LOG.warn("Failed to close socket.", e);
         }
-        node.getListener().unregisterLogReader(appLog.getTailFile());
+        node.getListener().unregisterLogReader(topicMeta.getTailFile());
     }
 
     @Override
     public void run() {
         try {
-            LOG.info("Log reader for " + appLog + " running...");
+            LOG.info("Log reader for " + topicMeta + " running...");
             
-            File tailFile = new File(appLog.getTailFile());
-            this.eventWriter = new EventWriter(tailFile, appLog.getMaxLineSize());
+            File tailFile = new File(topicMeta.getTailFile());
+            this.eventWriter = new EventWriter(tailFile, topicMeta.getMaxLineSize());
             
-            if (!node.getListener().registerLogReader(appLog.getTailFile(), this)) {
-                throw new IOException("Failed to register a log reader for " + appLog.getAppName() 
-                        + " with " + appLog.getTailFile() + ", thread will not run.");
+            if (!node.getListener().registerLogReader(topicMeta.getTailFile(), this)) {
+                throw new IOException("Failed to register a log reader for " + topicMeta.getMetaKey() 
+                        + " with " + topicMeta.getTailFile() + ", thread will not run.");
             }
         } catch (UnknownHostException e) {
             LOG.error("Socket fail!", e);
             Cat.logError("Socket fail!", e);
-            node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+            node.reportFailure(topicMeta.getMetaKey(), node.getHost(), Util.getTS());
         } catch (IOException e) {
             LOG.error("Oops, got an exception", e);
             Cat.logError("Oops, got an exception", e);
-            node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+            node.reportFailure(topicMeta.getMetaKey(), node.getHost(), Util.getTS());
         } catch (RuntimeException e) {
             LOG.error("Oops, got an RuntimException:" , e);
             Cat.logError("Oops, got an RuntimException:" , e);
-            node.reportFailure(appLog.getAppName(), node.getHost(), Util.getTS());
+            node.reportFailure(topicMeta.getMetaKey(), node.getHost(), Util.getTS());
         }
-    }
-
-    public String getAppName() {
-        return this.appLog.getAppName();
     }
 
     class EventWriter {
@@ -115,12 +111,17 @@ public class LogReader implements Runnable{
             
             channel = SocketChannel.open();
             channel.connect(new InetSocketAddress(broker, brokerPort));
+            socket = channel.socket();
             LOG.info("connected broker: " + broker + ":" + brokerPort);
             doStreamReg();
         }
         
         private void doStreamReg() throws IOException {
-            RegisterRequest request = new RegisterRequest(appLog.getAppName(), localhost, appLog.getRollPeriod(), broker);
+            RegisterRequest request = new RegisterRequest(
+                    topicMeta.getTopic(),
+                    Util.getSourceIdentify(localhost, topicMeta.getInstanceId()),
+                    topicMeta.getRollPeriod(),
+                    broker);
             TransferWrap wrap = new TransferWrap(request);
             wrap.write(channel);
         }
@@ -134,7 +135,10 @@ public class LogReader implements Runnable{
                 readLines(save);
                 closeQuietly(save);
                 sendMessage();
-                RotateRequest request = new RotateRequest(appLog.getAppName(), localhost, appLog.getRollPeriod());
+                RotateRequest request = new RotateRequest(
+                        topicMeta.getTopic(),
+                        Util.getSourceIdentify(localhost, topicMeta.getInstanceId()),
+                        topicMeta.getRollPeriod());
                 TransferWrap wrap = new TransferWrap(request);
                 wrap.write(channel);
             } catch (IOException e) {
@@ -144,7 +148,33 @@ public class LogReader implements Runnable{
                 closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
                 stop();
-                node.reportFailure(appLog.getAppName(), localhost, Util.getTS());
+                node.reportFailure(topicMeta.getMetaKey(), localhost, Util.getTS());
+            }
+        }
+        
+        public void processLastRotate() {
+            try {
+                final RandomAccessFile save = reader;
+                reader = new RandomAccessFile(file, "r");
+                // At this point, we're sure that the old file is rotated
+                // Finish scanning the old file and then we'll start with the new one
+                readLines(save);
+                closeQuietly(save);
+                sendMessage();
+                RotateRequest request = new RotateRequest(
+                        topicMeta.getTopic(),
+                        Util.getSourceIdentify(localhost, topicMeta.getInstanceId()),
+                        topicMeta.getRollPeriod());
+                TransferWrap wrap = new TransferWrap(request);
+                wrap.write(channel);
+            } catch (IOException e) {
+                LOG.error("Oops, got an exception:", e);
+                Cat.logError("Oops, got an exception:", e);
+                closeQuietly(reader);
+                closeChannelQuietly(channel);
+                LOG.debug("process rotate failed, stop.");
+                stop();
+                node.reportFailure(topicMeta.getMetaKey(), localhost, Util.getTS());
             }
         }
         
@@ -158,7 +188,7 @@ public class LogReader implements Runnable{
                 closeChannelQuietly(channel);
                 LOG.debug("process failed, stop.");
                 stop();
-                node.reportFailure(appLog.getAppName(), localhost, Util.getTS());
+                node.reportFailure(topicMeta.getMetaKey(), localhost, Util.getTS());
             }
         }
         
@@ -200,7 +230,7 @@ public class LogReader implements Runnable{
         private void sendMessage() throws IOException {
             messageBuffer.flip();
             ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
-            ProduceRequest request = new ProduceRequest(appLog.getAppName(), localhost, messages);
+            ProduceRequest request = new ProduceRequest(topicMeta.getTopic(), localhost, messages);
             TransferWrap wrap = new TransferWrap(request);
             wrap.write(channel);
             messageBuffer.clear();
@@ -235,8 +265,11 @@ public class LogReader implements Runnable{
         }
         
         private void closeChannelQuietly(SocketChannel channel) {
+            Socket socket = channel.socket();
             try {
-                channel.socket().shutdownOutput();
+                if (socket != null) {
+                    channel.socket().shutdownOutput();
+                }
             } catch (IOException e1) {
             }
             try {
@@ -244,7 +277,10 @@ public class LogReader implements Runnable{
             } catch (IOException e) {
             }
             try {
-                channel.socket().close();
+                if (socket != null) {
+                    socket.close();
+                    socket = null;
+                }
             } catch (IOException e) {
             }
         }

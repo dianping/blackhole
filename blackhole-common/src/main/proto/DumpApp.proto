@@ -4,5 +4,5 @@ option java_package = "com.dp.blackhole.protocol.control";
 option java_outer_classname = "DumpAppPB";
 
 message DumpApp {
-    required string app_name = 1;
+    required string topic = 1;
 }

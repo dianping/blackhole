@@ -102,12 +102,12 @@ public final class FailurePB {
       // @@protoc_insertion_point(enum_scope:blackhole.Failure.NodeType)
     }
     
-    // required string app = 1;
-    public static final int APP_FIELD_NUMBER = 1;
-    private boolean hasApp;
-    private java.lang.String app_ = "";
-    public boolean hasApp() { return hasApp; }
-    public java.lang.String getApp() { return app_; }
+    // required string topic = 1;
+    public static final int TOPIC_FIELD_NUMBER = 1;
+    private boolean hasTopic;
+    private java.lang.String topic_ = "";
+    public boolean hasTopic() { return hasTopic; }
+    public java.lang.String getTopic() { return topic_; }
     
     // required .blackhole.Failure.NodeType type = 2;
     public static final int TYPE_FIELD_NUMBER = 2;
@@ -116,12 +116,12 @@ public final class FailurePB {
     public boolean hasType() { return hasType; }
     public com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType getType() { return type_; }
     
-    // required string app_server = 3;
-    public static final int APP_SERVER_FIELD_NUMBER = 3;
-    private boolean hasAppServer;
-    private java.lang.String appServer_ = "";
-    public boolean hasAppServer() { return hasAppServer; }
-    public java.lang.String getAppServer() { return appServer_; }
+    // required string source_identify = 3;
+    public static final int SOURCE_IDENTIFY_FIELD_NUMBER = 3;
+    private boolean hasSourceIdentify;
+    private java.lang.String sourceIdentify_ = "";
+    public boolean hasSourceIdentify() { return hasSourceIdentify; }
+    public java.lang.String getSourceIdentify() { return sourceIdentify_; }
     
     // required int64 failTs = 4;
     public static final int FAILTS_FIELD_NUMBER = 4;
@@ -134,9 +134,9 @@ public final class FailurePB {
       type_ = com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType.APP_NODE;
     }
     public final boolean isInitialized() {
-      if (!hasApp) return false;
+      if (!hasTopic) return false;
       if (!hasType) return false;
-      if (!hasAppServer) return false;
+      if (!hasSourceIdentify) return false;
       if (!hasFailTs) return false;
       return true;
     }
@@ -144,14 +144,14 @@ public final class FailurePB {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasApp()) {
-        output.writeString(1, getApp());
+      if (hasTopic()) {
+        output.writeString(1, getTopic());
       }
       if (hasType()) {
         output.writeEnum(2, getType().getNumber());
       }
-      if (hasAppServer()) {
-        output.writeString(3, getAppServer());
+      if (hasSourceIdentify()) {
+        output.writeString(3, getSourceIdentify());
       }
       if (hasFailTs()) {
         output.writeInt64(4, getFailTs());
@@ -165,17 +165,17 @@ public final class FailurePB {
       if (size != -1) return size;
     
       size = 0;
-      if (hasApp()) {
+      if (hasTopic()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getApp());
+          .computeStringSize(1, getTopic());
       }
       if (hasType()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, getType().getNumber());
       }
-      if (hasAppServer()) {
+      if (hasSourceIdentify()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(3, getAppServer());
+          .computeStringSize(3, getSourceIdentify());
       }
       if (hasFailTs()) {
         size += com.google.protobuf.CodedOutputStream
@@ -339,14 +339,14 @@ public final class FailurePB {
       
       public Builder mergeFrom(com.dp.blackhole.protocol.control.FailurePB.Failure other) {
         if (other == com.dp.blackhole.protocol.control.FailurePB.Failure.getDefaultInstance()) return this;
-        if (other.hasApp()) {
-          setApp(other.getApp());
+        if (other.hasTopic()) {
+          setTopic(other.getTopic());
         }
         if (other.hasType()) {
           setType(other.getType());
         }
-        if (other.hasAppServer()) {
-          setAppServer(other.getAppServer());
+        if (other.hasSourceIdentify()) {
+          setSourceIdentify(other.getSourceIdentify());
         }
         if (other.hasFailTs()) {
           setFailTs(other.getFailTs());
@@ -377,7 +377,7 @@ public final class FailurePB {
               break;
             }
             case 10: {
-              setApp(input.readString());
+              setTopic(input.readString());
               break;
             }
             case 16: {
@@ -391,7 +391,7 @@ public final class FailurePB {
               break;
             }
             case 26: {
-              setAppServer(input.readString());
+              setSourceIdentify(input.readString());
               break;
             }
             case 32: {
@@ -403,24 +403,24 @@ public final class FailurePB {
       }
       
       
-      // required string app = 1;
-      public boolean hasApp() {
-        return result.hasApp();
+      // required string topic = 1;
+      public boolean hasTopic() {
+        return result.hasTopic();
       }
-      public java.lang.String getApp() {
-        return result.getApp();
+      public java.lang.String getTopic() {
+        return result.getTopic();
       }
-      public Builder setApp(java.lang.String value) {
+      public Builder setTopic(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasApp = true;
-        result.app_ = value;
+  result.hasTopic = true;
+        result.topic_ = value;
         return this;
       }
-      public Builder clearApp() {
-        result.hasApp = false;
-        result.app_ = getDefaultInstance().getApp();
+      public Builder clearTopic() {
+        result.hasTopic = false;
+        result.topic_ = getDefaultInstance().getTopic();
         return this;
       }
       
@@ -445,24 +445,24 @@ public final class FailurePB {
         return this;
       }
       
-      // required string app_server = 3;
-      public boolean hasAppServer() {
-        return result.hasAppServer();
+      // required string source_identify = 3;
+      public boolean hasSourceIdentify() {
+        return result.hasSourceIdentify();
       }
-      public java.lang.String getAppServer() {
-        return result.getAppServer();
+      public java.lang.String getSourceIdentify() {
+        return result.getSourceIdentify();
       }
-      public Builder setAppServer(java.lang.String value) {
+      public Builder setSourceIdentify(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppServer = true;
-        result.appServer_ = value;
+  result.hasSourceIdentify = true;
+        result.sourceIdentify_ = value;
         return this;
       }
-      public Builder clearAppServer() {
-        result.hasAppServer = false;
-        result.appServer_ = getDefaultInstance().getAppServer();
+      public Builder clearSourceIdentify() {
+        result.hasSourceIdentify = false;
+        result.sourceIdentify_ = getDefaultInstance().getSourceIdentify();
         return this;
       }
       
@@ -510,12 +510,12 @@ public final class FailurePB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rFailure.proto\022\tblackhole\"\220\001\n\007Failure\022\013" +
-      "\n\003app\030\001 \002(\t\022)\n\004type\030\002 \002(\0162\033.blackhole.Fa" +
-      "ilure.NodeType\022\022\n\napp_server\030\003 \002(\t\022\016\n\006fa" +
-      "ilTs\030\004 \002(\003\")\n\010NodeType\022\014\n\010APP_NODE\020\001\022\017\n\013" +
-      "BROKER_NODE\020\002B.\n!com.dp.blackhole.protoc" +
-      "ol.controlB\tFailurePB"
+      "\n\rFailure.proto\022\tblackhole\"\227\001\n\007Failure\022\r" +
+      "\n\005topic\030\001 \002(\t\022)\n\004type\030\002 \002(\0162\033.blackhole." +
+      "Failure.NodeType\022\027\n\017source_identify\030\003 \002(" +
+      "\t\022\016\n\006failTs\030\004 \002(\003\")\n\010NodeType\022\014\n\010APP_NOD" +
+      "E\020\001\022\017\n\013BROKER_NODE\020\002B.\n!com.dp.blackhole" +
+      ".protocol.controlB\tFailurePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -527,7 +527,7 @@ public final class FailurePB {
           internal_static_blackhole_Failure_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Failure_descriptor,
-              new java.lang.String[] { "App", "Type", "AppServer", "FailTs", },
+              new java.lang.String[] { "Topic", "Type", "SourceIdentify", "FailTs", },
               com.dp.blackhole.protocol.control.FailurePB.Failure.class,
               com.dp.blackhole.protocol.control.FailurePB.Failure.Builder.class);
           return null;

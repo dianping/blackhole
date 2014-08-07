@@ -1,0 +1,10 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "RollCleanPB";
+
+message RollClean {
+    required string topic = 1;
+    required string source_identify = 2;
+    required int64 period = 3;
+}
