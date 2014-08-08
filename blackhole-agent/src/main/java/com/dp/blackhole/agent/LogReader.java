@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import com.dianping.cat.Cat;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.TransferWrap;
+import com.dp.blackhole.protocol.data.LastRotateRequest;
 import com.dp.blackhole.protocol.data.ProduceRequest;
 import com.dp.blackhole.protocol.data.RegisterRequest;
 import com.dp.blackhole.protocol.data.RotateRequest;
@@ -30,7 +31,7 @@ public class LogReader implements Runnable{
 
     private TopicMeta topicMeta;
     private Agent node;
-    private String localhost;
+    private String sourceIdentify;
     private String broker;
     private int brokerPort;
     private Socket socket;
@@ -38,7 +39,7 @@ public class LogReader implements Runnable{
     
     public LogReader(Agent node, String localhost, String broker, int port, TopicMeta topicMeta) {
         this.node = node;
-        this.localhost = localhost;
+        this.sourceIdentify =  Util.getSourceIdentify(localhost, topicMeta.getInstanceId());
         this.broker = broker;
         this.brokerPort = port;
         this.topicMeta = topicMeta;
@@ -119,7 +120,7 @@ public class LogReader implements Runnable{
         private void doStreamReg() throws IOException {
             RegisterRequest request = new RegisterRequest(
                     topicMeta.getTopic(),
-                    Util.getSourceIdentify(localhost, topicMeta.getInstanceId()),
+                    sourceIdentify,
                     topicMeta.getRollPeriod(),
                     broker);
             TransferWrap wrap = new TransferWrap(request);
@@ -137,7 +138,7 @@ public class LogReader implements Runnable{
                 sendMessage();
                 RotateRequest request = new RotateRequest(
                         topicMeta.getTopic(),
-                        Util.getSourceIdentify(localhost, topicMeta.getInstanceId()),
+                        sourceIdentify,
                         topicMeta.getRollPeriod());
                 TransferWrap wrap = new TransferWrap(request);
                 wrap.write(channel);
@@ -148,7 +149,7 @@ public class LogReader implements Runnable{
                 closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
                 stop();
-                node.reportFailure(topicMeta.getMetaKey(), localhost, Util.getTS());
+                node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
             }
         }
         
@@ -161,9 +162,9 @@ public class LogReader implements Runnable{
                 readLines(save);
                 closeQuietly(save);
                 sendMessage();
-                RotateRequest request = new RotateRequest(
+                LastRotateRequest request = new LastRotateRequest(
                         topicMeta.getTopic(),
-                        Util.getSourceIdentify(localhost, topicMeta.getInstanceId()),
+                        sourceIdentify,
                         topicMeta.getRollPeriod());
                 TransferWrap wrap = new TransferWrap(request);
                 wrap.write(channel);
@@ -174,7 +175,7 @@ public class LogReader implements Runnable{
                 closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
                 stop();
-                node.reportFailure(topicMeta.getMetaKey(), localhost, Util.getTS());
+                node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
             }
         }
         
@@ -188,7 +189,7 @@ public class LogReader implements Runnable{
                 closeChannelQuietly(channel);
                 LOG.debug("process failed, stop.");
                 stop();
-                node.reportFailure(topicMeta.getMetaKey(), localhost, Util.getTS());
+                node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
             }
         }
         
@@ -230,7 +231,7 @@ public class LogReader implements Runnable{
         private void sendMessage() throws IOException {
             messageBuffer.flip();
             ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
-            ProduceRequest request = new ProduceRequest(topicMeta.getTopic(), localhost, messages);
+            ProduceRequest request = new ProduceRequest(topicMeta.getTopic(), sourceIdentify, messages);
             TransferWrap wrap = new TransferWrap(request);
             wrap.write(channel);
             messageBuffer.clear();

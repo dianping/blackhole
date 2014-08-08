@@ -56,6 +56,8 @@ public class RequestListener extends Thread {
         HttpRequestHandlerRegistry reqistry = new HttpRequestHandlerRegistry();
         reqistry.register("/scaleout*", new HttpScaleOutHandler(configManager, cmdbHttpClient));
         reqistry.register("/scalein*", new HttpScaleInHandler(configManager, cmdbHttpClient));
+        reqistry.register("/paaslogin*", new HttpPaaSLoginHandler(configManager, cmdbHttpClient));
+        reqistry.register("/paaslogout*", new HttpPaaSLogoutHandler(configManager, cmdbHttpClient));
         reqistry.register("*", new HttpFallbackHandler());
         
         // Set up the HTTP service

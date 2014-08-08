@@ -121,9 +121,14 @@ public class Supervisor {
         Util.send(connection, msg);
     }
     
-    public void cachedSend(Map<SimpleConnection, Message> toBeSend) {
-        for (Map.Entry<SimpleConnection, Message> entry : toBeSend.entrySet()) {
-            send(entry.getKey(), entry.getValue());
+    public void cachedSend(Map<String, Message> toBeSend) {
+        for (Map.Entry<String, Message> entry : toBeSend.entrySet()) {
+            SimpleConnection agent = getConnectionByHostname(entry.getKey());
+            if (agent == null) {
+                LOG.info("Can not find any agents connected by " + entry.getKey() + ", message send abort.");
+                continue;
+            }
+            send(agent, entry.getValue());
         }
     }
     
@@ -396,7 +401,7 @@ public class Supervisor {
                 }
                    
                 // remove corresponding appNodes's relationship with the stream
-                String agentHost = stream.sourceIdentify;
+                String agentHost = Util.getAgentHostFromSourceIdentify(stream.sourceIdentify);
                 SimpleConnection agentConnection = agentsMapping.get(agentHost);
                 if (agentConnection == null) {
                     LOG.error("can not find agentConnection by host " + agentHost);
@@ -906,6 +911,12 @@ public class Supervisor {
         Stream stream = streamIdMap.get(id);
 
         if (stream != null) {
+            if (rollID.getIsFinal()) {
+                LOG.info("Final but unrecoverable. Just retire this stream.");
+                stream.updateActive(false);
+                retireStreamInternal(id);
+                return;
+            }
             ArrayList<Stage> stages = Streams.get(stream);
             if (stages != null) {
                 synchronized (stages) {
@@ -1229,7 +1240,7 @@ public class Supervisor {
             stage.status = Stage.PENDING;
             stageConnectionMap.remove(stage);
         } else {
-            SimpleConnection c = agentsMapping.get(stream.sourceIdentify);
+            SimpleConnection c = agentsMapping.get(Util.getAgentHostFromSourceIdentify(stream.sourceIdentify));
             if (c == null) {
                 LOG.error("can not find connection by host: " + stream.sourceIdentify);
                 return null;
@@ -1320,7 +1331,7 @@ public class Supervisor {
         
         // register connection with agent and broker
         recordConnectionStreamMapping(from, stream);
-        SimpleConnection agentConnection = agentsMapping.get(stream.sourceIdentify);
+        SimpleConnection agentConnection = agentsMapping.get(Util.getAgentHostFromSourceIdentify(stream.sourceIdentify));
         recordConnectionStreamMapping(agentConnection, stream);
         
         // process partition affairs
@@ -1534,8 +1545,8 @@ public class Supervisor {
         return broker;
     }
 
-    public void handleRollClean(RollClean rollClean, SimpleConnection from) {
-        boolean isLastTime = true;
+    public void handleRollingAndTriggerClean(RollClean rollClean, SimpleConnection from) {
+        boolean isFinal = true;
         StreamId id = new StreamId(rollClean.getTopic(), rollClean.getSourceIdentify());
         Stream stream = streamIdMap.get(id);
         if (stream != null) {
@@ -1545,12 +1556,12 @@ public class Supervisor {
                     Stage current = stages.get(stages.size() - 1);
                     if (current.cleanstart == false || current.issuelist.size() != 0) {
                         current.isCurrent = false;
-                        doRecovery(stream, current, isLastTime);
+                        doRecovery(stream, current, isFinal);
                     } else {
                         if (current.status != Stage.UPLOADING) {
                             current.status = Stage.UPLOADING;
                             current.isCurrent = false;
-                            doUpload(stream, current, from, isLastTime);
+                            doUpload(stream, current, from, isFinal);
                         }
                     }
                 }
@@ -1559,7 +1570,6 @@ public class Supervisor {
             }
         } else {
             LOG.info("stream: " + id + " has been clean up.");
-            //TODO remove it
         }
     }
     
@@ -1676,7 +1686,7 @@ public class Supervisor {
                 sendRestart(msg.getRestart());
                 break;
             case ROLL_CLEAN:
-                handleRollClean(msg.getRollClean(), from);
+                handleRollingAndTriggerClean(msg.getRollClean(), from);
                 break;
             case DUMP_CONSUMER_GROUP:
                 dumpConsumerGroup(msg.getDumpConsumerGroup(), from);
@@ -1927,9 +1937,11 @@ public class Supervisor {
      */
     public SimpleConnection getConnectionByHostname(String hostname) {
         synchronized (connections) {
-            for (SimpleConnection simpleConnection : connections.keySet()) {
-                if (simpleConnection.getHost().equals(hostname)) {
-                    return simpleConnection;
+            for (Map.Entry<SimpleConnection, ConnectionDescription> connectionEntry : connections.entrySet()) {
+                if (connectionEntry.getKey().getHost().equals(hostname)
+                        && connectionEntry.getValue().getType() != ConnectionDescription.BROKER
+                        && connectionEntry.getValue().getType() != ConnectionDescription.CONSUMER) {
+                    return connectionEntry.getKey();
                 }
             }
         }

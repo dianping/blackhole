@@ -70,6 +70,7 @@ public class Agent implements Runnable {
         this.baseDir = baseDir;
         if (baseDir != null) {
             paasModel = true;
+            LOG.info("Agent deploys for PaaS.");
         }
         pool = Executors.newCachedThreadPool();
         recoveryThreadPool = Executors.newFixedThreadPool(2);
@@ -219,16 +220,16 @@ public class Agent implements Runnable {
         this.listener = listener;
     }
 
-    public void reportFailure(MetaKey metaKey, String agentServer, final long ts) {
-        Message message = PBwrap.wrapAppFailure(metaKey.getTopic(), Util.getSourceIdentify(agentServer, metaKey.getInstanceId()), ts);
+    public void reportFailure(MetaKey metaKey, String sourceIdentify, final long ts) {
+        Message message = PBwrap.wrapAppFailure(metaKey.getTopic(), sourceIdentify, ts);
         send(message);
         TopicMeta applog = logMetas.get(metaKey);
         topicReaders.remove(applog);
         register(metaKey, applog.getCreateTime());
     }
 
-    public void reportUnrecoverable(MetaKey metaKey, String agentServer, final long period, final long rollTs) {
-        Message message = PBwrap.wrapUnrecoverable(metaKey.getTopic(), Util.getSourceIdentify(agentServer, metaKey.getInstanceId()), period, rollTs);
+    public void reportUnrecoverable(MetaKey metaKey, String agentServer, final long period, final long rollTs, boolean isFinal) {
+        Message message = PBwrap.wrapUnrecoverable(metaKey.getTopic(), Util.getSourceIdentify(agentServer, metaKey.getInstanceId()), period, rollTs, isFinal);
         send(message);
     }
 
@@ -403,6 +404,7 @@ public class Agent implements Runnable {
                 confLoopFactor = 1;
                 ConfRes confRes = msg.getConfRes();
                 if (isPaasModel()) {
+                    LOG.info("paas model, receive conf response.");
                     List<LxcConfRes> lxcConfResList = confRes.getLxcConfResList();
                     for (LxcConfRes lxcConfRes : lxcConfResList) {
                         topic = lxcConfRes.getTopic();
@@ -430,7 +432,6 @@ public class Agent implements Runnable {
                             }
                         }
                     }
-                    
                 } else {
                     List<AppConfRes> appConfResList = confRes.getAppConfResList();
                     for (AppConfRes appConfRes : appConfResList) {
@@ -461,8 +462,8 @@ public class Agent implements Runnable {
                         LOG.error("Not all configurations are correct, sleep 5 minutes...");
                         requireConfigFromSupersivor(5 * 60);
                     }
-                    break;
                 }
+                break;
             case QUIT:
                 Quit quit = msg.getQuit();
                 List<InstanceGroup> instanceGroupQuitList = quit.getInstanceGroupList();
@@ -520,7 +521,12 @@ public class Agent implements Runnable {
     }
     
     public static void main(String[] args) {
-        Agent agent = new Agent();
+        Agent agent;
+        if (args.length > 0) {
+            agent = new Agent(args[0]);
+        } else {
+            agent = new Agent();
+        }
         Thread thread = new Thread(agent);
         thread.start();
     }

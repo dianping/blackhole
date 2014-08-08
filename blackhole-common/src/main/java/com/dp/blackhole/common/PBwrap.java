@@ -256,8 +256,8 @@ public class PBwrap {
         return wrapFailure(app, sourceIdentify, NodeType.BROKER_NODE, failTs);
     }
     
-    public static Message wrapUnrecoverable(String appName, String sourceIdentify, long period, long rollTs) {
-        return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, sourceIdentify, period, rollTs, false));
+    public static Message wrapUnrecoverable(String appName, String sourceIdentify, long period, long rollTs, boolean isFinal) {
+        return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, sourceIdentify, period, rollTs, isFinal));
     }
     
     public static Message wrapManualRecoveryRoll(String appName, String sourceIdentify, long period, long rollTs) {
@@ -455,7 +455,7 @@ public class PBwrap {
     }
     
     public static Message wrapRollClean(String topic, String sourceIdentify, long period) {
-        AppRoll.Builder builder = AppRoll.newBuilder();
+        RollClean.Builder builder = RollClean.newBuilder();
         builder.setTopic(topic);
         builder.setSourceIdentify(sourceIdentify);
         builder.setPeriod(period);

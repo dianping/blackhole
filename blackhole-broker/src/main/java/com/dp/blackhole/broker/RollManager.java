@@ -77,7 +77,7 @@ public class RollManager {
     
     public boolean doClean(String app, String source, long period, RollPartition roll) {
         boolean ret;
-        RollIdent ident = getRollIdent(app, source, period);
+        RollIdent ident = getLastRollIdent(app, source, period);
         if (rolls.get(ident) == null) {
             rolls.put(ident, roll);
             Message message = PBwrap.wrapRollClean(ident.topic, ident.sourceIdentify, ident.period);
@@ -146,6 +146,17 @@ public class RollManager {
         roll.sourceIdentify = source;
         roll.period = period;
         roll.ts = time.getTime();
+        return roll;
+    }
+    
+    private RollIdent getLastRollIdent(String app, String source, long period) {
+        Date time = new Date(Util.getCurrentRollTs(Util.getTS(), period));
+        RollIdent roll = new RollIdent();
+        roll.topic = app;
+        roll.sourceIdentify = source;
+        roll.period = period;
+        roll.ts = time.getTime();
+        roll.isFinal = true;
         return roll;
     }
     
