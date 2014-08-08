@@ -25,22 +25,18 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.log4j.Logger;
 
 import com.dp.blackhole.common.PBwrap;
-import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.conf.ConfigKeeper;
-import com.dp.blackhole.conf.Context;
-import com.dp.blackhole.network.SimpleConnection;
-import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
+import com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup;
 import com.dp.blackhole.supervisor.ConfigManager;
 import com.dp.blackhole.supervisor.Supervisor;
 
-public class HttpPaaSLogin extends HttpAbstractHandler implements HttpRequestHandler {
-    private static Logger LOG = Logger.getLogger(HttpPaaSLogin.class);
+public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRequestHandler {
+    private static Logger LOG = Logger.getLogger(HttpPaaSLogoutHandler.class);
     private ConfigManager configManager;
     private Supervisor supervisor;
     
-    public HttpPaaSLogin(ConfigManager configManger, HttpClientSingle httpClient) {
+    public HttpPaaSLogoutHandler(ConfigManager configManger, HttpClientSingle httpClient) {
         this.configManager = configManger;
         this.supervisor = configManger.getSupervisor();
     }
@@ -53,9 +49,9 @@ public class HttpPaaSLogin extends HttpAbstractHandler implements HttpRequestHan
                 .toUpperCase(Locale.ENGLISH);
 
         LOG.debug("Frontend: Handling Search; Line = " + request.getRequestLine());
-        if (method.equals("GET")) {//TODO how to post
+        if (method.equals("GET")) {
             final String target = request.getRequestLine().getUri();
-            Pattern p = Pattern.compile("/paaslogin\\?app=(.*)&ids=(.*)&ips=(.*)$");
+            Pattern p = Pattern.compile("/paaslogout\\?app=(.*)&ids=(.*)&ips=(.*)$");
             Matcher m = p.matcher(target);
             if (m.find()) {
                 String app = m.group(1);
@@ -67,7 +63,7 @@ public class HttpPaaSLogin extends HttpAbstractHandler implements HttpRequestHan
                     response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
                     return;
                 }
-                LOG.debug("Handle paas login request, app: " + app + " instances: " + Arrays.toString(ids));
+                LOG.debug("Handle paas logout request, app: " + app + " instances: " + Arrays.toString(ids));
                 final HttpResult Content = getContent(app, ids, ips);
                 EntityTemplate body = new EntityTemplate(new ContentProducer() {
                     public void writeTo(final OutputStream outstream)
@@ -110,49 +106,50 @@ public class HttpPaaSLogin extends HttpAbstractHandler implements HttpRequestHan
         String[] ips = args[1];
         Map<String, List<String>> hostIds = extractIdMapShuffleByHost(ids, ips);
         
-        Map<SimpleConnection, Message> toBeSend = new HashMap<SimpleConnection, Message>();
+        Map<String, Message> toBeQuit = new HashMap<String, Message>();
+        Map<String, Message> toBeClean = new HashMap<String, Message>();
         for(Map.Entry<String, List<String>> entry : hostIds.entrySet()) {
             String eachHost = entry.getKey();
             List<String> idsInTheSameHost = entry.getValue();
-            SimpleConnection agent = supervisor.getConnectionByHostname(eachHost);
-            if (agent == null) {
-                LOG.info("Can not find any agents connected by " + eachHost);
-                return new HttpResult(HttpResult.FAILURE, "Can not find any agents connected by " + eachHost);
-            }
-            List<LxcConfRes> lxcConfResList = new ArrayList<LxcConfRes>();
+            List<InstanceGroup> quits = new ArrayList<InstanceGroup>();
+            List<InstanceGroup> cleans = new ArrayList<InstanceGroup>();
             for (String topic : topicSet) {
-                if (inBlacklist(topic)) {
-                    continue;
-                }
                 // filter the stream already active instance
-                filterIsActive(topic, eachHost, idsInTheSameHost, supervisor);
-                
-                Context context = ConfigKeeper.configMap.get(topic);
-                if (context == null) {
-                    LOG.error("Can not get topic: " + topic + " from configMap");
-                    return new HttpResult(HttpResult.FAILURE, "Can not get topic: " + topic + " from configMap");
-                }
-                String period = context.getString(ParamsKey.TopicConf.ROLL_PERIOD);
-                String maxLineSize = context.getString(ParamsKey.TopicConf.MAX_LINE_SIZE);
-                String watchFile = context.getString(ParamsKey.TopicConf.WATCH_FILE);
-                LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, period, maxLineSize, idsInTheSameHost);
-                lxcConfResList.add(lxcConfRes);
+                filterIsInactive(topic, eachHost, idsInTheSameHost, supervisor);
+                InstanceGroup quit = PBwrap.wrapInstanceGroup(topic, idsInTheSameHost);
+                InstanceGroup clean = PBwrap.wrapInstanceGroup(topic, idsInTheSameHost);
+                quits.add(quit);
+                cleans.add(clean);
             }
-            Message message = PBwrap.wrapConfRes(null, lxcConfResList);
-            toBeSend.put(agent, message);
+            Message quitMessage = PBwrap.wrapQuit(quits);
+            Message cleanMessage = PBwrap.wrapClean(cleans);
+            toBeQuit.put(eachHost, quitMessage);
+            toBeClean.put(eachHost, cleanMessage);
         }
         
-        return sendAndReceive(toBeSend, supervisor);
+        return sendAndReceive(toBeQuit, toBeClean, supervisor);
     }
     
-    private HttpResult sendAndReceive(Map<SimpleConnection, Message> toBeSend, Supervisor supervisor) {
+    private HttpResult sendAndReceive(
+            Map<String, Message> toBeQuit,
+            Map<String, Message> toBeClean,
+            Supervisor supervisor) {
+        HttpResult result = sendAndReceiveForQuit(toBeQuit, supervisor);
+        if (result.code == HttpResult.SUCCESS) {
+            return sendAndReceiveForClean(toBeClean, supervisor);
+        } else {
+            return result;
+        }
+    }
+    
+    private HttpResult sendAndReceiveForQuit(Map<String, Message> toBeQuit, Supervisor supervisor) {
         long currentTime = System.currentTimeMillis();
         long timeout = currentTime + TIMEOUT;
         while (currentTime < timeout) {
-            if (checkStreamsActive(toBeSend, supervisor)) {
+            if (checkStreamsEmpty(toBeQuit, supervisor)) {
                 return new HttpResult(HttpResult.SUCCESS, "");
             }
-            supervisor.cachedSend(toBeSend);
+            supervisor.cachedSend(toBeQuit);
             currentTime += CHECK_PERIOD;
             try {
                 Thread.sleep(CHECK_PERIOD);
@@ -163,17 +160,51 @@ public class HttpPaaSLogin extends HttpAbstractHandler implements HttpRequestHan
         return new HttpResult(HttpResult.FAILURE, "timeout");
     }
     
-    private boolean checkStreamsActive(Map<SimpleConnection, Message> toBeSend, Supervisor supervisor) {
+    private HttpResult sendAndReceiveForClean(Map<String, Message> toBeClean, Supervisor supervisor) {
+        long currentTime = System.currentTimeMillis();
+        long timeout = currentTime + TIMEOUT;
+        while (currentTime < timeout) {
+            if (checkStreamsClean(toBeClean, supervisor)) {
+                return new HttpResult(HttpResult.SUCCESS, "");
+            }
+            supervisor.cachedSend(toBeClean);
+            currentTime += CHECK_PERIOD;
+            try {
+                Thread.sleep(CHECK_PERIOD);
+            } catch (InterruptedException e) {
+                return new HttpResult(HttpResult.FAILURE, "Thread interrupted");
+            }
+        }
+        return new HttpResult(HttpResult.FAILURE, "timeout");
+    }
+
+    private boolean checkStreamsEmpty(Map<String, Message> toBeSend, Supervisor supervisor) {
         // loop for every agent server
-        for (Map.Entry<SimpleConnection, Message> entry : toBeSend.entrySet()) {
-            String agentServer = entry.getKey().getHost();
+        for (Map.Entry<String, Message> entry : toBeSend.entrySet()) {
+            String agentServer = entry.getKey();
             // loop for every topic in an agent server
-            for (LxcConfRes lxcConfRes : entry.getValue().getConfRes().getLxcConfResList()) {
-                String topic = lxcConfRes.getTopic();
-                List<String> idsInTheSameHost = lxcConfRes.getInstanceIdsList();
+            for (InstanceGroup instanceGroup : entry.getValue().getQuit().getInstanceGroupList()) {
+                String topic = instanceGroup.getTopic();
+                List<String> idsInTheSameHost = instanceGroup.getInstanceIdsList();
                 // loop for every instance with the same topic in the same agent server
                 for (String id : idsInTheSameHost) {
-                    if (!supervisor.isActiveStream(topic, Util.getSourceIdentify(agentServer, id))) {
+                    if (!supervisor.isEmptyStream(topic, Util.getSourceIdentify(agentServer, id))) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    
+    private boolean checkStreamsClean(Map<String, Message> toBeSend, Supervisor supervisor) {
+        for (Map.Entry<String, Message> entry : toBeSend.entrySet()) {
+            String agentServer = entry.getKey();
+            for (InstanceGroup instanceGroup : entry.getValue().getClean().getInstanceGroupList()) {
+                String topic = instanceGroup.getTopic();
+                List<String> idsInTheSameHost = instanceGroup.getInstanceIdsList();
+                for (String id : idsInTheSameHost) {
+                    if (!supervisor.isCleanStream(topic, Util.getSourceIdentify(agentServer, id))) {
                         return false;
                     }
                 }

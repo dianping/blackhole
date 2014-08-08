@@ -1,4 +1,4 @@
-package com.dp.blackhole.scaleout;
+package com.dp.blackhole.http;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;

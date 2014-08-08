@@ -55,8 +55,8 @@ public class SimAgent extends Agent{
     }
     
     @Override
-    public void reportUnrecoverable(MetaKey metaKey, String appHost, final long period, long ts) {
-        LOG.debug(metaKey + ", APP HOST: " + appHost  + ", period: " + period + ", roll ts: " + ts);
+    public void reportUnrecoverable(MetaKey metaKey, String appHost, final long period, long ts, boolean isFinal) {
+        LOG.debug(metaKey + ", APP HOST: " + appHost  + ", period: " + period + ", roll ts: " + ts + ", final:" + isFinal);
     }
     
     public static void deleteTmpFile(String MAGIC) {

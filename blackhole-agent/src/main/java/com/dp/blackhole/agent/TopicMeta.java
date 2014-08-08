@@ -16,7 +16,7 @@ public class TopicMeta {
         this.rollPeriod = rollPeriod;
         this.createTime = System.currentTimeMillis();
         this.maxLineSize = maxLineSize;
-        this.dying.set(false);
+        this.dying = new AtomicBoolean(false);
     }
 
     public MetaKey getMetaKey() {

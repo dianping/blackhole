@@ -67,20 +67,25 @@ public class RollRecovery implements Runnable{
         long period = topicMeta.getRollPeriod();
         long fileSize = 0;
         File transferFile = null;
+        File rolledFile = null;
+        File gzFile = null;
         boolean hasCompressed = false;
         SimpleDateFormat unitFormat = new SimpleDateFormat(Util.getFormatFromPeroid(period));
         String rollIdent = unitFormat.format(rollTimestamp);
         LOG.info("Recoverying " + rollIdent + " " + topicMeta);
-        File rolledFile = Util.findRealFileByIdent(topicMeta.getTailFile(), rollIdent);
-        File gzFile = Util.findGZFileByIdent(topicMeta.getTailFile(), rollIdent);
+        if (isFinal) {
+            rolledFile = new File(topicMeta.getTailFile());
+        } else {
+            rolledFile = Util.findRealFileByIdent(topicMeta.getTailFile(), rollIdent);
+            gzFile = Util.findGZFileByIdent(topicMeta.getTailFile(), rollIdent);
+        }
         if (!rolledFile.exists() && (gzFile == null || !gzFile.exists())) {
             LOG.error("Can not found both " + rolledFile + " and gzFile");
             Cat.logError(new BlackholeClientException("Can not found both " + rolledFile + " and gzFile"));
             stopRecoverying();
-            node.reportUnrecoverable(topicMeta.getMetaKey(), node.getHost(), period, rollTimestamp);
+            node.reportUnrecoverable(topicMeta.getMetaKey(), node.getHost(), period, rollTimestamp, isFinal);
             return;
         }
-
         // send recovery head, report fail in agent if catch exception.
         DataOutputStream out = null;
         try {
