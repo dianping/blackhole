@@ -110,7 +110,11 @@ public class TopicMeta {
         
         public MetaKey(String topic, String instanceId) {
             this.topic = topic;
-            this.instanceId = instanceId;
+            if (instanceId == null || instanceId.length() == 0) {
+                this.instanceId = null;
+            } else {
+                this.instanceId = instanceId;
+            }
         }
         
         public String getTopic() {
@@ -155,6 +159,14 @@ public class TopicMeta {
         
         @Override
         public String toString() {
+            String result = topic;
+            if (instanceId != null) {
+                result = result + "#" + instanceId;
+            }
+            return result;
+        }
+        
+        public String getContent() {
             String result = topic;
             if (instanceId != null) {
                 result = result + "#" + instanceId;

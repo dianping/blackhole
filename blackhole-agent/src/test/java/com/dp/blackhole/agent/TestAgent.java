@@ -62,8 +62,6 @@ public class TestAgent {
         String WATCH_FILE = "/tmp/check1/" + name + ".access.log /tmp/check2/" + name + ".access.log";
         String expectedFileName1 = "/tmp/check1/" + name + ".access.log";
         String expectedFileName2 = "/tmp/check2/" + name + ".access.log";
-        String expectedFileName3 = "/tmp/check1/" + hostname + ".access.log";
-        String expectedFileName4 = "/tmp/check2/" + hostname + ".access.log";
         String expectedFileName5 = "/tmp/check2/xxxxxxx.access.log";
         File expectedFile;
         expectedFile = new File(expectedFileName1);
@@ -75,16 +73,6 @@ public class TestAgent {
         expectedFile.createNewFile();
         assertTrue(agent.checkFilesExist(MAGIC, WATCH_FILE));
         assertEquals(expectedFileName2, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.TopicConf.WATCH_FILE));
-        expectedFile.delete();
-        expectedFile = new File(expectedFileName3);
-        expectedFile.createNewFile();
-        assertTrue(agent.checkFilesExist(MAGIC, WATCH_FILE));
-        assertEquals(expectedFileName3, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.TopicConf.WATCH_FILE));
-        expectedFile.delete();
-        expectedFile = new File(expectedFileName4);
-        expectedFile.createNewFile();
-        assertTrue(agent.checkFilesExist(MAGIC, WATCH_FILE));
-        assertEquals(expectedFileName4, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.TopicConf.WATCH_FILE));
         expectedFile.delete();
         expectedFile = new File(expectedFileName5);
         expectedFile.createNewFile();

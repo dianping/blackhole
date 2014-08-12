@@ -349,7 +349,7 @@ public class Agent implements Runnable {
                 boolean isFinal = recoveryRoll.getIsFinal();
                 if ((topicMeta = logMetas.get(metaKey)) != null) {
                     long rollTs = recoveryRoll.getRollTs();
-                    String recoveryKey = metaKey.toString() + ":" + rollTs;
+                    String recoveryKey = metaKey.getContent() + ":" + rollTs;
                     if ((rollRecovery = recoveryingMap.get(recoveryKey)) == null) {
                         broker = recoveryRoll.getBrokerServer();
                         int recoveryPort = recoveryRoll.getRecoveryPort();
