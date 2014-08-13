@@ -165,9 +165,9 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
         long timeout = currentTime + TIMEOUT;
         while (currentTime < timeout) {
             if (checkStreamsClean(toBeClean, supervisor)) {
+                supervisor.cachedSend(toBeClean);
                 return new HttpResult(HttpResult.SUCCESS, "");
             }
-            supervisor.cachedSend(toBeClean);
             currentTime += CHECK_PERIOD;
             try {
                 Thread.sleep(CHECK_PERIOD);

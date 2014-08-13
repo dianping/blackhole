@@ -44,7 +44,7 @@ public class HttpScaleInHandler extends HttpAbstractHandler implements HttpReque
                 .toUpperCase(Locale.ENGLISH);
 
         LOG.debug("Frontend: Handling contract; Line = " + request.getRequestLine());
-        if (method.equals("GET")) {//TODO how to post
+        if (method.equals("GET")) {
             final String target = request.getRequestLine().getUri();
             Pattern p = Pattern.compile("/contract\\?app=(.*)&hosts=(.*)$");
             Matcher m = p.matcher(target);

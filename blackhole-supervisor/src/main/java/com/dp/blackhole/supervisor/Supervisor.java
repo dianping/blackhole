@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.dianping.lion.client.LionException;
@@ -733,7 +734,8 @@ public class Supervisor {
     }
 
     private void handleRetireStream(StreamID streamId) {
-        StreamId id = new StreamId(streamId.getTopic(), streamId.getAgentServer());
+        StreamId id = new StreamId(streamId.getTopic(),
+                Util.getSourceIdentify(streamId.getAgentServer(), streamId.getInstanceId()));
         retireStreamInternal(id);
     }
 
@@ -783,6 +785,11 @@ public class Supervisor {
             }
             // remove stream from Streams
             Streams.remove(stream);
+            
+            // mark partitions as offline
+            String topic = stream.topic;
+            String partitionId = stream.sourceIdentify;
+            markPartitionOffline(topic, partitionId);
         }
     }
     
@@ -1730,7 +1737,6 @@ public class Supervisor {
     }
 
     public void handleImportNewTopic(String topic) {
-        // TODO Auto-generated method stub
         String cmdbApp = configManager.getCmdbAppByTopic(topic);
         if (cmdbApp == null) {
             LOG.error("Oops, no cmdb app assign to topic " + topic);
@@ -1741,14 +1747,13 @@ public class Supervisor {
         try {
             Map<String, List<String>> hostToInstances = findInstancesByCmdbApps(cmdbApps);
             triggerConfRes(topic, hostToInstances);
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (Exception e) {
+            LOG.error("Oops, got an exception", e);
         }
     }
     
     private Map<String, List<String>> findInstancesByCmdbApps(
-            List<String> cmdbApps) throws UnsupportedEncodingException {
+            List<String> cmdbApps) throws UnsupportedEncodingException, JSONException {
         Map<String, List<String>> hostToInstances = new HashMap<String, List<String>>();
         if (cmdbApps.size() == 0) {
             return hostToInstances;
@@ -1762,7 +1767,8 @@ public class Supervisor {
         catalogURLBuild.deleteCharAt(catalogURLBuild.length() - 1);
         String response = paasQuery.getResponseText(catalogURLBuild.toString());
         if (response == null) {
-            //TODO check
+            LOG.error("response is null.");
+            return hostToInstances;
         }
         String jsonStr = java.net.URLDecoder.decode(response, "utf-8");
         JSONObject rootObject = new JSONObject(jsonStr);
@@ -1797,8 +1803,8 @@ public class Supervisor {
         return hostToInstances;
     }
 
-    private void triggerConfRes(String topic, Map<String, List<String>> hostToInstances) {
         Message message;
+        private void triggerConfRes(String topic, Map<String, List<String>> hostToInstances) {
         for (Map.Entry<String, List<String>> entry : hostToInstances.entrySet()) {
             SimpleConnection agent = getConnectionByHostname(entry.getKey());
             if (agent == null) {

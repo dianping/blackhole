@@ -52,7 +52,7 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
                 .toUpperCase(Locale.ENGLISH);
 
         LOG.debug("Frontend: Handling Search; Line = " + request.getRequestLine());
-        if (method.equals("GET")) {//TODO how to post
+        if (method.equals("GET")) {
             final String target = request.getRequestLine().getUri();
             Pattern p = Pattern.compile("/paaslogin\\?app=(.*)&ids=(.*)&ips=(.*)$");
             Matcher m = p.matcher(target);

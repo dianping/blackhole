@@ -72,15 +72,15 @@ public class LogReader implements Runnable{
         } catch (UnknownHostException e) {
             LOG.error("Socket fail!", e);
             Cat.logError("Socket fail!", e);
-            node.reportFailure(topicMeta.getMetaKey(), node.getHost(), Util.getTS());
+            node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
         } catch (IOException e) {
             LOG.error("Oops, got an exception", e);
             Cat.logError("Oops, got an exception", e);
-            node.reportFailure(topicMeta.getMetaKey(), node.getHost(), Util.getTS());
+            node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
         } catch (RuntimeException e) {
             LOG.error("Oops, got an RuntimException:" , e);
             Cat.logError("Oops, got an RuntimException:" , e);
-            node.reportFailure(topicMeta.getMetaKey(), node.getHost(), Util.getTS());
+            node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
         }
     }
 

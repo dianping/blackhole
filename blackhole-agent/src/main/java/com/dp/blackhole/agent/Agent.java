@@ -228,13 +228,13 @@ public class Agent implements Runnable {
         register(metaKey, applog.getCreateTime());
     }
 
-    public void reportUnrecoverable(MetaKey metaKey, String agentServer, final long period, final long rollTs, boolean isFinal) {
-        Message message = PBwrap.wrapUnrecoverable(metaKey.getTopic(), Util.getSourceIdentify(agentServer, metaKey.getInstanceId()), period, rollTs, isFinal);
+    public void reportUnrecoverable(MetaKey metaKey, String sourceIdentify, final long period, final long rollTs, boolean isFinal) {
+        Message message = PBwrap.wrapUnrecoverable(metaKey.getTopic(), sourceIdentify, period, rollTs, isFinal);
         send(message);
     }
 
-    public void reportRecoveryFail(MetaKey metaKey, String agentServer, long period, final long rollTs, boolean isFinal) {
-        Message message = PBwrap.wrapRecoveryFail(metaKey.getTopic(), Util.getSourceIdentify(agentServer, metaKey.getInstanceId()), period, rollTs, isFinal);
+    public void reportRecoveryFail(MetaKey metaKey, String sourceIdentify, long period, final long rollTs, boolean isFinal) {
+        Message message = PBwrap.wrapRecoveryFail(metaKey.getTopic(), sourceIdentify, period, rollTs, isFinal);
         send(message);
     }
 
@@ -499,6 +499,7 @@ public class Agent implements Runnable {
                             // set a stream status to dying, and send a special rotate message.
                             if (topicMeta.isDying()) {
                                 if ((logReader = topicReaders.get(topicMeta)) != null) {
+                                    LOG.info("Clean up " + topicMeta);
                                     logReader.stop();
                                     topicReaders.remove(topicMeta);
                                     logMetas.remove(metaKey);

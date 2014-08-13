@@ -369,7 +369,7 @@ public class Util {
     }
     
     public static String getSourceIdentify(String agentServer, String instanceId) {
-        if (instanceId == null) {
+        if (instanceId == null || instanceId.trim().length() == 0) {
             return agentServer;
         } else {
             return agentServer + "#" + instanceId;

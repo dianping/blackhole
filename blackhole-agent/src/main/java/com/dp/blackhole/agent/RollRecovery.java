@@ -28,6 +28,7 @@ public class RollRecovery implements Runnable{
     private Socket socket;
     private byte[] inbuf;
     private Agent node;
+    private String sourceIdentify;
     private boolean isFinal;
     public RollRecovery(Agent node, String brokerServer, int port, TopicMeta topicMeta, final long rollTimestamp, boolean isFinal) {
         this.node = node;
@@ -36,6 +37,7 @@ public class RollRecovery implements Runnable{
         this.topicMeta = topicMeta;
         this.rollTimestamp = rollTimestamp;
         this.inbuf = new byte[DEFAULT_BUFSIZE];
+        this.sourceIdentify =  Util.getSourceIdentify(node.getHost(), topicMeta.getInstanceId());
         this.isFinal = isFinal;
     }
 
@@ -83,7 +85,7 @@ public class RollRecovery implements Runnable{
             LOG.error("Can not found both " + rolledFile + " and gzFile");
             Cat.logError(new BlackholeClientException("Can not found both " + rolledFile + " and gzFile"));
             stopRecoverying();
-            node.reportUnrecoverable(topicMeta.getMetaKey(), node.getHost(), period, rollTimestamp, isFinal);
+            node.reportUnrecoverable(topicMeta.getMetaKey(), sourceIdentify, period, rollTimestamp, isFinal);
             return;
         }
         // send recovery head, report fail in agent if catch exception.
@@ -104,7 +106,7 @@ public class RollRecovery implements Runnable{
             wrapSendRecoveryHead(out, fileSize, hasCompressed, isFinal);
         } catch (IOException e) {
             stopRecoveryingCauseException("Faild to build recovery stream or send protocol header.", e);
-            node.reportRecoveryFail(topicMeta.getMetaKey(), node.getHost(), period, rollTimestamp, isFinal);
+            node.reportRecoveryFail(topicMeta.getMetaKey(), sourceIdentify, period, rollTimestamp, isFinal);
             return;
         }
 
