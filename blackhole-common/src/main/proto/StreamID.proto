@@ -6,4 +6,5 @@ option java_outer_classname = "StreamIDPB";
 message StreamID {
     required string topic = 1;
     required string agent_server = 2;
+    optional string instance_id = 3;
 }

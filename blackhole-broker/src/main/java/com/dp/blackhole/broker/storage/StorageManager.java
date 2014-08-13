@@ -44,6 +44,15 @@ public class StorageManager {
         c.start();
     }
     
+    public void removePartition(String topic, String partitionId) {
+        Map<String, Partition> map = storage.get(topic);
+        if (map != null) {
+            Partition p = map.get(partitionId);
+            p.cleanupSegments(Util.getTS(), 0);
+            map.remove(partitionId);
+        }
+    }
+    
     private void load() throws IOException {
         File baseDir = new File(basedir);
         Util.checkDir(baseDir);

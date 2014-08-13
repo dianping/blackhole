@@ -85,7 +85,11 @@ public class Cli {
                     String[] tokens = getTokens(cmd);
                     String topic = tokens[1];
                     String agentServer = tokens[2];
-                    Message msg = PBwrap.wrapRetireStream(topic, agentServer);
+                    String instanceId = "";
+                    if (tokens.length > 3) {
+                        instanceId = tokens[3];
+                    }
+                    Message msg = PBwrap.wrapRetireStream(topic, agentServer, instanceId);
                     send(msg);
                     out.println("send message: " + msg);
                 } else if (cmd.equals("dumpconf")) {

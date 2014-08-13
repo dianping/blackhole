@@ -264,10 +264,11 @@ public class PBwrap {
         return wrapMessage(MessageType.MANUAL_RECOVERY_ROLL, wrapRollID(appName, sourceIdentify, period, rollTs, false));
     }
     
-    public static Message wrapRetireStream(String topic, String agentServer) {
+    public static Message wrapRetireStream(String topic, String agentServer, String instanceId) {
         StreamID.Builder builder = StreamID.newBuilder();
         builder.setTopic(topic);
         builder.setAgentServer(agentServer);
+        builder.setInstanceId(instanceId);
         return wrapMessage(MessageType.RETIRESTREAM, builder.build());
     }
     

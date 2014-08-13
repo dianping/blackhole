@@ -191,7 +191,7 @@ public class BrokerService extends Thread {
         }
         
         public void handleRegisterRequest(RegisterRequest request, DelegationIOConnection from) {
-            clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT));
+            clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT, request.sourceIdentify));
             try {
                 manager.getPartition(request.topic, request.sourceIdentify, true);
             } catch (IOException e) {
@@ -256,7 +256,8 @@ public class BrokerService extends Thread {
             LOG.info(connection + " disconnected");
             ClientDesc desc = clients.get(connection);
             if (desc.type == ClientDesc.AGENT) {
-                Broker.getRollMgr().reportFailure(desc.topic, connection.getHost(), Util.getTS());
+                manager.removePartition(desc.topic, desc.sourceIdentify);
+                Broker.getRollMgr().reportFailure(desc.topic, desc.sourceIdentify, Util.getTS());
             }
             clients.remove(connection);
         }
@@ -269,10 +270,12 @@ public class BrokerService extends Thread {
         
         public String topic;
         public int type;
+        public String sourceIdentify;
         
-        public ClientDesc (String topic, int type) {
+        public ClientDesc (String topic, int type, String sourceIdentify) {
             this.topic = topic;
             this.type = type;
+            this.sourceIdentify = sourceIdentify;
         }
         
         public ClientDesc(int type) {

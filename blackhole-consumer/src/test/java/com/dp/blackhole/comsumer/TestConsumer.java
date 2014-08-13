@@ -11,13 +11,13 @@ public class TestConsumer {
     
     public static void main( String[] args ) throws LionException, InterruptedException {
         
-        args = new String[] {"testblackhole2","test321", "1000"};
+        args = new String[] {"testpaas","t123", "100000000"};
         
         String topic = args[0];
         String group = args[1];
         int num = Integer.parseInt(args[2]);
 
-        ConsumerConnector.getInstance().init("192.168.213.245", 8081, true, 3000000);
+        ConsumerConnector.getInstance().init("localhost", 8080, true, 3000000);
         ConsumerConfig config = new ConsumerConfig();
         Consumer consumer = new Consumer(topic, group, config);
         consumer.start();
@@ -30,7 +30,7 @@ public class TestConsumer {
 //            if (i == num) {
 //                break;
 //            }
-            System.out.println(message);
+//            System.out.println(message);
             i++;
         }
         ConsumerConnector.shutdownNow();

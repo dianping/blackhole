@@ -36,7 +36,7 @@ import com.dp.blackhole.storage.MessageSet;
 public class Fetcher extends Thread {
     private final Log LOG = LogFactory.getLog(Fetcher.class);
     
-    private GenClient<TransferWrap, DelegationIOConnection, ConsumerProcessor> client;
+    private GenClient<TransferWrap, DelegationIOConnection, FetcherProcessor> client;
     private String groupId;
     private String consumerId; 
     private String broker;
@@ -61,7 +61,7 @@ public class Fetcher extends Thread {
         }
         this.config = config;
         client = new GenClient(
-                new ConsumerProcessor(),
+                new FetcherProcessor(),
                 new DelegationIOConnection.DelegationIOConnectionFactory(),
                 new DataMessageTypeFactory());
     }
@@ -108,7 +108,7 @@ public class Fetcher extends Thread {
         return buf.toString();
     }
     
-    class ConsumerProcessor implements EntityProcessor<TransferWrap, DelegationIOConnection> {
+    class FetcherProcessor implements EntityProcessor<TransferWrap, DelegationIOConnection> {
         
         @Override
         public void OnConnected(DelegationIOConnection connection) {

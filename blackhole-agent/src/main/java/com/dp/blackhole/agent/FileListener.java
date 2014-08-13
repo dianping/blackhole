@@ -135,7 +135,7 @@ public class FileListener implements JNotifyListener{
             try {
                 Integer oldWd;
                 if ((oldWd = path2wd.get(createdFilePath)) != null) {
-                    iJNotifyInstance.removeWatch(oldWd);//TODO review
+                    iJNotifyInstance.removeWatch(oldWd);
                     path2wd.remove(createdFilePath);
                 } else {
                     LOG.fatal("Failed to get wd by file " + createdFilePath);

@@ -43,7 +43,6 @@ public class SimAgent extends Agent{
         try {
             return Util.getLocalHost();
         } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return null;

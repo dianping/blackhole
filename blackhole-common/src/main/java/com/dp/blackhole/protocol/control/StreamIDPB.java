@@ -49,6 +49,13 @@ public final class StreamIDPB {
     public boolean hasAgentServer() { return hasAgentServer; }
     public java.lang.String getAgentServer() { return agentServer_; }
     
+    // optional string instance_id = 3;
+    public static final int INSTANCE_ID_FIELD_NUMBER = 3;
+    private boolean hasInstanceId;
+    private java.lang.String instanceId_ = "";
+    public boolean hasInstanceId() { return hasInstanceId; }
+    public java.lang.String getInstanceId() { return instanceId_; }
+    
     private void initFields() {
     }
     public final boolean isInitialized() {
@@ -66,6 +73,9 @@ public final class StreamIDPB {
       if (hasAgentServer()) {
         output.writeString(2, getAgentServer());
       }
+      if (hasInstanceId()) {
+        output.writeString(3, getInstanceId());
+      }
       getUnknownFields().writeTo(output);
     }
     
@@ -82,6 +92,10 @@ public final class StreamIDPB {
       if (hasAgentServer()) {
         size += com.google.protobuf.CodedOutputStream
           .computeStringSize(2, getAgentServer());
+      }
+      if (hasInstanceId()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeStringSize(3, getInstanceId());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -247,6 +261,9 @@ public final class StreamIDPB {
         if (other.hasAgentServer()) {
           setAgentServer(other.getAgentServer());
         }
+        if (other.hasInstanceId()) {
+          setInstanceId(other.getInstanceId());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -278,6 +295,10 @@ public final class StreamIDPB {
             }
             case 18: {
               setAgentServer(input.readString());
+              break;
+            }
+            case 26: {
+              setInstanceId(input.readString());
               break;
             }
           }
@@ -327,6 +348,27 @@ public final class StreamIDPB {
         return this;
       }
       
+      // optional string instance_id = 3;
+      public boolean hasInstanceId() {
+        return result.hasInstanceId();
+      }
+      public java.lang.String getInstanceId() {
+        return result.getInstanceId();
+      }
+      public Builder setInstanceId(java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  result.hasInstanceId = true;
+        result.instanceId_ = value;
+        return this;
+      }
+      public Builder clearInstanceId() {
+        result.hasInstanceId = false;
+        result.instanceId_ = getDefaultInstance().getInstanceId();
+        return this;
+      }
+      
       // @@protoc_insertion_point(builder_scope:blackhole.StreamID)
     }
     
@@ -353,10 +395,10 @@ public final class StreamIDPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\016StreamID.proto\022\tblackhole\"/\n\010StreamID\022" +
-      "\r\n\005topic\030\001 \002(\t\022\024\n\014agent_server\030\002 \002(\tB/\n!" +
-      "com.dp.blackhole.protocol.controlB\nStrea" +
-      "mIDPB"
+      "\n\016StreamID.proto\022\tblackhole\"D\n\010StreamID\022" +
+      "\r\n\005topic\030\001 \002(\t\022\024\n\014agent_server\030\002 \002(\t\022\023\n\013" +
+      "instance_id\030\003 \001(\tB/\n!com.dp.blackhole.pr" +
+      "otocol.controlB\nStreamIDPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -368,7 +410,7 @@ public final class StreamIDPB {
           internal_static_blackhole_StreamID_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_StreamID_descriptor,
-              new java.lang.String[] { "Topic", "AgentServer", },
+              new java.lang.String[] { "Topic", "AgentServer", "InstanceId", },
               com.dp.blackhole.protocol.control.StreamIDPB.StreamID.class,
               com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder.class);
           return null;
