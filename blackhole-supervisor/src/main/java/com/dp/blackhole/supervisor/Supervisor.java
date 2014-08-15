@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +39,7 @@ import com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.DumpAppPB.DumpApp;
+import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
 import com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
@@ -243,10 +245,6 @@ public class Supervisor {
     }
 
     private void handleOffsetCommit(OffsetCommit offsetCommit) {
-        //TODO disable temporarily
-        if (true) {
-            return;
-        }
         String id = offsetCommit.getConsumerIdString();
         String groupId = id.split("-")[0];
         String topic = offsetCommit.getTopic();
@@ -585,7 +583,7 @@ public class Supervisor {
             }
         }
         sb.append("\n");
-        
+        Map<String, PartitionInfo> partitionMap = topics.get(appName);
         sb.append("print Streams:\n");
         for (Stream stream : printStreams) {
             sb.append("[stream]\n")
@@ -595,8 +593,13 @@ public class Supervisor {
             ArrayList<Stage> stages = Streams.get(stream);
             synchronized (stages) {
                 for (Stage stage : stages) {
-                    sb.append(stage)
-                    .append("\n");
+                    sb.append(stage);
+                }
+            }
+            if (partitionMap != null) {
+                PartitionInfo partitionInfo = partitionMap.get(stream.appHost);
+                if (partitionInfo != null) {
+                    sb.append(partitionInfo).append("\n");
                 }
             }
         }
@@ -610,6 +613,30 @@ public class Supervisor {
     public void dumpconf(SimpleConnection from) {
         String dumpconf = lionConfChange.dumpconf();
         Message message = PBwrap.wrapDumpReply(dumpconf);
+        send(from, message);
+    }
+
+    public void dumpConsumerGroup(DumpConsumerGroup dumpConsumerGroup,
+            SimpleConnection from) {
+        String topic = dumpConsumerGroup.getTopic();
+        String groupId = dumpConsumerGroup.getGroupId();
+        ConsumerGroup consumerGroup = new ConsumerGroup(groupId, topic);
+        ConsumerGroupDesc consumerGroupDesc = consumerGroups.get(consumerGroup);
+        StringBuilder sb = new StringBuilder();
+        if (consumerGroupDesc == null) {
+            sb.append("Can not find consumer group by groupId:").append(groupId).append(" topic:").append(topic);
+            LOG.info(sb.toString());
+        } else {
+            sb.append("dump consumer group:\n");
+            sb.append("############################## dump ##############################\n");
+            sb.append(consumerGroup).append("\n");
+            for(Map.Entry<String, AtomicLong> entry : consumerGroupDesc.getCommitedOffsets().entrySet()) {
+                sb.append("<").append(entry.getKey())
+                .append(":").append(entry.getValue().get()).append(">\n");
+            }
+            sb.append("##################################################################");
+        }
+        Message message = PBwrap.wrapDumpReply(sb.toString());
         send(from, message);
     }
 
@@ -1510,6 +1537,9 @@ public class Supervisor {
                 break;
             case RESTART:
                 sendRestart(msg.getRestart());
+                break;
+            case DUMP_CONSUMER_GROUP:
+                dumpConsumerGroup(msg.getDumpConsumerGroup(), from);
                 break;
             default:
                 LOG.warn("unknown message: " + msg.toString());

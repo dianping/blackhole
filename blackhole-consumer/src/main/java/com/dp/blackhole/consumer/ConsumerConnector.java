@@ -104,7 +104,7 @@ public class ConsumerConnector implements Runnable {
                     long newOffset = info.getConsumedOffset();
                     updateOffset(id , info.topic, info.partition, newOffset);
                     info.updateComsumedOffsetChanged(lastChanged);
-                    LOG.debug("Committed " + info.partition + " for topic " + info.topic);
+                    LOG.debug("Committed " + newOffset + " @" + info.partition + " for topic " + info.topic);
                 }
             }
         }

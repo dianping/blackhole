@@ -22,6 +22,7 @@ import "AssignConsumer.proto";
 import "OffsetCommit.proto";
 import "TopicReport.proto";
 import "Restart.proto";
+import "DumpConsumerGroup.proto";
 
 message Message {
     enum MessageType {
@@ -59,6 +60,7 @@ message Message {
         MAKR_UNRECOVERABLE = 32;
         LISTIDLE = 33;
         RESTART = 34;
+        DUMP_CONSUMER_GROUP = 38;
     }
 
     required MessageType type = 1;
@@ -81,4 +83,5 @@ message Message {
     optional OffsetCommit offsetCommit = 18;
     optional TopicReport topicReport = 19;
     optional Restart restart = 20;
+    optional DumpConsumerGroup dumpConsumerGroup = 24;
 }
