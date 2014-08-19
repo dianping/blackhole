@@ -588,18 +588,18 @@ public class Supervisor {
         for (Stream stream : printStreams) {
             sb.append("[stream]\n")
             .append(stream)
-            .append("\n")
-            .append("[stages]\n");
-            ArrayList<Stage> stages = Streams.get(stream);
-            synchronized (stages) {
-                for (Stage stage : stages) {
-                    sb.append(stage);
-                }
-            }
+            .append("\n").append("[partition]\n");
             if (partitionMap != null) {
                 PartitionInfo partitionInfo = partitionMap.get(stream.appHost);
                 if (partitionInfo != null) {
                     sb.append(partitionInfo).append("\n");
+                }
+            }
+            sb.append("[stages]\n");
+            ArrayList<Stage> stages = Streams.get(stream);
+            synchronized (stages) {
+                for (Stage stage : stages) {
+                    sb.append(stage);
                 }
             }
         }
@@ -629,10 +629,17 @@ public class Supervisor {
         } else {
             sb.append("dump consumer group:\n");
             sb.append("############################## dump ##############################\n");
-            sb.append(consumerGroup).append("\n");
+            sb.append("print ").append(consumerGroup).append("\n");
+            Map<String, PartitionInfo> partitionMap = topics.get(topic);
             for(Map.Entry<String, AtomicLong> entry : consumerGroupDesc.getCommitedOffsets().entrySet()) {
-                sb.append("<").append(entry.getKey())
-                .append(":").append(entry.getValue().get()).append(">\n");
+                if (partitionMap != null) {
+                    PartitionInfo partitionInfo = partitionMap.get(entry.getKey());
+                    if (partitionInfo != null) {
+                        sb.append(partitionInfo).append("\n");
+                    }
+                }
+                sb.append("{committedinfo,").append(entry.getKey())
+                .append(",").append(entry.getValue().get()).append("}\n\n");
             }
             sb.append("##################################################################");
         }
