@@ -59,16 +59,16 @@ public class Agent implements Runnable {
     AgentProcessor processor;
     private SimpleConnection supervisor;
     private int confLoopFactor = 1;
-    private final String baseDir;
+    private final String baseDirWildcard;
     private boolean paasModel = false;
     
     public Agent() {
         this(null);
     }
     
-    public Agent(String baseDir) {
-        this.baseDir = baseDir;
-        if (baseDir != null) {
+    public Agent(String baseDirWildcard) {
+        this.baseDirWildcard = baseDirWildcard;
+        if (baseDirWildcard != null) {
             paasModel = true;
             LOG.info("Agent deploys for PaaS.");
         }
@@ -84,8 +84,8 @@ public class Agent implements Runnable {
         return hostname;
     }
     
-    public String getBaseDir() {
-        return baseDir;
+    public String getBaseDirWildcard() {
+        return baseDirWildcard;
     }
 
     public boolean isPaasModel() {
@@ -124,11 +124,11 @@ public class Agent implements Runnable {
     }
     
     public boolean checkFilesExist(String topic, String watchFile, String instanceId) {
-        if (watchFile == null) {
+        if (watchFile == null || watchFile.trim().length() == 0) {
             //TODO file by regulation
             return false;
         }
-        String realWatchFile = baseDir + "/" + instanceId + watchFile;
+        String realWatchFile = String.format(baseDirWildcard, instanceId) + watchFile;
         File fileForTest = new File(realWatchFile);
         if (fileForTest.exists()) {
             LOG.info("Check file " + realWatchFile + " ok.");
