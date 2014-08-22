@@ -113,7 +113,7 @@ public class StorageManager {
         
         private List<ReportEntry> entrylist;
         private Map<String, Long> reportedOffsets;
-        private long interval = 10000;
+        private long interval = 3000;
         
         public reporter() {
             reportedOffsets = new HashMap<String, Long>();

@@ -72,7 +72,7 @@ public class ConsumerConnector implements Runnable {
         ConfigCache configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
         String host = configCache.getProperty("blackhole.supervisor.host");
         int port = configCache.getIntProperty("blackhole.supervisor.port");
-        init(host, port, true, 3000);
+        init(host, port, true, 6000);
     }
 
     public synchronized void init(String supervisorHost, int supervisorPort, boolean autoCommit, int autoCommitIntervalMs) {

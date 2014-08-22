@@ -22,7 +22,7 @@ public class TestConsumer {
         String group = args[3];
         int num = Integer.parseInt(args[4]);
 
-        ConsumerConnector.getInstance().init(supervisorHost, port, true, 3000);
+        ConsumerConnector.getInstance().init(supervisorHost, port, true, 6000);
         ConsumerConfig config = new ConsumerConfig();
         Consumer consumer = new Consumer(topic, group, config);
         consumer.start();
