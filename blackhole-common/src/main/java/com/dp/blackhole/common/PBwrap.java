@@ -332,8 +332,9 @@ public class PBwrap {
     /**
      * report committed offset of a partition
      */
-    public static Message wrapOffsetCommit(String consumerId, String topic, String partitionName, long offset) {
+    public static Message wrapOffsetCommit(String groupId, String consumerId, String topic, String partitionName, long offset) {
         OffsetCommit.Builder builder = OffsetCommit.newBuilder();
+        builder.setGroupId(groupId);
         builder.setConsumerIdString(consumerId);
         builder.setTopic(topic);
         builder.setPartition(partitionName);

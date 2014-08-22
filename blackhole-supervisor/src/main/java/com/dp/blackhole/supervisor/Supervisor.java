@@ -238,7 +238,7 @@ public class Supervisor {
                 AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(broker, info.getId(), info.getEndOffset());
                 offsets.add(offset);
             }
-            Message assign = PBwrap.wrapAssignConsumer(group.getId(), c.getId(), group.getTopic(), offsets);
+            Message assign = PBwrap.wrapAssignConsumer(group.getGroupId(), c.getId(), group.getTopic(), offsets);
             send(c.getConnection(), assign);
             i++;
         }
@@ -246,7 +246,10 @@ public class Supervisor {
 
     private void handleOffsetCommit(OffsetCommit offsetCommit) {
         String id = offsetCommit.getConsumerIdString();
-        String groupId = id.split("-")[0];
+        String groupId = offsetCommit.getGroupId();
+        if (groupId == null || groupId.length() == 0) {
+            groupId = id.split("-")[0];
+        }
         String topic = offsetCommit.getTopic();
         String partition = offsetCommit.getPartition();
         long offset = offsetCommit.getOffset();
