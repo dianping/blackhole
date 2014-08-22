@@ -8,5 +8,6 @@ message OffsetCommit {
     required string partition = 2;
     required string consumerIdString = 3;
     required int64  offset = 4;
+    optional string groupId = 5;
 }
 
