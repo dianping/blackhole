@@ -433,24 +433,31 @@ public class Supervisor {
         if (nodeDescs == null || nodeDescs.size() == 0) {
             return;
         }
+        //the purpose of the map named 'toBeReAssign' is to avoid multiple distribution of consumers in a group
+        HashMap<ConsumerGroup, ConsumerGroupDesc> toBeReAssign = new HashMap<ConsumerGroup, ConsumerGroupDesc>();
         for (NodeDesc nodeDesc : nodeDescs) {
             ConsumerDesc consumerDesc = (ConsumerDesc) nodeDesc;
             ConsumerGroup group = consumerDesc.getConsumerGroup();
             ConsumerGroupDesc groupDesc = consumerGroups.get(group);
             if (groupDesc == null) {
                 LOG.error("can not find groupDesc by ConsumerGroup: " + group);
-                return;
+                continue;
             }
 
             groupDesc.unregisterConsumer(consumerDesc);
             
             if (groupDesc.getConsumers().size() != 0) {
-                LOG.info("reassign consumers in group: " + group + ", caused by consumer fail: " + consumerDesc);
-                tryAssignConsumer(null, group, groupDesc);
+                toBeReAssign.put(group, groupDesc);
             } else {
                 LOG.info("consumerGroup " + group +" has not live consumer, thus be removed");
+                toBeReAssign.remove(group);
                 consumerGroups.remove(group);
             }
+        }
+        
+        for (Map.Entry<ConsumerGroup, ConsumerGroupDesc> entry : toBeReAssign.entrySet()) {
+            LOG.info("reassign consumers in group: " + entry.getKey() + ", caused by consumer fail: " + entry.getValue());
+            tryAssignConsumer(null, entry.getKey(), entry.getValue());
         }
     }
     
