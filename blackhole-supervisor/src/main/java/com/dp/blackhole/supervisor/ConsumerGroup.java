@@ -1,16 +1,16 @@
 package com.dp.blackhole.supervisor;
 
 public class ConsumerGroup {
-    private String gtoupId;
+    private String goupId;
     private String topic;
     
     public ConsumerGroup(String groupId, String topic) {
-        this.gtoupId = groupId;
+        this.goupId = groupId;
         this.topic = topic;
     }
 
     public String getGroupId() {
-        return gtoupId;
+        return goupId;
     }
 
     public String getTopic() {
@@ -21,7 +21,7 @@ public class ConsumerGroup {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((gtoupId == null) ? 0 : gtoupId.hashCode());
+        result = prime * result + ((goupId == null) ? 0 : goupId.hashCode());
         result = prime * result + ((topic == null) ? 0 : topic.hashCode());
         return result;
     }
@@ -35,10 +35,10 @@ public class ConsumerGroup {
         if (getClass() != obj.getClass())
             return false;
         ConsumerGroup other = (ConsumerGroup) obj;
-        if (gtoupId == null) {
-            if (other.gtoupId != null)
+        if (goupId == null) {
+            if (other.goupId != null)
                 return false;
-        } else if (!gtoupId.equals(other.gtoupId))
+        } else if (!goupId.equals(other.goupId))
             return false;
         if (topic == null) {
             if (other.topic != null)
@@ -50,7 +50,7 @@ public class ConsumerGroup {
     
     @Override
     public String toString() {
-        return "ConsumerGroup[" + gtoupId + "/" + topic + "]";
+        return "ConsumerGroup[" + goupId + "/" + topic + "]";
     }
     
 }

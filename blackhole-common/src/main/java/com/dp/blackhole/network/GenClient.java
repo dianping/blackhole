@@ -164,6 +164,9 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
     public void shutdown() {
         running = false;
         selector.wakeup();
+        for (Handler handler : handlers) {
+            handler.interrupt();
+        }
     }
     
     private class Handler extends Thread {

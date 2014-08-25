@@ -60,6 +60,10 @@ public class Fetcher extends Thread {
             partitionBlockMap.put(info, false);
         }
         this.config = config;
+        client = new GenClient(
+                new ConsumerProcessor(),
+                new DelegationIOConnection.DelegationIOConnectionFactory(),
+                new DataMessageTypeFactory());
     }
 
     public Collection<PartitionTopicInfo> getpartitionInfos() {
@@ -78,11 +82,6 @@ public class Fetcher extends Thread {
     @Override
     public void run() {
         LOG.info("start " + this.toString());
-
-        client = new GenClient(
-                new ConsumerProcessor(),
-                new DelegationIOConnection.DelegationIOConnectionFactory(),
-                new DataMessageTypeFactory());
         Properties prop = new Properties();
         prop.setProperty("broker.host", Util.getHostFromBroker(broker));
         prop.setProperty("broker.port", Util.getPortFromBroker(broker));
