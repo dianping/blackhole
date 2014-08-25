@@ -140,7 +140,11 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
     }
 
     public void shutdown() {
-        running = false;  
+        running = false;
+        selector.wakeup();
+        for (Handler handler : handlers) {
+            handler.interrupt();
+        }
     }
     
     private Handler getHandler(Connection connection) {
