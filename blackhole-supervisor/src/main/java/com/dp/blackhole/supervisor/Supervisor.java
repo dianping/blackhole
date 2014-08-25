@@ -429,25 +429,28 @@ public class Supervisor {
         SimpleConnection connection = desc.getConnection();
         LOG.info("consumer " + connection + " disconnectted");
         
-        ConsumerDesc consumerDesc = (ConsumerDesc) desc.getAttachment();
-        if (consumerDesc == null) {
+        List<NodeDesc> nodeDescs = desc.getAttachments();
+        if (nodeDescs == null || nodeDescs.size() == 0) {
             return;
         }
-        ConsumerGroup group = consumerDesc.getConsumerGroup();
-        ConsumerGroupDesc groupDesc = consumerGroups.get(group);
-        if (groupDesc == null) {
-            LOG.error("can not find groupDesc by ConsumerGroup: " + group);
-            return;
-        }
+        for (NodeDesc nodeDesc : nodeDescs) {
+            ConsumerDesc consumerDesc = (ConsumerDesc) nodeDesc;
+            ConsumerGroup group = consumerDesc.getConsumerGroup();
+            ConsumerGroupDesc groupDesc = consumerGroups.get(group);
+            if (groupDesc == null) {
+                LOG.error("can not find groupDesc by ConsumerGroup: " + group);
+                return;
+            }
 
-        groupDesc.unregisterConsumer(consumerDesc);
-        
-        if (groupDesc.getConsumers().size() != 0) {
-            LOG.info("reassign consumers in group: " + group + ", caused by consumer fail: " + consumerDesc);
-            tryAssignConsumer(null, group, groupDesc);
-        } else {
-            LOG.info("consumerGroup " + group +" has not live consumer, thus be removed");
-            consumerGroups.remove(group);
+            groupDesc.unregisterConsumer(consumerDesc);
+            
+            if (groupDesc.getConsumers().size() != 0) {
+                LOG.info("reassign consumers in group: " + group + ", caused by consumer fail: " + consumerDesc);
+                tryAssignConsumer(null, group, groupDesc);
+            } else {
+                LOG.info("consumerGroup " + group +" has not live consumer, thus be removed");
+                consumerGroups.remove(group);
+            }
         }
     }
     
@@ -1683,7 +1686,8 @@ public class Supervisor {
             LOG.error("can not get ConnectionDescription from connection: " + connection);
             return 0;
         }
-        BrokerDesc brokerDesc = (BrokerDesc) desc.getAttachment();
+        List<NodeDesc> nodeDescs = desc.getAttachments();
+        BrokerDesc brokerDesc = (BrokerDesc) nodeDescs.get(0);
         return brokerDesc.getBrokerPort();
     }
     
@@ -1698,7 +1702,8 @@ public class Supervisor {
             LOG.error("can not get ConnectionDescription from connection: " + connection);
             return 0;
         }
-        BrokerDesc brokerDesc = (BrokerDesc) desc.getAttachment();
+        List<NodeDesc> nodeDescs = desc.getAttachments();
+        BrokerDesc brokerDesc = (BrokerDesc) nodeDescs.get(0);
         return brokerDesc.getRecoveryPort();
     }
     

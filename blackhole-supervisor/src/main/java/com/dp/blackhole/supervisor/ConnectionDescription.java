@@ -1,5 +1,7 @@
 package com.dp.blackhole.supervisor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dp.blackhole.common.Util;
@@ -13,11 +15,12 @@ public class ConnectionDescription {
     private int type;
     private AtomicLong lastHeartBeat;
     private SimpleConnection connection;
-    private NodeDesc attachment;
+    private List<NodeDesc> attachments;
     
     public ConnectionDescription(SimpleConnection connection) {
         this.connection = connection;
         lastHeartBeat = new AtomicLong(Util.getTS());
+        attachments = new ArrayList<NodeDesc>();
     }
     
     public void setType(int type) {
@@ -40,12 +43,12 @@ public class ConnectionDescription {
         return connection;
     }
     
-    public NodeDesc getAttachment() {
-        return attachment;
+    public List<NodeDesc> getAttachments() {
+        return attachments;
     }
 
     public void attach(NodeDesc desc) {
-        attachment = desc;
+        attachments.add(desc);
     }
     
     @Override
