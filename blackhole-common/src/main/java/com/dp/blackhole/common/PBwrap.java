@@ -13,6 +13,7 @@ import com.dp.blackhole.protocol.control.ConfResPB.ConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.DumpAppPB.DumpApp;
+import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
 import com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
 import com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType;
@@ -112,6 +113,11 @@ public class PBwrap {
             break;
         case RESTART:
             msg.setRestart((Restart) message);
+            break;
+        case DUMP_CONSUMER_GROUP:
+            msg.setDumpConsumerGroup((DumpConsumerGroup) message);
+            break;
+        case LIST_CONSUMER_GROUP:
             break;
         default:
         }
@@ -328,8 +334,9 @@ public class PBwrap {
     /**
      * report committed offset of a partition
      */
-    public static Message wrapOffsetCommit(String consumerId, String topic, String partitionName, long offset) {
+    public static Message wrapOffsetCommit(String groupId, String consumerId, String topic, String partitionName, long offset) {
         OffsetCommit.Builder builder = OffsetCommit.newBuilder();
+        builder.setGroupId(groupId);
         builder.setConsumerIdString(consumerId);
         builder.setTopic(topic);
         builder.setPartition(partitionName);
@@ -386,5 +393,16 @@ public class PBwrap {
         Restart.Builder builder = Restart.newBuilder();
         builder.addAllAppServers(appServers);
         return wrapMessage(MessageType.RESTART, builder.build());
+    }
+    
+    public static Message wrapDumpConsumeGroup(String topic, String groupId) {
+        DumpConsumerGroup.Builder builder = DumpConsumerGroup.newBuilder();
+        builder.setTopic(topic);
+        builder.setGroupId(groupId);
+        return wrapMessage(MessageType.DUMP_CONSUMER_GROUP, builder.build());
+    }
+    
+    public static Message wrapListConsumerGroups() {
+        return wrapMessage(MessageType.LIST_CONSUMER_GROUP, null);
     }
 }

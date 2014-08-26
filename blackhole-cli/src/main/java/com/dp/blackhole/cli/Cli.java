@@ -51,59 +51,59 @@ public class Cli {
                     Message msg = PBwrap.wrapDumpStat();
                     send(msg);
                     out.println("send message: " + msg);
-                } else if (cmd.startsWith("dumpapp")) {
+                } else if (cmd.startsWith("dumptopic")) {
                     String[] tokens = getTokens(cmd);
-                    String appName = tokens[1];
-                    Message msg = PBwrap.wrapDumpApp(appName);
+                    String topic = tokens[1];
+                    Message msg = PBwrap.wrapDumpApp(topic);
                     send(msg);
                     out.println("send message: " + msg);
                 } else if (cmd.startsWith("recovery")) {
                     String[] tokens = getTokens(cmd);
-                    String appName = tokens[1];
-                    String appServer = tokens[2];
+                    String topic = tokens[1];
+                    String agentServer = tokens[2];
                     long period = Long.parseLong(tokens[3]);
                     long rollTs = Long.parseLong(tokens[4]); 
-                    Message msg = PBwrap.wrapManualRecoveryRoll(appName, appServer, period, rollTs);
+                    Message msg = PBwrap.wrapManualRecoveryRoll(topic, agentServer, period, rollTs);
                     send(msg);
                     out.println("send message: " + msg);
                 } else if (cmd.startsWith("range")) {
                     //recovery -a 3600 1385276400000 1385301600000
                     String[] tokens = getTokens(cmd);
-                    String appName = tokens[1];
-                    String appServer = tokens[2];
+                    String topic = tokens[1];
+                    String agentServer = tokens[2];
                     long period = Long.parseLong(tokens[3]);
                     long startRollTs = Long.parseLong(tokens[4]);
                     long endRollTs = Long.parseLong(tokens[5]);
                     long recoveryStageCount = (endRollTs - startRollTs) / period / 1000;
                     for (int i = 0; i<= recoveryStageCount; i++) {
                         long rollTs = startRollTs + period * 1000 * (i);
-                        Message msg = PBwrap.wrapManualRecoveryRoll(appName, appServer, period, rollTs);
+                        Message msg = PBwrap.wrapManualRecoveryRoll(topic, agentServer, period, rollTs);
                         send(msg);
                         out.println("send message: " + msg);
                     }
                 } else if (cmd.startsWith("retire")) {
                     String[] tokens = getTokens(cmd);
-                    String appName = tokens[1];
-                    String appServer = tokens[2];
-                    Message msg = PBwrap.wrapRetireStream(appName, appServer);
+                    String topic = tokens[1];
+                    String agentServer = tokens[2];
+                    Message msg = PBwrap.wrapRetireStream(topic, agentServer);
                     send(msg);
                     out.println("send message: " + msg);
                 } else if (cmd.equals("dumpconf")) {
                     Message msg = PBwrap.wrapDumpConf();
                     send(msg);
                     out.println("send message: " + msg);
-                } else if (cmd.equals("listapps")) {
+                } else if (cmd.equals("listtopic")) {
                     Message msg = PBwrap.wrapListApps();
                     send(msg);
                     out.println("send message: " + msg);
                 } else if (cmd.startsWith("rmconf")) {
                     String[] tokens = getTokens(cmd);
-                    String appName = tokens[1];
-                    ArrayList<String> appServers = new ArrayList<String>();
+                    String topic = tokens[1];
+                    ArrayList<String> agentServers = new ArrayList<String>();
                     for (int i = 2; i < tokens.length; i++) {
-                        appServers.add(tokens[i]);
+                        agentServers.add(tokens[i]);
                     }
-                    Message msg = PBwrap.wrapRemoveConf(appName, appServers);
+                    Message msg = PBwrap.wrapRemoveConf(topic, agentServers);
                     send(msg);
                 } else if (cmd.equals("listidle")) {
                     Message msg = PBwrap.wrapListIdle();
@@ -111,28 +111,41 @@ public class Cli {
                     out.println("send message: " + msg);
                 } else if (cmd.startsWith("restart")) {
                     String[] tokens = getTokens(cmd);
-                    ArrayList<String> appServers = new ArrayList<String>();
+                    ArrayList<String> agentServers = new ArrayList<String>();
                     for (int i = 1; i < tokens.length; i++) {
-                        appServers.add(tokens[i]);
+                        agentServers.add(tokens[i]);
                     }
-                    Message msg = PBwrap.wrapRestart(appServers);
+                    Message msg = PBwrap.wrapRestart(agentServers);
+                    send(msg);
+                    out.println("send message: " + msg);
+                } else if (cmd.startsWith("dumpcons")) {
+                    String[] tokens = getTokens(cmd);
+                    String topic = tokens[1];
+                    String groupId = tokens[2];
+                    Message msg = PBwrap.wrapDumpConsumeGroup(topic, groupId);
+                    send(msg);
+                    out.println("send message: " + msg);
+                } else if (cmd.equals("listcons")) {
+                    Message msg = PBwrap.wrapListConsumerGroups();
                     send(msg);
                     out.println("send message: " + msg);
                 } else if (cmd.equals("help")) {
                     out.println("Usage:");
                     out.println(" dumpstat              Display all of streams information.");
-                    out.println(" dumpconf              Display all of app config information.");
-                    out.println(" listapps              List all of application names.");
+                    out.println(" dumpconf              Display all of topic config information.");
+                    out.println(" listtopic             List all of topic names.");
                     out.println(" listidle              List all of idle hostname or ip.");
-                    out.println(" dumpapp <Appname>     Display the stream, stages of the application followed.");
-                    out.println(" rmconf <Appname>      Remove the configuration specified by appname which should be useless.");
+                    out.println(" dumptopic <topic>     Display the stream, stages of the topic followed.");
+                    out.println(" rmconf <topic>      Remove the configuration specified by topic which should be useless.");
                     out.println("                       (Just remove from supervisor memory rather than lion/ZK).");
-                    out.println(" retire <Appname> <AgentHost>      Retire the stream specified by appname and agentHost.");
-                    out.println(" recovery <Appname> <appserver> <period> <rolltimestamp>");
-                    out.println("                       Recovery the stream specified by appname, agentHost and roll ts.");
-                    out.println(" range <Appname> <AgentHost> <period> <start rolltimestamp> <end rolltimestamp>");
+                    out.println(" retire <topic> <agentserver>      Retire the stream specified by topic and agentServer.");
+                    out.println(" recovery <topic> <agentserver> <period> <rolltimestamp>");
+                    out.println("                       Recovery the stream specified by topic, agentserver and roll ts.");
+                    out.println(" range <topic> <agentserver> <period> <start rolltimestamp> <end rolltimestamp>");
                     out.println("                       Recovery a range of streams specified period from start timestamp to end timestamp.");
-                    out.println(" restart [AgentHosts]  Restart a set of agents in one command. The agents are splitted by \" \"");
+                    out.println(" restart [agentservers]  Restart a set of agents in one command. The agents are splitted by \" \"");
+                    out.println(" dumpcons <topic> <consumerGroupId>         Display the consumer group information.");
+                    out.println(" listcons              List all of consumer group, contains topic and group name");
                     out.println(" quit                  Quit the command line interface.");
                     out.println(" help                  Display help information.");
                 } else if (cmd.equals("quit")) {

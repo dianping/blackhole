@@ -1,0 +1,9 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "DumpConsumerGroupPB";
+
+message DumpConsumerGroup {
+    required string groupId = 1;  
+    required string topic = 2;
+}

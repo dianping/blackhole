@@ -37,6 +37,7 @@ public class Fetcher extends Thread {
     private final Log LOG = LogFactory.getLog(Fetcher.class);
     
     private GenClient<TransferWrap, DelegationIOConnection, ConsumerProcessor> client;
+    private String groupId;
     private String consumerId; 
     private String broker;
     private final Map<String, PartitionTopicInfo> partitionMap;
@@ -47,7 +48,8 @@ public class Fetcher extends Thread {
     private ScheduledExecutorService retryPool =
             Executors.newSingleThreadScheduledExecutor();
     
-    public Fetcher(String consumerId, String broker, List<PartitionTopicInfo> partitionTopicInfos, LinkedBlockingQueue<FetchedDataChunk> queue, ConsumerConfig config) {
+    public Fetcher(String groupId, String consumerId, String broker, List<PartitionTopicInfo> partitionTopicInfos, LinkedBlockingQueue<FetchedDataChunk> queue, ConsumerConfig config) {
+        this.groupId = groupId;
         this.consumerId = consumerId;
         this.broker = broker;
         this.chunkQueue = queue;
@@ -58,11 +60,19 @@ public class Fetcher extends Thread {
             partitionBlockMap.put(info, false);
         }
         this.config = config;
+        client = new GenClient(
+                new ConsumerProcessor(),
+                new DelegationIOConnection.DelegationIOConnectionFactory(),
+                new DataMessageTypeFactory());
     }
 
     public Collection<PartitionTopicInfo> getpartitionInfos() {
         return partitionMap.values();
     }
+    public String getGroupId() {
+        return groupId;
+    }
+
     public void shutdown() {
         LOG.debug("shutdown the fetcher " + getName());
         retryPool.shutdownNow();
@@ -72,11 +82,6 @@ public class Fetcher extends Thread {
     @Override
     public void run() {
         LOG.info("start " + this.toString());
-
-        client = new GenClient(
-                new ConsumerProcessor(),
-                new DelegationIOConnection.DelegationIOConnectionFactory(),
-                new DataMessageTypeFactory());
         Properties prop = new Properties();
         prop.setProperty("broker.host", Util.getHostFromBroker(broker));
         prop.setProperty("broker.port", Util.getPortFromBroker(broker));
@@ -203,7 +208,7 @@ public class Fetcher extends Thread {
             }
             
             ConsumerConnector connector = ConsumerConnector.getInstance();
-            connector.updateOffset(consumerId, topic, partition, resetOffset);
+            connector.updateOffset(groupId, consumerId, topic, partition, resetOffset);
             
             if (config.isMultiFetch()) {
                 if (!needBlocking()) {

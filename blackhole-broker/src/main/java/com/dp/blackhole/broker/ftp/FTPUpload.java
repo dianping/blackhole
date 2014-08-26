@@ -62,7 +62,7 @@ public class FTPUpload implements Runnable {
             ftp.setFileTransferMode(FTPClient.BINARY_FILE_TYPE);
             ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
             if(!ftp.changeWorkingDirectory("/")) {
-                throw new IOException("Can not change to " + configration.getRootDir());
+                throw new IOException("Can not change to root dir /");
             }
             String remoteDir = mgr.getParentPath(configration.getRootDir(), ident);
             ftpCreateDirectoryTree(ftp, remoteDir);
