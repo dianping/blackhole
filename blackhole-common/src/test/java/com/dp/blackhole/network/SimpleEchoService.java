@@ -44,7 +44,7 @@ public class SimpleEchoService {
                     new GenServer(new echoProcessor(), new SimpleConnection.SimpleConnectionFactory(), null);
             Properties prop = new Properties();
             prop.setProperty("GenServer.port", "2223");
-            server.init(prop, "echo");
+            server.init(prop, "echo", "GenServer.port");
         }
         
         @Override

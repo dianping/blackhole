@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,7 +44,6 @@ import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
 import com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
-import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
 import com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
@@ -433,24 +433,31 @@ public class Supervisor {
         if (nodeDescs == null || nodeDescs.size() == 0) {
             return;
         }
+        //the purpose of the map named 'toBeReAssign' is to avoid multiple distribution of consumers in a group
+        HashMap<ConsumerGroup, ConsumerGroupDesc> toBeReAssign = new HashMap<ConsumerGroup, ConsumerGroupDesc>();
         for (NodeDesc nodeDesc : nodeDescs) {
             ConsumerDesc consumerDesc = (ConsumerDesc) nodeDesc;
             ConsumerGroup group = consumerDesc.getConsumerGroup();
             ConsumerGroupDesc groupDesc = consumerGroups.get(group);
             if (groupDesc == null) {
                 LOG.error("can not find groupDesc by ConsumerGroup: " + group);
-                return;
+                continue;
             }
 
             groupDesc.unregisterConsumer(consumerDesc);
             
             if (groupDesc.getConsumers().size() != 0) {
-                LOG.info("reassign consumers in group: " + group + ", caused by consumer fail: " + consumerDesc);
-                tryAssignConsumer(null, group, groupDesc);
+                toBeReAssign.put(group, groupDesc);
             } else {
                 LOG.info("consumerGroup " + group +" has not live consumer, thus be removed");
+                toBeReAssign.remove(group);
                 consumerGroups.remove(group);
             }
+        }
+        
+        for (Map.Entry<ConsumerGroup, ConsumerGroupDesc> entry : toBeReAssign.entrySet()) {
+            LOG.info("reassign consumers in group: " + entry.getKey() + ", caused by consumer fail: " + entry.getValue());
+            tryAssignConsumer(null, entry.getKey(), entry.getValue());
         }
     }
     
@@ -712,6 +719,29 @@ public class Supervisor {
         
         String listIdle = sb.toString();
         Message message = PBwrap.wrapDumpReply(listIdle);
+        send(from, message);
+    }
+    
+    public void listConsumerGroups(SimpleConnection from) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("list consumer groups:\n");
+        sb.append("############################## dump ##############################\n");
+        SortedSet<ConsumerGroup> groupsSorted  = new TreeSet<ConsumerGroup>(new Comparator<ConsumerGroup>() {
+            @Override
+            public int compare(ConsumerGroup o1, ConsumerGroup o2) {
+                return o1.getTopic().compareTo(o2.getTopic());
+            }
+        });
+        for (ConsumerGroup group : consumerGroups.keySet()) {
+            groupsSorted.add(group);
+        }
+        for (ConsumerGroup group : groupsSorted) {
+            sb.append(group).append("\n");
+        }
+        sb.append("##################################################################");
+        
+        String listConsGroup = sb.toString();
+        Message message = PBwrap.wrapDumpReply(listConsGroup);
         send(from, message);
     }
 
@@ -1471,46 +1501,59 @@ public class Supervisor {
                 return;
             }
             
-            if (msg.getType() != MessageType.HEARTBEART 
-                    && msg.getType() != MessageType.TOPICREPORT
-                    && msg.getType() != MessageType.OFFSET_COMMIT
-                    && msg.getType() != MessageType.CONF_REQ) {
-                LOG.debug("received: " + msg);
-            }
-            
             switch (msg.getType()) {
             case HEARTBEART:
                 handleHeartBeat(from);
                 break;
             case BROKER_REG:
+                LOG.debug("received: " + msg);
                 registerBroker(msg.getBrokerReg(), from);
                 break;
             case APP_REG:
+                LOG.debug("received: " + msg);
                 registerApp(msg, from);
                 break;
+            case CONSUMER_REG:
+                LOG.debug("received: " + msg);
+                handleConsumerReg(msg.getConsumerReg(), from);
+                break;
             case READY_BROKER:
+                LOG.debug("received: " + msg);
                 registerStream(msg.getReadyBroker(), from);
                 break;
             case APP_ROLL:
+                LOG.debug("received: " + msg);
                 handleRolling(msg.getAppRoll(), from);
                 break;
             case UPLOAD_SUCCESS:
+                LOG.debug("received: " + msg);
                 handleUploadSuccess(msg.getRollID(), from);
                 break;
             case UPLOAD_FAIL:
+                LOG.debug("received: " + msg);
                 handleUploadFail(msg.getRollID());
                 break;
             case RECOVERY_SUCCESS:
+                LOG.debug("received: " + msg);
                 handleRecoverySuccess(msg.getRollID());
                 break;
             case RECOVERY_FAIL:
+                LOG.debug("received: " + msg);
                 handleRecoveryFail(msg.getRollID());
                 break;
             case FAILURE:
+                LOG.debug("received: " + msg);
                 handleFailure(msg.getFailure());
                 break;
             case UNRECOVERABLE:
+                LOG.debug("received: " + msg);
                 handleUnrecoverable(msg.getRollID());
+                break;
+            case TOPICREPORT:
+                handleTopicReport(msg.getTopicReport(), from);
+                break;
+            case OFFSET_COMMIT:
+                handleOffsetCommit(msg.getOffsetCommit());
                 break;
             case MANUAL_RECOVERY_ROLL:
                 handleManualRecoveryRoll(msg.getRollID());
@@ -1536,15 +1579,6 @@ public class Supervisor {
             case DUMP_APP:
                 dumpapp(msg.getDumpApp(), from);
                 break;
-            case TOPICREPORT:
-                handleTopicReport(msg.getTopicReport(), from);
-                break;
-            case CONSUMER_REG:
-                handleConsumerReg(msg.getConsumerReg(), from);
-                break;
-            case OFFSET_COMMIT:
-                handleOffsetCommit(msg.getOffsetCommit());
-                break;
             case LISTIDLE:
                 listIdle(from);
                 break;
@@ -1553,6 +1587,9 @@ public class Supervisor {
                 break;
             case DUMP_CONSUMER_GROUP:
                 dumpConsumerGroup(msg.getDumpConsumerGroup(), from);
+                break;
+            case LIST_CONSUMER_GROUP:
+                listConsumerGroups(from);
                 break;
             default:
                 LOG.warn("unknown message: " + msg.toString());

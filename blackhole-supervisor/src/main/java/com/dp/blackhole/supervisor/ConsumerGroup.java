@@ -50,7 +50,7 @@ public class ConsumerGroup {
     
     @Override
     public String toString() {
-        return "ConsumerGroup[" + goupId + "/" + topic + "]";
+        return "ConsumerGroup[" + topic + "/" + goupId + "]";
     }
     
 }
