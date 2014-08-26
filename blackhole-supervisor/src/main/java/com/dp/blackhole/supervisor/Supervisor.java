@@ -729,7 +729,8 @@ public class Supervisor {
         SortedSet<ConsumerGroup> groupsSorted  = new TreeSet<ConsumerGroup>(new Comparator<ConsumerGroup>() {
             @Override
             public int compare(ConsumerGroup o1, ConsumerGroup o2) {
-                return o1.getTopic().compareTo(o2.getTopic());
+                int topicResult = o1.getTopic().compareTo(o2.getTopic());
+                return topicResult == 0 ? o1.getGroupId().compareTo(o2.getGroupId()) : topicResult;
             }
         });
         for (ConsumerGroup group : consumerGroups.keySet()) {
