@@ -25,6 +25,7 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
     private Processor processor;
     
     private Selector selector;
+    private ServerSocketChannel serverSocketChannel;
     volatile private boolean running = true;
     private ArrayList<Handler> handlers = null;
     private int handlerCount;
@@ -78,7 +79,27 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
                     closeConnection((Connection) key.attachment());
                 }
             }
-
+        }
+        releaseResources();
+    }
+    
+    private void releaseResources() {
+        try {
+            selector.close();
+        } catch (Throwable t) {
+            LOG.error(t.getMessage());
+        }
+        
+        if (handlers != null) {
+            for (Handler handler : handlers) {
+                handler.interrupt();
+            }
+        }
+        
+        try {
+            serverSocketChannel.close();
+        } catch (Throwable t) {
+            LOG.error(t.getMessage());
         }
     }
 
@@ -141,9 +162,8 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
 
     public void shutdown() {
         running = false;
-        selector.wakeup();
-        for (Handler handler : handlers) {
-            handler.interrupt();
+        if (selector != null) {
+            selector.wakeup();
         }
     }
     
@@ -199,12 +219,12 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         handlerCount = Integer.parseInt(prop.getProperty("GenServer.handler.count", "3"));
         int port = Integer.parseInt(prop.getProperty(servicePort));
         
-        ServerSocketChannel ssc = ServerSocketChannel.open();
-        ssc.configureBlocking(false);
-        ServerSocket ss = ssc.socket();
+        serverSocketChannel = ServerSocketChannel.open();
+        serverSocketChannel.configureBlocking(false);
+        ServerSocket ss = serverSocketChannel.socket();
         ss.bind(new InetSocketAddress(port));
         selector = Selector.open();
-        ssc.register(selector, SelectionKey.OP_ACCEPT);
+        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
         
         // start message handler thread
         handlers = new ArrayList<Handler>(handlerCount);
