@@ -44,7 +44,6 @@ import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
 import com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
-import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
 import com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
@@ -1502,46 +1501,59 @@ public class Supervisor {
                 return;
             }
             
-            if (msg.getType() != MessageType.HEARTBEART 
-                    && msg.getType() != MessageType.TOPICREPORT
-                    && msg.getType() != MessageType.OFFSET_COMMIT
-                    && msg.getType() != MessageType.CONF_REQ) {
-                LOG.debug("received: " + msg);
-            }
-            
             switch (msg.getType()) {
             case HEARTBEART:
                 handleHeartBeat(from);
                 break;
             case BROKER_REG:
+                LOG.debug("received: " + msg);
                 registerBroker(msg.getBrokerReg(), from);
                 break;
             case APP_REG:
+                LOG.debug("received: " + msg);
                 registerApp(msg, from);
                 break;
+            case CONSUMER_REG:
+                LOG.debug("received: " + msg);
+                handleConsumerReg(msg.getConsumerReg(), from);
+                break;
             case READY_BROKER:
+                LOG.debug("received: " + msg);
                 registerStream(msg.getReadyBroker(), from);
                 break;
             case APP_ROLL:
+                LOG.debug("received: " + msg);
                 handleRolling(msg.getAppRoll(), from);
                 break;
             case UPLOAD_SUCCESS:
+                LOG.debug("received: " + msg);
                 handleUploadSuccess(msg.getRollID(), from);
                 break;
             case UPLOAD_FAIL:
+                LOG.debug("received: " + msg);
                 handleUploadFail(msg.getRollID());
                 break;
             case RECOVERY_SUCCESS:
+                LOG.debug("received: " + msg);
                 handleRecoverySuccess(msg.getRollID());
                 break;
             case RECOVERY_FAIL:
+                LOG.debug("received: " + msg);
                 handleRecoveryFail(msg.getRollID());
                 break;
             case FAILURE:
+                LOG.debug("received: " + msg);
                 handleFailure(msg.getFailure());
                 break;
             case UNRECOVERABLE:
+                LOG.debug("received: " + msg);
                 handleUnrecoverable(msg.getRollID());
+                break;
+            case TOPICREPORT:
+                handleTopicReport(msg.getTopicReport(), from);
+                break;
+            case OFFSET_COMMIT:
+                handleOffsetCommit(msg.getOffsetCommit());
                 break;
             case MANUAL_RECOVERY_ROLL:
                 handleManualRecoveryRoll(msg.getRollID());
@@ -1566,15 +1578,6 @@ public class Supervisor {
                 break;
             case DUMP_APP:
                 dumpapp(msg.getDumpApp(), from);
-                break;
-            case TOPICREPORT:
-                handleTopicReport(msg.getTopicReport(), from);
-                break;
-            case CONSUMER_REG:
-                handleConsumerReg(msg.getConsumerReg(), from);
-                break;
-            case OFFSET_COMMIT:
-                handleOffsetCommit(msg.getOffsetCommit());
                 break;
             case LISTIDLE:
                 listIdle(from);
