@@ -72,6 +72,7 @@ public final class MessagePB {
       LISTIDLE(32, 33),
       RESTART(33, 34),
       DUMP_CONSUMER_GROUP(34, 38),
+      LIST_CONSUMER_GROUP(35, 39),
       ;
       
       
@@ -114,6 +115,7 @@ public final class MessagePB {
           case 33: return LISTIDLE;
           case 34: return RESTART;
           case 38: return DUMP_CONSUMER_GROUP;
+          case 39: return LIST_CONSUMER_GROUP;
           default: return null;
         }
       }
@@ -144,7 +146,7 @@ public final class MessagePB {
       }
       
       private static final MessageType[] VALUES = {
-        HEARTBEART, APP_REG, BROKER_REG, ASSIGN_BROKER, READY_BROKER, APP_ROLL, UPLOAD_ROLL, UPLOAD_SUCCESS, UPLOAD_FAIL, RECOVERY_ROLL, RECOVERY_SUCCESS, RECOVERY_FAIL, FAILURE, NOAVAILABLENODE, UNRECOVERABLE, MANUAL_RECOVERY_ROLL, DUMPSTAT, RETIRESTREAM, CONF_REQ, CONF_RES, NOAVAILABLECONF, DUMPCONF, DUMPREPLY, LISTAPPS, REMOVE_CONF, DUMP_APP, CONSUMER_REG, ASSIGN_CONSUMER, OFFSET_COMMIT, TOPICREPORT, CONSUMERREGFAIL, MAKR_UNRECOVERABLE, LISTIDLE, RESTART, DUMP_CONSUMER_GROUP, 
+        HEARTBEART, APP_REG, BROKER_REG, ASSIGN_BROKER, READY_BROKER, APP_ROLL, UPLOAD_ROLL, UPLOAD_SUCCESS, UPLOAD_FAIL, RECOVERY_ROLL, RECOVERY_SUCCESS, RECOVERY_FAIL, FAILURE, NOAVAILABLENODE, UNRECOVERABLE, MANUAL_RECOVERY_ROLL, DUMPSTAT, RETIRESTREAM, CONF_REQ, CONF_RES, NOAVAILABLECONF, DUMPCONF, DUMPREPLY, LISTAPPS, REMOVE_CONF, DUMP_APP, CONSUMER_REG, ASSIGN_CONSUMER, OFFSET_COMMIT, TOPICREPORT, CONSUMERREGFAIL, MAKR_UNRECOVERABLE, LISTIDLE, RESTART, DUMP_CONSUMER_GROUP, LIST_CONSUMER_GROUP, 
       };
       public static MessageType valueOf(
           com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
@@ -1796,7 +1798,7 @@ public final class MessagePB {
       "Reg.proto\032\rDumpApp.proto\032\021ConsumerReg.pr" +
       "oto\032\024AssignConsumer.proto\032\022OffsetCommit." +
       "proto\032\021TopicReport.proto\032\rRestart.proto\032" +
-      "\027DumpConsumerGroup.proto\"\207\014\n\007Message\022,\n\004",
+      "\027DumpConsumerGroup.proto\"\240\014\n\007Message\022,\n\004",
       "type\030\001 \002(\0162\036.blackhole.Message.MessageTy" +
       "pe\022!\n\006appReg\030\002 \001(\0132\021.blackhole.AppReg\022-\n" +
       "\014assignBroker\030\003 \001(\0132\027.blackhole.AssignBr" +
@@ -1819,7 +1821,7 @@ public final class MessagePB {
       "+\n\013topicReport\030\023 \001(\0132\026.blackhole.TopicRe",
       "port\022#\n\007restart\030\024 \001(\0132\022.blackhole.Restar" +
       "t\0227\n\021dumpConsumerGroup\030\030 \001(\0132\034.blackhole" +
-      ".DumpConsumerGroup\"\365\004\n\013MessageType\022\016\n\nHE" +
+      ".DumpConsumerGroup\"\216\005\n\013MessageType\022\016\n\nHE" +
       "ARTBEART\020\001\022\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022" +
       "\021\n\rASSIGN_BROKER\020\004\022\020\n\014READY_BROKER\020\005\022\014\n\010" +
       "APP_ROLL\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_SU" +
@@ -1835,8 +1837,9 @@ public final class MessagePB {
       "\rOFFSET_COMMIT\020\035\022\017\n\013TOPICREPORT\020\036\022\023\n\017CON" +
       "SUMERREGFAIL\020\037\022\026\n\022MAKR_UNRECOVERABLE\020 \022\014" +
       "\n\010LISTIDLE\020!\022\013\n\007RESTART\020\"\022\027\n\023DUMP_CONSUM" +
-      "ER_GROUP\020&B.\n!com.dp.blackhole.protocol." +
-      "controlB\tMessagePB"
+      "ER_GROUP\020&\022\027\n\023LIST_CONSUMER_GROUP\020\'B.\n!c" +
+      "om.dp.blackhole.protocol.controlB\tMessag",
+      "ePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

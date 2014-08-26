@@ -125,6 +125,10 @@ public class Cli {
                     Message msg = PBwrap.wrapDumpConsumeGroup(topic, groupId);
                     send(msg);
                     out.println("send message: " + msg);
+                } else if (cmd.equals("listcons")) {
+                    Message msg = PBwrap.wrapListConsumerGroups();
+                    send(msg);
+                    out.println("send message: " + msg);
                 } else if (cmd.equals("help")) {
                     out.println("Usage:");
                     out.println(" dumpstat              Display all of streams information.");
@@ -141,6 +145,7 @@ public class Cli {
                     out.println("                       Recovery a range of streams specified period from start timestamp to end timestamp.");
                     out.println(" restart [agentservers]  Restart a set of agents in one command. The agents are splitted by \" \"");
                     out.println(" dumpcons <topic> <consumerGroupId>         Display the consumer group information.");
+                    out.println(" listcons              List all of consumer group, contains topic and group name");
                     out.println(" quit                  Quit the command line interface.");
                     out.println(" help                  Display help information.");
                 } else if (cmd.equals("quit")) {

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -719,6 +720,29 @@ public class Supervisor {
         
         String listIdle = sb.toString();
         Message message = PBwrap.wrapDumpReply(listIdle);
+        send(from, message);
+    }
+    
+    public void listConsumerGroups(SimpleConnection from) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("list consumer groups:\n");
+        sb.append("############################## dump ##############################\n");
+        SortedSet<ConsumerGroup> groupsSorted  = new TreeSet<ConsumerGroup>(new Comparator<ConsumerGroup>() {
+            @Override
+            public int compare(ConsumerGroup o1, ConsumerGroup o2) {
+                return o1.getTopic().compareTo(o2.getTopic());
+            }
+        });
+        for (ConsumerGroup group : consumerGroups.keySet()) {
+            groupsSorted.add(group);
+        }
+        for (ConsumerGroup group : groupsSorted) {
+            sb.append(group).append("\n");
+        }
+        sb.append("##################################################################");
+        
+        String listConsGroup = sb.toString();
+        Message message = PBwrap.wrapDumpReply(listConsGroup);
         send(from, message);
     }
 
@@ -1560,6 +1584,9 @@ public class Supervisor {
                 break;
             case DUMP_CONSUMER_GROUP:
                 dumpConsumerGroup(msg.getDumpConsumerGroup(), from);
+                break;
+            case LIST_CONSUMER_GROUP:
+                listConsumerGroups(from);
                 break;
             default:
                 LOG.warn("unknown message: " + msg.toString());

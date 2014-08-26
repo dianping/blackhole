@@ -117,6 +117,8 @@ public class PBwrap {
         case DUMP_CONSUMER_GROUP:
             msg.setDumpConsumerGroup((DumpConsumerGroup) message);
             break;
+        case LIST_CONSUMER_GROUP:
+            break;
         default:
         }
         return msg.build();
@@ -398,5 +400,9 @@ public class PBwrap {
         builder.setTopic(topic);
         builder.setGroupId(groupId);
         return wrapMessage(MessageType.DUMP_CONSUMER_GROUP, builder.build());
+    }
+    
+    public static Message wrapListConsumerGroups() {
+        return wrapMessage(MessageType.LIST_CONSUMER_GROUP, null);
     }
 }

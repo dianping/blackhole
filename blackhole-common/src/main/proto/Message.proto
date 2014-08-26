@@ -61,6 +61,7 @@ message Message {
         LISTIDLE = 33;
         RESTART = 34;
         DUMP_CONSUMER_GROUP = 38;
+        LIST_CONSUMER_GROUP = 39;
     }
 
     required MessageType type = 1;
