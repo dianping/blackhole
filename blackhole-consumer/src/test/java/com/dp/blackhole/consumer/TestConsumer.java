@@ -1,4 +1,7 @@
 package com.dp.blackhole.consumer;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -20,27 +23,28 @@ public class TestConsumer {
         int port = Integer.parseInt(args[1]);
         String topic = args[2];
         String group = args[3];
-        int num = Integer.parseInt(args[4]);
+        int numConsumerInOneProcess = Integer.parseInt(args[4]);
+        if (numConsumerInOneProcess < 1 || numConsumerInOneProcess > 10) {
+            throw new RuntimeException("numConsumerInOneProcess must greater than 0 and less than 10");
+        }
+        List<MessageStream> messageStreams = new ArrayList<MessageStream>();
 
         ConsumerConnector.getInstance().init(supervisorHost, port, true, 6000);
         ConsumerConfig config = new ConsumerConfig();
-        Consumer firstConsumerInOneProcess = new Consumer(topic, group, config);
-        firstConsumerInOneProcess.start();
-        MessageStream firstStream = firstConsumerInOneProcess.getStream();
         
-        Consumer secondConsumerInOneProcess = new Consumer(topic, group, config);
-        secondConsumerInOneProcess.start();
-        MessageStream secondStream = secondConsumerInOneProcess.getStream();
-        
+        for (int i = 0; i < numConsumerInOneProcess; i++) {
+            Consumer consumer = new Consumer(topic, group, config);
+            consumer.start();
+            MessageStream stream = consumer.getStream();
+            messageStreams.add(stream);
+        }
         long start = Util.getTS();
+        for (MessageStream stream : messageStreams) {
+            Thread t = new MessageConsumeThread(stream);
+            t.start();
+            t.join();
+        }
         
-        Thread t1 = new MessageConsumeThread(firstStream, num);
-        t1.start();
-        Thread t2 = new MessageConsumeThread(secondStream, num);
-        t2.start();
-        
-        t1.join();
-        t2.join();
         ConsumerConnector.shutdownNow();
         long end = Util.getTS();
         double k = 1000.0;
@@ -51,16 +55,14 @@ public class TestConsumer {
     
     static class MessageConsumeThread extends Thread {
         private MessageStream stream;
-        private int num;
-        public MessageConsumeThread(MessageStream stream, int num) {
+        public MessageConsumeThread(MessageStream stream) {
             this.stream = stream;
-            this.num = num;
         }
         @Override
         public void run() {
             int i =0;
             for (String message : stream) {
-                if (i % num == 0) {
+                if (i % 100000 == 0) {
                     LOG.info("consumed: " + i);
                 }
 //                System.out.println(message);

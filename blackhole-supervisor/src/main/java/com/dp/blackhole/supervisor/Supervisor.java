@@ -190,19 +190,18 @@ public class Supervisor {
         int consumerNum = consumes.size();
         ArrayList<ArrayList<PartitionInfo>> assignPartitions
             = new ArrayList<ArrayList<PartitionInfo>>(consumerNum);
-        for (int i =0 ; i < consumerNum; i++) {
+        for (int i = 0; i < consumerNum; i++) {
             assignPartitions.add(new ArrayList<PartitionInfo>());
         }
         
         // split partition into consumerNum groups
-        int i =0;
-        for (PartitionInfo pinfo : partitions) {
+        for (int i = 0; i < partitions.size(); i++) {
+            PartitionInfo pinfo = partitions.get(i);
             assignPartitions.get(i % consumerNum).add(pinfo);
-            i++;
         }
         
-        i = 0;
-        for (ConsumerDesc cond : consumes) {
+        for (int i = 0; i < consumes.size(); i++) {
+            ConsumerDesc cond = consumes.get(i);
             ArrayList<PartitionInfo> pinfoList = assignPartitions.get(i);
  
             List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(pinfoList.size());
@@ -213,7 +212,6 @@ public class Supervisor {
             }
             Message assign = PBwrap.wrapAssignConsumer(group.getGroupId(), cond.getId(), group.getTopic(), offsets);
             send(cond.getConnection(), assign);
-            i++;
         }
         
         // update consumerGroupDesc mapping
