@@ -143,13 +143,89 @@ public class Supervisor {
         String id = consumerReg.getConsumerId();
         String topic = consumerReg.getTopic();
 
-        // get available Partitions
-        ConcurrentHashMap<String, PartitionInfo> partitionMap = topics.get(topic);
-        if (partitionMap == null) {
+        ArrayList<PartitionInfo> availPartitions = getAvailPartitions(topic);
+        if (availPartitions == null) {
             LOG.error("unknown topic: " + topic);
             sendConsumerRegFail(from, groupId, id, topic);
             return;
-        }      
+        } else if (availPartitions.size() == 0) {
+            LOG.error("no partition available , topic: " + topic);
+            sendConsumerRegFail(from, groupId, id, topic);
+            return;
+        } 
+        
+        ConsumerGroup group = new ConsumerGroup(groupId, topic);
+        ConsumerGroupDesc groupDesc = consumerGroups.get(group);
+        if (groupDesc == null) {
+            groupDesc = new ConsumerGroupDesc(group);
+            consumerGroups.put(group, groupDesc);
+        }
+        
+        ConsumerDesc consumerDesc = new ConsumerDesc(id, group, topic, from);
+        desc.attach(consumerDesc);
+        
+        tryAssignConsumer(consumerDesc, groupDesc);
+    }
+    
+    public void tryAssignConsumer(ConsumerDesc consumer, ConsumerGroupDesc group) {
+        ArrayList<ConsumerDesc> consumes = group.getConsumes();
+        
+        // new consumer arrived?
+        if (consumer != null) {
+            if (group.exists(consumer)) {
+                LOG.error("consumer already exists: " + consumer);
+                return;
+            }
+            consumes.add(consumer);
+        }
+        
+        // get online partitions
+        ArrayList<PartitionInfo> partitions = getAvailPartitions(group.getTopic());
+        if (partitions == null || partitions.size() ==0) {
+            LOG.error("can not get any available partitions");
+            return;
+        }
+        
+        // split partitions by consumer number
+        int consumerNum = consumes.size();
+        ArrayList<ArrayList<PartitionInfo>> assignPartitions
+            = new ArrayList<ArrayList<PartitionInfo>>(consumerNum);
+        for (int i =0 ; i < consumerNum; i++) {
+            assignPartitions.add(new ArrayList<PartitionInfo>());
+        }
+        
+        // split partition into consumerNum groups
+        int i =0;
+        for (PartitionInfo pinfo : partitions) {
+            assignPartitions.get(i % consumerNum).add(pinfo);
+            i++;
+        }
+        
+        i = 0;
+        for (ConsumerDesc cond : consumes) {
+            ArrayList<PartitionInfo> pinfoList = assignPartitions.get(i);
+ 
+            List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(pinfoList.size());
+            for (PartitionInfo info : pinfoList) {
+                String broker = info.getHost()+ ":" + getBrokerPort(info.getHost());
+                AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(broker, info.getId(), info.getEndOffset());
+                offsets.add(offset);
+            }
+            Message assign = PBwrap.wrapAssignConsumer(group.getGroupId(), cond.getId(), group.getTopic(), offsets);
+            send(cond.getConnection(), assign);
+            i++;
+        }
+        
+        // update consumerGroupDesc mapping
+        group.update(consumes, assignPartitions, partitions);
+    }
+
+    private ArrayList<PartitionInfo> getAvailPartitions(String topic) {
+        // get available Partitions
+        ConcurrentHashMap<String, PartitionInfo> partitionMap = topics.get(topic);
+        if (partitionMap == null) {
+            return null;
+        }
         Collection<PartitionInfo> partitions = partitionMap.values();
         ArrayList<PartitionInfo> availPartitions = new ArrayList<PartitionInfo>();
         for (PartitionInfo pinfo : partitions) {
@@ -158,92 +234,9 @@ public class Supervisor {
             }
             availPartitions.add(pinfo);
         }
-        
-        if (availPartitions.size() == 0) {
-            LOG.error("no partition available , topic: " + topic);
-            sendConsumerRegFail(from, groupId, id, topic);
-            return;
-        }
-        
-        ConsumerGroup group = new ConsumerGroup(groupId, topic);
-        ConsumerGroupDesc groupDesc = consumerGroups.get(group);
-        if (groupDesc == null) {
-            groupDesc = new ConsumerGroupDesc(group, availPartitions);
-            consumerGroups.put(group, groupDesc);
-        }
-        
-        ConsumerDesc consumerDesc = new ConsumerDesc(id, group, topic, from);
-        desc.attach(consumerDesc);
-        
-        tryAssignConsumer(consumerDesc, group, groupDesc);
+        return availPartitions;
     }
     
-    public void tryAssignConsumer(ConsumerDesc consumer, ConsumerGroup group, ConsumerGroupDesc groupDesc) {
-        Map<ConsumerDesc, ArrayList<String>> consumeMap = groupDesc.getConsumeMap();
-//        Map<String, PartitionInfo> partitions = groupDesc.getPartitions();
-        
-        // new consumer arrived?
-        if (consumer != null) {
-            if (groupDesc.exists(consumer)) {
-                LOG.error("consumer already exists: " + consumer);
-                return;
-            }
-            consumeMap.put(consumer, new ArrayList<String>());
-        }
-        
-        // calc online partitions
-        Map<String, PartitionInfo> allpartitions = topics.get(group.getTopic());
-        Map<String, PartitionInfo> partitions = new HashMap<String, PartitionInfo>();
-        for (Entry<String, PartitionInfo> entry : allpartitions.entrySet()) {
-            if (entry.getValue().isOffline()) {
-                continue;
-            }
-            partitions.put(entry.getKey(), entry.getValue());
-        }
-        
-        // prepare for split
-        int consumerNum = consumeMap.keySet().size();
-        ArrayList<ArrayList<String>> assignPartitions = new ArrayList<ArrayList<String>>(consumerNum);
-        for (int i =0 ; i < consumerNum; i++) {
-            assignPartitions.add(new ArrayList<String>());
-        }
-        
-        // split partition into consumerNum groups, and skip offline partitions
-        int i =0;
-        for (String id : partitions.keySet()) {
-            assignPartitions.get(i % consumerNum).add(id);
-            i++;
-        }
-        
-        // assign each group to a consumer
-        i = 0;
-        for (ConsumerDesc c : consumeMap.keySet()) {
-            consumeMap.put(c, assignPartitions.get(i));
-            i++;
-        }
-        
-        i = 0;
-        for (Entry<ConsumerDesc, ArrayList<String>> entry : consumeMap.entrySet()) {
-            ConsumerDesc c = entry.getKey();
-            ArrayList<String> pinfoList = entry.getValue();
-            List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(pinfoList.size());
-            for (String partitionId : pinfoList) {
-                PartitionInfo info = partitions.get(partitionId);
-                if (info == null) {
-                    LOG.error("can not find PartitionInfo by partitionId " + partitionId + ", it shouldn't happen");
-                    continue;
-                }
-
-                String broker = info.getHost()+ ":" + getBrokerPort(info.getHost());
-                AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(broker, info.getId(), info.getEndOffset());
-                offsets.add(offset);
-            }
-            Message assign = PBwrap.wrapAssignConsumer(group.getGroupId(), c.getId(), group.getTopic(), offsets);
-            send(c.getConnection(), assign);
-            i++;
-        }
-    }
-
     private void handleOffsetCommit(OffsetCommit offsetCommit) {
         String id = offsetCommit.getConsumerIdString();
         String groupId = offsetCommit.getGroupId();
@@ -456,8 +449,10 @@ public class Supervisor {
         }
         
         for (Map.Entry<ConsumerGroup, ConsumerGroupDesc> entry : toBeReAssign.entrySet()) {
-            LOG.info("reassign consumers in group: " + entry.getKey() + ", caused by consumer fail: " + entry.getValue());
-            tryAssignConsumer(null, entry.getKey(), entry.getValue());
+            ConsumerGroup cong = entry.getKey();
+            ConsumerGroupDesc cond = entry.getValue();
+            LOG.info("reassign consumers in group: " + cong + ", caused by consumer fail: " + cond);
+            tryAssignConsumer(null, cond);
         }
     }
     
@@ -1289,14 +1284,12 @@ public class Supervisor {
     }
 
     private void reassignConsumers(String topic) {
-        for (Entry<ConsumerGroup, ConsumerGroupDesc> entry : consumerGroups.entrySet()) {
-            ConsumerGroup group = entry.getKey();
-            ConsumerGroupDesc groupDesc = entry.getValue();
-            if (!topic.equals(group.getTopic())) {
+        for (ConsumerGroupDesc groupDesc : consumerGroups.values()) {
+            if (!topic.equals(groupDesc.getTopic())) {
                 continue;
             }
             LOG.info("reassign consumer of topic: " + topic);
-            tryAssignConsumer(null, group, groupDesc);
+            tryAssignConsumer(null, groupDesc);
         }
     }
 

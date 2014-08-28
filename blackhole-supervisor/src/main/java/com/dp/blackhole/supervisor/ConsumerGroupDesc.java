@@ -11,21 +11,25 @@ import org.apache.commons.logging.LogFactory;
 
 public class ConsumerGroupDesc {
     private ConsumerGroup group;
-    // currrently available partitions
     private Map<String, AtomicLong> commitedOffsetMap;
     private Map<ConsumerDesc, ArrayList<String>> consumeMap;
     
     public static final Log LOG = LogFactory.getLog(Supervisor.class);
     
-    public ConsumerGroupDesc(ConsumerGroup group, Collection<PartitionInfo> pinfos) {
+    public ConsumerGroupDesc(ConsumerGroup group) {
         this.group = group;
         commitedOffsetMap = new ConcurrentHashMap<String, AtomicLong>();
-        for (PartitionInfo pinfo: pinfos) {
-            commitedOffsetMap.put(pinfo.getId(), new AtomicLong(0));
-        }
         consumeMap = new ConcurrentHashMap<ConsumerDesc, ArrayList<String>>();
     }
 
+    public String getTopic () {
+        return group.getTopic();
+    }
+    
+    public String getGroupId () {
+        return group.getGroupId();
+    }
+    
     public boolean exists (ConsumerDesc consumer) {
         return consumeMap.containsKey(consumer);
     }
@@ -34,8 +38,8 @@ public class ConsumerGroupDesc {
         return commitedOffsetMap;
     }
     
-    public Map<ConsumerDesc, ArrayList<String>> getConsumeMap () {
-        return consumeMap;
+    public ArrayList<ConsumerDesc> getConsumes () {
+        return new ArrayList<ConsumerDesc>(consumeMap.keySet());
     }
 
     public void unregisterConsumer(ConsumerDesc consumer) {
@@ -54,4 +58,26 @@ public class ConsumerGroupDesc {
             commitedOffset.set(offset);
         }
     }
+
+    public void update(ArrayList<ConsumerDesc> consumes,
+            ArrayList<ArrayList<PartitionInfo>> assignPartitions,
+            ArrayList<PartitionInfo> partitions) {
+        consumeMap.clear();
+        int index = 0;
+        for (ConsumerDesc cond : consumes) {
+            ArrayList<String> ids = new ArrayList<String>();
+            for (PartitionInfo pinfo : assignPartitions.get(index)) {
+                ids.add(pinfo.getId());
+            }
+            consumeMap.put(cond, ids);
+            index++;
+        }
+        for (PartitionInfo pinfo : partitions) {
+            String id = pinfo.getId();
+            if (commitedOffsetMap.get(id) == null) {
+                commitedOffsetMap.put(pinfo.getId(), new AtomicLong(0));
+            }
+        }
+    }
+    
 }
