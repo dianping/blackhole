@@ -190,19 +190,18 @@ public class Supervisor {
         int consumerNum = consumes.size();
         ArrayList<ArrayList<PartitionInfo>> assignPartitions
             = new ArrayList<ArrayList<PartitionInfo>>(consumerNum);
-        for (int i =0 ; i < consumerNum; i++) {
+        for (int i = 0; i < consumerNum; i++) {
             assignPartitions.add(new ArrayList<PartitionInfo>());
         }
         
         // split partition into consumerNum groups
-        int i =0;
-        for (PartitionInfo pinfo : partitions) {
+        for (int i = 0; i < partitions.size(); i++) {
+            PartitionInfo pinfo = partitions.get(i);
             assignPartitions.get(i % consumerNum).add(pinfo);
-            i++;
         }
         
-        i = 0;
-        for (ConsumerDesc cond : consumes) {
+        for (int i = 0; i < consumes.size(); i++) {
+            ConsumerDesc cond = consumes.get(i);
             ArrayList<PartitionInfo> pinfoList = assignPartitions.get(i);
  
             List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(pinfoList.size());
@@ -213,7 +212,6 @@ public class Supervisor {
             }
             Message assign = PBwrap.wrapAssignConsumer(group.getGroupId(), cond.getId(), group.getTopic(), offsets);
             send(cond.getConnection(), assign);
-            i++;
         }
         
         // update consumerGroupDesc mapping
@@ -639,16 +637,21 @@ public class Supervisor {
             sb.append("############################## dump ##############################\n");
             sb.append("print ").append(consumerGroup).append("\n");
             Map<String, PartitionInfo> partitionMap = topics.get(topic);
+            long sumDelta = 0;
             for(Map.Entry<String, AtomicLong> entry : consumerGroupDesc.getCommitedOffsets().entrySet()) {
+                long delta = 0;
                 if (partitionMap != null) {
                     PartitionInfo partitionInfo = partitionMap.get(entry.getKey());
                     if (partitionInfo != null) {
+                        delta = partitionInfo.getEndOffset() - entry.getValue().get();
+                        sumDelta += delta;
                         sb.append(partitionInfo).append("\n");
                     }
                 }
                 sb.append("{committedinfo,").append(entry.getKey())
-                .append(",").append(entry.getValue().get()).append("}\n\n");
+                .append(",").append(entry.getValue().get()).append(",").append(delta).append("}\n\n");
             }
+            sb.append("The sum of slow offset delta [").append(sumDelta).append("]\n");
             sb.append("##################################################################");
         }
         Message message = PBwrap.wrapDumpReply(sb.toString());

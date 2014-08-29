@@ -63,14 +63,13 @@ public class ConsumerGroupDesc {
             ArrayList<ArrayList<PartitionInfo>> assignPartitions,
             ArrayList<PartitionInfo> partitions) {
         consumeMap.clear();
-        int index = 0;
-        for (ConsumerDesc cond : consumes) {
+        for (int i = 0; i < consumes.size(); i++) {
+            ConsumerDesc cond = consumes.get(i);
             ArrayList<String> ids = new ArrayList<String>();
-            for (PartitionInfo pinfo : assignPartitions.get(index)) {
+            for (PartitionInfo pinfo : assignPartitions.get(i)) {
                 ids.add(pinfo.getId());
             }
             consumeMap.put(cond, ids);
-            index++;
         }
         for (PartitionInfo pinfo : partitions) {
             String id = pinfo.getId();
