@@ -75,7 +75,7 @@ public class Fetcher extends Thread {
 
     public void shutdown() {
         LOG.debug("shutdown the fetcher " + getName());
-        retryPool.shutdownNow();
+        retryPool.shutdown();
         client.shutdown();
     }
 
@@ -232,8 +232,8 @@ public class Fetcher extends Thread {
                 try {
                     validSize = enqueue(messageSet, info);
                 } catch (InterruptedException e) {
-                    LOG.error("Oops, catch an Interrupted Exception of queue.put()," +
-                            " but ignore it.", e);
+                    LOG.error("Interrupted when enqueue");
+                    throw new RuntimeException(e.getMessage(), e);
                 }
                 if (validSize > 0) {
                     sendFetchRequest(from, info);
