@@ -120,8 +120,20 @@ public class Cli {
                     out.println("send message: " + msg);
                 } else if (cmd.startsWith("dumpcons")) {
                     String[] tokens = getTokens(cmd);
-                    String topic = tokens[1];
-                    String groupId = tokens[2];
+                    String topic;
+                    String groupId;
+                    if (tokens.length > 2) {
+                        topic = tokens[1];
+                        groupId = tokens[2];
+                    } else {
+                        String[] newTokens = tokens[1].split("/");
+                        if (newTokens.length == 2) {
+                            topic = newTokens[0];
+                            groupId = newTokens[1];
+                        } else {
+                            throw new ArrayIndexOutOfBoundsException();
+                        }
+                    }
                     Message msg = PBwrap.wrapDumpConsumeGroup(topic, groupId);
                     send(msg);
                     out.println("send message: " + msg);
@@ -144,7 +156,7 @@ public class Cli {
                     out.println(" range <topic> <agentserver> <period> <start rolltimestamp> <end rolltimestamp>");
                     out.println("                       Recovery a range of streams specified period from start timestamp to end timestamp.");
                     out.println(" restart [agentservers]  Restart a set of agents in one command. The agents are splitted by \" \"");
-                    out.println(" dumpcons <topic> <consumerGroupId>         Display the consumer group information.");
+                    out.println(" dumpcons <topic>/<consumerGroupId>         Display the consumer group information.");
                     out.println(" listcons              List all of consumer group, contains topic and group name");
                     out.println(" quit                  Quit the command line interface.");
                     out.println(" help                  Display help information.");

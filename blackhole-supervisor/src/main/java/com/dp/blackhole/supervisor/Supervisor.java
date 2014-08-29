@@ -637,16 +637,21 @@ public class Supervisor {
             sb.append("############################## dump ##############################\n");
             sb.append("print ").append(consumerGroup).append("\n");
             Map<String, PartitionInfo> partitionMap = topics.get(topic);
+            long sumDelta = 0;
             for(Map.Entry<String, AtomicLong> entry : consumerGroupDesc.getCommitedOffsets().entrySet()) {
+                long delta = 0;
                 if (partitionMap != null) {
                     PartitionInfo partitionInfo = partitionMap.get(entry.getKey());
                     if (partitionInfo != null) {
+                        delta = partitionInfo.getEndOffset() - entry.getValue().get();
+                        sumDelta += delta;
                         sb.append(partitionInfo).append("\n");
                     }
                 }
                 sb.append("{committedinfo,").append(entry.getKey())
-                .append(",").append(entry.getValue().get()).append("}\n\n");
+                .append(",").append(entry.getValue().get()).append(",").append(delta).append("}\n\n");
             }
+            sb.append("The sum of slow offset delta [").append(sumDelta).append("]\n");
             sb.append("##################################################################");
         }
         Message message = PBwrap.wrapDumpReply(sb.toString());
