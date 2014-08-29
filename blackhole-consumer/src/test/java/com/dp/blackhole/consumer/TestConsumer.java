@@ -42,15 +42,11 @@ public class TestConsumer {
         for (MessageStream stream : messageStreams) {
             Thread t = new MessageConsumeThread(stream);
             t.start();
-            t.join();
         }
         
-        ConsumerConnector.shutdownNow();
-        long end = Util.getTS();
-        double k = 1000.0;
-        double time = (end -start)/k;
-        System.out.println("run time: " + time);
-//        System.out.println("throughout: " + i/time);
+        while (true) {
+            Thread.sleep(1000);
+        }
     }
     
     static class MessageConsumeThread extends Thread {

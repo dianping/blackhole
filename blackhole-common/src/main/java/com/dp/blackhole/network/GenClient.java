@@ -195,7 +195,7 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
 
         public Handler(int instanceNumber) {
             this.setDaemon(true);
-            this.setName("process handler thread-"+instanceNumber);
+            this.setName("process handler thread@" + Integer.toHexString(hashCode()) + "-"+ instanceNumber );
         }
         
         @Override
