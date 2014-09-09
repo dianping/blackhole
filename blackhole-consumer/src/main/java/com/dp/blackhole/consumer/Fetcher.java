@@ -112,6 +112,7 @@ public class Fetcher extends Thread {
         
         @Override
         public void OnConnected(DelegationIOConnection connection) {
+            LOG.info("Fetcher " + this + " process connected with " + connection);
             if (config.isMultiFetch()) {
                 sendMultiFetchRequest(connection);
             } else {
@@ -123,6 +124,7 @@ public class Fetcher extends Thread {
 
         @Override
         public void OnDisconnected(DelegationIOConnection connection) {
+            LOG.info("Fetcher " + this + " process disconnected with " + connection);
             partitionBlockMap.clear();
             partitionMap.clear();
             client.shutdown();
