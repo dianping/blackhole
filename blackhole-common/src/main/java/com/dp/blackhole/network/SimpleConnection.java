@@ -188,10 +188,9 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
             LOG.error("connection closed, message sending abort: " + this.toString());
             return;
         }
-        
+        offer(entity.duplicate());
         SelectionKey key = keyFor(selector);
         key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
-        offer(entity.duplicate());
         selector.wakeup();
     }
 

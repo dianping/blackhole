@@ -75,7 +75,7 @@ public class Fetcher extends Thread {
 
     public void shutdown() {
         LOG.debug("shutdown the fetcher " + getName());
-        retryPool.shutdownNow();
+        retryPool.shutdown();
         client.shutdown();
     }
 
@@ -112,6 +112,7 @@ public class Fetcher extends Thread {
         
         @Override
         public void OnConnected(DelegationIOConnection connection) {
+            LOG.info("Fetcher " + this + " process connected with " + connection);
             if (config.isMultiFetch()) {
                 sendMultiFetchRequest(connection);
             } else {
@@ -123,6 +124,7 @@ public class Fetcher extends Thread {
 
         @Override
         public void OnDisconnected(DelegationIOConnection connection) {
+            LOG.info("Fetcher " + this + " process disconnected with " + connection);
             partitionBlockMap.clear();
             partitionMap.clear();
             client.shutdown();
@@ -232,8 +234,8 @@ public class Fetcher extends Thread {
                 try {
                     validSize = enqueue(messageSet, info);
                 } catch (InterruptedException e) {
-                    LOG.error("Oops, catch an Interrupted Exception of queue.put()," +
-                            " but ignore it.", e);
+                    LOG.error("Interrupted when enqueue");
+                    throw new RuntimeException(e.getMessage(), e);
                 }
                 if (validSize > 0) {
                     sendFetchRequest(from, info);
