@@ -75,8 +75,31 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
                 }
             }
         }
+        releaseResources();
     }
     
+    private void releaseResources() {
+        try {
+            selector.close();
+        } catch (Throwable t) {
+            LOG.error(t.getMessage());
+        }
+        
+        if (handlers != null) {
+            for (Handler handler : handlers) {
+                //interrupt the queue.take()
+                handler.interrupt();
+            }
+        }
+        
+        try {
+            socketChannel.close();
+        } catch (Throwable t) {
+            LOG.error(t.getMessage());
+        }
+        
+    }
+
     protected void loopInternal() {
         SelectionKey key = null;
         while (running && socketChannel.isOpen()) {
@@ -163,14 +186,16 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
 
     public void shutdown() {
         running = false;
-        selector.wakeup();
+        if (selector != null) {
+            selector.wakeup();
+        }
     }
     
     private class Handler extends Thread {
 
         public Handler(int instanceNumber) {
             this.setDaemon(true);
-            this.setName("process handler thread-"+instanceNumber);
+            this.setName("process handler thread@" + Integer.toHexString(hashCode()) + "-"+ instanceNumber );
         }
         
         @Override
@@ -203,12 +228,16 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
     
-    public void init(Properties prop, String clientName, String serverHost, String serverPort) throws IOException, ClosedChannelException {  
-        host = prop.getProperty(serverHost);
-        port = Integer.parseInt(prop.getProperty(serverPort));;
+    public void init(String clientName, String serverHost, int serverPort) throws IOException, ClosedChannelException {  
+        Properties prop = new Properties();
+        host = serverHost;
+        port = serverPort;
         handlerCount = Integer.parseInt(prop.getProperty("GenClient.handlercount", "1"));
         
         entityQueue = new LinkedBlockingQueue<EntityEvent>();
+        
+        socketChannel = SocketChannel.open();
+        selector = Selector.open();
         
         // start message handler thread
         handlers = new ArrayList<Handler>(handlerCount);
@@ -230,7 +259,6 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         socketChannel.configureBlocking(false);
         SocketAddress server = new InetSocketAddress(host, port);
         socketChannel.connect(server);
-        selector = Selector.open();
         socketChannel.register(selector, SelectionKey.OP_CONNECT);
     }
 }

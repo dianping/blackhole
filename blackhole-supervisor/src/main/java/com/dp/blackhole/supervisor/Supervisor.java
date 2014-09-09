@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,10 +46,10 @@ import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
 import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.DumpAppPB.DumpApp;
+import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
 import com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
-import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
 import com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
@@ -181,13 +183,87 @@ public class Supervisor {
         String id = consumerReg.getConsumerId();
         String topic = consumerReg.getTopic();
 
-        // get available Partitions
-        ConcurrentHashMap<String, PartitionInfo> partitionMap = topics.get(topic);
-        if (partitionMap == null) {
+        ArrayList<PartitionInfo> availPartitions = getAvailPartitions(topic);
+        if (availPartitions == null) {
             LOG.error("unknown topic: " + topic);
             sendConsumerRegFail(from, groupId, id, topic);
             return;
-        }      
+        } else if (availPartitions.size() == 0) {
+            LOG.error("no partition available , topic: " + topic);
+            sendConsumerRegFail(from, groupId, id, topic);
+            return;
+        } 
+        
+        ConsumerGroup group = new ConsumerGroup(groupId, topic);
+        ConsumerGroupDesc groupDesc = consumerGroups.get(group);
+        if (groupDesc == null) {
+            groupDesc = new ConsumerGroupDesc(group);
+            consumerGroups.put(group, groupDesc);
+        }
+        
+        ConsumerDesc consumerDesc = new ConsumerDesc(id, group, topic, from);
+        desc.attach(consumerDesc);
+        
+        tryAssignConsumer(consumerDesc, groupDesc);
+    }
+    
+    public void tryAssignConsumer(ConsumerDesc consumer, ConsumerGroupDesc group) {
+        ArrayList<ConsumerDesc> consumes = group.getConsumes();
+        
+        // new consumer arrived?
+        if (consumer != null) {
+            if (group.exists(consumer)) {
+                LOG.error("consumer already exists: " + consumer);
+                return;
+            }
+            consumes.add(consumer);
+        }
+        
+        // get online partitions
+        ArrayList<PartitionInfo> partitions = getAvailPartitions(group.getTopic());
+        if (partitions == null || partitions.size() ==0) {
+            LOG.error("can not get any available partitions");
+            return;
+        }
+        
+        // split partitions by consumer number
+        int consumerNum = consumes.size();
+        ArrayList<ArrayList<PartitionInfo>> assignPartitions
+            = new ArrayList<ArrayList<PartitionInfo>>(consumerNum);
+        for (int i = 0; i < consumerNum; i++) {
+            assignPartitions.add(new ArrayList<PartitionInfo>());
+        }
+        
+        // split partition into consumerNum groups
+        for (int i = 0; i < partitions.size(); i++) {
+            PartitionInfo pinfo = partitions.get(i);
+            assignPartitions.get(i % consumerNum).add(pinfo);
+        }
+        
+        for (int i = 0; i < consumes.size(); i++) {
+            ConsumerDesc cond = consumes.get(i);
+            ArrayList<PartitionInfo> pinfoList = assignPartitions.get(i);
+ 
+            List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(pinfoList.size());
+            for (PartitionInfo info : pinfoList) {
+                String broker = info.getHost()+ ":" + getBrokerPort(info.getHost());
+                AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(broker, info.getId(), info.getEndOffset());
+                offsets.add(offset);
+            }
+            Message assign = PBwrap.wrapAssignConsumer(group.getGroupId(), cond.getId(), group.getTopic(), offsets);
+            send(cond.getConnection(), assign);
+        }
+        
+        // update consumerGroupDesc mapping
+        group.update(consumes, assignPartitions, partitions);
+    }
+
+    private ArrayList<PartitionInfo> getAvailPartitions(String topic) {
+        // get available Partitions
+        ConcurrentHashMap<String, PartitionInfo> partitionMap = topics.get(topic);
+        if (partitionMap == null) {
+            return null;
+        }
         Collection<PartitionInfo> partitions = partitionMap.values();
         ArrayList<PartitionInfo> availPartitions = new ArrayList<PartitionInfo>();
         for (PartitionInfo pinfo : partitions) {
@@ -196,99 +272,15 @@ public class Supervisor {
             }
             availPartitions.add(pinfo);
         }
-        
-        if (availPartitions.size() == 0) {
-            LOG.error("no partition available , topic: " + topic);
-            sendConsumerRegFail(from, groupId, id, topic);
-            return;
-        }
-        
-        ConsumerGroup group = new ConsumerGroup(groupId, topic);
-        ConsumerGroupDesc groupDesc = consumerGroups.get(group);
-        if (groupDesc == null) {
-            groupDesc = new ConsumerGroupDesc(group, availPartitions);
-            consumerGroups.put(group, groupDesc);
-        }
-        
-        ConsumerDesc consumerDesc = new ConsumerDesc(id, group, topic, from);
-        desc.attach(consumerDesc);
-        
-        tryAssignConsumer(consumerDesc, group, groupDesc);
+        return availPartitions;
     }
     
-    public void tryAssignConsumer(ConsumerDesc consumer, ConsumerGroup group, ConsumerGroupDesc groupDesc) {
-        Map<ConsumerDesc, ArrayList<String>> consumeMap = groupDesc.getConsumeMap();
-//        Map<String, PartitionInfo> partitions = groupDesc.getPartitions();
-        
-        // new consumer arrived?
-        if (consumer != null) {
-            if (groupDesc.exists(consumer)) {
-                LOG.error("consumer already exists: " + consumer);
-                return;
-            }
-            consumeMap.put(consumer, new ArrayList<String>());
-        }
-        
-        // calc online partitions
-        Map<String, PartitionInfo> allpartitions = topics.get(group.getTopic());
-        Map<String, PartitionInfo> partitions = new HashMap<String, PartitionInfo>();
-        for (Entry<String, PartitionInfo> entry : allpartitions.entrySet()) {
-            if (entry.getValue().isOffline()) {
-                continue;
-            }
-            partitions.put(entry.getKey(), entry.getValue());
-        }
-        
-        // prepare for split
-        int consumerNum = consumeMap.keySet().size();
-        ArrayList<ArrayList<String>> assignPartitions = new ArrayList<ArrayList<String>>(consumerNum);
-        for (int i =0 ; i < consumerNum; i++) {
-            assignPartitions.add(new ArrayList<String>());
-        }
-        
-        // split partition into consumerNum groups, and skip offline partitions
-        int i =0;
-        for (String id : partitions.keySet()) {
-            assignPartitions.get(i % consumerNum).add(id);
-            i++;
-        }
-        
-        // assign each group to a consumer
-        i = 0;
-        for (ConsumerDesc c : consumeMap.keySet()) {
-            consumeMap.put(c, assignPartitions.get(i));
-            i++;
-        }
-        
-        i = 0;
-        for (Entry<ConsumerDesc, ArrayList<String>> entry : consumeMap.entrySet()) {
-            ConsumerDesc c = entry.getKey();
-            ArrayList<String> pinfoList = entry.getValue();
-            List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(pinfoList.size());
-            for (String partitionId : pinfoList) {
-                PartitionInfo info = partitions.get(partitionId);
-                if (info == null) {
-                    LOG.error("can not find PartitionInfo by partitionId " + partitionId + ", it shouldn't happen");
-                    continue;
-                }
-
-                String broker = info.getHost()+ ":" + getBrokerPort(info.getHost());
-                AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(broker, info.getId(), info.getEndOffset());
-                offsets.add(offset);
-            }
-            Message assign = PBwrap.wrapAssignConsumer(group.getId(), c.getId(), group.getTopic(), offsets);
-            send(c.getConnection(), assign);
-            i++;
-        }
-    }
-
     private void handleOffsetCommit(OffsetCommit offsetCommit) {
-        //TODO disable temporarily
-        if (true) {
-            return;
-        }
         String id = offsetCommit.getConsumerIdString();
-        String groupId = id.split("-")[0];
+        String groupId = offsetCommit.getGroupId();
+        if (groupId == null || groupId.length() == 0) {
+            groupId = id.split("-")[0];
+        }
         String topic = offsetCommit.getTopic();
         String partition = offsetCommit.getPartition();
         long offset = offsetCommit.getOffset();
@@ -468,25 +460,37 @@ public class Supervisor {
         SimpleConnection connection = desc.getConnection();
         LOG.info("consumer " + connection + " disconnectted");
         
-        ConsumerDesc consumerDesc = (ConsumerDesc) desc.getAttachment();
-        if (consumerDesc == null) {
+        List<NodeDesc> nodeDescs = desc.getAttachments();
+        if (nodeDescs == null || nodeDescs.size() == 0) {
             return;
         }
-        ConsumerGroup group = consumerDesc.getConsumerGroup();
-        ConsumerGroupDesc groupDesc = consumerGroups.get(group);
-        if (groupDesc == null) {
-            LOG.error("can not find groupDesc by ConsumerGroup: " + group);
-            return;
-        }
+        //the purpose of the map named 'toBeReAssign' is to avoid multiple distribution of consumers in a group
+        HashMap<ConsumerGroup, ConsumerGroupDesc> toBeReAssign = new HashMap<ConsumerGroup, ConsumerGroupDesc>();
+        for (NodeDesc nodeDesc : nodeDescs) {
+            ConsumerDesc consumerDesc = (ConsumerDesc) nodeDesc;
+            ConsumerGroup group = consumerDesc.getConsumerGroup();
+            ConsumerGroupDesc groupDesc = consumerGroups.get(group);
+            if (groupDesc == null) {
+                LOG.error("can not find groupDesc by ConsumerGroup: " + group);
+                continue;
+            }
 
-        groupDesc.unregisterConsumer(consumerDesc);
+            groupDesc.unregisterConsumer(consumerDesc);
+            
+            if (groupDesc.getConsumers().size() != 0) {
+                toBeReAssign.put(group, groupDesc);
+            } else {
+                LOG.info("consumerGroup " + group +" has not live consumer, thus be removed");
+                toBeReAssign.remove(group);
+                consumerGroups.remove(group);
+            }
+        }
         
-        if (groupDesc.getConsumers().size() != 0) {
-            LOG.info("reassign consumers in group: " + group + ", caused by consumer fail: " + consumerDesc);
-            tryAssignConsumer(null, group, groupDesc);
-        } else {
-            LOG.info("consumerGroup " + group +" has not live consumer, thus be removed");
-            consumerGroups.remove(group);
+        for (Map.Entry<ConsumerGroup, ConsumerGroupDesc> entry : toBeReAssign.entrySet()) {
+            ConsumerGroup cong = entry.getKey();
+            ConsumerGroupDesc cond = entry.getValue();
+            LOG.info("reassign consumers in group: " + cong + ", caused by consumer fail: " + cond);
+            tryAssignConsumer(null, cond);
         }
     }
     
@@ -625,18 +629,23 @@ public class Supervisor {
             }
         }
         sb.append("\n");
-        
+        Map<String, PartitionInfo> partitionMap = topics.get(topic);
         sb.append("print Streams:\n");
         for (Stream stream : printStreams) {
             sb.append("[stream]\n")
             .append(stream)
-            .append("\n")
-            .append("[stages]\n");
+            .append("\n").append("[partition]\n");
+            if (partitionMap != null) {
+                PartitionInfo partitionInfo = partitionMap.get(stream.sourceIdentify);
+                if (partitionInfo != null) {
+                    sb.append(partitionInfo).append("\n");
+                }
+            }
+            sb.append("[stages]\n");
             ArrayList<Stage> stages = Streams.get(stream);
             synchronized (stages) {
                 for (Stage stage : stages) {
-                    sb.append(stage)
-                    .append("\n");
+                    sb.append(stage);
                 }
             }
         }
@@ -653,6 +662,42 @@ public class Supervisor {
         send(from, message);
     }
 
+    public void dumpConsumerGroup(DumpConsumerGroup dumpConsumerGroup,
+            SimpleConnection from) {
+        String topic = dumpConsumerGroup.getTopic();
+        String groupId = dumpConsumerGroup.getGroupId();
+        ConsumerGroup consumerGroup = new ConsumerGroup(groupId, topic);
+        ConsumerGroupDesc consumerGroupDesc = consumerGroups.get(consumerGroup);
+        StringBuilder sb = new StringBuilder();
+        if (consumerGroupDesc == null) {
+            sb.append("Can not find consumer group by groupId:").append(groupId).append(" topic:").append(topic);
+            LOG.info(sb.toString());
+        } else {
+            sb.append("dump consumer group:\n");
+            sb.append("############################## dump ##############################\n");
+            sb.append("print ").append(consumerGroup).append("\n");
+            Map<String, PartitionInfo> partitionMap = topics.get(topic);
+            long sumDelta = 0;
+            for(Map.Entry<String, AtomicLong> entry : consumerGroupDesc.getCommitedOffsets().entrySet()) {
+                long delta = 0;
+                if (partitionMap != null) {
+                    PartitionInfo partitionInfo = partitionMap.get(entry.getKey());
+                    if (partitionInfo != null) {
+                        delta = partitionInfo.getEndOffset() - entry.getValue().get();
+                        sumDelta += delta;
+                        sb.append(partitionInfo).append("\n");
+                    }
+                }
+                sb.append("{committedinfo,").append(entry.getKey())
+                .append(",").append(entry.getValue().get()).append(",").append(delta).append("}\n\n");
+            }
+            sb.append("The sum of slow offset delta [").append(sumDelta).append("]\n");
+            sb.append("##################################################################");
+        }
+        Message message = PBwrap.wrapDumpReply(sb.toString());
+        send(from, message);
+    }
+    
     public void listTopics(SimpleConnection from) {
         StringBuilder sb = new StringBuilder();
         SortedSet<String> topicSet = new TreeSet<String>();
@@ -712,6 +757,30 @@ public class Supervisor {
         
         String listIdle = sb.toString();
         Message message = PBwrap.wrapDumpReply(listIdle);
+        send(from, message);
+    }
+    
+    public void listConsumerGroups(SimpleConnection from) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("list consumer groups:\n");
+        sb.append("############################## dump ##############################\n");
+        SortedSet<ConsumerGroup> groupsSorted  = new TreeSet<ConsumerGroup>(new Comparator<ConsumerGroup>() {
+            @Override
+            public int compare(ConsumerGroup o1, ConsumerGroup o2) {
+                int topicResult = o1.getTopic().compareTo(o2.getTopic());
+                return topicResult == 0 ? o1.getGroupId().compareTo(o2.getGroupId()) : topicResult;
+            }
+        });
+        for (ConsumerGroup group : consumerGroups.keySet()) {
+            groupsSorted.add(group);
+        }
+        for (ConsumerGroup group : groupsSorted) {
+            sb.append(group).append("\n");
+        }
+        sb.append("##################################################################");
+        
+        String listConsGroup = sb.toString();
+        Message message = PBwrap.wrapDumpReply(listConsGroup);
         send(from, message);
     }
 
@@ -1300,14 +1369,12 @@ public class Supervisor {
     }
 
     private void reassignConsumers(String topic) {
-        for (Entry<ConsumerGroup, ConsumerGroupDesc> entry : consumerGroups.entrySet()) {
-            ConsumerGroup group = entry.getKey();
-            ConsumerGroupDesc groupDesc = entry.getValue();
-            if (!topic.equals(group.getTopic())) {
+        for (ConsumerGroupDesc groupDesc : consumerGroups.values()) {
+            if (!topic.equals(groupDesc.getTopic())) {
                 continue;
             }
             LOG.info("reassign consumer of topic: " + topic);
-            tryAssignConsumer(null, group, groupDesc);
+            tryAssignConsumer(null, groupDesc);
         }
     }
 
@@ -1541,46 +1608,59 @@ public class Supervisor {
                 return;
             }
             
-            if (msg.getType() != MessageType.HEARTBEART 
-                    && msg.getType() != MessageType.TOPICREPORT
-                    && msg.getType() != MessageType.OFFSET_COMMIT
-                    && msg.getType() != MessageType.CONF_REQ) {
-                LOG.debug("received: " + msg);
-            }
-            
             switch (msg.getType()) {
             case HEARTBEART:
                 handleHeartBeat(from);
                 break;
             case BROKER_REG:
+                LOG.debug("received: " + msg);
                 handleBrokerReg(msg.getBrokerReg(), from);
                 break;
             case APP_REG:
+                LOG.debug("received: " + msg);
                 handleTopicReg(msg, from);
                 break;
+            case CONSUMER_REG:
+                LOG.debug("received: " + msg);
+                handleConsumerReg(msg.getConsumerReg(), from);
+                break;
             case READY_BROKER:
+                LOG.debug("received: " + msg);
                 handleReadyStream(msg.getReadyBroker(), from);
                 break;
             case APP_ROLL:
+                LOG.debug("received: " + msg);
                 handleRolling(msg.getAppRoll(), from);
                 break;
             case UPLOAD_SUCCESS:
+                LOG.debug("received: " + msg);
                 handleUploadSuccess(msg.getRollID(), from);
                 break;
             case UPLOAD_FAIL:
+                LOG.debug("received: " + msg);
                 handleUploadFail(msg.getRollID());
                 break;
             case RECOVERY_SUCCESS:
+                LOG.debug("received: " + msg);
                 handleRecoverySuccess(msg.getRollID());
                 break;
             case RECOVERY_FAIL:
+                LOG.debug("received: " + msg);
                 handleRecoveryFail(msg.getRollID());
                 break;
             case FAILURE:
+                LOG.debug("received: " + msg);
                 handleFailure(msg.getFailure());
                 break;
             case UNRECOVERABLE:
+                LOG.debug("received: " + msg);
                 handleUnrecoverable(msg.getRollID());
+                break;
+            case TOPICREPORT:
+                handleTopicReport(msg.getTopicReport(), from);
+                break;
+            case OFFSET_COMMIT:
+                handleOffsetCommit(msg.getOffsetCommit());
                 break;
             case MANUAL_RECOVERY_ROLL:
                 handleManualRecoveryRoll(msg.getRollID());
@@ -1606,15 +1686,6 @@ public class Supervisor {
             case DUMP_APP:
                 dumpTopic(msg.getDumpApp(), from);
                 break;
-            case TOPICREPORT:
-                handleTopicReport(msg.getTopicReport(), from);
-                break;
-            case CONSUMER_REG:
-                handleConsumerReg(msg.getConsumerReg(), from);
-                break;
-            case OFFSET_COMMIT:
-                handleOffsetCommit(msg.getOffsetCommit());
-                break;
             case LISTIDLE:
                 listIdle(from);
                 break;
@@ -1623,6 +1694,12 @@ public class Supervisor {
                 break;
             case ROLL_CLEAN:
                 handleRollingAndTriggerClean(msg.getRollClean(), from);
+                break;
+            case DUMP_CONSUMER_GROUP:
+                dumpConsumerGroup(msg.getDumpConsumerGroup(), from);
+                break;
+            case LIST_CONSUMER_GROUP:
+                listConsumerGroups(from);
                 break;
             default:
                 LOG.warn("unknown message: " + msg.toString());
@@ -1838,7 +1915,8 @@ public class Supervisor {
             LOG.error("can not get ConnectionDescription from connection: " + connection);
             return 0;
         }
-        BrokerDesc brokerDesc = (BrokerDesc) desc.getAttachment();
+        List<NodeDesc> nodeDescs = desc.getAttachments();
+        BrokerDesc brokerDesc = (BrokerDesc) nodeDescs.get(0);
         return brokerDesc.getBrokerPort();
     }
     
@@ -1853,7 +1931,8 @@ public class Supervisor {
             LOG.error("can not get ConnectionDescription from connection: " + connection);
             return 0;
         }
-        BrokerDesc brokerDesc = (BrokerDesc) desc.getAttachment();
+        List<NodeDesc> nodeDescs = desc.getAttachments();
+        BrokerDesc brokerDesc = (BrokerDesc) nodeDescs.get(0);
         return brokerDesc.getRecoveryPort();
     }
     

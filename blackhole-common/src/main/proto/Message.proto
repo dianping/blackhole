@@ -24,6 +24,7 @@ import "TopicReport.proto";
 import "Restart.proto";
 import "QuitAndClean.proto";
 import "RollClean.proto";
+import "DumpConsumerGroup.proto";
 
 message Message {
     enum MessageType {
@@ -64,6 +65,8 @@ message Message {
         QUIT = 35;
         CLEAN = 36;
         ROLL_CLEAN = 37;
+        DUMP_CONSUMER_GROUP = 38;
+        LIST_CONSUMER_GROUP = 39;
     }
 
     required MessageType type = 1;
@@ -89,4 +92,5 @@ message Message {
     optional Quit quit = 21;
     optional Clean clean = 22;
     optional RollClean rollClean = 23;
+    optional DumpConsumerGroup dumpConsumerGroup = 24;
 }

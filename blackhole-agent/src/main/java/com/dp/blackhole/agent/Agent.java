@@ -162,6 +162,9 @@ public class Agent implements Runnable {
             return;
         }    
 
+        String serverHost = prop.getProperty("supervisor.host");
+        int serverPort = Integer.parseInt(prop.getProperty("supervisor.port"));
+        
         try {    
             listener = new FileListener();
         } catch (Exception e) {
@@ -175,9 +178,9 @@ public class Agent implements Runnable {
                 processor,
                 new SimpleConnection.SimpleConnectionFactory(),
                 null);
-
+        
         try {
-            client.init(prop, "agent", "supervisor.host", "supervisor.port");
+            client.init("agent", serverHost, serverPort);
         } catch (ClosedChannelException e) {
             LOG.error(e.getMessage(), e);
             Cat.logError(e);

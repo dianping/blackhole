@@ -42,9 +42,7 @@ public class SimpleEchoService {
         public void startService() throws IOException {
             GenServer<ByteBuffer, SimpleConnection, echoProcessor> server = 
                     new GenServer(new echoProcessor(), new SimpleConnection.SimpleConnectionFactory(), null);
-            Properties prop = new Properties();
-            prop.setProperty("GenServer.port", "2223");
-            server.init(prop, "echo");
+            server.init("echo", 2223, 1);
         }
         
         @Override

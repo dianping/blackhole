@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -72,7 +71,7 @@ public class ConsumerConnector implements Runnable {
         ConfigCache configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
         String host = configCache.getProperty("blackhole.supervisor.host");
         int port = configCache.getIntProperty("blackhole.supervisor.port");
-        init(host, port, true, 3000);
+        init(host, port, true, 6000);
     }
 
     public synchronized void init(String supervisorHost, int supervisorPort, boolean autoCommit, int autoCommitIntervalMs) {
@@ -102,9 +101,9 @@ public class ConsumerConnector implements Runnable {
                         continue;
                     }
                     long newOffset = info.getConsumedOffset();
-                    updateOffset(id , info.topic, info.partition, newOffset);
+                    updateOffset(f.getGroupId(), id, info.topic, info.partition, newOffset);
                     info.updateComsumedOffsetChanged(lastChanged);
-                    LOG.debug("Committed " + info.partition + " for topic " + info.topic);
+                    LOG.debug("Committed " + newOffset + " @" + info.partition + " for topic " + info.topic);
                 }
             }
         }
@@ -125,12 +124,8 @@ public class ConsumerConnector implements Runnable {
                 processor,
                 new SimpleConnection.SimpleConnectionFactory(),
                 null);
-        
-        Properties prop = new Properties();
-        prop.setProperty("supervisor.host", supervisorHost);
-        prop.setProperty("supervisor.port", Integer.toString(supervisorPort));
         try {
-            client.init(prop, "consumer", "supervisor.host", "supervisor.port");
+            client.init("consumer", supervisorHost, supervisorPort);
         } catch (ClosedChannelException e) {
             LOG.error(e.getMessage(), e);
         } catch (IOException e) {
@@ -176,8 +171,8 @@ public class ConsumerConnector implements Runnable {
         send(message);
     }
     
-    void updateOffset(String consumerId, String topic, String partitionName, long offset) {
-        Message message = PBwrap.wrapOffsetCommit(consumerId, topic, partitionName, offset);
+    void updateOffset(String groupId, String consumerId, String topic, String partitionName, long offset) {
+        Message message = PBwrap.wrapOffsetCommit(groupId, consumerId, topic, partitionName, offset);
         send(message);
     }
     
@@ -236,7 +231,7 @@ public class ConsumerConnector implements Runnable {
                 break;
             case ASSIGN_CONSUMER:
                 AssignConsumer assign = msg.getAssignConsumer();
-                
+                String groupId = assign.getGroup();
                 String consumerId = assign.getConsumerIdString();
                 //First, shutdown thread and clear consumer queue.
                 List<Fetcher> fetches = consumerThreadsMap.get(consumerId);
@@ -284,7 +279,7 @@ public class ConsumerConnector implements Runnable {
                 for (Map.Entry<String, List<PartitionTopicInfo>> entry : brokerPartitionInfoMap.entrySet()) {
                     String brokerString = entry.getKey();
                     List<PartitionTopicInfo> pInfoList = entry.getValue();
-                    Fetcher fetcherThread = new Fetcher(consumerId, brokerString, pInfoList, c.getDataQueue(), configMap.get(consumerId));
+                    Fetcher fetcherThread = new Fetcher(groupId, consumerId, brokerString, pInfoList, c.getDataQueue(), configMap.get(consumerId));
                     fetches.add(fetcherThread);
                     fetcherThread.start();
                 }

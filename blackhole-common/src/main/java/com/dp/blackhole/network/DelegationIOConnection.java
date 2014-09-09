@@ -59,10 +59,9 @@ public class DelegationIOConnection implements NonblockingConnection<TransferWra
             LOG.error("connection closed, message sending abort");
             return;
         }
-        
+        offer(entity);
         SelectionKey key = keyFor(selector);
         key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
-        offer(entity);
         selector.wakeup();
     }
 

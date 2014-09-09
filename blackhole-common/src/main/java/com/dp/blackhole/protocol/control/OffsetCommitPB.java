@@ -63,6 +63,13 @@ public final class OffsetCommitPB {
     public boolean hasOffset() { return hasOffset; }
     public long getOffset() { return offset_; }
     
+    // optional string groupId = 5;
+    public static final int GROUPID_FIELD_NUMBER = 5;
+    private boolean hasGroupId;
+    private java.lang.String groupId_ = "";
+    public boolean hasGroupId() { return hasGroupId; }
+    public java.lang.String getGroupId() { return groupId_; }
+    
     private void initFields() {
     }
     public final boolean isInitialized() {
@@ -88,6 +95,9 @@ public final class OffsetCommitPB {
       if (hasOffset()) {
         output.writeInt64(4, getOffset());
       }
+      if (hasGroupId()) {
+        output.writeString(5, getGroupId());
+      }
       getUnknownFields().writeTo(output);
     }
     
@@ -112,6 +122,10 @@ public final class OffsetCommitPB {
       if (hasOffset()) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(4, getOffset());
+      }
+      if (hasGroupId()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeStringSize(5, getGroupId());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -283,6 +297,9 @@ public final class OffsetCommitPB {
         if (other.hasOffset()) {
           setOffset(other.getOffset());
         }
+        if (other.hasGroupId()) {
+          setGroupId(other.getGroupId());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -322,6 +339,10 @@ public final class OffsetCommitPB {
             }
             case 32: {
               setOffset(input.readInt64());
+              break;
+            }
+            case 42: {
+              setGroupId(input.readString());
               break;
             }
           }
@@ -410,6 +431,27 @@ public final class OffsetCommitPB {
         return this;
       }
       
+      // optional string groupId = 5;
+      public boolean hasGroupId() {
+        return result.hasGroupId();
+      }
+      public java.lang.String getGroupId() {
+        return result.getGroupId();
+      }
+      public Builder setGroupId(java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  result.hasGroupId = true;
+        result.groupId_ = value;
+        return this;
+      }
+      public Builder clearGroupId() {
+        result.hasGroupId = false;
+        result.groupId_ = getDefaultInstance().getGroupId();
+        return this;
+      }
+      
       // @@protoc_insertion_point(builder_scope:blackhole.OffsetCommit)
     }
     
@@ -436,11 +478,11 @@ public final class OffsetCommitPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022OffsetCommit.proto\022\tblackhole\"Z\n\014Offse" +
+      "\n\022OffsetCommit.proto\022\tblackhole\"k\n\014Offse" +
       "tCommit\022\r\n\005topic\030\001 \002(\t\022\021\n\tpartition\030\002 \002(" +
       "\t\022\030\n\020consumerIdString\030\003 \002(\t\022\016\n\006offset\030\004 " +
-      "\002(\003B3\n!com.dp.blackhole.protocol.control" +
-      "B\016OffsetCommitPB"
+      "\002(\003\022\017\n\007groupId\030\005 \001(\tB3\n!com.dp.blackhole" +
+      ".protocol.controlB\016OffsetCommitPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -452,7 +494,7 @@ public final class OffsetCommitPB {
           internal_static_blackhole_OffsetCommit_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_OffsetCommit_descriptor,
-              new java.lang.String[] { "Topic", "Partition", "ConsumerIdString", "Offset", },
+              new java.lang.String[] { "Topic", "Partition", "ConsumerIdString", "Offset", "GroupId", },
               com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.class,
               com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit.Builder.class);
           return null;
