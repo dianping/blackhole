@@ -139,20 +139,21 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
     }
     
     public void closeConnection(Connection connection) {
+        if (connection == null) {
+            return;
+        }
         synchronized (connection) {
             if (!connection.isActive()) {
                 LOG.info("connection " + connection + "already closed" );
                 return;
             }
-            
             SelectionKey key = connection.getChannel().keyFor(selector);
+            
             LOG.info("close connection: " + connection);
+            connection.close();
+            
             key.attach(null);
             key.cancel();
-            
-            if (connection != null) {
-                connection.close();
-            }
             
             Handler handler = getHandler(connection);
             handler.addEvent(new EntityEvent(EntityEvent.DISCONNECTED, null, connection));
