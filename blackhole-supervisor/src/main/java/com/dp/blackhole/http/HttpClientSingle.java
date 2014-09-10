@@ -1,7 +1,9 @@
-package com.dp.blackhole.scaleout;
+package com.dp.blackhole.http;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -28,7 +30,7 @@ public class HttpClientSingle {
         HttpConnectionParams.setSoTimeout(params, socketTimeout);
     }
     
-    public InputStream getResource(String uri) throws IOException {
+    private synchronized InputStream getResource(String uri) throws IOException {
         HttpGet method = new HttpGet(uri);
         HttpResponse httpResponse = this.httpClient.execute(method);
         int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -42,5 +44,47 @@ public class HttpClientSingle {
             throw new IOException("Something went wrong, statusCode is " + statusCode);
         }
         return is;
+    }
+    
+    public String getResponseText(String url) {
+        LOG.debug("http client access url: " + url);
+        StringBuilder responseBuilder = new StringBuilder();
+        BufferedReader bufferedReader = null;
+        InputStream is = null;
+        try {
+            is = getResource(url);
+        } catch (IOException e) {
+            LOG.error("Can not get http response. " + e.getMessage());
+            return null;
+        }
+        try {
+            bufferedReader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8 * 1024);
+            String line = null;
+            while ((line = bufferedReader.readLine()) != null) {
+                responseBuilder.append(line + "\n");
+            }
+            if (responseBuilder.length() != 0) {
+                responseBuilder.deleteCharAt(responseBuilder.length() - 1);
+            }
+        } catch (IOException e) {
+            LOG.error("Oops, got an exception in reading http response content." + e.getMessage());
+            return null;
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                }
+                is = null;
+            }
+            if (bufferedReader != null) {
+                try {
+                    bufferedReader.close();
+                } catch (IOException e) {
+                }
+                bufferedReader = null;
+            }
+        }
+        return responseBuilder.toString();
     }
 }

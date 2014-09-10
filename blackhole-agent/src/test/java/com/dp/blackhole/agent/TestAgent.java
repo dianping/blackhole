@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.dp.blackhole.agent.TopicMeta.MetaKey;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
@@ -35,9 +36,9 @@ public class TestAgent {
         tailFile.createNewFile();
         tailFile.deleteOnExit();
         agent = new SimAgent();
-        ConfigKeeper.configMap.put(MAGIC, new Context(ParamsKey.Appconf.ROLL_PERIOD, "3600"));
-        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.MAX_LINE_SIZE, "1024");
-        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.Appconf.WATCH_FILE, tailFile.getAbsolutePath());
+        ConfigKeeper.configMap.put(MAGIC, new Context(ParamsKey.TopicConf.ROLL_PERIOD, "3600"));
+        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.TopicConf.MAX_LINE_SIZE, "1024");
+        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.TopicConf.WATCH_FILE, tailFile.getAbsolutePath());
     }
 
     @After
@@ -61,29 +62,17 @@ public class TestAgent {
         String WATCH_FILE = "/tmp/check1/" + name + ".access.log /tmp/check2/" + name + ".access.log";
         String expectedFileName1 = "/tmp/check1/" + name + ".access.log";
         String expectedFileName2 = "/tmp/check2/" + name + ".access.log";
-        String expectedFileName3 = "/tmp/check1/" + hostname + ".access.log";
-        String expectedFileName4 = "/tmp/check2/" + hostname + ".access.log";
         String expectedFileName5 = "/tmp/check2/xxxxxxx.access.log";
         File expectedFile;
         expectedFile = new File(expectedFileName1);
         expectedFile.createNewFile();
         assertTrue(agent.checkFilesExist(MAGIC, WATCH_FILE));
-        assertEquals(expectedFileName1, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
+        assertEquals(expectedFileName1, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.TopicConf.WATCH_FILE));
         expectedFile.delete();
         expectedFile = new File(expectedFileName2);
         expectedFile.createNewFile();
         assertTrue(agent.checkFilesExist(MAGIC, WATCH_FILE));
-        assertEquals(expectedFileName2, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
-        expectedFile.delete();
-        expectedFile = new File(expectedFileName3);
-        expectedFile.createNewFile();
-        assertTrue(agent.checkFilesExist(MAGIC, WATCH_FILE));
-        assertEquals(expectedFileName3, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
-        expectedFile.delete();
-        expectedFile = new File(expectedFileName4);
-        expectedFile.createNewFile();
-        assertTrue(agent.checkFilesExist(MAGIC, WATCH_FILE));
-        assertEquals(expectedFileName4, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.Appconf.WATCH_FILE));
+        assertEquals(expectedFileName2, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.TopicConf.WATCH_FILE));
         expectedFile.delete();
         expectedFile = new File(expectedFileName5);
         expectedFile.createNewFile();
@@ -95,7 +84,8 @@ public class TestAgent {
 
     @Test
     public void testAssignBrokerProcess() throws InterruptedException {
-        agent.fillUpAppLogsFromConfig(MAGIC);
+        MetaKey metaKey = new MetaKey(MAGIC, null);
+        agent.fillUpAppLogsFromConfig(metaKey);
         Message bad = getMessageOfAssignBroker(MAGIC + MAGIC);
         assertFalse(agent.processor.processInternal(bad));
         Message good = getMessageOfAssignBroker(MAGIC);
@@ -104,7 +94,8 @@ public class TestAgent {
     
     @Test
     public void testRecoveryRollProcess() throws InterruptedException {
-        agent.fillUpAppLogsFromConfig(MAGIC);
+        MetaKey metaKey = new MetaKey(MAGIC, null);
+        agent.fillUpAppLogsFromConfig(metaKey);
         Message bad = getMessageOfRecoveryRoll(MAGIC + MAGIC);
         assertFalse(agent.processor.processInternal(bad));
         Message good = getMessageOfRecoveryRoll(MAGIC);
@@ -118,11 +109,11 @@ public class TestAgent {
     }
 
     private Message getMessageOfAssignBroker(String appName) {
-        return PBwrap.wrapAssignBroker(appName, SimAgent.HOSTNAME, SimAgent.COLPORT);
+        return PBwrap.wrapAssignBroker(appName, SimAgent.HOSTNAME, SimAgent.COLPORT, null);
     }
     
     private Message getMessageOfRecoveryRoll(String appName) {
-        return PBwrap.wrapRecoveryRoll(appName, SimAgent.HOSTNAME, SimAgent.COLPORT, SimAgent.rollTS);
+        return PBwrap.wrapRecoveryRoll(appName, SimAgent.HOSTNAME, SimAgent.COLPORT, SimAgent.rollTS, null, false);
     }
 
     private Message getUnknowMessage() {

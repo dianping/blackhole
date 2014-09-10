@@ -1,4 +1,4 @@
-package com.dp.blackhole.scaleout;
+package com.dp.blackhole.http;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -24,7 +24,7 @@ import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 import org.apache.log4j.Logger;
 
-import com.dp.blackhole.supervisor.LionConfChange;
+import com.dp.blackhole.supervisor.ConfigManager;
 
 public class RequestListener extends Thread {
     private static Logger LOG = Logger.getLogger(RequestListener.class);
@@ -34,7 +34,7 @@ public class RequestListener extends Thread {
     private boolean running;
     private ExecutorService handlerPool = Executors.newCachedThreadPool();
     
-    public RequestListener(int port, LionConfChange lionConfChange, HttpClientSingle cmdbHttpClient) throws IOException {
+    public RequestListener(int port, ConfigManager configManager, HttpClientSingle cmdbHttpClient) throws IOException {
         this.serversocket = new ServerSocket(port);
         this.params = new SyncBasicHttpParams();
         this.params
@@ -54,8 +54,10 @@ public class RequestListener extends Thread {
         
         // Set up request handlers
         HttpRequestHandlerRegistry reqistry = new HttpRequestHandlerRegistry();
-        reqistry.register("/scaleout*", new HttpScaleoutHandler(lionConfChange, cmdbHttpClient));
-        reqistry.register("/contract*", new HttpContractHandler(lionConfChange, cmdbHttpClient));
+        reqistry.register("/scaleout*", new HttpScaleOutHandler(configManager, cmdbHttpClient));
+        reqistry.register("/scalein*", new HttpScaleInHandler(configManager, cmdbHttpClient));
+        reqistry.register("/paaslogin*", new HttpPaaSLoginHandler(configManager, cmdbHttpClient));
+        reqistry.register("/paaslogout*", new HttpPaaSLogoutHandler(configManager, cmdbHttpClient));
         reqistry.register("*", new HttpFallbackHandler());
         
         // Set up the HTTP service

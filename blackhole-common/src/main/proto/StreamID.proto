@@ -4,6 +4,7 @@ option java_package = "com.dp.blackhole.protocol.control";
 option java_outer_classname = "StreamIDPB";
 
 message StreamID {
-    required string app_name = 1;
-    required string app_server = 2;
+    required string topic = 1;
+    required string agent_server = 2;
+    optional string instance_id = 3;
 }

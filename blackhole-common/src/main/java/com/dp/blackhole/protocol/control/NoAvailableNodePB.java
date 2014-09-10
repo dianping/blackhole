@@ -35,25 +35,35 @@ public final class NoAvailableNodePB {
       return com.dp.blackhole.protocol.control.NoAvailableNodePB.internal_static_blackhole_NoAvailableNode_fieldAccessorTable;
     }
     
-    // required string app_name = 1;
-    public static final int APP_NAME_FIELD_NUMBER = 1;
-    private boolean hasAppName;
-    private java.lang.String appName_ = "";
-    public boolean hasAppName() { return hasAppName; }
-    public java.lang.String getAppName() { return appName_; }
+    // required string topic = 1;
+    public static final int TOPIC_FIELD_NUMBER = 1;
+    private boolean hasTopic;
+    private java.lang.String topic_ = "";
+    public boolean hasTopic() { return hasTopic; }
+    public java.lang.String getTopic() { return topic_; }
+    
+    // optional string instance_id = 2;
+    public static final int INSTANCE_ID_FIELD_NUMBER = 2;
+    private boolean hasInstanceId;
+    private java.lang.String instanceId_ = "";
+    public boolean hasInstanceId() { return hasInstanceId; }
+    public java.lang.String getInstanceId() { return instanceId_; }
     
     private void initFields() {
     }
     public final boolean isInitialized() {
-      if (!hasAppName) return false;
+      if (!hasTopic) return false;
       return true;
     }
     
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasAppName()) {
-        output.writeString(1, getAppName());
+      if (hasTopic()) {
+        output.writeString(1, getTopic());
+      }
+      if (hasInstanceId()) {
+        output.writeString(2, getInstanceId());
       }
       getUnknownFields().writeTo(output);
     }
@@ -64,9 +74,13 @@ public final class NoAvailableNodePB {
       if (size != -1) return size;
     
       size = 0;
-      if (hasAppName()) {
+      if (hasTopic()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getAppName());
+          .computeStringSize(1, getTopic());
+      }
+      if (hasInstanceId()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeStringSize(2, getInstanceId());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -226,8 +240,11 @@ public final class NoAvailableNodePB {
       
       public Builder mergeFrom(com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode other) {
         if (other == com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.getDefaultInstance()) return this;
-        if (other.hasAppName()) {
-          setAppName(other.getAppName());
+        if (other.hasTopic()) {
+          setTopic(other.getTopic());
+        }
+        if (other.hasInstanceId()) {
+          setInstanceId(other.getInstanceId());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -255,7 +272,11 @@ public final class NoAvailableNodePB {
               break;
             }
             case 10: {
-              setAppName(input.readString());
+              setTopic(input.readString());
+              break;
+            }
+            case 18: {
+              setInstanceId(input.readString());
               break;
             }
           }
@@ -263,24 +284,45 @@ public final class NoAvailableNodePB {
       }
       
       
-      // required string app_name = 1;
-      public boolean hasAppName() {
-        return result.hasAppName();
+      // required string topic = 1;
+      public boolean hasTopic() {
+        return result.hasTopic();
       }
-      public java.lang.String getAppName() {
-        return result.getAppName();
+      public java.lang.String getTopic() {
+        return result.getTopic();
       }
-      public Builder setAppName(java.lang.String value) {
+      public Builder setTopic(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppName = true;
-        result.appName_ = value;
+  result.hasTopic = true;
+        result.topic_ = value;
         return this;
       }
-      public Builder clearAppName() {
-        result.hasAppName = false;
-        result.appName_ = getDefaultInstance().getAppName();
+      public Builder clearTopic() {
+        result.hasTopic = false;
+        result.topic_ = getDefaultInstance().getTopic();
+        return this;
+      }
+      
+      // optional string instance_id = 2;
+      public boolean hasInstanceId() {
+        return result.hasInstanceId();
+      }
+      public java.lang.String getInstanceId() {
+        return result.getInstanceId();
+      }
+      public Builder setInstanceId(java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  result.hasInstanceId = true;
+        result.instanceId_ = value;
+        return this;
+      }
+      public Builder clearInstanceId() {
+        result.hasInstanceId = false;
+        result.instanceId_ = getDefaultInstance().getInstanceId();
         return this;
       }
       
@@ -310,10 +352,10 @@ public final class NoAvailableNodePB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\025NoAvailableNode.proto\022\tblackhole\"#\n\017No" +
-      "AvailableNode\022\020\n\010app_name\030\001 \002(\tB6\n!com.d" +
-      "p.blackhole.protocol.controlB\021NoAvailabl" +
-      "eNodePB"
+      "\n\025NoAvailableNode.proto\022\tblackhole\"5\n\017No" +
+      "AvailableNode\022\r\n\005topic\030\001 \002(\t\022\023\n\013instance" +
+      "_id\030\002 \001(\tB6\n!com.dp.blackhole.protocol.c" +
+      "ontrolB\021NoAvailableNodePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -325,7 +367,7 @@ public final class NoAvailableNodePB {
           internal_static_blackhole_NoAvailableNode_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_NoAvailableNode_descriptor,
-              new java.lang.String[] { "AppName", },
+              new java.lang.String[] { "Topic", "InstanceId", },
               com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.class,
               com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.Builder.class);
           return null;

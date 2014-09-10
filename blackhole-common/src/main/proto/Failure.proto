@@ -9,8 +9,8 @@ message Failure {
     BROKER_NODE = 2;
   }
 
-  required string app = 1;
+  required string topic = 1;
   required NodeType type = 2;
-  required string app_server = 3;
+  required string source_identify = 3;
   required int64 failTs = 4;
 }

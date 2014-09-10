@@ -1,4 +1,4 @@
-package com.dp.blackhole.scaleout;
+package com.dp.blackhole.http;
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;

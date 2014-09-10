@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -125,12 +124,8 @@ public class ConsumerConnector implements Runnable {
                 processor,
                 new SimpleConnection.SimpleConnectionFactory(),
                 null);
-        
-        Properties prop = new Properties();
-        prop.setProperty("supervisor.host", supervisorHost);
-        prop.setProperty("supervisor.port", Integer.toString(supervisorPort));
         try {
-            client.init(prop, "consumer", "supervisor.host", "supervisor.port");
+            client.init("consumer", supervisorHost, supervisorPort);
         } catch (ClosedChannelException e) {
             LOG.error(e.getMessage(), e);
         } catch (IOException e) {

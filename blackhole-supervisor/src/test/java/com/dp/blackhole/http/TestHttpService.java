@@ -1,15 +1,10 @@
-package com.dp.blackhole.scaleout;
+package com.dp.blackhole.http;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -21,7 +16,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.dp.blackhole.common.ParamsKey;
-import com.dp.blackhole.supervisor.LionConfChange;
+import com.dp.blackhole.http.HttpClientSingle;
+import com.dp.blackhole.http.RequestListener;
+import com.dp.blackhole.supervisor.ConfigManager;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TestHttpService {
@@ -41,7 +38,7 @@ public class TestHttpService {
     private final static String newHosts = "new-host1.nh,new-host2.nh";
     
     @Mock
-    LionConfChange mockLion;
+    ConfigManager mockLion;
     @Mock
     HttpClientSingle mockHttpClient;
     
@@ -57,59 +54,16 @@ public class TestHttpService {
         listener.interrupt();
     }
 
-    private String httpClientExec(HttpClientSingle myHttpClient, String url) {
-        StringBuilder responseBuilder = new StringBuilder();
-        BufferedReader bufferedReader = null;
-        InputStream is = null;
-        try {
-            is = myHttpClient.getResource(url);
-        } catch (IOException e) {
-            return null;
-        }
-        try {
-            bufferedReader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8 * 1024);
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                responseBuilder.append(line + "\n");
-            }
-            if (responseBuilder.length() != 0) {
-                responseBuilder.deleteCharAt(responseBuilder.length() - 1);
-            }
-        } catch (IOException e) {
-            return null;
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
-            } catch (IOException e) {
-            }
-        }
-        return responseBuilder.toString();
-    }
-    
     private void simulateLionGetUrl(String testurl, String response, String newValue) {
-        when(mockLion.generateGetURL(ParamsKey.LionNode.APP_HOSTS_PREFIX + testurl)).thenReturn("http://testlion/get/" + testurl);
-        when(mockLion.generateSetURL(eq(ParamsKey.LionNode.APP_HOSTS_PREFIX + testurl), anyString())).thenReturn("http://testlion/set/" + testurl);
+        when(mockLion.generateGetURL(ParamsKey.LionNode.HOSTS_PREFIX + testurl)).thenReturn("http://testlion/get/" + testurl);
+        when(mockLion.generateSetURL(eq(ParamsKey.LionNode.HOSTS_PREFIX + testurl), anyString())).thenReturn("http://testlion/set/" + testurl);
         if (testurl.equals(marineapp)) {
-            when(mockLion.generateSetURL(ParamsKey.LionNode.APP_HOSTS_PREFIX + testurl, marineNewValue)).thenReturn("http://testlion/set/" + testurl);
+            when(mockLion.generateSetURL(ParamsKey.LionNode.HOSTS_PREFIX + testurl, marineNewValue)).thenReturn("http://testlion/set/" + testurl);
         } else if (testurl.equals(nginxapp)) {
-            when(mockLion.generateSetURL(ParamsKey.LionNode.APP_HOSTS_PREFIX + testurl, nginxNewValue)).thenReturn("http://testlion/set/" + testurl);
+            when(mockLion.generateSetURL(ParamsKey.LionNode.HOSTS_PREFIX + testurl, nginxNewValue)).thenReturn("http://testlion/set/" + testurl);
         }
-        ByteArrayInputStream contentFromGetUri = new ByteArrayInputStream(response.getBytes());
-        ByteArrayInputStream contentFromSetUri = null;
-        if (newValue != null) {
-            contentFromSetUri = new ByteArrayInputStream("0".getBytes());
-        }
-        try {
-            when(mockHttpClient.getResource("http://testlion/get/" + testurl)).thenReturn(contentFromGetUri);
-            when(mockHttpClient.getResource("http://testlion/set/" + testurl)).thenReturn(contentFromSetUri);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        when(mockHttpClient.getResponseText("http://testlion/get/" + testurl)).thenReturn(response);
+        when(mockHttpClient.getResponseText("http://testlion/set/" + testurl)).thenReturn("0");
     }
     
     @Test
@@ -118,8 +72,8 @@ public class TestHttpService {
         Set<String> errorAppList = new CopyOnWriteArraySet<String>();
         rightAppList.add(marineapp);
         rightAppList.add(nginxapp);
-        when(mockLion.getAppNamesByCmdb("noneed")).thenReturn(errorAppList);
-        when(mockLion.getAppNamesByCmdb("cmdbapp")).thenReturn(rightAppList);
+        when(mockLion.getTopicsByCmdb("noneed")).thenReturn(errorAppList);
+        when(mockLion.getTopicsByCmdb("cmdbapp")).thenReturn(rightAppList);
         simulateLionGetUrl(marineapp, marineResp, marineNewValue);
         simulateLionGetUrl(nginxapp, nginxResp, nginxNewValue);
         simulateLionGetUrl(errorapp, errorResp, null);
@@ -127,9 +81,9 @@ public class TestHttpService {
         String rightUrl = "http://localhost:" + webServicePort + "/scaleout?app=cmdbapp&hosts=" + newHosts;
         String errorUrl = "http://localhost:" + webServicePort + "/scaleout?app=noneed&hosts=" + newHosts;
         HttpClientSingle myTestClient = new HttpClientSingle(2000, 2000);
-        String response = httpClientExec(myTestClient, rightUrl);
+        String response = myTestClient.getResponseText(rightUrl);
         assertEquals("0|", response);
-        response = httpClientExec(myTestClient, errorUrl);
+        response = myTestClient.getResponseText(errorUrl);
         assertEquals("1|It contains no mapping for the cmdbapp noneed", response);
         try {
             Thread.sleep(1000);

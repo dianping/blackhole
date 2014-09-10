@@ -35,39 +35,39 @@ public final class RemoveConfPB {
       return com.dp.blackhole.protocol.control.RemoveConfPB.internal_static_blackhole_RemoveConf_fieldAccessorTable;
     }
     
-    // required string app_name = 1;
-    public static final int APP_NAME_FIELD_NUMBER = 1;
-    private boolean hasAppName;
-    private java.lang.String appName_ = "";
-    public boolean hasAppName() { return hasAppName; }
-    public java.lang.String getAppName() { return appName_; }
+    // required string topic = 1;
+    public static final int TOPIC_FIELD_NUMBER = 1;
+    private boolean hasTopic;
+    private java.lang.String topic_ = "";
+    public boolean hasTopic() { return hasTopic; }
+    public java.lang.String getTopic() { return topic_; }
     
-    // repeated string app_servers = 2;
-    public static final int APP_SERVERS_FIELD_NUMBER = 2;
-    private java.util.List<java.lang.String> appServers_ =
+    // repeated string agent_servers = 2;
+    public static final int AGENT_SERVERS_FIELD_NUMBER = 2;
+    private java.util.List<java.lang.String> agentServers_ =
       java.util.Collections.emptyList();
-    public java.util.List<java.lang.String> getAppServersList() {
-      return appServers_;
+    public java.util.List<java.lang.String> getAgentServersList() {
+      return agentServers_;
     }
-    public int getAppServersCount() { return appServers_.size(); }
-    public java.lang.String getAppServers(int index) {
-      return appServers_.get(index);
+    public int getAgentServersCount() { return agentServers_.size(); }
+    public java.lang.String getAgentServers(int index) {
+      return agentServers_.get(index);
     }
     
     private void initFields() {
     }
     public final boolean isInitialized() {
-      if (!hasAppName) return false;
+      if (!hasTopic) return false;
       return true;
     }
     
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasAppName()) {
-        output.writeString(1, getAppName());
+      if (hasTopic()) {
+        output.writeString(1, getTopic());
       }
-      for (java.lang.String element : getAppServersList()) {
+      for (java.lang.String element : getAgentServersList()) {
         output.writeString(2, element);
       }
       getUnknownFields().writeTo(output);
@@ -79,18 +79,18 @@ public final class RemoveConfPB {
       if (size != -1) return size;
     
       size = 0;
-      if (hasAppName()) {
+      if (hasTopic()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getAppName());
+          .computeStringSize(1, getTopic());
       }
       {
         int dataSize = 0;
-        for (java.lang.String element : getAppServersList()) {
+        for (java.lang.String element : getAgentServersList()) {
           dataSize += com.google.protobuf.CodedOutputStream
             .computeStringSizeNoTag(element);
         }
         size += dataSize;
-        size += 1 * getAppServersList().size();
+        size += 1 * getAgentServersList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -234,9 +234,9 @@ public final class RemoveConfPB {
           throw new IllegalStateException(
             "build() has already been called on this Builder.");
         }
-        if (result.appServers_ != java.util.Collections.EMPTY_LIST) {
-          result.appServers_ =
-            java.util.Collections.unmodifiableList(result.appServers_);
+        if (result.agentServers_ != java.util.Collections.EMPTY_LIST) {
+          result.agentServers_ =
+            java.util.Collections.unmodifiableList(result.agentServers_);
         }
         com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf returnMe = result;
         result = null;
@@ -254,14 +254,14 @@ public final class RemoveConfPB {
       
       public Builder mergeFrom(com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf other) {
         if (other == com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.getDefaultInstance()) return this;
-        if (other.hasAppName()) {
-          setAppName(other.getAppName());
+        if (other.hasTopic()) {
+          setTopic(other.getTopic());
         }
-        if (!other.appServers_.isEmpty()) {
-          if (result.appServers_.isEmpty()) {
-            result.appServers_ = new java.util.ArrayList<java.lang.String>();
+        if (!other.agentServers_.isEmpty()) {
+          if (result.agentServers_.isEmpty()) {
+            result.agentServers_ = new java.util.ArrayList<java.lang.String>();
           }
-          result.appServers_.addAll(other.appServers_);
+          result.agentServers_.addAll(other.agentServers_);
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -289,11 +289,11 @@ public final class RemoveConfPB {
               break;
             }
             case 10: {
-              setAppName(input.readString());
+              setTopic(input.readString());
               break;
             }
             case 18: {
-              addAppServers(input.readString());
+              addAgentServers(input.readString());
               break;
             }
           }
@@ -301,64 +301,64 @@ public final class RemoveConfPB {
       }
       
       
-      // required string app_name = 1;
-      public boolean hasAppName() {
-        return result.hasAppName();
+      // required string topic = 1;
+      public boolean hasTopic() {
+        return result.hasTopic();
       }
-      public java.lang.String getAppName() {
-        return result.getAppName();
+      public java.lang.String getTopic() {
+        return result.getTopic();
       }
-      public Builder setAppName(java.lang.String value) {
+      public Builder setTopic(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppName = true;
-        result.appName_ = value;
+  result.hasTopic = true;
+        result.topic_ = value;
         return this;
       }
-      public Builder clearAppName() {
-        result.hasAppName = false;
-        result.appName_ = getDefaultInstance().getAppName();
+      public Builder clearTopic() {
+        result.hasTopic = false;
+        result.topic_ = getDefaultInstance().getTopic();
         return this;
       }
       
-      // repeated string app_servers = 2;
-      public java.util.List<java.lang.String> getAppServersList() {
-        return java.util.Collections.unmodifiableList(result.appServers_);
+      // repeated string agent_servers = 2;
+      public java.util.List<java.lang.String> getAgentServersList() {
+        return java.util.Collections.unmodifiableList(result.agentServers_);
       }
-      public int getAppServersCount() {
-        return result.getAppServersCount();
+      public int getAgentServersCount() {
+        return result.getAgentServersCount();
       }
-      public java.lang.String getAppServers(int index) {
-        return result.getAppServers(index);
+      public java.lang.String getAgentServers(int index) {
+        return result.getAgentServers(index);
       }
-      public Builder setAppServers(int index, java.lang.String value) {
+      public Builder setAgentServers(int index, java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.appServers_.set(index, value);
+  result.agentServers_.set(index, value);
         return this;
       }
-      public Builder addAppServers(java.lang.String value) {
+      public Builder addAgentServers(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  if (result.appServers_.isEmpty()) {
-          result.appServers_ = new java.util.ArrayList<java.lang.String>();
+  if (result.agentServers_.isEmpty()) {
+          result.agentServers_ = new java.util.ArrayList<java.lang.String>();
         }
-        result.appServers_.add(value);
+        result.agentServers_.add(value);
         return this;
       }
-      public Builder addAllAppServers(
+      public Builder addAllAgentServers(
           java.lang.Iterable<? extends java.lang.String> values) {
-        if (result.appServers_.isEmpty()) {
-          result.appServers_ = new java.util.ArrayList<java.lang.String>();
+        if (result.agentServers_.isEmpty()) {
+          result.agentServers_ = new java.util.ArrayList<java.lang.String>();
         }
-        super.addAll(values, result.appServers_);
+        super.addAll(values, result.agentServers_);
         return this;
       }
-      public Builder clearAppServers() {
-        result.appServers_ = java.util.Collections.emptyList();
+      public Builder clearAgentServers() {
+        result.agentServers_ = java.util.Collections.emptyList();
         return this;
       }
       
@@ -388,10 +388,10 @@ public final class RemoveConfPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\020RemoveConf.proto\022\tblackhole\"3\n\nRemoveC" +
-      "onf\022\020\n\010app_name\030\001 \002(\t\022\023\n\013app_servers\030\002 \003" +
-      "(\tB1\n!com.dp.blackhole.protocol.controlB" +
-      "\014RemoveConfPB"
+      "\n\020RemoveConf.proto\022\tblackhole\"2\n\nRemoveC" +
+      "onf\022\r\n\005topic\030\001 \002(\t\022\025\n\ragent_servers\030\002 \003(" +
+      "\tB1\n!com.dp.blackhole.protocol.controlB\014" +
+      "RemoveConfPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -403,7 +403,7 @@ public final class RemoveConfPB {
           internal_static_blackhole_RemoveConf_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RemoveConf_descriptor,
-              new java.lang.String[] { "AppName", "AppServers", },
+              new java.lang.String[] { "Topic", "AgentServers", },
               com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.class,
               com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.Builder.class);
           return null;

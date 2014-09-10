@@ -22,6 +22,8 @@ import "AssignConsumer.proto";
 import "OffsetCommit.proto";
 import "TopicReport.proto";
 import "Restart.proto";
+import "QuitAndClean.proto";
+import "RollClean.proto";
 import "DumpConsumerGroup.proto";
 
 message Message {
@@ -60,6 +62,9 @@ message Message {
         MAKR_UNRECOVERABLE = 32;
         LISTIDLE = 33;
         RESTART = 34;
+        QUIT = 35;
+        CLEAN = 36;
+        ROLL_CLEAN = 37;
         DUMP_CONSUMER_GROUP = 38;
         LIST_CONSUMER_GROUP = 39;
     }
@@ -84,5 +89,8 @@ message Message {
     optional OffsetCommit offsetCommit = 18;
     optional TopicReport topicReport = 19;
     optional Restart restart = 20;
+    optional Quit quit = 21;
+    optional Clean clean = 22;
+    optional RollClean rollClean = 23;
     optional DumpConsumerGroup dumpConsumerGroup = 24;
 }

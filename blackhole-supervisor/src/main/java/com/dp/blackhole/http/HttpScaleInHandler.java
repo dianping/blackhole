@@ -1,9 +1,6 @@
-package com.dp.blackhole.scaleout;
+package com.dp.blackhole.http;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -27,15 +24,15 @@ import org.apache.log4j.Logger;
 
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.supervisor.LionConfChange;
+import com.dp.blackhole.supervisor.ConfigManager;
 
-public class HttpContractHandler extends HttpAbstractHandler implements HttpRequestHandler {
-    private static Logger LOG = Logger.getLogger(HttpContractHandler.class);
-    private LionConfChange lionConfChange;
+public class HttpScaleInHandler extends HttpAbstractHandler implements HttpRequestHandler {
+    private static Logger LOG = Logger.getLogger(HttpScaleInHandler.class);
+    private ConfigManager configManager;
     private HttpClientSingle httpClient;
     
-    public HttpContractHandler(LionConfChange lionConfChange, HttpClientSingle httpClient) {
-        this.lionConfChange = lionConfChange;
+    public HttpScaleInHandler(ConfigManager configManager, HttpClientSingle httpClient) {
+        this.configManager = configManager;
         this.httpClient = httpClient;
     }
     
@@ -47,7 +44,7 @@ public class HttpContractHandler extends HttpAbstractHandler implements HttpRequ
                 .toUpperCase(Locale.ENGLISH);
 
         LOG.debug("Frontend: Handling contract; Line = " + request.getRequestLine());
-        if (method.equals("GET")) {//TODO how to post
+        if (method.equals("GET")) {
             final String target = request.getRequestLine().getUri();
             Pattern p = Pattern.compile("/contract\\?app=(.*)&hosts=(.*)$");
             Matcher m = p.matcher(target);
@@ -86,16 +83,16 @@ public class HttpContractHandler extends HttpAbstractHandler implements HttpRequ
     }
     
     @Override
-    public HttpResult getContent(String cmdbApp, String[] hostnames) {
-        Set<String> topicList = lionConfChange.getAppNamesByCmdb(cmdbApp);
+    public HttpResult getContent(String app, String[]... args) {
+        Set<String> topicList = configManager.getTopicsByCmdb(app);
         if (topicList == null || topicList.size() == 0) {
-            return new HttpResult(HttpResult.NONEED, "It contains no mapping for the cmdbapp " + cmdbApp);
+            return new HttpResult(HttpResult.NONEED, "It contains no mapping for the cmdbapp " + app);
         }
         for (String topic : topicList) {
             //get string of old hosts of the app
-            String watchKey = ParamsKey.LionNode.APP_HOSTS_PREFIX + topic;
-            String url = lionConfChange.generateGetURL(watchKey);
-            String response = getResponseText(url);
+            String watchKey = ParamsKey.LionNode.HOSTS_PREFIX + topic;
+            String url = configManager.generateGetURL(watchKey);
+            String response = httpClient.getResponseText(url);
             if (response == null) {
                 return new HttpResult(HttpResult.FAILURE, "IO exception was thrown when handle url ." + url);
             } else if (response.startsWith("1|")) {
@@ -108,14 +105,14 @@ public class HttpContractHandler extends HttpAbstractHandler implements HttpRequ
             String[] oldHosts = Util.getStringListOfLionValue(response);
 
             ArrayList<String> newHostList = new ArrayList<String>();
-            //change it (add the given hostname)
+            //change it (sub the given hostname)
             if (oldHosts == null) {
                 LOG.error("Faild to contract hosts cause there is no host in lion for topic " + topic);
                 continue;
             } else {
                 
                 Set<String> contractSet = new HashSet<String>();
-                for (String contractHost : hostnames) {
+                for (String contractHost : args[0]) {
                     contractSet.add(contractHost);
                 }
                 for (String old : oldHosts) {
@@ -126,8 +123,8 @@ public class HttpContractHandler extends HttpAbstractHandler implements HttpRequ
             }
             String[] newHosts = new String[newHostList.size()];
             String newHostsLionString = Util.getLionValueOfStringList(newHostList.toArray(newHosts));
-            url = lionConfChange.generateSetURL(watchKey, newHostsLionString);
-            response = getResponseText(url);
+            url = configManager.generateSetURL(watchKey, newHostsLionString);
+            response = httpClient.getResponseText(url);
             if (response == null) {
                 return new HttpResult(HttpResult.FAILURE, "IO exception was thrown when handle url ." + url);
             } else if (response.startsWith("1|")) {
@@ -139,47 +136,5 @@ public class HttpContractHandler extends HttpAbstractHandler implements HttpRequ
             }
         }
         return new HttpResult(HttpResult.SUCCESS, "");
-    }
-    
-    public String getResponseText(String url) {
-        LOG.debug("http client access url: " + url);
-        StringBuilder responseBuilder = new StringBuilder();
-        BufferedReader bufferedReader = null;
-        InputStream is = null;
-        try {
-            is = httpClient.getResource(url);
-        } catch (IOException e) {
-            LOG.error("Can not get http response. " + e.getMessage());
-            return null;
-        }
-        try {
-            bufferedReader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8 * 1024);
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                responseBuilder.append(line + "\n");
-            }
-            if (responseBuilder.length() != 0) {
-                responseBuilder.deleteCharAt(responseBuilder.length() - 1);
-            }
-        } catch (IOException e) {
-            LOG.error("Oops, got an exception in reading http response content." + e.getMessage());
-            return null;
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                }
-                is = null;
-            }
-            if (bufferedReader != null) {
-                try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                }
-                bufferedReader = null;
-            }
-        }
-        return responseBuilder.toString();
     }
 }

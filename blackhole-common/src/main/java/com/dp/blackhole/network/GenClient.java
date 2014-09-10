@@ -226,9 +226,10 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
     
-    public void init(Properties prop, String clientName, String serverHost, String serverPort) throws IOException, ClosedChannelException {  
-        host = prop.getProperty(serverHost);
-        port = Integer.parseInt(prop.getProperty(serverPort));;
+    public void init(String clientName, String serverHost, int serverPort) throws IOException, ClosedChannelException {  
+        Properties prop = new Properties();
+        host = serverHost;
+        port = serverPort;
         handlerCount = Integer.parseInt(prop.getProperty("GenClient.handlercount", "1"));
         
         entityQueue = new LinkedBlockingQueue<EntityEvent>();

@@ -35,12 +35,12 @@ public final class RecoveryRollPB {
       return com.dp.blackhole.protocol.control.RecoveryRollPB.internal_static_blackhole_RecoveryRoll_fieldAccessorTable;
     }
     
-    // required string app_name = 1;
-    public static final int APP_NAME_FIELD_NUMBER = 1;
-    private boolean hasAppName;
-    private java.lang.String appName_ = "";
-    public boolean hasAppName() { return hasAppName; }
-    public java.lang.String getAppName() { return appName_; }
+    // required string topic = 1;
+    public static final int TOPIC_FIELD_NUMBER = 1;
+    private boolean hasTopic;
+    private java.lang.String topic_ = "";
+    public boolean hasTopic() { return hasTopic; }
+    public java.lang.String getTopic() { return topic_; }
     
     // required string broker_server = 2;
     public static final int BROKER_SERVER_FIELD_NUMBER = 2;
@@ -63,10 +63,24 @@ public final class RecoveryRollPB {
     public boolean hasRecoveryPort() { return hasRecoveryPort; }
     public int getRecoveryPort() { return recoveryPort_; }
     
+    // optional string instance_id = 5;
+    public static final int INSTANCE_ID_FIELD_NUMBER = 5;
+    private boolean hasInstanceId;
+    private java.lang.String instanceId_ = "";
+    public boolean hasInstanceId() { return hasInstanceId; }
+    public java.lang.String getInstanceId() { return instanceId_; }
+    
+    // optional bool is_final = 6;
+    public static final int IS_FINAL_FIELD_NUMBER = 6;
+    private boolean hasIsFinal;
+    private boolean isFinal_ = false;
+    public boolean hasIsFinal() { return hasIsFinal; }
+    public boolean getIsFinal() { return isFinal_; }
+    
     private void initFields() {
     }
     public final boolean isInitialized() {
-      if (!hasAppName) return false;
+      if (!hasTopic) return false;
       if (!hasBrokerServer) return false;
       if (!hasRollTs) return false;
       if (!hasRecoveryPort) return false;
@@ -76,8 +90,8 @@ public final class RecoveryRollPB {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasAppName()) {
-        output.writeString(1, getAppName());
+      if (hasTopic()) {
+        output.writeString(1, getTopic());
       }
       if (hasBrokerServer()) {
         output.writeString(2, getBrokerServer());
@@ -88,6 +102,12 @@ public final class RecoveryRollPB {
       if (hasRecoveryPort()) {
         output.writeInt32(4, getRecoveryPort());
       }
+      if (hasInstanceId()) {
+        output.writeString(5, getInstanceId());
+      }
+      if (hasIsFinal()) {
+        output.writeBool(6, getIsFinal());
+      }
       getUnknownFields().writeTo(output);
     }
     
@@ -97,9 +117,9 @@ public final class RecoveryRollPB {
       if (size != -1) return size;
     
       size = 0;
-      if (hasAppName()) {
+      if (hasTopic()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getAppName());
+          .computeStringSize(1, getTopic());
       }
       if (hasBrokerServer()) {
         size += com.google.protobuf.CodedOutputStream
@@ -112,6 +132,14 @@ public final class RecoveryRollPB {
       if (hasRecoveryPort()) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(4, getRecoveryPort());
+      }
+      if (hasInstanceId()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeStringSize(5, getInstanceId());
+      }
+      if (hasIsFinal()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(6, getIsFinal());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -271,8 +299,8 @@ public final class RecoveryRollPB {
       
       public Builder mergeFrom(com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll other) {
         if (other == com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.getDefaultInstance()) return this;
-        if (other.hasAppName()) {
-          setAppName(other.getAppName());
+        if (other.hasTopic()) {
+          setTopic(other.getTopic());
         }
         if (other.hasBrokerServer()) {
           setBrokerServer(other.getBrokerServer());
@@ -282,6 +310,12 @@ public final class RecoveryRollPB {
         }
         if (other.hasRecoveryPort()) {
           setRecoveryPort(other.getRecoveryPort());
+        }
+        if (other.hasInstanceId()) {
+          setInstanceId(other.getInstanceId());
+        }
+        if (other.hasIsFinal()) {
+          setIsFinal(other.getIsFinal());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -309,7 +343,7 @@ public final class RecoveryRollPB {
               break;
             }
             case 10: {
-              setAppName(input.readString());
+              setTopic(input.readString());
               break;
             }
             case 18: {
@@ -324,29 +358,37 @@ public final class RecoveryRollPB {
               setRecoveryPort(input.readInt32());
               break;
             }
+            case 42: {
+              setInstanceId(input.readString());
+              break;
+            }
+            case 48: {
+              setIsFinal(input.readBool());
+              break;
+            }
           }
         }
       }
       
       
-      // required string app_name = 1;
-      public boolean hasAppName() {
-        return result.hasAppName();
+      // required string topic = 1;
+      public boolean hasTopic() {
+        return result.hasTopic();
       }
-      public java.lang.String getAppName() {
-        return result.getAppName();
+      public java.lang.String getTopic() {
+        return result.getTopic();
       }
-      public Builder setAppName(java.lang.String value) {
+      public Builder setTopic(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppName = true;
-        result.appName_ = value;
+  result.hasTopic = true;
+        result.topic_ = value;
         return this;
       }
-      public Builder clearAppName() {
-        result.hasAppName = false;
-        result.appName_ = getDefaultInstance().getAppName();
+      public Builder clearTopic() {
+        result.hasTopic = false;
+        result.topic_ = getDefaultInstance().getTopic();
         return this;
       }
       
@@ -407,6 +449,45 @@ public final class RecoveryRollPB {
         return this;
       }
       
+      // optional string instance_id = 5;
+      public boolean hasInstanceId() {
+        return result.hasInstanceId();
+      }
+      public java.lang.String getInstanceId() {
+        return result.getInstanceId();
+      }
+      public Builder setInstanceId(java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  result.hasInstanceId = true;
+        result.instanceId_ = value;
+        return this;
+      }
+      public Builder clearInstanceId() {
+        result.hasInstanceId = false;
+        result.instanceId_ = getDefaultInstance().getInstanceId();
+        return this;
+      }
+      
+      // optional bool is_final = 6;
+      public boolean hasIsFinal() {
+        return result.hasIsFinal();
+      }
+      public boolean getIsFinal() {
+        return result.getIsFinal();
+      }
+      public Builder setIsFinal(boolean value) {
+        result.hasIsFinal = true;
+        result.isFinal_ = value;
+        return this;
+      }
+      public Builder clearIsFinal() {
+        result.hasIsFinal = false;
+        result.isFinal_ = false;
+        return this;
+      }
+      
       // @@protoc_insertion_point(builder_scope:blackhole.RecoveryRoll)
     }
     
@@ -433,11 +514,12 @@ public final class RecoveryRollPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022RecoveryRoll.proto\022\tblackhole\"_\n\014Recov" +
-      "eryRoll\022\020\n\010app_name\030\001 \002(\t\022\025\n\rbroker_serv" +
-      "er\030\002 \002(\t\022\017\n\007roll_ts\030\003 \002(\003\022\025\n\rrecovery_po" +
-      "rt\030\004 \002(\005B3\n!com.dp.blackhole.protocol.co" +
-      "ntrolB\016RecoveryRollPB"
+      "\n\022RecoveryRoll.proto\022\tblackhole\"\203\001\n\014Reco" +
+      "veryRoll\022\r\n\005topic\030\001 \002(\t\022\025\n\rbroker_server" +
+      "\030\002 \002(\t\022\017\n\007roll_ts\030\003 \002(\003\022\025\n\rrecovery_port" +
+      "\030\004 \002(\005\022\023\n\013instance_id\030\005 \001(\t\022\020\n\010is_final\030" +
+      "\006 \001(\010B3\n!com.dp.blackhole.protocol.contr" +
+      "olB\016RecoveryRollPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -449,7 +531,7 @@ public final class RecoveryRollPB {
           internal_static_blackhole_RecoveryRoll_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RecoveryRoll_descriptor,
-              new java.lang.String[] { "AppName", "BrokerServer", "RollTs", "RecoveryPort", },
+              new java.lang.String[] { "Topic", "BrokerServer", "RollTs", "RecoveryPort", "InstanceId", "IsFinal", },
               com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.class,
               com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll.Builder.class);
           return null;

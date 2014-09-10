@@ -35,19 +35,19 @@ public final class ReadyBrokerPB {
       return com.dp.blackhole.protocol.control.ReadyBrokerPB.internal_static_blackhole_ReadyBroker_fieldAccessorTable;
     }
     
-    // required string app_name = 1;
-    public static final int APP_NAME_FIELD_NUMBER = 1;
-    private boolean hasAppName;
-    private java.lang.String appName_ = "";
-    public boolean hasAppName() { return hasAppName; }
-    public java.lang.String getAppName() { return appName_; }
+    // required string topic = 1;
+    public static final int TOPIC_FIELD_NUMBER = 1;
+    private boolean hasTopic;
+    private java.lang.String topic_ = "";
+    public boolean hasTopic() { return hasTopic; }
+    public java.lang.String getTopic() { return topic_; }
     
-    // required string app_server = 2;
-    public static final int APP_SERVER_FIELD_NUMBER = 2;
-    private boolean hasAppServer;
-    private java.lang.String appServer_ = "";
-    public boolean hasAppServer() { return hasAppServer; }
-    public java.lang.String getAppServer() { return appServer_; }
+    // required string source_identify = 2;
+    public static final int SOURCE_IDENTIFY_FIELD_NUMBER = 2;
+    private boolean hasSourceIdentify;
+    private java.lang.String sourceIdentify_ = "";
+    public boolean hasSourceIdentify() { return hasSourceIdentify; }
+    public java.lang.String getSourceIdentify() { return sourceIdentify_; }
     
     // required string broker_server = 3;
     public static final int BROKER_SERVER_FIELD_NUMBER = 3;
@@ -73,8 +73,8 @@ public final class ReadyBrokerPB {
     private void initFields() {
     }
     public final boolean isInitialized() {
-      if (!hasAppName) return false;
-      if (!hasAppServer) return false;
+      if (!hasTopic) return false;
+      if (!hasSourceIdentify) return false;
       if (!hasBrokerServer) return false;
       if (!hasPeriod) return false;
       if (!hasConnectedTs) return false;
@@ -84,11 +84,11 @@ public final class ReadyBrokerPB {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasAppName()) {
-        output.writeString(1, getAppName());
+      if (hasTopic()) {
+        output.writeString(1, getTopic());
       }
-      if (hasAppServer()) {
-        output.writeString(2, getAppServer());
+      if (hasSourceIdentify()) {
+        output.writeString(2, getSourceIdentify());
       }
       if (hasBrokerServer()) {
         output.writeString(3, getBrokerServer());
@@ -108,13 +108,13 @@ public final class ReadyBrokerPB {
       if (size != -1) return size;
     
       size = 0;
-      if (hasAppName()) {
+      if (hasTopic()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getAppName());
+          .computeStringSize(1, getTopic());
       }
-      if (hasAppServer()) {
+      if (hasSourceIdentify()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(2, getAppServer());
+          .computeStringSize(2, getSourceIdentify());
       }
       if (hasBrokerServer()) {
         size += com.google.protobuf.CodedOutputStream
@@ -286,11 +286,11 @@ public final class ReadyBrokerPB {
       
       public Builder mergeFrom(com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker other) {
         if (other == com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.getDefaultInstance()) return this;
-        if (other.hasAppName()) {
-          setAppName(other.getAppName());
+        if (other.hasTopic()) {
+          setTopic(other.getTopic());
         }
-        if (other.hasAppServer()) {
-          setAppServer(other.getAppServer());
+        if (other.hasSourceIdentify()) {
+          setSourceIdentify(other.getSourceIdentify());
         }
         if (other.hasBrokerServer()) {
           setBrokerServer(other.getBrokerServer());
@@ -327,11 +327,11 @@ public final class ReadyBrokerPB {
               break;
             }
             case 10: {
-              setAppName(input.readString());
+              setTopic(input.readString());
               break;
             }
             case 18: {
-              setAppServer(input.readString());
+              setSourceIdentify(input.readString());
               break;
             }
             case 26: {
@@ -351,45 +351,45 @@ public final class ReadyBrokerPB {
       }
       
       
-      // required string app_name = 1;
-      public boolean hasAppName() {
-        return result.hasAppName();
+      // required string topic = 1;
+      public boolean hasTopic() {
+        return result.hasTopic();
       }
-      public java.lang.String getAppName() {
-        return result.getAppName();
+      public java.lang.String getTopic() {
+        return result.getTopic();
       }
-      public Builder setAppName(java.lang.String value) {
+      public Builder setTopic(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppName = true;
-        result.appName_ = value;
+  result.hasTopic = true;
+        result.topic_ = value;
         return this;
       }
-      public Builder clearAppName() {
-        result.hasAppName = false;
-        result.appName_ = getDefaultInstance().getAppName();
+      public Builder clearTopic() {
+        result.hasTopic = false;
+        result.topic_ = getDefaultInstance().getTopic();
         return this;
       }
       
-      // required string app_server = 2;
-      public boolean hasAppServer() {
-        return result.hasAppServer();
+      // required string source_identify = 2;
+      public boolean hasSourceIdentify() {
+        return result.hasSourceIdentify();
       }
-      public java.lang.String getAppServer() {
-        return result.getAppServer();
+      public java.lang.String getSourceIdentify() {
+        return result.getSourceIdentify();
       }
-      public Builder setAppServer(java.lang.String value) {
+      public Builder setSourceIdentify(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppServer = true;
-        result.appServer_ = value;
+  result.hasSourceIdentify = true;
+        result.sourceIdentify_ = value;
         return this;
       }
-      public Builder clearAppServer() {
-        result.hasAppServer = false;
-        result.appServer_ = getDefaultInstance().getAppServer();
+      public Builder clearSourceIdentify() {
+        result.hasSourceIdentify = false;
+        result.sourceIdentify_ = getDefaultInstance().getSourceIdentify();
         return this;
       }
       
@@ -476,11 +476,11 @@ public final class ReadyBrokerPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\021ReadyBroker.proto\022\tblackhole\"o\n\013ReadyB" +
-      "roker\022\020\n\010app_name\030\001 \002(\t\022\022\n\napp_server\030\002 " +
-      "\002(\t\022\025\n\rbroker_server\030\003 \002(\t\022\016\n\006period\030\004 \002" +
-      "(\003\022\023\n\013connectedTs\030\005 \002(\003B2\n!com.dp.blackh" +
-      "ole.protocol.controlB\rReadyBrokerPB"
+      "\n\021ReadyBroker.proto\022\tblackhole\"q\n\013ReadyB" +
+      "roker\022\r\n\005topic\030\001 \002(\t\022\027\n\017source_identify\030" +
+      "\002 \002(\t\022\025\n\rbroker_server\030\003 \002(\t\022\016\n\006period\030\004" +
+      " \002(\003\022\023\n\013connectedTs\030\005 \002(\003B2\n!com.dp.blac" +
+      "khole.protocol.controlB\rReadyBrokerPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -492,7 +492,7 @@ public final class ReadyBrokerPB {
           internal_static_blackhole_ReadyBroker_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ReadyBroker_descriptor,
-              new java.lang.String[] { "AppName", "AppServer", "BrokerServer", "Period", "ConnectedTs", },
+              new java.lang.String[] { "Topic", "SourceIdentify", "BrokerServer", "Period", "ConnectedTs", },
               com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.class,
               com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.Builder.class);
           return null;
