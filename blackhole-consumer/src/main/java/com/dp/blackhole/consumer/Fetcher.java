@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -82,11 +81,8 @@ public class Fetcher extends Thread {
     @Override
     public void run() {
         LOG.info("start " + this.toString());
-        Properties prop = new Properties();
-        prop.setProperty("broker.host", Util.getHostFromBroker(broker));
-        prop.setProperty("broker.port", Util.getPortFromBroker(broker));
         try {
-            client.init(prop, getName(), "broker.host", "broker.port");
+            client.init(getName(), Util.getHostFromBroker(broker), Util.getPortFromBroker(broker));
         } catch (ClosedChannelException e) {
             LOG.error("ClosedChannelException catched: ", e);
         } catch (IOException e) {

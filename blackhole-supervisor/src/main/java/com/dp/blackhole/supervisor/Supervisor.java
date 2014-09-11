@@ -1,9 +1,6 @@
 package com.dp.blackhole.supervisor;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,9 +19,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.dianping.lion.client.LionException;
 import com.dp.blackhole.common.PBwrap;
@@ -79,8 +73,6 @@ public class Supervisor {
     private ConcurrentHashMap<SimpleConnection, ConnectionDescription> connections;
     private ConcurrentHashMap<String, SimpleConnection> agentsMapping;
     private ConcurrentHashMap<String, SimpleConnection> brokersMapping;
-    
-    private HttpClientSingle paasQuery;
     
     public boolean isActiveStream(String topic, String sourceIdentify) {
         StreamId streamId = new StreamId(topic, sourceIdentify);
@@ -1588,6 +1580,8 @@ public class Supervisor {
             if (desc == null) {
                 LOG.info("client " + connection + " connected");
                 connections.put(connection, new ConnectionDescription(connection));
+                //trigger PAAS config response
+                triggerConfRes(connection);
             } else {
                 LOG.error("connection already registered: " + connection);
             }
@@ -1764,9 +1758,6 @@ public class Supervisor {
         httpService.setDaemon(true);
         httpService.start();
         
-        //create a http client for PaaS
-        paasQuery = new HttpClientSingle(configManager.connectionTimeout, configManager.socketTimeout);
-        
         // start heart beat checker thread
         LiveChecker checker = new LiveChecker();
         checker.setDaemon(true);
@@ -1812,98 +1803,32 @@ public class Supervisor {
         message = PBwrap.wrapConfRes(appConfResList, null);
         send(from, message);
     }
-
-    public void handleImportNewTopic(String topic) {
-        String cmdbApp = configManager.getCmdbAppByTopic(topic);
-        if (cmdbApp == null) {
-            LOG.error("Oops, no cmdb app assign to topic " + topic);
-            return;
-        }
-        List<String> cmdbApps = new ArrayList<String>();
-        cmdbApps.add(cmdbApp);
-        try {
-            Map<String, List<String>> hostToInstances = findInstancesByCmdbApps(cmdbApps);
-            triggerConfRes(topic, hostToInstances);
-        } catch (Exception e) {
-            LOG.error("Oops, got an exception", e);
-        }
-    }
     
-    private Map<String, List<String>> findInstancesByCmdbApps(
-            List<String> cmdbApps) throws UnsupportedEncodingException, JSONException {
-        Map<String, List<String>> hostToInstances = new HashMap<String, List<String>>();
-        if (cmdbApps.size() == 0) {
-            return hostToInstances;
-        }
-        //HTTP get the json
-        StringBuilder catalogURLBuild = new StringBuilder();
-        catalogURLBuild.append(configManager.getPaaSInstanceURLPerfix);
-        for (String app : cmdbApps) {
-            catalogURLBuild.append(app).append(",");
-        }
-        catalogURLBuild.deleteCharAt(catalogURLBuild.length() - 1);
-        String response = paasQuery.getResponseText(catalogURLBuild.toString());
-        if (response == null) {
-            LOG.error("response is null.");
-            return hostToInstances;
-        }
-        String jsonStr = java.net.URLDecoder.decode(response, "utf-8");
-        JSONObject rootObject = new JSONObject(jsonStr);
-        JSONArray catalogArray = rootObject.getJSONArray("catalog");
-        for (int i = 0; i < catalogArray.length(); i++) {
-            JSONObject layoutObject = catalogArray.getJSONObject(i);
-            String app = (String)layoutObject.get("app");
-            JSONArray layoutArray = layoutObject.getJSONArray("layout");
-            for (int j = 0; j < layoutArray.length(); j++) {
-                JSONObject hostIdObject = layoutArray.getJSONObject(j);
-                String ip = (String) hostIdObject.get("ip");
-                InetAddress host;
-                try {
-                    host = InetAddress.getByName(ip);
-                } catch (UnknownHostException e) {
-                    LOG.error("Receive a unknown host " + ip, e);
+    public void triggerConfRes(SimpleConnection connection) {
+        List<LxcConfRes> lxcConfResList = new ArrayList<LxcConfRes>();
+        Set<String> topics = configManager.getTopicsByHost(connection.getHost());
+        if (topics != null) {
+            for (String topic : topics) {
+                Context context = ConfigKeeper.configMap.get(topic);
+                if (context == null) {
+                    LOG.error("Can not get topic: " + topic + " from configMap");
                     continue;
                 }
-                String agentHost = host.getHostName();
-                List<String> instances;
-                if ((instances = hostToInstances.get(agentHost)) == null) {
-                    instances = new ArrayList<String>();
-                    hostToInstances.put(agentHost, instances);
+                String period = context.getString(ParamsKey.TopicConf.ROLL_PERIOD);
+                String maxLineSize = context.getString(ParamsKey.TopicConf.MAX_LINE_SIZE);
+                String watchFile = context.getString(ParamsKey.TopicConf.WATCH_FILE);
+                List<String> ids = configManager.getIdsByTopicAndHost(topic, connection.getHost());
+                if (ids == null) {
+                    continue;
                 }
-                JSONArray idArray = hostIdObject.getJSONArray("id");
-                for (int k = 0; k < idArray.length(); k++) {
-                    LOG.debug("PaaS catalog app: " + app + ", ip: " + ip + ", id: " + idArray.getString(k));
-                    instances.add(idArray.getString(k));
-                }
+                LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, period, maxLineSize, ids);
+                lxcConfResList.add(lxcConfRes);
             }
-        }
-        return hostToInstances;
-    }
-
-        Message message;
-        private void triggerConfRes(String topic, Map<String, List<String>> hostToInstances) {
-        for (Map.Entry<String, List<String>> entry : hostToInstances.entrySet()) {
-            SimpleConnection agent = getConnectionByHostname(entry.getKey());
-            if (agent == null) {
-                LOG.info("Can not find any agents connected by " + entry.getKey());
-                continue;
-            }
-            Context context = ConfigKeeper.configMap.get(topic);
-            if (context == null) {
-                LOG.error("Can not get topic: " + topic + " from configMap");
-                continue;
-            }
-            String period = context.getString(ParamsKey.TopicConf.ROLL_PERIOD);
-            String maxLineSize = context.getString(ParamsKey.TopicConf.MAX_LINE_SIZE);
-            String watchFile = context.getString(ParamsKey.TopicConf.WATCH_FILE);
-            LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, period, maxLineSize, entry.getValue());
-            List<LxcConfRes> lxcConfResList = new ArrayList<LxcConfRes>();
-            lxcConfResList.add(lxcConfRes);
-            message = PBwrap.wrapConfRes(null, lxcConfResList);
-            send(agent, message);
+            Message message = PBwrap.wrapConfRes(null, lxcConfResList);
+            send(connection, message);
         }
     }
-
+        
     private int getBrokerPort(String host) {
         SimpleConnection connection = brokersMapping.get(host);
         if (connection == null) {

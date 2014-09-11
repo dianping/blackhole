@@ -259,12 +259,14 @@ public class Cli {
         Properties prop = new Properties();
         prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
         terminatePeriod = Long.parseLong(prop.getProperty("cli.terminate.period", "1000"));
+        String supervisorHost = prop.getProperty("supervisor.host");
+        int supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
         processor = new CliProcessor();
         client = new GenClient<ByteBuffer, SimpleConnection, Cli.CliProcessor>(
                 processor,
                 new SimpleConnection.SimpleConnectionFactory(),
                 null);
-        client.init(prop, "cli", "supervisor.host", "supervisor.port");
+        client.init("cli", supervisorHost, supervisorPort);
     }
     
     public static void main(String[] args) throws FileNotFoundException, IOException {

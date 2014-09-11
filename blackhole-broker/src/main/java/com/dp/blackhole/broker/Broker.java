@@ -46,7 +46,8 @@ public class Broker {
     private void start() throws FileNotFoundException, IOException {
         Properties prop = new Properties();
         prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
-        
+        String supervisorHost = prop.getProperty("supervisor.host");
+        int supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
         servicePort =  Integer.parseInt(prop.getProperty("broker.service.port"));
         recoveryPort = Integer.parseInt(prop.getProperty("broker.recovery.port"));
         String hdfsbasedir = prop.getProperty("broker.hdfs.basedir");
@@ -86,7 +87,7 @@ public class Broker {
                 processor,
                 new SimpleConnection.SimpleConnectionFactory(),
                 null);
-        client.init(prop, "broker", "supervisor.host", "supervisor.port");
+        client.init("broker", supervisorHost, supervisorPort);
         
         rollMgr.close();
     }

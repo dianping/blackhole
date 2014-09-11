@@ -160,7 +160,10 @@ public class Agent implements Runnable {
             LOG.fatal("Load app.properties file fail.", e);
             Cat.logError("Load app.properties file fail.", e);
             return;
-        }    
+        }
+        
+        String supervisorHost = prop.getProperty("supervisor.host");
+        int supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
 
         try {    
             listener = new FileListener();
@@ -177,7 +180,7 @@ public class Agent implements Runnable {
                 null);
 
         try {
-            client.init(prop, "agent", "supervisor.host", "supervisor.port");
+            client.init("agent", supervisorHost, supervisorPort);
         } catch (ClosedChannelException e) {
             LOG.error(e.getMessage(), e);
             Cat.logError(e);

@@ -2,7 +2,9 @@ package com.dp.blackhole.supervisor;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,6 +19,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
@@ -26,6 +31,7 @@ import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.conf.Context;
+import com.dp.blackhole.http.HttpClientSingle;
 
 public class ConfigManager {
     private static final Log LOG = LogFactory.getLog(ConfigManager.class);
@@ -34,12 +40,16 @@ public class ConfigManager {
     
     private final Map<String, Set<String>> hostToTopics = Collections.synchronizedMap(new HashMap<String, Set<String>>());
     private final Map<String, List<String>> topicToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
+    //TODO concurrent
+    private final Map<String, Map<String, List<String>>> topicToInstances = new HashMap<String, Map<String,List<String>>>();
     
     private final Map<String, Set<String>> cmdbAppToTopics = Collections.synchronizedMap(new HashMap<String, Set<String>>());
     private final Map<String, String> topicToCmdb = Collections.synchronizedMap(new HashMap<String, String>());
     
     private final ConfigCache cache;
     private final Supervisor supervisor;
+    
+    private HttpClientSingle paasQuery;
     
     private int apiId;
     
@@ -73,6 +83,15 @@ public class ConfigManager {
         return topicToCmdb.get(topic);
     }
     
+    public List<String> getIdsByTopicAndHost(String topic, String host) {
+        Map<String, List<String>> hostToInstances = topicToInstances.get(topic);
+        if (hostToInstances == null) {
+            return null;
+        } else {
+            return hostToInstances.get(host);
+        }
+    }
+    
     public void initConfig() throws IOException {
         Properties prop = new Properties();
         prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
@@ -84,7 +103,8 @@ public class ConfigManager {
         supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));;
         numHandler = Integer.parseInt(prop.getProperty("GenServer.handler.count", "3"));
         getPaaSInstanceURLPerfix = prop.getProperty("supervisor.paas.url");
-        
+        //create a http client for PaaS
+        paasQuery = new HttpClientSingle(connectionTimeout, socketTimeout);
         reloadTopicConfig();
     }
     
@@ -102,21 +122,14 @@ public class ConfigManager {
         }
         for (int i = 0; i < topics.length; i++) {
             topicSet.add(topics[i]);
-            String confString = definitelyGetProperty(ParamsKey.LionNode.CONF_PREFIX + topics[i]);
-            if (confString == null) {
-                LOG.error("Lose configurations for " + topics[i]);
-            }
-            fillConfMap(topics[i], confString);
-            String hostsString = definitelyGetProperty(ParamsKey.LionNode.HOSTS_PREFIX + topics[i]);
-            if (hostsString == null) {
-                LOG.error("Lose hosts for " + topics[i]);
-            }
-            fillHostMap(topics[i], hostsString);
             String cmdbString = definitelyGetProperty(ParamsKey.LionNode.CMDB_PREFIX + topics[i]);
-            if (cmdbString == null) {
-                LOG.error("Lose CMDB mapping for " + topics[i]);
-            }
             fillCMDBMap(topics[i], cmdbString);
+            
+            String confString = definitelyGetProperty(ParamsKey.LionNode.CONF_PREFIX + topics[i]);
+            fillConfMap(topics[i], confString);
+            
+            String hostsString = definitelyGetProperty(ParamsKey.LionNode.HOSTS_PREFIX + topics[i]);
+            fillHostMap(topics[i], hostsString);
         }
     }
 
@@ -162,14 +175,92 @@ public class ConfigManager {
                 } else {
                     ConfigKeeper.configMap.put(topic, new Context(key, value));
                 }
-                if (key.equals("isPaaS") && value.equals("true")) {
+                if (key.equalsIgnoreCase("isPaaS") && value.equalsIgnoreCase("true")) {
                     isPaaSModel = true;
                 }
             }
             if (isPaaSModel) {
-                supervisor.handleImportNewTopic(topic);
+                handleImportNewTopic(topic);
+            }
+        } else {
+            LOG.error("Lose configurations for " + topic);
+        }
+    }
+    
+    public void handleImportNewTopic(String topic) {
+        String cmdbApp = getCmdbAppByTopic(topic);
+        if (cmdbApp == null) {
+            LOG.error("Oops, no cmdb app assign to topic " + topic);
+            return;
+        }
+        //one topic has only one cmdbapp, but the interface of PAAS is cmdbapp list
+        List<String> cmdbApps = new ArrayList<String>();
+        cmdbApps.add(cmdbApp);
+        try {
+            Map<String, List<String>> hostToInstances = findInstancesByCmdbApps(topic, cmdbApps);
+            topicToInstances.put(topic, hostToInstances);
+        } catch (Exception e) {
+            LOG.error("Oops, got an exception", e);
+        }
+    }
+    
+    private Map<String, List<String>> findInstancesByCmdbApps(String topic, List<String> cmdbApps)
+            throws UnsupportedEncodingException, JSONException {
+        Map<String, List<String>> hostToInstances = new HashMap<String, List<String>>();
+        if (cmdbApps.size() == 0) {
+            return hostToInstances;
+        }
+        //HTTP get the json
+        StringBuilder catalogURLBuild = new StringBuilder();
+        catalogURLBuild.append(getPaaSInstanceURLPerfix);
+        for (String app : cmdbApps) {
+            catalogURLBuild.append(app).append(",");
+        }
+        catalogURLBuild.deleteCharAt(catalogURLBuild.length() - 1);
+        String response = paasQuery.getResponseText(catalogURLBuild.toString());
+        if (response == null) {
+            LOG.error("response is null.");
+            return hostToInstances;
+        }
+        String jsonStr = java.net.URLDecoder.decode(response, "utf-8");
+        JSONObject rootObject = new JSONObject(jsonStr);
+        JSONArray catalogArray = rootObject.getJSONArray("catalog");
+        for (int i = 0; i < catalogArray.length(); i++) {
+            JSONObject layoutObject = catalogArray.getJSONObject(i);
+            String app = (String)layoutObject.get("app");
+            JSONArray layoutArray = layoutObject.getJSONArray("layout");
+            for (int j = 0; j < layoutArray.length(); j++) {
+                JSONObject hostIdObject = layoutArray.getJSONObject(j);
+                String ip = (String) hostIdObject.get("ip");
+                InetAddress host;
+                try {
+                    host = InetAddress.getByName(ip);
+                } catch (UnknownHostException e) {
+                    LOG.error("Receive a unknown host " + ip, e);
+                    continue;
+                }
+                String agentHost = host.getHostName();
+                //fill host->topics map
+                Set<String> topicsInOneHost;
+                if ((topicsInOneHost = hostToTopics.get(agentHost)) == null) {
+                    topicsInOneHost = new CopyOnWriteArraySet<String>();
+                    hostToTopics.put(agentHost, topicsInOneHost);
+                }
+                topicsInOneHost.add(topic);
+                
+                List<String> instances;
+                if ((instances = hostToInstances.get(agentHost)) == null) {
+                    instances = new ArrayList<String>();
+                    hostToInstances.put(agentHost, instances);
+                }
+                JSONArray idArray = hostIdObject.getJSONArray("id");
+                for (int k = 0; k < idArray.length(); k++) {
+                    LOG.debug("PaaS catalog app: " + app + ", ip: " + ip + ", id: " + idArray.getString(k));
+                    instances.add(idArray.getString(k));
+                }
             }
         }
+        return hostToInstances;
     }
     
     private synchronized void fillHostMap(String topic, String hostsValue) {
@@ -195,6 +286,8 @@ public class ConfigManager {
                 }
                 topicsInOneHost.add(topic);
             }
+        } else {
+            LOG.warn("Lose hosts for " + topic);
         }
     }
     
@@ -208,6 +301,8 @@ public class ConfigManager {
                 cmdbAppToTopics.put(cmdbApp, topicsInOneCMDB);
             }
             topicsInOneCMDB.add(topic);
+        } else {
+            LOG.error("Lose CMDB mapping for " + topic);
         }
     }
 
