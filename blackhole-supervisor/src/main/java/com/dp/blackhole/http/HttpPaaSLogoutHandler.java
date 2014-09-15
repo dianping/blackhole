@@ -114,8 +114,8 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
             List<InstanceGroup> quits = new ArrayList<InstanceGroup>();
             List<InstanceGroup> cleans = new ArrayList<InstanceGroup>();
             for (String topic : topicSet) {
-                // filter the stream already active instance
-                filterIsInactive(topic, eachHost, idsInTheSameHost, supervisor);
+                // filter the stream already inactive
+                filterHost(topic, eachHost, idsInTheSameHost, false, supervisor);
                 InstanceGroup quit = PBwrap.wrapInstanceGroup(topic, idsInTheSameHost);
                 InstanceGroup clean = PBwrap.wrapInstanceGroup(topic, idsInTheSameHost);
                 quits.add(quit);

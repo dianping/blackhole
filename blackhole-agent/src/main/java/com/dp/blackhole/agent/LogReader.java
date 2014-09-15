@@ -136,6 +136,10 @@ public class LogReader implements Runnable{
                 readLines(save);
                 closeQuietly(save);
                 sendMessage();
+                //do not handle log rotation any more when dying
+                if (topicMeta.isDying()) {
+                    return;
+                }
                 RotateRequest request = new RotateRequest(
                         topicMeta.getTopic(),
                         sourceIdentify,

@@ -118,8 +118,8 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
                 if (inBlacklist(topic)) {
                     continue;
                 }
-                // filter the stream already active instance
-                filterIsActive(topic, eachHost, idsInTheSameHost, supervisor);
+                // filter the stream already active
+                filterHost(topic, eachHost, idsInTheSameHost, true, supervisor);
                 
                 Context context = ConfigKeeper.configMap.get(topic);
                 if (context == null) {
@@ -136,15 +136,22 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
             toBeSend.put(eachHost, message);
         }
         
-        return sendAndReceive(toBeSend, supervisor);
+        return sendAndReceive(toBeSend, supervisor, app);
     }
     
-    private HttpResult sendAndReceive(Map<String, Message> toBeSend, Supervisor supervisor) {
+    private HttpResult sendAndReceive(Map<String, Message> toBeSend, Supervisor supervisor, String app) {
         long currentTime = System.currentTimeMillis();
         long timeout = currentTime + TIMEOUT;
         while (currentTime < timeout) {
             if (checkStreamsActive(toBeSend, supervisor)) {
                 LOG.info("all stream active, instances login succcss.");
+                //fill hostToTopics map
+                Set<String> topicSet = configManager.getTopicsByCmdb(app);
+                for (String eachHost : toBeSend.keySet()) {
+                    for (String topic : topicSet) {
+                        configManager.addTopicToHost(eachHost, topic);
+                    }
+                }
                 return new HttpResult(HttpResult.SUCCESS, "");
             }
             supervisor.cachedSend(toBeSend);

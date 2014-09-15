@@ -515,7 +515,9 @@ public class Supervisor {
             handleConsumerFail(desc, now);
         }
         
-        connections.remove(connection);
+        synchronized (connections) {
+            connections.remove(connection);
+        }
         connectionStreamMap.remove(connection);
     }
 
@@ -1579,7 +1581,9 @@ public class Supervisor {
             ConnectionDescription desc = connections.get(connection);
             if (desc == null) {
                 LOG.info("client " + connection + " connected");
-                connections.put(connection, new ConnectionDescription(connection));
+                synchronized (connections) {
+                    connections.put(connection, new ConnectionDescription(connection));
+                }
                 //trigger PAAS config response
                 triggerConfRes(connection);
             } else {

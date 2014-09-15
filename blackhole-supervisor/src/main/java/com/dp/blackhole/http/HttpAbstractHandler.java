@@ -37,17 +37,9 @@ public abstract class HttpAbstractHandler {
         return hostIds;
     }
     
-    protected void filterIsActive(String topic, String host, List<String> idsInTheSameHost, Supervisor supervisor) {
+    protected void filterHost(String topic, String host, List<String> idsInTheSameHost, boolean expect, Supervisor supervisor) {
         for (int i = 0; i < idsInTheSameHost.size(); i++) {
-            if (supervisor.isActiveStream(topic, Util.getSourceIdentify(host, idsInTheSameHost.get(i)))) {
-                idsInTheSameHost.remove(i);
-            }
-        }
-    }
-    
-    protected void filterIsInactive(String topic, String host, List<String> idsInTheSameHost, Supervisor supervisor) {
-        for (int i = 0; i < idsInTheSameHost.size(); i++) {
-            if (!supervisor.isActiveStream(topic, Util.getSourceIdentify(host, idsInTheSameHost.get(i)))) {
+            if (expect == supervisor.isActiveStream(topic, Util.getSourceIdentify(host, idsInTheSameHost.get(i)))) {
                 idsInTheSameHost.remove(i);
             }
         }

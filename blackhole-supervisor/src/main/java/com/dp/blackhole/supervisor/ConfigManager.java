@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -38,10 +39,9 @@ public class ConfigManager {
 
     public final Set<String> topicSet = new CopyOnWriteArraySet<String>();
     
-    private final Map<String, Set<String>> hostToTopics = Collections.synchronizedMap(new HashMap<String, Set<String>>());
+    private final ConcurrentHashMap<String, Set<String>> hostToTopics = new ConcurrentHashMap<String, Set<String>>();
     private final Map<String, List<String>> topicToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
-    //TODO concurrent
-    private final Map<String, Map<String, List<String>>> topicToInstances = new HashMap<String, Map<String,List<String>>>();
+    private final Map<String, Map<String, List<String>>> topicToInstances = new ConcurrentHashMap<String, Map<String,List<String>>>();
     
     private final Map<String, Set<String>> cmdbAppToTopics = Collections.synchronizedMap(new HashMap<String, Set<String>>());
     private final Map<String, String> topicToCmdb = Collections.synchronizedMap(new HashMap<String, String>());
@@ -81,6 +81,16 @@ public class ConfigManager {
     
     public String getCmdbAppByTopic(String topic) {
         return topicToCmdb.get(topic);
+    }
+    
+    public void addTopicToHost(String agentHost, String topic) {
+        //fill host->topics map
+        Set<String> tmp = new CopyOnWriteArraySet<String>();
+        Set<String> topicsInOneHost = hostToTopics.putIfAbsent(agentHost, tmp);
+        if (topicsInOneHost == null) {
+            topicsInOneHost = tmp;
+        }
+        topicsInOneHost.add(topic);
     }
     
     public List<String> getIdsByTopicAndHost(String topic, String host) {
@@ -240,13 +250,7 @@ public class ConfigManager {
                     continue;
                 }
                 String agentHost = host.getHostName();
-                //fill host->topics map
-                Set<String> topicsInOneHost;
-                if ((topicsInOneHost = hostToTopics.get(agentHost)) == null) {
-                    topicsInOneHost = new CopyOnWriteArraySet<String>();
-                    hostToTopics.put(agentHost, topicsInOneHost);
-                }
-                topicsInOneHost.add(topic);
+                addTopicToHost(agentHost, topic);
                 
                 List<String> instances;
                 if ((instances = hostToInstances.get(agentHost)) == null) {
@@ -262,7 +266,7 @@ public class ConfigManager {
         }
         return hostToInstances;
     }
-    
+
     private synchronized void fillHostMap(String topic, String hostsValue) {
         String[] hosts = Util.getStringListOfLionValue(hostsValue);
         if (hosts != null) {
@@ -279,12 +283,7 @@ public class ConfigManager {
                 if (host.length() == 0) {
                     continue;
                 }
-                Set<String> topicsInOneHost;
-                if ((topicsInOneHost = hostToTopics.get(host)) == null) {
-                    topicsInOneHost = new CopyOnWriteArraySet<String>();
-                    hostToTopics.put(host, topicsInOneHost);
-                }
-                topicsInOneHost.add(topic);
+                addTopicToHost(host, topic);
             }
         } else {
             LOG.warn("Lose hosts for " + topic);
