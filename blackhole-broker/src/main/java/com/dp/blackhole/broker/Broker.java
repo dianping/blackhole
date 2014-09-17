@@ -45,7 +45,7 @@ public class Broker {
 
     private void start() throws FileNotFoundException, IOException {
         Properties prop = new Properties();
-        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
+        prop.load(getClass().getClassLoader().getResourceAsStream("config.properties"));
         String supervisorHost = prop.getProperty("supervisor.host");
         int supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
         servicePort =  Integer.parseInt(prop.getProperty("broker.service.port"));

@@ -257,7 +257,7 @@ public class Cli {
 
     private void start() throws FileNotFoundException, IOException {
         Properties prop = new Properties();
-        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
+        prop.load(getClass().getClassLoader().getResourceAsStream("config.properties"));
         terminatePeriod = Long.parseLong(prop.getProperty("cli.terminate.period", "1000"));
         String supervisorHost = prop.getProperty("supervisor.host");
         int supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));

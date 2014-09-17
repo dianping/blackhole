@@ -104,7 +104,7 @@ public class ConfigManager {
     
     public void initConfig() throws IOException {
         Properties prop = new Properties();
-        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
+        prop.load(getClass().getClassLoader().getResourceAsStream("config.properties"));
         apiId = Integer.parseInt(prop.getProperty("supervisor.lionapi.id"));
         webServicePort = Integer.parseInt(prop.getProperty("supervisor.webservice.port"));
         connectionTimeout = Integer.parseInt(prop.getProperty("supervisor.webservice.connectionTimeout", "30000"));

@@ -155,7 +155,7 @@ public class Agent implements Runnable {
         //  hard code, please modify to real supervisor address before mvn package
         Properties prop = new Properties();
         try {
-            prop.load(ClassLoader.getSystemResourceAsStream("connection.properties"));
+            prop.load(getClass().getClassLoader().getResourceAsStream("connection.properties"));
         } catch (IOException e) {
             LOG.fatal("Load app.properties file fail.", e);
             Cat.logError("Load app.properties file fail.", e);
