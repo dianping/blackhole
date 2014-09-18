@@ -248,7 +248,12 @@ public class Util {
         if (rawValue == null) {
             return null;
         }
-        return rawValue.trim();
+        String[] cmdbApp = getStringListOfLionValue(rawValue);
+        if (cmdbApp == null) {
+            return rawValue.trim();
+        } else {
+            return cmdbApp[0];
+        }
     }
 
     //["host01","host02"]
