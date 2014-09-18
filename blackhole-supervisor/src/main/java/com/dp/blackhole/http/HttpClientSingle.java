@@ -1,10 +1,8 @@
 package com.dp.blackhole.http;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
@@ -30,61 +28,25 @@ public class HttpClientSingle {
         HttpConnectionParams.setSoTimeout(params, socketTimeout);
     }
     
-    private synchronized InputStream getResource(String uri) throws IOException {
+    private synchronized HttpEntity getResource(String uri) throws IOException {
         HttpGet method = new HttpGet(uri);
         HttpResponse httpResponse = this.httpClient.execute(method);
         int statusCode = httpResponse.getStatusLine().getStatusCode();
-        InputStream is = null;
         if (HttpStatus.SC_OK == statusCode) {
             LOG.debug("200 OK request");
-            is = httpResponse.getEntity().getContent();
-            EntityUtils.consume(httpResponse.getEntity());
+            return httpResponse.getEntity();
         } else {
-            EntityUtils.consume(httpResponse.getEntity());
             throw new IOException("Something went wrong, statusCode is " + statusCode);
         }
-        return is;
     }
     
-    public String getResponseText(String url) {
-        LOG.debug("http client access url: " + url);
-        StringBuilder responseBuilder = new StringBuilder();
-        BufferedReader bufferedReader = null;
-        InputStream is = null;
+    public String getResponseText(String uri) {
+        LOG.debug("http client access uri: " + uri);
         try {
-            is = getResource(url);
-        } catch (IOException e) {
-            LOG.error("Can not get http response. " + e.getMessage());
-            return null;
-        }
-        try {
-            bufferedReader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8 * 1024);
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                responseBuilder.append(line + "\n");
-            }
-            if (responseBuilder.length() != 0) {
-                responseBuilder.deleteCharAt(responseBuilder.length() - 1);
-            }
+            return EntityUtils.toString(getResource(uri), "utf-8");
         } catch (IOException e) {
             LOG.error("Oops, got an exception in reading http response content." + e.getMessage());
             return null;
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                }
-                is = null;
-            }
-            if (bufferedReader != null) {
-                try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                }
-                bufferedReader = null;
-            }
         }
-        return responseBuilder.toString();
     }
 }
