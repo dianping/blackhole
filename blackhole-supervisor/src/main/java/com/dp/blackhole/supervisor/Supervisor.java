@@ -796,13 +796,17 @@ public class Supervisor {
         configManager.removeConf(topic, agentServers);
     }
 
-    private void handleRetireStream(StreamID streamId) {
+    private void handleRetireStream(StreamID streamId, SimpleConnection from) {
         StreamId id = new StreamId(streamId.getTopic(),
                 Util.getSourceIdentify(streamId.getAgentServer(), streamId.getInstanceId()));
-        retireStreamInternal(id);
+        boolean force = false;
+        if (getConnectionType(from) == ConnectionDescription.AGENT) {
+            force = true;
+        }
+        retireStreamInternal(id, force);
     }
 
-    private void retireStreamInternal(StreamId id) {
+    private void retireStreamInternal(StreamId id, boolean forceRetire) {
         Stream stream = streamIdMap.get(id);
         
         if (stream == null) {
@@ -810,7 +814,7 @@ public class Supervisor {
             return;
         }
         
-        if (stream.isActive()) {
+        if (stream.isActive() && !forceRetire) {
             LOG.error("only inactive stream can be retired");
             return;
         } else {
@@ -914,8 +918,7 @@ public class Supervisor {
         if (stream != null) {
             if (rollID.getIsFinal()) {
                 LOG.info("Final but unrecoverable. Just retire this stream.");
-                stream.updateActive(false);
-                retireStreamInternal(id);
+                retireStreamInternal(id, true);
                 return;
             }
             ArrayList<Stage> stages = Streams.get(stream);
@@ -1038,8 +1041,7 @@ public class Supervisor {
         if (stream != null) {
             if (rollID.getIsFinal()) {
                 LOG.info("Final upload suceessed. to retire this stream.");
-                stream.updateActive(false);
-                retireStreamInternal(id);
+                retireStreamInternal(id, true);
                 return;
             }
             stream.setGreatlastSuccessTs(rollID.getRollTs());
@@ -1106,8 +1108,7 @@ public class Supervisor {
         if (stream != null) {
             if (rollID.getIsFinal()) {
                 LOG.info("Final upload suceessed. to retire this stream.");
-                stream.updateActive(false);
-                retireStreamInternal(id);
+                retireStreamInternal(id, true);
                 return;
             }
             stream.setGreatlastSuccessTs(rollID.getRollTs()); 
@@ -1667,7 +1668,7 @@ public class Supervisor {
                 dumpstat(from);
                 break;
             case RETIRESTREAM:
-                handleRetireStream(msg.getStreamId());
+                handleRetireStream(msg.getStreamId(), from);
                 break;
             case CONF_REQ:
                 handleConfReq(from);
@@ -1881,6 +1882,14 @@ public class Supervisor {
             }
         }
         return null;
+    }
+    
+    public int getConnectionType(SimpleConnection connection) {
+        ConnectionDescription des = connections.get(connection);
+        if (des == null) {
+            return 0;
+        }
+        return des.getType();
     }
     
     /**
