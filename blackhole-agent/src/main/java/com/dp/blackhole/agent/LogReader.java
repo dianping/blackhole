@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -24,21 +23,21 @@ import com.dp.blackhole.protocol.data.RotateRequest;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.Message;
 
-public class LogReader implements Runnable{
+public class LogReader {
     private static final Log LOG = LogFactory.getLog(LogReader.class);
     private static final int IN_BUF = 1024 * 8;
     private static final int SYS_MAX_LINE_SIZE = 1024 * 512;
 
     private TopicMeta topicMeta;
-    private Agent node;
+    private Agent agent;
     private String sourceIdentify;
     private String broker;
     private int brokerPort;
     private Socket socket;
     EventWriter eventWriter;
     
-    public LogReader(Agent node, String localhost, String broker, int port, TopicMeta topicMeta) {
-        this.node = node;
+    public LogReader(Agent agent, String localhost, String broker, int port, TopicMeta topicMeta) {
+        this.agent = agent;
         this.sourceIdentify =  Util.getSourceIdentify(localhost, topicMeta.getInstanceId());
         this.broker = broker;
         this.brokerPort = port;
@@ -54,33 +53,24 @@ public class LogReader implements Runnable{
         } catch (IOException e) {
             LOG.warn("Failed to close socket.", e);
         }
-        node.getListener().unregisterLogReader(topicMeta.getTailFile());
+        agent.getListener().unregisterLogReader(topicMeta.getTailFile());
     }
 
-    @Override
-    public void run() {
+    public void start() {
         try {
             LOG.info("Log reader for " + topicMeta + " running...");
             
             File tailFile = new File(topicMeta.getTailFile());
             this.eventWriter = new EventWriter(tailFile, topicMeta.getMaxLineSize());
             
-            if (!node.getListener().registerLogReader(topicMeta.getTailFile(), this)) {
+            if (!agent.getListener().registerLogReader(topicMeta.getTailFile(), this)) {
                 throw new IOException("Failed to register a log reader for " + topicMeta.getMetaKey() 
                         + " with " + topicMeta.getTailFile() + ", thread will not run.");
             }
-        } catch (UnknownHostException e) {
-            LOG.error("Socket fail!", e);
-            Cat.logError("Socket fail!", e);
-            node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
-        } catch (IOException e) {
-            LOG.error("Oops, got an exception", e);
-            Cat.logError("Oops, got an exception", e);
-            node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
-        } catch (RuntimeException e) {
-            LOG.error("Oops, got an RuntimException:" , e);
-            Cat.logError("Oops, got an RuntimException:" , e);
-            node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+        } catch (Throwable t) {
+            LOG.error("Oops, got an exception", t);
+            Cat.logError("Oops, got an exception", t);
+            agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
         }
     }
 
@@ -153,7 +143,7 @@ public class LogReader implements Runnable{
                 closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
                 stop();
-                node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+                agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
             }
         }
         
@@ -179,7 +169,7 @@ public class LogReader implements Runnable{
                 closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
                 stop();
-                node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+                agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
             }
         }
         
@@ -193,7 +183,7 @@ public class LogReader implements Runnable{
                 closeChannelQuietly(channel);
                 LOG.debug("process failed, stop.");
                 stop();
-                node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+                agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
             }
         }
         

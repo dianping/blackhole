@@ -87,19 +87,17 @@ public class TestLogReader {
         }
         agent.setListener(listener);
         loggerThread.start();
-        Thread readerThread = null;
+        LogReader reader = null;
         try {
-            Thread.sleep(500);
-            LogReader reader = new LogReader(agent, SimAgent.HOSTNAME, localhost,
+            Thread.sleep(1500);//ignore file first create
+            reader = new LogReader(agent, SimAgent.HOSTNAME, localhost,
                     port, appLog);
-            readerThread = new Thread(reader);
-            Thread.sleep(1000);//ignore file first create
-            readerThread.start();
+            reader.start();
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        readerThread.interrupt();
+        reader.stop();
         ByteBuffer buffer = ByteBuffer.allocate(1024*1024);
         ByteBufferChannel channel = new ByteBufferChannel(buffer);
         Segment segment = new Segment(tmpDir + "/" + MAGIC + "/"+ localhost, 0, false, false, 1024, 108);

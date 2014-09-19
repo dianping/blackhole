@@ -46,7 +46,6 @@ public class Agent implements Runnable {
     private static final Log LOG = LogFactory.getLog(Agent.class);
     private static final int DEFAULT_DELAY_SECOND = 5;
     private final ConfigKeeper confKeeper = new ConfigKeeper();
-    private ExecutorService pool;
     private ExecutorService recoveryThreadPool;
     private FileListener listener;
     private String hostname;
@@ -72,7 +71,6 @@ public class Agent implements Runnable {
             paasModel = true;
             LOG.info("Agent deploys for PaaS.");
         }
-        pool = Executors.newCachedThreadPool();
         recoveryThreadPool = Executors.newFixedThreadPool(2);
         scheduler = new ScheduledThreadPoolExecutor(1);
         
@@ -209,7 +207,7 @@ public class Agent implements Runnable {
     }
 
     public void shutdown() {
-        pool.shutdownNow();
+        processor.OnDisconnected(supervisor);
         recoveryThreadPool.shutdownNow();
         scheduler.shutdownNow();
         
@@ -382,8 +380,8 @@ public class Agent implements Runnable {
                         broker = assignBroker.getBrokerServer();
                         int brokerPort = assignBroker.getBrokerPort();
                         logReader = new LogReader(Agent.this, hostname, broker, brokerPort, topicMeta);
+                        logReader.start();
                         topicReaders.put(topicMeta, logReader);
-                        pool.execute(logReader);
                         return true;
                     } else {
                         LOG.info("duplicated assign broker message: " + assignBroker);
