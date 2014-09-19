@@ -379,6 +379,10 @@ public class Agent implements Runnable {
                 metaKey = new MetaKey(topic, instanceId);
                 if ((topicMeta = logMetas.get(metaKey)) != null) {
                     if ((logReader = topicReaders.get(topicMeta)) == null) {
+                        if (topicMeta.isDying()) {
+                            LOG.warn(topicMeta + " is dying, do not restart log reader.");
+                            return true;
+                        }
                         broker = assignBroker.getBrokerServer();
                         int brokerPort = assignBroker.getBrokerPort();
                         logReader = new LogReader(Agent.this, hostname, broker, brokerPort, topicMeta);
@@ -478,7 +482,10 @@ public class Agent implements Runnable {
                         if ((topicMeta = logMetas.get(metaKey)) != null) {
                             // set a stream status to dying, and send a special rotate message.
                             if (topicMeta.setDying()) {
-                                if ((logReader = topicReaders.get(topicMeta)) != null) {
+                                if (!new File(topicMeta.getTailFile()).exists()) {
+                                    LOG.warn("QUIT but " + topicMeta.getTailFile() + " not exists, retire stream and trigger CLEAN.");
+                                    send(PBwrap.wrapRetireStream(topic, hostname, id));
+                                } else if ((logReader = topicReaders.get(topicMeta)) != null) {
                                     logReader.eventWriter.processLastRotate();
                                 } else {
                                     LOG.info(topicMeta + " has already stopped.");
