@@ -7,14 +7,12 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dianping.cat.Cat;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.TransferWrap;
 import com.dp.blackhole.protocol.data.LastRotateRequest;
@@ -30,15 +28,15 @@ public class LogReader implements Runnable{
     private static final int SYS_MAX_LINE_SIZE = 1024 * 512;
 
     private TopicMeta topicMeta;
-    private Agent node;
+    private Agent agent;
     private String sourceIdentify;
     private String broker;
     private int brokerPort;
     private Socket socket;
     EventWriter eventWriter;
     
-    public LogReader(Agent node, String localhost, String broker, int port, TopicMeta topicMeta) {
-        this.node = node;
+    public LogReader(Agent agent, String localhost, String broker, int port, TopicMeta topicMeta) {
+        this.agent = agent;
         this.sourceIdentify =  Util.getSourceIdentify(localhost, topicMeta.getInstanceId());
         this.broker = broker;
         this.brokerPort = port;
@@ -54,7 +52,7 @@ public class LogReader implements Runnable{
         } catch (IOException e) {
             LOG.warn("Failed to close socket.", e);
         }
-        node.getListener().unregisterLogReader(topicMeta.getTailFile());
+        agent.getListener().unregisterLogReader(topicMeta.getTailFile());
     }
 
     @Override
@@ -65,22 +63,13 @@ public class LogReader implements Runnable{
             File tailFile = new File(topicMeta.getTailFile());
             this.eventWriter = new EventWriter(tailFile, topicMeta.getMaxLineSize());
             
-            if (!node.getListener().registerLogReader(topicMeta.getTailFile(), this)) {
+            if (!agent.getListener().registerLogReader(topicMeta.getTailFile(), this)) {
                 throw new IOException("Failed to register a log reader for " + topicMeta.getMetaKey() 
                         + " with " + topicMeta.getTailFile() + ", thread will not run.");
             }
-        } catch (UnknownHostException e) {
-            LOG.error("Socket fail!", e);
-            Cat.logError("Socket fail!", e);
-            node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
-        } catch (IOException e) {
-            LOG.error("Oops, got an exception", e);
-            Cat.logError("Oops, got an exception", e);
-            node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
-        } catch (RuntimeException e) {
-            LOG.error("Oops, got an RuntimException:" , e);
-            Cat.logError("Oops, got an RuntimException:" , e);
-            node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+        } catch (Throwable t) {
+            LOG.error("Oops, got an exception", t);
+            agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
         }
     }
 
@@ -148,12 +137,11 @@ public class LogReader implements Runnable{
                 wrap.write(channel);
             } catch (IOException e) {
                 LOG.error("Oops, got an exception:", e);
-                Cat.logError("Oops, got an exception:", e);
                 closeQuietly(reader);
                 closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
                 stop();
-                node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+                agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
             }
         }
         
@@ -174,12 +162,11 @@ public class LogReader implements Runnable{
                 wrap.write(channel);
             } catch (IOException e) {
                 LOG.error("Oops, got an exception:", e);
-                Cat.logError("Oops, got an exception:", e);
                 closeQuietly(reader);
                 closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
                 stop();
-                node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+                agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
             }
         }
         
@@ -188,12 +175,11 @@ public class LogReader implements Runnable{
                 readLines(reader);
             } catch (IOException e) {
                 LOG.error("Oops, process read lines fail:", e);
-                Cat.logError("Oops, process read lines fail:", e);
                 closeQuietly(reader);
                 closeChannelQuietly(channel);
                 LOG.debug("process failed, stop.");
                 stop();
-                node.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+                agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
             }
         }
         

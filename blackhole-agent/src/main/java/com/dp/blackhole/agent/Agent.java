@@ -19,13 +19,11 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dianping.cat.Cat;
 import com.dp.blackhole.agent.TopicMeta.MetaKey;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
-import com.dp.blackhole.exception.BlackholeClientException;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
@@ -70,7 +68,9 @@ public class Agent implements Runnable {
         this.baseDirWildcard = baseDirWildcard;
         if (baseDirWildcard != null) {
             paasModel = true;
-            LOG.info("Agent deploys for PaaS.");
+            LOG.info("Agent deployed for LXC.");
+        } else {
+            LOG.info("Agent deployed for KVM.");
         }
         pool = Executors.newCachedThreadPool();
         recoveryThreadPool = Executors.newFixedThreadPool(2);
@@ -101,7 +101,6 @@ public class Agent implements Runnable {
     public boolean checkFilesExist(String topic, String pathCandidateStr) {
         if (pathCandidateStr == null) {
             LOG.error("Oops, can not get WATCH_FILE from mapping for topic " + topic);
-            Cat.logError(new BlackholeClientException("Oops, can not get WATCH_FILE from mapping for topic " + topic));
             return false;
         }
         String[] pathCandidates = pathCandidateStr.split("\\s+");
@@ -115,7 +114,6 @@ public class Agent implements Runnable {
             } else {
                 if (i == pathCandidates.length - 1) {
                     LOG.error("Topic: " + topic + ", Log: " + Arrays.toString(pathCandidates) + " not found!");
-                    Cat.logError(new BlackholeClientException("App: " + topic + ", Log: " + Arrays.toString(pathCandidates) + " not found!"));
                     return false;
                 }
             }
@@ -137,7 +135,6 @@ public class Agent implements Runnable {
             return true;
         } else {
             LOG.error("Topic: " + topic + ", Log: " + realWatchFile + " not found!");
-            Cat.logError(new BlackholeClientException("Topic: " + topic + ", Log: " + realWatchFile + " not found!"));
             return false;
         }
     }
@@ -148,7 +145,6 @@ public class Agent implements Runnable {
             hostname = Util.getLocalHost();
         } catch (UnknownHostException e) {
             LOG.error("can not get localhost: ", e);
-            Cat.logError("can not get localhost: ", e);
             return;
         }
         
@@ -158,7 +154,6 @@ public class Agent implements Runnable {
             prop.load(getClass().getClassLoader().getResourceAsStream("connection.properties"));
         } catch (IOException e) {
             LOG.fatal("Load app.properties file fail.", e);
-            Cat.logError("Load app.properties file fail.", e);
             return;
         }
         
@@ -169,7 +164,6 @@ public class Agent implements Runnable {
             listener = new FileListener();
         } catch (Exception e) {
             LOG.error("Failed to create a file listener, agent shutdown!", e);
-            Cat.logError("Failed to create a file listener, agent shutdown!", e);
             return;
         }
         
@@ -183,10 +177,8 @@ public class Agent implements Runnable {
             client.init("agent", supervisorHost, supervisorPort);
         } catch (ClosedChannelException e) {
             LOG.error(e.getMessage(), e);
-            Cat.logError(e);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-            Cat.logError(e);
         }
     }
     
@@ -368,8 +360,6 @@ public class Agent implements Runnable {
                 } else {
                     LOG.error("AppName [" + recoveryRoll.getTopic()
                             + "] from supervisor message not match with local");
-                    Cat.logError(new BlackholeClientException("RECOVERY_ROLL: " + recoveryRoll.getTopic()
-                            + " from supervisor message not match with local"));
                 }
                 break;
             case ASSIGN_BROKER:
@@ -395,8 +385,6 @@ public class Agent implements Runnable {
                 } else {
                     LOG.error("AppName [" + assignBroker.getTopic()
                             + "] from supervisor message not match with local");
-                    Cat.logError(new BlackholeClientException("ASSIGN_BROKER: " + assignBroker.getTopic()
-                            + " from supervisor message not match with local"));
                 }
                 break;
             case NOAVAILABLECONF:
@@ -525,7 +513,6 @@ public class Agent implements Runnable {
                 break;
             default:
                 LOG.error("Illegal message type " + msg.getType());
-                Cat.logError(new BlackholeClientException("Illegal message type " + msg.getType()));
             }
             return false;
         }
