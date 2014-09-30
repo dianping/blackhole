@@ -22,4 +22,9 @@ public abstract class ParamsKey {
         public final static String ROOT = "/blackhole";
         public final static String STREAMS = "/blackhole/streams";
     }
+    
+    public static class HTTP {
+        public static final String WILDCARD_ACL_VALUE = "*";
+        public static final int INITIAL_CAPACITY = 256;
+    }
 }

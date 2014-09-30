@@ -15,6 +15,7 @@ import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.SocketChannel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
@@ -393,5 +394,23 @@ public class Util {
     public static String getAgentHostFromSourceIdentify(String sourceIdentify) {
         String[] splits = sourceIdentify.split("#");
         return splits[0];
+    }
+    
+    /**
+     * Returns comma-separated concatenated single String of all strings of the
+     * given collection
+     */
+    public static String printCollection(Collection<String> strings) {
+        StringBuilder sb = new StringBuilder(ParamsKey.HTTP.INITIAL_CAPACITY);
+        boolean first = true;
+        for (String str : strings) {
+            if (!first) {
+                sb.append(",");
+            } else {
+                first = false;
+            }
+            sb.append(str);
+        }
+        return sb.toString();
     }
 }
