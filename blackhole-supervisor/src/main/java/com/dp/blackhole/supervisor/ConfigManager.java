@@ -235,10 +235,16 @@ public class ConfigManager {
         String jsonStr = java.net.URLDecoder.decode(response, "utf-8");
         JSONObject rootObject = new JSONObject(jsonStr);
         JSONArray catalogArray = rootObject.getJSONArray("catalog");
+        if (catalogArray.length() == 0) {
+            LOG.warn("Can not get any catalog by url " + catalogURLBuild.toString());
+        }
         for (int i = 0; i < catalogArray.length(); i++) {
             JSONObject layoutObject = catalogArray.getJSONObject(i);
             String app = (String)layoutObject.get("app");
             JSONArray layoutArray = layoutObject.getJSONArray("layout");
+            if (layoutArray.length() == 0) {
+                LOG.warn("Can not get any layout by app " + app);
+            }
             for (int j = 0; j < layoutArray.length(); j++) {
                 JSONObject hostIdObject = layoutArray.getJSONObject(j);
                 String ip = (String) hostIdObject.get("ip");
@@ -258,6 +264,9 @@ public class ConfigManager {
                     hostToInstances.put(agentHost, instances);
                 }
                 JSONArray idArray = hostIdObject.getJSONArray("id");
+                if (idArray.length() == 0) {
+                    LOG.warn("Can not get any instance by host " + agentHost);
+                }
                 for (int k = 0; k < idArray.length(); k++) {
                     LOG.debug("PaaS catalog app: " + app + ", ip: " + ip + ", id: " + idArray.getString(k));
                     instances.add(idArray.getString(k));

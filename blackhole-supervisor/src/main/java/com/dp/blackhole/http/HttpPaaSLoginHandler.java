@@ -144,7 +144,7 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
         long timeout = currentTime + TIMEOUT;
         while (currentTime < timeout) {
             if (checkStreamsActive(toBeSend, supervisor)) {
-                LOG.info("all stream active, instances login succcss.");
+                LOG.info(app + ": all stream active, instances login succcss.");
                 //fill hostToTopics map
                 Set<String> topicSet = configManager.getTopicsByCmdb(app);
                 for (String eachHost : toBeSend.keySet()) {

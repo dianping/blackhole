@@ -1812,7 +1812,7 @@ public class Supervisor {
     public void triggerConfRes(SimpleConnection connection) {
         List<LxcConfRes> lxcConfResList = new ArrayList<LxcConfRes>();
         Set<String> topics = configManager.getTopicsByHost(connection.getHost());
-        if (topics != null) {
+        if (topics != null && !topics.isEmpty()) {
             for (String topic : topics) {
                 Context context = ConfigKeeper.configMap.get(topic);
                 if (context == null) {
@@ -1824,6 +1824,7 @@ public class Supervisor {
                 String watchFile = context.getString(ParamsKey.TopicConf.WATCH_FILE);
                 List<String> ids = configManager.getIdsByTopicAndHost(topic, connection.getHost());
                 if (ids == null) {
+                    LOG.error("Can not get instances by " + topic + " and " + connection.getHost());
                     continue;
                 }
                 LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, period, maxLineSize, ids);
@@ -1831,6 +1832,8 @@ public class Supervisor {
             }
             Message message = PBwrap.wrapConfRes(null, lxcConfResList);
             send(connection, message);
+        } else {
+            LOG.debug("No topic mapping to " + connection.getHost());
         }
     }
         
