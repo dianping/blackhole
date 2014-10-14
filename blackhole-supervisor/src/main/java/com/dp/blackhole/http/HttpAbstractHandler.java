@@ -3,9 +3,10 @@ package com.dp.blackhole.http;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.supervisor.Supervisor;
@@ -18,8 +19,8 @@ public abstract class HttpAbstractHandler {
     public static final String FAILURE = "FAILURE";
     public abstract HttpResult getContent(String app, String[] ... args);
     
-    protected Map<String, List<String>> extractIdMapShuffleByHost(String[] ids, String[] ips) {
-        Map<String, List<String>> hostIds = new HashMap<String, List<String>>();
+    protected Map<String, Set<String>> extractIdMapShuffleByHost(String[] ids, String[] ips) {
+        Map<String, Set<String>> hostIds = new HashMap<String, Set<String>>();
         for (int i = 0; i< ips.length; i++) {
             InetAddress host;
             try {
@@ -27,9 +28,9 @@ public abstract class HttpAbstractHandler {
             } catch (UnknownHostException e) {
                 continue;
             }
-            List<String> idsInTheSameHost;
+            Set<String> idsInTheSameHost;
             if ((idsInTheSameHost = hostIds.get(host.getHostName())) == null) {
-                idsInTheSameHost = new LinkedList<String>();
+                idsInTheSameHost = new HashSet<String>();
                 hostIds.put(host.getHostName(), idsInTheSameHost);
             }
             idsInTheSameHost.add(ids[i]);
@@ -37,10 +38,12 @@ public abstract class HttpAbstractHandler {
         return hostIds;
     }
     
-    protected void filterHost(String topic, String host, List<String> idsInTheSameHost, boolean expect, Supervisor supervisor) {
-        for (int i = 0; i < idsInTheSameHost.size(); i++) {
-            if (expect == supervisor.isActiveStream(topic, Util.getSourceIdentify(host, idsInTheSameHost.get(i)))) {
-                idsInTheSameHost.remove(i);
+    protected void filterHost(String topic, String host, Set<String> idsInTheSameHost, boolean expect, Supervisor supervisor) {
+        Iterator<String> it = idsInTheSameHost.iterator();
+        while(it.hasNext()){
+            String ids = it.next();
+            if(expect == supervisor.isActiveStream(topic, Util.getSourceIdentify(host, ids))){
+                it.remove();
             }
         }
     }

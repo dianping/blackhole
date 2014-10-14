@@ -107,12 +107,12 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
         }
         String[] ids = args[0];
         String[] ips = args[1];
-        Map<String, List<String>> hostIds = extractIdMapShuffleByHost(ids, ips);
+        Map<String, Set<String>> hostIds = extractIdMapShuffleByHost(ids, ips);
         
         Map<String, Message> toBeSend = new HashMap<String, Message>();
-        for(Map.Entry<String, List<String>> entry : hostIds.entrySet()) {
+        for(Map.Entry<String, Set<String>> entry : hostIds.entrySet()) {
             String eachHost = entry.getKey();
-            List<String> idsInTheSameHost = entry.getValue();
+            Set<String> idsInTheSameHost = entry.getValue();
             List<LxcConfRes> lxcConfResList = new ArrayList<LxcConfRes>();
             for (String topic : topicSet) {
                 if (inBlacklist(topic)) {
@@ -136,21 +136,26 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
             toBeSend.put(eachHost, message);
         }
         
-        return sendAndReceive(toBeSend, supervisor, app);
+        return sendAndReceive(toBeSend, app, hostIds);
     }
     
-    private HttpResult sendAndReceive(Map<String, Message> toBeSend, Supervisor supervisor, String app) {
+    private HttpResult sendAndReceive(
+            Map<String, Message> toBeSend,
+            String app,
+            Map<String, Set<String>> hostIds) {
         long currentTime = System.currentTimeMillis();
         long timeout = currentTime + TIMEOUT;
         while (currentTime < timeout) {
-            if (checkStreamsActive(toBeSend, supervisor)) {
+            if (checkStreamsActive(app, hostIds)) {
                 LOG.info(app + ": all stream active, instances login succcss.");
-                //fill hostToTopics map
                 Set<String> topicSet = configManager.getTopicsByCmdb(app);
-                for (String eachHost : toBeSend.keySet()) {
-                    for (String topic : topicSet) {
+                for (String topic : topicSet) {
+                    for (String eachHost : hostIds.keySet()) {
+                        //fill hostToTopics map
                         configManager.addTopicToHost(eachHost, topic);
                     }
+                    //fill <topic,<host,ids>> map
+                    configManager.addIdsByTopicAndHost(topic, hostIds);
                 }
                 return new HttpResult(HttpResult.SUCCESS, "");
             }
@@ -162,20 +167,18 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
                 return new HttpResult(HttpResult.FAILURE, "Thread interrupted");
             }
         }
+        LOG.warn(app + " instances login timeout.");
         return new HttpResult(HttpResult.FAILURE, "timeout");
     }
     
-    private boolean checkStreamsActive(Map<String, Message> toBeSend, Supervisor supervisor) {
-        // loop for every agent server
-        for (Map.Entry<String, Message> entry : toBeSend.entrySet()) {
-            String agentServer = entry.getKey();
-            // loop for every topic in an agent server
-            for (LxcConfRes lxcConfRes : entry.getValue().getConfRes().getLxcConfResList()) {
-                String topic = lxcConfRes.getTopic();
-                List<String> idsInTheSameHost = lxcConfRes.getInstanceIdsList();
-                // loop for every instance with the same topic in the same agent server
-                for (String id : idsInTheSameHost) {
-                    if (!supervisor.isActiveStream(topic, Util.getSourceIdentify(agentServer, id))) {
+    private boolean checkStreamsActive(String app, Map<String, Set<String>> hostIds) {
+        Set<String> topicSet = configManager.getTopicsByCmdb(app);
+        for (String topic : topicSet) {
+            for (Map.Entry<String, Set<String>> entry : hostIds.entrySet()) {
+                String host = entry.getKey();
+                Set<String> ids = entry.getValue();
+                for (String id : ids) {
+                    if (!supervisor.isActiveStream(topic, Util.getSourceIdentify(host, id))) {
                         return false;
                     }
                 }

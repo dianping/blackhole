@@ -1822,7 +1822,7 @@ public class Supervisor {
                 String period = context.getString(ParamsKey.TopicConf.ROLL_PERIOD);
                 String maxLineSize = context.getString(ParamsKey.TopicConf.MAX_LINE_SIZE);
                 String watchFile = context.getString(ParamsKey.TopicConf.WATCH_FILE);
-                List<String> ids = configManager.getIdsByTopicAndHost(topic, connection.getHost());
+                Set<String> ids = configManager.getIdsByTopicAndHost(topic, connection.getHost());
                 if (ids == null) {
                     LOG.error("Can not get instances by " + topic + " and " + connection.getHost());
                     continue;

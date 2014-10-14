@@ -41,7 +41,7 @@ public class ConfigManager {
     
     private final ConcurrentHashMap<String, Set<String>> hostToTopics = new ConcurrentHashMap<String, Set<String>>();
     private final Map<String, List<String>> topicToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
-    private final Map<String, Map<String, List<String>>> topicToInstances = new ConcurrentHashMap<String, Map<String,List<String>>>();
+    private final ConcurrentHashMap<String, Map<String, Set<String>>> topicToInstances = new ConcurrentHashMap<String, Map<String, Set<String>>>();
     
     private final Map<String, Set<String>> cmdbAppToTopics = Collections.synchronizedMap(new HashMap<String, Set<String>>());
     private final Map<String, String> topicToCmdb = Collections.synchronizedMap(new HashMap<String, String>());
@@ -93,8 +93,36 @@ public class ConfigManager {
         topicsInOneHost.add(topic);
     }
     
-    public List<String> getIdsByTopicAndHost(String topic, String host) {
-        Map<String, List<String>> hostToInstances = topicToInstances.get(topic);
+    public void addIdsByTopicAndHost(String topic, Map<String, Set<String>> hostIds) {
+        Map<String, Set<String>> oldHostIds = topicToInstances.putIfAbsent(topic, hostIds);
+        if (oldHostIds != null) {
+            for (Map.Entry<String, Set<String>> newHostIds : hostIds.entrySet()) {
+                Set<String> oldIds = oldHostIds.get(newHostIds.getKey());
+                if (oldIds == null) {
+                    oldHostIds.put(newHostIds.getKey(), newHostIds.getValue());
+                } else {
+                    oldIds.addAll(newHostIds.getValue());
+                }
+            }
+        }
+    }
+    
+    public void removeIdsByTopicAndHost(String topic, Map<String, Set<String>> hostIds) {
+        Map<String, Set<String>> oldHostIds = topicToInstances.get(topic);
+        if (oldHostIds != null) {
+            for (Map.Entry<String, Set<String>> newHostIds : hostIds.entrySet()) {
+                Set<String> oldIds = oldHostIds.get(newHostIds.getKey());
+                if (oldIds != null) {
+                    oldIds.removeAll(newHostIds.getValue());
+                } else {
+                    LOG.error("No instances exists for topic:" + topic + " host:" +  newHostIds.getKey());
+                }
+            }
+        }
+    }
+    
+    public Set<String> getIdsByTopicAndHost(String topic, String host) {
+        Map<String, Set<String>> hostToInstances = topicToInstances.get(topic);
         if (hostToInstances == null) {
             return null;
         } else {
@@ -207,16 +235,16 @@ public class ConfigManager {
         List<String> cmdbApps = new ArrayList<String>();
         cmdbApps.add(cmdbApp);
         try {
-            Map<String, List<String>> hostToInstances = findInstancesByCmdbApps(topic, cmdbApps);
+            Map<String, Set<String>> hostToInstances = findInstancesByCmdbApps(topic, cmdbApps);
             topicToInstances.put(topic, hostToInstances);
         } catch (Exception e) {
             LOG.error("Oops, got an exception", e);
         }
     }
     
-    private Map<String, List<String>> findInstancesByCmdbApps(String topic, List<String> cmdbApps)
+    private Map<String, Set<String>> findInstancesByCmdbApps(String topic, List<String> cmdbApps)
             throws UnsupportedEncodingException, JSONException {
-        Map<String, List<String>> hostToInstances = new HashMap<String, List<String>>();
+        Map<String, Set<String>> hostToInstances = new HashMap<String, Set<String>>();
         if (cmdbApps.size() == 0) {
             return hostToInstances;
         }
@@ -258,9 +286,9 @@ public class ConfigManager {
                 String agentHost = host.getHostName();
                 addTopicToHost(agentHost, topic);
                 
-                List<String> instances;
+                Set<String> instances;
                 if ((instances = hostToInstances.get(agentHost)) == null) {
-                    instances = new ArrayList<String>();
+                    instances = new HashSet<String>();
                     hostToInstances.put(agentHost, instances);
                 }
                 JSONArray idArray = hostIdObject.getJSONArray("id");

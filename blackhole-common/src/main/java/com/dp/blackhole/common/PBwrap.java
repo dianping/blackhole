@@ -3,6 +3,7 @@ package com.dp.blackhole.common;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.dp.blackhole.protocol.control.AppRegPB.AppReg;
 import com.dp.blackhole.protocol.control.AppRollPB.AppRoll;
@@ -291,7 +292,7 @@ public class PBwrap {
         return builder.build();
     }
     
-    public static LxcConfRes wrapLxcConfRes (String topic, String watchFile, String period, String maxLineSize, List<String> ids) {
+    public static LxcConfRes wrapLxcConfRes (String topic, String watchFile, String period, String maxLineSize, Set<String> ids) {
         LxcConfRes.Builder builder = LxcConfRes.newBuilder();
         builder.setTopic(topic);
         builder.setPeriod(period);
@@ -436,7 +437,7 @@ public class PBwrap {
         return wrapMessage(MessageType.RESTART, builder.build());
     }
     
-    public static InstanceGroup wrapInstanceGroup(String topic, List<String> ids) {
+    public static InstanceGroup wrapInstanceGroup(String topic, Set<String> ids) {
         InstanceGroup.Builder builder = InstanceGroup.newBuilder();
         builder.setTopic(topic);
         builder.addAllInstanceIds(ids);
