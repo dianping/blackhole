@@ -22,7 +22,7 @@ import com.dp.blackhole.protocol.data.RotateRequest;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.Message;
 
-public class LogReader implements Runnable{
+public class LogReader implements Runnable {
     private static final Log LOG = LogFactory.getLog(LogReader.class);
     private static final int IN_BUF = 1024 * 8;
     private static final int SYS_MAX_LINE_SIZE = 1024 * 512;

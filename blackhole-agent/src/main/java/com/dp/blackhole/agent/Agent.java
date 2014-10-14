@@ -202,6 +202,7 @@ public class Agent implements Runnable {
 
     public void shutdown() {
         pool.shutdownNow();
+        processor.OnDisconnected(supervisor);
         recoveryThreadPool.shutdownNow();
         scheduler.shutdownNow();
         
