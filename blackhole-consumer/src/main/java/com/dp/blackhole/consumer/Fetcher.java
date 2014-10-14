@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -36,7 +35,7 @@ import com.dp.blackhole.storage.MessageSet;
 public class Fetcher extends Thread {
     private final Log LOG = LogFactory.getLog(Fetcher.class);
     
-    private GenClient<TransferWrap, DelegationIOConnection, ConsumerProcessor> client;
+    private GenClient<TransferWrap, DelegationIOConnection, FetcherProcessor> client;
     private String groupId;
     private String consumerId; 
     private String broker;
@@ -61,7 +60,7 @@ public class Fetcher extends Thread {
         }
         this.config = config;
         client = new GenClient(
-                new ConsumerProcessor(),
+                new FetcherProcessor(),
                 new DelegationIOConnection.DelegationIOConnectionFactory(),
                 new DataMessageTypeFactory());
     }
@@ -82,11 +81,8 @@ public class Fetcher extends Thread {
     @Override
     public void run() {
         LOG.info("start " + this.toString());
-        Properties prop = new Properties();
-        prop.setProperty("broker.host", Util.getHostFromBroker(broker));
-        prop.setProperty("broker.port", Util.getPortFromBroker(broker));
         try {
-            client.init(prop, getName(), "broker.host", "broker.port");
+            client.init(getName(), Util.getHostFromBroker(broker), Util.getPortFromBroker(broker));
         } catch (ClosedChannelException e) {
             LOG.error("ClosedChannelException catched: ", e);
         } catch (IOException e) {
@@ -108,7 +104,7 @@ public class Fetcher extends Thread {
         return buf.toString();
     }
     
-    class ConsumerProcessor implements EntityProcessor<TransferWrap, DelegationIOConnection> {
+    class FetcherProcessor implements EntityProcessor<TransferWrap, DelegationIOConnection> {
         
         @Override
         public void OnConnected(DelegationIOConnection connection) {

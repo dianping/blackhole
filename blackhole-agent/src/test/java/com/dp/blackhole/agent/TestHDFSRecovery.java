@@ -20,9 +20,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dp.blackhole.agent.AppLog;
+import com.dp.blackhole.agent.TopicMeta;
 import com.dp.blackhole.agent.RollRecovery;
 import com.dp.blackhole.agent.SimAgent;
+import com.dp.blackhole.agent.TopicMeta.MetaKey;
 import com.dp.blackhole.broker.SimBroker;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
@@ -85,8 +86,9 @@ public class TestHDFSRecovery {
 
     @Test
     public void test() throws IOException, InterruptedException {
-        AppLog appLog = new AppLog(MAGIC, file.getAbsolutePath(), 3600, 1024);
-        RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS);
+        MetaKey metaKey = new MetaKey(MAGIC, null);
+        TopicMeta appLog = new TopicMeta(metaKey, file.getAbsolutePath(), 3600, 1024);
+        RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();
         convertToGZIP(file);

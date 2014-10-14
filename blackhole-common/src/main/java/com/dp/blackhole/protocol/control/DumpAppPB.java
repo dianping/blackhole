@@ -35,25 +35,25 @@ public final class DumpAppPB {
       return com.dp.blackhole.protocol.control.DumpAppPB.internal_static_blackhole_DumpApp_fieldAccessorTable;
     }
     
-    // required string app_name = 1;
-    public static final int APP_NAME_FIELD_NUMBER = 1;
-    private boolean hasAppName;
-    private java.lang.String appName_ = "";
-    public boolean hasAppName() { return hasAppName; }
-    public java.lang.String getAppName() { return appName_; }
+    // required string topic = 1;
+    public static final int TOPIC_FIELD_NUMBER = 1;
+    private boolean hasTopic;
+    private java.lang.String topic_ = "";
+    public boolean hasTopic() { return hasTopic; }
+    public java.lang.String getTopic() { return topic_; }
     
     private void initFields() {
     }
     public final boolean isInitialized() {
-      if (!hasAppName) return false;
+      if (!hasTopic) return false;
       return true;
     }
     
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasAppName()) {
-        output.writeString(1, getAppName());
+      if (hasTopic()) {
+        output.writeString(1, getTopic());
       }
       getUnknownFields().writeTo(output);
     }
@@ -64,9 +64,9 @@ public final class DumpAppPB {
       if (size != -1) return size;
     
       size = 0;
-      if (hasAppName()) {
+      if (hasTopic()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getAppName());
+          .computeStringSize(1, getTopic());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -226,8 +226,8 @@ public final class DumpAppPB {
       
       public Builder mergeFrom(com.dp.blackhole.protocol.control.DumpAppPB.DumpApp other) {
         if (other == com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.getDefaultInstance()) return this;
-        if (other.hasAppName()) {
-          setAppName(other.getAppName());
+        if (other.hasTopic()) {
+          setTopic(other.getTopic());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -255,7 +255,7 @@ public final class DumpAppPB {
               break;
             }
             case 10: {
-              setAppName(input.readString());
+              setTopic(input.readString());
               break;
             }
           }
@@ -263,24 +263,24 @@ public final class DumpAppPB {
       }
       
       
-      // required string app_name = 1;
-      public boolean hasAppName() {
-        return result.hasAppName();
+      // required string topic = 1;
+      public boolean hasTopic() {
+        return result.hasTopic();
       }
-      public java.lang.String getAppName() {
-        return result.getAppName();
+      public java.lang.String getTopic() {
+        return result.getTopic();
       }
-      public Builder setAppName(java.lang.String value) {
+      public Builder setTopic(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppName = true;
-        result.appName_ = value;
+  result.hasTopic = true;
+        result.topic_ = value;
         return this;
       }
-      public Builder clearAppName() {
-        result.hasAppName = false;
-        result.appName_ = getDefaultInstance().getAppName();
+      public Builder clearTopic() {
+        result.hasTopic = false;
+        result.topic_ = getDefaultInstance().getTopic();
         return this;
       }
       
@@ -310,9 +310,9 @@ public final class DumpAppPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rDumpApp.proto\022\tblackhole\"\033\n\007DumpApp\022\020\n" +
-      "\010app_name\030\001 \002(\tB.\n!com.dp.blackhole.prot" +
-      "ocol.controlB\tDumpAppPB"
+      "\n\rDumpApp.proto\022\tblackhole\"\030\n\007DumpApp\022\r\n" +
+      "\005topic\030\001 \002(\tB.\n!com.dp.blackhole.protoco" +
+      "l.controlB\tDumpAppPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -324,7 +324,7 @@ public final class DumpAppPB {
           internal_static_blackhole_DumpApp_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_DumpApp_descriptor,
-              new java.lang.String[] { "AppName", },
+              new java.lang.String[] { "Topic", },
               com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.class,
               com.dp.blackhole.protocol.control.DumpAppPB.DumpApp.Builder.class);
           return null;

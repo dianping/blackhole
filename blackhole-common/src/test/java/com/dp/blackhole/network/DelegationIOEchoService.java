@@ -3,7 +3,6 @@ package com.dp.blackhole.network;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
-import java.util.Properties;
 
 public class DelegationIOEchoService {
     
@@ -83,11 +82,8 @@ public class DelegationIOEchoService {
                     new echoProcessor(),
                     new DelegationIOConnection.DelegationIOConnectionFactory(),
                     new wappedObjectType());
-            Properties prop = new Properties();
-            prop.setProperty("GenServer.handler.count", "1");
-            prop.setProperty("GenServer.port", "2222");
             try {
-                server.init(prop, "echo", "GenServer.port");
+                server.init("echo", 2222, 1);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -144,11 +140,8 @@ public class DelegationIOEchoService {
                             new echoClientProcessor(),
                             new DelegationIOConnection.DelegationIOConnectionFactory(),
                             new wappedObjectType());
-            Properties prop = new Properties();
-            prop.setProperty("Server.host", "localhost");
-            prop.setProperty("Server.port", "2222");
             try {
-                client.init(prop, "echo", "Server.host", "Server.port");
+                client.init("echo", "localhost", 2222);
             } catch (ClosedChannelException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

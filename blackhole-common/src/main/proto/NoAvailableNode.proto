@@ -4,5 +4,6 @@ option java_package = "com.dp.blackhole.protocol.control";
 option java_outer_classname = "NoAvailableNodePB";
 
 message NoAvailableNode {
-    required string app_name = 1;
+    required string topic = 1;
+    optional string instance_id = 2;
 }

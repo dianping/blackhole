@@ -1,0 +1,17 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "QuitAndCleanPB";
+
+message InstanceGroup {
+    required string topic = 1;
+    repeated string instance_ids = 2;
+}
+
+message Quit {
+    repeated InstanceGroup instanceGroup = 1;
+}
+
+message Clean {
+    repeated InstanceGroup instanceGroup = 1;
+}

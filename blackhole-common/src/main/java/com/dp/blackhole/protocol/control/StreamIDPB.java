@@ -35,36 +35,46 @@ public final class StreamIDPB {
       return com.dp.blackhole.protocol.control.StreamIDPB.internal_static_blackhole_StreamID_fieldAccessorTable;
     }
     
-    // required string app_name = 1;
-    public static final int APP_NAME_FIELD_NUMBER = 1;
-    private boolean hasAppName;
-    private java.lang.String appName_ = "";
-    public boolean hasAppName() { return hasAppName; }
-    public java.lang.String getAppName() { return appName_; }
+    // required string topic = 1;
+    public static final int TOPIC_FIELD_NUMBER = 1;
+    private boolean hasTopic;
+    private java.lang.String topic_ = "";
+    public boolean hasTopic() { return hasTopic; }
+    public java.lang.String getTopic() { return topic_; }
     
-    // required string app_server = 2;
-    public static final int APP_SERVER_FIELD_NUMBER = 2;
-    private boolean hasAppServer;
-    private java.lang.String appServer_ = "";
-    public boolean hasAppServer() { return hasAppServer; }
-    public java.lang.String getAppServer() { return appServer_; }
+    // required string agent_server = 2;
+    public static final int AGENT_SERVER_FIELD_NUMBER = 2;
+    private boolean hasAgentServer;
+    private java.lang.String agentServer_ = "";
+    public boolean hasAgentServer() { return hasAgentServer; }
+    public java.lang.String getAgentServer() { return agentServer_; }
+    
+    // optional string instance_id = 3;
+    public static final int INSTANCE_ID_FIELD_NUMBER = 3;
+    private boolean hasInstanceId;
+    private java.lang.String instanceId_ = "";
+    public boolean hasInstanceId() { return hasInstanceId; }
+    public java.lang.String getInstanceId() { return instanceId_; }
     
     private void initFields() {
     }
     public final boolean isInitialized() {
-      if (!hasAppName) return false;
-      if (!hasAppServer) return false;
+      if (!hasTopic) return false;
+      if (!hasAgentServer) return false;
       return true;
     }
     
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasAppName()) {
-        output.writeString(1, getAppName());
+      if (hasTopic()) {
+        output.writeString(1, getTopic());
       }
-      if (hasAppServer()) {
-        output.writeString(2, getAppServer());
+      if (hasAgentServer()) {
+        output.writeString(2, getAgentServer());
+      }
+      if (hasInstanceId()) {
+        output.writeString(3, getInstanceId());
       }
       getUnknownFields().writeTo(output);
     }
@@ -75,13 +85,17 @@ public final class StreamIDPB {
       if (size != -1) return size;
     
       size = 0;
-      if (hasAppName()) {
+      if (hasTopic()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getAppName());
+          .computeStringSize(1, getTopic());
       }
-      if (hasAppServer()) {
+      if (hasAgentServer()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(2, getAppServer());
+          .computeStringSize(2, getAgentServer());
+      }
+      if (hasInstanceId()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeStringSize(3, getInstanceId());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -241,11 +255,14 @@ public final class StreamIDPB {
       
       public Builder mergeFrom(com.dp.blackhole.protocol.control.StreamIDPB.StreamID other) {
         if (other == com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance()) return this;
-        if (other.hasAppName()) {
-          setAppName(other.getAppName());
+        if (other.hasTopic()) {
+          setTopic(other.getTopic());
         }
-        if (other.hasAppServer()) {
-          setAppServer(other.getAppServer());
+        if (other.hasAgentServer()) {
+          setAgentServer(other.getAgentServer());
+        }
+        if (other.hasInstanceId()) {
+          setInstanceId(other.getInstanceId());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -273,11 +290,15 @@ public final class StreamIDPB {
               break;
             }
             case 10: {
-              setAppName(input.readString());
+              setTopic(input.readString());
               break;
             }
             case 18: {
-              setAppServer(input.readString());
+              setAgentServer(input.readString());
+              break;
+            }
+            case 26: {
+              setInstanceId(input.readString());
               break;
             }
           }
@@ -285,45 +306,66 @@ public final class StreamIDPB {
       }
       
       
-      // required string app_name = 1;
-      public boolean hasAppName() {
-        return result.hasAppName();
+      // required string topic = 1;
+      public boolean hasTopic() {
+        return result.hasTopic();
       }
-      public java.lang.String getAppName() {
-        return result.getAppName();
+      public java.lang.String getTopic() {
+        return result.getTopic();
       }
-      public Builder setAppName(java.lang.String value) {
+      public Builder setTopic(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppName = true;
-        result.appName_ = value;
+  result.hasTopic = true;
+        result.topic_ = value;
         return this;
       }
-      public Builder clearAppName() {
-        result.hasAppName = false;
-        result.appName_ = getDefaultInstance().getAppName();
+      public Builder clearTopic() {
+        result.hasTopic = false;
+        result.topic_ = getDefaultInstance().getTopic();
         return this;
       }
       
-      // required string app_server = 2;
-      public boolean hasAppServer() {
-        return result.hasAppServer();
+      // required string agent_server = 2;
+      public boolean hasAgentServer() {
+        return result.hasAgentServer();
       }
-      public java.lang.String getAppServer() {
-        return result.getAppServer();
+      public java.lang.String getAgentServer() {
+        return result.getAgentServer();
       }
-      public Builder setAppServer(java.lang.String value) {
+      public Builder setAgentServer(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppServer = true;
-        result.appServer_ = value;
+  result.hasAgentServer = true;
+        result.agentServer_ = value;
         return this;
       }
-      public Builder clearAppServer() {
-        result.hasAppServer = false;
-        result.appServer_ = getDefaultInstance().getAppServer();
+      public Builder clearAgentServer() {
+        result.hasAgentServer = false;
+        result.agentServer_ = getDefaultInstance().getAgentServer();
+        return this;
+      }
+      
+      // optional string instance_id = 3;
+      public boolean hasInstanceId() {
+        return result.hasInstanceId();
+      }
+      public java.lang.String getInstanceId() {
+        return result.getInstanceId();
+      }
+      public Builder setInstanceId(java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  result.hasInstanceId = true;
+        result.instanceId_ = value;
+        return this;
+      }
+      public Builder clearInstanceId() {
+        result.hasInstanceId = false;
+        result.instanceId_ = getDefaultInstance().getInstanceId();
         return this;
       }
       
@@ -353,10 +395,10 @@ public final class StreamIDPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\016StreamID.proto\022\tblackhole\"0\n\010StreamID\022" +
-      "\020\n\010app_name\030\001 \002(\t\022\022\n\napp_server\030\002 \002(\tB/\n" +
-      "!com.dp.blackhole.protocol.controlB\nStre" +
-      "amIDPB"
+      "\n\016StreamID.proto\022\tblackhole\"D\n\010StreamID\022" +
+      "\r\n\005topic\030\001 \002(\t\022\024\n\014agent_server\030\002 \002(\t\022\023\n\013" +
+      "instance_id\030\003 \001(\tB/\n!com.dp.blackhole.pr" +
+      "otocol.controlB\nStreamIDPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -368,7 +410,7 @@ public final class StreamIDPB {
           internal_static_blackhole_StreamID_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_StreamID_descriptor,
-              new java.lang.String[] { "AppName", "AppServer", },
+              new java.lang.String[] { "Topic", "AgentServer", "InstanceId", },
               com.dp.blackhole.protocol.control.StreamIDPB.StreamID.class,
               com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder.class);
           return null;

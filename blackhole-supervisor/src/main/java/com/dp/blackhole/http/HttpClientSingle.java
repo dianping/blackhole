@@ -1,8 +1,8 @@
-package com.dp.blackhole.scaleout;
+package com.dp.blackhole.http;
 
 import java.io.IOException;
-import java.io.InputStream;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
@@ -28,19 +28,25 @@ public class HttpClientSingle {
         HttpConnectionParams.setSoTimeout(params, socketTimeout);
     }
     
-    public InputStream getResource(String uri) throws IOException {
+    private synchronized HttpEntity getResource(String uri) throws IOException {
         HttpGet method = new HttpGet(uri);
         HttpResponse httpResponse = this.httpClient.execute(method);
         int statusCode = httpResponse.getStatusLine().getStatusCode();
-        InputStream is = null;
         if (HttpStatus.SC_OK == statusCode) {
             LOG.debug("200 OK request");
-            is = httpResponse.getEntity().getContent();
-            EntityUtils.consume(httpResponse.getEntity());
+            return httpResponse.getEntity();
         } else {
-            EntityUtils.consume(httpResponse.getEntity());
             throw new IOException("Something went wrong, statusCode is " + statusCode);
         }
-        return is;
+    }
+    
+    public String getResponseText(String uri) {
+        LOG.debug("http client access uri: " + uri);
+        try {
+            return EntityUtils.toString(getResource(uri), "utf-8");
+        } catch (IOException e) {
+            LOG.error("Oops, got an exception in reading http response content." + e.getMessage());
+            return null;
+        }
     }
 }

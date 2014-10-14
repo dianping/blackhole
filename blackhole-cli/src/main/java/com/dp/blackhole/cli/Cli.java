@@ -60,10 +60,10 @@ public class Cli {
                 } else if (cmd.startsWith("recovery")) {
                     String[] tokens = getTokens(cmd);
                     String topic = tokens[1];
-                    String agentServer = tokens[2];
+                    String sourceIdentify = tokens[2];
                     long period = Long.parseLong(tokens[3]);
                     long rollTs = Long.parseLong(tokens[4]); 
-                    Message msg = PBwrap.wrapManualRecoveryRoll(topic, agentServer, period, rollTs);
+                    Message msg = PBwrap.wrapManualRecoveryRoll(topic, sourceIdentify, period, rollTs);
                     send(msg);
                     out.println("send message: " + msg);
                 } else if (cmd.startsWith("range")) {
@@ -85,7 +85,11 @@ public class Cli {
                     String[] tokens = getTokens(cmd);
                     String topic = tokens[1];
                     String agentServer = tokens[2];
-                    Message msg = PBwrap.wrapRetireStream(topic, agentServer);
+                    String instanceId = "";
+                    if (tokens.length > 3) {
+                        instanceId = tokens[3];
+                    }
+                    Message msg = PBwrap.wrapRetireStream(topic, agentServer, instanceId);
                     send(msg);
                     out.println("send message: " + msg);
                 } else if (cmd.equals("dumpconf")) {
@@ -253,14 +257,16 @@ public class Cli {
 
     private void start() throws FileNotFoundException, IOException {
         Properties prop = new Properties();
-        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
+        prop.load(getClass().getClassLoader().getResourceAsStream("config.properties"));
         terminatePeriod = Long.parseLong(prop.getProperty("cli.terminate.period", "1000"));
+        String supervisorHost = prop.getProperty("supervisor.host");
+        int supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
         processor = new CliProcessor();
         client = new GenClient<ByteBuffer, SimpleConnection, Cli.CliProcessor>(
                 processor,
                 new SimpleConnection.SimpleConnectionFactory(),
                 null);
-        client.init(prop, "cli", "supervisor.host", "supervisor.port");
+        client.init("cli", supervisorHost, supervisorPort);
     }
     
     public static void main(String[] args) throws FileNotFoundException, IOException {

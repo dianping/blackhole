@@ -35,12 +35,12 @@ public final class AssignBrokerPB {
       return com.dp.blackhole.protocol.control.AssignBrokerPB.internal_static_blackhole_AssignBroker_fieldAccessorTable;
     }
     
-    // required string app_name = 1;
-    public static final int APP_NAME_FIELD_NUMBER = 1;
-    private boolean hasAppName;
-    private java.lang.String appName_ = "";
-    public boolean hasAppName() { return hasAppName; }
-    public java.lang.String getAppName() { return appName_; }
+    // required string topic = 1;
+    public static final int TOPIC_FIELD_NUMBER = 1;
+    private boolean hasTopic;
+    private java.lang.String topic_ = "";
+    public boolean hasTopic() { return hasTopic; }
+    public java.lang.String getTopic() { return topic_; }
     
     // required string broker_server = 2;
     public static final int BROKER_SERVER_FIELD_NUMBER = 2;
@@ -56,10 +56,17 @@ public final class AssignBrokerPB {
     public boolean hasBrokerPort() { return hasBrokerPort; }
     public int getBrokerPort() { return brokerPort_; }
     
+    // optional string instance_id = 4;
+    public static final int INSTANCE_ID_FIELD_NUMBER = 4;
+    private boolean hasInstanceId;
+    private java.lang.String instanceId_ = "";
+    public boolean hasInstanceId() { return hasInstanceId; }
+    public java.lang.String getInstanceId() { return instanceId_; }
+    
     private void initFields() {
     }
     public final boolean isInitialized() {
-      if (!hasAppName) return false;
+      if (!hasTopic) return false;
       if (!hasBrokerServer) return false;
       if (!hasBrokerPort) return false;
       return true;
@@ -68,14 +75,17 @@ public final class AssignBrokerPB {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasAppName()) {
-        output.writeString(1, getAppName());
+      if (hasTopic()) {
+        output.writeString(1, getTopic());
       }
       if (hasBrokerServer()) {
         output.writeString(2, getBrokerServer());
       }
       if (hasBrokerPort()) {
         output.writeInt32(3, getBrokerPort());
+      }
+      if (hasInstanceId()) {
+        output.writeString(4, getInstanceId());
       }
       getUnknownFields().writeTo(output);
     }
@@ -86,9 +96,9 @@ public final class AssignBrokerPB {
       if (size != -1) return size;
     
       size = 0;
-      if (hasAppName()) {
+      if (hasTopic()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getAppName());
+          .computeStringSize(1, getTopic());
       }
       if (hasBrokerServer()) {
         size += com.google.protobuf.CodedOutputStream
@@ -97,6 +107,10 @@ public final class AssignBrokerPB {
       if (hasBrokerPort()) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, getBrokerPort());
+      }
+      if (hasInstanceId()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeStringSize(4, getInstanceId());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -256,14 +270,17 @@ public final class AssignBrokerPB {
       
       public Builder mergeFrom(com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker other) {
         if (other == com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.getDefaultInstance()) return this;
-        if (other.hasAppName()) {
-          setAppName(other.getAppName());
+        if (other.hasTopic()) {
+          setTopic(other.getTopic());
         }
         if (other.hasBrokerServer()) {
           setBrokerServer(other.getBrokerServer());
         }
         if (other.hasBrokerPort()) {
           setBrokerPort(other.getBrokerPort());
+        }
+        if (other.hasInstanceId()) {
+          setInstanceId(other.getInstanceId());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -291,7 +308,7 @@ public final class AssignBrokerPB {
               break;
             }
             case 10: {
-              setAppName(input.readString());
+              setTopic(input.readString());
               break;
             }
             case 18: {
@@ -302,29 +319,33 @@ public final class AssignBrokerPB {
               setBrokerPort(input.readInt32());
               break;
             }
+            case 34: {
+              setInstanceId(input.readString());
+              break;
+            }
           }
         }
       }
       
       
-      // required string app_name = 1;
-      public boolean hasAppName() {
-        return result.hasAppName();
+      // required string topic = 1;
+      public boolean hasTopic() {
+        return result.hasTopic();
       }
-      public java.lang.String getAppName() {
-        return result.getAppName();
+      public java.lang.String getTopic() {
+        return result.getTopic();
       }
-      public Builder setAppName(java.lang.String value) {
+      public Builder setTopic(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAppName = true;
-        result.appName_ = value;
+  result.hasTopic = true;
+        result.topic_ = value;
         return this;
       }
-      public Builder clearAppName() {
-        result.hasAppName = false;
-        result.appName_ = getDefaultInstance().getAppName();
+      public Builder clearTopic() {
+        result.hasTopic = false;
+        result.topic_ = getDefaultInstance().getTopic();
         return this;
       }
       
@@ -367,6 +388,27 @@ public final class AssignBrokerPB {
         return this;
       }
       
+      // optional string instance_id = 4;
+      public boolean hasInstanceId() {
+        return result.hasInstanceId();
+      }
+      public java.lang.String getInstanceId() {
+        return result.getInstanceId();
+      }
+      public Builder setInstanceId(java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  result.hasInstanceId = true;
+        result.instanceId_ = value;
+        return this;
+      }
+      public Builder clearInstanceId() {
+        result.hasInstanceId = false;
+        result.instanceId_ = getDefaultInstance().getInstanceId();
+        return this;
+      }
+      
       // @@protoc_insertion_point(builder_scope:blackhole.AssignBroker)
     }
     
@@ -393,11 +435,11 @@ public final class AssignBrokerPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022AssignBroker.proto\022\tblackhole\"L\n\014Assig" +
-      "nBroker\022\020\n\010app_name\030\001 \002(\t\022\025\n\rbroker_serv" +
-      "er\030\002 \002(\t\022\023\n\013broker_port\030\003 \002(\005B3\n!com.dp." +
-      "blackhole.protocol.controlB\016AssignBroker" +
-      "PB"
+      "\n\022AssignBroker.proto\022\tblackhole\"^\n\014Assig" +
+      "nBroker\022\r\n\005topic\030\001 \002(\t\022\025\n\rbroker_server\030" +
+      "\002 \002(\t\022\023\n\013broker_port\030\003 \002(\005\022\023\n\013instance_i" +
+      "d\030\004 \001(\tB3\n!com.dp.blackhole.protocol.con" +
+      "trolB\016AssignBrokerPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -409,7 +451,7 @@ public final class AssignBrokerPB {
           internal_static_blackhole_AssignBroker_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_AssignBroker_descriptor,
-              new java.lang.String[] { "AppName", "BrokerServer", "BrokerPort", },
+              new java.lang.String[] { "Topic", "BrokerServer", "BrokerPort", "InstanceId", },
               com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.class,
               com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker.Builder.class);
           return null;
