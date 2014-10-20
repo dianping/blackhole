@@ -21,17 +21,14 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.log4j.Logger;
 
 import com.dp.blackhole.common.ParamsKey;
-import com.dp.blackhole.common.Util;
 import com.dp.blackhole.supervisor.ConfigManager;
 
 public class HttpScaleOutHandler extends HttpAbstractHandler implements HttpRequestHandler {
     private static Logger LOG = Logger.getLogger(HttpScaleOutHandler.class);
     private ConfigManager configManager;
-    private HttpClientSingle httpClient;
     
-    public HttpScaleOutHandler(ConfigManager lionConfChange, HttpClientSingle httpClient) {
-        this.configManager = lionConfChange;
-        this.httpClient = httpClient;
+    public HttpScaleOutHandler(ConfigManager configManager) {
+        this.configManager = configManager;
     }
     
     @Override
@@ -87,43 +84,11 @@ public class HttpScaleOutHandler extends HttpAbstractHandler implements HttpRequ
             return new HttpResult(HttpResult.NONEED, "It contains no mapping for the cmdbapp " + app);
         }
         for (String topic : topicList) {
-            //get string of old hosts of the app
             String watchKey = ParamsKey.LionNode.HOSTS_PREFIX + topic;
-            String url = configManager.generateGetURL(watchKey);
-            String response = httpClient.getResponseText(url);
-            if (response == null) {
-                return new HttpResult(HttpResult.FAILURE, "IO exception was thrown when handle url ." + url);
-            } else if (response.startsWith("1|")) {
-                return new HttpResult(HttpResult.FAILURE, response.substring(2));
-            } else if (response.equals("<null>")) {
-                return new HttpResult(HttpResult.FAILURE, "No configration in lion for key=" + watchKey);
-            } else if (response.length() == 0) {
-                return new HttpResult(HttpResult.FAILURE, "Invalid response");
-            }
-            String[] oldHosts = Util.getStringListOfLionValue(response);
-
-            String[] newHosts = null;
-            //change it (add the given hostname)
-            if (oldHosts == null) {
-                newHosts = args[0];
-            } else {
-                newHosts = Arrays.copyOf(oldHosts, oldHosts.length + args[0].length);
-                for (int i = 0; i < args[0].length; i++) {
-                    newHosts[oldHosts.length + i] = args[0][i];
-                }
-            }
-
-            String newHostsLionString = Util.getLionValueOfStringList(newHosts);
-            url = configManager.generateSetURL(watchKey, newHostsLionString);
-            response = httpClient.getResponseText(url);
-            if (response == null) {
-                return new HttpResult(HttpResult.FAILURE, "IO exception was thrown when handle url ." + url);
-            } else if (response.startsWith("1|")) {
-                return new HttpResult(HttpResult.FAILURE, "No configration in lion for key=" + watchKey);
-            } else if (response.startsWith("0")) {
-            } else {
-                LOG.error("Unkown response.");
-                return new HttpResult(HttpResult.FAILURE, "Unkown response.");
+            try {
+                configManager.updateLionList(watchKey, ParamsKey.LionNode.OP_SCALEOUT, args[0]);
+            } catch (HttpException e) {
+                return new HttpResult(HttpResult.FAILURE, e.getMessage());
             }
         }
         return new HttpResult(HttpResult.SUCCESS, "");

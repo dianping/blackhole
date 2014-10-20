@@ -277,6 +277,8 @@ public final class HttpServer {
                 "com.sun.jersey.api.core.PackagesResourceConfig");
         sh.setInitParameter("com.sun.jersey.config.property.packages",
                 packageName);
+        sh.setInitParameter("com.sun.jersey.api.json.POJOMappingFeature",
+                "true");
         webAppContext.addServlet(sh, pathSpec);
     }
 

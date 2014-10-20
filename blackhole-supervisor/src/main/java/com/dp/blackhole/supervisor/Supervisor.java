@@ -1,9 +1,9 @@
 package com.dp.blackhole.supervisor;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,11 +22,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dianping.lion.client.LionException;
 import com.dp.blackhole.common.PBwrap;
-import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.conf.ConfigKeeper;
-import com.dp.blackhole.conf.Context;
-import com.dp.blackhole.http.HttpClientSingle;
 import com.dp.blackhole.http.RequestListener;
 import com.dp.blackhole.network.ConnectionFactory;
 import com.dp.blackhole.network.EntityProcessor;
@@ -53,46 +49,60 @@ import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 import com.dp.blackhole.protocol.control.StreamIDPB.StreamID;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry;
+import com.dp.blackhole.rest.HttpServer;
+import com.dp.blackhole.rest.ServiceFactory;
+import com.dp.blackhole.rest.model.TopicConfInfo;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Supervisor {
 
     public static final Log LOG = LogFactory.getLog(Supervisor.class);
+    private ConfigManager configManager;
     
     private GenServer<ByteBuffer, SimpleConnection, EntityProcessor<ByteBuffer, SimpleConnection>> server;  
     private ConcurrentHashMap<SimpleConnection, ArrayList<Stream>> connectionStreamMap;
     private ConcurrentHashMap<Stage, SimpleConnection> stageConnectionMap;
 
-    private ConcurrentHashMap<Stream, ArrayList<Stage>> Streams;
-    private ConcurrentHashMap<StreamId, Stream> streamIdMap;
-    private ConfigManager configManager;
-    
-    private ConcurrentHashMap<String, ConcurrentHashMap<String ,PartitionInfo>> topics;
-    private ConcurrentHashMap<ConsumerGroup, ConsumerGroupDesc> consumerGroups;
+    private ConcurrentHashMap<String, Topic> topics;
+
+    private ConcurrentHashMap<ConsumerGroupKey, ConsumerGroup> consumerGroups;
   
     private ConcurrentHashMap<SimpleConnection, ConnectionDescription> connections;
     private ConcurrentHashMap<String, SimpleConnection> agentsMapping;
     private ConcurrentHashMap<String, SimpleConnection> brokersMapping;
+
+    public Set<String> getAllTopicNames() {
+        return new HashSet<String>(topics.keySet());
+    }
     
-    public boolean isActiveStream(String topic, String sourceIdentify) {
-        StreamId streamId = new StreamId(topic, sourceIdentify);
-        Stream stream = streamIdMap.get(streamId);
+    public Set<ConsumerGroupKey> getAllConsumerGroupKeys() {
+        return new HashSet<ConsumerGroupKey>(consumerGroups.keySet());
+    }
+    
+    public ConsumerGroup getConsumerGroup(ConsumerGroupKey groupKey) {
+        return consumerGroups.get(groupKey);
+    }
+    
+    public boolean isActiveStream(String topic, String source) {
+        Stream stream = getStream(topic, source);
         return stream == null ? false : stream.isActive();
     }
     
-    public boolean isEmptyStream(String topic, String sourceIdentify) {
-        StreamId streamId = new StreamId(topic, sourceIdentify);
-        Stream stream = streamIdMap.get(streamId);
+    public boolean isEmptyStream(String topic, String source) {
+        Stream stream = getStream(topic, source);
         if (stream == null) {
             return true;
         }
-        List<Stage> stages = Streams.get(stream);
+        List<Stage> stages = stream.getStages();
         return ((stages == null || stages.size() == 0) ? true : false);
     }
     
-    public boolean isCleanStream(String topic, String sourceIdentify) {
-        StreamId streamId = new StreamId(topic, sourceIdentify);
-        Stream stream = streamIdMap.get(streamId);
+    public boolean isCleanStream(String topic, String source) {
+        Topic t = topics.get(topic);
+        if (t == null) {
+            return true;
+        }
+        Stream stream = t.getStream(source);
         return ((stream == null) ? true : false);
     }
 
@@ -134,20 +144,72 @@ public class Supervisor {
         desc.updateHeartBeat();
     }
     
+    private void addStream(Stream stream) {
+        Topic t = topics.get(stream.getTopic());
+        if (t != null) {
+            t.addStream(stream);
+        }
+    }
+    
+    public Stream getStream(String topic, String source) {
+        Stream stream = null;
+        Topic t = topics.get(topic);
+        if (t != null) {
+            stream = t.getStream(source);
+        }
+        return stream;
+    }
+    
+    public List<Stream> getAllStreams(String topic) {
+        List<Stream> streams = null;
+        Topic t = topics.get(topic);
+        if (t != null) {
+            streams = t.getAllStreamsOfCopy();
+        }
+        return streams;
+    }
+    
+    @SuppressWarnings("unused")
+    private void addPartition(String topic, PartitionInfo pInfo) {
+        Topic t = topics.get(topic);
+        if (t != null) {
+            t.addPartition(pInfo.getId(), pInfo);
+        }
+    }
+    
+    private void removeStream(String topic, String source) {
+        Topic t = topics.get(topic);
+        if (t != null) {
+            t.removeStream(source);
+        }
+    }
+    
+    private PartitionInfo getPartition(String topic, String partitionId) {
+        PartitionInfo pInfo = null;
+        Topic t = topics.get(topic);
+        if (t != null) {
+            pInfo = t.getPartition(partitionId);
+        }
+        return pInfo;
+    }
+    
+    @SuppressWarnings("unused")
+    private void removePartition(String topic, String partitionId) {
+        Topic t = topics.get(topic);
+        if (t != null) {
+            t.removePartition(partitionId);
+        }
+    }
+    
     private void handleTopicReport(TopicReport report, SimpleConnection from) { 
         for (TopicEntry entry : report.getEntriesList()) {
             String topic = entry.getTopic();
             String partitionId = entry.getPartitionId();
             
             // update partition offset
-            ConcurrentHashMap<String, PartitionInfo> partitionInfos = topics.get(topic);
-            if (partitionInfos == null) {
-                LOG.warn("topic: " + topic +" can't be found in topics, while exists in topic report");
-                continue;
-            }
-            PartitionInfo partitionInfo = partitionInfos.get(partitionId);
+            PartitionInfo partitionInfo = getPartition(topic, partitionId);
             if (partitionInfo == null) {
-                LOG.warn("partitionid: " + topic+ "." + partitionId +" can't be found in partitionInfos, while exists in topic report");
+                LOG.warn("partition: " + topic + "." + partitionId +" can't be found, while exists in topic report");
                 continue;
             } else {
                 if (partitionInfo.isOffline()) {
@@ -172,97 +234,101 @@ public class Supervisor {
         desc.setType(ConnectionDescription.CONSUMER);
         
         String groupId = consumerReg.getGroupId();
-        String id = consumerReg.getConsumerId();
+        String consumerId = consumerReg.getConsumerId();
         String topic = consumerReg.getTopic();
 
         ArrayList<PartitionInfo> availPartitions = getAvailPartitions(topic);
         if (availPartitions == null) {
             LOG.error("unknown topic: " + topic);
-            sendConsumerRegFail(from, groupId, id, topic);
+            sendConsumerRegFail(from, groupId, consumerId, topic);
             return;
         } else if (availPartitions.size() == 0) {
             LOG.error("no partition available , topic: " + topic);
-            sendConsumerRegFail(from, groupId, id, topic);
+            sendConsumerRegFail(from, groupId, consumerId, topic);
             return;
         } 
         
-        ConsumerGroup group = new ConsumerGroup(groupId, topic);
-        ConsumerGroupDesc groupDesc = consumerGroups.get(group);
-        if (groupDesc == null) {
-            groupDesc = new ConsumerGroupDesc(group);
-            consumerGroups.put(group, groupDesc);
+        ConsumerGroupKey groupKey = new ConsumerGroupKey(groupId, topic);
+        ConsumerGroup group = consumerGroups.get(groupKey);
+        if (group == null) {
+            group = new ConsumerGroup(groupKey);
+            consumerGroups.put(groupKey, group);
         }
         
-        ConsumerDesc consumerDesc = new ConsumerDesc(id, group, topic, from);
+        ConsumerDesc consumerDesc = new ConsumerDesc(consumerId, groupId, topic, from);
         desc.attach(consumerDesc);
         
-        tryAssignConsumer(consumerDesc, groupDesc);
+        tryAssignConsumer(consumerDesc, group);
     }
     
-    public void tryAssignConsumer(ConsumerDesc consumer, ConsumerGroupDesc group) {
-        ArrayList<ConsumerDesc> consumes = group.getConsumes();
-        
-        // new consumer arrived?
-        if (consumer != null) {
-            if (group.exists(consumer)) {
-                LOG.error("consumer already exists: " + consumer);
+    public void tryAssignConsumer(ConsumerDesc consumer, ConsumerGroup group) {
+        synchronized (group) {
+            List<ConsumerDesc> consumes = group.getConsumes();
+            if (consumes == null) {
+                consumes = new ArrayList<ConsumerDesc>();
+            }
+            // new consumer arrived?
+            if (consumer != null) {
+                if (group.exists(consumer)) {
+                    LOG.error("consumer already exists: " + consumer);
+                    return;
+                }
+                consumes.add(consumer);
+            }
+            
+            // get online partitions
+            ArrayList<PartitionInfo> partitions = getAvailPartitions(group.getTopic());
+            if (partitions == null || partitions.size() ==0) {
+                LOG.error("can not get any available partitions");
                 return;
             }
-            consumes.add(consumer);
-        }
-        
-        // get online partitions
-        ArrayList<PartitionInfo> partitions = getAvailPartitions(group.getTopic());
-        if (partitions == null || partitions.size() ==0) {
-            LOG.error("can not get any available partitions");
-            return;
-        }
-        
-        // split partitions by consumer number
-        int consumerNum = consumes.size();
-        ArrayList<ArrayList<PartitionInfo>> assignPartitions
-            = new ArrayList<ArrayList<PartitionInfo>>(consumerNum);
-        for (int i = 0; i < consumerNum; i++) {
-            assignPartitions.add(new ArrayList<PartitionInfo>());
-        }
-        
-        // split partition into consumerNum groups
-        for (int i = 0; i < partitions.size(); i++) {
-            PartitionInfo pinfo = partitions.get(i);
-            assignPartitions.get(i % consumerNum).add(pinfo);
-        }
-        
-        for (int i = 0; i < consumes.size(); i++) {
-            ConsumerDesc cond = consumes.get(i);
-            ArrayList<PartitionInfo> pinfoList = assignPartitions.get(i);
- 
-            List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(pinfoList.size());
-            for (PartitionInfo info : pinfoList) {
-                String broker = info.getHost()+ ":" + getBrokerPort(info.getHost());
-                AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(broker, info.getId(), info.getEndOffset());
-                offsets.add(offset);
+            
+            // split partitions by consumer number
+            int consumerNum = consumes.size();
+            ArrayList<ArrayList<PartitionInfo>> assignPartitions
+                = new ArrayList<ArrayList<PartitionInfo>>(consumerNum);
+            for (int i = 0; i < consumerNum; i++) {
+                assignPartitions.add(new ArrayList<PartitionInfo>());
             }
-            Message assign = PBwrap.wrapAssignConsumer(group.getGroupId(), cond.getId(), group.getTopic(), offsets);
-            send(cond.getConnection(), assign);
+            
+            // split partition into consumerNum groups
+            for (int i = 0; i < partitions.size(); i++) {
+                PartitionInfo pinfo = partitions.get(i);
+                assignPartitions.get(i % consumerNum).add(pinfo);
+            }
+            
+            for (int i = 0; i < consumerNum; i++) {
+                ConsumerDesc cond = consumes.get(i);
+                ArrayList<PartitionInfo> pinfoList = assignPartitions.get(i);
+                List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(pinfoList.size());
+                for (PartitionInfo info : pinfoList) {
+                    String broker = info.getHost()+ ":" + getBrokerPort(info.getHost());
+                    AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(broker, info.getId(), info.getEndOffset());
+                    offsets.add(offset);
+                }
+                Message assign = PBwrap.wrapAssignConsumer(group.getGroupId(), cond.getId(), group.getTopic(), offsets);
+                send(cond.getConnection(), assign);
+            }
+            
+            // update consumerGroup mapping
+            group.update(consumes, assignPartitions, partitions);
         }
-        
-        // update consumerGroupDesc mapping
-        group.update(consumes, assignPartitions, partitions);
     }
 
     private ArrayList<PartitionInfo> getAvailPartitions(String topic) {
-        // get available Partitions
-        ConcurrentHashMap<String, PartitionInfo> partitionMap = topics.get(topic);
-        if (partitionMap == null) {
-            return null;
-        }
-        Collection<PartitionInfo> partitions = partitionMap.values();
-        ArrayList<PartitionInfo> availPartitions = new ArrayList<PartitionInfo>();
-        for (PartitionInfo pinfo : partitions) {
-            if (pinfo.isOffline()) {
-                continue;
+        ArrayList<PartitionInfo> availPartitions = null;
+        Topic t = topics.get(topic);
+        if (t != null) {
+            List<PartitionInfo> partitions = t.getAllPartitionsOfCopy();
+            if (partitions != null) {
+                availPartitions = new ArrayList<PartitionInfo>();
+                for (PartitionInfo pinfo : partitions) {
+                    if (pinfo.isOffline()) {
+                        continue;
+                    }
+                    availPartitions.add(pinfo);
+                }
             }
-            availPartitions.add(pinfo);
         }
         return availPartitions;
     }
@@ -277,26 +343,20 @@ public class Supervisor {
         String partition = offsetCommit.getPartition();
         long offset = offsetCommit.getOffset();
         
-        ConsumerGroup group = new ConsumerGroup(groupId, topic);
-        ConsumerGroupDesc groupDesc = consumerGroups.get(group);
-        if (groupDesc == null) {
-            LOG.warn("can not find consumer group " + group);
+        ConsumerGroupKey groupKey = new ConsumerGroupKey(groupId, topic);
+        ConsumerGroup group = consumerGroups.get(groupKey);
+        if (group == null) {
+            LOG.warn("can not find consumer group " + groupKey);
             return;
         }
         
-        groupDesc.updateOffset(id, topic, partition, offset);
+        group.updateOffset(id, topic, partition, offset);//TODO consumerid to consumer
     }
     
     private void markPartitionOffline(String topic, String partitionId) {
-        ConcurrentHashMap<String, PartitionInfo> partitions = topics.get(topic);
-        if (partitions == null) {
-            LOG.warn("can't find partition by topic: " + topic + "." + partitionId);
-            return;
-        }
-        
-        PartitionInfo pinfo = partitions.get(partitionId);
+        PartitionInfo pinfo = getPartition(topic, partitionId);
         if (pinfo == null) {
-            LOG.warn("can't find partition by partitionId: " + topic + "." + partitionId);
+            LOG.warn("can't find partition by partition: " + topic + "." + partitionId);
             return;
         }
         pinfo.markOffline(true);
@@ -314,17 +374,17 @@ public class Supervisor {
             for (Stream stream : streams) {
                 LOG.info("mark stream as inactive: " + stream);
                 stream.updateActive(false);
-                ArrayList<Stage> stages = Streams.get(stream);
+                List<Stage> stages = stream.getStages();
                 if (stages != null) {
                     synchronized (stages) {
                         for (Stage stage : stages) {
                             LOG.info("checking stage: " + stage);
-                            if (stage.status != Stage.UPLOADING) {
+                            if (stage.getStatus() != Stage.UPLOADING) {
                                 Issue e = new Issue();
                                 e.desc = "logreader failed";
                                 e.ts = now;
-                                stage.issuelist.add(e);
-                                stage.status = Stage.PENDING;
+                                stage.getIssuelist().add(e);
+                                stage.setStatus(Stage.PENDING);
                             }
                         }
                     }
@@ -346,8 +406,8 @@ public class Supervisor {
                 }
                 
                 // mark partitions as offline
-                String topic = stream.topic;
-                String partitionId = stream.sourceIdentify;
+                String topic = stream.getTopic();
+                String partitionId = stream.getSource();
                 markPartitionOffline(topic, partitionId);
             }
         } else {
@@ -366,7 +426,7 @@ public class Supervisor {
         // processing current stage on streams
         if (streams != null) {
             for (Stream stream : streams) {
-                ArrayList<Stage> stages = Streams.get(stream);
+                List<Stage> stages = stream.getStages();
                 if (stages.size() == 0) {
                     continue;
                 }
@@ -381,20 +441,20 @@ public class Supervisor {
                     Issue e = new Issue();
                     e.desc = "broker failed";
                     e.ts = now;
-                    current.issuelist.add(e);
+                    current.getIssuelist().add(e);
 
                     // do not reassign broker here, since logreader will find broker fail,
                     // and do appReg again; otherwise two appReg for the same stream will send 
                     if (brokersMapping.size() == 0) {
-                        current.status = Stage.PENDING;
+                        current.setStatus(Stage.PENDING);
                     } else {
-                        current.status = Stage.BROKERFAIL;
+                        current.setStatus(Stage.BROKERFAIL);
                     }
                     LOG.info("after checking current stage: " + current);
                 }
                    
                 // remove corresponding appNodes's relationship with the stream
-                String agentHost = Util.getAgentHostFromSourceIdentify(stream.sourceIdentify);
+                String agentHost = Util.getAgentHostFromSource(stream.getSource());
                 SimpleConnection agentConnection = agentsMapping.get(agentHost);
                 if (agentConnection == null) {
                     LOG.error("can not find agentConnection by host " + agentHost);
@@ -413,8 +473,8 @@ public class Supervisor {
                 }
                  
                 // mark partitions as offline
-                String topic = stream.topic;
-                String partitionId = stream.sourceIdentify;
+                String topic = stream.getTopic();
+                String partitionId = stream.getSource();
                 markPartitionOffline(topic, partitionId);
             }
         } else {
@@ -426,16 +486,16 @@ public class Supervisor {
             if (connection.equals(entry.getValue())) {
                 LOG.info("processing entry: "+ entry);
                 Stage stage = entry.getKey();
-                if (stage.status == Stage.PENDING) {
+                if (stage.getStatus() == Stage.PENDING) {
                     continue;
                 }
-                StreamId id = new StreamId(stage.topic, stage.sourceIdentify);
-                Stream stream = streamIdMap.get(id);
+                Topic t = topics.get(stage.getTopic());
+                Stream stream = t.getStream(stage.getSource());
                 if (stream == null) {
-                    LOG.error("can not find stream by streamid: " + id);
+                    LOG.error("can not find stream by" + stage.getTopic() + ":" + stage.getSource());
                     continue;
                 }
-                ArrayList<Stage> stages = Streams.get(stream);
+                List<Stage> stages = stream.getStages();
                 if (stages != null) {
                     synchronized (stages) {
                         if (stream != null) {
@@ -457,32 +517,32 @@ public class Supervisor {
             return;
         }
         //the purpose of the map named 'toBeReAssign' is to avoid multiple distribution of consumers in a group
-        HashMap<ConsumerGroup, ConsumerGroupDesc> toBeReAssign = new HashMap<ConsumerGroup, ConsumerGroupDesc>();
+        HashMap<ConsumerGroupKey, ConsumerGroup> toBeReAssign = new HashMap<ConsumerGroupKey, ConsumerGroup>();
         for (NodeDesc nodeDesc : nodeDescs) {
             ConsumerDesc consumerDesc = (ConsumerDesc) nodeDesc;
-            ConsumerGroup group = consumerDesc.getConsumerGroup();
-            ConsumerGroupDesc groupDesc = consumerGroups.get(group);
-            if (groupDesc == null) {
-                LOG.error("can not find groupDesc by ConsumerGroup: " + group);
+            ConsumerGroupKey groupKey = new ConsumerGroupKey(consumerDesc.getGroupId(), consumerDesc.getTopic());
+            ConsumerGroup group = consumerGroups.get(groupKey);
+            if (group == null) {
+                LOG.error("can not find groupDesc by ConsumerGroup: " + groupKey);
                 continue;
             }
 
-            groupDesc.unregisterConsumer(consumerDesc);
+            group.unregisterConsumer(consumerDesc);
             
-            if (groupDesc.getConsumers().size() != 0) {
-                toBeReAssign.put(group, groupDesc);
+            if (group.getConsumerCount() != 0) {
+                toBeReAssign.put(groupKey, group);
             } else {
-                LOG.info("consumerGroup " + group +" has not live consumer, thus be removed");
-                toBeReAssign.remove(group);
-                consumerGroups.remove(group);
+                LOG.info("consumerGroup " + groupKey +" has not live consumer, thus be removed");
+                toBeReAssign.remove(groupKey);
+                consumerGroups.remove(groupKey);
             }
         }
         
-        for (Map.Entry<ConsumerGroup, ConsumerGroupDesc> entry : toBeReAssign.entrySet()) {
-            ConsumerGroup cong = entry.getKey();
-            ConsumerGroupDesc cond = entry.getValue();
-            LOG.info("reassign consumers in group: " + cong + ", caused by consumer fail: " + cond);
-            tryAssignConsumer(null, cond);
+        for (Map.Entry<ConsumerGroupKey, ConsumerGroup> entry : toBeReAssign.entrySet()) {
+            ConsumerGroupKey key = entry.getKey();
+            ConsumerGroup group = entry.getValue();
+            LOG.info("reassign consumers in group key: " + key + ", caused by consumer fail: " + group);
+            tryAssignConsumer(null, group);
         }
     }
     
@@ -527,31 +587,23 @@ public class Supervisor {
         sb.append("############################## dump ##############################\n");
         
         sb.append("print Streams:\n");
-        for (Entry<Stream, ArrayList<Stage>> entry : Streams.entrySet()) {
-            Stream stream = entry.getKey();
-            sb.append("[stream]\n")
-            .append(stream)
-            .append("\n")
-            .append("[stages]\n");
-            ArrayList<Stage> stages = entry.getValue();
-            synchronized (stages) {
-                for (Stage stage : stages) {
-                    sb.append(stage)
-                    .append("\n");
+        for (Topic t : topics.values()) {
+            List<Stream> streams = t.getAllStreamsOfCopy();
+            for (Stream stream : streams) {
+                sb.append("[stream]\n")
+                .append(stream)
+                .append("\n")
+                .append("[stages]\n");
+                List<Stage> stages = stream.getStages();
+                synchronized (stages) {
+                    for (Stage stage : stages) {
+                        sb.append(stage)
+                        .append("\n");
+                    }
                 }
             }
         }
         sb.append("\n");
-        
-        sb.append("print streamIdMap:\n");
-        for (Entry<StreamId, Stream> entry : streamIdMap.entrySet()) {
-            sb.append("<")
-            .append(entry.getValue())
-            .append(">")
-            .append("\n");
-        }
-        sb.append("\n");
-        
         sb.append("print stageConnectionMap:\n");
         for(Entry<Stage, SimpleConnection> entry : stageConnectionMap.entrySet()) {
             sb.append("<")
@@ -611,32 +663,23 @@ public class Supervisor {
         sb.append("dump topic:\n");
         sb.append("############################## dump ##############################\n");
         sb.append("print streamIdMap:\n");
-        Set<Stream> printStreams = new HashSet<Stream>();
-        for (StreamId streamId : streamIdMap.keySet()) {
-            if (streamId.belongTo(topic)) {
-                Stream stream = streamIdMap.get(streamId);
-                printStreams.add(stream);
-                sb.append("<")
-                .append(stream)
-                .append(">")
-                .append("\n");
-            }
+        Topic t = topics.get(topic);
+        if (t == null) {
+            LOG.warn("Can not dump topic " + topic + ", cause no mapping exists.");
+            return;
         }
         sb.append("\n");
-        Map<String, PartitionInfo> partitionMap = topics.get(topic);
         sb.append("print Streams:\n");
-        for (Stream stream : printStreams) {
+        for (Stream stream : t.getAllStreamsOfCopy()) {
             sb.append("[stream]\n")
             .append(stream)
             .append("\n").append("[partition]\n");
-            if (partitionMap != null) {
-                PartitionInfo partitionInfo = partitionMap.get(stream.sourceIdentify);
-                if (partitionInfo != null) {
-                    sb.append(partitionInfo).append("\n");
-                }
+            PartitionInfo partitionInfo = getPartition(topic, stream.getSource());
+            if (partitionInfo != null) {
+                sb.append(partitionInfo).append("\n");
             }
             sb.append("[stages]\n");
-            ArrayList<Stage> stages = Streams.get(stream);
+            List<Stage> stages = stream.getStages();
             synchronized (stages) {
                 for (Stage stage : stages) {
                     sb.append(stage);
@@ -660,27 +703,25 @@ public class Supervisor {
             SimpleConnection from) {
         String topic = dumpConsumerGroup.getTopic();
         String groupId = dumpConsumerGroup.getGroupId();
-        ConsumerGroup consumerGroup = new ConsumerGroup(groupId, topic);
-        ConsumerGroupDesc consumerGroupDesc = consumerGroups.get(consumerGroup);
+        ConsumerGroupKey groupKey = new ConsumerGroupKey(groupId, topic);
+        ConsumerGroup group = consumerGroups.get(groupKey);
         StringBuilder sb = new StringBuilder();
-        if (consumerGroupDesc == null) {
+        if (group == null) {
             sb.append("Can not find consumer group by groupId:").append(groupId).append(" topic:").append(topic);
             LOG.info(sb.toString());
         } else {
             sb.append("dump consumer group:\n");
             sb.append("############################## dump ##############################\n");
-            sb.append("print ").append(consumerGroup).append("\n");
-            Map<String, PartitionInfo> partitionMap = topics.get(topic);
+            sb.append("print ").append(groupKey).append("\n");
+            
             long sumDelta = 0;
-            for(Map.Entry<String, AtomicLong> entry : consumerGroupDesc.getCommitedOffsets().entrySet()) {
+            for(Map.Entry<String, AtomicLong> entry : group.getCommitedOffsets().entrySet()) {
                 long delta = 0;
-                if (partitionMap != null) {
-                    PartitionInfo partitionInfo = partitionMap.get(entry.getKey());
-                    if (partitionInfo != null) {
-                        delta = partitionInfo.getEndOffset() - entry.getValue().get();
-                        sumDelta += delta;
-                        sb.append(partitionInfo).append("\n");
-                    }
+                PartitionInfo partitionInfo = getPartition(topic, entry.getKey());
+                if (partitionInfo != null) {
+                    delta = partitionInfo.getEndOffset() - entry.getValue().get();
+                    sumDelta += delta;
+                    sb.append(partitionInfo).append("\n");
                 }
                 sb.append("{committedinfo,").append(entry.getKey())
                 .append(",").append(entry.getValue().get()).append(",").append(delta).append("}\n\n");
@@ -694,19 +735,9 @@ public class Supervisor {
 
     public void listTopics(SimpleConnection from) {
         StringBuilder sb = new StringBuilder();
-        SortedSet<String> topicSet = new TreeSet<String>();
+        SortedSet<String> topicSet = new TreeSet<String>(topics.keySet());
         sb.append("list topics:\n");
         sb.append("############################## dump ##############################\n");
-        
-        for(Entry<StreamId, Stream> entry : streamIdMap.entrySet()) {
-            String streamIdString = entry.getKey().toString();
-            int endIndex = streamIdString.indexOf('@');
-            if (endIndex == -1) {
-                continue;
-            }
-            String topic = streamIdString.substring(0, endIndex);
-            topicSet.add(topic);            
-        }
         for (String topicInOrder : topicSet) {
             sb.append("<")
             .append(topicInOrder)
@@ -758,18 +789,18 @@ public class Supervisor {
         StringBuilder sb = new StringBuilder();
         sb.append("list consumer groups:\n");
         sb.append("############################## dump ##############################\n");
-        SortedSet<ConsumerGroup> groupsSorted  = new TreeSet<ConsumerGroup>(new Comparator<ConsumerGroup>() {
+        SortedSet<ConsumerGroupKey> groupsSorted  = new TreeSet<ConsumerGroupKey>(new Comparator<ConsumerGroupKey>() {
             @Override
-            public int compare(ConsumerGroup o1, ConsumerGroup o2) {
+            public int compare(ConsumerGroupKey o1, ConsumerGroupKey o2) {
                 int topicResult = o1.getTopic().compareTo(o2.getTopic());
                 return topicResult == 0 ? o1.getGroupId().compareTo(o2.getGroupId()) : topicResult;
             }
         });
-        for (ConsumerGroup group : consumerGroups.keySet()) {
-            groupsSorted.add(group);
+        for (ConsumerGroupKey groupKey : consumerGroups.keySet()) {
+            groupsSorted.add(groupKey);
         }
-        for (ConsumerGroup group : groupsSorted) {
-            sb.append(group).append("\n");
+        for (ConsumerGroupKey groupKey : groupsSorted) {
+            sb.append(groupKey).append("\n");
         }
         sb.append("##################################################################");
         
@@ -792,25 +823,28 @@ public class Supervisor {
 
     public void removeConf(RemoveConf removeConf, SimpleConnection from) {
         String topic = removeConf.getTopic();
-        List<String> agentServers = removeConf.getAgentServersList();
-        configManager.removeConf(topic, agentServers);
+        configManager.removeConf(topic);
     }
 
     private void handleRetireStream(StreamID streamId, SimpleConnection from) {
-        StreamId id = new StreamId(streamId.getTopic(),
-                Util.getSourceIdentify(streamId.getAgentServer(), streamId.getInstanceId()));
         boolean force = false;
         if (getConnectionType(from) == ConnectionDescription.AGENT) {
             force = true;
         }
-        retireStreamInternal(id, force);
+        String topic = streamId.getTopic();
+        String source = Util.getSource(streamId.getAgentServer(), streamId.getInstanceId());
+        Stream stream = getStream(topic, source);
+        retireStreamInternal(stream, force);
     }
-
-    private void retireStreamInternal(StreamId id, boolean forceRetire) {
-        Stream stream = streamIdMap.get(id);
-        
+    
+    public void retireStream(String topic, String source) {
+        Stream stream = getStream(topic, source);
+        retireStreamInternal(stream, false);
+    }
+    
+    private void retireStreamInternal(Stream stream, boolean forceRetire) {
         if (stream == null) {
-            LOG.error("can't find stream by streamid: " + id);
+            LOG.error("can't find stream");
             return;
         }
         
@@ -826,10 +860,10 @@ public class Supervisor {
             LOG.info("retire stream: " + stream);
             
             // remove from streamIdMap
-            streamIdMap.remove(id);
+            removeStream(stream.getTopic(), stream.getSource());
             
             // remove the stages from stageConnectionMap
-            ArrayList<Stage> stages = Streams.get(stream);
+            List<Stage> stages = stream.getStages();
             if (stages != null) {
                 synchronized (stages) {
                     for (Stage stage : stages) {
@@ -851,54 +885,52 @@ public class Supervisor {
                 }
             }
             // remove stream from Streams
-            Streams.remove(stream);
+            stream.setStages(new ArrayList<Stage>());
             
             // mark partitions as offline
-            String topic = stream.topic;
-            String partitionId = stream.sourceIdentify;
+            String topic = stream.getTopic();
+            String partitionId = stream.getSource();
             markPartitionOffline(topic, partitionId);
         }
     }
     
     private void handleManualRecoveryRoll(RollID rollID) {
-        StreamId id = new StreamId(rollID.getTopic(), rollID.getSourceIdentify());
-        Stream stream = streamIdMap.get(id);
-
+        Stream stream = getStream(rollID.getTopic(), rollID.getSource());
         if (stream != null) {
             // check the stream is active
             if (!stream.isActive()) {
                 LOG.error("the manual recovery stage must belong to an active stream");
                 return;
             }
-            ArrayList<Stage> stages = Streams.get(stream);
+            List<Stage> stages = stream.getStages();
             if (stages != null) {
                 synchronized (stages) {
                     // process stage missed only
                     for (Stage stage : stages) {
-                        if (stage.rollTs == rollID.getRollTs()) {
-                            if (stage.status != Stage.RECOVERYING && stage.status != Stage.UPLOADING) {
+                        if (stage.getRollTs() == rollID.getRollTs()) {
+                            if (stage.getStatus() != Stage.RECOVERYING && stage.getStatus() != Stage.UPLOADING) {
                                 doRecovery(stream, stage);
                             } else {
-                                LOG.warn("Can't recovery stage manually cause the stage is " + stage.status);
+                                LOG.warn("Can't recovery stage manually cause the stage is " + stage.getStatus());
                             }
                             return;
                         }
                     }
                     // create the stage
                     Stage manualRecoveryStage = new Stage();
-                    manualRecoveryStage.topic = rollID.getTopic();
-                    manualRecoveryStage.sourceIdentify = rollID.getSourceIdentify();
-                    manualRecoveryStage.brokerhost = null;
-                    manualRecoveryStage.cleanstart = false;
-                    manualRecoveryStage.issuelist = new ArrayList<Issue>();
-                    manualRecoveryStage.status = Stage.RECOVERYING;
-                    manualRecoveryStage.rollTs = rollID.getRollTs();
-                    manualRecoveryStage.isCurrent = false;
+                    manualRecoveryStage.setTopic(rollID.getTopic());
+                    manualRecoveryStage.setSource(rollID.getSource());
+                    manualRecoveryStage.setBrokerhost(null);
+                    manualRecoveryStage.setCleanstart(false);
+                    manualRecoveryStage.setIssuelist(new ArrayList<Issue>());
+                    manualRecoveryStage.setStatus(Stage.RECOVERYING);
+                    manualRecoveryStage.setRollTs(rollID.getRollTs());
+                    manualRecoveryStage.setCurrent(false);
                     // put the stage to head of the stages
                     ArrayList<Stage> newStages = new ArrayList<Stage>();
                     newStages.add(manualRecoveryStage);
                     newStages.addAll(stages);
-                    Streams.put(stream, newStages);
+                    stream.setStages(newStages);
                     
                     // do recovery
                     doRecovery(stream, manualRecoveryStage);
@@ -907,25 +939,23 @@ public class Supervisor {
                 LOG.error("can not find stages of stream: " + stream);
             }
         } else {
-            LOG.error("can't find stream by streamid: " + id);
+            LOG.error("can't find stream by " + rollID.getTopic() + ":" +rollID.getSource());
         }   
     }
 
     private void handleUnrecoverable(RollID rollID) {
-        StreamId id = new StreamId(rollID.getTopic(), rollID.getSourceIdentify());
-        Stream stream = streamIdMap.get(id);
-
+        Stream stream = getStream(rollID.getTopic(), rollID.getSource());
         if (stream != null) {
             if (rollID.getIsFinal()) {
                 LOG.info("Final but unrecoverable. Just retire this stream.");
-                retireStreamInternal(id, true);
+                retireStreamInternal(stream, true);
                 return;
             }
-            ArrayList<Stage> stages = Streams.get(stream);
+            List<Stage> stages = stream.getStages();
             if (stages != null) {
                 synchronized (stages) {
                     for (Stage stage : stages) {
-                        if (stage.rollTs == rollID.getRollTs()) {
+                        if (stage.getRollTs() == rollID.getRollTs()) {
                             LOG.warn("stage " + stage + " cannot be recovered");
                             stages.remove(stage);
                             stageConnectionMap.remove(stage);
@@ -934,10 +964,10 @@ public class Supervisor {
                                 SimpleConnection brokerConnection = brokersMapping.get(broker);
                                 if (brokerConnection != null) {
                                     String topic = rollID.getTopic();
-                                    String sourceIdentify = rollID.getSourceIdentify();
+                                    String source = rollID.getSource();
                                     long rollTs = rollID.getRollTs();
                                     long period = rollID.getPeriod();
-                                    Message message = PBwrap.wrapMarkUnrecoverable(topic, sourceIdentify, period, rollTs);
+                                    Message message = PBwrap.wrapMarkUnrecoverable(topic, source, period, rollTs);
                                     send(brokerConnection, message);
                                 }
                             }
@@ -949,7 +979,7 @@ public class Supervisor {
                 LOG.error("can not find stages of stream: " + stream);
             }
         } else {
-            LOG.error("can't find stream by streamid: " + id);
+            LOG.error("can't find stream by " + rollID.getTopic() + ":" +rollID.getSource());
         }
         
     }
@@ -962,25 +992,23 @@ public class Supervisor {
      * register the topic again 
      */
     private void handleFailure(Failure failure) {
-        StreamId id = new StreamId(failure.getTopic(), failure.getSourceIdentify());
-        Stream stream = streamIdMap.get(id);
-        
+        Stream stream = getStream(failure.getTopic(), failure.getSource());
         if (stream == null) {
-            LOG.error("can not find stream by streamid: " + id);
+            LOG.error("can not find stream by " + failure.getTopic() + ":" +failure.getSource());
             return;
         }
         
-        ArrayList<Stage> stages = Streams.get(stream);
+        List<Stage> stages = stream.getStages();
         if (stages == null) {
             LOG.error("can not find stages of stream: " + stream);
             return;
         }
         
         synchronized (stages) {
-            long failRollTs = Util.getCurrentRollTs(failure.getFailTs(), stream.period);
+            long failRollTs = Util.getCurrentRollTs(failure.getFailTs(), stream.getPeriod());
             Stage failstage = null;
             for (Stage s : stages) {
-                if (s.rollTs == failRollTs) {
+                if (s.getRollTs() == failRollTs) {
                     failstage = s;
                     break;
                 }
@@ -995,12 +1023,12 @@ public class Supervisor {
                 Issue i = new Issue();
                 i.ts = failure.getFailTs();
                 i.desc = "logreader failed";
-                failstage.issuelist.add(i);
+                failstage.getIssuelist().add(i);
             } else {
                 Issue i = new Issue();
                 i.ts = failure.getFailTs();
                 i.desc = "broker failed";
-                failstage.issuelist.add(i);
+                failstage.getIssuelist().add(i);
             }
         }
     }
@@ -1009,15 +1037,13 @@ public class Supervisor {
      * try to do recovery again when last recovery failed
      */
     private void handleRecoveryFail(RollID rollID) {
-        StreamId id = new StreamId(rollID.getTopic(), rollID.getSourceIdentify());
-        Stream stream = streamIdMap.get(id);
-        
+        Stream stream = getStream(rollID.getTopic(), rollID.getSource());
         if (stream != null) {
-            ArrayList<Stage> stages = Streams.get(stream);
+            List<Stage> stages = stream.getStages();
             if (stages != null) {
                 synchronized (stages) {
                     for (Stage stage : stages) {
-                        if (stage.rollTs == rollID.getRollTs()) {
+                        if (stage.getRollTs() == rollID.getRollTs()) {
                             doRecovery(stream, stage, rollID.getIsFinal());
                             break;
                         }
@@ -1027,7 +1053,7 @@ public class Supervisor {
                 LOG.error("can not find stages of stream: " + stream);
             }
         } else {
-            LOG.error("can't find stream by streamid: " + id);
+            LOG.error("can't find stream by " + rollID.getTopic() + ":" +rollID.getSource());
         }
     }
 
@@ -1035,22 +1061,20 @@ public class Supervisor {
      * mark the stage as uploaded , print summary and remove it from Streams
      */
     private void handleRecoverySuccess(RollID rollID) {
-        StreamId id = new StreamId(rollID.getTopic(), rollID.getSourceIdentify());
-        Stream stream = streamIdMap.get(id);
-
+        Stream stream = getStream(rollID.getTopic(), rollID.getSource());
         if (stream != null) {
             if (rollID.getIsFinal()) {
                 LOG.info("Final upload suceessed. to retire this stream.");
-                retireStreamInternal(id, true);
+                retireStreamInternal(stream, true);
                 return;
             }
             stream.setGreatlastSuccessTs(rollID.getRollTs());
-            ArrayList<Stage> stages = Streams.get(stream);
+            List<Stage> stages = stream.getStages();
             if (stages != null) {
                 synchronized (stages) {
                     for (Stage stage : stages) {
-                        if (stage.rollTs == rollID.getRollTs()) {
-                            stage.status = Stage.UPLOADED;
+                        if (stage.getRollTs() == rollID.getRollTs()) {
+                            stage.setStatus(Stage.UPLOADED);
                             LOG.info(stage);
                             stages.remove(stage);
                             stageConnectionMap.remove(stage);
@@ -1062,7 +1086,7 @@ public class Supervisor {
                 LOG.warn("can not find stages of stream: " + stream);
             }
         } else {
-            LOG.warn("can't find stream by streamid: " + id);
+            LOG.warn("can't find stream by " + rollID.getTopic() + ":" +rollID.getSource());
         }
     }
 
@@ -1071,19 +1095,17 @@ public class Supervisor {
      * add issue to the stage, and do recovery
      */
     private void handleUploadFail(RollID rollID) {
-        StreamId id = new StreamId(rollID.getTopic(), rollID.getSourceIdentify());
-        Stream stream = streamIdMap.get(id);
-
+        Stream stream = getStream(rollID.getTopic(), rollID.getSource());
         if (stream != null) {
-            ArrayList<Stage> stages = Streams.get(stream);
+            List<Stage> stages = stream.getStages();
             if (stages != null) {
                 Issue e = new Issue();
                 e.desc = "upload failed";
                 e.ts = Util.getTS();
                 synchronized (stages) {
                     for (Stage stage : stages) {
-                        if (stage.rollTs == rollID.getRollTs()) {
-                            stage.issuelist.add(e);
+                        if (stage.getRollTs() == rollID.getRollTs()) {
+                            stage.getIssuelist().add(e);
                             doRecovery(stream, stage, rollID.getIsFinal());
                             break;
                         }
@@ -1093,7 +1115,7 @@ public class Supervisor {
                 LOG.error("can not find stages of stream: " + stream);
             }
         } else {
-            LOG.error("can't find stream by streamid: " + id);
+            LOG.error("can't find stream by " + rollID.getTopic() + ":" +rollID.getSource());
         }
     }
 
@@ -1102,23 +1124,21 @@ public class Supervisor {
      * make the uploaded stage as uploaded and remove it from Streams
      */
     private void handleUploadSuccess(RollID rollID, SimpleConnection from) {
-        StreamId id = new StreamId(rollID.getTopic(), rollID.getSourceIdentify());
-        Stream stream = streamIdMap.get(id);
-        
+        Stream stream = getStream(rollID.getTopic(), rollID.getSource());
         if (stream != null) {
             if (rollID.getIsFinal()) {
                 LOG.info("Final upload suceessed. to retire this stream.");
-                retireStreamInternal(id, true);
+                retireStreamInternal(stream, true);
                 return;
             }
             stream.setGreatlastSuccessTs(rollID.getRollTs()); 
        
-            ArrayList<Stage> stages = Streams.get(stream);
+            List<Stage> stages = stream.getStages();
             if (stages != null) {
                 synchronized (stages) {
                     for (Stage stage : stages) {
-                        if (stage.rollTs == rollID.getRollTs()) {
-                            stage.status = Stage.UPLOADED;
+                        if (stage.getRollTs() == rollID.getRollTs()) {
+                            stage.setStatus(Stage.UPLOADED);
                             LOG.info(stage);
                             stages.remove(stage);
                             stageConnectionMap.remove(stage);
@@ -1130,7 +1150,7 @@ public class Supervisor {
                 LOG.error("can not find stages of stream: " + stream);
             }
         } else {
-            LOG.error("can't find stream by streamid: " + id);
+            LOG.error("can't find stream by " + rollID.getTopic() + ":" +rollID.getSource());
         }
     }
     
@@ -1140,44 +1160,43 @@ public class Supervisor {
      * or upload the rolled stage;
      * create next stage as new current stage
      */
-    private void handleRolling(AppRoll msg, SimpleConnection from) {
-        StreamId id = new StreamId(msg.getTopic(), msg.getSourceIdentify());
-        Stream stream = streamIdMap.get(id);
+    private void handleRolling(AppRoll appRoll, SimpleConnection from) {
+        Stream stream = getStream(appRoll.getTopic(), appRoll.getSource());
         if (stream != null) {
-            if (msg.getRollTs() <= stream.getlastSuccessTs()) {
-                LOG.error("Receive a illegal roll ts (" + msg.getRollTs() + ") from broker(" + from.getHost() + ")");
+            if (appRoll.getRollTs() <= stream.getLastSuccessTs()) {
+                LOG.error("Receive a illegal roll ts (" + appRoll.getRollTs() + ") from broker(" + from.getHost() + ")");
                 return;
             }
-            ArrayList<Stage> stages = Streams.get(stream);
+            List<Stage> stages = stream.getStages();
             if (stages != null) {
                 synchronized (stages) {
                     Stage current = null;
                     for (Stage stage : stages) {
-                        if (stage.rollTs == msg.getRollTs()) {
+                        if (stage.getRollTs() == appRoll.getRollTs()) {
                             current = stage;
                         }
                     }
                     if (current == null) {
                         if (stages.size() > 0) {
                             LOG.warn("Stages may missed from stage:" + stages.get(stages.size() - 1)
-                                    + " to stage:" + msg.getRollTs());
+                                    + " to stage:" + appRoll.getRollTs());
                         } else {
                             LOG.warn("There are no stages in stream " + stream);
                         }
-                        int missedStageCount = getMissedStageCount(stream, msg.getRollTs());
+                        int missedStageCount = getMissedStageCount(stream, appRoll.getRollTs());
                         LOG.info("need recovery missed stages: " + missedStageCount);
                         for (Stage stage : stages) {
-                            stage.isCurrent = false;
+                            stage.setCurrent(false);
                         }
                         Issue issue = new Issue();
-                        issue.ts = stream.getlastSuccessTs() + stream.period * 1000;
+                        issue.ts = stream.getLastSuccessTs() + stream.getPeriod() * 1000;
                         issue.desc = "log discontinuous";
                         ArrayList<Stage> missedStages = getMissedStages(stream, missedStageCount, issue);
                         for (Stage missedStage : missedStages) {
                             LOG.info("processing missed stages: " + missedStage);
                             // check whether it is missed
                             if (missedStage.isCurrent()) {
-                                missedStage.isCurrent = false;
+                                missedStage.setCurrent(false);
                                 current = missedStage;
                             }
                             if (!stages.contains(missedStage)) {
@@ -1186,26 +1205,26 @@ public class Supervisor {
                             doRecovery(stream, missedStage);
                         }
                     } else {
-                        if (current.cleanstart == false || current.issuelist.size() != 0) {
-                            current.isCurrent = false;
+                        if (current.isCleanstart() == false || current.getIssuelist().size() != 0) {
+                            current.setCurrent(false);
                             doRecovery(stream, current);
                         } else {
-                            current.status = Stage.UPLOADING;
-                            current.isCurrent = false;
+                            current.setStatus(Stage.UPLOADING);
+                            current.setCurrent(false);
                             doUpload(stream, current, from);
                         }
                     }
                     // create next stage if stream is connected
-                    if (current.status != Stage.PENDING && current.status != Stage.BROKERFAIL) {
+                    if (current.getStatus() != Stage.PENDING && current.getStatus() != Stage.BROKERFAIL) {
                         Stage next = new Stage();
-                        next.topic = stream.topic;
-                        next.sourceIdentify = stream.sourceIdentify;
-                        next.brokerhost = current.brokerhost;
-                        next.cleanstart = true;
-                        next.rollTs = current.rollTs + stream.period * 1000;
-                        next.status = Stage.APPENDING;
-                        next.issuelist = new ArrayList<Issue>();
-                        next.isCurrent = true;
+                        next.setTopic(stream.getTopic());
+                        next.setSource(stream.getSource());
+                        next.setBrokerhost(current.getBrokerhost());
+                        next.setCleanstart(true);
+                        next.setRollTs(current.getRollTs() + stream.getPeriod() * 1000);
+                        next.setStatus(Stage.APPENDING);
+                        next.setIssuelist(new ArrayList<Issue>());
+                        next.setCurrent(true);
                         stages.add(next);
                     }
                 }
@@ -1213,12 +1232,12 @@ public class Supervisor {
                 LOG.error("can not find stages of stream: " + stream);
             }
         } else {
-            LOG.error("can't find stream by streamid: " + id);
+            LOG.error("can't find stream by " + appRoll.getTopic() + ":" +appRoll.getSource());
         }
     }
 
     private String doUpload(Stream stream, Stage current, SimpleConnection from, boolean isFinal) {
-        Message message = PBwrap.wrapUploadRoll(current.topic, current.sourceIdentify, stream.period, current.rollTs, isFinal);
+        Message message = PBwrap.wrapUploadRoll(current.getTopic(), current.getSource(), stream.getPeriod(), current.getRollTs(), isFinal);
         send(from, message);
         stageConnectionMap.put(current, from);
         return from.getHost();
@@ -1239,27 +1258,27 @@ public class Supervisor {
         broker = getBroker();   
 
         if (broker == null || !stream.isActive()) {
-            stage.status = Stage.PENDING;
+            stage.setStatus(Stage.PENDING);
             stageConnectionMap.remove(stage);
         } else {
-            SimpleConnection c = agentsMapping.get(Util.getAgentHostFromSourceIdentify(stream.sourceIdentify));
+            SimpleConnection c = agentsMapping.get(Util.getAgentHostFromSource(stream.getSource()));
             if (c == null) {
-                LOG.error("can not find connection by host: " + stream.sourceIdentify);
+                LOG.error("can not find connection by host: " + stream.getSource());
                 return null;
             }
             
             Message message = PBwrap.wrapRecoveryRoll(
-                        stream.topic,
+                        stream.getTopic(),
                         broker,
                         getRecoveryPort(broker),
-                        stage.rollTs,
-                        Util.getInstanceIdFromSourceIdentify(stream.sourceIdentify),
+                        stage.getRollTs(),
+                        Util.getInstanceIdFromSource(stream.getSource()),
                         isFinal
                 );
             send(c, message);
             
-            stage.status = Stage.RECOVERYING;
-            stage.brokerhost = broker;
+            stage.setStatus(Stage.RECOVERYING);
+            stage.setBrokerhost(broker);
             
             SimpleConnection brokerConnection = brokersMapping.get(broker);
             if (brokerConnection == null) {
@@ -1279,38 +1298,44 @@ public class Supervisor {
      * record the stream if it is a new stream;
      * do recovery if it is a old stream
      */
-    private void handleReadyStream(ReadyBroker message, SimpleConnection from) {
-        long connectedTs = message.getConnectedTs();
-        long currentTs = Util.getCurrentRollTs(connectedTs, message.getPeriod());
+    private void handleReadyStream(ReadyBroker readyBroker, SimpleConnection from) {
+        long connectedTs = readyBroker.getConnectedTs();
+        long currentTs = Util.getCurrentRollTs(connectedTs, readyBroker.getPeriod());
+        String brokerHost = readyBroker.getBrokerServer();
         
-        StreamId id = new StreamId(message.getTopic(), message.getSourceIdentify());
-        Stream stream = streamIdMap.get(id);
-        String brokerHost = message.getBrokerServer();
+        String topic = readyBroker.getTopic();
+        Topic t = topics.get(topic);
+        if (t == null) {
+            t = new Topic(topic);
+            topics.put(topic, t);
+            LOG.info("new topic added: " + topics);
+        }
         
+        Stream stream = getStream(readyBroker.getTopic(), readyBroker.getSource());
         // processing stream affairs
         if (stream == null) {
             // record new stream
             stream = new Stream();
-            stream.topic = message.getTopic();
-            stream.sourceIdentify = message.getSourceIdentify();
-            stream.setBrokerHost(message.getBrokerServer());
-            stream.startTs = connectedTs;
-            stream.period = message.getPeriod();
-            stream.setlastSuccessTs(currentTs - stream.period * 1000);
+            stream.setTopic(readyBroker.getTopic());
+            stream.setSource(readyBroker.getSource());
+            stream.setBrokerHost(readyBroker.getBrokerServer());
+            stream.setStartTs(connectedTs);
+            stream.setPeriod(readyBroker.getPeriod());
+            stream.updateLastSuccessTs(currentTs - stream.getPeriod() * 1000);
             
             ArrayList<Stage> stages = new ArrayList<Stage>();
             Stage current = new Stage();
-            current.topic = stream.topic;
-            current.sourceIdentify = stream.sourceIdentify;
-            current.brokerhost = message.getBrokerServer();
-            current.cleanstart = false;
-            current.issuelist = new ArrayList<Issue>();
-            current.status = Stage.APPENDING;
-            current.rollTs = currentTs;
-            current.isCurrent = true;
+            current.setTopic(stream.getTopic());
+            current.setSource(stream.getSource());
+            current.setBrokerhost(readyBroker.getBrokerServer());
+            current.setCleanstart(false);
+            current.setIssuelist(new ArrayList<Issue>());
+            current.setStatus(Stage.APPENDING);
+            current.setRollTs(currentTs);
+            current.setCurrent(true);
             stages.add(current);
-            Streams.put(stream, stages);
-            streamIdMap.put(id, stream);
+            stream.setStages(stages);
+            addStream(stream);
         } else {
             // old stream reconnected
             LOG.info("stream reconnected: " + stream);
@@ -1319,12 +1344,12 @@ public class Supervisor {
             }
             
             // update broker on stream
-            stream.setBrokerHost(message.getBrokerServer());
+            stream.setBrokerHost(readyBroker.getBrokerServer());
 
-            ArrayList<Stage> stages = Streams.get(stream);
+            List<Stage> stages = stream.getStages();
             if (stages != null) {
                 synchronized (stages) {
-                    recoveryStages(stream, stages, connectedTs, currentTs, message.getBrokerServer());
+                    recoveryStages(stream, stages, connectedTs, currentTs, readyBroker.getBrokerServer());
                 }
             } else {
                 LOG.error("can not find stages of stream: " + stream);
@@ -1333,25 +1358,17 @@ public class Supervisor {
         
         // register connection with agent and broker
         recordConnectionStreamMapping(from, stream);
-        SimpleConnection agentConnection = agentsMapping.get(Util.getAgentHostFromSourceIdentify(stream.sourceIdentify));
+        SimpleConnection agentConnection = agentsMapping.get(Util.getAgentHostFromSource(stream.getSource()));
         recordConnectionStreamMapping(agentConnection, stream);
         
         // process partition affairs
-        String topic = message.getTopic();
-        String partitionId = message.getSourceIdentify();
+        String partitionId = readyBroker.getSource();
         
-        ConcurrentHashMap<String, PartitionInfo> partitionInfos = topics.get(topic);
-        if (partitionInfos == null) {
-            partitionInfos = new ConcurrentHashMap<String, PartitionInfo>();
-            topics.put(topic, partitionInfos);
-            LOG.info("new topic added: " + topic);
-        }
-        
-        PartitionInfo pinfo = partitionInfos.get(partitionId);
+        PartitionInfo pinfo = t.getPartition(partitionId);
         if (pinfo == null) {
-            pinfo = new PartitionInfo(partitionId, message.getBrokerServer());
+            pinfo = new PartitionInfo(partitionId, readyBroker.getBrokerServer());
             LOG.info("new partition online: " + pinfo);
-            partitionInfos.put(partitionId, pinfo);
+            t.addPartition(partitionId, pinfo);
         } else {
             if (pinfo.isOffline()) {
                 pinfo.updateHost(brokerHost);
@@ -1364,12 +1381,12 @@ public class Supervisor {
     }
 
     private void reassignConsumers(String topic) {
-        for (ConsumerGroupDesc groupDesc : consumerGroups.values()) {
-            if (!topic.equals(groupDesc.getTopic())) {
+        for (ConsumerGroup group : consumerGroups.values()) {
+            if (!topic.equals(group.getTopic())) {
                 continue;
             }
             LOG.info("reassign consumer of topic: " + topic);
-            tryAssignConsumer(null, groupDesc);
+            tryAssignConsumer(null, group);
         }
     }
 
@@ -1378,7 +1395,7 @@ public class Supervisor {
      * 2. recovery missed stages (include current stage, but do no recovery)
      * 3. recovery current stage (realtime stream)with broker fail
      */
-    private void recoveryStages(Stream stream, ArrayList<Stage> stages, long connectedTs, long currentTs, String newBrokerHost) {
+    private void recoveryStages(Stream stream, List<Stage> stages, long connectedTs, long currentTs, String newBrokerHost) {
         Issue issue = new Issue();
         issue.ts = connectedTs;
         issue.desc = "stream reconnected";
@@ -1387,15 +1404,15 @@ public class Supervisor {
         for (int i=0 ; i < stages.size(); i++) {
             Stage stage = stages.get(i);
             LOG.info("processing pending stage: " + stage);
-            if (stage.status == Stage.PENDING || stage.status == Stage.BROKERFAIL) {
-                stage.issuelist.add(issue);
+            if (stage.getStatus() == Stage.PENDING || stage.getStatus() == Stage.BROKERFAIL) {
+                stage.getIssuelist().add(issue);
                 // do not recovery current stage
-                if (stage.rollTs != currentTs) {
+                if (stage.getRollTs() != currentTs) {
                     doRecovery(stream, stage);
                 } else {
                     // fix current stage status
-                    stage.status = Stage.APPENDING;
-                    stage.brokerhost = newBrokerHost;
+                    stage.setStatus(Stage.APPENDING);
+                    stage.setBrokerhost(newBrokerHost);
                 }
             }
         }
@@ -1406,8 +1423,8 @@ public class Supervisor {
 
         if (stages.size() != 0) {
             Stage oldcurrent = stages.get(stages.size() - 1);
-            if (oldcurrent.rollTs != currentTs) {
-                oldcurrent.isCurrent = false;
+            if (oldcurrent.getRollTs() != currentTs) {
+                oldcurrent.setCurrent(false);
             }
         } else {
             LOG.error("no stages found on stream: " + stream);
@@ -1420,11 +1437,11 @@ public class Supervisor {
             if (!stages.contains(stage)) {
                 LOG.info("process really missed stage: " + stage);
                 // do not recovery current stage
-                if (stage.rollTs != currentTs) {
+                if (stage.getRollTs() != currentTs) {
                     doRecovery(stream, stage);
                 } else {
-                    stage.status = Stage.APPENDING;
-                    stage.brokerhost = newBrokerHost;
+                    stage.setStatus(Stage.APPENDING);
+                    stage.setBrokerhost(newBrokerHost);
                 }
                 stages.add(stage);
             } else {
@@ -1432,11 +1449,11 @@ public class Supervisor {
                 int index = stages.indexOf(stage);
                 Stage nmStage = stages.get(index);
                 LOG.info("the not missed stage is " + nmStage);
-                if (nmStage.rollTs != currentTs) {
-                    nmStage.isCurrent = false;
+                if (nmStage.getRollTs() != currentTs) {
+                    nmStage.setCurrent(false);
                 } else {
-                    if (!nmStage.issuelist.contains(issue)) {
-                        nmStage.issuelist.add(issue);
+                    if (!nmStage.getIssuelist().contains(issue)) {
+                        nmStage.getIssuelist().add(issue);
                     }
                 }
             }
@@ -1462,8 +1479,8 @@ public class Supervisor {
     }
     
     private int getMissedStageCount(Stream stream, long connectedTs) {
-        long rollts = Util.getCurrentRollTs(connectedTs, stream.period);
-        return (int) ((rollts - stream.getlastSuccessTs()) / stream.period / 1000);
+        long rollts = Util.getCurrentRollTs(connectedTs, stream.getPeriod());
+        return (int) ((rollts - stream.getLastSuccessTs()) / stream.getPeriod() / 1000);
     }
     
     /*
@@ -1473,17 +1490,17 @@ public class Supervisor {
         ArrayList<Stage> missedStages = new ArrayList<Stage>();
         for (int i = 0; i< missedStageCount; i++) {
             Stage stage = new Stage();
-            stage.topic = stream.topic;
-            stage.sourceIdentify = stream.sourceIdentify;
+            stage.setTopic(stream.getTopic());
+            stage.setSource(stream.getSource());
             if (i == missedStageCount-1) {
-                stage.isCurrent = true;
+                stage.setCurrent(true);
             } else {
-                stage.isCurrent = false;
+                stage.setCurrent(false);
             }
-            stage.issuelist = new ArrayList<Issue>();
-            stage.issuelist.add(issue);
-            stage.status = Stage.RECOVERYING;
-            stage.rollTs = stream.getlastSuccessTs() + stream.period * 1000 * (i+1);
+            stage.setIssuelist(new ArrayList<Issue>());
+            stage.getIssuelist().add(issue);
+            stage.setStatus(Stage.RECOVERYING);
+            stage.setRollTs(stream.getLastSuccessTs() + stream.getPeriod() * 1000 * (i+1));
             missedStages.add(stage);
         }
         return missedStages;
@@ -1502,9 +1519,9 @@ public class Supervisor {
         desc.setType(ConnectionDescription.AGENT);
         agentsMapping.putIfAbsent(from.getHost(), from);
         AppReg message = m.getAppReg();
-        String sourceIdentify = message.getSourceIdentify();
-        LOG.info("Topic " + message.getTopic() + " registered from " + sourceIdentify);
-        assignBroker(message.getTopic(), from, Util.getInstanceIdFromSourceIdentify(sourceIdentify));
+        String source = message.getSource();
+        LOG.info("Topic " + message.getTopic() + " registered from " + source);
+        assignBroker(message.getTopic(), from, Util.getInstanceIdFromSource(source));
     }
 
     private String assignBroker(String topic, SimpleConnection from, String instanceId) {
@@ -1549,20 +1566,19 @@ public class Supervisor {
 
     public void handleRollingAndTriggerClean(RollClean rollClean, SimpleConnection from) {
         boolean isFinal = true;
-        StreamId id = new StreamId(rollClean.getTopic(), rollClean.getSourceIdentify());
-        Stream stream = streamIdMap.get(id);
+        Stream stream = getStream(rollClean.getTopic(), rollClean.getSource());
         if (stream != null) {
-            ArrayList<Stage> stages = Streams.get(stream);
+            List<Stage> stages = stream.getStages();
             if (stages != null && stages.size() != 0) {
                 synchronized (stages) {
                     Stage current = stages.get(stages.size() - 1);
-                    if (current.cleanstart == false || current.issuelist.size() != 0) {
-                        current.isCurrent = false;
+                    if (current.isCleanstart() == false || current.getIssuelist().size() != 0) {
+                        current.setCurrent(false);
                         doRecovery(stream, current, isFinal);
                     } else {
-                        if (current.status != Stage.UPLOADING) {
-                            current.status = Stage.UPLOADING;
-                            current.isCurrent = false;
+                        if (current.getStatus() != Stage.UPLOADING) {
+                            current.setStatus(Stage.UPLOADING);
+                            current.setCurrent(false);
                             doUpload(stream, current, from, isFinal);
                         }
                     }
@@ -1571,7 +1587,7 @@ public class Supervisor {
                 LOG.info("no stages of stream: " + stream + ", clean it up.");
             }
         } else {
-            LOG.info("stream: " + id + " has been clean up.");
+            LOG.info("stream " + rollClean.getTopic() + ":" + rollClean.getSource() + " has been clean up.");
         }
     }
     
@@ -1738,13 +1754,11 @@ public class Supervisor {
     }
        
     private void init() throws IOException, LionException {
+        topics = new ConcurrentHashMap<String, Topic>();
         connectionStreamMap = new ConcurrentHashMap<SimpleConnection, ArrayList<Stream>>();
         stageConnectionMap = new ConcurrentHashMap<Stage, SimpleConnection>();
 
-        Streams = new ConcurrentHashMap<Stream, ArrayList<Stage>>();
-        streamIdMap = new ConcurrentHashMap<StreamId, Stream>();
-        topics = new ConcurrentHashMap<String, ConcurrentHashMap<String,PartitionInfo>>();
-        consumerGroups = new ConcurrentHashMap<ConsumerGroup, ConsumerGroupDesc>();
+        consumerGroups = new ConcurrentHashMap<ConsumerGroupKey, ConsumerGroup>();
         
         connections = new ConcurrentHashMap<SimpleConnection, ConnectionDescription>();
         agentsMapping = new ConcurrentHashMap<String, SimpleConnection>();
@@ -1755,13 +1769,16 @@ public class Supervisor {
         configManager.initConfig();
         
         //initWebService
-        RequestListener httpService = new RequestListener(
-                configManager.webServicePort, 
-                configManager,
-                new HttpClientSingle(configManager.connectionTimeout, configManager.socketTimeout)
-        );
+        RequestListener httpService = new RequestListener(configManager);
         httpService.setDaemon(true);
         httpService.start();
+        
+        //start restful server
+        ServiceFactory.setConfigManger(configManager);
+        ServiceFactory.setSupervisor(this);
+        HttpServer restfulServer = new HttpServer.Builder().setName("supervisor").addEndpoint(URI.create("http://localhost:8085")).build();
+        restfulServer.addJerseyResourcePackage(ServiceFactory.class.getPackage().getName(), "/*");
+        restfulServer.start();
         
         // start heart beat checker thread
         LiveChecker checker = new LiveChecker();
@@ -1779,24 +1796,24 @@ public class Supervisor {
     public void handleConfReq(SimpleConnection from) {
         Message message;
         List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
-        Set<String> topics = configManager.getTopicsByHost(from.getHost());
-        if (topics == null || topics.size() == 0) {
+        Set<String> topicsAssocHost = configManager.getTopicsByHost(from.getHost());
+        if (topicsAssocHost == null || topicsAssocHost.size() == 0) {
             LOG.info("There is no blackhole topic for " + from.getHost());
             message = PBwrap.wrapNoAvailableConf();
             send(from, message);
             return;
         }
-        for (String topic : topics) {
-            Context context = ConfigKeeper.configMap.get(topic);
-            if (context == null) {
+        for (String topic : topicsAssocHost) {
+            TopicConfInfo confInfo = configManager.getConfByTopic(topic);
+            if (confInfo == null) {
                 LOG.error("Can not get topic: " + topic + " from configMap");
                 message = PBwrap.wrapNoAvailableConf();
                 send(from, message);
                 return;
             }
-            String period = context.getString(ParamsKey.TopicConf.ROLL_PERIOD);
-            String maxLineSize = context.getString(ParamsKey.TopicConf.MAX_LINE_SIZE);
-            String watchFile = context.getString(ParamsKey.TopicConf.WATCH_FILE);
+            String period = String.valueOf(confInfo.getRollPeriod());
+            String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
+            String watchFile = confInfo.getWatchLog();
             if (watchFile == null) {
                 message = PBwrap.wrapNoAvailableConf();
                 send(from, message);
@@ -1811,18 +1828,18 @@ public class Supervisor {
     
     public void triggerConfRes(SimpleConnection connection) {
         List<LxcConfRes> lxcConfResList = new ArrayList<LxcConfRes>();
-        Set<String> topics = configManager.getTopicsByHost(connection.getHost());
-        if (topics != null) {
-            for (String topic : topics) {
-                Context context = ConfigKeeper.configMap.get(topic);
-                if (context == null) {
+        Set<String> topicsAssocHost = configManager.getTopicsByHost(connection.getHost());
+        if (topicsAssocHost != null) {
+            for (String topic : topicsAssocHost) {
+                TopicConfInfo confInfo = configManager.getConfByTopic(topic);
+                if (confInfo == null) {
                     LOG.error("Can not get topic: " + topic + " from configMap");
                     continue;
                 }
-                String period = context.getString(ParamsKey.TopicConf.ROLL_PERIOD);
-                String maxLineSize = context.getString(ParamsKey.TopicConf.MAX_LINE_SIZE);
-                String watchFile = context.getString(ParamsKey.TopicConf.WATCH_FILE);
-                List<String> ids = configManager.getIdsByTopicAndHost(topic, connection.getHost());
+                String period = String.valueOf(confInfo.getRollPeriod());
+                String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
+                String watchFile = confInfo.getWatchLog();
+                List<String> ids = confInfo.getInstancesByHost(connection.getHost());
                 if (ids == null) {
                     continue;
                 }

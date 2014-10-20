@@ -35,12 +35,12 @@ public final class AppRegPB {
       return com.dp.blackhole.protocol.control.AppRegPB.internal_static_blackhole_AppReg_fieldAccessorTable;
     }
     
-    // required string source_identify = 1;
-    public static final int SOURCE_IDENTIFY_FIELD_NUMBER = 1;
-    private boolean hasSourceIdentify;
-    private java.lang.String sourceIdentify_ = "";
-    public boolean hasSourceIdentify() { return hasSourceIdentify; }
-    public java.lang.String getSourceIdentify() { return sourceIdentify_; }
+    // required string source = 1;
+    public static final int SOURCE_FIELD_NUMBER = 1;
+    private boolean hasSource;
+    private java.lang.String source_ = "";
+    public boolean hasSource() { return hasSource; }
+    public java.lang.String getSource() { return source_; }
     
     // required string topic = 2;
     public static final int TOPIC_FIELD_NUMBER = 2;
@@ -59,7 +59,7 @@ public final class AppRegPB {
     private void initFields() {
     }
     public final boolean isInitialized() {
-      if (!hasSourceIdentify) return false;
+      if (!hasSource) return false;
       if (!hasTopic) return false;
       if (!hasRegTs) return false;
       return true;
@@ -68,8 +68,8 @@ public final class AppRegPB {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasSourceIdentify()) {
-        output.writeString(1, getSourceIdentify());
+      if (hasSource()) {
+        output.writeString(1, getSource());
       }
       if (hasTopic()) {
         output.writeString(2, getTopic());
@@ -86,9 +86,9 @@ public final class AppRegPB {
       if (size != -1) return size;
     
       size = 0;
-      if (hasSourceIdentify()) {
+      if (hasSource()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getSourceIdentify());
+          .computeStringSize(1, getSource());
       }
       if (hasTopic()) {
         size += com.google.protobuf.CodedOutputStream
@@ -256,8 +256,8 @@ public final class AppRegPB {
       
       public Builder mergeFrom(com.dp.blackhole.protocol.control.AppRegPB.AppReg other) {
         if (other == com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance()) return this;
-        if (other.hasSourceIdentify()) {
-          setSourceIdentify(other.getSourceIdentify());
+        if (other.hasSource()) {
+          setSource(other.getSource());
         }
         if (other.hasTopic()) {
           setTopic(other.getTopic());
@@ -291,7 +291,7 @@ public final class AppRegPB {
               break;
             }
             case 10: {
-              setSourceIdentify(input.readString());
+              setSource(input.readString());
               break;
             }
             case 18: {
@@ -307,24 +307,24 @@ public final class AppRegPB {
       }
       
       
-      // required string source_identify = 1;
-      public boolean hasSourceIdentify() {
-        return result.hasSourceIdentify();
+      // required string source = 1;
+      public boolean hasSource() {
+        return result.hasSource();
       }
-      public java.lang.String getSourceIdentify() {
-        return result.getSourceIdentify();
+      public java.lang.String getSource() {
+        return result.getSource();
       }
-      public Builder setSourceIdentify(java.lang.String value) {
+      public Builder setSource(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasSourceIdentify = true;
-        result.sourceIdentify_ = value;
+  result.hasSource = true;
+        result.source_ = value;
         return this;
       }
-      public Builder clearSourceIdentify() {
-        result.hasSourceIdentify = false;
-        result.sourceIdentify_ = getDefaultInstance().getSourceIdentify();
+      public Builder clearSource() {
+        result.hasSource = false;
+        result.source_ = getDefaultInstance().getSource();
         return this;
       }
       
@@ -393,10 +393,10 @@ public final class AppRegPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014AppReg.proto\022\tblackhole\"@\n\006AppReg\022\027\n\017s" +
-      "ource_identify\030\001 \002(\t\022\r\n\005topic\030\002 \002(\t\022\016\n\006r" +
-      "eg_ts\030\003 \002(\003B-\n!com.dp.blackhole.protocol" +
-      ".controlB\010AppRegPB"
+      "\n\014AppReg.proto\022\tblackhole\"7\n\006AppReg\022\016\n\006s" +
+      "ource\030\001 \002(\t\022\r\n\005topic\030\002 \002(\t\022\016\n\006reg_ts\030\003 \002" +
+      "(\003B-\n!com.dp.blackhole.protocol.controlB" +
+      "\010AppRegPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -408,7 +408,7 @@ public final class AppRegPB {
           internal_static_blackhole_AppReg_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_AppReg_descriptor,
-              new java.lang.String[] { "SourceIdentify", "Topic", "RegTs", },
+              new java.lang.String[] { "Source", "Topic", "RegTs", },
               com.dp.blackhole.protocol.control.AppRegPB.AppReg.class,
               com.dp.blackhole.protocol.control.AppRegPB.AppReg.Builder.class);
           return null;

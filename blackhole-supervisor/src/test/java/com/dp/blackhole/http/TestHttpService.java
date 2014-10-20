@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.http.HttpClientSingle;
 import com.dp.blackhole.http.RequestListener;
 import com.dp.blackhole.supervisor.ConfigManager;
@@ -40,11 +41,13 @@ public class TestHttpService {
     @Mock
     ConfigManager mockLion;
     @Mock
+    Util mockUtil;
+    @Mock
     HttpClientSingle mockHttpClient;
     
     @Before
     public void setUp() throws Exception {
-        listener = new RequestListener(webServicePort, mockLion, mockHttpClient);
+        listener = new RequestListener(mockLion);
         listener.setDaemon(true);
         listener.start();
     }
@@ -54,13 +57,14 @@ public class TestHttpService {
         listener.interrupt();
     }
 
+    @SuppressWarnings("static-access")
     private void simulateLionGetUrl(String testurl, String response, String newValue) {
-        when(mockLion.generateGetURL(ParamsKey.LionNode.HOSTS_PREFIX + testurl)).thenReturn("http://testlion/get/" + testurl);
-        when(mockLion.generateSetURL(eq(ParamsKey.LionNode.HOSTS_PREFIX + testurl), anyString())).thenReturn("http://testlion/set/" + testurl);
+        when(mockUtil.generateGetURL(ParamsKey.LionNode.HOSTS_PREFIX + testurl)).thenReturn("http://testlion/get/" + testurl);
+        when(mockUtil.generateSetURL(eq(ParamsKey.LionNode.HOSTS_PREFIX + testurl), anyString())).thenReturn("http://testlion/set/" + testurl);
         if (testurl.equals(marineapp)) {
-            when(mockLion.generateSetURL(ParamsKey.LionNode.HOSTS_PREFIX + testurl, marineNewValue)).thenReturn("http://testlion/set/" + testurl);
+            when(mockUtil.generateSetURL(ParamsKey.LionNode.HOSTS_PREFIX + testurl, marineNewValue)).thenReturn("http://testlion/set/" + testurl);
         } else if (testurl.equals(nginxapp)) {
-            when(mockLion.generateSetURL(ParamsKey.LionNode.HOSTS_PREFIX + testurl, nginxNewValue)).thenReturn("http://testlion/set/" + testurl);
+            when(mockUtil.generateSetURL(ParamsKey.LionNode.HOSTS_PREFIX + testurl, nginxNewValue)).thenReturn("http://testlion/set/" + testurl);
         }
         when(mockHttpClient.getResponseText("http://testlion/get/" + testurl)).thenReturn(response);
         when(mockHttpClient.getResponseText("http://testlion/set/" + testurl)).thenReturn("0");

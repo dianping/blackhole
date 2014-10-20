@@ -1,32 +1,79 @@
 package com.dp.blackhole.supervisor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.dp.blackhole.common.Util;
 
 public class Stream {
-    String topic;
-    String sourceIdentify;
+    private String topic;
+    private String source;
     private String brokerHost;
-    long period;
-    long startTs;
-    AtomicLong lastSuccessTs = new AtomicLong();
-    AtomicBoolean active = new AtomicBoolean(true);
+    private long period;
+    private long startTs;
+    private AtomicLong lastSuccessTs = new AtomicLong();
+    private AtomicBoolean active = new AtomicBoolean(true);
+    private List<Stage> stages = new ArrayList<Stage>();
     
-    synchronized void setBrokerHost(String newBrokerHost) {
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public long getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(long period) {
+        this.period = period;
+    }
+
+    public long getStartTs() {
+        return startTs;
+    }
+
+    public void setStartTs(long startTs) {
+        this.startTs = startTs;
+    }
+
+    public synchronized void setBrokerHost(String newBrokerHost) {
         brokerHost = newBrokerHost;
     }
     
-    synchronized String getBrokerHost() {
+    public synchronized String getBrokerHost() {
         return brokerHost;
     }
     
-    void setlastSuccessTs(long ts) {
+    @JsonIgnore
+    public List<Stage> getStages() {
+        return stages;
+    }
+    
+    @JsonIgnore
+    public void setStages(List<Stage> stageList) {
+        this.stages = stageList;
+    }
+    
+    public void updateLastSuccessTs(long ts) {
         lastSuccessTs.getAndSet(ts);
     }
     
-    void setGreatlastSuccessTs(long ts) {
+    public void setGreatlastSuccessTs(long ts) {
         for (;;) {
             long current = lastSuccessTs.get();
             if (ts > current) {
@@ -39,15 +86,15 @@ public class Stream {
         }
     }
     
-    long getlastSuccessTs() {
+    public long getLastSuccessTs() {
         return lastSuccessTs.get();
     }
     
-    boolean isActive() {
+    public boolean isActive() {
         return active.get();
     }
     
-    void updateActive(boolean status) {
+    public void updateActive(boolean status) {
         active.getAndSet(status);
     }
     
@@ -56,7 +103,7 @@ public class Stream {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((topic == null) ? 0 : topic.hashCode());
-        result = prime * result + ((sourceIdentify == null) ? 0 : sourceIdentify.hashCode());
+        result = prime * result + ((source == null) ? 0 : source.hashCode());
         result = prime * result + (int) (period ^ (period >>> 32));
         result = prime * result + (int) (startTs ^ (startTs >>> 32));
         return result;
@@ -75,10 +122,10 @@ public class Stream {
                 return false;
         } else if (!topic.equals(other.topic))
             return false;
-        if (sourceIdentify == null) {
-            if (other.sourceIdentify != null)
+        if (source == null) {
+            if (other.source != null)
                 return false;
-        } else if (!sourceIdentify.equals(other.sourceIdentify))
+        } else if (!source.equals(other.source))
             return false;
         if (period != other.period)
             return false;
@@ -89,6 +136,6 @@ public class Stream {
     
     @Override
     public String toString() {
-        return topic+"@"+sourceIdentify+",period:" + period+ ",starttime:"+Util.formatTs(startTs)+",lastSuccessTs:"+lastSuccessTs.get()+",isActive:"+isActive();
-    } 
+        return topic+"@"+source+",period:" + period+ ",starttime:"+Util.formatTs(startTs)+",lastSuccessTs:"+lastSuccessTs.get()+",isActive:"+isActive();
+    }
 }

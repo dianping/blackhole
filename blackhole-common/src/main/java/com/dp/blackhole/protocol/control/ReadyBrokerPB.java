@@ -42,12 +42,12 @@ public final class ReadyBrokerPB {
     public boolean hasTopic() { return hasTopic; }
     public java.lang.String getTopic() { return topic_; }
     
-    // required string source_identify = 2;
-    public static final int SOURCE_IDENTIFY_FIELD_NUMBER = 2;
-    private boolean hasSourceIdentify;
-    private java.lang.String sourceIdentify_ = "";
-    public boolean hasSourceIdentify() { return hasSourceIdentify; }
-    public java.lang.String getSourceIdentify() { return sourceIdentify_; }
+    // required string source = 2;
+    public static final int SOURCE_FIELD_NUMBER = 2;
+    private boolean hasSource;
+    private java.lang.String source_ = "";
+    public boolean hasSource() { return hasSource; }
+    public java.lang.String getSource() { return source_; }
     
     // required string broker_server = 3;
     public static final int BROKER_SERVER_FIELD_NUMBER = 3;
@@ -74,7 +74,7 @@ public final class ReadyBrokerPB {
     }
     public final boolean isInitialized() {
       if (!hasTopic) return false;
-      if (!hasSourceIdentify) return false;
+      if (!hasSource) return false;
       if (!hasBrokerServer) return false;
       if (!hasPeriod) return false;
       if (!hasConnectedTs) return false;
@@ -87,8 +87,8 @@ public final class ReadyBrokerPB {
       if (hasTopic()) {
         output.writeString(1, getTopic());
       }
-      if (hasSourceIdentify()) {
-        output.writeString(2, getSourceIdentify());
+      if (hasSource()) {
+        output.writeString(2, getSource());
       }
       if (hasBrokerServer()) {
         output.writeString(3, getBrokerServer());
@@ -112,9 +112,9 @@ public final class ReadyBrokerPB {
         size += com.google.protobuf.CodedOutputStream
           .computeStringSize(1, getTopic());
       }
-      if (hasSourceIdentify()) {
+      if (hasSource()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(2, getSourceIdentify());
+          .computeStringSize(2, getSource());
       }
       if (hasBrokerServer()) {
         size += com.google.protobuf.CodedOutputStream
@@ -289,8 +289,8 @@ public final class ReadyBrokerPB {
         if (other.hasTopic()) {
           setTopic(other.getTopic());
         }
-        if (other.hasSourceIdentify()) {
-          setSourceIdentify(other.getSourceIdentify());
+        if (other.hasSource()) {
+          setSource(other.getSource());
         }
         if (other.hasBrokerServer()) {
           setBrokerServer(other.getBrokerServer());
@@ -331,7 +331,7 @@ public final class ReadyBrokerPB {
               break;
             }
             case 18: {
-              setSourceIdentify(input.readString());
+              setSource(input.readString());
               break;
             }
             case 26: {
@@ -372,24 +372,24 @@ public final class ReadyBrokerPB {
         return this;
       }
       
-      // required string source_identify = 2;
-      public boolean hasSourceIdentify() {
-        return result.hasSourceIdentify();
+      // required string source = 2;
+      public boolean hasSource() {
+        return result.hasSource();
       }
-      public java.lang.String getSourceIdentify() {
-        return result.getSourceIdentify();
+      public java.lang.String getSource() {
+        return result.getSource();
       }
-      public Builder setSourceIdentify(java.lang.String value) {
+      public Builder setSource(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasSourceIdentify = true;
-        result.sourceIdentify_ = value;
+  result.hasSource = true;
+        result.source_ = value;
         return this;
       }
-      public Builder clearSourceIdentify() {
-        result.hasSourceIdentify = false;
-        result.sourceIdentify_ = getDefaultInstance().getSourceIdentify();
+      public Builder clearSource() {
+        result.hasSource = false;
+        result.source_ = getDefaultInstance().getSource();
         return this;
       }
       
@@ -476,11 +476,11 @@ public final class ReadyBrokerPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\021ReadyBroker.proto\022\tblackhole\"q\n\013ReadyB" +
-      "roker\022\r\n\005topic\030\001 \002(\t\022\027\n\017source_identify\030" +
-      "\002 \002(\t\022\025\n\rbroker_server\030\003 \002(\t\022\016\n\006period\030\004" +
-      " \002(\003\022\023\n\013connectedTs\030\005 \002(\003B2\n!com.dp.blac" +
-      "khole.protocol.controlB\rReadyBrokerPB"
+      "\n\021ReadyBroker.proto\022\tblackhole\"h\n\013ReadyB" +
+      "roker\022\r\n\005topic\030\001 \002(\t\022\016\n\006source\030\002 \002(\t\022\025\n\r" +
+      "broker_server\030\003 \002(\t\022\016\n\006period\030\004 \002(\003\022\023\n\013c" +
+      "onnectedTs\030\005 \002(\003B2\n!com.dp.blackhole.pro" +
+      "tocol.controlB\rReadyBrokerPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -492,7 +492,7 @@ public final class ReadyBrokerPB {
           internal_static_blackhole_ReadyBroker_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ReadyBroker_descriptor,
-              new java.lang.String[] { "Topic", "SourceIdentify", "BrokerServer", "Period", "ConnectedTs", },
+              new java.lang.String[] { "Topic", "Source", "BrokerServer", "Period", "ConnectedTs", },
               com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.class,
               com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker.Builder.class);
           return null;

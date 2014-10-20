@@ -39,7 +39,7 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
     private ConfigManager configManager;
     private Supervisor supervisor;
     
-    public HttpPaaSLoginHandler(ConfigManager configManger, HttpClientSingle httpClient) {
+    public HttpPaaSLoginHandler(ConfigManager configManger) {
         this.configManager = configManger;
         this.supervisor = configManger.getSupervisor();
     }
@@ -175,7 +175,7 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
                 List<String> idsInTheSameHost = lxcConfRes.getInstanceIdsList();
                 // loop for every instance with the same topic in the same agent server
                 for (String id : idsInTheSameHost) {
-                    if (!supervisor.isActiveStream(topic, Util.getSourceIdentify(agentServer, id))) {
+                    if (!supervisor.isActiveStream(topic, Util.getSource(agentServer, id))) {
                         return false;
                     }
                 }

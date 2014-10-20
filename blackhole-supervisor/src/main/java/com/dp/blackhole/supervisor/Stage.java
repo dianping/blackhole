@@ -9,21 +9,83 @@ public class Stage {
     public static final int UPLOADING = 2;
     public static final int UPLOADED = 3;
     public static final int RECOVERYING = 4;
-//    public static final int APPFAIL = 5;
-    public static final int BROKERFAIL = 6;
-//    public static final int NOBROKER = 7;
     public static final int PENDING = 5;
+    public static final int BROKERFAIL = 6;
     
-    List<Issue> issuelist;
+    private List<Issue> issuelist;
     
-    String topic;
-    String sourceIdentify;
-    String brokerhost;
-    boolean cleanstart;
-    int status;
-    long rollTs;
-    boolean isCurrent;
+    private String topic;
+    private String source;
+    private String brokerhost;
+    private boolean cleanstart;
+    private int status;
+    private long rollTs;
+    private boolean isCurrent;
     
+    public List<Issue> getIssuelist() {
+        return issuelist;
+    }
+
+    public void setIssuelist(List<Issue> issuelist) {
+        this.issuelist = issuelist;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getBrokerhost() {
+        return brokerhost;
+    }
+
+    public void setBrokerhost(String brokerhost) {
+        this.brokerhost = brokerhost;
+    }
+
+    public boolean isCleanstart() {
+        return cleanstart;
+    }
+
+    public void setCleanstart(boolean cleanstart) {
+        this.cleanstart = cleanstart;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public long getRollTs() {
+        return rollTs;
+    }
+
+    public void setRollTs(long rollTs) {
+        this.rollTs = rollTs;
+    }
+
+    public boolean isCurrent() {
+        return isCurrent;
+    }
+    
+    public void setCurrent(boolean isCurrent) {
+        this.isCurrent = isCurrent;
+    }
+
     private String getStatusString(int status) {
         switch (status) {
         case Stage.APPENDING:
@@ -44,7 +106,7 @@ public class Stage {
     }
     
     public String toString() {
-        String summary = topic + "@" + sourceIdentify + "," + getStatusString(status) + "," + Util.formatTs(rollTs);
+        String summary = topic + "@" + source + "," + getStatusString(status) + "," + Util.formatTs(rollTs);
         if (!cleanstart) {
             summary = summary + ",not cleanstart";
         }
@@ -57,16 +119,12 @@ public class Stage {
         return summary;
     }
 
-    public boolean isCurrent() {
-        return isCurrent;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((topic == null) ? 0 : topic.hashCode());
-        result = prime * result + ((sourceIdentify == null) ? 0 : sourceIdentify.hashCode());
+        result = prime * result + ((source == null) ? 0 : source.hashCode());
         result = prime * result + (int) (rollTs ^ (rollTs >>> 32));
         return result;
     }
@@ -85,10 +143,10 @@ public class Stage {
                 return false;
         } else if (!topic.equals(other.topic))
             return false;
-        if (sourceIdentify == null) {
-            if (other.sourceIdentify != null)
+        if (source == null) {
+            if (other.source != null)
                 return false;
-        } else if (!sourceIdentify.equals(other.sourceIdentify))
+        } else if (!source.equals(other.source))
             return false;
         if (rollTs != other.rollTs)
             return false;

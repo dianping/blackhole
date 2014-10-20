@@ -60,7 +60,7 @@ public class SimBroker extends Broker {
         RollIdent rollIdent = new RollIdent();
         rollIdent.topic = appName;
         rollIdent.period = 3600;
-        rollIdent.sourceIdentify = SimBroker.HOSTNAME;
+        rollIdent.source = SimBroker.HOSTNAME;
         rollIdent.ts = SimBroker.rollTS;
         return rollIdent;
     }

@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.GatheringByteChannel;
@@ -31,6 +32,16 @@ public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static long localTimezoneOffset = TimeZone.getTimeZone("Asia/Shanghai").getRawOffset();
+    private static String zkEnv;
+    private static int authorizationId;
+    
+    public static void setZkEnv(String _zkEnv) {
+        zkEnv = _zkEnv;
+    }
+    
+    public static void setAuthorizationId(int id) {
+        authorizationId = id;
+    }
     
     public static InetSocketAddress getRemoteAddr(Socket socket) {
         return (InetSocketAddress) socket.getRemoteSocketAddress();
@@ -228,12 +239,42 @@ public class Util {
     public static String getValue(String content) {
         return content.substring(content.indexOf('=') + 1);
     }
+    
+    public static String generateGetURL(String key) {
+        return ParamsKey.LionNode.DEFAULT_LION_HOST +
+                ParamsKey.LionNode.LION_GET_PATH +
+                generateURIPrefix() +
+                "&k=" + key;
+    }
+
+    public static String generateSetURL(String key, String value) {
+        String encodedValue = "";
+        try {
+            encodedValue = URLEncoder.encode(value,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+        }
+        return ParamsKey.LionNode.DEFAULT_LION_HOST +
+                ParamsKey.LionNode.LION_SET_PATH +
+                generateURIPrefix() +
+                "&ef=1" +
+                "&k=" + key +
+                "&v=" + encodedValue;
+    }
+
+    private static String generateURIPrefix() {
+        return "?&p=" + ParamsKey.LionNode.LION_PROJECT +
+                "&e=" + zkEnv +
+                "&id=" + authorizationId;
+    }
 
     public static String[] getStringListOfLionValue(String rawValue) {
         if (rawValue == null) {
             return null;
         }
         String value = rawValue.trim();
+        if (value.isEmpty()) {
+            return new String[]{};
+        }
         if (value.charAt(0) != '[' || value.charAt(value.length() - 1) != ']') {
             return null;
         }
@@ -374,7 +415,7 @@ public class Util {
         }
     }
     
-    public static String getSourceIdentify(String agentServer, String instanceId) {
+    public static String getSource(String agentServer, String instanceId) {
         if (instanceId == null || instanceId.trim().length() == 0) {
             return agentServer;
         } else {
@@ -382,8 +423,8 @@ public class Util {
         }
     }
     
-    public static String getInstanceIdFromSourceIdentify(String sourceIdentify) {
-        String[] splits = sourceIdentify.split("#");
+    public static String getInstanceIdFromSource(String source) {
+        String[] splits = source.split("#");
         if (splits.length == 2) {
             return splits[1];
         } else {
@@ -391,8 +432,8 @@ public class Util {
         }
     }
     
-    public static String getAgentHostFromSourceIdentify(String sourceIdentify) {
-        String[] splits = sourceIdentify.split("#");
+    public static String getAgentHostFromSource(String source) {
+        String[] splits = source.split("#");
         return splits[0];
     }
     

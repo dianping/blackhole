@@ -36,7 +36,7 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
     private ConfigManager configManager;
     private Supervisor supervisor;
     
-    public HttpPaaSLogoutHandler(ConfigManager configManger, HttpClientSingle httpClient) {
+    public HttpPaaSLogoutHandler(ConfigManager configManger) {
         this.configManager = configManger;
         this.supervisor = configManger.getSupervisor();
     }
@@ -188,7 +188,7 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
                 List<String> idsInTheSameHost = instanceGroup.getInstanceIdsList();
                 // loop for every instance with the same topic in the same agent server
                 for (String id : idsInTheSameHost) {
-                    if (!supervisor.isEmptyStream(topic, Util.getSourceIdentify(agentServer, id))) {
+                    if (!supervisor.isEmptyStream(topic, Util.getSource(agentServer, id))) {
                         return false;
                     }
                 }
@@ -204,7 +204,7 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
                 String topic = instanceGroup.getTopic();
                 List<String> idsInTheSameHost = instanceGroup.getInstanceIdsList();
                 for (String id : idsInTheSameHost) {
-                    if (!supervisor.isCleanStream(topic, Util.getSourceIdentify(agentServer, id))) {
+                    if (!supervisor.isCleanStream(topic, Util.getSource(agentServer, id))) {
                         return false;
                     }
                 }

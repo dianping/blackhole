@@ -116,12 +116,12 @@ public final class FailurePB {
     public boolean hasType() { return hasType; }
     public com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType getType() { return type_; }
     
-    // required string source_identify = 3;
-    public static final int SOURCE_IDENTIFY_FIELD_NUMBER = 3;
-    private boolean hasSourceIdentify;
-    private java.lang.String sourceIdentify_ = "";
-    public boolean hasSourceIdentify() { return hasSourceIdentify; }
-    public java.lang.String getSourceIdentify() { return sourceIdentify_; }
+    // required string source = 3;
+    public static final int SOURCE_FIELD_NUMBER = 3;
+    private boolean hasSource;
+    private java.lang.String source_ = "";
+    public boolean hasSource() { return hasSource; }
+    public java.lang.String getSource() { return source_; }
     
     // required int64 failTs = 4;
     public static final int FAILTS_FIELD_NUMBER = 4;
@@ -136,7 +136,7 @@ public final class FailurePB {
     public final boolean isInitialized() {
       if (!hasTopic) return false;
       if (!hasType) return false;
-      if (!hasSourceIdentify) return false;
+      if (!hasSource) return false;
       if (!hasFailTs) return false;
       return true;
     }
@@ -150,8 +150,8 @@ public final class FailurePB {
       if (hasType()) {
         output.writeEnum(2, getType().getNumber());
       }
-      if (hasSourceIdentify()) {
-        output.writeString(3, getSourceIdentify());
+      if (hasSource()) {
+        output.writeString(3, getSource());
       }
       if (hasFailTs()) {
         output.writeInt64(4, getFailTs());
@@ -173,9 +173,9 @@ public final class FailurePB {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, getType().getNumber());
       }
-      if (hasSourceIdentify()) {
+      if (hasSource()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(3, getSourceIdentify());
+          .computeStringSize(3, getSource());
       }
       if (hasFailTs()) {
         size += com.google.protobuf.CodedOutputStream
@@ -345,8 +345,8 @@ public final class FailurePB {
         if (other.hasType()) {
           setType(other.getType());
         }
-        if (other.hasSourceIdentify()) {
-          setSourceIdentify(other.getSourceIdentify());
+        if (other.hasSource()) {
+          setSource(other.getSource());
         }
         if (other.hasFailTs()) {
           setFailTs(other.getFailTs());
@@ -391,7 +391,7 @@ public final class FailurePB {
               break;
             }
             case 26: {
-              setSourceIdentify(input.readString());
+              setSource(input.readString());
               break;
             }
             case 32: {
@@ -445,24 +445,24 @@ public final class FailurePB {
         return this;
       }
       
-      // required string source_identify = 3;
-      public boolean hasSourceIdentify() {
-        return result.hasSourceIdentify();
+      // required string source = 3;
+      public boolean hasSource() {
+        return result.hasSource();
       }
-      public java.lang.String getSourceIdentify() {
-        return result.getSourceIdentify();
+      public java.lang.String getSource() {
+        return result.getSource();
       }
-      public Builder setSourceIdentify(java.lang.String value) {
+      public Builder setSource(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasSourceIdentify = true;
-        result.sourceIdentify_ = value;
+  result.hasSource = true;
+        result.source_ = value;
         return this;
       }
-      public Builder clearSourceIdentify() {
-        result.hasSourceIdentify = false;
-        result.sourceIdentify_ = getDefaultInstance().getSourceIdentify();
+      public Builder clearSource() {
+        result.hasSource = false;
+        result.source_ = getDefaultInstance().getSource();
         return this;
       }
       
@@ -510,12 +510,12 @@ public final class FailurePB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rFailure.proto\022\tblackhole\"\227\001\n\007Failure\022\r" +
+      "\n\rFailure.proto\022\tblackhole\"\216\001\n\007Failure\022\r" +
       "\n\005topic\030\001 \002(\t\022)\n\004type\030\002 \002(\0162\033.blackhole." +
-      "Failure.NodeType\022\027\n\017source_identify\030\003 \002(" +
-      "\t\022\016\n\006failTs\030\004 \002(\003\")\n\010NodeType\022\014\n\010APP_NOD" +
-      "E\020\001\022\017\n\013BROKER_NODE\020\002B.\n!com.dp.blackhole" +
-      ".protocol.controlB\tFailurePB"
+      "Failure.NodeType\022\016\n\006source\030\003 \002(\t\022\016\n\006fail" +
+      "Ts\030\004 \002(\003\")\n\010NodeType\022\014\n\010APP_NODE\020\001\022\017\n\013BR" +
+      "OKER_NODE\020\002B.\n!com.dp.blackhole.protocol" +
+      ".controlB\tFailurePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -527,7 +527,7 @@ public final class FailurePB {
           internal_static_blackhole_Failure_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Failure_descriptor,
-              new java.lang.String[] { "Topic", "Type", "SourceIdentify", "FailTs", },
+              new java.lang.String[] { "Topic", "Type", "Source", "FailTs", },
               com.dp.blackhole.protocol.control.FailurePB.Failure.class,
               com.dp.blackhole.protocol.control.FailurePB.Failure.Builder.class);
           return null;

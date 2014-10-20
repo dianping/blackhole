@@ -5,7 +5,7 @@ option java_outer_classname = "AppRollPB";
 
 message AppRoll {
     required string topic = 1;
-    required string source_identify = 2;
+    required string source = 2;
     required int64 period = 3;
     required int64 roll_ts = 4;
 }
