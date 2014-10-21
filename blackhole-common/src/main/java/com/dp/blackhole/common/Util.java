@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -18,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32;
@@ -55,12 +58,30 @@ public class Util {
     public static String getRemoteHostAndPort(Socket socket) {
         InetSocketAddress remoteAddr= ((InetSocketAddress)socket.getRemoteSocketAddress());
         return remoteAddr.toString();
-      }
+    }
     
     public static String getLocalHost() throws UnknownHostException {
       return InetAddress.getLocalHost().getHostName();
     }
     
+    public static String getLocalHostIP() throws UnknownHostException, SocketException {
+        String ip = null;
+        Enumeration<NetworkInterface> interfaces  = NetworkInterface.getNetworkInterfaces();
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface ni = (NetworkInterface) interfaces.nextElement();
+            Enumeration<InetAddress> enumIpAddr = ni.getInetAddresses();
+            while (enumIpAddr.hasMoreElements()) {
+                 InetAddress inetAddress = (InetAddress) enumIpAddr.nextElement();
+                 if (!inetAddress.isLoopbackAddress()  
+                         && !inetAddress.isLinkLocalAddress() 
+                         && inetAddress.isSiteLocalAddress()) {
+                     ip = inetAddress.getHostAddress();
+                 }
+             }
+          }
+        return ip;
+    }
+
     public static String ts2String(long ts) {
         return (new Date(ts)).toString();
     }

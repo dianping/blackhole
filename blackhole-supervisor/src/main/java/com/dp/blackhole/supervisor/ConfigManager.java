@@ -52,6 +52,7 @@ public class ConfigManager {
     public int socketTimeout;
     
     public int supervisorPort;
+    public int jettyPort;
     public int numHandler;
     
     public String getPaaSInstanceURLPerfix;
@@ -113,7 +114,8 @@ public class ConfigManager {
         connectionTimeout = Integer.parseInt(prop.getProperty("supervisor.webservice.connectionTimeout", "30000"));
         socketTimeout = Integer.parseInt(prop.getProperty("supervisor.webservice.socketTimeout", "10000"));
         
-        supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));;
+        supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
+        jettyPort = Integer.parseInt(prop.getProperty("rest.jetty.port", "8085"));
         numHandler = Integer.parseInt(prop.getProperty("GenServer.handler.count", "3"));
         getPaaSInstanceURLPerfix = prop.getProperty("supervisor.paas.url");
         //create a http client for PaaS

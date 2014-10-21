@@ -1776,7 +1776,8 @@ public class Supervisor {
         //start restful server
         ServiceFactory.setConfigManger(configManager);
         ServiceFactory.setSupervisor(this);
-        HttpServer restfulServer = new HttpServer.Builder().setName("supervisor").addEndpoint(URI.create("http://localhost:8085")).build();
+        String restfulServerAddr = "http://" + Util.getLocalHostIP() + ":" + Integer.toString(configManager.jettyPort);
+        HttpServer restfulServer = new HttpServer.Builder().setName("supervisor").addEndpoint(URI.create(restfulServerAddr)).build();
         restfulServer.addJerseyResourcePackage(ServiceFactory.class.getPackage().getName(), "/*");
         restfulServer.start();
         
