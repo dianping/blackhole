@@ -20,22 +20,19 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
 
 import com.dp.blackhole.common.ParamsKey;
-import com.dp.blackhole.rest.model.BlacklistInfo;
-import com.dp.blackhole.rest.model.TopicConfInfo;
-import com.dp.blackhole.supervisor.ConfigManager;
+import com.dp.blackhole.supervisor.Blacklist;
+import com.dp.blackhole.supervisor.TopicConfig;
 
 @Path("/confs")
-public class TopicConfsResource {
+public class TopicConfsResource extends BaseResource {
     private static final Log LOG = LogFactory.getLog(TopicConfsResource.class);
     
-    private ConfigManager configService = ServiceFactory.getConfigManager();
-
     @GET
     @Path("/")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<TopicConfInfo> getAllConfInfos() {
+    public List<TopicConfig> getAllConfInfos() {
         LOG.info("GET: all confs");
-        List<TopicConfInfo> allConfs = new ArrayList<TopicConfInfo>();
+        List<TopicConfig> allConfs = new ArrayList<TopicConfig>();
         for (String topic : configService.getAllTopicConfNames()) {
             allConfs.add(configService.getConfByTopic(topic));
         }
@@ -45,9 +42,9 @@ public class TopicConfsResource {
     @GET
     @Path("/{topic}")
     @Produces({MediaType.APPLICATION_JSON})
-    public TopicConfInfo getConfInfoByTopic(
+    public TopicConfig getConfInfoByTopic(
             @PathParam("topic") final String topic) {
-        LOG.info("get: topic -> conf");
+        LOG.info("GET: topic -> conf");
         return configService.getConfByTopic(topic);
     }
     
@@ -56,7 +53,7 @@ public class TopicConfsResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response deleteConfByTopic(
             @PathParam("topic") final String topic) {
-        LOG.info("delete: topic -> conf");
+        LOG.info("DEL: topic -> conf");
         configService.removeConf(topic);
         return Response.ok().build();
     }
@@ -64,8 +61,8 @@ public class TopicConfsResource {
     @GET
     @Path("/blacklist")
     @Produces({MediaType.APPLICATION_JSON})
-    public BlacklistInfo listBlacklist() {
-        LOG.info("get: blacklist");
+    public Blacklist listBlacklist() {
+        LOG.info("GET: blacklist");
         return configService.getBlacklist();
     }
     

@@ -51,7 +51,6 @@ import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry;
 import com.dp.blackhole.rest.HttpServer;
 import com.dp.blackhole.rest.ServiceFactory;
-import com.dp.blackhole.rest.model.TopicConfInfo;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Supervisor {
@@ -381,8 +380,8 @@ public class Supervisor {
                             LOG.info("checking stage: " + stage);
                             if (stage.getStatus() != Stage.UPLOADING) {
                                 Issue e = new Issue();
-                                e.desc = "logreader failed";
-                                e.ts = now;
+                                e.setDesc("logreader failed");
+                                e.setTs(now);
                                 stage.getIssuelist().add(e);
                                 stage.setStatus(Stage.PENDING);
                             }
@@ -439,8 +438,8 @@ public class Supervisor {
                     LOG.info("checking current stage: " + current);
                     
                     Issue e = new Issue();
-                    e.desc = "broker failed";
-                    e.ts = now;
+                    e.setDesc("broker failed");
+                    e.setTs(now);
                     current.getIssuelist().add(e);
 
                     // do not reassign broker here, since logreader will find broker fail,
@@ -808,9 +807,13 @@ public class Supervisor {
         Message message = PBwrap.wrapDumpReply(listConsGroup);
         send(from, message);
     }
-
-    private void sendRestart(Restart restart) {
+    
+    private void handleRestart(Restart restart) {
         List<String> agentServers = restart.getAgentServersList();
+        sendRestart(agentServers);
+    }
+
+    public void sendRestart(List<String> agentServers) {
         for (String agentHost : agentServers) {
             SimpleConnection agent = agentsMapping.get(agentHost);
             if (agent != null) {
@@ -837,24 +840,24 @@ public class Supervisor {
         retireStreamInternal(stream, force);
     }
     
-    public void retireStream(String topic, String source) {
+    public boolean retireStream(String topic, String source) {
         Stream stream = getStream(topic, source);
-        retireStreamInternal(stream, false);
+        return retireStreamInternal(stream, false);
     }
     
-    private void retireStreamInternal(Stream stream, boolean forceRetire) {
+    private boolean retireStreamInternal(Stream stream, boolean forceRetire) {
         if (stream == null) {
             LOG.error("can't find stream");
-            return;
+            return false;
         }
         
         if (stream.isActive() && !forceRetire) {
             LOG.error("only inactive stream can be retired");
-            return;
+            return false;
         } else {
             if (brokersMapping.isEmpty()) {
                 LOG.error("only inactive stream can be retired");
-                return;
+                return false;
             }
             
             LOG.info("retire stream: " + stream);
@@ -891,40 +894,45 @@ public class Supervisor {
             String topic = stream.getTopic();
             String partitionId = stream.getSource();
             markPartitionOffline(topic, partitionId);
+            return true;
         }
     }
     
     private void handleManualRecoveryRoll(RollID rollID) {
-        Stream stream = getStream(rollID.getTopic(), rollID.getSource());
+        manualRecoveryRoll(rollID.getTopic(), rollID.getSource(), rollID.getRollTs());
+    }
+    
+    public boolean manualRecoveryRoll(String topic, String source, long rollTs) {
+        Stream stream = getStream(topic, source);
         if (stream != null) {
             // check the stream is active
             if (!stream.isActive()) {
                 LOG.error("the manual recovery stage must belong to an active stream");
-                return;
+                return false;
             }
             List<Stage> stages = stream.getStages();
             if (stages != null) {
                 synchronized (stages) {
                     // process stage missed only
                     for (Stage stage : stages) {
-                        if (stage.getRollTs() == rollID.getRollTs()) {
+                        if (stage.getRollTs() == rollTs) {
                             if (stage.getStatus() != Stage.RECOVERYING && stage.getStatus() != Stage.UPLOADING) {
                                 doRecovery(stream, stage);
                             } else {
                                 LOG.warn("Can't recovery stage manually cause the stage is " + stage.getStatus());
                             }
-                            return;
+                            return true;
                         }
                     }
                     // create the stage
                     Stage manualRecoveryStage = new Stage();
-                    manualRecoveryStage.setTopic(rollID.getTopic());
-                    manualRecoveryStage.setSource(rollID.getSource());
+                    manualRecoveryStage.setTopic(topic);
+                    manualRecoveryStage.setSource(source);
                     manualRecoveryStage.setBrokerhost(null);
                     manualRecoveryStage.setCleanstart(false);
                     manualRecoveryStage.setIssuelist(new ArrayList<Issue>());
                     manualRecoveryStage.setStatus(Stage.RECOVERYING);
-                    manualRecoveryStage.setRollTs(rollID.getRollTs());
+                    manualRecoveryStage.setRollTs(rollTs);
                     manualRecoveryStage.setCurrent(false);
                     // put the stage to head of the stages
                     ArrayList<Stage> newStages = new ArrayList<Stage>();
@@ -935,11 +943,14 @@ public class Supervisor {
                     // do recovery
                     doRecovery(stream, manualRecoveryStage);
                 }
+                return true;
             } else {
                 LOG.error("can not find stages of stream: " + stream);
+                return false;
             }
         } else {
-            LOG.error("can't find stream by " + rollID.getTopic() + ":" +rollID.getSource());
+            LOG.error("can't find stream by " + topic + ":" + source);
+            return false;
         }   
     }
 
@@ -1021,13 +1032,13 @@ public class Supervisor {
             }
             if (failure.getType() == NodeType.APP_NODE) {
                 Issue i = new Issue();
-                i.ts = failure.getFailTs();
-                i.desc = "logreader failed";
+                i.setTs(failure.getFailTs());
+                i.setDesc("logreader failed");
                 failstage.getIssuelist().add(i);
             } else {
                 Issue i = new Issue();
-                i.ts = failure.getFailTs();
-                i.desc = "broker failed";
+                i.setTs(failure.getFailTs());
+                i.setDesc("broker failed");
                 failstage.getIssuelist().add(i);
             }
         }
@@ -1100,8 +1111,8 @@ public class Supervisor {
             List<Stage> stages = stream.getStages();
             if (stages != null) {
                 Issue e = new Issue();
-                e.desc = "upload failed";
-                e.ts = Util.getTS();
+                e.setDesc("upload failed");
+                e.setTs(Util.getTS());
                 synchronized (stages) {
                     for (Stage stage : stages) {
                         if (stage.getRollTs() == rollID.getRollTs()) {
@@ -1189,8 +1200,8 @@ public class Supervisor {
                             stage.setCurrent(false);
                         }
                         Issue issue = new Issue();
-                        issue.ts = stream.getLastSuccessTs() + stream.getPeriod() * 1000;
-                        issue.desc = "log discontinuous";
+                        issue.setTs(stream.getLastSuccessTs() + stream.getPeriod() * 1000);
+                        issue.setDesc("log discontinuous");
                         ArrayList<Stage> missedStages = getMissedStages(stream, missedStageCount, issue);
                         for (Stage missedStage : missedStages) {
                             LOG.info("processing missed stages: " + missedStage);
@@ -1397,8 +1408,8 @@ public class Supervisor {
      */
     private void recoveryStages(Stream stream, List<Stage> stages, long connectedTs, long currentTs, String newBrokerHost) {
         Issue issue = new Issue();
-        issue.ts = connectedTs;
-        issue.desc = "stream reconnected";
+        issue.setTs(connectedTs);
+        issue.setDesc("stream reconnected");
         
         // recovery Pending and BROKERFAIL stages
         for (int i=0 ; i < stages.size(); i++) {
@@ -1705,7 +1716,7 @@ public class Supervisor {
                 listIdle(from);
                 break;
             case RESTART:
-                sendRestart(msg.getRestart());
+                handleRestart(msg.getRestart());
                 break;
             case ROLL_CLEAN:
                 handleRollingAndTriggerClean(msg.getRollClean(), from);
@@ -1805,7 +1816,7 @@ public class Supervisor {
             return;
         }
         for (String topic : topicsAssocHost) {
-            TopicConfInfo confInfo = configManager.getConfByTopic(topic);
+            TopicConfig confInfo = configManager.getConfByTopic(topic);
             if (confInfo == null) {
                 LOG.error("Can not get topic: " + topic + " from configMap");
                 message = PBwrap.wrapNoAvailableConf();
@@ -1832,7 +1843,7 @@ public class Supervisor {
         Set<String> topicsAssocHost = configManager.getTopicsByHost(connection.getHost());
         if (topicsAssocHost != null) {
             for (String topic : topicsAssocHost) {
-                TopicConfInfo confInfo = configManager.getConfByTopic(topic);
+                TopicConfig confInfo = configManager.getConfByTopic(topic);
                 if (confInfo == null) {
                     LOG.error("Can not get topic: " + topic + " from configMap");
                     continue;

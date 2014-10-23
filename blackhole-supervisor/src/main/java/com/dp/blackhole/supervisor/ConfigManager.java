@@ -30,8 +30,6 @@ import com.dianping.lion.client.LionException;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.http.HttpClientSingle;
-import com.dp.blackhole.rest.model.BlacklistInfo;
-import com.dp.blackhole.rest.model.TopicConfInfo;
 
 public class ConfigManager {
     private static final Log LOG = LogFactory.getLog(ConfigManager.class);
@@ -39,11 +37,11 @@ public class ConfigManager {
     private final ConcurrentHashMap<String, Set<String>> hostToTopics = new ConcurrentHashMap<String, Set<String>>();
     private final Map<String, Set<String>> cmdbAppToTopics = new ConcurrentHashMap<String, Set<String>>();
     // key is a topic name which is just maintained in configurations but may not be using.
-    private final Map<String, TopicConfInfo> confMap = new ConcurrentHashMap<String, TopicConfInfo>();
+    private final Map<String, TopicConfig> confMap = new ConcurrentHashMap<String, TopicConfig>();
 
     private final ConfigCache cache;
     private final Supervisor supervisor;
-    private final BlacklistInfo blacklist;
+    private final Blacklist blacklist;
 
     private HttpClientSingle httpClient;
     
@@ -60,14 +58,14 @@ public class ConfigManager {
     public ConfigManager(Supervisor supervisor) throws LionException {
         this.cache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
         this.supervisor = supervisor;
-        this.blacklist = new BlacklistInfo();
+        this.blacklist = new Blacklist();
     }
     
     public Supervisor getSupervisor() {
         return this.supervisor;
     }
     
-    public BlacklistInfo getBlacklist() {
+    public Blacklist getBlacklist() {
         return blacklist;
     }
 
@@ -91,7 +89,7 @@ public class ConfigManager {
         return confMap.keySet();
     }
     
-    public TopicConfInfo getConfByTopic(String topic) {
+    public TopicConfig getConfByTopic(String topic) {
         return confMap.get(topic);
     }
     
@@ -139,7 +137,7 @@ public class ConfigManager {
         String[] blacklist = Util.getStringListOfLionValue(blacklistString);
         this.blacklist.setBlacklist(Arrays.asList(blacklist));
         for (int i = 0; i < topics.length; i++) {
-            confMap.put(topics[i], new TopicConfInfo(topics[i]));
+            confMap.put(topics[i], new TopicConfig(topics[i]));
             
             String cmdbString = definitelyGetProperty(ParamsKey.LionNode.CMDB_PREFIX + topics[i]);
             fillCMDBMap(topics[i], cmdbString);
@@ -189,7 +187,7 @@ public class ConfigManager {
     private void fillConfMap(String topic, String confValue) {
         String[][] confKV = Util.getStringMapOfLionValue(confValue);
         if (confKV != null) {
-            TopicConfInfo confInfo = confMap.get(topic);
+            TopicConfig confInfo = confMap.get(topic);
             for (int i = 0; i < confKV.length; i++) {
                 String key = confKV[i][0];
                 String value = confKV[i][1];
@@ -215,7 +213,7 @@ public class ConfigManager {
         }
     }
     
-    public void importNewTopicInPaaS(String topic, TopicConfInfo confInfo) {
+    public void importNewTopicInPaaS(String topic, TopicConfig confInfo) {
         if (confInfo.isPaas()) {
             String cmdbApp = confInfo.getAppName();
             if (cmdbApp == null) {
@@ -298,7 +296,7 @@ public class ConfigManager {
                     addTopicToHost(host, topic);
                 }
             }
-            TopicConfInfo confInfo = confMap.get(topic);
+            TopicConfig confInfo = confMap.get(topic);
             confInfo.setHosts(list);
         } else {
             LOG.warn("Lose hosts for " + topic);
@@ -318,7 +316,7 @@ public class ConfigManager {
                 cmdbAppToTopics.put(cmdbApp, topicsInOneCMDB);
             }
             topicsInOneCMDB.add(topic);
-            TopicConfInfo confInfo = confMap.get(topic);
+            TopicConfig confInfo = confMap.get(topic);
             confInfo.setAppName(cmdbApp);
         } else {
             LOG.error("Lose CMDB mapping for " + topic);
@@ -373,7 +371,7 @@ public class ConfigManager {
         for (String topic : confMap.keySet()) {
             sb.append("TOPIC: [").append(topic).append("]\n");
             sb.append("HOSTS: \n");
-            TopicConfInfo confInfo = confMap.get(topic);
+            TopicConfig confInfo = confMap.get(topic);
             if (confInfo == null) {
                 continue;
             }
@@ -440,7 +438,7 @@ public class ConfigManager {
                     for (String newTopic : newTopicSet) {
                         if (!confMap.containsKey(newTopic)) {
                             LOG.info("Topics Change is triggered by "+ newTopic);
-                            confMap.put(newTopic, new TopicConfInfo(newTopic));
+                            confMap.put(newTopic, new TopicConfig(newTopic));
                             String watchKey = ParamsKey.LionNode.CONF_PREFIX + newTopic;
                             addWatherForKey(watchKey);
                             watchKey = ParamsKey.LionNode.HOSTS_PREFIX + newTopic;

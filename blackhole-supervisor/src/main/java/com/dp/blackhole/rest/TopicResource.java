@@ -21,20 +21,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.ajax.JSON;
 
-import com.dp.blackhole.rest.model.TopicConfInfo;
-import com.dp.blackhole.supervisor.ConfigManager;
 import com.dp.blackhole.supervisor.ConsumerDesc;
 import com.dp.blackhole.supervisor.ConsumerGroup;
 import com.dp.blackhole.supervisor.ConsumerGroupKey;
 import com.dp.blackhole.supervisor.Stage;
 import com.dp.blackhole.supervisor.Stream;
-import com.dp.blackhole.supervisor.Supervisor;
+import com.dp.blackhole.supervisor.TopicConfig;
 
 @Path("topics")
-public class TopicResource {
+public class TopicResource extends BaseResource {
     private static final Log LOG = LogFactory.getLog(TopicResource.class);
-    private ConfigManager configService = ServiceFactory.getConfigManager();
-    private Supervisor supervisorService = ServiceFactory.getSupervisor();
     
     @GET
     @Path("/")
@@ -52,7 +48,7 @@ public class TopicResource {
     public Response getApplicationByTopic(
             @PathParam("topic") final String topic) {
         LOG.info("GET: topic -> app");
-        TopicConfInfo confInfo = configService.getConfByTopic(topic);
+        TopicConfig confInfo = configService.getConfByTopic(topic);
         if (confInfo != null) {
             return Response.ok(JSON.toString(confInfo.getAppName())).build();
         } else {

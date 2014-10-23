@@ -1,9 +1,9 @@
-package com.dp.blackhole.rest.model;
+package com.dp.blackhole.supervisor;
 
 import java.util.List;
 import java.util.Map;
 
-public class TopicConfInfo {
+public class TopicConfig {
     private String topic;
     private String appName;
     private String watchLog;
@@ -12,7 +12,7 @@ public class TopicConfInfo {
     private boolean isPaas;
     private List<String> hosts;
     private Map<String, List<String>> hostsInstances;
-    public TopicConfInfo(String topic) {
+    public TopicConfig(String topic) {
         this.topic = topic;
         this.isPaas = false;
     }

@@ -1,8 +1,8 @@
-package com.dp.blackhole.rest.model;
+package com.dp.blackhole.supervisor;
 
 import java.util.List;
 
-public class BlacklistInfo {
+public class Blacklist {
     private List<String> blacklist;
     /**
      * @return blacklist may be null

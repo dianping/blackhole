@@ -15,12 +15,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.ajax.JSON;
 
-import com.dp.blackhole.supervisor.ConfigManager;
-
 @Path("/apps")
-public class ApplicationResource {
+public class ApplicationResource extends BaseResource {
     private static final Log LOG = LogFactory.getLog(ApplicationResource.class);
-    private ConfigManager configService = ServiceFactory.getConfigManager();
     
     @GET
     @Path("/")

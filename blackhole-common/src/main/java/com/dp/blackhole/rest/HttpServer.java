@@ -34,24 +34,10 @@ import org.mortbay.util.MultiException;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
-/**
- * Create a Jetty embedded server to answer http requests. The primary goal is
- * to serve up status information for the server. There are three contexts:
- * "/logs/" -> points to the log directory "/static/" -> points to common static
- * files (src/webapps/static) "/" -> the jsp server code from
- * (src/webapps/<name>)
- */
 public final class HttpServer {
     public static final Log LOG = LogFactory.getLog(HttpServer.class);
 
     static final String HTTP_MAX_THREADS = "http.max.threads";
-
-    // The ServletContext attribute where the daemon Configuration
-    // gets stored.
-    public static final String CONF_CONTEXT_ATTRIBUTE = "blackhole.conf";
-    public static final String NO_CACHE_FILTER = "NoCacheFilter";
-
-    public static final String BIND_ADDRESS = "bind.address";
 
     protected final Server webServer;
 
@@ -220,7 +206,7 @@ public final class HttpServer {
         WebAppContext ctx = new WebAppContext();
         ctx.setDisplayName(name);
         ctx.setContextPath("/");
-        ctx.setWar(appDir + "/" + name);
+        ctx.setWar(appDir);
         return ctx;
     }
 
@@ -395,8 +381,7 @@ public final class HttpServer {
         if (url == null)
             throw new FileNotFoundException("webapps/" + appName
                     + " not found in CLASSPATH");
-        String urlString = url.toString();
-        return urlString.substring(0, urlString.lastIndexOf('/'));
+        return url.toString();
     }
 
     /**
