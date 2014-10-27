@@ -6,8 +6,8 @@ import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.Encoded;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -72,7 +72,7 @@ public class TopicConfsResource extends BaseResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response updateBlacklist(
             @PathParam("topic") final String topic, 
-            @Encoded @HeaderParam("op") final String op) {
+            @Encoded @FormParam("op") final String op) {
         LOG.info("PUT: topic " + op + " blacklist");
         String[] updates = {topic};
         try {
