@@ -25,10 +25,7 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.log4j.Logger;
 
 import com.dp.blackhole.common.PBwrap;
-import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.conf.ConfigKeeper;
-import com.dp.blackhole.conf.Context;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.supervisor.ConfigManager;
@@ -121,15 +118,14 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
                 }
                 // filter the stream already active
                 filterHost(topic, eachHost, idsInTheSameHost, true, supervisor);
-                
-                Context context = ConfigKeeper.configMap.get(topic);
-                if (context == null) {
-                    LOG.error("Can not get topic: " + topic + " from configMap");
-                    return new HttpResult(HttpResult.FAILURE, "Can not get topic: " + topic + " from configMap");
+                TopicConfig topicConfig = configManager.getConfByTopic(topic);
+                if (topicConfig == null) {
+                    LOG.error("Can not get config of " + topic + " from configMap");
+                    return new HttpResult(HttpResult.FAILURE, "Can not get config of " + topic + " from configMap");
                 }
-                String period = context.getString(ParamsKey.TopicConf.ROLL_PERIOD);
-                String maxLineSize = context.getString(ParamsKey.TopicConf.MAX_LINE_SIZE);
-                String watchFile = context.getString(ParamsKey.TopicConf.WATCH_FILE);
+                String period = Integer.toString(topicConfig.getRollPeriod());
+                String maxLineSize = Integer.toString(topicConfig.getMaxLineSize());
+                String watchFile = topicConfig.getWatchLog();
                 LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, period, maxLineSize, idsInTheSameHost);
                 lxcConfResList.add(lxcConfRes);
             }

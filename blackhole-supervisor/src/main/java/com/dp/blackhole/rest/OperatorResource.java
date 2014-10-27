@@ -1,7 +1,6 @@
 package com.dp.blackhole.rest;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.Consumes;

@@ -29,7 +29,7 @@ public class HttpCoreRequestHandler implements Runnable {
                 this.httpservice.handleRequest(this.conn, context);
             }
         } catch (ConnectionClosedException e) {
-            LOG.error("Client closed connection", e);
+            LOG.warn("Client closed connection", e);
         } catch (IOException e) {
             LOG.error("I/O error: ", e);
         } catch (HttpException e) {
