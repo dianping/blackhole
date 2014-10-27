@@ -15,9 +15,7 @@ import net.contentobjects.jnotify.IJNotify;
 import net.contentobjects.jnotify.JNotifyException;
 import net.contentobjects.jnotify.JNotifyListener;
 
-import com.dianping.cat.Cat;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.exception.BlackholeClientException;
 
 public class FileListener implements JNotifyListener{
     private static final Log LOG = LogFactory.getLog(FileListener.class);
@@ -52,7 +50,6 @@ public class FileListener implements JNotifyListener{
                     fwd = iJNotifyInstance.addWatch(parentPath, FILE_CREATED, false, this);
                 } catch (JNotifyException e) {
                     LOG.error("Failed to add watch for " + parentPath, e);
-                    Cat.logError("Failed to add watch for " + parentPath, e);
                     readerMap.remove(watchPath);
                     parentWathchPathSet.remove(parentPath);
                     return false;
@@ -72,7 +69,6 @@ public class FileListener implements JNotifyListener{
                 wd = iJNotifyInstance.addWatch(watchPath, FILE_MODIFIED, false, this);
             } catch (JNotifyException e) {
                 LOG.error("Failed to add watch for " + watchPath, e);
-                Cat.logError("Failed to add watch for " + watchPath, e);
                 readerMap.remove(watchPath);
                 return false;
             }
@@ -109,10 +105,6 @@ public class FileListener implements JNotifyListener{
                     ". Because the watch descriptor wd is not valid;" +
                     " or fd is not an inotify file descriptor." +
                     " See \"inotify_rm_watch\" for more detail", e);
-            Cat.logError("Failed to remove wd " + wd + " for " + watchPath + 
-                    ". Because the watch descriptor wd is not valid;" +
-                    " or fd is not an inotify file descriptor." +
-                    " See \"inotify_rm_watch\" for more detail", e);
         }
         readerMap.remove(watchPath);
     }
@@ -139,14 +131,12 @@ public class FileListener implements JNotifyListener{
                     path2wd.remove(createdFilePath);
                 } else {
                     LOG.fatal("Failed to get wd by file " + createdFilePath);
-                    Cat.logError(new BlackholeClientException("Failed to get wd by file " + createdFilePath));
                 }
                 Integer newWd = iJNotifyInstance.addWatch(createdFilePath, FILE_MODIFIED, false, this);
                 path2wd.put(createdFilePath, newWd);
                 LOG.info("Re-monitoring "+ createdFilePath + " \"FILE_MODIFIED\" for rotate.");
             } catch (JNotifyException e) {
                 LOG.fatal("Failed to add or remove watch for " + createdFilePath, e);
-                Cat.logError("Failed to add or remove watch for " + createdFilePath, e);
             } finally {
                 lock.unlock();
             }

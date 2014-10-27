@@ -13,7 +13,6 @@ import java.nio.channels.SocketChannel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dianping.cat.Cat;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.TransferWrap;
 import com.dp.blackhole.protocol.data.LastRotateRequest;
@@ -23,7 +22,7 @@ import com.dp.blackhole.protocol.data.RotateRequest;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.Message;
 
-public class LogReader {
+public class LogReader implements Runnable {
     private static final Log LOG = LogFactory.getLog(LogReader.class);
     private static final int IN_BUF = 1024 * 8;
     private static final int SYS_MAX_LINE_SIZE = 1024 * 512;
@@ -56,7 +55,8 @@ public class LogReader {
         agent.getListener().unregisterLogReader(topicMeta.getTailFile());
     }
 
-    public void start() {
+    @Override
+    public void run() {
         try {
             LOG.info("Log reader for " + topicMeta + " running...");
             
@@ -69,7 +69,6 @@ public class LogReader {
             }
         } catch (Throwable t) {
             LOG.error("Oops, got an exception", t);
-            Cat.logError("Oops, got an exception", t);
             agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
         }
     }
@@ -138,7 +137,6 @@ public class LogReader {
                 wrap.write(channel);
             } catch (IOException e) {
                 LOG.error("Oops, got an exception:", e);
-                Cat.logError("Oops, got an exception:", e);
                 closeQuietly(reader);
                 closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
@@ -164,7 +162,6 @@ public class LogReader {
                 wrap.write(channel);
             } catch (IOException e) {
                 LOG.error("Oops, got an exception:", e);
-                Cat.logError("Oops, got an exception:", e);
                 closeQuietly(reader);
                 closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
@@ -178,7 +175,6 @@ public class LogReader {
                 readLines(reader);
             } catch (IOException e) {
                 LOG.error("Oops, process read lines fail:", e);
-                Cat.logError("Oops, process read lines fail:", e);
                 closeQuietly(reader);
                 closeChannelQuietly(channel);
                 LOG.debug("process failed, stop.");

@@ -12,11 +12,9 @@ import java.text.SimpleDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dianping.cat.Cat;
 import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
-import com.dp.blackhole.exception.BlackholeClientException;
 
 public class RollRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(RollRecovery.class);
@@ -59,7 +57,6 @@ public class RollRecovery implements Runnable{
 
     private void stopRecoveryingCauseException(String desc, Exception e) {
         LOG.error(desc, e);
-        Cat.logError(desc, e);
         stopRecoverying();
     }
 
@@ -83,7 +80,6 @@ public class RollRecovery implements Runnable{
         }
         if (!rolledFile.exists() && (gzFile == null || !gzFile.exists())) {
             LOG.error("Can not found both " + rolledFile + " and gzFile");
-            Cat.logError(new BlackholeClientException("Can not found both " + rolledFile + " and gzFile"));
             stopRecoverying();
             node.reportUnrecoverable(topicMeta.getMetaKey(), sourceIdentify, period, rollTimestamp, isFinal);
             return;
@@ -129,7 +125,6 @@ public class RollRecovery implements Runnable{
             LOG.info(transferFile + " transfered, including [" + transferBytes + "] bytes.");
         } catch (IOException e) {
             LOG.error("Recover stream broken.", e);
-            Cat.logError("Recover stream broken.", e);
         } finally {
             if (is != null) {
                 try {

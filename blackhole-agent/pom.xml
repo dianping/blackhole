@@ -9,12 +9,7 @@
 	<artifactId>blackhole-agent</artifactId>
 	<name>blackhole-agent</name>
 	<packaging>jar</packaging>
-    <dependencies>
-        <dependency>
-	       <groupId>com.dianping.cat</groupId>
-	       <artifactId>cat-client</artifactId>
-	       <version>0.6.2</version>
-	       </dependency>
+	<dependencies>
 		<dependency>
 			<groupId>net.contentobjects.jnotify</groupId>
 			<artifactId>jnotify</artifactId>
@@ -30,17 +25,17 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>blackhole-common</artifactId>
 		</dependency>
-                <dependency>
-                        <groupId>${project.groupId}</groupId>
-                        <artifactId>blackhole-broker</artifactId>
-                        <scope>test</scope>
-                </dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>blackhole-broker</artifactId>
-                        <version>${project.version}</version>
-                        <type>test-jar</type>
-                        <scope>test</scope>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>blackhole-broker</artifactId>
+			<version>${project.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

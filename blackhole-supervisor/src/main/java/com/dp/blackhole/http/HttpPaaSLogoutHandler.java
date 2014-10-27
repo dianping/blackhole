@@ -104,13 +104,13 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
         }
         String[] ids = args[0];
         String[] ips = args[1];
-        Map<String, List<String>> hostIds = extractIdMapShuffleByHost(ids, ips);
+        Map<String, Set<String>> hostIds = extractIdMapShuffleByHost(ids, ips);
         
         Map<String, Message> toBeQuit = new HashMap<String, Message>();
         Map<String, Message> toBeClean = new HashMap<String, Message>();
-        for(Map.Entry<String, List<String>> entry : hostIds.entrySet()) {
+        for(Map.Entry<String, Set<String>> entry : hostIds.entrySet()) {
             String eachHost = entry.getKey();
-            List<String> idsInTheSameHost = entry.getValue();
+            Set<String> idsInTheSameHost = entry.getValue();
             List<InstanceGroup> quits = new ArrayList<InstanceGroup>();
             List<InstanceGroup> cleans = new ArrayList<InstanceGroup>();
             for (String topic : topicSet) {
@@ -127,26 +127,30 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
             toBeClean.put(eachHost, cleanMessage);
         }
         
-        return sendAndReceive(toBeQuit, toBeClean, supervisor);
+        return sendAndReceive(toBeQuit, toBeClean, app, hostIds);
     }
     
     private HttpResult sendAndReceive(
             Map<String, Message> toBeQuit,
             Map<String, Message> toBeClean,
-            Supervisor supervisor) {
-        HttpResult result = sendAndReceiveForQuit(toBeQuit, supervisor);
+            String app,
+            Map<String, Set<String>> hostIds) {
+        HttpResult result = sendAndReceiveForQuit(toBeQuit, app, hostIds);
         if (result.code == HttpResult.SUCCESS) {
-            return sendAndReceiveForClean(toBeClean, supervisor);
+            return sendAndReceiveForClean(toBeClean, app, hostIds);
         } else {
             return result;
         }
     }
     
-    private HttpResult sendAndReceiveForQuit(Map<String, Message> toBeQuit, Supervisor supervisor) {
+    private HttpResult sendAndReceiveForQuit(
+            Map<String, Message> toBeQuit,
+            String app,
+            Map<String, Set<String>> hostIds) {
         long currentTime = System.currentTimeMillis();
         long timeout = currentTime + TIMEOUT;
         while (currentTime < timeout) {
-            if (checkStreamsEmpty(toBeQuit, supervisor)) {
+            if (checkStreamsEmpty(app, hostIds)) {
                 return new HttpResult(HttpResult.SUCCESS, "");
             }
             supervisor.cachedSend(toBeQuit);
@@ -160,14 +164,23 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
         return new HttpResult(HttpResult.FAILURE, "timeout");
     }
     
-    private HttpResult sendAndReceiveForClean(Map<String, Message> toBeClean, Supervisor supervisor) {
+    private HttpResult sendAndReceiveForClean(
+            Map<String, Message> toBeClean,
+            String app,
+            Map<String, Set<String>> hostIds) {
         long currentTime = System.currentTimeMillis();
         long timeout = currentTime + TIMEOUT;
         while (currentTime < timeout) {
-            if (checkStreamsClean(toBeClean, supervisor)) {
-                supervisor.cachedSend(toBeClean);
+            if (checkStreamsClean(app, hostIds)) {
+                LOG.info(app + ": all stream empty, instances logout succcss.");
+                Set<String> topicSet = configManager.getTopicsByCmdb(app);
+                for (String topic : topicSet) {
+                    //update <topic,<host,ids>> map
+                    configManager.removeIdsByTopicAndHost(topic, hostIds);
+                }
                 return new HttpResult(HttpResult.SUCCESS, "");
             }
+            supervisor.cachedSend(toBeClean);
             currentTime += CHECK_PERIOD;
             try {
                 Thread.sleep(CHECK_PERIOD);
@@ -178,17 +191,14 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
         return new HttpResult(HttpResult.FAILURE, "timeout");
     }
 
-    private boolean checkStreamsEmpty(Map<String, Message> toBeSend, Supervisor supervisor) {
-        // loop for every agent server
-        for (Map.Entry<String, Message> entry : toBeSend.entrySet()) {
-            String agentServer = entry.getKey();
-            // loop for every topic in an agent server
-            for (InstanceGroup instanceGroup : entry.getValue().getQuit().getInstanceGroupList()) {
-                String topic = instanceGroup.getTopic();
-                List<String> idsInTheSameHost = instanceGroup.getInstanceIdsList();
-                // loop for every instance with the same topic in the same agent server
-                for (String id : idsInTheSameHost) {
-                    if (!supervisor.isEmptyStream(topic, Util.getSourceIdentify(agentServer, id))) {
+    private boolean checkStreamsEmpty(String app, Map<String, Set<String>> hostIds) {
+        Set<String> topicSet = configManager.getTopicsByCmdb(app);
+        for (String topic : topicSet) {
+            for (Map.Entry<String, Set<String>> entry : hostIds.entrySet()) {
+                String host = entry.getKey();
+                Set<String> ids = entry.getValue();
+                for (String id : ids) {
+                    if (!supervisor.isEmptyStream(topic, Util.getSourceIdentify(host, id))) {
                         return false;
                     }
                 }
@@ -197,14 +207,14 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
         return true;
     }
     
-    private boolean checkStreamsClean(Map<String, Message> toBeSend, Supervisor supervisor) {
-        for (Map.Entry<String, Message> entry : toBeSend.entrySet()) {
-            String agentServer = entry.getKey();
-            for (InstanceGroup instanceGroup : entry.getValue().getClean().getInstanceGroupList()) {
-                String topic = instanceGroup.getTopic();
-                List<String> idsInTheSameHost = instanceGroup.getInstanceIdsList();
-                for (String id : idsInTheSameHost) {
-                    if (!supervisor.isCleanStream(topic, Util.getSourceIdentify(agentServer, id))) {
+    private boolean checkStreamsClean(String app, Map<String, Set<String>> hostIds) {
+        Set<String> topicSet = configManager.getTopicsByCmdb(app);
+        for (String topic : topicSet) {
+            for (Map.Entry<String, Set<String>> entry : hostIds.entrySet()) {
+                String host = entry.getKey();
+                Set<String> ids = entry.getValue();
+                for (String id : ids) {
+                    if (!supervisor.isCleanStream(topic, Util.getSourceIdentify(host, id))) {
                         return false;
                     }
                 }
