@@ -1,56 +1,82 @@
 package com.dp.blackhole.supervisor;
 
-public class ConsumerGroup {
-    private String goupId;
-    private String topic;
-    
-    public ConsumerGroup(String groupId, String topic) {
-        this.goupId = groupId;
-        this.topic = topic;
-    }
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
-    public String getGroupId() {
-        return goupId;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class ConsumerGroup {
+    private ConsumerGroupKey groupKey;
+    private Map<String, AtomicLong> commitedOffsetMap;
+    private List<ConsumerDesc> consumes;
+    
+    public static final Log LOG = LogFactory.getLog(Supervisor.class);
+    
+    public ConsumerGroup(ConsumerGroupKey groupKey) {
+        this.groupKey = groupKey;
+        commitedOffsetMap = new ConcurrentHashMap<String, AtomicLong>();
     }
 
     public String getTopic() {
-        return topic;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((goupId == null) ? 0 : goupId.hashCode());
-        result = prime * result + ((topic == null) ? 0 : topic.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        ConsumerGroup other = (ConsumerGroup) obj;
-        if (goupId == null) {
-            if (other.goupId != null)
-                return false;
-        } else if (!goupId.equals(other.goupId))
-            return false;
-        if (topic == null) {
-            if (other.topic != null)
-                return false;
-        } else if (!topic.equals(other.topic))
-            return false;
-        return true;
+        return groupKey.getTopic();
     }
     
-    @Override
-    public String toString() {
-        return "ConsumerGroup[" + topic + "/" + goupId + "]";
+    public String getGroupId() {
+        return groupKey.getGroupId();
     }
     
+    public synchronized boolean exists(ConsumerDesc consumer) {
+        return consumes == null ? false : consumes.contains(consumer);
+    }
+
+    public Map<String, AtomicLong> getCommitedOffsets() {
+        return commitedOffsetMap;
+    }
+    
+    public synchronized void setConsumers(List<ConsumerDesc> consumes) {
+        this.consumes = consumes;
+    }
+    
+    public synchronized List<ConsumerDesc> getConsumes() {
+        return consumes;
+    }
+
+    public synchronized void unregisterConsumer(ConsumerDesc consumer) {
+        if (consumes != null) {
+            consumes.remove(consumer);
+        }
+    }
+
+    public synchronized int getConsumerCount() {
+        return consumes == null ? 0 : consumes.size();
+    }
+
+    public void updateOffset(String consumerId, String topic, String partition, long offset) {
+        AtomicLong commitedOffset = commitedOffsetMap.get(partition);
+        if (commitedOffset == null) {
+            LOG.error("can not find PartitionInfo by partition: " + "[" + topic +"]" + partition + " ,request from " + consumerId);
+        } else {
+            commitedOffset.set(offset);
+        }
+    }
+
+    public void update(List<ConsumerDesc> consumes,
+            ArrayList<ArrayList<PartitionInfo>> assignPartitions,
+            ArrayList<PartitionInfo> partitions) {
+        for (int i = 0; i < consumes.size(); i++) {
+            ConsumerDesc cond = consumes.get(i);
+            cond.setPartitions(assignPartitions.get(i));
+        }
+        setConsumers(consumes);
+        for (PartitionInfo pinfo : partitions) {
+            String id = pinfo.getId();
+            if (commitedOffsetMap.get(id) == null) {
+                commitedOffsetMap.put(pinfo.getId(), new AtomicLong(0));
+            }
+        }
+    }
 }

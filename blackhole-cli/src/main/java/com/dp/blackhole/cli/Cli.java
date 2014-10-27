@@ -60,10 +60,10 @@ public class Cli {
                 } else if (cmd.startsWith("recovery")) {
                     String[] tokens = getTokens(cmd);
                     String topic = tokens[1];
-                    String sourceIdentify = tokens[2];
+                    String source = tokens[2];
                     long period = Long.parseLong(tokens[3]);
                     long rollTs = Long.parseLong(tokens[4]); 
-                    Message msg = PBwrap.wrapManualRecoveryRoll(topic, sourceIdentify, period, rollTs);
+                    Message msg = PBwrap.wrapManualRecoveryRoll(topic, source, period, rollTs);
                     send(msg);
                     out.println("send message: " + msg);
                 } else if (cmd.startsWith("range")) {

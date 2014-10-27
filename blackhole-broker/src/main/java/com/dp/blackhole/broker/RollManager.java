@@ -65,7 +65,7 @@ public class RollManager {
         RollIdent ident = getRollIdent(app, source, period);
         if (rolls.get(ident) == null) {
             rolls.put(ident, roll);
-            Message message = PBwrap.wrapAppRoll(ident.topic, ident.sourceIdentify, ident.period, ident.ts);
+            Message message = PBwrap.wrapAppRoll(ident.topic, ident.source, ident.period, ident.ts);
             Broker.getSupervisor().send(message);
             ret = true;
         } else {
@@ -80,7 +80,7 @@ public class RollManager {
         RollIdent ident = getLastRollIdent(app, source, period);
         if (rolls.get(ident) == null) {
             rolls.put(ident, roll);
-            Message message = PBwrap.wrapRollClean(ident.topic, ident.sourceIdentify, ident.period);
+            Message message = PBwrap.wrapRollClean(ident.topic, ident.source, ident.period);
             Broker.getSupervisor().send(message);
             ret = true;
         } else {
@@ -93,7 +93,7 @@ public class RollManager {
     public boolean doUpload(RollID rollID) {
         RollIdent ident = new RollIdent();
         ident.topic = rollID.getTopic();
-        ident.sourceIdentify = rollID.getSourceIdentify();
+        ident.source = rollID.getSource();
         ident.period = rollID.getPeriod();
         ident.ts = rollID.getRollTs();
         ident.isFinal = rollID.getIsFinal();
@@ -115,7 +115,7 @@ public class RollManager {
         if ((ftpConf = FTPConfigrationLoader.getFTPConfigration(ident.topic)) != null) {
             Partition p;
             try {
-                p = manager.getPartition(ident.topic, ident.sourceIdentify, false);
+                p = manager.getPartition(ident.topic, ident.source, false);
                 LOG.info("start to ftp " + ident);
                 FTPUpload ftpUpload = new FTPUpload(this, ftpConf, ident, roll, p);
                 Thread ftpThread = new Thread(ftpUpload);
@@ -130,7 +130,7 @@ public class RollManager {
     public void markUnrecoverable(RollID rollID) {
         RollIdent ident = new RollIdent();
         ident.topic = rollID.getTopic();
-        ident.sourceIdentify = rollID.getSourceIdentify();
+        ident.source = rollID.getSource();
         ident.period = rollID.getPeriod();
         ident.ts = rollID.getRollTs();
         
@@ -143,7 +143,7 @@ public class RollManager {
         Date time = new Date(Util.getLatestRotateRollTsUnderTimeBuf(Util.getTS(), period, clockSyncBufMillis));
         RollIdent roll = new RollIdent();
         roll.topic = app;
-        roll.sourceIdentify = source;
+        roll.source = source;
         roll.period = period;
         roll.ts = time.getTime();
         return roll;
@@ -153,7 +153,7 @@ public class RollManager {
         Date time = new Date(Util.getCurrentRollTs(Util.getTS(), period));
         RollIdent roll = new RollIdent();
         roll.topic = app;
-        roll.sourceIdentify = source;
+        roll.source = source;
         roll.period = period;
         roll.ts = time.getTime();
         roll.isFinal = true;
@@ -189,9 +189,9 @@ public class RollManager {
         Date roll = new Date(ident.ts);
         SimpleDateFormat dm = new SimpleDateFormat(format);
         if (hidden) {
-            return "_" + ident.sourceIdentify + '@' + ident.topic + "_" + dm.format(roll);
+            return "_" + ident.source + '@' + ident.topic + "_" + dm.format(roll);
         } else {
-            return ident.sourceIdentify + '@' + ident.topic + "_" + dm.format(roll);
+            return ident.source + '@' + ident.topic + "_" + dm.format(roll);
         }
     }
     
@@ -214,9 +214,9 @@ public class RollManager {
     public void reportRecovery(RollIdent ident, boolean recoverySuccess) {
         Message message;
         if (recoverySuccess == true) {
-            message = PBwrap.wrapRecoverySuccess(ident.topic, ident.sourceIdentify, ident.period, ident.ts, ident.isFinal);
+            message = PBwrap.wrapRecoverySuccess(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal);
         } else {
-            message = PBwrap.wrapRecoveryFail(ident.topic, ident.sourceIdentify, ident.period, ident.ts, ident.isFinal);
+            message = PBwrap.wrapRecoveryFail(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal);
         }
         Broker.getSupervisor().send(message);
     }
@@ -225,10 +225,10 @@ public class RollManager {
         rolls.remove(ident);
         
         if (uploadSuccess == true) {
-            Message message = PBwrap.wrapUploadSuccess(ident.topic, ident.sourceIdentify, ident.period, ident.ts, ident.isFinal);
+            Message message = PBwrap.wrapUploadSuccess(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal);
             Broker.getSupervisor().send(message);
         } else {
-            Message message = PBwrap.wrapUploadFail(ident.topic, ident.sourceIdentify, ident.period, ident.ts, ident.isFinal);
+            Message message = PBwrap.wrapUploadFail(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal);
             Broker.getSupervisor().send(message);
         }
     }
@@ -284,9 +284,9 @@ public class RollManager {
                         
                     RollIdent roll = new RollIdent();
                     roll.topic = head.app;
-                    roll.sourceIdentify = Util.getRemoteHost(socket);
+                    roll.source = Util.getRemoteHost(socket);
                     if (head.instanceId != null) {
-                        roll.sourceIdentify += "#" + head.instanceId;
+                        roll.source += "#" + head.instanceId;
                     }
                     roll.period = head.peroid;
                     roll.ts = head.ts;

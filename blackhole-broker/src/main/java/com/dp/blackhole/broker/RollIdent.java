@@ -3,7 +3,7 @@ package com.dp.blackhole.broker;
 public class RollIdent {
     public String topic;
     public long period;
-    public String sourceIdentify;
+    public String source;
     public long ts;
     public boolean isFinal;
     
@@ -14,7 +14,7 @@ public class RollIdent {
         result = prime * result + (isFinal ? 1231 : 1237);
         result = prime * result + (int) (period ^ (period >>> 32));
         result = prime * result
-                + ((sourceIdentify == null) ? 0 : sourceIdentify.hashCode());
+                + ((source == null) ? 0 : source.hashCode());
         result = prime * result + ((topic == null) ? 0 : topic.hashCode());
         result = prime * result + (int) (ts ^ (ts >>> 32));
         return result;
@@ -32,10 +32,10 @@ public class RollIdent {
             return false;
         if (period != other.period)
             return false;
-        if (sourceIdentify == null) {
-            if (other.sourceIdentify != null)
+        if (source == null) {
+            if (other.source != null)
                 return false;
-        } else if (!sourceIdentify.equals(other.sourceIdentify))
+        } else if (!source.equals(other.source))
             return false;
         if (topic == null) {
             if (other.topic != null)
@@ -49,6 +49,6 @@ public class RollIdent {
 
     @Override
     public String toString() {
-        return topic + "@" + sourceIdentify + "," + period + "," + ts + ",final:" + isFinal; 
+        return topic + "@" + source + "," + period + "," + ts + ",final:" + isFinal; 
     }
 }

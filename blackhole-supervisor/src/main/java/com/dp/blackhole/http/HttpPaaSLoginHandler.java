@@ -33,13 +33,14 @@ import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.supervisor.ConfigManager;
 import com.dp.blackhole.supervisor.Supervisor;
+import com.dp.blackhole.supervisor.TopicConfig;
 
 public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpRequestHandler {
     private static Logger LOG = Logger.getLogger(HttpPaaSLoginHandler.class);
     private ConfigManager configManager;
     private Supervisor supervisor;
     
-    public HttpPaaSLoginHandler(ConfigManager configManger, HttpClientSingle httpClient) {
+    public HttpPaaSLoginHandler(ConfigManager configManger) {
         this.configManager = configManger;
         this.supervisor = configManger.getSupervisor();
     }
@@ -155,7 +156,10 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
                         configManager.addTopicToHost(eachHost, topic);
                     }
                     //fill <topic,<host,ids>> map
-                    configManager.addIdsByTopicAndHost(topic, hostIds);
+                    TopicConfig topicConfig = configManager.getConfByTopic(topic);
+                    if (topicConfig != null) {
+                        topicConfig.addIdsByHosts(hostIds);
+                    }
                 }
                 return new HttpResult(HttpResult.SUCCESS, "");
             }
@@ -178,7 +182,7 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
                 String host = entry.getKey();
                 Set<String> ids = entry.getValue();
                 for (String id : ids) {
-                    if (!supervisor.isActiveStream(topic, Util.getSourceIdentify(host, id))) {
+                    if (!supervisor.isActiveStream(topic, Util.getSource(host, id))) {
                         return false;
                     }
                 }

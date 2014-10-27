@@ -18,6 +18,10 @@ public class HttpClientSingle {
     private static Logger LOG = Logger.getLogger(HttpClientSingle.class);
     private final DefaultHttpClient httpClient;
     
+    public HttpClientSingle() {
+        this(15000, 15000);
+    }
+    
     public HttpClientSingle(int connectionTimeout, int socketTimeout) {
         PoolingClientConnectionManager conMan = new PoolingClientConnectionManager(SchemeRegistryFactory.createDefault() );
         conMan.setMaxTotal(200);

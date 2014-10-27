@@ -29,7 +29,7 @@ public class LogReader implements Runnable {
 
     private TopicMeta topicMeta;
     private Agent agent;
-    private String sourceIdentify;
+    private String source;
     private String broker;
     private int brokerPort;
     private Socket socket;
@@ -37,7 +37,7 @@ public class LogReader implements Runnable {
     
     public LogReader(Agent agent, String localhost, String broker, int port, TopicMeta topicMeta) {
         this.agent = agent;
-        this.sourceIdentify =  Util.getSourceIdentify(localhost, topicMeta.getInstanceId());
+        this.source =  Util.getSource(localhost, topicMeta.getInstanceId());
         this.broker = broker;
         this.brokerPort = port;
         this.topicMeta = topicMeta;
@@ -69,7 +69,7 @@ public class LogReader implements Runnable {
             }
         } catch (Throwable t) {
             LOG.error("Oops, got an exception", t);
-            agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+            agent.reportFailure(topicMeta.getMetaKey(), source, Util.getTS());
         }
     }
 
@@ -109,7 +109,7 @@ public class LogReader implements Runnable {
         private void doStreamReg() throws IOException {
             RegisterRequest request = new RegisterRequest(
                     topicMeta.getTopic(),
-                    sourceIdentify,
+                    source,
                     topicMeta.getRollPeriod(),
                     broker);
             TransferWrap wrap = new TransferWrap(request);
@@ -131,7 +131,7 @@ public class LogReader implements Runnable {
                 }
                 RotateRequest request = new RotateRequest(
                         topicMeta.getTopic(),
-                        sourceIdentify,
+                        source,
                         topicMeta.getRollPeriod());
                 TransferWrap wrap = new TransferWrap(request);
                 wrap.write(channel);
@@ -141,7 +141,7 @@ public class LogReader implements Runnable {
                 closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
                 stop();
-                agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+                agent.reportFailure(topicMeta.getMetaKey(), source, Util.getTS());
             }
         }
         
@@ -156,7 +156,7 @@ public class LogReader implements Runnable {
                 sendMessage();
                 LastRotateRequest request = new LastRotateRequest(
                         topicMeta.getTopic(),
-                        sourceIdentify,
+                        source,
                         topicMeta.getRollPeriod());
                 TransferWrap wrap = new TransferWrap(request);
                 wrap.write(channel);
@@ -166,7 +166,7 @@ public class LogReader implements Runnable {
                 closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
                 stop();
-                agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+                agent.reportFailure(topicMeta.getMetaKey(), source, Util.getTS());
             }
         }
         
@@ -179,7 +179,7 @@ public class LogReader implements Runnable {
                 closeChannelQuietly(channel);
                 LOG.debug("process failed, stop.");
                 stop();
-                agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+                agent.reportFailure(topicMeta.getMetaKey(), source, Util.getTS());
             }
         }
         
@@ -221,7 +221,7 @@ public class LogReader implements Runnable {
         private void sendMessage() throws IOException {
             messageBuffer.flip();
             ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
-            ProduceRequest request = new ProduceRequest(topicMeta.getTopic(), sourceIdentify, messages);
+            ProduceRequest request = new ProduceRequest(topicMeta.getTopic(), source, messages);
             TransferWrap wrap = new TransferWrap(request);
             wrap.write(channel);
             messageBuffer.clear();

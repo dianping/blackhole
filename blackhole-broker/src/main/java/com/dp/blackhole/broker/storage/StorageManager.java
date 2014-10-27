@@ -145,7 +145,7 @@ public class StorageManager {
                     Long reportedOffset = reportedOffsets.get(topicPartition);
                     if (reportedOffset != null) {
                         // report as new data arrive
-                        if (endOffset > reportedOffset) {
+                        if (endOffset > reportedOffset) {//TODO BUG FOUND
                             reportedOffsets.put(topicPartition, endOffset);
                             report(topic, partitionId, endOffset);
                         }

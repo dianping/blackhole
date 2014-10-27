@@ -5,6 +5,6 @@ option java_outer_classname = "RollCleanPB";
 
 message RollClean {
     required string topic = 1;
-    required string source_identify = 2;
+    required string source = 2;
     required int64 period = 3;
 }

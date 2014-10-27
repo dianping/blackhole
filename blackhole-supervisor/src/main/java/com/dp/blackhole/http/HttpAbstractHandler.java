@@ -42,7 +42,7 @@ public abstract class HttpAbstractHandler {
         Iterator<String> it = idsInTheSameHost.iterator();
         while(it.hasNext()){
             String ids = it.next();
-            if(expect == supervisor.isActiveStream(topic, Util.getSourceIdentify(host, ids))){
+            if(expect == supervisor.isActiveStream(topic, Util.getSource(host, ids))){
                 it.remove();
             }
         }

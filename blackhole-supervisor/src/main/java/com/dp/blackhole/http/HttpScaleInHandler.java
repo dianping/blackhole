@@ -3,9 +3,7 @@ package com.dp.blackhole.http;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -23,17 +21,14 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.log4j.Logger;
 
 import com.dp.blackhole.common.ParamsKey;
-import com.dp.blackhole.common.Util;
 import com.dp.blackhole.supervisor.ConfigManager;
 
 public class HttpScaleInHandler extends HttpAbstractHandler implements HttpRequestHandler {
     private static Logger LOG = Logger.getLogger(HttpScaleInHandler.class);
     private ConfigManager configManager;
-    private HttpClientSingle httpClient;
     
-    public HttpScaleInHandler(ConfigManager configManager, HttpClientSingle httpClient) {
+    public HttpScaleInHandler(ConfigManager configManager) {
         this.configManager = configManager;
-        this.httpClient = httpClient;
     }
     
     @Override
@@ -89,50 +84,11 @@ public class HttpScaleInHandler extends HttpAbstractHandler implements HttpReque
             return new HttpResult(HttpResult.NONEED, "It contains no mapping for the cmdbapp " + app);
         }
         for (String topic : topicList) {
-            //get string of old hosts of the app
             String watchKey = ParamsKey.LionNode.HOSTS_PREFIX + topic;
-            String url = configManager.generateGetURL(watchKey);
-            String response = httpClient.getResponseText(url);
-            if (response == null) {
-                return new HttpResult(HttpResult.FAILURE, "IO exception was thrown when handle url ." + url);
-            } else if (response.startsWith("1|")) {
-                return new HttpResult(HttpResult.FAILURE, response.substring(2));
-            } else if (response.equals("<null>")) {
-                return new HttpResult(HttpResult.FAILURE, "No configration in lion for key=" + watchKey);
-            } else if (response.length() == 0) {
-                return new HttpResult(HttpResult.FAILURE, "Invalid response");
-            }
-            String[] oldHosts = Util.getStringListOfLionValue(response);
-
-            ArrayList<String> newHostList = new ArrayList<String>();
-            //change it (sub the given hostname)
-            if (oldHosts == null) {
-                LOG.error("Faild to contract hosts cause there is no host in lion for topic " + topic);
-                continue;
-            } else {
-                
-                Set<String> contractSet = new HashSet<String>();
-                for (String contractHost : args[0]) {
-                    contractSet.add(contractHost);
-                }
-                for (String old : oldHosts) {
-                    if (!contractSet.contains(old)) {
-                        newHostList.add(old);
-                    }
-                }
-            }
-            String[] newHosts = new String[newHostList.size()];
-            String newHostsLionString = Util.getLionValueOfStringList(newHostList.toArray(newHosts));
-            url = configManager.generateSetURL(watchKey, newHostsLionString);
-            response = httpClient.getResponseText(url);
-            if (response == null) {
-                return new HttpResult(HttpResult.FAILURE, "IO exception was thrown when handle url ." + url);
-            } else if (response.startsWith("1|")) {
-                return new HttpResult(HttpResult.FAILURE, "No configration in lion for key=" + watchKey);
-            } else if (response.startsWith("0")) {
-            } else {
-                LOG.error("Unkown response.");
-                return new HttpResult(HttpResult.FAILURE, "Unkown response.");
+            try {
+                configManager.updateLionList(watchKey, ParamsKey.LionNode.OP_SCALEIN, args[0]);
+            } catch (HttpException e) {
+                return new HttpResult(HttpResult.FAILURE, e.getMessage());
             }
         }
         return new HttpResult(HttpResult.SUCCESS, "");

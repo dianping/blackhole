@@ -94,7 +94,7 @@ public class Agent implements Runnable {
 
     private void register(MetaKey metaKey, long regTimestamp) {
         Message msg = PBwrap.wrapTopicReg(metaKey.getTopic(),
-                Util.getSourceIdentify(hostname, metaKey.getInstanceId()), regTimestamp);
+                Util.getSource(hostname, metaKey.getInstanceId()), regTimestamp);
         send(msg, DEFAULT_DELAY_SECOND);
     }
 
@@ -216,21 +216,21 @@ public class Agent implements Runnable {
         this.listener = listener;
     }
 
-    public void reportFailure(MetaKey metaKey, String sourceIdentify, final long ts) {
-        Message message = PBwrap.wrapAppFailure(metaKey.getTopic(), sourceIdentify, ts);
+    public void reportFailure(MetaKey metaKey, String source, final long ts) {
+        Message message = PBwrap.wrapAppFailure(metaKey.getTopic(), source, ts);
         send(message);
         TopicMeta applog = logMetas.get(metaKey);
         topicReaders.remove(applog);
         register(metaKey, applog.getCreateTime());
     }
 
-    public void reportUnrecoverable(MetaKey metaKey, String sourceIdentify, final long period, final long rollTs, boolean isFinal) {
-        Message message = PBwrap.wrapUnrecoverable(metaKey.getTopic(), sourceIdentify, period, rollTs, isFinal);
+    public void reportUnrecoverable(MetaKey metaKey, String source, final long period, final long rollTs, boolean isFinal) {
+        Message message = PBwrap.wrapUnrecoverable(metaKey.getTopic(), source, period, rollTs, isFinal);
         send(message);
     }
 
-    public void reportRecoveryFail(MetaKey metaKey, String sourceIdentify, long period, final long rollTs, boolean isFinal) {
-        Message message = PBwrap.wrapRecoveryFail(metaKey.getTopic(), sourceIdentify, period, rollTs, isFinal);
+    public void reportRecoveryFail(MetaKey metaKey, String source, long period, final long rollTs, boolean isFinal) {
+        Message message = PBwrap.wrapRecoveryFail(metaKey.getTopic(), source, period, rollTs, isFinal);
         send(message);
     }
 

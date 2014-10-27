@@ -15,6 +15,8 @@ public class ConnectionDescription {
     private int type;
     private AtomicLong lastHeartBeat;
     private SimpleConnection connection;
+    //Storm sets up multi-thread(Executors) in a processor(worker),
+    //each executor will register a consumer entity
     private List<NodeDesc> attachments;
     
     public ConnectionDescription(SimpleConnection connection) {

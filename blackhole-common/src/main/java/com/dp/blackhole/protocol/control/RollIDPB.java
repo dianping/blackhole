@@ -42,12 +42,12 @@ public final class RollIDPB {
     public boolean hasTopic() { return hasTopic; }
     public java.lang.String getTopic() { return topic_; }
     
-    // required string source_identify = 2;
-    public static final int SOURCE_IDENTIFY_FIELD_NUMBER = 2;
-    private boolean hasSourceIdentify;
-    private java.lang.String sourceIdentify_ = "";
-    public boolean hasSourceIdentify() { return hasSourceIdentify; }
-    public java.lang.String getSourceIdentify() { return sourceIdentify_; }
+    // required string source = 2;
+    public static final int SOURCE_FIELD_NUMBER = 2;
+    private boolean hasSource;
+    private java.lang.String source_ = "";
+    public boolean hasSource() { return hasSource; }
+    public java.lang.String getSource() { return source_; }
     
     // required int64 period = 3;
     public static final int PERIOD_FIELD_NUMBER = 3;
@@ -74,7 +74,7 @@ public final class RollIDPB {
     }
     public final boolean isInitialized() {
       if (!hasTopic) return false;
-      if (!hasSourceIdentify) return false;
+      if (!hasSource) return false;
       if (!hasPeriod) return false;
       if (!hasRollTs) return false;
       return true;
@@ -86,8 +86,8 @@ public final class RollIDPB {
       if (hasTopic()) {
         output.writeString(1, getTopic());
       }
-      if (hasSourceIdentify()) {
-        output.writeString(2, getSourceIdentify());
+      if (hasSource()) {
+        output.writeString(2, getSource());
       }
       if (hasPeriod()) {
         output.writeInt64(3, getPeriod());
@@ -111,9 +111,9 @@ public final class RollIDPB {
         size += com.google.protobuf.CodedOutputStream
           .computeStringSize(1, getTopic());
       }
-      if (hasSourceIdentify()) {
+      if (hasSource()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(2, getSourceIdentify());
+          .computeStringSize(2, getSource());
       }
       if (hasPeriod()) {
         size += com.google.protobuf.CodedOutputStream
@@ -288,8 +288,8 @@ public final class RollIDPB {
         if (other.hasTopic()) {
           setTopic(other.getTopic());
         }
-        if (other.hasSourceIdentify()) {
-          setSourceIdentify(other.getSourceIdentify());
+        if (other.hasSource()) {
+          setSource(other.getSource());
         }
         if (other.hasPeriod()) {
           setPeriod(other.getPeriod());
@@ -330,7 +330,7 @@ public final class RollIDPB {
               break;
             }
             case 18: {
-              setSourceIdentify(input.readString());
+              setSource(input.readString());
               break;
             }
             case 24: {
@@ -371,24 +371,24 @@ public final class RollIDPB {
         return this;
       }
       
-      // required string source_identify = 2;
-      public boolean hasSourceIdentify() {
-        return result.hasSourceIdentify();
+      // required string source = 2;
+      public boolean hasSource() {
+        return result.hasSource();
       }
-      public java.lang.String getSourceIdentify() {
-        return result.getSourceIdentify();
+      public java.lang.String getSource() {
+        return result.getSource();
       }
-      public Builder setSourceIdentify(java.lang.String value) {
+      public Builder setSource(java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasSourceIdentify = true;
-        result.sourceIdentify_ = value;
+  result.hasSource = true;
+        result.source_ = value;
         return this;
       }
-      public Builder clearSourceIdentify() {
-        result.hasSourceIdentify = false;
-        result.sourceIdentify_ = getDefaultInstance().getSourceIdentify();
+      public Builder clearSource() {
+        result.hasSource = false;
+        result.source_ = getDefaultInstance().getSource();
         return this;
       }
       
@@ -472,11 +472,11 @@ public final class RollIDPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014RollID.proto\022\tblackhole\"c\n\006RollID\022\r\n\005t" +
-      "opic\030\001 \002(\t\022\027\n\017source_identify\030\002 \002(\t\022\016\n\006p" +
-      "eriod\030\003 \002(\003\022\017\n\007roll_ts\030\004 \002(\003\022\020\n\010is_final" +
-      "\030\005 \001(\010B-\n!com.dp.blackhole.protocol.cont" +
-      "rolB\010RollIDPB"
+      "\n\014RollID.proto\022\tblackhole\"Z\n\006RollID\022\r\n\005t" +
+      "opic\030\001 \002(\t\022\016\n\006source\030\002 \002(\t\022\016\n\006period\030\003 \002" +
+      "(\003\022\017\n\007roll_ts\030\004 \002(\003\022\020\n\010is_final\030\005 \001(\010B-\n" +
+      "!com.dp.blackhole.protocol.controlB\010Roll" +
+      "IDPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -488,7 +488,7 @@ public final class RollIDPB {
           internal_static_blackhole_RollID_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RollID_descriptor,
-              new java.lang.String[] { "Topic", "SourceIdentify", "Period", "RollTs", "IsFinal", },
+              new java.lang.String[] { "Topic", "Source", "Period", "RollTs", "IsFinal", },
               com.dp.blackhole.protocol.control.RollIDPB.RollID.class,
               com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder.class);
           return null;
