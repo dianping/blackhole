@@ -1,4 +1,4 @@
-package com.dp.blackhole.supervisor;
+package com.dp.blackhole.supervisor.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.dp.blackhole.supervisor.Supervisor;
 
 public class ConsumerGroup {
     private ConsumerGroupKey groupKey;

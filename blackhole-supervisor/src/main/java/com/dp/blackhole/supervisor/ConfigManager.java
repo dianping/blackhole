@@ -30,6 +30,8 @@ import com.dianping.lion.client.LionException;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.http.HttpClientSingle;
+import com.dp.blackhole.supervisor.model.Blacklist;
+import com.dp.blackhole.supervisor.model.TopicConfig;
 
 public class ConfigManager {
     private static final Log LOG = LogFactory.getLog(ConfigManager.class);

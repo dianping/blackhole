@@ -1,4 +1,4 @@
-package com.dp.blackhole.supervisor;
+package com.dp.blackhole.supervisor.model;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.dp.blackhole.supervisor;
+package com.dp.blackhole.supervisor.model;
 
 import java.util.ArrayList;
 import java.util.List;

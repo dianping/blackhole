@@ -1,4 +1,4 @@
-package com.dp.blackhole.supervisor;
+package com.dp.blackhole.supervisor.model;
 
 public class NodeDesc {
     protected String id;

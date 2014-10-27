@@ -21,12 +21,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.ajax.JSON;
 
-import com.dp.blackhole.supervisor.ConsumerDesc;
-import com.dp.blackhole.supervisor.ConsumerGroup;
-import com.dp.blackhole.supervisor.ConsumerGroupKey;
-import com.dp.blackhole.supervisor.Stage;
-import com.dp.blackhole.supervisor.Stream;
-import com.dp.blackhole.supervisor.TopicConfig;
+import com.dp.blackhole.supervisor.model.ConsumerDesc;
+import com.dp.blackhole.supervisor.model.ConsumerGroup;
+import com.dp.blackhole.supervisor.model.ConsumerGroupKey;
+import com.dp.blackhole.supervisor.model.Stage;
+import com.dp.blackhole.supervisor.model.Stream;
+import com.dp.blackhole.supervisor.model.TopicConfig;
 
 @Path("topics")
 public class TopicResource extends BaseResource {

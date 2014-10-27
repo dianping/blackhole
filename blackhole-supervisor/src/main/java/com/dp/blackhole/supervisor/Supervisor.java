@@ -51,6 +51,18 @@ import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry;
 import com.dp.blackhole.rest.HttpServer;
 import com.dp.blackhole.rest.ServiceFactory;
+import com.dp.blackhole.supervisor.model.BrokerDesc;
+import com.dp.blackhole.supervisor.model.ConnectionDesc;
+import com.dp.blackhole.supervisor.model.ConsumerDesc;
+import com.dp.blackhole.supervisor.model.ConsumerGroup;
+import com.dp.blackhole.supervisor.model.ConsumerGroupKey;
+import com.dp.blackhole.supervisor.model.Issue;
+import com.dp.blackhole.supervisor.model.NodeDesc;
+import com.dp.blackhole.supervisor.model.PartitionInfo;
+import com.dp.blackhole.supervisor.model.Stage;
+import com.dp.blackhole.supervisor.model.Stream;
+import com.dp.blackhole.supervisor.model.Topic;
+import com.dp.blackhole.supervisor.model.TopicConfig;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Supervisor {
@@ -66,7 +78,7 @@ public class Supervisor {
 
     private ConcurrentHashMap<ConsumerGroupKey, ConsumerGroup> consumerGroups;
   
-    private ConcurrentHashMap<SimpleConnection, ConnectionDescription> connections;
+    private ConcurrentHashMap<SimpleConnection, ConnectionDesc> connections;
     private ConcurrentHashMap<String, SimpleConnection> agentsMapping;
     private ConcurrentHashMap<String, SimpleConnection> brokersMapping;
 
@@ -135,7 +147,7 @@ public class Supervisor {
     }
     
     private void handleHeartBeat(SimpleConnection from) {
-        ConnectionDescription desc = connections.get(from);
+        ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
             return;
@@ -225,12 +237,12 @@ public class Supervisor {
     }
     
     private void handleConsumerReg(ConsumerReg consumerReg, SimpleConnection from) {
-        ConnectionDescription desc = connections.get(from);
+        ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
             return;
         }
-        desc.setType(ConnectionDescription.CONSUMER);
+        desc.setType(ConnectionDesc.CONSUMER);
         
         String groupId = consumerReg.getGroupId();
         String consumerId = consumerReg.getConsumerId();
@@ -366,7 +378,7 @@ public class Supervisor {
      * mark the stream as inactive, mark all the stages as pending unless the uploading stage
      * remove the relationship of the corresponding broker and streams
      */
-    private void handleAppNodeFail(ConnectionDescription desc, long now) {
+    private void handleAppNodeFail(ConnectionDesc desc, long now) {
         SimpleConnection connection = desc.getConnection();
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         if (streams != null) {
@@ -419,7 +431,7 @@ public class Supervisor {
      * 2. remove the relationship of the corresponding agent and streams
      * 3. processing uploading and recovery stages
      */
-    private void handleBrokerNodeFail(ConnectionDescription desc, long now) {
+    private void handleBrokerNodeFail(ConnectionDesc desc, long now) {
         SimpleConnection connection = desc.getConnection();
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         // processing current stage on streams
@@ -507,7 +519,7 @@ public class Supervisor {
     }
     
 
-    private void handleConsumerFail(ConnectionDescription desc, long now) {
+    private void handleConsumerFail(ConnectionDesc desc, long now) {
         SimpleConnection connection = desc.getConnection();
         LOG.info("consumer " + connection + " disconnectted");
         
@@ -555,21 +567,21 @@ public class Supervisor {
         LOG.info("close connection: " + connection);
         
         long now = Util.getTS();
-        ConnectionDescription desc = connections.get(connection);
+        ConnectionDesc desc = connections.get(connection);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + connection);
             return;
         }
         String host = connection.getHost();
-        if (desc.getType() == ConnectionDescription.AGENT) {
+        if (desc.getType() == ConnectionDesc.AGENT) {
             agentsMapping.remove(host);
             LOG.info("close APPNODE: " + host);
             handleAppNodeFail(desc, now);
-        } else if (desc.getType() == ConnectionDescription.BROKER) {
+        } else if (desc.getType() == ConnectionDesc.BROKER) {
             brokersMapping.remove(host);
             LOG.info("close BROKER: " + host);
             handleBrokerNodeFail(desc, now);
-        } else if (desc.getType() == ConnectionDescription.CONSUMER) {
+        } else if (desc.getType() == ConnectionDesc.CONSUMER) {
             LOG.info("close consumer: " + host);
             handleConsumerFail(desc, now);
         }
@@ -635,7 +647,7 @@ public class Supervisor {
         sb.append("print connectionStreamMap:\n");
         for(Entry<SimpleConnection, ArrayList<Stream>> entry : connectionStreamMap.entrySet()) {
             SimpleConnection conn = entry.getKey();
-            ConnectionDescription desc = connections.get(conn);
+            ConnectionDesc desc = connections.get(conn);
             if (desc != null) {
                 sb.append(desc).append("\n");
             }
@@ -755,14 +767,14 @@ public class Supervisor {
         sb.append("list idle hosts:\n");
         sb.append("############################## dump ##############################\n");
         SortedSet<String> idleHosts = new TreeSet<String>();
-        for(ConnectionDescription desc : connections.values()) {
+        for(ConnectionDesc desc : connections.values()) {
             if (desc == null) {
                 LOG.error("can not find ConnectionDesc by connection " + desc);
                 return;
             }
-            if (desc.getType() != ConnectionDescription.AGENT &&
-                desc.getType() != ConnectionDescription.BROKER &&
-                desc.getType() != ConnectionDescription.CONSUMER &&
+            if (desc.getType() != ConnectionDesc.AGENT &&
+                desc.getType() != ConnectionDesc.BROKER &&
+                desc.getType() != ConnectionDesc.CONSUMER &&
                 desc.getConnection() != from) {
                 idleHosts.add(desc.getConnection().getHost());
             }
@@ -831,7 +843,7 @@ public class Supervisor {
 
     private void handleRetireStream(StreamID streamId, SimpleConnection from) {
         boolean force = false;
-        if (getConnectionType(from) == ConnectionDescription.AGENT) {
+        if (getConnectionType(from) == ConnectionDesc.AGENT) {
             force = true;
         }
         String topic = streamId.getTopic();
@@ -1522,12 +1534,12 @@ public class Supervisor {
      * 2. assign a broker to the topic
      */
     private void handleTopicReg(Message m, SimpleConnection from) {
-        ConnectionDescription desc = connections.get(from);
+        ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
             return;
         }
-        desc.setType(ConnectionDescription.AGENT);
+        desc.setType(ConnectionDesc.AGENT);
         agentsMapping.putIfAbsent(from.getHost(), from);
         AppReg message = m.getAppReg();
         String source = message.getSource();
@@ -1550,12 +1562,12 @@ public class Supervisor {
     }
     
     private void handleBrokerReg(BrokerReg brokerReg, SimpleConnection from) {
-        ConnectionDescription desc = connections.get(from);
+        ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
             return;
         }
-        desc.setType(ConnectionDescription.BROKER);
+        desc.setType(ConnectionDesc.BROKER);
         desc.attach(new BrokerDesc(from.toString(), brokerReg.getBrokerPort(), brokerReg.getRecoveryPort()));
         brokersMapping.put(from.getHost(), from);
         LOG.info("Broker " + from.getHost() + " registered");
@@ -1606,11 +1618,11 @@ public class Supervisor {
 
         @Override
         public void OnConnected(SimpleConnection connection) {
-            ConnectionDescription desc = connections.get(connection);
+            ConnectionDesc desc = connections.get(connection);
             if (desc == null) {
                 LOG.info("client " + connection + " connected");
                 synchronized (connections) {
-                    connections.put(connection, new ConnectionDescription(connection));
+                    connections.put(connection, new ConnectionDesc(connection));
                 }
                 //trigger PAAS config response
                 triggerConfRes(connection);
@@ -1743,11 +1755,11 @@ public class Supervisor {
                 try {
                     Thread.sleep(5000);
                     long now = Util.getTS();
-                    for (Entry<SimpleConnection, ConnectionDescription> entry : connections.entrySet()) {
-                        ConnectionDescription dsc = entry.getValue();
-                        if (dsc.getType() != ConnectionDescription.AGENT &&
-                            dsc.getType() != ConnectionDescription.BROKER &&
-                            dsc.getType() != ConnectionDescription.CONSUMER) {
+                    for (Entry<SimpleConnection, ConnectionDesc> entry : connections.entrySet()) {
+                        ConnectionDesc dsc = entry.getValue();
+                        if (dsc.getType() != ConnectionDesc.AGENT &&
+                            dsc.getType() != ConnectionDesc.BROKER &&
+                            dsc.getType() != ConnectionDesc.CONSUMER) {
                             continue;
                         }
                         SimpleConnection conn = entry.getKey();
@@ -1771,7 +1783,7 @@ public class Supervisor {
 
         consumerGroups = new ConcurrentHashMap<ConsumerGroupKey, ConsumerGroup>();
         
-        connections = new ConcurrentHashMap<SimpleConnection, ConnectionDescription>();
+        connections = new ConcurrentHashMap<SimpleConnection, ConnectionDesc>();
         agentsMapping = new ConcurrentHashMap<String, SimpleConnection>();
         brokersMapping = new ConcurrentHashMap<String, SimpleConnection>();
         
@@ -1872,7 +1884,7 @@ public class Supervisor {
             LOG.error("can not get connection from host: " + host);
             return 0;
         }
-        ConnectionDescription desc = connections.get(connection);
+        ConnectionDesc desc = connections.get(connection);
         if (desc == null) {
             LOG.error("can not get ConnectionDescription from connection: " + connection);
             return 0;
@@ -1888,7 +1900,7 @@ public class Supervisor {
             LOG.error("can not get connection from host: " + host);
             return 0;
         }
-        ConnectionDescription desc = connections.get(connection);
+        ConnectionDesc desc = connections.get(connection);
         if (desc == null) {
             LOG.error("can not get ConnectionDescription from connection: " + connection);
             return 0;
@@ -1905,10 +1917,10 @@ public class Supervisor {
      */
     public SimpleConnection getConnectionByHostname(String hostname) {
         synchronized (connections) {
-            for (Map.Entry<SimpleConnection, ConnectionDescription> connectionEntry : connections.entrySet()) {
+            for (Map.Entry<SimpleConnection, ConnectionDesc> connectionEntry : connections.entrySet()) {
                 if (connectionEntry.getKey().getHost().equals(hostname)
-                        && connectionEntry.getValue().getType() != ConnectionDescription.BROKER
-                        && connectionEntry.getValue().getType() != ConnectionDescription.CONSUMER) {
+                        && connectionEntry.getValue().getType() != ConnectionDesc.BROKER
+                        && connectionEntry.getValue().getType() != ConnectionDesc.CONSUMER) {
                     return connectionEntry.getKey();
                 }
             }
@@ -1917,7 +1929,7 @@ public class Supervisor {
     }
     
     public int getConnectionType(SimpleConnection connection) {
-        ConnectionDescription des = connections.get(connection);
+        ConnectionDesc des = connections.get(connection);
         if (des == null) {
             return 0;
         }

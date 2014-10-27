@@ -18,7 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.ajax.JSON;
 
-import com.dp.blackhole.supervisor.Stream;
+import com.dp.blackhole.supervisor.model.Stream;
 
 @Path("ops")
 public class OperatorResource extends BaseResource {

@@ -30,7 +30,7 @@ import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup;
 import com.dp.blackhole.supervisor.ConfigManager;
 import com.dp.blackhole.supervisor.Supervisor;
-import com.dp.blackhole.supervisor.TopicConfig;
+import com.dp.blackhole.supervisor.model.TopicConfig;
 
 public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRequestHandler {
     private static Logger LOG = Logger.getLogger(HttpPaaSLogoutHandler.class);

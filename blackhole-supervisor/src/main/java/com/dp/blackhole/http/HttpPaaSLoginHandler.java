@@ -33,7 +33,7 @@ import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.supervisor.ConfigManager;
 import com.dp.blackhole.supervisor.Supervisor;
-import com.dp.blackhole.supervisor.TopicConfig;
+import com.dp.blackhole.supervisor.model.TopicConfig;
 
 public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpRequestHandler {
     private static Logger LOG = Logger.getLogger(HttpPaaSLoginHandler.class);

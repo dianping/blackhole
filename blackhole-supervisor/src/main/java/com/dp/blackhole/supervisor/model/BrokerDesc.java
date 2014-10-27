@@ -1,4 +1,5 @@
-package com.dp.blackhole.supervisor;
+package com.dp.blackhole.supervisor.model;
+
 
 
 public class BrokerDesc extends NodeDesc{

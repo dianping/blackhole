@@ -20,8 +20,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
 
 import com.dp.blackhole.common.ParamsKey;
-import com.dp.blackhole.supervisor.Blacklist;
-import com.dp.blackhole.supervisor.TopicConfig;
+import com.dp.blackhole.supervisor.model.Blacklist;
+import com.dp.blackhole.supervisor.model.TopicConfig;
 
 @Path("/confs")
 public class TopicConfsResource extends BaseResource {
