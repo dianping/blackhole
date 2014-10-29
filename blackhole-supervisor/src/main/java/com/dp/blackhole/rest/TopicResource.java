@@ -141,4 +141,13 @@ public class TopicResource extends BaseResource {
         ConsumerGroup group = supervisorService.getConsumerGroup(groupKey);
         return group.getCommitedOffsets();
     }
+    
+    @GET
+    @Path("/detail/groups")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Set<ConsumerGroup> getAllConsumerGroupDetail(
+            @PathParam("topic") final String topic) {
+        LOG.info("GET: topic -> groups detail");
+        return supervisorService.getCopyOfConsumerGroups();
+    }
 }

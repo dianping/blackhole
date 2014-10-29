@@ -2,6 +2,8 @@ package com.dp.blackhole.supervisor.model;
 
 import java.util.List;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import com.dp.blackhole.common.Util;
 
 public class Stage {
@@ -13,6 +15,7 @@ public class Stage {
     public static final int BROKERFAIL = 6;
     
     private List<Issue> issuelist;
+    private String latestIssue;
     
     private String topic;
     private String source;
@@ -22,12 +25,23 @@ public class Stage {
     private long rollTs;
     private boolean isCurrent;
     
+    @JsonIgnore
     public List<Issue> getIssuelist() {
         return issuelist;
     }
 
+    @JsonIgnore
     public void setIssuelist(List<Issue> issuelist) {
         this.issuelist = issuelist;
+    }
+
+    public String getLatestIssue() {
+        if (issuelist.size() != 0) {
+            this.latestIssue = issuelist.get(issuelist.size() - 1).toString();
+        } else {
+            this.latestIssue = null;
+        }
+        return latestIssue;
     }
 
     public String getTopic() {

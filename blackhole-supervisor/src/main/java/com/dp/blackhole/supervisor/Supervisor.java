@@ -94,6 +94,12 @@ public class Supervisor {
         return consumerGroups.get(groupKey);
     }
     
+    public Set<ConsumerGroup> getCopyOfConsumerGroups() {
+        Set<ConsumerGroup> copy = new HashSet<ConsumerGroup>(consumerGroups.size());
+        copy.addAll(consumerGroups.values());
+        return copy;
+    }
+    
     public boolean isActiveStream(String topic, String source) {
         Stream stream = getStream(topic, source);
         return stream == null ? false : stream.isActive();
