@@ -118,6 +118,10 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
                 }
                 // filter the stream already active
                 filterHost(topic, eachHost, idsInTheSameHost, true, supervisor);
+                if (idsInTheSameHost.size() == 0) {
+                    //streams in the same host were active, no need to send any more
+                    continue;
+                }
                 TopicConfig topicConfig = configManager.getConfByTopic(topic);
                 if (topicConfig == null) {
                     LOG.error("Can not get config of " + topic + " from configMap");
