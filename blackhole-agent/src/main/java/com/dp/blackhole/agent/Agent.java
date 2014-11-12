@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.TopicMeta.MetaKey;
+import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
@@ -72,9 +73,9 @@ public class Agent implements Runnable {
         } else {
             LOG.info("Agent deployed for KVM.");
         }
-        pool = Executors.newCachedThreadPool();
-        recoveryThreadPool = Executors.newFixedThreadPool(2);
-        scheduler = new ScheduledThreadPoolExecutor(1);
+        pool = Executors.newCachedThreadPool(new DaemonThreadFactory("LogReader"));
+        recoveryThreadPool = Executors.newFixedThreadPool(2, new DaemonThreadFactory("Recovery"));
+        scheduler = new ScheduledThreadPoolExecutor(1, new DaemonThreadFactory("Scheduler"));
         
         scheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
         scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
@@ -179,6 +180,8 @@ public class Agent implements Runnable {
             LOG.error(e.getMessage(), e);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
+        } catch (Throwable t) {
+            LOG.error(t.getMessage(), t);
         }
     }
     
