@@ -430,11 +430,13 @@ public class Agent implements Runnable {
                     }
                 } else {
                     List<AppConfRes> appConfResList = confRes.getAppConfResList();
+                    int accepted = 0;
                     for (AppConfRes appConfRes : appConfResList) {
                         topic = appConfRes.getTopic();
                         metaKey = new MetaKey(topic, null);
                         if (logMetas.containsKey(metaKey)) {
                             LOG.info(metaKey + " has already in used.");
+                            ++accepted;
                             continue;
                         }
                         //check files existence
@@ -447,6 +449,7 @@ public class Agent implements Runnable {
                                 + ParamsKey.TopicConf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
                         
                         fillUpAppLogsFromConfig(metaKey);
+                        ++accepted;
                         register(metaKey, Util.getTS());
                         if (this.heartbeat == null || !this.heartbeat.isAlive()) {
                             this.heartbeat = new HeartBeat(supervisor);
@@ -454,8 +457,8 @@ public class Agent implements Runnable {
                             this.heartbeat.start();
                         }
                     }
-                    if (logMetas.size() < appConfResList.size()) {
-                        LOG.error("Not all configurations are correct, sleep 5 minutes...");
+                    if (accepted < appConfResList.size()) {
+                        LOG.error("Not all configurations are accepted, sleep 5 minutes...");
                         requireConfigFromSupersivor(5 * 60);
                     }
                 }

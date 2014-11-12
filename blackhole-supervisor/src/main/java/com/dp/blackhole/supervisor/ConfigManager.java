@@ -40,7 +40,8 @@ public class ConfigManager {
     private final Map<String, Set<String>> cmdbAppToTopics = new ConcurrentHashMap<String, Set<String>>();
     // key is a topic name which is just maintained in configurations but may not be using.
     private final Map<String, TopicConfig> confMap = new ConcurrentHashMap<String, TopicConfig>();
-
+    private final Set<String> newTopicToBroadcast = new CopyOnWriteArraySet<String>();
+    
     private final ConfigCache cache;
     private final Supervisor supervisor;
     private final Blacklist blacklist;
@@ -210,6 +211,10 @@ public class ConfigManager {
                     LOG.error("Unrecognized conf string.");
                 }
             }
+            if (newTopicToBroadcast.contains(confInfo.getTopic())) {
+                //broadcast confRes message for new topic, most of the time, not works here
+                broadcastNewTopicConfig(confInfo);
+            }
         } else {
             LOG.error("Lose configurations for " + topic);
         }
@@ -309,11 +314,14 @@ public class ConfigManager {
             }
             TopicConfig confInfo = confMap.get(topic);
             confInfo.setHosts(list);
+            
+            //broadcast confRes message for new topic, most of the time, it works
+            broadcastNewTopicConfig(confInfo);
         } else {
             LOG.warn("Lose hosts for " + topic);
         }
     }
-    
+
     private void fillCMDBMap(String topic, String cmdbValue) {
         String cmdbApp = Util.getStringOfLionValue(cmdbValue);
         internalFillingCmdbMap(topic, cmdbApp);
@@ -437,6 +445,21 @@ public class ConfigManager {
             }
         }
     }
+    
+    private void broadcastNewTopicConfig(TopicConfig confInfo) {
+        if (confInfo.isPaas()) {
+            return;
+        }
+        if (confInfo.getHosts() == null || confInfo.getHosts().size() == 0) {
+            return;
+        }
+        if (confInfo.getWatchLog() == null || confInfo.getWatchLog().length() == 0) {
+            return;
+        }
+        if (newTopicToBroadcast.remove(confInfo.getTopic())) {
+            supervisor.findAndSend(confInfo);
+        }
+    }
 
     class TopicsChangeListener implements ConfigChange {
     
@@ -456,6 +479,8 @@ public class ConfigManager {
                             addWatherForKey(watchKey);
                             watchKey = ParamsKey.LionNode.CMDB_PREFIX + newTopic;
                             addWatherForKey(watchKey);
+                            //trigger new topic to broadcast confRes messages
+                            newTopicToBroadcast.add(newTopic);
                         }
                     }
                     for (String oldTopic : confMap.keySet()) {

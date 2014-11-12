@@ -152,6 +152,27 @@ public class Supervisor {
         }
     }
     
+    void findAndSend(TopicConfig confInfo) {
+        List<AppConfRes> appConfResList = new ArrayList<AppConfRes>(1);
+        AppConfRes appConfRes = PBwrap.wrapAppConfRes(
+                confInfo.getTopic(),
+                confInfo.getWatchLog(),
+                Integer.toString(confInfo.getRollPeriod()),
+                Integer.toString(confInfo.getMaxLineSize())
+        );
+        appConfResList.add(appConfRes);
+        Message message = PBwrap.wrapConfRes(appConfResList, null);
+        for (String agentHost : confInfo.getHosts()) {
+            //we find the connections from agentMapping instead of all connections map
+            //cause if a connection belong to agent type standing for the streams in it
+            //have already been enable, its confReq-conRes message loop is termination.
+            SimpleConnection connection = agentsMapping.get(agentHost);
+            if (connection != null) {
+                send(connection, message);
+            }
+        }
+    }
+    
     private void handleHeartBeat(SimpleConnection from) {
         ConnectionDesc desc = connections.get(from);
         if (desc == null) {
@@ -1631,7 +1652,7 @@ public class Supervisor {
                     connections.put(connection, new ConnectionDesc(connection));
                 }
                 //trigger PAAS config response
-                triggerConfRes(connection);
+                triggerConfResOfPaaS(connection);
             } else {
                 LOG.error("connection already registered: " + connection);
             }
@@ -1856,7 +1877,7 @@ public class Supervisor {
         send(from, message);
     }
     
-    public void triggerConfRes(SimpleConnection connection) {
+    public void triggerConfResOfPaaS(SimpleConnection connection) {
         List<LxcConfRes> lxcConfResList = new ArrayList<LxcConfRes>();
         Set<String> topicsAssocHost = configManager.getTopicsByHost(connection.getHost());
         if (topicsAssocHost != null) {
