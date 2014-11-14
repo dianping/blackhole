@@ -190,7 +190,8 @@ public class Agent implements Runnable {
         String path = ConfigKeeper.configMap.get(topic).getString(ParamsKey.TopicConf.WATCH_FILE);
         long rollPeroid = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROLL_PERIOD);
         int maxLineSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MAX_LINE_SIZE, 512000);
-        TopicMeta topicMeta = new TopicMeta(metaKey, path, rollPeroid, maxLineSize);
+        long readInterval = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.READ_INTERVAL, 1L);
+        TopicMeta topicMeta = new TopicMeta(metaKey, path, rollPeroid, maxLineSize, readInterval);
         logMetas.put(metaKey, topicMeta);
     }
 
@@ -392,7 +393,7 @@ public class Agent implements Runnable {
                 }
                 break;
             case NOAVAILABLECONF:
-                if (confLoopFactor < 30) {
+                if (confLoopFactor < 20) {
                     confLoopFactor = confLoopFactor << 1;
                 }
                 int randomSecond = confLoopFactor * (random.nextInt(21) + 40);
@@ -422,6 +423,8 @@ public class Agent implements Runnable {
                                     + ParamsKey.TopicConf.ROLL_PERIOD, lxcConfRes.getPeriod());
                             confKeeper.addRawProperty(topic + "."
                                     + ParamsKey.TopicConf.MAX_LINE_SIZE, lxcConfRes.getMaxLineSize());
+                            confKeeper.addRawProperty(topic + "."
+                                    + ParamsKey.TopicConf.READ_INTERVAL, lxcConfRes.getReadInterval());
                             fillUpAppLogsFromConfig(metaKey);
                             register(metaKey, Util.getTS());
                             if (this.heartbeat == null || !this.heartbeat.isAlive()) {
@@ -450,7 +453,8 @@ public class Agent implements Runnable {
                                 + ParamsKey.TopicConf.ROLL_PERIOD, appConfRes.getPeriod());
                         confKeeper.addRawProperty(topic + "."
                                 + ParamsKey.TopicConf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
-                        
+                        confKeeper.addRawProperty(topic + "."
+                                + ParamsKey.TopicConf.READ_INTERVAL, appConfRes.getReadInterval());
                         fillUpAppLogsFromConfig(metaKey);
                         ++accepted;
                         register(metaKey, Util.getTS());
@@ -481,7 +485,7 @@ public class Agent implements Runnable {
                                     LOG.warn("QUIT but " + topicMeta.getTailFile() + " not exists, retire stream and trigger CLEAN.");
                                     send(PBwrap.wrapRetireStream(topic, hostname, id));
                                 } else if ((logReader = topicReaders.get(topicMeta)) != null) {
-                                    logReader.eventWriter.processLastRotate();
+                                    logReader.beginLastLogRotate();
                                 } else {
                                     LOG.info(topicMeta + " has already stopped.");
                                 }

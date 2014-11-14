@@ -5,17 +5,20 @@ import java.util.Map;
 import java.util.Set;
 
 public class TopicConfig {
+    private static int DEFAULT_MAX_LINE_SIZE = 512000;
+    private static long DEFAULT_READ_INTERVAL = 1L;
+    private static boolean DEFAULT_DEPLOY_IN_PAAS = false;
     private String topic;
     private String appName;
     private String watchLog;
     private int rollPeriod;
-    private int maxLineSize;
-    private boolean isPaas;
+    private int maxLineSize = DEFAULT_MAX_LINE_SIZE;
+    private long readInterval = DEFAULT_READ_INTERVAL;
+    private boolean isPaas = DEFAULT_DEPLOY_IN_PAAS;
     private List<String> hosts;
     private Map<String, Set<String>> hostsInstances;
     public TopicConfig(String topic) {
         this.topic = topic;
-        this.isPaas = false;
     }
     public String getTopic() {
         return topic;
@@ -58,6 +61,12 @@ public class TopicConfig {
     }
     public void setHosts(List<String> hosts) {
         this.hosts = hosts;
+    }
+    public long getReadInterval() {
+        return readInterval;
+    }
+    public void setReadInterval(long readInterval) {
+        this.readInterval = readInterval;
     }
     public synchronized Map<String, Set<String>> getInstances() {
         return hostsInstances;

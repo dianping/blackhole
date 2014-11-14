@@ -158,7 +158,8 @@ public class Supervisor {
                 confInfo.getTopic(),
                 confInfo.getWatchLog(),
                 Integer.toString(confInfo.getRollPeriod()),
-                Integer.toString(confInfo.getMaxLineSize())
+                Integer.toString(confInfo.getMaxLineSize()),
+                Long.toString(confInfo.getReadInterval())
         );
         appConfResList.add(appConfRes);
         Message message = PBwrap.wrapConfRes(appConfResList, null);
@@ -1864,13 +1865,14 @@ public class Supervisor {
             }
             String period = String.valueOf(confInfo.getRollPeriod());
             String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
+            String readInterval = String.valueOf(confInfo.getReadInterval());
             String watchFile = confInfo.getWatchLog();
             if (watchFile == null) {
                 message = PBwrap.wrapNoAvailableConf();
                 send(from, message);
                 return;
             }
-            AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile, period, maxLineSize);
+            AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile, period, maxLineSize, readInterval);
             appConfResList.add(appConfRes);
         }
         message = PBwrap.wrapConfRes(appConfResList, null);
@@ -1889,13 +1891,14 @@ public class Supervisor {
                 }
                 String period = String.valueOf(confInfo.getRollPeriod());
                 String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
+                String readInterval = String.valueOf(confInfo.getReadInterval());
                 String watchFile = confInfo.getWatchLog();
                 Set<String> ids = confInfo.getInsByHost(connection.getHost());
                 if (ids == null) {
                     LOG.error("Can not get instances by " + topic + " and " + connection.getHost());
                     continue;
                 }
-                LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, period, maxLineSize, ids);
+                LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, period, maxLineSize, readInterval, ids);
                 lxcConfResList.add(lxcConfRes);
             }
             Message message = PBwrap.wrapConfRes(null, lxcConfResList);

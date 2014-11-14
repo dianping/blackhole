@@ -87,7 +87,7 @@ public class TestHDFSRecovery {
     @Test
     public void test() throws IOException, InterruptedException {
         MetaKey metaKey = new MetaKey(MAGIC, null);
-        TopicMeta appLog = new TopicMeta(metaKey, file.getAbsolutePath(), 3600, 1024);
+        TopicMeta appLog = new TopicMeta(metaKey, file.getAbsolutePath(), 3600, 1024, 1L);
         RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();

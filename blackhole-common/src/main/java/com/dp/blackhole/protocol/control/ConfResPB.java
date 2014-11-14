@@ -90,6 +90,13 @@ public final class ConfResPB {
       public boolean hasMaxLineSize() { return hasMaxLineSize; }
       public java.lang.String getMaxLineSize() { return maxLineSize_; }
       
+      // optional string read_interval = 5 [default = "1L"];
+      public static final int READ_INTERVAL_FIELD_NUMBER = 5;
+      private boolean hasReadInterval;
+      private java.lang.String readInterval_ = "1L";
+      public boolean hasReadInterval() { return hasReadInterval; }
+      public java.lang.String getReadInterval() { return readInterval_; }
+      
       private void initFields() {
       }
       public final boolean isInitialized() {
@@ -113,6 +120,9 @@ public final class ConfResPB {
         }
         if (hasMaxLineSize()) {
           output.writeString(4, getMaxLineSize());
+        }
+        if (hasReadInterval()) {
+          output.writeString(5, getReadInterval());
         }
         getUnknownFields().writeTo(output);
       }
@@ -138,6 +148,10 @@ public final class ConfResPB {
         if (hasMaxLineSize()) {
           size += com.google.protobuf.CodedOutputStream
             .computeStringSize(4, getMaxLineSize());
+        }
+        if (hasReadInterval()) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeStringSize(5, getReadInterval());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -309,6 +323,9 @@ public final class ConfResPB {
           if (other.hasMaxLineSize()) {
             setMaxLineSize(other.getMaxLineSize());
           }
+          if (other.hasReadInterval()) {
+            setReadInterval(other.getReadInterval());
+          }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
         }
@@ -348,6 +365,10 @@ public final class ConfResPB {
               }
               case 34: {
                 setMaxLineSize(input.readString());
+                break;
+              }
+              case 42: {
+                setReadInterval(input.readString());
                 break;
               }
             }
@@ -439,6 +460,27 @@ public final class ConfResPB {
           return this;
         }
         
+        // optional string read_interval = 5 [default = "1L"];
+        public boolean hasReadInterval() {
+          return result.hasReadInterval();
+        }
+        public java.lang.String getReadInterval() {
+          return result.getReadInterval();
+        }
+        public Builder setReadInterval(java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  result.hasReadInterval = true;
+          result.readInterval_ = value;
+          return this;
+        }
+        public Builder clearReadInterval() {
+          result.hasReadInterval = false;
+          result.readInterval_ = getDefaultInstance().getReadInterval();
+          return this;
+        }
+        
         // @@protoc_insertion_point(builder_scope:blackhole.ConfRes.AppConfRes)
       }
       
@@ -506,8 +548,15 @@ public final class ConfResPB {
       public boolean hasMaxLineSize() { return hasMaxLineSize; }
       public java.lang.String getMaxLineSize() { return maxLineSize_; }
       
-      // repeated string instance_ids = 5;
-      public static final int INSTANCE_IDS_FIELD_NUMBER = 5;
+      // optional string read_interval = 5 [default = "1L"];
+      public static final int READ_INTERVAL_FIELD_NUMBER = 5;
+      private boolean hasReadInterval;
+      private java.lang.String readInterval_ = "1L";
+      public boolean hasReadInterval() { return hasReadInterval; }
+      public java.lang.String getReadInterval() { return readInterval_; }
+      
+      // repeated string instance_ids = 6;
+      public static final int INSTANCE_IDS_FIELD_NUMBER = 6;
       private java.util.List<java.lang.String> instanceIds_ =
         java.util.Collections.emptyList();
       public java.util.List<java.lang.String> getInstanceIdsList() {
@@ -541,8 +590,11 @@ public final class ConfResPB {
         if (hasMaxLineSize()) {
           output.writeString(4, getMaxLineSize());
         }
+        if (hasReadInterval()) {
+          output.writeString(5, getReadInterval());
+        }
         for (java.lang.String element : getInstanceIdsList()) {
-          output.writeString(5, element);
+          output.writeString(6, element);
         }
         getUnknownFields().writeTo(output);
       }
@@ -568,6 +620,10 @@ public final class ConfResPB {
         if (hasMaxLineSize()) {
           size += com.google.protobuf.CodedOutputStream
             .computeStringSize(4, getMaxLineSize());
+        }
+        if (hasReadInterval()) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeStringSize(5, getReadInterval());
         }
         {
           int dataSize = 0;
@@ -752,6 +808,9 @@ public final class ConfResPB {
           if (other.hasMaxLineSize()) {
             setMaxLineSize(other.getMaxLineSize());
           }
+          if (other.hasReadInterval()) {
+            setReadInterval(other.getReadInterval());
+          }
           if (!other.instanceIds_.isEmpty()) {
             if (result.instanceIds_.isEmpty()) {
               result.instanceIds_ = new java.util.ArrayList<java.lang.String>();
@@ -800,6 +859,10 @@ public final class ConfResPB {
                 break;
               }
               case 42: {
+                setReadInterval(input.readString());
+                break;
+              }
+              case 50: {
                 addInstanceIds(input.readString());
                 break;
               }
@@ -892,7 +955,28 @@ public final class ConfResPB {
           return this;
         }
         
-        // repeated string instance_ids = 5;
+        // optional string read_interval = 5 [default = "1L"];
+        public boolean hasReadInterval() {
+          return result.hasReadInterval();
+        }
+        public java.lang.String getReadInterval() {
+          return result.getReadInterval();
+        }
+        public Builder setReadInterval(java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  result.hasReadInterval = true;
+          result.readInterval_ = value;
+          return this;
+        }
+        public Builder clearReadInterval() {
+          result.hasReadInterval = false;
+          result.readInterval_ = getDefaultInstance().getReadInterval();
+          return this;
+        }
+        
+        // repeated string instance_ids = 6;
         public java.util.List<java.lang.String> getInstanceIdsList() {
           return java.util.Collections.unmodifiableList(result.instanceIds_);
         }
@@ -1364,17 +1448,18 @@ public final class ConfResPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rConfRes.proto\022\tblackhole\"\305\002\n\007ConfRes\0221" +
+      "\n\rConfRes.proto\022\tblackhole\"\374\002\n\007ConfRes\0221" +
       "\n\nappConfRes\030\001 \003(\0132\035.blackhole.ConfRes.A" +
       "ppConfRes\0221\n\nlxcConfRes\030\002 \003(\0132\035.blackhol" +
-      "e.ConfRes.LxcConfRes\032^\n\nAppConfRes\022\r\n\005to" +
+      "e.ConfRes.LxcConfRes\032y\n\nAppConfRes\022\r\n\005to" +
       "pic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \002(\t\022\016\n\006period\030" +
-      "\003 \002(\t\022\035\n\rmax_line_size\030\004 \001(\t:\006512000\032t\n\n" +
-      "LxcConfRes\022\r\n\005topic\030\001 \002(\t\022\022\n\nwatch_file\030" +
-      "\002 \001(\t\022\016\n\006period\030\003 \002(\t\022\035\n\rmax_line_size\030\004" +
-      " \001(\t:\006512000\022\024\n\014instance_ids\030\005 \003(\tB.\n!co" +
-      "m.dp.blackhole.protocol.controlB\tConfRes",
-      "PB"
+      "\003 \002(\t\022\035\n\rmax_line_size\030\004 \001(\t:\006512000\022\031\n\r" +
+      "read_interval\030\005 \001(\t:\0021L\032\217\001\n\nLxcConfRes\022\r" +
+      "\n\005topic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \001(\t\022\016\n\006per" +
+      "iod\030\003 \002(\t\022\035\n\rmax_line_size\030\004 \001(\t:\006512000" +
+      "\022\031\n\rread_interval\030\005 \001(\t:\0021L\022\024\n\014instance_",
+      "ids\030\006 \003(\tB.\n!com.dp.blackhole.protocol.c" +
+      "ontrolB\tConfResPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1394,7 +1479,7 @@ public final class ConfResPB {
           internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_AppConfRes_descriptor,
-              new java.lang.String[] { "Topic", "WatchFile", "Period", "MaxLineSize", },
+              new java.lang.String[] { "Topic", "WatchFile", "Period", "MaxLineSize", "ReadInterval", },
               com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.class,
               com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes.Builder.class);
           internal_static_blackhole_ConfRes_LxcConfRes_descriptor =
@@ -1402,7 +1487,7 @@ public final class ConfResPB {
           internal_static_blackhole_ConfRes_LxcConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_LxcConfRes_descriptor,
-              new java.lang.String[] { "Topic", "WatchFile", "Period", "MaxLineSize", "InstanceIds", },
+              new java.lang.String[] { "Topic", "WatchFile", "Period", "MaxLineSize", "ReadInterval", "InstanceIds", },
               com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes.class,
               com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes.Builder.class);
           return null;

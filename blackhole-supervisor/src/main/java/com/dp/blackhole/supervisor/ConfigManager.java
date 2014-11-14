@@ -198,14 +198,15 @@ public class ConfigManager {
                 if (key.equalsIgnoreCase(ParamsKey.TopicConf.WATCH_FILE)) {
                     confInfo.setWatchLog(value);
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.ROLL_PERIOD)) {
-                    confInfo.setRollPeriod(Integer.parseInt(value));
+                    confInfo.setRollPeriod(Util.parseInt(value, 3600));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.MAX_LINE_SIZE)) {
-                    confInfo.setMaxLineSize(Integer.parseInt(value));
+                    confInfo.setMaxLineSize(Util.parseInt(value, 512000));
+                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.READ_INTERVAL)) {
+                    confInfo.setReadInterval(Util.parseLong(value, 1L));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.CMDB_APP)) {
                     internalFillingCmdbMap(topic, value);
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.IS_PAAS)) {
-                    boolean isPaaSModel = Boolean.parseBoolean(value);
-                    confInfo.setPaas(isPaaSModel);
+                    confInfo.setPaas(Util.parseBoolean(value, false));
                     importNewTopicInPaaS(topic, confInfo);
                 } else {
                     LOG.error("Unrecognized conf string.");

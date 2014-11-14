@@ -7,6 +7,7 @@ public abstract class ParamsKey {
         public static final String ROLL_PERIOD = "rollPeriod";
         public static final String MAX_LINE_SIZE = "maxLineSize";
         public static final String IS_PAAS = "isPaaS";
+        public static final String READ_INTERVAL = "readInterval";
     }
 
     public static class LionNode {

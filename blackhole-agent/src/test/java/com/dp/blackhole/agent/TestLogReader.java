@@ -76,7 +76,7 @@ public class TestLogReader {
     public void testFileRotated() throws IOException {
         String localhost = Util.getLocalHost();
         MetaKey metaKey = new MetaKey(MAGIC, null);
-        TopicMeta appLog = new TopicMeta(metaKey, SimAgent.TEST_ROLL_FILE, 3600, 1024);
+        TopicMeta appLog = new TopicMeta(metaKey, SimAgent.TEST_ROLL_FILE, 3600, 1024, 1L);
         SimAgent agent = new SimAgent();
         FileListener listener;
         try {

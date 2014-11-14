@@ -9,14 +9,16 @@ public class TopicMeta {
     private final long rollPeriod;
     private final int maxLineSize;
     private AtomicBoolean dying;
+    private final long readInterval;
     
-    public TopicMeta(MetaKey metaKey, String tailFile, long rollPeriod, int maxLineSize) {
+    public TopicMeta(MetaKey metaKey, String tailFile, long rollPeriod, int maxLineSize, long readInterval) {
         this.metaKey = metaKey;
         this.tailFile = tailFile;
         this.rollPeriod = rollPeriod;
         this.createTime = System.currentTimeMillis();
         this.maxLineSize = maxLineSize;
         this.dying = new AtomicBoolean(false);
+        this.readInterval = readInterval;
     }
 
     public MetaKey getMetaKey() {
@@ -53,6 +55,10 @@ public class TopicMeta {
 
     public boolean setDying() {
         return dying.compareAndSet(false, true);
+    }
+
+    public long getReadInterval() {
+        return readInterval;
     }
 
     @Override

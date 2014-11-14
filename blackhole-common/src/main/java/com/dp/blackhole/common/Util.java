@@ -475,4 +475,44 @@ public class Util {
         }
         return sb.toString();
     }
+    
+    public static int parseInt(String value, int defaultValue) {
+        try {
+            return Integer.parseInt(value);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+    
+    public static long parseLong(String value, long defaultValue) {
+        try {
+            return Long.parseLong(value);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+    
+    public static boolean parseBoolean(String value, boolean defaultValue) {
+        try {
+            return Boolean.parseBoolean(value);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+    
+    public static double parseDouble(String value, double defaultValue) {
+        try {
+            return Double.parseDouble(value);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+    
+    public static float parseFloat(String value, float defaultValue) {
+        try {
+            return Float.parseFloat(value);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
 }
