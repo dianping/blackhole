@@ -19,7 +19,7 @@ public class Stage {
     
     private String topic;
     private String source;
-    private String brokerhost;
+    private String brokerHost;
     private boolean cleanstart;
     private int status;
     private long rollTs;
@@ -60,12 +60,12 @@ public class Stage {
         this.source = source;
     }
 
-    public String getBrokerhost() {
-        return brokerhost;
+    public String getBrokerHost() {
+        return brokerHost;
     }
 
-    public void setBrokerhost(String brokerhost) {
-        this.brokerhost = brokerhost;
+    public void setBrokerHost(String brokerHost) {
+        this.brokerHost = brokerHost;
     }
 
     public boolean isCleanstart() {

@@ -968,7 +968,7 @@ public class Supervisor {
                     Stage manualRecoveryStage = new Stage();
                     manualRecoveryStage.setTopic(topic);
                     manualRecoveryStage.setSource(source);
-                    manualRecoveryStage.setBrokerhost(null);
+                    manualRecoveryStage.setBrokerHost(null);
                     manualRecoveryStage.setCleanstart(false);
                     manualRecoveryStage.setIssuelist(new ArrayList<Issue>());
                     manualRecoveryStage.setStatus(Stage.RECOVERYING);
@@ -1270,7 +1270,7 @@ public class Supervisor {
                         Stage next = new Stage();
                         next.setTopic(stream.getTopic());
                         next.setSource(stream.getSource());
-                        next.setBrokerhost(current.getBrokerhost());
+                        next.setBrokerHost(current.getBrokerHost());
                         next.setCleanstart(true);
                         next.setRollTs(current.getRollTs() + stream.getPeriod() * 1000);
                         next.setStatus(Stage.APPENDING);
@@ -1329,7 +1329,7 @@ public class Supervisor {
             send(c, message);
             
             stage.setStatus(Stage.RECOVERYING);
-            stage.setBrokerhost(broker);
+            stage.setBrokerHost(broker);
             
             SimpleConnection brokerConnection = brokersMapping.get(broker);
             if (brokerConnection == null) {
@@ -1378,7 +1378,7 @@ public class Supervisor {
             Stage current = new Stage();
             current.setTopic(stream.getTopic());
             current.setSource(stream.getSource());
-            current.setBrokerhost(readyBroker.getBrokerServer());
+            current.setBrokerHost(readyBroker.getBrokerServer());
             current.setCleanstart(false);
             current.setIssuelist(new ArrayList<Issue>());
             current.setStatus(Stage.APPENDING);
@@ -1463,7 +1463,7 @@ public class Supervisor {
                 } else {
                     // fix current stage status
                     stage.setStatus(Stage.APPENDING);
-                    stage.setBrokerhost(newBrokerHost);
+                    stage.setBrokerHost(newBrokerHost);
                 }
             }
         }
@@ -1492,7 +1492,7 @@ public class Supervisor {
                     doRecovery(stream, stage);
                 } else {
                     stage.setStatus(Stage.APPENDING);
-                    stage.setBrokerhost(newBrokerHost);
+                    stage.setBrokerHost(newBrokerHost);
                 }
                 stages.add(stage);
             } else {
