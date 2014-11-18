@@ -144,8 +144,9 @@ public class StorageManager {
                     String topicPartition = topic+"@"+partitionId;
                     Long reportedOffset = reportedOffsets.get(topicPartition);
                     if (reportedOffset != null) {
-                        // report as new data arrive
-                        if (endOffset > reportedOffset) {//TODO BUG FOUND
+                        // report when new data arrive (endOffset > reportedOffset)
+                        // or agent reconnecting to create a new segment file (endOffset < reportedOffset)
+                        if (endOffset != reportedOffset) {
                             reportedOffsets.put(topicPartition, endOffset);
                             report(topic, partitionId, endOffset);
                         }
