@@ -293,8 +293,8 @@ public class Util {
             return null;
         }
         String value = rawValue.trim();
-        if (value.isEmpty()) {
-            return new String[]{};
+        if (value.length() < 3) {
+            return null;
         }
         if (value.charAt(0) != '[' || value.charAt(value.length() - 1) != ']') {
             return null;
