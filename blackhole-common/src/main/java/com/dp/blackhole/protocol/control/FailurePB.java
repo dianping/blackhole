@@ -8,42 +8,202 @@ public final class FailurePB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  public interface FailureOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required string topic = 1;
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    boolean hasTopic();
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    java.lang.String getTopic();
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getTopicBytes();
+
+    // required .blackhole.Failure.NodeType type = 2;
+    /**
+     * <code>required .blackhole.Failure.NodeType type = 2;</code>
+     */
+    boolean hasType();
+    /**
+     * <code>required .blackhole.Failure.NodeType type = 2;</code>
+     */
+    com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType getType();
+
+    // required string source = 3;
+    /**
+     * <code>required string source = 3;</code>
+     */
+    boolean hasSource();
+    /**
+     * <code>required string source = 3;</code>
+     */
+    java.lang.String getSource();
+    /**
+     * <code>required string source = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getSourceBytes();
+
+    // required int64 failTs = 4;
+    /**
+     * <code>required int64 failTs = 4;</code>
+     */
+    boolean hasFailTs();
+    /**
+     * <code>required int64 failTs = 4;</code>
+     */
+    long getFailTs();
+  }
+  /**
+   * Protobuf type {@code blackhole.Failure}
+   */
   public static final class Failure extends
-      com.google.protobuf.GeneratedMessage {
+      com.google.protobuf.GeneratedMessage
+      implements FailureOrBuilder {
     // Use Failure.newBuilder() to construct.
-    private Failure() {
-      initFields();
+    private Failure(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private Failure(boolean noInit) {}
-    
+    private Failure(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final Failure defaultInstance;
     public static Failure getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public Failure getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private Failure(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              topic_ = input.readBytes();
+              break;
+            }
+            case 16: {
+              int rawValue = input.readEnum();
+              com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType value = com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(2, rawValue);
+              } else {
+                bitField0_ |= 0x00000002;
+                type_ = value;
+              }
+              break;
+            }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              source_ = input.readBytes();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              failTs_ = input.readInt64();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.FailurePB.internal_static_blackhole_Failure_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.FailurePB.internal_static_blackhole_Failure_fieldAccessorTable;
+      return com.dp.blackhole.protocol.control.FailurePB.internal_static_blackhole_Failure_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.dp.blackhole.protocol.control.FailurePB.Failure.class, com.dp.blackhole.protocol.control.FailurePB.Failure.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<Failure> PARSER =
+        new com.google.protobuf.AbstractParser<Failure>() {
+      public Failure parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new Failure(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Failure> getParserForType() {
+      return PARSER;
+    }
+
+    /**
+     * Protobuf enum {@code blackhole.Failure.NodeType}
+     */
     public enum NodeType
         implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>APP_NODE = 1;</code>
+       */
       APP_NODE(0, 1),
+      /**
+       * <code>BROKER_NODE = 2;</code>
+       */
       BROKER_NODE(1, 2),
       ;
-      
-      
+
+      /**
+       * <code>APP_NODE = 1;</code>
+       */
+      public static final int APP_NODE_VALUE = 1;
+      /**
+       * <code>BROKER_NODE = 2;</code>
+       */
+      public static final int BROKER_NODE_VALUE = 2;
+
+
       public final int getNumber() { return value; }
-      
+
       public static NodeType valueOf(int value) {
         switch (value) {
           case 1: return APP_NODE;
@@ -51,7 +211,7 @@ public final class FailurePB {
           default: return null;
         }
       }
-      
+
       public static com.google.protobuf.Internal.EnumLiteMap<NodeType>
           internalGetValueMap() {
         return internalValueMap;
@@ -60,10 +220,10 @@ public final class FailurePB {
           internalValueMap =
             new com.google.protobuf.Internal.EnumLiteMap<NodeType>() {
               public NodeType findValueByNumber(int number) {
-                return NodeType.valueOf(number)
-      ;        }
+                return NodeType.valueOf(number);
+              }
             };
-      
+
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
         return getDescriptor().getValues().get(index);
@@ -76,10 +236,9 @@ public final class FailurePB {
           getDescriptor() {
         return com.dp.blackhole.protocol.control.FailurePB.Failure.getDescriptor().getEnumTypes().get(0);
       }
-      
-      private static final NodeType[] VALUES = {
-        APP_NODE, BROKER_NODE, 
-      };
+
+      private static final NodeType[] VALUES = values();
+
       public static NodeType valueOf(
           com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
         if (desc.getType() != getDescriptor()) {
@@ -88,246 +247,381 @@ public final class FailurePB {
         }
         return VALUES[desc.getIndex()];
       }
+
       private final int index;
       private final int value;
+
       private NodeType(int index, int value) {
         this.index = index;
         this.value = value;
       }
-      
-      static {
-        com.dp.blackhole.protocol.control.FailurePB.getDescriptor();
-      }
-      
+
       // @@protoc_insertion_point(enum_scope:blackhole.Failure.NodeType)
     }
-    
+
+    private int bitField0_;
     // required string topic = 1;
     public static final int TOPIC_FIELD_NUMBER = 1;
-    private boolean hasTopic;
-    private java.lang.String topic_ = "";
-    public boolean hasTopic() { return hasTopic; }
-    public java.lang.String getTopic() { return topic_; }
-    
+    private java.lang.Object topic_;
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public boolean hasTopic() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public java.lang.String getTopic() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          topic_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTopicBytes() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        topic_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     // required .blackhole.Failure.NodeType type = 2;
     public static final int TYPE_FIELD_NUMBER = 2;
-    private boolean hasType;
     private com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType type_;
-    public boolean hasType() { return hasType; }
-    public com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType getType() { return type_; }
-    
+    /**
+     * <code>required .blackhole.Failure.NodeType type = 2;</code>
+     */
+    public boolean hasType() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required .blackhole.Failure.NodeType type = 2;</code>
+     */
+    public com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType getType() {
+      return type_;
+    }
+
     // required string source = 3;
     public static final int SOURCE_FIELD_NUMBER = 3;
-    private boolean hasSource;
-    private java.lang.String source_ = "";
-    public boolean hasSource() { return hasSource; }
-    public java.lang.String getSource() { return source_; }
-    
+    private java.lang.Object source_;
+    /**
+     * <code>required string source = 3;</code>
+     */
+    public boolean hasSource() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required string source = 3;</code>
+     */
+    public java.lang.String getSource() {
+      java.lang.Object ref = source_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          source_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string source = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getSourceBytes() {
+      java.lang.Object ref = source_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        source_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     // required int64 failTs = 4;
     public static final int FAILTS_FIELD_NUMBER = 4;
-    private boolean hasFailTs;
-    private long failTs_ = 0L;
-    public boolean hasFailTs() { return hasFailTs; }
-    public long getFailTs() { return failTs_; }
-    
-    private void initFields() {
-      type_ = com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType.APP_NODE;
+    private long failTs_;
+    /**
+     * <code>required int64 failTs = 4;</code>
+     */
+    public boolean hasFailTs() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
+    /**
+     * <code>required int64 failTs = 4;</code>
+     */
+    public long getFailTs() {
+      return failTs_;
+    }
+
+    private void initFields() {
+      topic_ = "";
+      type_ = com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType.APP_NODE;
+      source_ = "";
+      failTs_ = 0L;
+    }
+    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      if (!hasTopic) return false;
-      if (!hasType) return false;
-      if (!hasSource) return false;
-      if (!hasFailTs) return false;
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasTopic()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasType()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasSource()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasFailTs()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasTopic()) {
-        output.writeString(1, getTopic());
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getTopicBytes());
       }
-      if (hasType()) {
-        output.writeEnum(2, getType().getNumber());
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeEnum(2, type_.getNumber());
       }
-      if (hasSource()) {
-        output.writeString(3, getSource());
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, getSourceBytes());
       }
-      if (hasFailTs()) {
-        output.writeInt64(4, getFailTs());
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt64(4, failTs_);
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
-      if (hasTopic()) {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getTopic());
+          .computeBytesSize(1, getTopicBytes());
       }
-      if (hasType()) {
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(2, getType().getNumber());
+          .computeEnumSize(2, type_.getNumber());
       }
-      if (hasSource()) {
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(3, getSource());
+          .computeBytesSize(3, getSourceBytes());
       }
-      if (hasFailTs()) {
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(4, getFailTs());
+          .computeInt64Size(4, failTs_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-    
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
     public static com.dp.blackhole.protocol.control.FailurePB.Failure parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.FailurePB.Failure parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.FailurePB.Failure parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.FailurePB.Failure parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.FailurePB.Failure parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.FailurePB.Failure parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.FailurePB.Failure parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static com.dp.blackhole.protocol.control.FailurePB.Failure parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.FailurePB.Failure parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.FailurePB.Failure parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.FailurePB.Failure prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code blackhole.Failure}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> {
-      private com.dp.blackhole.protocol.control.FailurePB.Failure result;
-      
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.dp.blackhole.protocol.control.FailurePB.FailureOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.dp.blackhole.protocol.control.FailurePB.internal_static_blackhole_Failure_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.dp.blackhole.protocol.control.FailurePB.internal_static_blackhole_Failure_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.dp.blackhole.protocol.control.FailurePB.Failure.class, com.dp.blackhole.protocol.control.FailurePB.Failure.Builder.class);
+      }
+
       // Construct using com.dp.blackhole.protocol.control.FailurePB.Failure.newBuilder()
-      private Builder() {}
-      
-      private static Builder create() {
-        Builder builder = new Builder();
-        builder.result = new com.dp.blackhole.protocol.control.FailurePB.Failure();
-        return builder;
+      private Builder() {
+        maybeForceBuilderInitialization();
       }
-      
-      protected com.dp.blackhole.protocol.control.FailurePB.Failure internalGetResult() {
-        return result;
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
       }
-      
-      public Builder clear() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "Cannot call clear() after build().");
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
         }
-        result = new com.dp.blackhole.protocol.control.FailurePB.Failure();
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        topic_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        type_ = com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType.APP_NODE;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        source_ = "";
+        bitField0_ = (bitField0_ & ~0x00000004);
+        failTs_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
-      
+
       public Builder clone() {
-        return create().mergeFrom(result);
+        return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.FailurePB.Failure.getDescriptor();
+        return com.dp.blackhole.protocol.control.FailurePB.internal_static_blackhole_Failure_descriptor;
       }
-      
+
       public com.dp.blackhole.protocol.control.FailurePB.Failure getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.FailurePB.Failure.getDefaultInstance();
       }
-      
-      public boolean isInitialized() {
-        return result.isInitialized();
-      }
+
       public com.dp.blackhole.protocol.control.FailurePB.Failure build() {
-        if (result != null && !isInitialized()) {
+        com.dp.blackhole.protocol.control.FailurePB.Failure result = buildPartial();
+        if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return buildPartial();
+        return result;
       }
-      
-      private com.dp.blackhole.protocol.control.FailurePB.Failure buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        if (!isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return buildPartial();
-      }
-      
+
       public com.dp.blackhole.protocol.control.FailurePB.Failure buildPartial() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "build() has already been called on this Builder.");
+        com.dp.blackhole.protocol.control.FailurePB.Failure result = new com.dp.blackhole.protocol.control.FailurePB.Failure(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
         }
-        com.dp.blackhole.protocol.control.FailurePB.Failure returnMe = result;
-        result = null;
-        return returnMe;
+        result.topic_ = topic_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.type_ = type_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.source_ = source_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.failTs_ = failTs_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.FailurePB.Failure) {
           return mergeFrom((com.dp.blackhole.protocol.control.FailurePB.Failure)other);
@@ -336,17 +630,21 @@ public final class FailurePB {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.dp.blackhole.protocol.control.FailurePB.Failure other) {
         if (other == com.dp.blackhole.protocol.control.FailurePB.Failure.getDefaultInstance()) return this;
         if (other.hasTopic()) {
-          setTopic(other.getTopic());
+          bitField0_ |= 0x00000001;
+          topic_ = other.topic_;
+          onChanged();
         }
         if (other.hasType()) {
           setType(other.getType());
         }
         if (other.hasSource()) {
-          setSource(other.getSource());
+          bitField0_ |= 0x00000004;
+          source_ = other.source_;
+          onChanged();
         }
         if (other.hasFailTs()) {
           setFailTs(other.getFailTs());
@@ -354,154 +652,280 @@ public final class FailurePB {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
+      public final boolean isInitialized() {
+        if (!hasTopic()) {
+          
+          return false;
+        }
+        if (!hasType()) {
+          
+          return false;
+        }
+        if (!hasSource()) {
+          
+          return false;
+        }
+        if (!hasFailTs()) {
+          
+          return false;
+        }
+        return true;
+      }
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              setTopic(input.readString());
-              break;
-            }
-            case 16: {
-              int rawValue = input.readEnum();
-              com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType value = com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(2, rawValue);
-              } else {
-                setType(value);
-              }
-              break;
-            }
-            case 26: {
-              setSource(input.readString());
-              break;
-            }
-            case 32: {
-              setFailTs(input.readInt64());
-              break;
-            }
+        com.dp.blackhole.protocol.control.FailurePB.Failure parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.dp.blackhole.protocol.control.FailurePB.Failure) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
-      
+      private int bitField0_;
+
       // required string topic = 1;
+      private java.lang.Object topic_ = "";
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public boolean hasTopic() {
-        return result.hasTopic();
+        return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public java.lang.String getTopic() {
-        return result.getTopic();
+        java.lang.Object ref = topic_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          topic_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
-      public Builder setTopic(java.lang.String value) {
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTopicBytes() {
+        java.lang.Object ref = topic_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          topic_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public Builder setTopic(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasTopic = true;
-        result.topic_ = value;
+  bitField0_ |= 0x00000001;
+        topic_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public Builder clearTopic() {
-        result.hasTopic = false;
-        result.topic_ = getDefaultInstance().getTopic();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        topic_ = getDefaultInstance().getTopic();
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public Builder setTopicBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        topic_ = value;
+        onChanged();
+        return this;
+      }
+
       // required .blackhole.Failure.NodeType type = 2;
+      private com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType type_ = com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType.APP_NODE;
+      /**
+       * <code>required .blackhole.Failure.NodeType type = 2;</code>
+       */
       public boolean hasType() {
-        return result.hasType();
+        return ((bitField0_ & 0x00000002) == 0x00000002);
       }
+      /**
+       * <code>required .blackhole.Failure.NodeType type = 2;</code>
+       */
       public com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType getType() {
-        return result.getType();
+        return type_;
       }
+      /**
+       * <code>required .blackhole.Failure.NodeType type = 2;</code>
+       */
       public Builder setType(com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType value) {
         if (value == null) {
           throw new NullPointerException();
         }
-        result.hasType = true;
-        result.type_ = value;
+        bitField0_ |= 0x00000002;
+        type_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required .blackhole.Failure.NodeType type = 2;</code>
+       */
       public Builder clearType() {
-        result.hasType = false;
-        result.type_ = com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType.APP_NODE;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        type_ = com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType.APP_NODE;
+        onChanged();
         return this;
       }
-      
+
       // required string source = 3;
+      private java.lang.Object source_ = "";
+      /**
+       * <code>required string source = 3;</code>
+       */
       public boolean hasSource() {
-        return result.hasSource();
+        return ((bitField0_ & 0x00000004) == 0x00000004);
       }
+      /**
+       * <code>required string source = 3;</code>
+       */
       public java.lang.String getSource() {
-        return result.getSource();
+        java.lang.Object ref = source_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          source_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
-      public Builder setSource(java.lang.String value) {
+      /**
+       * <code>required string source = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSourceBytes() {
+        java.lang.Object ref = source_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          source_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string source = 3;</code>
+       */
+      public Builder setSource(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasSource = true;
-        result.source_ = value;
+  bitField0_ |= 0x00000004;
+        source_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required string source = 3;</code>
+       */
       public Builder clearSource() {
-        result.hasSource = false;
-        result.source_ = getDefaultInstance().getSource();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        source_ = getDefaultInstance().getSource();
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>required string source = 3;</code>
+       */
+      public Builder setSourceBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        source_ = value;
+        onChanged();
+        return this;
+      }
+
       // required int64 failTs = 4;
+      private long failTs_ ;
+      /**
+       * <code>required int64 failTs = 4;</code>
+       */
       public boolean hasFailTs() {
-        return result.hasFailTs();
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
+      /**
+       * <code>required int64 failTs = 4;</code>
+       */
       public long getFailTs() {
-        return result.getFailTs();
+        return failTs_;
       }
+      /**
+       * <code>required int64 failTs = 4;</code>
+       */
       public Builder setFailTs(long value) {
-        result.hasFailTs = true;
-        result.failTs_ = value;
+        bitField0_ |= 0x00000008;
+        failTs_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required int64 failTs = 4;</code>
+       */
       public Builder clearFailTs() {
-        result.hasFailTs = false;
-        result.failTs_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        failTs_ = 0L;
+        onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:blackhole.Failure)
     }
-    
+
     static {
       defaultInstance = new Failure(true);
-      com.dp.blackhole.protocol.control.FailurePB.internalForceInit();
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:blackhole.Failure)
   }
-  
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_Failure_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_Failure_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -527,9 +951,7 @@ public final class FailurePB {
           internal_static_blackhole_Failure_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Failure_descriptor,
-              new java.lang.String[] { "Topic", "Type", "Source", "FailTs", },
-              com.dp.blackhole.protocol.control.FailurePB.Failure.class,
-              com.dp.blackhole.protocol.control.FailurePB.Failure.Builder.class);
+              new java.lang.String[] { "Topic", "Type", "Source", "FailTs", });
           return null;
         }
       };
@@ -538,8 +960,6 @@ public final class FailurePB {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-  
-  public static void internalForceInit() {}
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }
