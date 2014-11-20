@@ -141,13 +141,8 @@ public class ConfigManager {
         this.blacklist.setBlacklist(Arrays.asList(blacklist));
         for (int i = 0; i < topics.length; i++) {
             confMap.put(topics[i], new TopicConfig(topics[i]));
-            
-            String cmdbString = definitelyGetProperty(ParamsKey.LionNode.CMDB_PREFIX + topics[i]);
-            fillCMDBMap(topics[i], cmdbString);
-            
             String confString = definitelyGetProperty(ParamsKey.LionNode.CONF_PREFIX + topics[i]);
             fillConfMap(topics[i], confString);
-            
             String hostsString = definitelyGetProperty(ParamsKey.LionNode.HOSTS_PREFIX + topics[i]);
             fillHostMap(topics[i], hostsString);
         }
@@ -162,8 +157,6 @@ public class ConfigManager {
         cache.addChange(topicConfListener);
         AgentHostsChangeListener agentHostsListener = new AgentHostsChangeListener();
         cache.addChange(agentHostsListener);
-        CMDBChangeListener cmdbChangeListener = new CMDBChangeListener();
-        cache.addChange(cmdbChangeListener);
         definitelyGetProperty(ParamsKey.LionNode.TOPIC);
         definitelyGetProperty(ParamsKey.LionNode.BLACKLIST);
     }
@@ -203,48 +196,45 @@ public class ConfigManager {
                     confInfo.setMaxLineSize(Util.parseInt(value, 512000));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.READ_INTERVAL)) {
                     confInfo.setReadInterval(Util.parseLong(value, 1L));
-                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.CMDB_APP)) {
+                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.APP)) {
                     internalFillingCmdbMap(topic, value);
-                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.IS_PAAS)) {
-                    confInfo.setPaas(Util.parseBoolean(value, false));
-                    importNewTopicInPaaS(topic, confInfo);
+                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.OWNER)) {
+                    confInfo.setOwner(value);
+                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.COMPRESSION)) {
+                    confInfo.setCompression(value);
+                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.UPLOAD_PERIOD)) {
+                    confInfo.setUploadPeriod(Util.parseInt(value, confInfo.getRollPeriod()));
                 } else {
                     LOG.error("Unrecognized conf string.");
                 }
-            }
-            if (newTopicToBroadcast.contains(confInfo.getTopic())) {
-                //broadcast confRes message for new topic, most of the time, not works here
-                broadcastNewTopicConfig(confInfo);
             }
         } else {
             LOG.error("Lose configurations for " + topic);
         }
     }
     
-    public void importNewTopicInPaaS(String topic, TopicConfig confInfo) {
-        if (confInfo.isPaas()) {
-            String cmdbApp = confInfo.getAppName();
-            if (cmdbApp == null) {
-                LOG.error("Oops, no cmdb app assign to topic " + topic);
-                return;
-            }
-            //one topic has only one cmdbapp, but the interface of PAAS is cmdbapp list
-            List<String> cmdbApps = new ArrayList<String>();
-            cmdbApps.add(cmdbApp);
-            try {
-                Map<String, Set<String>> hostToInstances = findInstancesByCmdbApps(topic, cmdbApps);
-                confInfo.setInstances(hostToInstances);
-            } catch (Exception e) {
-                LOG.error("Oops, can not find instances.", e);
-            }
+    public void updateInstancesOfNewTopic(TopicConfig confInfo) {
+        String cmdbApp = confInfo.getAppName();
+        String topic = confInfo.getTopic();
+        if (cmdbApp == null) {
+            LOG.error("Oops, no cmdb app assign to topic " + confInfo.getTopic());
+            return;
+        }
+        //one topic has only one cmdbapp, but the interface of PAAS is cmdbapp list
+        List<String> cmdbApps = new ArrayList<String>();
+        cmdbApps.add(cmdbApp);
+        try {
+            Map<String, Set<String>> hostToInstances = findInstancesByCmdbApps(topic, cmdbApps);
+            confInfo.setInstances(hostToInstances);
+        } catch (Exception e) {
+            LOG.error("Oops, can not find instances.", e);
         }
     }
     
     public Map<String, Set<String>> findInstancesByCmdbApps(String topic, List<String> cmdbApps)
             throws UnsupportedEncodingException, JSONException {
-        Map<String, Set<String>> hostToInstances = new HashMap<String, Set<String>>();
         if (cmdbApps.size() == 0) {
-            return hostToInstances;
+            return null;
         }
         //HTTP get the json
         StringBuilder catalogURLBuild = new StringBuilder();
@@ -256,7 +246,7 @@ public class ConfigManager {
         String response = httpClient.getResponseText(catalogURLBuild.toString());
         if (response == null) {
             LOG.error("response is null.");
-            return hostToInstances;
+            return null;
         }
         String jsonStr = java.net.URLDecoder.decode(response, "utf-8");
         JSONObject rootObject = new JSONObject(jsonStr);
@@ -264,6 +254,7 @@ public class ConfigManager {
         if (catalogArray.length() == 0) {
             LOG.warn("Can not get any catalog by url " + catalogURLBuild.toString());
         }
+        Map<String, Set<String>> hostToInstances = new HashMap<String, Set<String>>();
         for (int i = 0; i < catalogArray.length(); i++) {
             JSONObject layoutObject = catalogArray.getJSONObject(i);
             String app = (String)layoutObject.get("app");
@@ -315,17 +306,14 @@ public class ConfigManager {
             }
             TopicConfig confInfo = confMap.get(topic);
             confInfo.setHosts(list);
-            
-            //broadcast confRes message for new topic, most of the time, it works
+            //update instances if this topic also exists in PaaS
+            updateInstancesOfNewTopic(confInfo);
+            //broadcast confRes message for new topic
             broadcastNewTopicConfig(confInfo);
         } else {
             LOG.warn("Lose hosts for " + topic);
         }
-    }
-
-    private void fillCMDBMap(String topic, String cmdbValue) {
-        String cmdbApp = Util.getStringOfLionValue(cmdbValue);
-        internalFillingCmdbMap(topic, cmdbApp);
+        
     }
 
     public void internalFillingCmdbMap(String topic, String cmdbApp) {
@@ -416,11 +404,7 @@ public class ConfigManager {
             .append(" = ")
             .append(confInfo.getMaxLineSize())
             .append("\n")
-            .append(ParamsKey.TopicConf.IS_PAAS)
-            .append(" = ")
-            .append(confInfo.isPaas())
-            .append("\n")
-            .append(ParamsKey.TopicConf.CMDB_APP)
+            .append(ParamsKey.TopicConf.APP)
             .append(" = ")
             .append(confInfo.getAppName())
             .append("\n");
@@ -448,17 +432,16 @@ public class ConfigManager {
     }
     
     private void broadcastNewTopicConfig(TopicConfig confInfo) {
-        if (confInfo.isPaas()) {
-            return;
-        }
-        if (confInfo.getHosts() == null || confInfo.getHosts().size() == 0) {
-            return;
-        }
         if (confInfo.getWatchLog() == null || confInfo.getWatchLog().length() == 0) {
+            LOG.error("Oops, no watchlog found for " + confInfo.getTopic());
             return;
         }
         if (newTopicToBroadcast.remove(confInfo.getTopic())) {
-            supervisor.findAndSend(confInfo);
+            //trigger confRes of topic deployed in KVM
+            supervisor.findAndSendAppConfRes(confInfo);
+            
+            //trigger confRes of topic deployed in PAAS
+            supervisor.findAndSendLxcConfRes(confInfo);
         }
     }
 
@@ -478,8 +461,6 @@ public class ConfigManager {
                             addWatherForKey(watchKey);
                             watchKey = ParamsKey.LionNode.HOSTS_PREFIX + newTopic;
                             addWatherForKey(watchKey);
-                            watchKey = ParamsKey.LionNode.CMDB_PREFIX + newTopic;
-                            addWatherForKey(watchKey);
                             //trigger new topic to broadcast confRes messages
                             newTopicToBroadcast.add(newTopic);
                         }
@@ -498,22 +479,6 @@ public class ConfigManager {
         }
     }
     
-    class CMDBChangeListener implements ConfigChange {
-
-        @Override
-        public void onChange(String key, String value) {
-            if (key.startsWith(ParamsKey.LionNode.CMDB_PREFIX)) {
-                for (String topic : confMap.keySet()) {
-                    if (key.equals(ParamsKey.LionNode.CMDB_PREFIX + topic)) {
-                        LOG.info("CMDB Change is triggered by " + topic);
-                        fillCMDBMap(topic, value);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
     class AgentHostsChangeListener implements ConfigChange {
 
         @Override

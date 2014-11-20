@@ -7,16 +7,17 @@ import java.util.Set;
 public class TopicConfig {
     private static int DEFAULT_MAX_LINE_SIZE = 512000;
     private static long DEFAULT_READ_INTERVAL = 1L;
-    private static boolean DEFAULT_DEPLOY_IN_PAAS = false;
     private String topic;
     private String appName;
     private String watchLog;
     private int rollPeriod;
     private int maxLineSize = DEFAULT_MAX_LINE_SIZE;
-    private long readInterval = DEFAULT_READ_INTERVAL;
-    private boolean isPaas = DEFAULT_DEPLOY_IN_PAAS;
     private List<String> hosts;
     private Map<String, Set<String>> hostsInstances;
+    private long readInterval = DEFAULT_READ_INTERVAL;
+    private String owner;
+    private String compression;
+    private int uploadPeriod;
     public TopicConfig(String topic) {
         this.topic = topic;
     }
@@ -50,12 +51,6 @@ public class TopicConfig {
     public void setMaxLineSize(int maxLineSize) {
         this.maxLineSize = maxLineSize;
     }
-    public boolean isPaas() {
-        return isPaas;
-    }
-    public void setPaas(boolean isPaas) {
-        this.isPaas = isPaas;
-    }
     public List<String> getHosts() {
         return hosts;
     }
@@ -71,10 +66,27 @@ public class TopicConfig {
     public synchronized Map<String, Set<String>> getInstances() {
         return hostsInstances;
     }
+    public String getOwner() {
+        return owner;
+    }
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+    public String getCompression() {
+        return compression;
+    }
+    public void setCompression(String compression) {
+        this.compression = compression;
+    }
+    public int getUploadPeriod() {
+        return uploadPeriod;
+    }
+    public void setUploadPeriod(int uploadPeriod) {
+        this.uploadPeriod = uploadPeriod;
+    }
     public synchronized void setInstances(Map<String, Set<String>> hostsInstances) {
         this.hostsInstances = hostsInstances;
     }
-
     public Set<String> getInsByHost(String host) {
         if (hostsInstances != null) {
             return hostsInstances.get(host);
@@ -82,7 +94,6 @@ public class TopicConfig {
             return null;
         }
     }
-    
     public void addIdsByHosts(Map<String, Set<String>> hostIds) {
         if (getInstances() == null) {
             setInstances(hostIds);
@@ -97,7 +108,6 @@ public class TopicConfig {
             }
         }
     }
-    
     public void removeIdsByHosts(Map<String, Set<String>> hostIds) {
         if (getInstances() != null) {
             for (Map.Entry<String, Set<String>> newHostIds : hostIds.entrySet()) {

@@ -293,11 +293,14 @@ public class Util {
             return null;
         }
         String value = rawValue.trim();
-        if (value.length() < 3) {
+        if (value.length() < 2) {
             return null;
         }
         if (value.charAt(0) != '[' || value.charAt(value.length() - 1) != ']') {
             return null;
+        }
+        if (value.length() == 2) {
+            return new String[]{};
         }
         String[] tmp = value.substring(1, value.length() - 1).split(",");
         String[] result = new String[tmp.length];

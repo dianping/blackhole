@@ -2,12 +2,14 @@ package com.dp.blackhole.common;
 
 public abstract class ParamsKey {
     public static class TopicConf {
-        public static final String CMDB_APP = "cmdbApp";
+        public static final String APP = "app";
         public static final String WATCH_FILE = "watchLog";
         public static final String ROLL_PERIOD = "rollPeriod";
         public static final String MAX_LINE_SIZE = "maxLineSize";
-        public static final String IS_PAAS = "isPaaS";
         public static final String READ_INTERVAL = "readInterval";
+        public static final String OWNER = "owner";
+        public static final String COMPRESSION = "compression";
+        public static final String UPLOAD_PERIOD = "uploadPeriod";
     }
 
     public static class LionNode {
@@ -18,7 +20,6 @@ public abstract class ParamsKey {
         public static final String TOPIC = "blackhole.apps";
         public static final String HOSTS_PREFIX = "blackhole.hosts.";
         public static final String CONF_PREFIX = "blackhole.conf.";
-        public static final String CMDB_PREFIX = "blackhole.cmdb.";
         public static final String BLACKLIST = "blackhole.check.blacklist";
         public static final String OP_SCALEOUT = "+";
         public static final String OP_SCALEIN = "-";

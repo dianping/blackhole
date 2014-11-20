@@ -152,18 +152,22 @@ public class Supervisor {
         }
     }
     
-    void findAndSend(TopicConfig confInfo) {
+    void findAndSendAppConfRes(TopicConfig confInfo) {
+        List<String> hosts = confInfo.getHosts();
+        if (hosts == null || hosts.isEmpty()) {
+            return;
+        }
         List<AppConfRes> appConfResList = new ArrayList<AppConfRes>(1);
         AppConfRes appConfRes = PBwrap.wrapAppConfRes(
                 confInfo.getTopic(),
                 confInfo.getWatchLog(),
-                Integer.toString(confInfo.getRollPeriod()),
-                Integer.toString(confInfo.getMaxLineSize()),
-                Long.toString(confInfo.getReadInterval())
+                String.valueOf(confInfo.getRollPeriod()),
+                String.valueOf(confInfo.getMaxLineSize()),
+                String.valueOf(confInfo.getReadInterval())
         );
         appConfResList.add(appConfRes);
         Message message = PBwrap.wrapConfRes(appConfResList, null);
-        for (String agentHost : confInfo.getHosts()) {
+        for (String agentHost : hosts) {
             //we find the connections from agentMapping instead of all connections map
             //cause if a connection belong to agent type standing for the streams in it
             //have already been enable, its confReq-conRes message loop is termination.
@@ -171,6 +175,36 @@ public class Supervisor {
             if (connection != null) {
                 send(connection, message);
             }
+        }
+    }
+    
+
+    void findAndSendLxcConfRes(TopicConfig confInfo) {
+        Map<String, Set<String>> hostToInstances = confInfo.getInstances();
+        if (hostToInstances == null || hostToInstances.isEmpty()) {
+            return;
+        }
+        Map<String, Message> toBeSend = new HashMap<String, Message>();
+        for(Map.Entry<String, Set<String>> entry : hostToInstances.entrySet()) {
+            String eachHost = entry.getKey();
+            Set<String> idsInTheSameHost = entry.getValue();
+            List<LxcConfRes> lxcConfResList = new ArrayList<LxcConfRes>();
+            if (idsInTheSameHost.size() == 0) {
+                continue;
+            }
+            LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(
+                    confInfo.getTopic(),
+                    confInfo.getWatchLog(),
+                    String.valueOf(confInfo.getRollPeriod()),
+                    String.valueOf(confInfo.getMaxLineSize()),
+                    String.valueOf(confInfo.getReadInterval()),
+                    idsInTheSameHost);
+            lxcConfResList.add(lxcConfRes);
+            Message message = PBwrap.wrapConfRes(null, lxcConfResList);
+            toBeSend.put(eachHost, message);
+        }
+        if (toBeSend != null) {
+            cachedSend(toBeSend);
         }
     }
     
