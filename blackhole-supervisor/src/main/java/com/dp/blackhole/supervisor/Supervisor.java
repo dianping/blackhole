@@ -1322,7 +1322,16 @@ public class Supervisor {
     }
 
     private String doUpload(Stream stream, Stage current, SimpleConnection from, boolean isFinal) {
-        Message message = PBwrap.wrapUploadRoll(current.getTopic(), current.getSource(), stream.getPeriod(), current.getRollTs(), isFinal);
+        TopicConfig config = configManager.getConfByTopic(stream.getTopic());
+        String compression = config.getCompression();
+        Message message = PBwrap.wrapUploadRoll(
+                current.getTopic(),
+                current.getSource(),
+                stream.getPeriod(),
+                current.getRollTs(),
+                isFinal,
+                compression
+        );
         send(from, message);
         stageConnectionMap.put(current, from);
         return from.getHost();

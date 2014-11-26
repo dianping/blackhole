@@ -57,7 +57,7 @@ public class TestLogReader {
         properties.setProperty("broker.storage.dir", tmpDir);
         BrokerService pubservice = new BrokerService(properties);
         new SimBroker(port);
-        SimBroker.getRollMgr().init("/tmp/hdfs", ".gz", 40020, 5000, 1, 1, 60000);
+        SimBroker.getRollMgr().init("/tmp/hdfs", "gz", 40020, 5000, 1, 1, 60000);
         pubservice.start();
 
         //build a app log

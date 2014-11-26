@@ -18,6 +18,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.dp.blackhole.broker.Compression.Algorithm;
 import com.dp.blackhole.broker.ftp.FTPConfigration;
 import com.dp.blackhole.broker.ftp.FTPConfigrationLoader;
 import com.dp.blackhole.broker.ftp.FTPUpload;
@@ -26,6 +27,7 @@ import com.dp.blackhole.broker.storage.RollPartition;
 import com.dp.blackhole.broker.storage.StorageManager;
 import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
@@ -35,22 +37,27 @@ public class RollManager {
     private final static Log LOG = LogFactory.getLog(RollManager.class);
     
     Map<RollIdent, RollPartition> rolls;
-    
     private String hdfsbase;
-    private String suffix;
+    private String defaultCompression;
     private int port;
     private FileSystem fs;
     private ExecutorService uploadPool;
     private ExecutorService recoveryPool;
     private RecoveryAcceptor accepter;
     private long clockSyncBufMillis;
+    private Algorithm defaultCompressionAlgo;
     
-    public void init(String hdfsbase, String suffix, int port, long clockSyncBufMillis, 
+    public Algorithm getDefaultCompressionAlgo() {
+        return defaultCompressionAlgo;
+    }
+    
+    public void init(String hdfsbase, String defaultCompression, int port, long clockSyncBufMillis, 
             int maxUploadThreads, int maxRecoveryThreads, int recoverySocketTimeout) throws IOException {
         this.hdfsbase = hdfsbase;
-        this.suffix = suffix;
+        this.defaultCompression = defaultCompression;
         this.port = port;
         this.clockSyncBufMillis = clockSyncBufMillis;
+        this.defaultCompressionAlgo = Compression.getCompressionAlgorithmByName(defaultCompression);
         uploadPool = Executors.newFixedThreadPool(maxUploadThreads);
         recoveryPool = Executors.newFixedThreadPool(maxRecoveryThreads);
         fs = (new Path(hdfsbase)).getFileSystem(new Configuration());
@@ -102,15 +109,16 @@ public class RollManager {
         
         if (roll == null) {
             LOG.error("can not find roll by rollident " + ident);
-            reportUpload(ident, false);
+            reportUpload(ident, rollID.getCompression(), false);
             return false;
         }
         
         LOG.info("start to upload roll " + ident);
         StorageManager manager = Broker.getBrokerService().getPersistentManager();
-        HDFSUpload upload = new HDFSUpload(this, manager, fs, ident, roll);
+        HDFSUpload upload = new HDFSUpload(this, manager, fs, ident, roll, rollID.getCompression());
         uploadPool.execute(upload);
         //start a ftp uploader which need uploading to work with HDFS in parallel.
+        //ftp uploader use gz compression algo by default
         FTPConfigration ftpConf;
         if ((ftpConf = FTPConfigrationLoader.getFTPConfigration(ident.topic)) != null) {
             Partition p;
@@ -196,15 +204,27 @@ public class RollManager {
     }
     
     public String getCompressedFileName(RollIdent ident) {
-        return getFileName(ident, false) + suffix;
+        return getCompressedFileName(ident, this.defaultCompression);
+    }
+    
+    public String getGZCompressedFileName(RollIdent ident) {
+        return getCompressedFileName(ident, ParamsKey.COMPRESSION_GZ);
+    }
+    
+    public String getCompressedFileName(RollIdent ident, String compressionAlgoName) {
+        return getFileName(ident, false) + "." + compressionAlgoName;
     }
 
     /*
      * Path format:
-     * hdfsbasedir/appname/2013-11-01/14/08/machine01@appname_2013-11-01.14.08.gz
+     * hdfsbasedir/appname/2013-11-01/14/08/machine01@appname_2013-11-01.14.08.gz(lzo)
      */
     public String getRollHdfsPath(RollIdent ident) {
         return getParentPath(hdfsbase, ident) + getCompressedFileName(ident);
+    }
+    
+    public String getRollHdfsPath(RollIdent ident, String compressionAlgoName) {
+        return getParentPath(hdfsbase, ident) + getCompressedFileName(ident, compressionAlgoName);
     }
     
     public String getMarkHdfsPath(RollIdent ident) {
@@ -221,14 +241,14 @@ public class RollManager {
         Broker.getSupervisor().send(message);
     }
 
-    public void reportUpload(RollIdent ident, boolean uploadSuccess) {
+    public void reportUpload(RollIdent ident, String compression, boolean uploadSuccess) {
         rolls.remove(ident);
         
         if (uploadSuccess == true) {
-            Message message = PBwrap.wrapUploadSuccess(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal);
+            Message message = PBwrap.wrapUploadSuccess(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal, compression);
             Broker.getSupervisor().send(message);
         } else {
-            Message message = PBwrap.wrapUploadFail(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal);
+            Message message = PBwrap.wrapUploadFail(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal, compression);
             Broker.getSupervisor().send(message);
         }
     }

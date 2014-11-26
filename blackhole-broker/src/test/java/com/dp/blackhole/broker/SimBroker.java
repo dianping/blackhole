@@ -3,6 +3,7 @@ package com.dp.blackhole.broker;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,9 +39,12 @@ public class SimBroker extends Broker {
         LOG.debug(msg.getType());
     }
     
-    public void start() {
+    public void start() throws IOException {
+        Properties prop = new Properties();
+        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
+        String compressionAlgoName = prop.getProperty("broker.hdfs.compression.default");
         try {
-            Broker.getRollMgr().init("/tmp/hdfs", ".gz", port, 5000, 1, 1, 60000);
+            Broker.getRollMgr().init("/tmp/hdfs", compressionAlgoName, port, 5000, 1, 1, 60000);
         } catch (IOException e) {
             e.printStackTrace();
         }

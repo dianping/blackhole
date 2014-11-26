@@ -51,7 +51,7 @@ public class Broker {
         servicePort =  Integer.parseInt(prop.getProperty("broker.service.port"));
         recoveryPort = Integer.parseInt(prop.getProperty("broker.recovery.port"));
         String hdfsbasedir = prop.getProperty("broker.hdfs.basedir");
-        String suffix = prop.getProperty("broker.hdfs.file.suffix");
+        String copmressionAlgoName = prop.getProperty("broker.hdfs.compression.default");
         long clockSyncBufMillis = Long.parseLong(prop.getProperty("broker.rollmanager.clockSyncBufMillis", "5000"));
         int maxUploadThreads = Integer.parseInt(prop.getProperty("broker.rollmanager.maxUploadThreads", "20"));
         int maxRecoveryThreads = Integer.parseInt(prop.getProperty("broker.rollmanager.maxRecoveryThreads", "10"));
@@ -75,7 +75,7 @@ public class Broker {
             thread.start();
         }
         
-        rollMgr.init(hdfsbasedir, suffix, recoveryPort, clockSyncBufMillis, maxUploadThreads, maxRecoveryThreads, recoverySocketTimeout);
+        rollMgr.init(hdfsbasedir, copmressionAlgoName, recoveryPort, clockSyncBufMillis, maxUploadThreads, maxRecoveryThreads, recoverySocketTimeout);
         
         brokerService = new BrokerService(prop);
         brokerService.setDaemon(true);

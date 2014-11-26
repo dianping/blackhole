@@ -70,6 +70,21 @@ public final class RollIDPB {
      * <code>optional bool is_final = 5;</code>
      */
     boolean getIsFinal();
+
+    // optional string compression = 6;
+    /**
+     * <code>optional string compression = 6;</code>
+     */
+    boolean hasCompression();
+    /**
+     * <code>optional string compression = 6;</code>
+     */
+    java.lang.String getCompression();
+    /**
+     * <code>optional string compression = 6;</code>
+     */
+    com.google.protobuf.ByteString
+        getCompressionBytes();
   }
   /**
    * Protobuf type {@code blackhole.RollID}
@@ -145,6 +160,11 @@ public final class RollIDPB {
             case 40: {
               bitField0_ |= 0x00000010;
               isFinal_ = input.readBool();
+              break;
+            }
+            case 50: {
+              bitField0_ |= 0x00000020;
+              compression_ = input.readBytes();
               break;
             }
           }
@@ -321,12 +341,56 @@ public final class RollIDPB {
       return isFinal_;
     }
 
+    // optional string compression = 6;
+    public static final int COMPRESSION_FIELD_NUMBER = 6;
+    private java.lang.Object compression_;
+    /**
+     * <code>optional string compression = 6;</code>
+     */
+    public boolean hasCompression() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional string compression = 6;</code>
+     */
+    public java.lang.String getCompression() {
+      java.lang.Object ref = compression_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          compression_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string compression = 6;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCompressionBytes() {
+      java.lang.Object ref = compression_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        compression_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private void initFields() {
       topic_ = "";
       source_ = "";
       period_ = 0L;
       rollTs_ = 0L;
       isFinal_ = false;
+      compression_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -371,6 +435,9 @@ public final class RollIDPB {
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         output.writeBool(5, isFinal_);
       }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeBytes(6, getCompressionBytes());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -399,6 +466,10 @@ public final class RollIDPB {
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(5, isFinal_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(6, getCompressionBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -526,6 +597,8 @@ public final class RollIDPB {
         bitField0_ = (bitField0_ & ~0x00000008);
         isFinal_ = false;
         bitField0_ = (bitField0_ & ~0x00000010);
+        compression_ = "";
+        bitField0_ = (bitField0_ & ~0x00000020);
         return this;
       }
 
@@ -574,6 +647,10 @@ public final class RollIDPB {
           to_bitField0_ |= 0x00000010;
         }
         result.isFinal_ = isFinal_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.compression_ = compression_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -608,6 +685,11 @@ public final class RollIDPB {
         }
         if (other.hasIsFinal()) {
           setIsFinal(other.getIsFinal());
+        }
+        if (other.hasCompression()) {
+          bitField0_ |= 0x00000020;
+          compression_ = other.compression_;
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -899,6 +981,80 @@ public final class RollIDPB {
         return this;
       }
 
+      // optional string compression = 6;
+      private java.lang.Object compression_ = "";
+      /**
+       * <code>optional string compression = 6;</code>
+       */
+      public boolean hasCompression() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional string compression = 6;</code>
+       */
+      public java.lang.String getCompression() {
+        java.lang.Object ref = compression_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          compression_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string compression = 6;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCompressionBytes() {
+        java.lang.Object ref = compression_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          compression_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string compression = 6;</code>
+       */
+      public Builder setCompression(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000020;
+        compression_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string compression = 6;</code>
+       */
+      public Builder clearCompression() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        compression_ = getDefaultInstance().getCompression();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string compression = 6;</code>
+       */
+      public Builder setCompressionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000020;
+        compression_ = value;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.RollID)
     }
 
@@ -924,11 +1080,11 @@ public final class RollIDPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014RollID.proto\022\tblackhole\"Z\n\006RollID\022\r\n\005t" +
+      "\n\014RollID.proto\022\tblackhole\"o\n\006RollID\022\r\n\005t" +
       "opic\030\001 \002(\t\022\016\n\006source\030\002 \002(\t\022\016\n\006period\030\003 \002" +
-      "(\003\022\017\n\007roll_ts\030\004 \002(\003\022\020\n\010is_final\030\005 \001(\010B-\n" +
-      "!com.dp.blackhole.protocol.controlB\010Roll" +
-      "IDPB"
+      "(\003\022\017\n\007roll_ts\030\004 \002(\003\022\020\n\010is_final\030\005 \001(\010\022\023\n" +
+      "\013compression\030\006 \001(\tB-\n!com.dp.blackhole.p" +
+      "rotocol.controlB\010RollIDPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -940,7 +1096,7 @@ public final class RollIDPB {
           internal_static_blackhole_RollID_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RollID_descriptor,
-              new java.lang.String[] { "Topic", "Source", "Period", "RollTs", "IsFinal", });
+              new java.lang.String[] { "Topic", "Source", "Period", "RollTs", "IsFinal", "Compression", });
           return null;
         }
       };

@@ -197,26 +197,31 @@ public class PBwrap {
         return wrapMessage(MessageType.APP_ROLL, builder.build());
     }
     
-    public static RollID wrapRollID(String topic, String source, long period, long rollTs, boolean isFinal) {
+    public static RollID wrapRollID(String appName, String appServer, long period, long rollTs, boolean isFinal) {
+        return wrapRollID(appName, appServer, period, rollTs, isFinal, "");
+    }
+    
+    public static RollID wrapRollID(String topic, String source, long period, long rollTs, boolean isFinal, String compression) {
         RollID.Builder builder = RollID.newBuilder();
         builder.setTopic(topic);
         builder.setSource(source);
         builder.setPeriod(period);
         builder.setRollTs(rollTs);
         builder.setIsFinal(isFinal);
+        builder.setCompression(compression);
         return builder.build();
     }
     
-    public static Message wrapUploadRoll(String appName, String source, long period, long rollTs, boolean isFinal) {
-        return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(appName, source, period, rollTs, isFinal));
+    public static Message wrapUploadRoll(String appName, String source, long period, long rollTs, boolean isFinal, String compression) {
+        return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(appName, source, period, rollTs, isFinal, compression));
     }
     
-    public static Message wrapUploadSuccess(String appName, String appServer, long period, long rollTs, boolean isFinal) {
-        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(appName, appServer, period, rollTs, isFinal));
+    public static Message wrapUploadSuccess(String appName, String appServer, long period, long rollTs, boolean isFinal, String compression) {
+        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(appName, appServer, period, rollTs, isFinal, compression));
     }
     
-    public static Message wrapUploadFail(String appName, String source, long period, long rollTs, boolean isFinal) {
-        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, source, period, rollTs, isFinal));
+    public static Message wrapUploadFail(String appName, String source, long period, long rollTs, boolean isFinal, String compression) {
+        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, source, period, rollTs, isFinal, compression));
     }
     
     public static Message wrapRecoveryRoll(String topic, String brokerServer, int port, long rollTs, String instanceId, boolean isFinal) {

@@ -8,18 +8,21 @@ import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.util.Iterator;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
+import org.apache.hadoop.io.compress.Compressor;
 
 import com.dp.blackhole.broker.ByteBufferChannel;
+import com.dp.blackhole.broker.Compression;
 import com.dp.blackhole.broker.RollIdent;
 import com.dp.blackhole.broker.RollManager;
+import com.dp.blackhole.broker.Compression.Algorithm;
 import com.dp.blackhole.broker.storage.Partition;
 import com.dp.blackhole.broker.storage.RollPartition;
+import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.FileMessageSet;
@@ -67,10 +70,12 @@ public class FTPUpload implements Runnable {
             String remoteDir = mgr.getParentPath(configration.getRootDir(), ident);
             ftpCreateDirectoryTree(ftp, remoteDir);
             LOG.debug("Current FTP working directory is: " + ftp.printWorkingDirectory());
-            String remoteFilename = mgr.getCompressedFileName(ident);
+            String remoteFilename = mgr.getGZCompressedFileName(ident);
             remoteTempFilename = "." + remoteFilename + ".tmp";
-            out = new GZIPOutputStream(ftp.storeFileStream(remoteTempFilename));
-            
+            Algorithm compressionAlgo = Compression.getCompressionAlgorithmByName(ParamsKey.COMPRESSION_GZ);
+            Compressor compressor = compressionAlgo.getCompressor();
+            out = compressionAlgo.createCompressionStream(
+                    ftp.storeFileStream(remoteTempFilename), compressor, 0);
             remoteWrite(out);
             
             if (!ftp.completePendingCommand()) {
@@ -106,7 +111,7 @@ public class FTPUpload implements Runnable {
     }
     
     private void remoteWrite(OutputStream out) throws IOException {
-        WritableByteChannel gzFtpChannel =  Channels.newChannel(out);
+        WritableByteChannel compressionFtpChannel =  Channels.newChannel(out);
         ByteBuffer buffer = ByteBuffer.allocate(BufferSize);
         ByteBufferChannel channel = new ByteBufferChannel(buffer);
         
@@ -131,14 +136,14 @@ public class FTPUpload implements Runnable {
             Iterator<MessageAndOffset> iter = bms.getItertor();
             while (iter.hasNext()) {
                 MessageAndOffset mo = iter.next();
-                gzFtpChannel.write(mo.message.payload());
-                gzFtpChannel.write(newline);
+                compressionFtpChannel.write(mo.message.payload());
+                compressionFtpChannel.write(newline);
                 newline.clear();
             }
             buffer.clear();
             start += realRead;
         }
-        gzFtpChannel.close();
+        compressionFtpChannel.close();
     }
     
     private void fetchFileMessageSet(GatheringByteChannel channel, FileMessageSet messages) throws IOException {

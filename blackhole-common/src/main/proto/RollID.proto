@@ -9,4 +9,5 @@ message RollID {
     required int64 period = 3;
     required int64 roll_ts = 4;
     optional bool is_final = 5;
+    optional string compression = 6;
 }
