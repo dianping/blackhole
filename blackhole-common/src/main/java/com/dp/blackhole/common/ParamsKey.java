@@ -38,4 +38,5 @@ public abstract class ParamsKey {
     public static final String COMPRESSION_LZO = "lzo";
     public static final String COMPRESSION_GZ = "gz";
     public static final String COMPRESSION_NONE = "none";
+    public static final String COMPRESSION_UNDEFINED = "undefined";
 }

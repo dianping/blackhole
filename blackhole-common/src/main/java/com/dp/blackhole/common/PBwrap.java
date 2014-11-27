@@ -208,7 +208,11 @@ public class PBwrap {
         builder.setPeriod(period);
         builder.setRollTs(rollTs);
         builder.setIsFinal(isFinal);
-        builder.setCompression(compression);
+        if (compression == null) {
+            builder.setCompression(ParamsKey.COMPRESSION_UNDEFINED);
+        } else {
+            builder.setCompression(compression);
+        }
         return builder.build();
     }
     

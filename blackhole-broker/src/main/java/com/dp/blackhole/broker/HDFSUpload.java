@@ -47,7 +47,7 @@ public class HDFSUpload implements Runnable{
         this.roll = roll;
         this.uploadSuccess = false;
         this.compression = compression;
-        newline = ByteBuffer.wrap("\n".getBytes(Charset.forName("UTF-8" )));
+        newline = ByteBuffer.wrap("\n".getBytes(Charset.forName("UTF-8")));
     }
     
     @Override
@@ -63,6 +63,7 @@ public class HDFSUpload implements Runnable{
             compressionAlgo = Compression.getCompressionAlgorithmByName(this.compression);
         } catch (IllegalArgumentException e) {
             compressionAlgo = Compression.getCompressionAlgorithmByName(ParamsKey.COMPRESSION_GZ);
+            this.compression = ParamsKey.COMPRESSION_GZ;
         }
         try {
             String dfsPath = mgr.getRollHdfsPath(ident, compressionAlgo.getName());
