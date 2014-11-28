@@ -3,6 +3,7 @@ package com.dp.blackhole.check;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -56,14 +57,14 @@ public class CheckDone implements Runnable{
         long nowTS = calendar.getTimeInMillis();
         List<String> attemptSource = new ArrayList<String>();
         while (ident.ts <= Util.getPrevWholeTs(nowTS, ident.period)) {
-            LOG.info("Try to handle [" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + "]");
+            LOG.debug("Try to handle [" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + "]");
             attemptSource.clear();
             if (!Util.wasDone(ident, ident.ts)) {
                 Path[] expectedFile = null;
                 for(String source : ident.sources) {
                     expectedFile = Util.getRollHdfsPath(ident, source);
                     if (!Util.retryExists(expectedFile)) {
-                        LOG.info("File " + expectedFile + " not ready.");
+                        LOG.debug("None of " + Arrays.toString(expectedFile) + " is ready.");
                         attemptSource.add(source);
                     }
                 }
