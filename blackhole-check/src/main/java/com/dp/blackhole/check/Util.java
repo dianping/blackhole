@@ -67,21 +67,37 @@ public class Util {
      * hdfsbasedir/appname/2013-11-01/14/08/machine01@appname_2013-11-01.14.08.gz.tmp
      * hdfsbasedir/appname/2013-11-01/14/08/machine02@appname_2013-11-01.14.08.gz.tmp
      */
-    public static Path getRollHdfsPath (RollIdent ident, String source) {
+    public static Path[] getRollHdfsPath (RollIdent ident, String source) {
         return getRollHdfsPathByTs(ident, ident.ts, source, false);
     }
 
-    public static Path getRollHdfsPathByTs (RollIdent ident, long checkTs, String source, boolean hidden) {
+    public static Path[] getRollHdfsPathByTs (RollIdent ident, long checkTs, String source, boolean hidden) {
         String format  = Util.getFormatFromPeroid(ident.period);
         Date roll = new Date(checkTs);
         SimpleDateFormat dm= new SimpleDateFormat(format);
         if (hidden) {
-            return new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
+            Path[] hiddenPath = new Path[1];
+            hiddenPath[0] = new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
                     CheckDone.hdfsHiddenfileprefix + source + '@' + ident.app + "_" + dm.format(roll));
+            return hiddenPath;
         } else {
-            return new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
-                    source + '@' + ident.app + "_" + dm.format(roll) + CheckDone.hdfsfilesuffix);
+            Path[] rollPath = new Path[CheckDone.hdfsfilesuffix.length];
+            for(int i =0 ;i < CheckDone.hdfsfilesuffix.length; i++) {
+                rollPath[i] = new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
+                        source + '@' + ident.app + "_" + dm.format(roll) + "." + CheckDone.hdfsfilesuffix[i]);
+            }
+            return rollPath;
         }
+    }
+    
+    public static boolean retryExists(Path[] expecteds) {
+        for (int i = 0; i < expecteds.length; i++) {
+            Path path = expecteds[i];
+            if (retryExists(path)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean retryExists(Path expected) {
