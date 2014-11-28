@@ -30,7 +30,7 @@ public class OperatorResource extends BaseResource {
             @Encoded @FormParam("topic") final String topic,
             @Encoded @FormParam("source") final String source,
             @FormParam("rollTs") final long rollTs) {
-        LOG.info("POST: recovery " + topic + " " + source + " " + Long.toString(rollTs));
+        LOG.debug("POST: recovery " + topic + " " + source + " " + Long.toString(rollTs));
         return supervisorService.manualRecoveryRoll(topic, source, rollTs)
                 ? Response.ok().build() : Response.status(Response.Status.NOT_ACCEPTABLE).build();
     }
@@ -43,7 +43,7 @@ public class OperatorResource extends BaseResource {
             @Encoded @FormParam("source") final String source,
             @FormParam("start") final long startRollTs,
             @FormParam("end") final long endRollTs) {
-        LOG.info("POST: range " + topic + " " + source + " from " + Long.toString(startRollTs) + " to " + Long.toString(endRollTs));
+        LOG.debug("POST: range " + topic + " " + source + " from " + Long.toString(startRollTs) + " to " + Long.toString(endRollTs));
         Stream stream = supervisorService.getStream(topic, source);
         if (stream != null) {
             long period = stream.getPeriod();
@@ -67,7 +67,7 @@ public class OperatorResource extends BaseResource {
     public Response retire(
             @Encoded @FormParam("topic") final String topic,
             @Encoded @FormParam("source") final String source) {
-        LOG.info("POST: retire " + topic + " " + source);
+        LOG.debug("POST: retire " + topic + " " + source);
         return supervisorService.retireStream(topic, source)
                 ? Response.ok().build() : Response.status(Response.Status.NOT_ACCEPTABLE).build();
     }

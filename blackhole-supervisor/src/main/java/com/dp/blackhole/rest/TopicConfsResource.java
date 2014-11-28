@@ -31,7 +31,7 @@ public class TopicConfsResource extends BaseResource {
     @Path("/")
     @Produces({MediaType.APPLICATION_JSON})
     public List<TopicConfig> getAllConfInfos() {
-        LOG.info("GET: all confs");
+        LOG.debug("GET: all confs");
         List<TopicConfig> allConfs = new ArrayList<TopicConfig>();
         for (String topic : configService.getAllTopicConfNames()) {
             allConfs.add(configService.getConfByTopic(topic));
@@ -44,7 +44,7 @@ public class TopicConfsResource extends BaseResource {
     @Produces({MediaType.APPLICATION_JSON})
     public TopicConfig getConfInfoByTopic(
             @PathParam("topic") final String topic) {
-        LOG.info("GET: topic -> conf");
+        LOG.debug("GET: topic[" + topic + "] -> conf");
         return configService.getConfByTopic(topic);
     }
     
@@ -53,7 +53,7 @@ public class TopicConfsResource extends BaseResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response deleteConfByTopic(
             @PathParam("topic") final String topic) {
-        LOG.info("DEL: topic -> conf");
+        LOG.debug("DEL: topic[" + topic + "] -> conf");
         configService.removeConf(topic);
         return Response.ok().build();
     }
@@ -62,7 +62,7 @@ public class TopicConfsResource extends BaseResource {
     @Path("/blacklist")
     @Produces({MediaType.APPLICATION_JSON})
     public Blacklist listBlacklist() {
-        LOG.info("GET: blacklist");
+        LOG.debug("GET: blacklist");
         return configService.getBlacklist();
     }
     
@@ -73,7 +73,7 @@ public class TopicConfsResource extends BaseResource {
     public Response updateBlacklist(
             @PathParam("topic") final String topic, 
             @Encoded @FormParam("op") final String op) {
-        LOG.info("PUT: topic " + op + " blacklist");
+        LOG.debug("PUT: topic[" + topic + "] " + op + " blacklist");
         String[] updates = {topic};
         try {
             configService.updateLionList(ParamsKey.LionNode.BLACKLIST, op, updates);

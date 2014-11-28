@@ -23,7 +23,7 @@ public class ApplicationResource extends BaseResource {
     @Path("/")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getAllApps() {
-        LOG.info("get: apps");
+        LOG.debug("GET: apps");
         String[] apps = configService.getAllCmdb().toArray(new String[configService.getAllCmdb().size()]);
         final String js = JSON.toString(apps);
         return Response.ok(js).build();
@@ -34,7 +34,7 @@ public class ApplicationResource extends BaseResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response getTopicsByApp(
             @PathParam("app") final String app) {
-        LOG.info("get: app -> topics");
+        LOG.debug("GET: app[" + app + "] -> topics");
         Set<String> topicSet = configService.getTopicsByCmdb(app);
         String[] topics = topicSet.toArray(new String[topicSet.size()]);
         final String js = JSON.toString(topics);
@@ -47,7 +47,7 @@ public class ApplicationResource extends BaseResource {
     public Response getCataLogByApp(
             @PathParam("app") final String app,
             @PathParam("topic") final String topic) {
-        LOG.info("get: app -> catalog");
+        LOG.debug("get: app[" + app + "] topic[" + topic + "] -> catalog");
         List<String> apps = new ArrayList<String>();
         apps.add(app);
         String js = null;

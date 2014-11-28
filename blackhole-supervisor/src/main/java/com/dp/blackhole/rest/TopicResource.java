@@ -36,7 +36,7 @@ public class TopicResource extends BaseResource {
     @Path("/")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getAllTopics() {
-        LOG.info("GET: topic names");
+        LOG.debug("GET: topic names");
         Set<String> topics = supervisorService.getAllTopicNames();
         final String js = JSON.toString(topics.toArray(new String[topics.size()]));
         return Response.ok(js).build();
@@ -47,7 +47,7 @@ public class TopicResource extends BaseResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response getApplicationByTopic(
             @PathParam("topic") final String topic) {
-        LOG.info("GET: topic -> app");
+        LOG.debug("GET: topic[" + topic + "] -> app");
         TopicConfig confInfo = configService.getConfByTopic(topic);
         if (confInfo != null) {
             return Response.ok(JSON.toString(confInfo.getAppName())).build();
@@ -61,7 +61,7 @@ public class TopicResource extends BaseResource {
     @Produces({MediaType.APPLICATION_JSON})
     public List<Stream> getAllStreamsByTopic(
             @PathParam("topic") final String topic) {
-        LOG.info("GET: topic -> streams");
+        LOG.debug("GET: topic[" + topic + "] -> streams");
         List<Stream> streams = supervisorService.getAllStreams(topic);
         return streams;
     }
@@ -72,7 +72,7 @@ public class TopicResource extends BaseResource {
     public Stream getStreamInfo(
             @PathParam("topic") final String topic,
             @PathParam("source") final String source) {
-        LOG.info("GET: topic, source -> stream");
+        LOG.debug("GET: topic[" + topic + "] source[" + source + "] -> stream");
         return supervisorService.getStream(topic, source);
     }
     
@@ -81,7 +81,7 @@ public class TopicResource extends BaseResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response retireStream(@PathParam("topic") final String topic,
             @PathParam("source") final String source) {
-        LOG.info("DELETE: topic, source -> stream");
+        LOG.debug("DELETE: topic[" + topic + "] source[" + source + "] -> stream");
         supervisorService.retireStream(topic, source);
         return Response.ok().build();
     }
@@ -92,7 +92,7 @@ public class TopicResource extends BaseResource {
     public List<Stage> getAllStagesFromStream(
             @PathParam("topic") final String topic,
             @PathParam("source") final String source) {
-        LOG.info("GET: topic, source -> stages");
+        LOG.trace("GET: topic[" + topic + "] source[" + source + "] -> stages");
         List<Stage> stages = null;
         Stream stream = supervisorService.getStream(topic, source);
         if (stream != null) {
@@ -106,7 +106,7 @@ public class TopicResource extends BaseResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Set<ConsumerGroupKey> getAllConsumerGroup(
             @PathParam("topic") final String topic) {
-        LOG.info("GET: topic -> groups");
+        LOG.debug("GET: topic[" + topic + "] -> groups");
         SortedSet<ConsumerGroupKey> groupsSorted  = new TreeSet<ConsumerGroupKey>(new Comparator<ConsumerGroupKey>() {
             @Override
             public int compare(ConsumerGroupKey o1, ConsumerGroupKey o2) {
@@ -124,7 +124,7 @@ public class TopicResource extends BaseResource {
     public List<ConsumerDesc> getAllConsumersByGroupId(
             @PathParam("topic") final String topic,
             @PathParam("groupId") final String groupId) {
-        LOG.info("GET: topic, groupId -> consumer");
+        LOG.debug("GET: topic[" + topic + "] groupId[" + groupId + "] -> consumer");
         ConsumerGroupKey groupKey = new ConsumerGroupKey(groupId, topic);
         ConsumerGroup group = supervisorService.getConsumerGroup(groupKey);
         return group.getConsumes();
@@ -136,7 +136,7 @@ public class TopicResource extends BaseResource {
     public Map<String, AtomicLong> getAllCommittedOffsets(
             @PathParam("topic") final String topic,
             @PathParam("groupId") final String groupId) {
-        LOG.info("GET: topic, groupId -> conmitted offsets");
+        LOG.debug("GET: topic[" + topic + "] groupId[" + groupId + "] -> conmitted offsets");
         ConsumerGroupKey groupKey = new ConsumerGroupKey(groupId, topic);
         ConsumerGroup group = supervisorService.getConsumerGroup(groupKey);
         return group.getCommitedOffsets();
@@ -147,7 +147,7 @@ public class TopicResource extends BaseResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Set<ConsumerGroup> getAllConsumerGroupDetail(
             @PathParam("topic") final String topic) {
-        LOG.info("GET: topic -> groups detail");
+        LOG.debug("GET: topic[" + topic + "] -> groups detail");
         return supervisorService.getCopyOfConsumerGroups();
     }
 }
