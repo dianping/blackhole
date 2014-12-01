@@ -50,7 +50,7 @@ public class CheckDone implements Runnable{
         //reload sources
         List<String> sources = lionConfChange.getAppToHosts().get(ident.app);
         if (sources == null || sources.isEmpty()) {
-            LOG.error("Alarm, source hosts are all miss for " + ident.app);
+            LOG.error("source hosts are all miss for " + ident.app);
         }
         ident.sources = sources;
         Calendar calendar = Calendar.getInstance();
@@ -182,7 +182,7 @@ public class CheckDone implements Runnable{
             rollIdent.app = appName;
             List<String> sources = lionConfChange.getAppToHosts().get(appName);
             if (sources == null || sources.isEmpty()) {
-                LOG.error("Alarm, source hosts are all miss.");
+                LOG.error("source hosts are all miss for " + appName);
                 continue;
             }
             rollIdent.sources = sources;

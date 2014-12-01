@@ -1,6 +1,7 @@
 package com.dp.blackhole.check;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -77,7 +78,7 @@ public class TimeChecker extends Thread {
                     hiddenFile = Util.getRollHdfsPathByTs(ident, checkTs, source, true)[0];
                     if (Util.retryExists(expectedFile) || Util.retryExists(hiddenFile)) {
                     } else {
-                        LOG.debug("TimeChecker: File " + expectedFile + " not ready.");
+                        LOG.debug("TimeChecker:  None of " + Arrays.toString(expectedFile) + " is ready.");
                         shouldDone = false;
                         break;
                     }

@@ -1,6 +1,8 @@
 package com.dp.blackhole.check;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -13,8 +15,8 @@ import org.apache.hadoop.fs.Path;
 public class Util {
     private final static Log LOG = LogFactory.getLog(Util.class);
     private static long localTimezoneOffset = TimeZone.getTimeZone("Asia/Shanghai").getRawOffset();
-    private static final int REPEATE = 3;
-    private static final int RETRY_SLEEP_TIME = 1000;
+    private static final int REPEATE = 2;
+    private static final int RETRY_SLEEP_TIME = 100;
     public static final String DONE_FLAG = "_done";
     public static final String TIMEOUT_FLAG = "_timeout";
     public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -81,13 +83,32 @@ public class Util {
                     CheckDone.hdfsHiddenfileprefix + source + '@' + ident.app + "_" + dm.format(roll));
             return hiddenPath;
         } else {
-            Path[] rollPath = new Path[CheckDone.hdfsfilesuffix.length];
-            for(int i =0 ;i < CheckDone.hdfsfilesuffix.length; i++) {
+            int toCheckPathRatio = 2;
+            String ip = null;
+            try {
+                ip = getIpByHostname(source);
+            } catch (UnknownHostException e) {
+                toCheckPathRatio = 1;
+                LOG.error(source + " cann't be solved.", e);
+            }
+            Path[] rollPath = new Path[CheckDone.hdfsfilesuffix.length * toCheckPathRatio];
+            for(int i = 0;i < CheckDone.hdfsfilesuffix.length; i++) {
                 rollPath[i] = new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
-                        source + '@' + ident.app + "_" + dm.format(roll) + "." + CheckDone.hdfsfilesuffix[i]);
+                    source + '@' + ident.app + "_" + dm.format(roll) + "." + CheckDone.hdfsfilesuffix[i]);
+            }
+            if (ip != null) {
+                for(int i = 0;i < CheckDone.hdfsfilesuffix.length; i++) {
+                    rollPath[i + CheckDone.hdfsfilesuffix.length] = new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
+                        ip + '@' + ident.app + "_" + dm.format(roll) + "." + CheckDone.hdfsfilesuffix[i]);
+                }
             }
             return rollPath;
         }
+    }
+    
+    public static String getIpByHostname(String hostname) throws UnknownHostException {
+        InetAddress inetAddress = InetAddress.getByName(hostname);
+        return inetAddress.getHostAddress().toString();
     }
     
     public static boolean retryExists(Path[] expecteds) {
@@ -101,6 +122,9 @@ public class Util {
     }
 
     public static boolean retryExists(Path expected) {
+        if (expected == null) {
+            return false;
+        }
         for (int i = 0; i < REPEATE; i++) {
             try {
                 return CheckDone.fs.exists(expected);
@@ -161,8 +185,14 @@ public class Util {
             return null;
         }
         String value = rawValue.trim();
+        if (value.length() < 2) {
+            return null;
+        }
         if (value.charAt(0) != '[' || value.charAt(value.length() - 1) != ']') {
             return null;
+        }
+        if (value.length() == 2) {
+            return new String[]{};
         }
         String[] tmp = value.substring(1, value.length() - 1).split(",");
         String[] result = new String[tmp.length];
