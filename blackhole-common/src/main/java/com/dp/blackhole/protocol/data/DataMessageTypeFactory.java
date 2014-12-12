@@ -19,6 +19,7 @@ public class DataMessageTypeFactory implements TypedFactory {
     public static final int RotateRequest = 8;
     public static final int RegisterRequest = 9;
     public static final int LastRotateRequest = 10;
+    public static final int MicroBatchRequest = 11;
     
     @Override
     public TypedWrappable getWrappedInstanceFromType(int type) {
@@ -53,6 +54,9 @@ public class DataMessageTypeFactory implements TypedFactory {
             break;
         case 10:
             ret = new LastRotateRequest();
+            break;
+        case 11:
+            ret = new MicroBatchRequest();
             break;
         default:
             LOG.error("unknown Message Type: " + type);

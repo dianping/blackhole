@@ -45,7 +45,7 @@ public class TestRollRecovery {
     @Before
     public void setUp() throws Exception {
         MetaKey metaKey = new MetaKey(MAGIC, null);
-        appLog = new TopicMeta(metaKey, file.getAbsolutePath(), 3600, 1024, 1L);
+        appLog = new TopicMeta(metaKey, file.getAbsolutePath(), 3600, 3600, 1024, 1L);
         SimRecoveryServer server = new SimRecoveryServer(port, header, receives);
         serverThread = new Thread(server);
         serverThread.start();

@@ -5,6 +5,7 @@ public abstract class ParamsKey {
         public static final String APP = "app";
         public static final String WATCH_FILE = "watchLog";
         public static final String ROLL_PERIOD = "rollPeriod";
+        public static final String BATCH_PERIOD = "batchPeriod";
         public static final String MAX_LINE_SIZE = "maxLineSize";
         public static final String READ_INTERVAL = "readInterval";
         public static final String OWNER = "owner";

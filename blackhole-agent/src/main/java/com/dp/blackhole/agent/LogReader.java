@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.TransferWrap;
 import com.dp.blackhole.protocol.data.LastRotateRequest;
+import com.dp.blackhole.protocol.data.MicroBatchRequest;
 import com.dp.blackhole.protocol.data.ProduceRequest;
 import com.dp.blackhole.protocol.data.RegisterRequest;
 import com.dp.blackhole.protocol.data.RotateRequest;
@@ -54,28 +55,36 @@ public class LogReader implements Runnable {
         currentLogStatus.set(LogStatus.NONE);
     }
 
-    public void beginLogRotate() {
-        currentLogStatus.set(LogStatus.ROTATE);
+    public void doFileAppend() {
+        currentLogStatus.compareAndSet(LogStatus.APPEND, LogStatus.APPEND);
     }
     
     public void doFileAppendForce() {
         currentLogStatus.set(LogStatus.APPEND);
     }
     
-    public void doFileAppend() {
-        currentLogStatus.compareAndSet(LogStatus.APPEND, LogStatus.APPEND);
+    public void beginLogRotate() {
+        currentLogStatus.set(LogStatus.ROTATE);
+    }
+    
+    public void beginLastLogRotate() {
+        currentLogStatus.set(LogStatus.LAST_ROTATE);
+    }
+    
+    public void beginBatchAttempt() {
+        currentLogStatus.set(LogStatus.BATCH_ATTEMPT);
     }
     
     public void finishLogRotate() {
         currentLogStatus.compareAndSet(LogStatus.ROTATE, LogStatus.APPEND);
     }
-
-    public void beginLastLogRotate() {
-        currentLogStatus.set(LogStatus.LAST_ROTATE);
-    }
     
     public void finishLastLogRotate() {
         currentLogStatus.compareAndSet(LogStatus.LAST_ROTATE, LogStatus.NONE);
+    }
+    
+    public void finishBatchAttempt() {
+        currentLogStatus.compareAndSet(LogStatus.BATCH_ATTEMPT, LogStatus.APPEND);
     }
 
     public void stop() {
@@ -112,9 +121,9 @@ public class LogReader implements Runnable {
     private enum LogStatus {
         NONE,
         APPEND,
+        BATCH_ATTEMPT,
         ROTATE,
-        LAST_ROTATE,
-        TRANSACTION_ATTEPT;
+        LAST_ROTATE;
     }
     
     class EventWriter extends Thread {
@@ -178,7 +187,9 @@ public class LogReader implements Runnable {
                         processLastRotate();
                         finishLastLogRotate();
                         break;
-                    case TRANSACTION_ATTEPT:
+                    case BATCH_ATTEMPT:
+                        processBatchAttempt();
+                        finishBatchAttempt();
                         break;
                     case NONE:
                         Thread.sleep(1000);
@@ -190,6 +201,33 @@ public class LogReader implements Runnable {
                     running = false;
                     LOG.error("exception catched when processing event", t);
                 }
+            }
+        }
+        
+        public void processBatchAttempt() {
+            try {
+                //first, append the snapshot file
+                
+                
+                long currentOffset = reader.getFilePointer();
+//                //do not handle log rotation any more when dying
+//                if (topicMeta.isDying()) {
+//                    return;
+//                }
+                MicroBatchRequest request = new MicroBatchRequest(
+                        topicMeta.getTopic(),
+                        source,
+                        topicMeta.getRollPeriod(),
+                        currentOffset);
+                TransferWrap wrap = new TransferWrap(request);
+                wrap.write(channel);
+            } catch (IOException e) {
+                LOG.error("Oops, got an exception:", e);
+                closeQuietly(reader);
+                closeChannelQuietly(channel);
+                LOG.debug("process micro batch attempt failed, stop.");
+                LogReader.this.stop();
+                agent.reportFailure(topicMeta.getMetaKey(), source, Util.getTS());
             }
         }
         

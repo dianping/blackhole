@@ -221,6 +221,26 @@ public class Util {
     }
     
     /*
+     * get the closest step timestamp, for example
+     * now is 16:14, and step peroid is 1 hour, then
+     * return ts of 16:00;
+     * now is 15:47, and rollPeroid is 1 hour, then
+     * return ts of 16:00
+     */
+    public static long getClosestStepTs(long ts, long period) {
+        period = period * 1000;
+        ts = ts + localTimezoneOffset;
+        long ret;
+        if ((ts % period) < (period/2)) {
+            ret = (ts / period) * period;
+        } else {
+            ret = (ts / period + 1) * period;
+        }
+        ret = ret - localTimezoneOffset;
+        return ret;
+    }
+    
+    /*
      * get the stage roll timestamp, for example
      * now is 16:02, and rollPeroid is 1 hour, then
      * return ts of 15:00;

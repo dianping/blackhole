@@ -92,6 +92,10 @@ public class Agent implements Runnable {
     public boolean isPaasModel() {
         return paasModel;
     }
+    
+    public static Map<TopicMeta, LogReader> getTopicReaders() {
+        return topicReaders;
+    }
 
     private void register(MetaKey metaKey, long regTimestamp) {
         Message msg = PBwrap.wrapTopicReg(metaKey.getTopic(),
@@ -189,9 +193,10 @@ public class Agent implements Runnable {
         String topic = metaKey.getTopic();
         String path = ConfigKeeper.configMap.get(topic).getString(ParamsKey.TopicConf.WATCH_FILE);
         long rollPeroid = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROLL_PERIOD);
+        long batchPeroid = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.BATCH_PERIOD);
         int maxLineSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MAX_LINE_SIZE, 512000);
         long readInterval = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.READ_INTERVAL, 1L);
-        TopicMeta topicMeta = new TopicMeta(metaKey, path, rollPeroid, maxLineSize, readInterval);
+        TopicMeta topicMeta = new TopicMeta(metaKey, path, rollPeroid, batchPeroid, maxLineSize, readInterval);
         logMetas.put(metaKey, topicMeta);
     }
 
@@ -422,6 +427,8 @@ public class Agent implements Runnable {
                             confKeeper.addRawProperty(topic + "."
                                     + ParamsKey.TopicConf.ROLL_PERIOD, lxcConfRes.getPeriod());
                             confKeeper.addRawProperty(topic + "."
+                                    + ParamsKey.TopicConf.BATCH_PERIOD, lxcConfRes.getBatchPeriod());
+                            confKeeper.addRawProperty(topic + "."
                                     + ParamsKey.TopicConf.MAX_LINE_SIZE, lxcConfRes.getMaxLineSize());
                             confKeeper.addRawProperty(topic + "."
                                     + ParamsKey.TopicConf.READ_INTERVAL, lxcConfRes.getReadInterval());
@@ -451,6 +458,8 @@ public class Agent implements Runnable {
                         }
                         confKeeper.addRawProperty(topic + "."
                                 + ParamsKey.TopicConf.ROLL_PERIOD, appConfRes.getPeriod());
+                        confKeeper.addRawProperty(topic + "."
+                                + ParamsKey.TopicConf.BATCH_PERIOD, appConfRes.getBatchPeriod());
                         confKeeper.addRawProperty(topic + "."
                                 + ParamsKey.TopicConf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
                         confKeeper.addRawProperty(topic + "."
