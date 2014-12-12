@@ -10,6 +10,7 @@ public class TopicConfig {
     private String topic;
     private String appName;
     private String watchLog;
+    private int rotatePeriod;
     private int rollPeriod;
     private int maxLineSize = DEFAULT_MAX_LINE_SIZE;
     private List<String> hosts;
@@ -17,7 +18,6 @@ public class TopicConfig {
     private long readInterval = DEFAULT_READ_INTERVAL;
     private String owner;
     private String compression;
-    private int uploadPeriod;
     public TopicConfig(String topic) {
         this.topic = topic;
     }
@@ -38,6 +38,12 @@ public class TopicConfig {
     }
     public void setWatchLog(String watchLog) {
         this.watchLog = watchLog;
+    }
+    public int getRotatePeriod() {
+        return rotatePeriod;
+    }
+    public void setRotatePeriod(int rotatePeriod) {
+        this.rotatePeriod = rotatePeriod;
     }
     public int getRollPeriod() {
         return rollPeriod;
@@ -77,12 +83,6 @@ public class TopicConfig {
     }
     public void setCompression(String compression) {
         this.compression = compression;
-    }
-    public int getUploadPeriod() {
-        return uploadPeriod;
-    }
-    public void setUploadPeriod(int uploadPeriod) {
-        this.uploadPeriod = uploadPeriod;
     }
     public synchronized void setInstances(Map<String, Set<String>> hostsInstances) {
         this.hostsInstances = hostsInstances;

@@ -16,7 +16,7 @@ public class DataMessageTypeFactory implements TypedFactory {
     public static final int MultiFetchReply = 5;
     public static final int OffsetRequest = 6;
     public static final int OffsetReply = 7;
-    public static final int RotateRequest = 8;
+    public static final int RotateOrRollRequest = 8;
     public static final int RegisterRequest = 9;
     public static final int LastRotateRequest = 10;
     
@@ -46,13 +46,13 @@ public class DataMessageTypeFactory implements TypedFactory {
             ret = new OffsetReply();
             break;
         case 8:
-            ret = new RotateRequest();
+            ret = new RollRequest();
             break;
         case 9:
             ret = new RegisterRequest();
             break;
         case 10:
-            ret = new LastRotateRequest();
+            ret = new HaltRequest();
             break;
         default:
             LOG.error("unknown Message Type: " + type);

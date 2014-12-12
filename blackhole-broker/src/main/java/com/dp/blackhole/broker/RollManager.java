@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -36,7 +34,7 @@ import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 public class RollManager {
     private final static Log LOG = LogFactory.getLog(RollManager.class);
     
-    Map<RollIdent, RollPartition> rolls;
+    private ConcurrentHashMap<RollIdent, RollPartition> rolls;
     private String hdfsbase;
     private String defaultCompression;
     private int port;
@@ -61,18 +59,18 @@ public class RollManager {
         uploadPool = Executors.newFixedThreadPool(maxUploadThreads);
         recoveryPool = Executors.newFixedThreadPool(maxRecoveryThreads);
         fs = (new Path(hdfsbase)).getFileSystem(new Configuration());
-        rolls = Collections.synchronizedMap(new HashMap<RollIdent, RollPartition>());
+        rolls = new ConcurrentHashMap<RollIdent, RollPartition>();
         accepter = new RecoveryAcceptor(recoverySocketTimeout);
         accepter.start();
         LOG.info("roll manager started");
     }
     
-    public boolean doRegister(String app, String source, long period, RollPartition roll) {
+    public boolean perpareUpload(String app, String source, long period, RollPartition rollPartition) {
         boolean ret;
         RollIdent ident = getRollIdent(app, source, period);
         if (rolls.get(ident) == null) {
-            rolls.put(ident, roll);
-            Message message = PBwrap.wrapAppRoll(ident.topic, ident.source, ident.period, ident.ts);
+            rolls.put(ident, rollPartition);
+            Message message = PBwrap.wrapReadyUpload(ident.topic, ident.source, ident.period, ident.ts);
             Broker.getSupervisor().send(message);
             ret = true;
         } else {
@@ -148,7 +146,7 @@ public class RollManager {
     }
     
     private RollIdent getRollIdent(String app, String source, long period) {
-        Date time = new Date(Util.getLatestRotateRollTsUnderTimeBuf(Util.getTS(), period, clockSyncBufMillis));
+        Date time = new Date(Util.getLatestRollTsUnderTimeBuf(Util.getTS(), period, clockSyncBufMillis));
         RollIdent roll = new RollIdent();
         roll.topic = app;
         roll.source = source;
@@ -182,7 +180,7 @@ public class RollManager {
      */
     public String getParentPath(String baseDir, RollIdent ident) {
         String format;
-        format = Util.getFormatFromPeroid(ident.period);
+        format = Util.getFormatFromPeriod(ident.period);
         Date roll = new Date(ident.ts);
         SimpleDateFormat dm = new SimpleDateFormat(format);
         return baseDir + "/" + ident.topic + '/' + getDatepathbyFormat(dm.format(roll));
@@ -193,7 +191,7 @@ public class RollManager {
      */
     public String getFileName(RollIdent ident, boolean hidden) {
         String format;
-        format = Util.getFormatFromPeroid(ident.period);
+        format = Util.getFormatFromPeriod(ident.period);
         Date roll = new Date(ident.ts);
         SimpleDateFormat dm = new SimpleDateFormat(format);
         if (hidden) {
@@ -301,23 +299,23 @@ public class RollManager {
                     AgentHead head = protocol.new AgentHead();
                     
                     protocol.recieveHead(in, head);
-                        
+
                     RollIdent roll = new RollIdent();
                     roll.topic = head.app;
-                    roll.source = Util.getRemoteHost(socket);
-                    if (head.instanceId != null) {
-                        roll.source += "#" + head.instanceId;
-                    }
+                    roll.source = head.source;
                     roll.period = head.peroid;
                     roll.ts = head.ts;
                     roll.isFinal = head.isFinal;
                     
-                    LOG.info("start to recovery roll " + roll);
-                    
-                    HDFSRecovery recovery = new HDFSRecovery(
-                            RollManager.this, fs, socket, roll, head.size, head.hasCompressed);
-                    recoveryPool.execute(recovery);
-
+                    if (head.ignore) {
+                        LOG.info("ignore the roll " + roll);
+                        reportRecovery(roll, true);
+                    } else {
+                        LOG.info("start to recovery roll " + roll);
+                        HDFSRecovery recovery = new HDFSRecovery(
+                                RollManager.this, fs, socket, roll, head.size, head.hasCompressed);
+                        recoveryPool.execute(recovery);
+                    }
                 } catch (IOException e) {
                     LOG.error("error in acceptor: ", e);
                 }

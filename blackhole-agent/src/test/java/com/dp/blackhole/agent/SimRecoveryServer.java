@@ -57,8 +57,8 @@ public class SimRecoveryServer implements Runnable {
             AgentHead head = protocol.new AgentHead();
             
             protocol.recieveHead(din, head);
-            String type = String.valueOf(head.type);
-            header.add(type);
+            String ignore = String.valueOf(head.ignore);
+            header.add(ignore);
             String appname = head.app;
             header.add(appname);
             String periodStr = String.valueOf(head.peroid);

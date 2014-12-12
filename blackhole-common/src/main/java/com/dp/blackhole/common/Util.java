@@ -1,10 +1,15 @@
 package com.dp.blackhole.common;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -16,12 +21,14 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.SocketChannel;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 
@@ -142,7 +149,7 @@ public class Util {
         }
     }
 
-    public static String getFormatFromPeroid (long period) {
+    public static String getFormatFromPeriod (long period) {
         String format;
         if (period < 60) {
             format = "yyyy-MM-dd.HH.mm.ss";
@@ -155,7 +162,21 @@ public class Util {
         }
         return format;
     }
-
+    
+    public static String getRegexFormPeriod(long period) {
+        String pattern;
+        if (period < 60) {
+            pattern = "\\d{4}-\\d{2}-\\d{2}\\.\\d{2}\\.\\d{2}\\.\\d{2}";
+        } else if (period < 3600) {
+            pattern = "\\d{4}-\\d{2}-\\d{2}\\.\\d{2}\\.\\d{2}";
+        } else if (period < 86400) {
+            pattern = "\\d{4}-\\d{2}-\\d{2}\\.\\d{2}";
+        } else {
+            pattern = "\\d{4}-\\d{2}-\\d{2}";
+        }
+        return pattern;
+    }
+    
     public static void writeString(String str, ByteBuffer buffer) {
         byte[] data = str.getBytes();
         buffer.putInt(data.length);
@@ -202,9 +223,122 @@ public class Util {
         out.write(data);
     }
     
+    public static byte[] serialize(Object obj) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(obj);
+            oos.close();
+            return bos.toByteArray();
+        } catch(IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
+    }
+
+    public static Object deserialize(byte[] serialized) {
+        try {
+            ByteArrayInputStream bis = new ByteArrayInputStream(serialized);
+            ObjectInputStream ois = new ObjectInputStream(bis);
+            Object ret = ois.readObject();
+            ois.close();
+            return ret;
+        } catch(IOException ioe) {
+            throw new RuntimeException(ioe);
+        } catch(ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    /**
+     * get offset of beginning of last line in a file
+     * @param reader
+     * @param fileLength
+     * @return return the offset(from 0) of beginning of last line
+     * @throws IOException
+     */
+    public static long getOffsetOfLastLineHeader(RandomAccessFile reader, long fileLength) throws IOException {
+        return getOffsetOfLastLineHeader(reader, fileLength, 1024 * 8);
+    }
+    
+    public static long getOffsetOfLastLineHeader(RandomAccessFile reader, long fileLength, int bufSize) throws IOException {
+        long headerOffset = 0;
+        byte readBuf[] = new byte[bufSize];
+        int loop = 0;
+        boolean found = false;
+        while (!found) {
+            loop++;
+            long repos = (fileLength - 1) - bufSize * loop; //fileLength - 1 cause offset index begin from 0
+            if (repos < 0) {
+                //there is not entire line in line, reset to header of file.
+                headerOffset = 0;
+                break;
+            } else {
+                reader.seek(repos);
+                //prepare to read a buffer to find last \n
+                int num = reader.read(readBuf);
+                for (int i = num - 1; i >= 0; i--) {
+                    final byte ch = readBuf[i];
+                    switch (ch) {
+                    case '\n':
+                        found = true;
+                        headerOffset = repos + i + 1;
+                        break;
+                    default:
+                        break;
+                    }
+                    if (found) {
+                        break;
+                    }
+                }
+            }
+        }
+        return headerOffset;
+    }
+    
     public static long getTS() {
         Date now = new Date();
         return now.getTime();
+    }
+    
+    public static long getTS(int number, TimeUnit unit) {
+        return getTS() + unit.toMillis(number);
+    }
+    
+    public static String getTimeString(long ts) {
+        SimpleDateFormat printFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        return printFormat.format(new Date(ts));
+    }
+    
+    /*
+     * get roll timestamp, for example
+     * now is 16:02, and rollPeroid is 1 hour, then
+     * return st of 17:00
+     */
+    public static long getNextRollTs(long ts, long period) {
+        period = period * 1000;
+        ts = ts + localTimezoneOffset;
+        long ret = (ts / period + 1) * period;
+        ret = ret - localTimezoneOffset;
+        return ret;
+    }
+    
+    /*
+     * get the closest step timestamp, for example
+     * now is 16:14, and step peroid is 1 hour, then
+     * return ts of 16:00;
+     * now is 15:47, and rollPeroid is 1 hour, then
+     * return ts of 16:00
+     */
+    public static long getClosestRollTs(long ts, long period) {
+        period = period * 1000;
+        ts = ts + localTimezoneOffset;
+        long ret;
+        if ((ts % period) < (period/2)) {
+            ret = (ts / period) * period;
+        } else {
+            ret = (ts / period + 1) * period;
+        }
+        ret = ret - localTimezoneOffset;
+        return ret;
     }
     
     /*
@@ -225,8 +359,8 @@ public class Util {
      * now is 16:02, and rollPeroid is 1 hour, then
      * return ts of 15:00;
      */
-    public static long getLatestRotateRollTs(long ts, long rollPeriod) {
-        return getLatestRotateRollTsUnderTimeBuf(ts, rollPeriod, 0);
+    public static long getLatestRollTs(long ts, long rollPeriod) {
+        return getLatestRollTsUnderTimeBuf(ts, rollPeriod, 0);
     }
     
     /*
@@ -236,13 +370,21 @@ public class Util {
      * timebuf is 5000, now is 15:59:54, and rollPeroid is 1 hour, then
      * return ts of 14:00;
      */
-    public static long getLatestRotateRollTsUnderTimeBuf(
+    public static long getLatestRollTsUnderTimeBuf(
             long ts, long rollPeriod, long clockSyncBufMillis) {
         rollPeriod = rollPeriod * 1000;
         ts = ts + localTimezoneOffset;
         long ret = ((ts + clockSyncBufMillis) / rollPeriod -1) * rollPeriod;
         ret = ret - localTimezoneOffset;
         return ret;
+    }
+
+    public static boolean belongToSameRotate(long rollTs1, long rollTs2, long rotatePeriod) {
+        return getCurrentRollTs(rollTs1, rotatePeriod) == getCurrentRollTs(rollTs2, rotatePeriod);
+    }
+
+    public static int getMissRotateRollCount(long lastRotateTs, long resumeRollTs, long logRotatePeriod) {
+        return (int) ((getCurrentRollTs(resumeRollTs, logRotatePeriod) - getNextRollTs(lastRotateTs, logRotatePeriod))/(logRotatePeriod * 1000L));
     }
     
     public static String getParentAbsolutePath(String absolutePath) {
@@ -252,6 +394,14 @@ public class Util {
     
     public static String formatTs(long ts) {
         return format.format(new Date(ts));
+    }
+    
+    public static String formatTs(long ts, long period) {
+        return new SimpleDateFormat(getFormatFromPeriod(period)).format(new Date(ts));
+    }
+    
+    public static long parseTs(String timeString, long period) throws ParseException {
+        return new SimpleDateFormat(getFormatFromPeriod(period)).parse(timeString).getTime();
     }
     
     public static String getKey(String content) {

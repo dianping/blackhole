@@ -135,7 +135,7 @@ public class Partition {
         }
     }
     
-    public RollPartition markRotate() throws IOException {
+    public RollPartition markRollPartition() throws IOException {
         RollPartition ret = null;
         long endoffset;
         lock.writeLock().lock();

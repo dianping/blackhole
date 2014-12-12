@@ -1,8 +1,3 @@
-/**
- * 
- * @company dianping.com
- * @author lantao.jin
- */
 package com.dp.blackhole.conf;
 
 import java.util.Collections;

@@ -1,9 +1,9 @@
 package blackhole;
 
 option java_package = "com.dp.blackhole.protocol.control";
-option java_outer_classname = "ReadyBrokerPB";
+option java_outer_classname = "ReadyStreamPB";
 
-message ReadyBroker {
+message ReadyStream {
     required string topic = 1;
     required string source = 2;
     required string broker_server = 3;

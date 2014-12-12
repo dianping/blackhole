@@ -55,10 +55,27 @@ public class SimBroker extends Broker {
         for (File file : dir.listFiles()) {
             if (file.getName().contains(MAGIC)) {
                 LOG.debug("delete tmp file " + file);
+                if (file.isDirectory()) {
+                    deleteInnerFile(file.listFiles());
+                    file.delete();
+                } else {
+                    file.delete();
+                }
+            }
+        }
+    }
+    
+    private static void deleteInnerFile(File[] files) {
+        for (File file : files) {
+            if (file.isDirectory()) {
+                deleteInnerFile(file.listFiles());
+                file.delete();
+            } else {
                 file.delete();
             }
         }
     }
+
 
     public static RollIdent getRollIdent(String appName) {
         RollIdent rollIdent = new RollIdent();

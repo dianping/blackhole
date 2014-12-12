@@ -6,16 +6,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class DaemonThreadFactory implements ThreadFactory{
     final AtomicInteger threadNumber = new AtomicInteger(1);
     final String namePrefix;
-    static final String nameSuffix = "]";
     
     public DaemonThreadFactory(String poolName) {
-        namePrefix = poolName + " Pool [Thread-";
+        namePrefix = poolName + "-thread-";
     }
     
     @Override
     public Thread newThread(Runnable r) {
-        Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement()
-                + nameSuffix);
+        Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
         t.setDaemon(true);
         return t;
     }

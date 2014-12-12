@@ -4,6 +4,7 @@ public abstract class ParamsKey {
     public static class TopicConf {
         public static final String APP = "app";
         public static final String WATCH_FILE = "watchLog";
+        public static final String ROTATE_PERIOD = "rotatePeriod";
         public static final String ROLL_PERIOD = "rollPeriod";
         public static final String MAX_LINE_SIZE = "maxLineSize";
         public static final String READ_INTERVAL = "readInterval";
@@ -39,4 +40,5 @@ public abstract class ParamsKey {
     public static final String COMPRESSION_GZ = "gz";
     public static final String COMPRESSION_NONE = "none";
     public static final String COMPRESSION_UNDEFINED = "undefined";
+    public static final long DEFAULT_CLOCK_SYNC_BUF_MILLIS = 20000;
 }

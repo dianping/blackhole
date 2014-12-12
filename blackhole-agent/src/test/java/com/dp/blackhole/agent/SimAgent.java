@@ -12,7 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.Agent;
-import com.dp.blackhole.agent.TopicMeta.MetaKey;
+import com.dp.blackhole.agent.TopicMeta.TopicId;
 import com.dp.blackhole.common.Util;
 
 public class SimAgent extends Agent{
@@ -49,13 +49,13 @@ public class SimAgent extends Agent{
     }
 
     @Override
-    public void reportFailure(MetaKey metaKey, String appHost, long ts) {
-        LOG.debug(metaKey + ", APP HOST: " + appHost + "ts: " + ts);
+    public void reportFailure(TopicId topicId, String appHost, long ts) {
+        LOG.debug(topicId + ", APP HOST: " + appHost + "ts: " + ts);
     }
     
     @Override
-    public void reportUnrecoverable(MetaKey metaKey, String appHost, final long period, long ts, boolean isFinal) {
-        LOG.debug(metaKey + ", APP HOST: " + appHost  + ", period: " + period + ", roll ts: " + ts + ", final:" + isFinal);
+    public void reportUnrecoverable(TopicId topicId, String appHost, final long period, long ts, boolean isFinal) {
+        LOG.debug(topicId + ", APP HOST: " + appHost  + ", period: " + period + ", roll ts: " + ts + ", final:" + isFinal);
     }
     
     public static void deleteTmpFile(String MAGIC) {

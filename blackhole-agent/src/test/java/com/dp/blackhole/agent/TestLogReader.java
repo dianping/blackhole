@@ -1,7 +1,9 @@
 package com.dp.blackhole.agent;
 
 import static org.junit.Assert.*;
+import static org.powermock.api.mockito.PowerMockito.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.GatheringByteChannel;
@@ -16,11 +18,18 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.dp.blackhole.agent.LogReader.EventWriter;
 import com.dp.blackhole.agent.TopicMeta;
 import com.dp.blackhole.agent.FileListener;
 import com.dp.blackhole.agent.LogReader;
-import com.dp.blackhole.agent.TopicMeta.MetaKey;
+import com.dp.blackhole.agent.TopicMeta.TopicId;
+import com.dp.blackhole.agent.persist.LocalState;
+import com.dp.blackhole.agent.persist.Record;
 import com.dp.blackhole.broker.BrokerService;
 import com.dp.blackhole.broker.ByteBufferChannel;
 import com.dp.blackhole.broker.SimBroker;
@@ -31,6 +40,9 @@ import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.FileMessageSet;
 import com.dp.blackhole.storage.MessageAndOffset;
 
+@RunWith(PowerMockRunner.class)
+@PowerMockIgnore({"org.apache.hadoop.*", "com.sun.*", "net.contentobjects.*"})
+@PrepareForTest(LocalState.class)
 public class TestLogReader {
     private static final String MAGIC = "sdfjiojwe";
     private static final int port = 40001;
@@ -42,14 +54,6 @@ public class TestLogReader {
     public static void setUpBeforeClass() throws Exception {
         ConfigKeeper confKeeper = new ConfigKeeper();
         confKeeper.addRawProperty(MAGIC + ".rollPeriod", "3600");
-    }
-
-    @AfterClass
-    public static void tearDownAfterClass() throws Exception {
-    }
-
-    @Before
-    public void setUp() throws Exception {
         //build a server
         Properties properties = new Properties();
         properties.setProperty("GenServer.handlercount", "1");
@@ -59,24 +63,33 @@ public class TestLogReader {
         new SimBroker(port);
         SimBroker.getRollMgr().init("/tmp/hdfs", "gz", 40020, 5000, 1, 1, 60000);
         pubservice.start();
+    }
 
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+    }
+
+    @Before
+    public void setUp() throws Exception {
         //build a app log
         SimLogger logger = new SimLogger(100);
         loggerThread = new Thread(logger);
+        loggerThread.start();
         expectedLines = logger.getVerifyLines();
     }
 
     @After
     public void tearDown() throws Exception {
         loggerThread.interrupt();
+        SimAgent.deleteTmpFile(SimLogger.TEST_ROLL_FILE_NAME);
         SimAgent.deleteTmpFile(MAGIC);
     }
 
     @Test
     public void testFileRotated() throws IOException {
         String localhost = Util.getLocalHost();
-        MetaKey metaKey = new MetaKey(MAGIC, null);
-        TopicMeta appLog = new TopicMeta(metaKey, SimAgent.TEST_ROLL_FILE, 3600, 1024, 1L);
+        TopicId topicId = new TopicId(MAGIC, null);
+        TopicMeta appLog = new TopicMeta(topicId, SimAgent.TEST_ROLL_FILE, 3600, 3600, 1024, 1L);
         SimAgent agent = new SimAgent();
         FileListener listener;
         try {
@@ -86,16 +99,13 @@ public class TestLogReader {
             return;
         }
         agent.setListener(listener);
-        loggerThread.start();
         Thread readerThread = null;
         try {
-            Thread.sleep(500);
-            LogReader reader = new LogReader(agent, SimAgent.HOSTNAME, localhost,
-                    port, appLog);
+            LogReader reader = new LogReader(agent, SimAgent.HOSTNAME, localhost, port, appLog, "/tmp");
             readerThread = new Thread(reader);
-            Thread.sleep(1000);//ignore file first create
             readerThread.start();
-            Thread.sleep(3000);
+            Thread.sleep(1000);
+            reader.doFileAppendForce();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -110,11 +120,11 @@ public class TestLogReader {
         Iterator<MessageAndOffset> iter = bms.getItertor();
         Charset charset = Charset.forName("UTF-8");
         CharsetDecoder decoder = charset.newDecoder();
-        int index = 10;
+        MessageAndOffset mo = null;
         while (iter.hasNext()) {
-            MessageAndOffset mo = iter.next();
-            assertEquals(expectedLines.get(index++), decoder.decode(mo.message.payload()).toString());
+            mo = iter.next();
         }
+        assertEquals(expectedLines.get(expectedLines.size() - 2), decoder.decode(mo.message.payload()).toString());
     }
     private void fetchFileMessageSet(GatheringByteChannel channel, FileMessageSet messages) throws IOException {
         int read = 0;
@@ -131,4 +141,41 @@ public class TestLogReader {
         }
         return read;
     }
+    
+    @Test
+    public void testRestoreMissingRotationRecords() {
+        LogReader reader = mock(LogReader.class);
+        TopicId topicId = new TopicId(MAGIC, null);
+        TopicMeta meta = new TopicMeta(topicId, SimAgent.TEST_ROLL_FILE, 3600, 3600, 1024, 1L);
+        LocalState spyState = spy(new LocalState("/tmp/test1", meta));
+        try {
+            doNothing().when(spyState, "persist");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+//            loggerThread.start();
+            EventWriter eventWriter = reader.new EventWriter(spyState, new File(SimLogger.TEST_ROLL_FILE), 1024, 1);
+            long rollTs1 = 1421036400000L; //2015-01-12 12:20:00
+            spyState.record(Record.ROLL, rollTs1, 100);
+            long rollTs2 = 1421036700000L; //2015-01-12 12:25:00
+            spyState.record(Record.ROLL, rollTs2, 200);
+            long resumeRollTs = 1421065320000L; //2015-01-12 20:22:00
+            eventWriter.restoreMissingRotationRecords(300, 3600, resumeRollTs);
+            assertEquals(10, spyState.getSnapshot().getRecords().size());
+            assertEquals(1421036400000L, spyState.getSnapshot().getRecords().get(0).getRollTs());
+            assertEquals(1421036700000L, spyState.getSnapshot().getRecords().get(1).getRollTs());
+            assertEquals(1421038500000L, spyState.getSnapshot().getRecords().get(2).getRollTs());
+            assertEquals(1421042100000L, spyState.getSnapshot().getRecords().get(3).getRollTs());
+            assertEquals(1421045700000L, spyState.getSnapshot().getRecords().get(4).getRollTs());
+            assertEquals(1421049300000L, spyState.getSnapshot().getRecords().get(5).getRollTs());
+            assertEquals(1421052900000L, spyState.getSnapshot().getRecords().get(6).getRollTs());
+            assertEquals(1421056500000L, spyState.getSnapshot().getRecords().get(7).getRollTs());
+            assertEquals(1421060100000L, spyState.getSnapshot().getRecords().get(8).getRollTs());
+            assertEquals(1421063700000L, spyState.getSnapshot().getRecords().get(9).getRollTs());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
 }

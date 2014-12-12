@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.dp.blackhole.protocol.control.AppRegPB.AppReg;
-import com.dp.blackhole.protocol.control.AppRollPB.AppRoll;
 import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
 import com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg;
@@ -26,7 +25,8 @@ import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit;
-import com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker;
+import com.dp.blackhole.protocol.control.ReadyStreamPB.ReadyStream;
+import com.dp.blackhole.protocol.control.ReadyUploadPB.ReadyUpload;
 import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.protocol.control.RestartPB.Restart;
@@ -58,17 +58,17 @@ public class PBwrap {
         case ASSIGN_BROKER:
             msg.setAssignBroker((AssignBroker) message);
             break;
-        case READY_BROKER:
-            msg.setReadyBroker((ReadyBroker) message);
-            break;
-        case APP_ROLL:
-            msg.setAppRoll((AppRoll) message);
+        case READY_STREAM:
+            msg.setReadyStream((ReadyStream) message);
             break;
         case RECOVERY_ROLL:
             msg.setRecoveryRoll((RecoveryRoll) message);
             break;
         case FAILURE:
             msg.setFailure((Failure) message);
+            break;
+        case READY_UPLOAD:
+            msg.setReadyUpload((ReadyUpload) message);
             break;
         case UPLOAD_ROLL:
         case UPLOAD_SUCCESS:
@@ -178,23 +178,14 @@ public class PBwrap {
         return wrapMessage(MessageType.ASSIGN_BROKER, builder.build());
     }
     
-    public static Message wrapReadyBroker(String topic, String source, long peroid, String broker_server, long connectedTs) {
-        ReadyBroker.Builder builder = ReadyBroker.newBuilder();
+    public static Message wrapReadyStream(String topic, String source, long peroid, String brokerServer, long connectedTs) {
+        ReadyStream.Builder builder = ReadyStream.newBuilder();
         builder.setTopic(topic);
         builder.setSource(source);
         builder.setPeriod(peroid);
-        builder.setBrokerServer(broker_server);
+        builder.setBrokerServer(brokerServer);
         builder.setConnectedTs(connectedTs);
-        return wrapMessage(MessageType.READY_BROKER, builder.build());
-    }
-    
-    public static Message wrapAppRoll(String topic, String source, long period, long rollTs) {
-        AppRoll.Builder builder = AppRoll.newBuilder();
-        builder.setTopic(topic);
-        builder.setSource(source);
-        builder.setPeriod(period);
-        builder.setRollTs(rollTs);
-        return wrapMessage(MessageType.APP_ROLL, builder.build());
+        return wrapMessage(MessageType.READY_STREAM, builder.build());
     }
     
     public static RollID wrapRollID(String appName, String appServer, long period, long rollTs, boolean isFinal) {
@@ -214,6 +205,15 @@ public class PBwrap {
             builder.setCompression(compression);
         }
         return builder.build();
+    }
+    
+    public static Message wrapReadyUpload(String topic, String source, long period, long rollTs) {
+        ReadyUpload.Builder builder = ReadyUpload.newBuilder();
+        builder.setTopic(topic);
+        builder.setSource(source);
+        builder.setPeriod(period);
+        builder.setRollTs(rollTs);
+        return wrapMessage(MessageType.READY_UPLOAD, builder.build());
     }
     
     public static Message wrapUploadRoll(String appName, String source, long period, long rollTs, boolean isFinal, String compression) {
@@ -291,10 +291,11 @@ public class PBwrap {
     }
     
     public static AppConfRes wrapAppConfRes(String topic, String watchFile,
-            String period, String maxLineSize, String readInterval) {
+            String rotatePeriod, String rollPeriod, String maxLineSize, String readInterval) {
         AppConfRes.Builder builder = AppConfRes.newBuilder();
         builder.setTopic(topic);
-        builder.setPeriod(period);
+        builder.setRotatePeriod(rotatePeriod);
+        builder.setRollPeriod(rollPeriod);
         builder.setWatchFile(watchFile);
         if (maxLineSize != null) {
             builder.setMaxLineSize(maxLineSize);
@@ -304,10 +305,11 @@ public class PBwrap {
     }
     
     public static LxcConfRes wrapLxcConfRes(String topic, String watchFile,
-            String period, String maxLineSize, String readInterval, Set<String> ids) {
+            String rotatePeriod, String rollPeriod, String maxLineSize, String readInterval, Set<String> ids) {
         LxcConfRes.Builder builder = LxcConfRes.newBuilder();
         builder.setTopic(topic);
-        builder.setPeriod(period);
+        builder.setRotatePeriod(rotatePeriod);
+        builder.setRollPeriod(rollPeriod);
         builder.setWatchFile(watchFile);
         if (maxLineSize != null) {
             builder.setMaxLineSize(maxLineSize);

@@ -127,11 +127,12 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
                     LOG.error("Can not get config of " + topic + " from configMap");
                     return new HttpResult(HttpResult.FAILURE, "Can not get config of " + topic + " from configMap");
                 }
-                String period = String.valueOf(topicConfig.getRollPeriod());
+                String rotatePeriod = String.valueOf(topicConfig.getRotatePeriod());
+                String rollPeriod = String.valueOf(topicConfig.getRollPeriod());
                 String maxLineSize = String.valueOf(topicConfig.getMaxLineSize());
                 String watchFile = topicConfig.getWatchLog();
                 String readInterval = String.valueOf(topicConfig.getReadInterval());
-                LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, period, maxLineSize, readInterval, idsInTheSameHost);
+                LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, rotatePeriod, rollPeriod, maxLineSize, readInterval, idsInTheSameHost);
                 lxcConfResList.add(lxcConfRes);
             }
             Message message = PBwrap.wrapConfRes(null, lxcConfResList);

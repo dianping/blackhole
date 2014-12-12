@@ -19,7 +19,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.agent.TopicMeta.MetaKey;
+import com.dp.blackhole.agent.TopicMeta.TopicId;
+import com.dp.blackhole.agent.persist.IState;
 import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
@@ -50,7 +51,7 @@ public class Agent implements Runnable {
     private FileListener listener;
     private String hostname;
     private ScheduledThreadPoolExecutor scheduler;
-    private static Map<MetaKey, TopicMeta> logMetas = new ConcurrentHashMap<MetaKey, TopicMeta>();
+    private static Map<TopicId, TopicMeta> logMetas = new ConcurrentHashMap<TopicId, TopicMeta>();
     private static Map<TopicMeta, LogReader> topicReaders = new ConcurrentHashMap<TopicMeta, LogReader>();
     private Map<String, RollRecovery> recoveryingMap = new ConcurrentHashMap<String, RollRecovery>();
     
@@ -60,6 +61,7 @@ public class Agent implements Runnable {
     private int confLoopFactor = 1;
     private final String baseDirWildcard;
     private boolean paasModel = false;
+    private String snapshotPersistDir;
     
     public Agent() {
         this(null);
@@ -92,10 +94,14 @@ public class Agent implements Runnable {
     public boolean isPaasModel() {
         return paasModel;
     }
+    
+    public static Map<TopicMeta, LogReader> getTopicReaders() {
+        return topicReaders;
+    }
 
-    private void register(MetaKey metaKey, long regTimestamp) {
-        Message msg = PBwrap.wrapTopicReg(metaKey.getTopic(),
-                Util.getSource(hostname, metaKey.getInstanceId()), regTimestamp);
+    private void register(TopicId topicId, long regTimestamp) {
+        Message msg = PBwrap.wrapTopicReg(topicId.getTopic(),
+                Util.getSource(hostname, topicId.getInstanceId()), regTimestamp);
         send(msg, DEFAULT_DELAY_SECOND);
     }
 
@@ -124,7 +130,6 @@ public class Agent implements Runnable {
     
     public boolean checkFilesExist(String topic, String watchFile, String instanceId) {
         if (watchFile == null || watchFile.trim().length() == 0) {
-            //TODO file by regulation
             return false;
         }
         String realWatchFile = String.format(baseDirWildcard, instanceId) + watchFile;
@@ -158,6 +163,8 @@ public class Agent implements Runnable {
             return;
         }
         
+        snapshotPersistDir = prop.getProperty("agent.snapshot.persist.dir", "/data/applogs/phoenix/snapshot");
+        
         String supervisorHost = prop.getProperty("supervisor.host");
         int supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
 
@@ -185,14 +192,15 @@ public class Agent implements Runnable {
         }
     }
     
-    public void fillUpAppLogsFromConfig(MetaKey metaKey) {
-        String topic = metaKey.getTopic();
+    public void fillUpAppLogsFromConfig(TopicId topicId) {
+        String topic = topicId.getTopic();
         String path = ConfigKeeper.configMap.get(topic).getString(ParamsKey.TopicConf.WATCH_FILE);
+        long rotatePeroid = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROTATE_PERIOD);
         long rollPeroid = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROLL_PERIOD);
         int maxLineSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MAX_LINE_SIZE, 512000);
         long readInterval = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.READ_INTERVAL, 1L);
-        TopicMeta topicMeta = new TopicMeta(metaKey, path, rollPeroid, maxLineSize, readInterval);
-        logMetas.put(metaKey, topicMeta);
+        TopicMeta topicMeta = new TopicMeta(topicId, path, rotatePeroid, rollPeroid, maxLineSize, readInterval);
+        logMetas.put(topicId, topicMeta);
     }
 
     private void requireConfigFromSupersivor(int delaySecond) {
@@ -220,26 +228,26 @@ public class Agent implements Runnable {
         this.listener = listener;
     }
 
-    public void reportFailure(MetaKey metaKey, String source, final long ts) {
-        Message message = PBwrap.wrapAppFailure(metaKey.getTopic(), source, ts);
+    public void reportFailure(TopicId topicId, String source, final long ts) {
+        Message message = PBwrap.wrapAppFailure(topicId.getTopic(), source, ts);
         send(message);
-        TopicMeta applog = logMetas.get(metaKey);
+        TopicMeta applog = logMetas.get(topicId);
         topicReaders.remove(applog);
-        register(metaKey, applog.getCreateTime());
+        register(topicId, applog.getCreateTime());
     }
 
-    public void reportUnrecoverable(MetaKey metaKey, String source, final long period, final long rollTs, boolean isFinal) {
-        Message message = PBwrap.wrapUnrecoverable(metaKey.getTopic(), source, period, rollTs, isFinal);
+    public void reportUnrecoverable(TopicId topicId, String source, final long rollPeriod, final long rollTs, boolean isFinal) {
+        Message message = PBwrap.wrapUnrecoverable(topicId.getTopic(), source, rollPeriod, rollTs, isFinal);
         send(message);
     }
 
-    public void reportRecoveryFail(MetaKey metaKey, String source, long period, final long rollTs, boolean isFinal) {
-        Message message = PBwrap.wrapRecoveryFail(metaKey.getTopic(), source, period, rollTs, isFinal);
+    public void reportRecoveryFail(TopicId topicId, String source, long period, final long rollTs, boolean isFinal) {
+        Message message = PBwrap.wrapRecoveryFail(topicId.getTopic(), source, period, rollTs, isFinal);
         send(message);
     }
 
-    public void removeRecoverying(MetaKey metaKey, final long rollTs) {
-        String recoveryKey = metaKey.toString() + ":" + rollTs;
+    public void removeRecoverying(TopicId topicId, final long rollTs) {
+        String recoveryKey = topicId.toString() + ":" + rollTs;
         recoveryingMap.remove(recoveryKey);
     }
     
@@ -326,7 +334,7 @@ public class Agent implements Runnable {
             String topic;
             String broker;
             String instanceId;
-            MetaKey metaKey;
+            TopicId topicId;
             TopicMeta topicMeta = null;
             LogReader logReader = null;
             RollRecovery rollRecovery = null;
@@ -337,24 +345,30 @@ public class Agent implements Runnable {
             case NOAVAILABLENODE:
                 topic = msg.getNoAvailableNode().getTopic();
                 instanceId = msg.getNoAvailableNode().getInstanceId();
-                metaKey = new MetaKey(topic, instanceId);
-                TopicMeta applog = logMetas.get(metaKey);
-                register(metaKey, applog.getCreateTime());
+                topicId = new TopicId(topic, instanceId);
+                TopicMeta applog = logMetas.get(topicId);
+                register(topicId, applog.getCreateTime());
                 break;
             case RECOVERY_ROLL:
                 RecoveryRoll recoveryRoll = msg.getRecoveryRoll();
                 topic = recoveryRoll.getTopic();
                 instanceId = recoveryRoll.getInstanceId();
-                metaKey = new MetaKey(topic, instanceId);
+                topicId = new TopicId(topic, instanceId);
                 boolean isFinal = recoveryRoll.getIsFinal();
-                if ((topicMeta = logMetas.get(metaKey)) != null) {
+                if ((topicMeta = logMetas.get(topicId)) != null) {
+                    LogReader reader = topicReaders.get(topicMeta);
+                    if (reader == null) {
+                        LOG.error("Can not find reader by " + topicId + " to recovery");
+                        return false;
+                    }
+                    IState state = reader.getState();
                     long rollTs = recoveryRoll.getRollTs();
-                    String recoveryKey = metaKey.getContent() + ":" + rollTs;
+                    String recoveryKey = topicId.getContent() + ":" + rollTs;
                     if ((rollRecovery = recoveryingMap.get(recoveryKey)) == null) {
                         broker = recoveryRoll.getBrokerServer();
                         int recoveryPort = recoveryRoll.getRecoveryPort();
                         rollRecovery = new RollRecovery(Agent.this,
-                                broker, recoveryPort, topicMeta, rollTs, isFinal);
+                                broker, recoveryPort, topicMeta, rollTs, isFinal, state);
                         recoveryingMap.put(recoveryKey, rollRecovery);
                         recoveryThreadPool.execute(rollRecovery);
                         return true;
@@ -371,8 +385,8 @@ public class Agent implements Runnable {
                 AssignBroker assignBroker = msg.getAssignBroker();
                 topic = assignBroker.getTopic();
                 instanceId = assignBroker.getInstanceId();
-                metaKey = new MetaKey(topic, instanceId);
-                if ((topicMeta = logMetas.get(metaKey)) != null) {
+                topicId = new TopicId(topic, instanceId);
+                if ((topicMeta = logMetas.get(topicId)) != null) {
                     if ((logReader = topicReaders.get(topicMeta)) == null) {
                         if (topicMeta.isDying()) {
                             LOG.warn(topicMeta + " is dying, do not restart log reader.");
@@ -380,7 +394,7 @@ public class Agent implements Runnable {
                         }
                         broker = assignBroker.getBrokerServer();
                         int brokerPort = assignBroker.getBrokerPort();
-                        logReader = new LogReader(Agent.this, hostname, broker, brokerPort, topicMeta);
+                        logReader = new LogReader(Agent.this, hostname, broker, brokerPort, topicMeta, snapshotPersistDir);
                         topicReaders.put(topicMeta, logReader);
                         pool.execute(logReader);
                         return true;
@@ -410,9 +424,9 @@ public class Agent implements Runnable {
                         topic = lxcConfRes.getTopic();
                         List<String> ids = lxcConfRes.getInstanceIdsList();
                         for (String id : ids) {
-                            metaKey = new MetaKey(topic, id);
-                            if (logMetas.containsKey(metaKey)) {
-                                LOG.info(metaKey + " has already in used.");
+                            topicId = new TopicId(topic, id);
+                            if (logMetas.containsKey(topicId)) {
+                                LOG.info(topicId + " has already in used.");
                                 continue;
                             }
                             //check files existence
@@ -420,13 +434,15 @@ public class Agent implements Runnable {
                                 continue;
                             }
                             confKeeper.addRawProperty(topic + "."
-                                    + ParamsKey.TopicConf.ROLL_PERIOD, lxcConfRes.getPeriod());
+                                    + ParamsKey.TopicConf.ROTATE_PERIOD, lxcConfRes.getRotatePeriod());
+                            confKeeper.addRawProperty(topic + "."
+                                    + ParamsKey.TopicConf.ROLL_PERIOD, lxcConfRes.getRollPeriod());
                             confKeeper.addRawProperty(topic + "."
                                     + ParamsKey.TopicConf.MAX_LINE_SIZE, lxcConfRes.getMaxLineSize());
                             confKeeper.addRawProperty(topic + "."
                                     + ParamsKey.TopicConf.READ_INTERVAL, lxcConfRes.getReadInterval());
-                            fillUpAppLogsFromConfig(metaKey);
-                            register(metaKey, Util.getTS());
+                            fillUpAppLogsFromConfig(topicId);
+                            register(topicId, Util.getTS());
                             if (this.heartbeat == null || !this.heartbeat.isAlive()) {
                                 this.heartbeat = new HeartBeat(supervisor);
                                 this.heartbeat.setDaemon(true);
@@ -439,9 +455,9 @@ public class Agent implements Runnable {
                     int accepted = 0;
                     for (AppConfRes appConfRes : appConfResList) {
                         topic = appConfRes.getTopic();
-                        metaKey = new MetaKey(topic, null);
-                        if (logMetas.containsKey(metaKey)) {
-                            LOG.info(metaKey + " has already in used.");
+                        topicId = new TopicId(topic, null);
+                        if (logMetas.containsKey(topicId)) {
+                            LOG.info(topicId + " has already in used.");
                             ++accepted;
                             continue;
                         }
@@ -450,14 +466,16 @@ public class Agent implements Runnable {
                             continue;
                         }
                         confKeeper.addRawProperty(topic + "."
-                                + ParamsKey.TopicConf.ROLL_PERIOD, appConfRes.getPeriod());
+                                + ParamsKey.TopicConf.ROTATE_PERIOD, appConfRes.getRotatePeriod());
+                        confKeeper.addRawProperty(topic + "."
+                                + ParamsKey.TopicConf.ROLL_PERIOD, appConfRes.getRollPeriod());
                         confKeeper.addRawProperty(topic + "."
                                 + ParamsKey.TopicConf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
                         confKeeper.addRawProperty(topic + "."
                                 + ParamsKey.TopicConf.READ_INTERVAL, appConfRes.getReadInterval());
-                        fillUpAppLogsFromConfig(metaKey);
+                        fillUpAppLogsFromConfig(topicId);
                         ++accepted;
-                        register(metaKey, Util.getTS());
+                        register(topicId, Util.getTS());
                         if (this.heartbeat == null || !this.heartbeat.isAlive()) {
                             this.heartbeat = new HeartBeat(supervisor);
                             this.heartbeat.setDaemon(true);
@@ -477,8 +495,8 @@ public class Agent implements Runnable {
                     topic = instanceGroup.getTopic();
                     List<String> ids = instanceGroup.getInstanceIdsList();
                     for (String id : ids) {
-                        metaKey = new MetaKey(topic, id);
-                        if ((topicMeta = logMetas.get(metaKey)) != null) {
+                        topicId = new TopicId(topic, id);
+                        if ((topicMeta = logMetas.get(topicId)) != null) {
                             // set a stream status to dying, and send a special rotate message.
                             if (topicMeta.setDying()) {
                                 if (!new File(topicMeta.getTailFile()).exists()) {
@@ -490,7 +508,7 @@ public class Agent implements Runnable {
                                     LOG.info(topicMeta + " has already stopped.");
                                 }
                             } else {
-                                LOG.info(metaKey + " was dying.");
+                                LOG.info(topicId + " was dying.");
                             }
                         }
                     }
@@ -503,20 +521,20 @@ public class Agent implements Runnable {
                     topic = instanceGroup.getTopic();
                     List<String> ids = instanceGroup.getInstanceIdsList();
                     for (String id : ids) {
-                        metaKey = new MetaKey(topic, id);
-                        if ((topicMeta = logMetas.get(metaKey)) != null) {
+                        topicId = new TopicId(topic, id);
+                        if ((topicMeta = logMetas.get(topicId)) != null) {
                             // set a stream status to dying, and send a special rotate message.
                             if (topicMeta.isDying()) {
                                 if ((logReader = topicReaders.get(topicMeta)) != null) {
                                     LOG.info("Clean up " + topicMeta);
                                     logReader.stop();
                                     topicReaders.remove(topicMeta);
-                                    logMetas.remove(metaKey);
+                                    logMetas.remove(topicId);
                                 } else {
                                     LOG.info(topicMeta + " has already stopped.");
                                 }
                             } else {
-                                LOG.info(metaKey + " was dying.");
+                                LOG.info(topicId + " was dying.");
                             }
                         }
                     }
