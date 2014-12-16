@@ -38,10 +38,10 @@ public class HttpScaleInHandler extends HttpAbstractHandler implements HttpReque
         String method = request.getRequestLine().getMethod()
                 .toUpperCase(Locale.ENGLISH);
 
-        LOG.debug("Frontend: Handling contract; Line = " + request.getRequestLine());
+        LOG.debug("Frontend: Handling scale-in; Line = " + request.getRequestLine());
         if (method.equals("GET")) {
             final String target = request.getRequestLine().getUri();
-            Pattern p = Pattern.compile("/contract\\?app=(.*)&hosts=(.*)$");
+            Pattern p = Pattern.compile("/scalein\\?app=(.*)&hosts=(.*)$");
             Matcher m = p.matcher(target);
             if (m.find()) {
                 String app = m.group(1);
@@ -51,7 +51,7 @@ public class HttpScaleInHandler extends HttpAbstractHandler implements HttpReque
                     response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
                     return;
                 }
-                LOG.debug("Handle contract request, app: " + app + " host: " + Arrays.toString(hostnames));
+                LOG.debug("Handle scale-in request, app: " + app + " host: " + Arrays.toString(hostnames));
                 final HttpResult Content = getContent(app, hostnames);
                 EntityTemplate body = new EntityTemplate(new ContentProducer() {
                     public void writeTo(final OutputStream outstream)

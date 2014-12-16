@@ -38,7 +38,7 @@ public class HttpScaleOutHandler extends HttpAbstractHandler implements HttpRequ
         String method = request.getRequestLine().getMethod()
                 .toUpperCase(Locale.ENGLISH);
 
-        LOG.debug("Frontend: Handling Search; Line = " + request.getRequestLine());
+        LOG.debug("Frontend: Handling scale-out; Line = " + request.getRequestLine());
         if (method.equals("GET")) {
             final String target = request.getRequestLine().getUri();
             Pattern p = Pattern.compile("/scaleout\\?app=(.*)&hosts=(.*)$");
@@ -51,7 +51,7 @@ public class HttpScaleOutHandler extends HttpAbstractHandler implements HttpRequ
                     response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
                     return;
                 }
-                LOG.debug("Handle scaleout request, app: " + app + " host: " + Arrays.toString(hostnames));
+                LOG.debug("Handle scale-out request, app: " + app + " host: " + Arrays.toString(hostnames));
                 final HttpResult Content = getContent(app, hostnames);
                 EntityTemplate body = new EntityTemplate(new ContentProducer() {
                     public void writeTo(final OutputStream outstream)

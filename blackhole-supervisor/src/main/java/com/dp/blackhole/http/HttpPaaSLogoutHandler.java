@@ -49,7 +49,7 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
         String method = request.getRequestLine().getMethod()
                 .toUpperCase(Locale.ENGLISH);
 
-        LOG.debug("Frontend: Handling Search; Line = " + request.getRequestLine());
+        LOG.debug("Frontend: Handling paas logout; Line = " + request.getRequestLine());
         if (method.equals("GET")) {
             final String target = request.getRequestLine().getUri();
             Pattern p = Pattern.compile("/paaslogout\\?app=(.*)&ids=(.*)&ips=(.*)$");

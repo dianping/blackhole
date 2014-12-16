@@ -1402,7 +1402,7 @@ public class Supervisor {
         if (t == null) {
             t = new Topic(topic);
             topics.put(topic, t);
-            LOG.info("new topic added: " + topics);
+            LOG.info("new topic added: " + t);
         }
         
         Stream stream = getStream(readyBroker.getTopic(), readyBroker.getSource());
@@ -1893,7 +1893,7 @@ public class Supervisor {
         List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
         Set<String> topicsAssocHost = configManager.getTopicsByHost(from.getHost());
         if (topicsAssocHost == null || topicsAssocHost.size() == 0) {
-            LOG.info("There is no blackhole topic for " + from.getHost());
+            LOG.debug("No topic mapping to " + from.getHost());
             message = PBwrap.wrapNoAvailableConf();
             send(from, message);
             return;
@@ -1911,6 +1911,7 @@ public class Supervisor {
             String readInterval = String.valueOf(confInfo.getReadInterval());
             String watchFile = confInfo.getWatchLog();
             if (watchFile == null) {
+                LOG.error("Can not get watch file of " + topic);
                 message = PBwrap.wrapNoAvailableConf();
                 send(from, message);
                 return;
