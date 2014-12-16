@@ -8,14 +8,19 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.SocketChannel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32;
@@ -30,6 +35,16 @@ public class Util {
     private static final Log LOG = LogFactory.getLog(Util.class);
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static long localTimezoneOffset = TimeZone.getTimeZone("Asia/Shanghai").getRawOffset();
+    private static String zkEnv;
+    private static int authorizationId;
+    
+    public static void setZkEnv(String _zkEnv) {
+        zkEnv = _zkEnv;
+    }
+    
+    public static void setAuthorizationId(int id) {
+        authorizationId = id;
+    }
     
     public static InetSocketAddress getRemoteAddr(Socket socket) {
         return (InetSocketAddress) socket.getRemoteSocketAddress();
@@ -43,12 +58,30 @@ public class Util {
     public static String getRemoteHostAndPort(Socket socket) {
         InetSocketAddress remoteAddr= ((InetSocketAddress)socket.getRemoteSocketAddress());
         return remoteAddr.toString();
-      }
+    }
     
     public static String getLocalHost() throws UnknownHostException {
       return InetAddress.getLocalHost().getHostName();
     }
     
+    public static String getLocalHostIP() throws UnknownHostException, SocketException {
+        String ip = null;
+        Enumeration<NetworkInterface> interfaces  = NetworkInterface.getNetworkInterfaces();
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface ni = (NetworkInterface) interfaces.nextElement();
+            Enumeration<InetAddress> enumIpAddr = ni.getInetAddresses();
+            while (enumIpAddr.hasMoreElements()) {
+                 InetAddress inetAddress = (InetAddress) enumIpAddr.nextElement();
+                 if (!inetAddress.isLoopbackAddress()  
+                         && !inetAddress.isLinkLocalAddress() 
+                         && inetAddress.isSiteLocalAddress()) {
+                     ip = inetAddress.getHostAddress();
+                 }
+             }
+          }
+        return ip;
+    }
+
     public static String ts2String(long ts) {
         return (new Date(ts)).toString();
     }
@@ -188,6 +221,26 @@ public class Util {
     }
     
     /*
+     * get the closest step timestamp, for example
+     * now is 16:14, and step peroid is 1 hour, then
+     * return ts of 16:00;
+     * now is 15:47, and rollPeroid is 1 hour, then
+     * return ts of 16:00
+     */
+    public static long getClosestStepTs(long ts, long period) {
+        period = period * 1000;
+        ts = ts + localTimezoneOffset;
+        long ret;
+        if ((ts % period) < (period/2)) {
+            ret = (ts / period) * period;
+        } else {
+            ret = (ts / period + 1) * period;
+        }
+        ret = ret - localTimezoneOffset;
+        return ret;
+    }
+    
+    /*
      * get the stage roll timestamp, for example
      * now is 16:02, and rollPeroid is 1 hour, then
      * return ts of 15:00;
@@ -227,14 +280,47 @@ public class Util {
     public static String getValue(String content) {
         return content.substring(content.indexOf('=') + 1);
     }
+    
+    public static String generateGetURL(String key) {
+        return ParamsKey.LionNode.DEFAULT_LION_HOST +
+                ParamsKey.LionNode.LION_GET_PATH +
+                generateURIPrefix() +
+                "&k=" + key;
+    }
+
+    public static String generateSetURL(String key, String value) {
+        String encodedValue = "";
+        try {
+            encodedValue = URLEncoder.encode(value,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+        }
+        return ParamsKey.LionNode.DEFAULT_LION_HOST +
+                ParamsKey.LionNode.LION_SET_PATH +
+                generateURIPrefix() +
+                "&ef=1" +
+                "&k=" + key +
+                "&v=" + encodedValue;
+    }
+
+    private static String generateURIPrefix() {
+        return "?&p=" + ParamsKey.LionNode.LION_PROJECT +
+                "&e=" + zkEnv +
+                "&id=" + authorizationId;
+    }
 
     public static String[] getStringListOfLionValue(String rawValue) {
         if (rawValue == null) {
             return null;
         }
         String value = rawValue.trim();
+        if (value.length() < 2) {
+            return null;
+        }
         if (value.charAt(0) != '[' || value.charAt(value.length() - 1) != ']') {
             return null;
+        }
+        if (value.length() == 2) {
+            return new String[]{};
         }
         String[] tmp = value.substring(1, value.length() - 1).split(",");
         String[] result = new String[tmp.length];
@@ -373,7 +459,7 @@ public class Util {
         }
     }
     
-    public static String getSourceIdentify(String agentServer, String instanceId) {
+    public static String getSource(String agentServer, String instanceId) {
         if (instanceId == null || instanceId.trim().length() == 0) {
             return agentServer;
         } else {
@@ -381,8 +467,8 @@ public class Util {
         }
     }
     
-    public static String getInstanceIdFromSourceIdentify(String sourceIdentify) {
-        String[] splits = sourceIdentify.split("#");
+    public static String getInstanceIdFromSource(String source) {
+        String[] splits = source.split("#");
         if (splits.length == 2) {
             return splits[1];
         } else {
@@ -390,8 +476,66 @@ public class Util {
         }
     }
     
-    public static String getAgentHostFromSourceIdentify(String sourceIdentify) {
-        String[] splits = sourceIdentify.split("#");
+    public static String getAgentHostFromSource(String source) {
+        String[] splits = source.split("#");
         return splits[0];
+    }
+    
+    /**
+     * Returns comma-separated concatenated single String of all strings of the
+     * given collection
+     */
+    public static String printCollection(Collection<String> strings) {
+        StringBuilder sb = new StringBuilder(ParamsKey.HTTP.INITIAL_CAPACITY);
+        boolean first = true;
+        for (String str : strings) {
+            if (!first) {
+                sb.append(",");
+            } else {
+                first = false;
+            }
+            sb.append(str);
+        }
+        return sb.toString();
+    }
+    
+    public static int parseInt(String value, int defaultValue) {
+        try {
+            return Integer.parseInt(value);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+    
+    public static long parseLong(String value, long defaultValue) {
+        try {
+            return Long.parseLong(value);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+    
+    public static boolean parseBoolean(String value, boolean defaultValue) {
+        try {
+            return Boolean.parseBoolean(value);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+    
+    public static double parseDouble(String value, double defaultValue) {
+        try {
+            return Double.parseDouble(value);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+    
+    public static float parseFloat(String value, float defaultValue) {
+        try {
+            return Float.parseFloat(value);
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 }

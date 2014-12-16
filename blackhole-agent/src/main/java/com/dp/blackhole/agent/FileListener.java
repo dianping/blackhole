@@ -1,10 +1,10 @@
 package com.dp.blackhole.agent;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -25,7 +25,7 @@ public class FileListener implements JNotifyListener{
     public static final int FILE_RENAMED    = 0x8;
     public static final int FILE_ANY        = FILE_CREATED | FILE_DELETED | FILE_MODIFIED | FILE_RENAMED;
     private IJNotify iJNotifyInstance;
-    private Map<String, LogReader> readerMap;
+    private ConcurrentHashMap<String, LogReader> readerMap;
     private Set<String> parentWathchPathSet;
     private Map<String, Integer> path2wd;
     // Lock the path2wd map only to avoid non-atomic operation
@@ -33,7 +33,7 @@ public class FileListener implements JNotifyListener{
 
     public FileListener() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         iJNotifyInstance = (IJNotify) Class.forName("net.contentobjects.jnotify.linux.JNotifyAdapterLinux").newInstance();
-        readerMap = Collections.synchronizedMap(new HashMap<String, LogReader>());
+        readerMap = new ConcurrentHashMap<String, LogReader>();
         //guarantee by synchronized
         parentWathchPathSet = new HashSet<String>();
         path2wd = new HashMap<String, Integer>();
@@ -41,8 +41,7 @@ public class FileListener implements JNotifyListener{
 
     public synchronized boolean registerLogReader(final String watchPath, final LogReader reader) {
         int fwd, wd;
-        if (!readerMap.containsKey(watchPath)) {
-            readerMap.put(watchPath, reader);
+        if (readerMap.putIfAbsent(watchPath, reader) == null) {
             String parentPath = Util.getParentAbsolutePath(watchPath);
             if (!parentWathchPathSet.contains(parentPath)) {
                 parentWathchPathSet.add(parentPath);
@@ -72,6 +71,9 @@ public class FileListener implements JNotifyListener{
                 readerMap.remove(watchPath);
                 return false;
             }
+            
+            //tag file appending
+            reader.doFileAppendForce();
             lock.lock();
             try {
                 path2wd.put(watchPath, wd);
@@ -85,7 +87,7 @@ public class FileListener implements JNotifyListener{
         return true;
     }
     
-    public void unregisterLogReader(String watchPath) {
+    public void unregisterLogReader(final String watchPath, final LogReader reader) {
         Integer wd;
         lock.lock();
         try {
@@ -99,6 +101,7 @@ public class FileListener implements JNotifyListener{
         }
         try {
             iJNotifyInstance.removeWatch(wd);
+            reader.resetCurrentLogStatus();
             LOG.info("Unregister watch path " + watchPath);
         } catch (JNotifyException e) {
             LOG.fatal("Failed to remove wd " + wd + " for " + watchPath + 
@@ -121,9 +124,9 @@ public class FileListener implements JNotifyListener{
         LogReader reader;
         if ((reader = readerMap.get(createdFilePath)) != null) {
             LOG.info("rotate detected of " + createdFilePath);
+            reader.beginLogRotate();
             //Here, we lock to removing the old and adding a new path as a atomic operation.
             lock.lock();
-            reader.eventWriter.processRotate();
             try {
                 Integer oldWd;
                 if ((oldWd = path2wd.get(createdFilePath)) != null) {
@@ -154,7 +157,7 @@ public class FileListener implements JNotifyListener{
     public void fileModified(int wd, String rootPath, String name) {
         LogReader reader; 
         if ((reader = readerMap.get(rootPath)) != null ) {
-            reader.eventWriter.process();
+            reader.doFileAppend();
         }
     }
 

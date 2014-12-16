@@ -34,8 +34,8 @@ public class RequestListener extends Thread {
     private boolean running;
     private ExecutorService handlerPool = Executors.newCachedThreadPool();
     
-    public RequestListener(int port, ConfigManager configManager, HttpClientSingle cmdbHttpClient) throws IOException {
-        this.serversocket = new ServerSocket(port);
+    public RequestListener(ConfigManager configManager) throws IOException {
+        this.serversocket = new ServerSocket(configManager.webServicePort);
         this.params = new SyncBasicHttpParams();
         this.params
             .setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 120000)
@@ -54,10 +54,10 @@ public class RequestListener extends Thread {
         
         // Set up request handlers
         HttpRequestHandlerRegistry reqistry = new HttpRequestHandlerRegistry();
-        reqistry.register("/scaleout*", new HttpScaleOutHandler(configManager, cmdbHttpClient));
-        reqistry.register("/scalein*", new HttpScaleInHandler(configManager, cmdbHttpClient));
-        reqistry.register("/paaslogin*", new HttpPaaSLoginHandler(configManager, cmdbHttpClient));
-        reqistry.register("/paaslogout*", new HttpPaaSLogoutHandler(configManager, cmdbHttpClient));
+        reqistry.register("/scaleout*", new HttpScaleOutHandler(configManager));
+        reqistry.register("/scalein*", new HttpScaleInHandler(configManager));
+        reqistry.register("/paaslogin*", new HttpPaaSLoginHandler(configManager));
+        reqistry.register("/paaslogout*", new HttpPaaSLogoutHandler(configManager));
         reqistry.register("*", new HttpFallbackHandler());
         
         // Set up the HTTP service

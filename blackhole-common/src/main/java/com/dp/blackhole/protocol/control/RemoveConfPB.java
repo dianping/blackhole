@@ -8,86 +8,268 @@ public final class RemoveConfPB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  public interface RemoveConfOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required string topic = 1;
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    boolean hasTopic();
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    java.lang.String getTopic();
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getTopicBytes();
+
+    // repeated string agent_servers = 2;
+    /**
+     * <code>repeated string agent_servers = 2;</code>
+     */
+    java.util.List<java.lang.String>
+    getAgentServersList();
+    /**
+     * <code>repeated string agent_servers = 2;</code>
+     */
+    int getAgentServersCount();
+    /**
+     * <code>repeated string agent_servers = 2;</code>
+     */
+    java.lang.String getAgentServers(int index);
+    /**
+     * <code>repeated string agent_servers = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getAgentServersBytes(int index);
+  }
+  /**
+   * Protobuf type {@code blackhole.RemoveConf}
+   */
   public static final class RemoveConf extends
-      com.google.protobuf.GeneratedMessage {
+      com.google.protobuf.GeneratedMessage
+      implements RemoveConfOrBuilder {
     // Use RemoveConf.newBuilder() to construct.
-    private RemoveConf() {
-      initFields();
+    private RemoveConf(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private RemoveConf(boolean noInit) {}
-    
+    private RemoveConf(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final RemoveConf defaultInstance;
     public static RemoveConf getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public RemoveConf getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RemoveConf(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              topic_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                agentServers_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              agentServers_.add(input.readBytes());
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          agentServers_ = new com.google.protobuf.UnmodifiableLazyStringList(agentServers_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.RemoveConfPB.internal_static_blackhole_RemoveConf_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.RemoveConfPB.internal_static_blackhole_RemoveConf_fieldAccessorTable;
+      return com.dp.blackhole.protocol.control.RemoveConfPB.internal_static_blackhole_RemoveConf_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.class, com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<RemoveConf> PARSER =
+        new com.google.protobuf.AbstractParser<RemoveConf>() {
+      public RemoveConf parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RemoveConf(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RemoveConf> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
     // required string topic = 1;
     public static final int TOPIC_FIELD_NUMBER = 1;
-    private boolean hasTopic;
-    private java.lang.String topic_ = "";
-    public boolean hasTopic() { return hasTopic; }
-    public java.lang.String getTopic() { return topic_; }
-    
+    private java.lang.Object topic_;
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public boolean hasTopic() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public java.lang.String getTopic() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          topic_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTopicBytes() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        topic_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     // repeated string agent_servers = 2;
     public static final int AGENT_SERVERS_FIELD_NUMBER = 2;
-    private java.util.List<java.lang.String> agentServers_ =
-      java.util.Collections.emptyList();
-    public java.util.List<java.lang.String> getAgentServersList() {
+    private com.google.protobuf.LazyStringList agentServers_;
+    /**
+     * <code>repeated string agent_servers = 2;</code>
+     */
+    public java.util.List<java.lang.String>
+        getAgentServersList() {
       return agentServers_;
     }
-    public int getAgentServersCount() { return agentServers_.size(); }
+    /**
+     * <code>repeated string agent_servers = 2;</code>
+     */
+    public int getAgentServersCount() {
+      return agentServers_.size();
+    }
+    /**
+     * <code>repeated string agent_servers = 2;</code>
+     */
     public java.lang.String getAgentServers(int index) {
       return agentServers_.get(index);
     }
-    
-    private void initFields() {
+    /**
+     * <code>repeated string agent_servers = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAgentServersBytes(int index) {
+      return agentServers_.getByteString(index);
     }
+
+    private void initFields() {
+      topic_ = "";
+      agentServers_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      if (!hasTopic) return false;
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasTopic()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasTopic()) {
-        output.writeString(1, getTopic());
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getTopicBytes());
       }
-      for (java.lang.String element : getAgentServersList()) {
-        output.writeString(2, element);
+      for (int i = 0; i < agentServers_.size(); i++) {
+        output.writeBytes(2, agentServers_.getByteString(i));
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
-      if (hasTopic()) {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getTopic());
+          .computeBytesSize(1, getTopicBytes());
       }
       {
         int dataSize = 0;
-        for (java.lang.String element : getAgentServersList()) {
+        for (int i = 0; i < agentServers_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-            .computeStringSizeNoTag(element);
+            .computeBytesSizeNoTag(agentServers_.getByteString(i));
         }
         size += dataSize;
         size += 1 * getAgentServersList().size();
@@ -96,153 +278,165 @@ public final class RemoveConfPB {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
     public static com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code blackhole.RemoveConf}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> {
-      private com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf result;
-      
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConfOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.dp.blackhole.protocol.control.RemoveConfPB.internal_static_blackhole_RemoveConf_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.dp.blackhole.protocol.control.RemoveConfPB.internal_static_blackhole_RemoveConf_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.class, com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.Builder.class);
+      }
+
       // Construct using com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.newBuilder()
-      private Builder() {}
-      
-      private static Builder create() {
-        Builder builder = new Builder();
-        builder.result = new com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf();
-        return builder;
+      private Builder() {
+        maybeForceBuilderInitialization();
       }
-      
-      protected com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf internalGetResult() {
-        return result;
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
       }
-      
-      public Builder clear() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "Cannot call clear() after build().");
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
         }
-        result = new com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf();
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        topic_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        agentServers_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-      
+
       public Builder clone() {
-        return create().mergeFrom(result);
+        return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.getDescriptor();
+        return com.dp.blackhole.protocol.control.RemoveConfPB.internal_static_blackhole_RemoveConf_descriptor;
       }
-      
+
       public com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.getDefaultInstance();
       }
-      
-      public boolean isInitialized() {
-        return result.isInitialized();
-      }
+
       public com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf build() {
-        if (result != null && !isInitialized()) {
+        com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf result = buildPartial();
+        if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return buildPartial();
+        return result;
       }
-      
-      private com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        if (!isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return buildPartial();
-      }
-      
+
       public com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf buildPartial() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "build() has already been called on this Builder.");
+        com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf result = new com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
         }
-        if (result.agentServers_ != java.util.Collections.EMPTY_LIST) {
-          result.agentServers_ =
-            java.util.Collections.unmodifiableList(result.agentServers_);
+        result.topic_ = topic_;
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          agentServers_ = new com.google.protobuf.UnmodifiableLazyStringList(
+              agentServers_);
+          bitField0_ = (bitField0_ & ~0x00000002);
         }
-        com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf returnMe = result;
-        result = null;
-        return returnMe;
+        result.agentServers_ = agentServers_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf) {
           return mergeFrom((com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf)other);
@@ -251,135 +445,239 @@ public final class RemoveConfPB {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf other) {
         if (other == com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.getDefaultInstance()) return this;
         if (other.hasTopic()) {
-          setTopic(other.getTopic());
+          bitField0_ |= 0x00000001;
+          topic_ = other.topic_;
+          onChanged();
         }
         if (!other.agentServers_.isEmpty()) {
-          if (result.agentServers_.isEmpty()) {
-            result.agentServers_ = new java.util.ArrayList<java.lang.String>();
+          if (agentServers_.isEmpty()) {
+            agentServers_ = other.agentServers_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+          } else {
+            ensureAgentServersIsMutable();
+            agentServers_.addAll(other.agentServers_);
           }
-          result.agentServers_.addAll(other.agentServers_);
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
+      public final boolean isInitialized() {
+        if (!hasTopic()) {
+          
+          return false;
+        }
+        return true;
+      }
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              setTopic(input.readString());
-              break;
-            }
-            case 18: {
-              addAgentServers(input.readString());
-              break;
-            }
+        com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
-      
+      private int bitField0_;
+
       // required string topic = 1;
+      private java.lang.Object topic_ = "";
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public boolean hasTopic() {
-        return result.hasTopic();
+        return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public java.lang.String getTopic() {
-        return result.getTopic();
+        java.lang.Object ref = topic_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          topic_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
-      public Builder setTopic(java.lang.String value) {
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTopicBytes() {
+        java.lang.Object ref = topic_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          topic_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public Builder setTopic(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasTopic = true;
-        result.topic_ = value;
+  bitField0_ |= 0x00000001;
+        topic_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public Builder clearTopic() {
-        result.hasTopic = false;
-        result.topic_ = getDefaultInstance().getTopic();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        topic_ = getDefaultInstance().getTopic();
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public Builder setTopicBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        topic_ = value;
+        onChanged();
+        return this;
+      }
+
       // repeated string agent_servers = 2;
-      public java.util.List<java.lang.String> getAgentServersList() {
-        return java.util.Collections.unmodifiableList(result.agentServers_);
+      private com.google.protobuf.LazyStringList agentServers_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureAgentServersIsMutable() {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+          agentServers_ = new com.google.protobuf.LazyStringArrayList(agentServers_);
+          bitField0_ |= 0x00000002;
+         }
       }
+      /**
+       * <code>repeated string agent_servers = 2;</code>
+       */
+      public java.util.List<java.lang.String>
+          getAgentServersList() {
+        return java.util.Collections.unmodifiableList(agentServers_);
+      }
+      /**
+       * <code>repeated string agent_servers = 2;</code>
+       */
       public int getAgentServersCount() {
-        return result.getAgentServersCount();
+        return agentServers_.size();
       }
+      /**
+       * <code>repeated string agent_servers = 2;</code>
+       */
       public java.lang.String getAgentServers(int index) {
-        return result.getAgentServers(index);
+        return agentServers_.get(index);
       }
-      public Builder setAgentServers(int index, java.lang.String value) {
+      /**
+       * <code>repeated string agent_servers = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAgentServersBytes(int index) {
+        return agentServers_.getByteString(index);
+      }
+      /**
+       * <code>repeated string agent_servers = 2;</code>
+       */
+      public Builder setAgentServers(
+          int index, java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.agentServers_.set(index, value);
+  ensureAgentServersIsMutable();
+        agentServers_.set(index, value);
+        onChanged();
         return this;
       }
-      public Builder addAgentServers(java.lang.String value) {
+      /**
+       * <code>repeated string agent_servers = 2;</code>
+       */
+      public Builder addAgentServers(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  if (result.agentServers_.isEmpty()) {
-          result.agentServers_ = new java.util.ArrayList<java.lang.String>();
-        }
-        result.agentServers_.add(value);
+  ensureAgentServersIsMutable();
+        agentServers_.add(value);
+        onChanged();
         return this;
       }
+      /**
+       * <code>repeated string agent_servers = 2;</code>
+       */
       public Builder addAllAgentServers(
-          java.lang.Iterable<? extends java.lang.String> values) {
-        if (result.agentServers_.isEmpty()) {
-          result.agentServers_ = new java.util.ArrayList<java.lang.String>();
-        }
-        super.addAll(values, result.agentServers_);
+          java.lang.Iterable<java.lang.String> values) {
+        ensureAgentServersIsMutable();
+        super.addAll(values, agentServers_);
+        onChanged();
         return this;
       }
+      /**
+       * <code>repeated string agent_servers = 2;</code>
+       */
       public Builder clearAgentServers() {
-        result.agentServers_ = java.util.Collections.emptyList();
+        agentServers_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>repeated string agent_servers = 2;</code>
+       */
+      public Builder addAgentServersBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureAgentServersIsMutable();
+        agentServers_.add(value);
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.RemoveConf)
     }
-    
+
     static {
       defaultInstance = new RemoveConf(true);
-      com.dp.blackhole.protocol.control.RemoveConfPB.internalForceInit();
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:blackhole.RemoveConf)
   }
-  
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_RemoveConf_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_RemoveConf_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -403,9 +701,7 @@ public final class RemoveConfPB {
           internal_static_blackhole_RemoveConf_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RemoveConf_descriptor,
-              new java.lang.String[] { "Topic", "AgentServers", },
-              com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.class,
-              com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.Builder.class);
+              new java.lang.String[] { "Topic", "AgentServers", });
           return null;
         }
       };
@@ -414,8 +710,6 @@ public final class RemoveConfPB {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-  
-  public static void internalForceInit() {}
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }

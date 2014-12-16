@@ -9,13 +9,17 @@ message ConfRes{
         required string watch_file = 2;
         required string period = 3;
         optional string max_line_size = 4 [default = "512000"];
+        optional string read_interval = 5 [default = "1L"];
+        optional string batch_period = 6;
     }
     message LxcConfRes {
         required string topic = 1;
         optional string watch_file = 2;
         required string period = 3;
         optional string max_line_size = 4 [default = "512000"];
-        repeated string instance_ids = 5;
+        optional string read_interval = 5 [default = "1L"];
+        repeated string instance_ids = 6;
+        optional string batch_period = 7;
     }
     repeated AppConfRes appConfRes = 1;
     repeated LxcConfRes lxcConfRes = 2;

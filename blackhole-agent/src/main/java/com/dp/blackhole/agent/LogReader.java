@@ -9,6 +9,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.TransferWrap;
 import com.dp.blackhole.protocol.data.LastRotateRequest;
+import com.dp.blackhole.protocol.data.MicroBatchRequest;
 import com.dp.blackhole.protocol.data.ProduceRequest;
 import com.dp.blackhole.protocol.data.RegisterRequest;
 import com.dp.blackhole.protocol.data.RotateRequest;
@@ -29,18 +31,60 @@ public class LogReader implements Runnable {
 
     private TopicMeta topicMeta;
     private Agent agent;
-    private String sourceIdentify;
+    private String source;
     private String broker;
     private int brokerPort;
     private Socket socket;
     EventWriter eventWriter;
+    private AtomicReference<LogStatus> currentLogStatus;
     
     public LogReader(Agent agent, String localhost, String broker, int port, TopicMeta topicMeta) {
         this.agent = agent;
-        this.sourceIdentify =  Util.getSourceIdentify(localhost, topicMeta.getInstanceId());
+        this.source =  Util.getSource(localhost, topicMeta.getInstanceId());
         this.broker = broker;
         this.brokerPort = port;
         this.topicMeta = topicMeta;
+        this.currentLogStatus = new AtomicReference<LogReader.LogStatus>(LogStatus.NONE);
+    }
+    
+    public LogStatus getCurrentLogStatus() {
+        return currentLogStatus.get();
+    }
+    
+    public void resetCurrentLogStatus() {
+        currentLogStatus.set(LogStatus.NONE);
+    }
+
+    public void doFileAppend() {
+        currentLogStatus.compareAndSet(LogStatus.APPEND, LogStatus.APPEND);
+    }
+    
+    public void doFileAppendForce() {
+        currentLogStatus.set(LogStatus.APPEND);
+    }
+    
+    public void beginLogRotate() {
+        currentLogStatus.set(LogStatus.ROTATE);
+    }
+    
+    public void beginLastLogRotate() {
+        currentLogStatus.set(LogStatus.LAST_ROTATE);
+    }
+    
+    public void beginBatchAttempt() {
+        currentLogStatus.set(LogStatus.BATCH_ATTEMPT);
+    }
+    
+    public void finishLogRotate() {
+        currentLogStatus.compareAndSet(LogStatus.ROTATE, LogStatus.APPEND);
+    }
+    
+    public void finishLastLogRotate() {
+        currentLogStatus.compareAndSet(LogStatus.LAST_ROTATE, LogStatus.NONE);
+    }
+    
+    public void finishBatchAttempt() {
+        currentLogStatus.compareAndSet(LogStatus.BATCH_ATTEMPT, LogStatus.APPEND);
     }
 
     public void stop() {
@@ -52,7 +96,7 @@ public class LogReader implements Runnable {
         } catch (IOException e) {
             LOG.warn("Failed to close socket.", e);
         }
-        agent.getListener().unregisterLogReader(topicMeta.getTailFile());
+        agent.getListener().unregisterLogReader(topicMeta.getTailFile(), this);
     }
 
     @Override
@@ -61,7 +105,8 @@ public class LogReader implements Runnable {
             LOG.info("Log reader for " + topicMeta + " running...");
             
             File tailFile = new File(topicMeta.getTailFile());
-            this.eventWriter = new EventWriter(tailFile, topicMeta.getMaxLineSize());
+            eventWriter = new EventWriter(tailFile, topicMeta.getMaxLineSize(), topicMeta.getReadInterval());
+            eventWriter.start();
             
             if (!agent.getListener().registerLogReader(topicMeta.getTailFile(), this)) {
                 throw new IOException("Failed to register a log reader for " + topicMeta.getMetaKey() 
@@ -69,13 +114,20 @@ public class LogReader implements Runnable {
             }
         } catch (Throwable t) {
             LOG.error("Oops, got an exception", t);
-            agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+            agent.reportFailure(topicMeta.getMetaKey(), source, Util.getTS());
         }
     }
-
-    class EventWriter {
+    
+    private enum LogStatus {
+        NONE,
+        APPEND,
+        BATCH_ATTEMPT,
+        ROTATE,
+        LAST_ROTATE;
+    }
+    
+    class EventWriter extends Thread {
         private final File file;
-
         private final byte inbuf[] = new byte[IN_BUF];
         private SocketChannel channel;
         private RandomAccessFile reader;
@@ -84,21 +136,23 @@ public class LogReader implements Runnable {
         private boolean accept;
         private ByteBuffer messageBuffer;
         private int messageNum;
+        private volatile boolean running = true;
+        private long readInterval;
         
-        public EventWriter(final File file, int maxLineSize) throws IOException {
+        public EventWriter(final File file, int maxLineSize, long readInterval) throws IOException {
+            this.setDaemon(true);
             this.file = file;
             if (maxLineSize > SYS_MAX_LINE_SIZE) {
                 this.maxLineSize = SYS_MAX_LINE_SIZE;
             } else {
                 this.maxLineSize = maxLineSize;
             }
+            this.readInterval = readInterval;
             this.reader = new RandomAccessFile(file, "r");
             this.lineBuf = new ByteArrayOutputStream(maxLineSize);
             this.accept = true;
             
             messageBuffer = ByteBuffer.allocate(512 * 1024);
-            
-            
             channel = SocketChannel.open();
             channel.connect(new InetSocketAddress(broker, brokerPort));
             socket = channel.socket();
@@ -109,11 +163,72 @@ public class LogReader implements Runnable {
         private void doStreamReg() throws IOException {
             RegisterRequest request = new RegisterRequest(
                     topicMeta.getTopic(),
-                    sourceIdentify,
+                    source,
                     topicMeta.getRollPeriod(),
                     broker);
             TransferWrap wrap = new TransferWrap(request);
             wrap.write(channel);
+        }
+
+        @Override
+        public void run() {
+            while (running) {
+                try {
+                    switch (currentLogStatus.get()) {
+                    case APPEND:
+                        process();
+                        Thread.sleep(readInterval);
+                        break;
+                    case ROTATE:
+                        processRotate();
+                        finishLogRotate();
+                        break;
+                    case LAST_ROTATE:
+                        processLastRotate();
+                        finishLastLogRotate();
+                        break;
+                    case BATCH_ATTEMPT:
+                        processBatchAttempt();
+                        finishBatchAttempt();
+                        break;
+                    case NONE:
+                        Thread.sleep(1000);
+                        break;
+                    default:
+                        break;
+                    }
+                } catch (Throwable t) {
+                    running = false;
+                    LOG.error("exception catched when processing event", t);
+                }
+            }
+        }
+        
+        public void processBatchAttempt() {
+            try {
+                //first, append the snapshot file
+                
+                
+                long currentOffset = reader.getFilePointer();
+//                //do not handle log rotation any more when dying
+//                if (topicMeta.isDying()) {
+//                    return;
+//                }
+                MicroBatchRequest request = new MicroBatchRequest(
+                        topicMeta.getTopic(),
+                        source,
+                        topicMeta.getRollPeriod(),
+                        currentOffset);
+                TransferWrap wrap = new TransferWrap(request);
+                wrap.write(channel);
+            } catch (IOException e) {
+                LOG.error("Oops, got an exception:", e);
+                closeQuietly(reader);
+                closeChannelQuietly(channel);
+                LOG.debug("process micro batch attempt failed, stop.");
+                LogReader.this.stop();
+                agent.reportFailure(topicMeta.getMetaKey(), source, Util.getTS());
+            }
         }
         
         public void processRotate() {
@@ -131,7 +246,7 @@ public class LogReader implements Runnable {
                 }
                 RotateRequest request = new RotateRequest(
                         topicMeta.getTopic(),
-                        sourceIdentify,
+                        source,
                         topicMeta.getRollPeriod());
                 TransferWrap wrap = new TransferWrap(request);
                 wrap.write(channel);
@@ -140,8 +255,8 @@ public class LogReader implements Runnable {
                 closeQuietly(reader);
                 closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
-                stop();
-                agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+                LogReader.this.stop();
+                agent.reportFailure(topicMeta.getMetaKey(), source, Util.getTS());
             }
         }
         
@@ -156,7 +271,7 @@ public class LogReader implements Runnable {
                 sendMessage();
                 LastRotateRequest request = new LastRotateRequest(
                         topicMeta.getTopic(),
-                        sourceIdentify,
+                        source,
                         topicMeta.getRollPeriod());
                 TransferWrap wrap = new TransferWrap(request);
                 wrap.write(channel);
@@ -165,8 +280,8 @@ public class LogReader implements Runnable {
                 closeQuietly(reader);
                 closeChannelQuietly(channel);
                 LOG.debug("process rotate failed, stop.");
-                stop();
-                agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+                LogReader.this.stop();
+                agent.reportFailure(topicMeta.getMetaKey(), source, Util.getTS());
             }
         }
         
@@ -178,8 +293,8 @@ public class LogReader implements Runnable {
                 closeQuietly(reader);
                 closeChannelQuietly(channel);
                 LOG.debug("process failed, stop.");
-                stop();
-                agent.reportFailure(topicMeta.getMetaKey(), sourceIdentify, Util.getTS());
+                LogReader.this.stop();
+                agent.reportFailure(topicMeta.getMetaKey(), source, Util.getTS());
             }
         }
         
@@ -221,7 +336,7 @@ public class LogReader implements Runnable {
         private void sendMessage() throws IOException {
             messageBuffer.flip();
             ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
-            ProduceRequest request = new ProduceRequest(topicMeta.getTopic(), sourceIdentify, messages);
+            ProduceRequest request = new ProduceRequest(topicMeta.getTopic(), source, messages);
             TransferWrap wrap = new TransferWrap(request);
             wrap.write(channel);
             messageBuffer.clear();

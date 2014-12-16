@@ -1,10 +1,10 @@
-package com.dp.blackhole.supervisor;
+package com.dp.blackhole.supervisor.model;
 
-public class ConsumerGroup {
+public class ConsumerGroupKey {
     private String goupId;
     private String topic;
     
-    public ConsumerGroup(String groupId, String topic) {
+    public ConsumerGroupKey(String groupId, String topic) {
         this.goupId = groupId;
         this.topic = topic;
     }
@@ -34,7 +34,7 @@ public class ConsumerGroup {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        ConsumerGroup other = (ConsumerGroup) obj;
+        ConsumerGroupKey other = (ConsumerGroupKey) obj;
         if (goupId == null) {
             if (other.goupId != null)
                 return false;

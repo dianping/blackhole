@@ -10,11 +10,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.zip.GZIPOutputStream;
+import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.io.compress.Compressor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +24,7 @@ import org.junit.Test;
 import com.dp.blackhole.broker.HDFSUpload;
 import com.dp.blackhole.broker.RollIdent;
 import com.dp.blackhole.broker.RollManager;
+import com.dp.blackhole.broker.Compression.Algorithm;
 import com.dp.blackhole.broker.storage.Partition;
 import com.dp.blackhole.broker.storage.StorageManager;
 import com.dp.blackhole.broker.storage.RollPartition;
@@ -33,11 +36,16 @@ public class TestHDFSUpload {
     private final String MAGIC = "TestHDFSUpload_" + Util.getTS();
     private File expect;
     private FileSystem fs;
+    private Algorithm compressionAlgo;
 
     @Before
     public void setUp() throws Exception {
+        Properties prop = new Properties();
+        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
+        String compressionAlgoName = prop.getProperty("broker.hdfs.compression.default");
+        this.compressionAlgo = Compression.getCompressionAlgorithmByName(compressionAlgoName);
         //build a expect file
-        expect = createExpectFile(getExpectFile()+".gz");
+        expect = createExpectFile(getExpectFile()+"."+compressionAlgoName);
         Configuration conf = new Configuration();
         fs = FileSystem.get(conf);
     } 
@@ -49,7 +57,7 @@ public class TestHDFSUpload {
             Util.rmr(testdir);
         }
         expect.delete();
-        new File(getRealFile()+".gz").delete();
+        new File(getRealFile()+"."+compressionAlgo.getName()).delete();
     }
 
     @Test
@@ -66,12 +74,11 @@ public class TestHDFSUpload {
         appendData(p);
         
         RollManager mgr = mock(RollManager.class);
-        when(mgr.getRollHdfsPath(ident)).thenReturn(getRealFile()+".gz");
-        
+        when(mgr.getRollHdfsPath(ident, compressionAlgo.getName())).thenReturn(getRealFile()+"."+compressionAlgo.getName());
         StorageManager manager = mock(StorageManager.class);
-        when(manager.getPartition(ident.topic, ident.sourceIdentify, false)).thenReturn(p);
+        when(manager.getPartition(ident.topic, ident.source, false)).thenReturn(p);
         
-        HDFSUpload writer = new HDFSUpload(mgr, manager, fs, ident, roll1);
+        HDFSUpload writer = new HDFSUpload(mgr, manager, fs, ident, roll1, compressionAlgo.getName());
         Thread thread = new Thread(writer);
         thread.start();
         thread.join();
@@ -79,7 +86,9 @@ public class TestHDFSUpload {
         FileInputStream fis = new FileInputStream(expect);
         String expectedMD5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
         String actualFile = getRealFile();
-        String actualMDS = org.apache.commons.codec.digest.DigestUtils.md5Hex(new FileInputStream(actualFile+".gz"));
+        String actualMDS = org.apache.commons.codec.digest.DigestUtils
+                .md5Hex(new FileInputStream(actualFile + "."
+                        + compressionAlgo.getName()));
         assertEquals("md5sum not equals", expectedMD5, actualMDS);
         fis.close();
     }
@@ -88,7 +97,7 @@ public class TestHDFSUpload {
         RollIdent rollIdent = new RollIdent();
         rollIdent.topic = appName;
         rollIdent.period = 3600;
-        rollIdent.sourceIdentify = SimBroker.HOSTNAME;
+        rollIdent.source = SimBroker.HOSTNAME;
         rollIdent.ts = SimBroker.rollTS;
         return rollIdent;
     }
@@ -97,19 +106,21 @@ public class TestHDFSUpload {
             throws IOException, FileNotFoundException {
         
         File file = new File(filename);
-        GZIPOutputStream gout = new GZIPOutputStream(new FileOutputStream(file));
+        Compressor compressor = compressionAlgo.getCompressor();
+        OutputStream compressionOutput = compressionAlgo
+                .createCompressionStream(new FileOutputStream(file), compressor, 0);
         
         for (int i=0; i < 65; i++) {
-            gout.write(Integer.toString(i).getBytes());
-            gout.write("\n".getBytes());
+            compressionOutput.write(Integer.toString(i).getBytes());
+            compressionOutput.write("\n".getBytes());
         }
         
         for (int i=0; i < 65; i++) {
-            gout.write(Integer.toString(i).getBytes());
-            gout.write("\n".getBytes());
+            compressionOutput.write(Integer.toString(i).getBytes());
+            compressionOutput.write("\n".getBytes());
         }
                
-        gout.close();
+        compressionOutput.close();
         return file;
     }
     

@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.TopicMeta.MetaKey;
+import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
@@ -72,9 +73,9 @@ public class Agent implements Runnable {
         } else {
             LOG.info("Agent deployed for KVM.");
         }
-        pool = Executors.newCachedThreadPool();
-        recoveryThreadPool = Executors.newFixedThreadPool(2);
-        scheduler = new ScheduledThreadPoolExecutor(1);
+        pool = Executors.newCachedThreadPool(new DaemonThreadFactory("LogReader"));
+        recoveryThreadPool = Executors.newFixedThreadPool(2, new DaemonThreadFactory("Recovery"));
+        scheduler = new ScheduledThreadPoolExecutor(1, new DaemonThreadFactory("Scheduler"));
         
         scheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
         scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
@@ -91,10 +92,14 @@ public class Agent implements Runnable {
     public boolean isPaasModel() {
         return paasModel;
     }
+    
+    public static Map<TopicMeta, LogReader> getTopicReaders() {
+        return topicReaders;
+    }
 
     private void register(MetaKey metaKey, long regTimestamp) {
         Message msg = PBwrap.wrapTopicReg(metaKey.getTopic(),
-                Util.getSourceIdentify(hostname, metaKey.getInstanceId()), regTimestamp);
+                Util.getSource(hostname, metaKey.getInstanceId()), regTimestamp);
         send(msg, DEFAULT_DELAY_SECOND);
     }
 
@@ -179,6 +184,8 @@ public class Agent implements Runnable {
             LOG.error(e.getMessage(), e);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
+        } catch (Throwable t) {
+            LOG.error(t.getMessage(), t);
         }
     }
     
@@ -186,8 +193,10 @@ public class Agent implements Runnable {
         String topic = metaKey.getTopic();
         String path = ConfigKeeper.configMap.get(topic).getString(ParamsKey.TopicConf.WATCH_FILE);
         long rollPeroid = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROLL_PERIOD);
+        long batchPeroid = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.BATCH_PERIOD);
         int maxLineSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MAX_LINE_SIZE, 512000);
-        TopicMeta topicMeta = new TopicMeta(metaKey, path, rollPeroid, maxLineSize);
+        long readInterval = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.READ_INTERVAL, 1L);
+        TopicMeta topicMeta = new TopicMeta(metaKey, path, rollPeroid, batchPeroid, maxLineSize, readInterval);
         logMetas.put(metaKey, topicMeta);
     }
 
@@ -216,21 +225,21 @@ public class Agent implements Runnable {
         this.listener = listener;
     }
 
-    public void reportFailure(MetaKey metaKey, String sourceIdentify, final long ts) {
-        Message message = PBwrap.wrapAppFailure(metaKey.getTopic(), sourceIdentify, ts);
+    public void reportFailure(MetaKey metaKey, String source, final long ts) {
+        Message message = PBwrap.wrapAppFailure(metaKey.getTopic(), source, ts);
         send(message);
         TopicMeta applog = logMetas.get(metaKey);
         topicReaders.remove(applog);
         register(metaKey, applog.getCreateTime());
     }
 
-    public void reportUnrecoverable(MetaKey metaKey, String sourceIdentify, final long period, final long rollTs, boolean isFinal) {
-        Message message = PBwrap.wrapUnrecoverable(metaKey.getTopic(), sourceIdentify, period, rollTs, isFinal);
+    public void reportUnrecoverable(MetaKey metaKey, String source, final long period, final long rollTs, boolean isFinal) {
+        Message message = PBwrap.wrapUnrecoverable(metaKey.getTopic(), source, period, rollTs, isFinal);
         send(message);
     }
 
-    public void reportRecoveryFail(MetaKey metaKey, String sourceIdentify, long period, final long rollTs, boolean isFinal) {
-        Message message = PBwrap.wrapRecoveryFail(metaKey.getTopic(), sourceIdentify, period, rollTs, isFinal);
+    public void reportRecoveryFail(MetaKey metaKey, String source, long period, final long rollTs, boolean isFinal) {
+        Message message = PBwrap.wrapRecoveryFail(metaKey.getTopic(), source, period, rollTs, isFinal);
         send(message);
     }
 
@@ -389,7 +398,7 @@ public class Agent implements Runnable {
                 }
                 break;
             case NOAVAILABLECONF:
-                if (confLoopFactor < 30) {
+                if (confLoopFactor < 20) {
                     confLoopFactor = confLoopFactor << 1;
                 }
                 int randomSecond = confLoopFactor * (random.nextInt(21) + 40);
@@ -418,7 +427,11 @@ public class Agent implements Runnable {
                             confKeeper.addRawProperty(topic + "."
                                     + ParamsKey.TopicConf.ROLL_PERIOD, lxcConfRes.getPeriod());
                             confKeeper.addRawProperty(topic + "."
+                                    + ParamsKey.TopicConf.BATCH_PERIOD, lxcConfRes.getBatchPeriod());
+                            confKeeper.addRawProperty(topic + "."
                                     + ParamsKey.TopicConf.MAX_LINE_SIZE, lxcConfRes.getMaxLineSize());
+                            confKeeper.addRawProperty(topic + "."
+                                    + ParamsKey.TopicConf.READ_INTERVAL, lxcConfRes.getReadInterval());
                             fillUpAppLogsFromConfig(metaKey);
                             register(metaKey, Util.getTS());
                             if (this.heartbeat == null || !this.heartbeat.isAlive()) {
@@ -430,11 +443,13 @@ public class Agent implements Runnable {
                     }
                 } else {
                     List<AppConfRes> appConfResList = confRes.getAppConfResList();
+                    int accepted = 0;
                     for (AppConfRes appConfRes : appConfResList) {
                         topic = appConfRes.getTopic();
                         metaKey = new MetaKey(topic, null);
                         if (logMetas.containsKey(metaKey)) {
                             LOG.info(metaKey + " has already in used.");
+                            ++accepted;
                             continue;
                         }
                         //check files existence
@@ -444,9 +459,13 @@ public class Agent implements Runnable {
                         confKeeper.addRawProperty(topic + "."
                                 + ParamsKey.TopicConf.ROLL_PERIOD, appConfRes.getPeriod());
                         confKeeper.addRawProperty(topic + "."
+                                + ParamsKey.TopicConf.BATCH_PERIOD, appConfRes.getBatchPeriod());
+                        confKeeper.addRawProperty(topic + "."
                                 + ParamsKey.TopicConf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
-                        
+                        confKeeper.addRawProperty(topic + "."
+                                + ParamsKey.TopicConf.READ_INTERVAL, appConfRes.getReadInterval());
                         fillUpAppLogsFromConfig(metaKey);
+                        ++accepted;
                         register(metaKey, Util.getTS());
                         if (this.heartbeat == null || !this.heartbeat.isAlive()) {
                             this.heartbeat = new HeartBeat(supervisor);
@@ -454,8 +473,8 @@ public class Agent implements Runnable {
                             this.heartbeat.start();
                         }
                     }
-                    if (logMetas.size() < appConfResList.size()) {
-                        LOG.error("Not all configurations are correct, sleep 5 minutes...");
+                    if (accepted < appConfResList.size()) {
+                        LOG.error("Not all configurations are accepted, sleep 5 minutes...");
                         requireConfigFromSupersivor(5 * 60);
                     }
                 }
@@ -475,7 +494,7 @@ public class Agent implements Runnable {
                                     LOG.warn("QUIT but " + topicMeta.getTailFile() + " not exists, retire stream and trigger CLEAN.");
                                     send(PBwrap.wrapRetireStream(topic, hostname, id));
                                 } else if ((logReader = topicReaders.get(topicMeta)) != null) {
-                                    logReader.eventWriter.processLastRotate();
+                                    logReader.beginLastLogRotate();
                                 } else {
                                     LOG.info(topicMeta + " has already stopped.");
                                 }

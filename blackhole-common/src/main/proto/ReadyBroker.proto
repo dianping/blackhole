@@ -5,7 +5,7 @@ option java_outer_classname = "ReadyBrokerPB";
 
 message ReadyBroker {
     required string topic = 1;
-    required string source_identify = 2;
+    required string source = 2;
     required string broker_server = 3;
     required int64 period = 4;
     required int64 connectedTs = 5;

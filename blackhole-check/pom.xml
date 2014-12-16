@@ -12,20 +12,15 @@
 	<packaging>jar</packaging>
 	<dependencies>
 		<dependency>
-			<groupId>com.dp.cosmos</groupId>
-			<artifactId>hadoop-core</artifactId>
-			<version>1.0.3.0</version>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-client</artifactId>
+			<version>2.4.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-            <groupId>com.dianping.lion</groupId>
-            <artifactId>lion-client</artifactId>
-            <version>0.2.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.dianping.lion</groupId>
-            <artifactId>lion-${env}</artifactId>
-            <version>1.0.0</version>
-        </dependency>
+			<groupId>com.dianping.lion</groupId>
+			<artifactId>lion-client</artifactId>
+			<version>0.4.5</version>
+		</dependency>
 	</dependencies>
 </project>

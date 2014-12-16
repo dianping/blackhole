@@ -1,6 +1,7 @@
 package com.dp.blackhole.check;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +65,7 @@ public class TimeChecker extends Thread {
                 continue;
             }
             List<Long> checkTsList = entry.getValue();
-            Path expectedFile = null;
+            Path expectedFile[] = null;
             Path hiddenFile = null;
             for (int index = 0; index < checkTsList.size(); index++) {
                 boolean shouldDone = true;
@@ -74,16 +75,16 @@ public class TimeChecker extends Thread {
                 }
                 for(String source : ident.sources) {
                     expectedFile = Util.getRollHdfsPathByTs(ident, checkTs, source, false);
-                    hiddenFile = Util.getRollHdfsPathByTs(ident, checkTs, source, true);
+                    hiddenFile = Util.getRollHdfsPathByTs(ident, checkTs, source, true)[0];
                     if (Util.retryExists(expectedFile) || Util.retryExists(hiddenFile)) {
                     } else {
-                        LOG.debug("TimeChecker: File " + expectedFile + " not ready.");
+                        LOG.debug("TimeChecker:  None of " + Arrays.toString(expectedFile) + " is ready.");
                         shouldDone = false;
                         break;
                     }
                 }
                 if (shouldDone) {
-                    if (Util.retryTouch(expectedFile.getParent(), Util.DONE_FLAG)) {
+                    if (Util.retryTouch(expectedFile[0].getParent(), Util.DONE_FLAG)) {
                         LOG.info("TimeChecker: [" + ident.app + ":" + Util.format.format(new Date(checkTs)) + "]....Done!");
                         checkTsList.remove(index);
                     } else {

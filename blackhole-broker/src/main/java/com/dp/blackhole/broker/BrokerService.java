@@ -191,13 +191,13 @@ public class BrokerService extends Thread {
         }
         
         public void handleRegisterRequest(RegisterRequest request, DelegationIOConnection from) {
-            clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT, request.sourceIdentify));
+            clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT, request.source));
             try {
-                manager.getPartition(request.topic, request.sourceIdentify, true);
+                manager.getPartition(request.topic, request.source, true);
             } catch (IOException e) {
                 LOG.error("Got an IOE", e);
             }
-            Message msg = PBwrap.wrapReadyBroker(request.topic, request.sourceIdentify, request.peroid, request.broker, Util.getTS());
+            Message msg = PBwrap.wrapReadyBroker(request.topic, request.source, request.peroid, request.broker, Util.getTS());
             Broker.getSupervisor().send(msg);
         }
         
@@ -256,8 +256,8 @@ public class BrokerService extends Thread {
             LOG.info(connection + " disconnected");
             ClientDesc desc = clients.get(connection);
             if (desc.type == ClientDesc.AGENT) {
-                manager.removePartition(desc.topic, desc.sourceIdentify);
-                Broker.getRollMgr().reportFailure(desc.topic, desc.sourceIdentify, Util.getTS());
+                manager.removePartition(desc.topic, desc.source);
+                Broker.getRollMgr().reportFailure(desc.topic, desc.source, Util.getTS());
             }
             clients.remove(connection);
         }
@@ -270,12 +270,12 @@ public class BrokerService extends Thread {
         
         public String topic;
         public int type;
-        public String sourceIdentify;
+        public String source;
         
-        public ClientDesc (String topic, int type, String sourceIdentify) {
+        public ClientDesc (String topic, int type, String source) {
             this.topic = topic;
             this.type = type;
-            this.sourceIdentify = sourceIdentify;
+            this.source = source;
         }
         
         public ClientDesc(int type) {

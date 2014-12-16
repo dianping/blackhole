@@ -30,13 +30,14 @@ import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup;
 import com.dp.blackhole.supervisor.ConfigManager;
 import com.dp.blackhole.supervisor.Supervisor;
+import com.dp.blackhole.supervisor.model.TopicConfig;
 
 public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRequestHandler {
     private static Logger LOG = Logger.getLogger(HttpPaaSLogoutHandler.class);
     private ConfigManager configManager;
     private Supervisor supervisor;
     
-    public HttpPaaSLogoutHandler(ConfigManager configManger, HttpClientSingle httpClient) {
+    public HttpPaaSLogoutHandler(ConfigManager configManger) {
         this.configManager = configManger;
         this.supervisor = configManger.getSupervisor();
     }
@@ -48,7 +49,7 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
         String method = request.getRequestLine().getMethod()
                 .toUpperCase(Locale.ENGLISH);
 
-        LOG.debug("Frontend: Handling Search; Line = " + request.getRequestLine());
+        LOG.debug("Frontend: Handling paas logout; Line = " + request.getRequestLine());
         if (method.equals("GET")) {
             final String target = request.getRequestLine().getUri();
             Pattern p = Pattern.compile("/paaslogout\\?app=(.*)&ids=(.*)&ips=(.*)$");
@@ -176,7 +177,10 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
                 Set<String> topicSet = configManager.getTopicsByCmdb(app);
                 for (String topic : topicSet) {
                     //update <topic,<host,ids>> map
-                    configManager.removeIdsByTopicAndHost(topic, hostIds);
+                    TopicConfig topicConfig = configManager.getConfByTopic(topic);
+                    if (topicConfig != null) {
+                        topicConfig.removeIdsByHosts(hostIds);
+                    }
                 }
                 return new HttpResult(HttpResult.SUCCESS, "");
             }
@@ -198,7 +202,7 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
                 String host = entry.getKey();
                 Set<String> ids = entry.getValue();
                 for (String id : ids) {
-                    if (!supervisor.isEmptyStream(topic, Util.getSourceIdentify(host, id))) {
+                    if (!supervisor.isEmptyStream(topic, Util.getSource(host, id))) {
                         return false;
                     }
                 }
@@ -214,7 +218,7 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
                 String host = entry.getKey();
                 Set<String> ids = entry.getValue();
                 for (String id : ids) {
-                    if (!supervisor.isCleanStream(topic, Util.getSourceIdentify(host, id))) {
+                    if (!supervisor.isCleanStream(topic, Util.getSource(host, id))) {
                         return false;
                     }
                 }

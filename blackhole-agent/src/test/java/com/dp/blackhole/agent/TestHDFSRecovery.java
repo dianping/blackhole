@@ -8,22 +8,24 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.compress.Compressor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dp.blackhole.agent.TopicMeta;
 import com.dp.blackhole.agent.RollRecovery;
 import com.dp.blackhole.agent.SimAgent;
 import com.dp.blackhole.agent.TopicMeta.MetaKey;
+import com.dp.blackhole.broker.Compression;
+import com.dp.blackhole.broker.Compression.Algorithm;
 import com.dp.blackhole.broker.SimBroker;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
@@ -87,7 +89,7 @@ public class TestHDFSRecovery {
     @Test
     public void test() throws IOException, InterruptedException {
         MetaKey metaKey = new MetaKey(MAGIC, null);
-        TopicMeta appLog = new TopicMeta(metaKey, file.getAbsolutePath(), 3600, 1024);
+        TopicMeta appLog = new TopicMeta(metaKey, file.getAbsolutePath(), 3600, 3600, 1024, 1L);
         RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();
@@ -111,7 +113,10 @@ public class TestHDFSRecovery {
         byte[] buf = new byte[8196];
         BufferedInputStream bin= new BufferedInputStream(new FileInputStream(file));
         File gzFile = new File(file.getAbsoluteFile() + ".tmp");
-        GZIPOutputStream gout = new GZIPOutputStream(new FileOutputStream(gzFile));
+        Algorithm compressionAlgo = Compression.getCompressionAlgorithmByName("gz");
+        Compressor compressor = compressionAlgo.getCompressor();
+        OutputStream gout = compressionAlgo.createCompressionStream(
+                new FileOutputStream(gzFile), compressor, 0);
         int len;
         while ((len = bin.read(buf)) != -1) {
             gout.write(buf, 0, len);

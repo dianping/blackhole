@@ -25,21 +25,19 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.log4j.Logger;
 
 import com.dp.blackhole.common.PBwrap;
-import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.conf.ConfigKeeper;
-import com.dp.blackhole.conf.Context;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.supervisor.ConfigManager;
 import com.dp.blackhole.supervisor.Supervisor;
+import com.dp.blackhole.supervisor.model.TopicConfig;
 
 public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpRequestHandler {
     private static Logger LOG = Logger.getLogger(HttpPaaSLoginHandler.class);
     private ConfigManager configManager;
     private Supervisor supervisor;
     
-    public HttpPaaSLoginHandler(ConfigManager configManger, HttpClientSingle httpClient) {
+    public HttpPaaSLoginHandler(ConfigManager configManger) {
         this.configManager = configManger;
         this.supervisor = configManger.getSupervisor();
     }
@@ -51,7 +49,7 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
         String method = request.getRequestLine().getMethod()
                 .toUpperCase(Locale.ENGLISH);
 
-        LOG.debug("Frontend: Handling Search; Line = " + request.getRequestLine());
+        LOG.debug("Frontend: Handling paas login; Line = " + request.getRequestLine());
         if (method.equals("GET")) {
             final String target = request.getRequestLine().getUri();
             Pattern p = Pattern.compile("/paaslogin\\?app=(.*)&ids=(.*)&ips=(.*)$");
@@ -120,16 +118,20 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
                 }
                 // filter the stream already active
                 filterHost(topic, eachHost, idsInTheSameHost, true, supervisor);
-                
-                Context context = ConfigKeeper.configMap.get(topic);
-                if (context == null) {
-                    LOG.error("Can not get topic: " + topic + " from configMap");
-                    return new HttpResult(HttpResult.FAILURE, "Can not get topic: " + topic + " from configMap");
+                if (idsInTheSameHost.size() == 0) {
+                    //streams in the same host were active, no need to send any more
+                    continue;
                 }
-                String period = context.getString(ParamsKey.TopicConf.ROLL_PERIOD);
-                String maxLineSize = context.getString(ParamsKey.TopicConf.MAX_LINE_SIZE);
-                String watchFile = context.getString(ParamsKey.TopicConf.WATCH_FILE);
-                LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, period, maxLineSize, idsInTheSameHost);
+                TopicConfig topicConfig = configManager.getConfByTopic(topic);
+                if (topicConfig == null) {
+                    LOG.error("Can not get config of " + topic + " from configMap");
+                    return new HttpResult(HttpResult.FAILURE, "Can not get config of " + topic + " from configMap");
+                }
+                String period = String.valueOf(topicConfig.getRollPeriod());
+                String maxLineSize = String.valueOf(topicConfig.getMaxLineSize());
+                String watchFile = topicConfig.getWatchLog();
+                String readInterval = String.valueOf(topicConfig.getReadInterval());
+                LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, period, maxLineSize, readInterval, idsInTheSameHost);
                 lxcConfResList.add(lxcConfRes);
             }
             Message message = PBwrap.wrapConfRes(null, lxcConfResList);
@@ -155,7 +157,10 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
                         configManager.addTopicToHost(eachHost, topic);
                     }
                     //fill <topic,<host,ids>> map
-                    configManager.addIdsByTopicAndHost(topic, hostIds);
+                    TopicConfig topicConfig = configManager.getConfByTopic(topic);
+                    if (topicConfig != null) {
+                        topicConfig.addIdsByHosts(hostIds);
+                    }
                 }
                 return new HttpResult(HttpResult.SUCCESS, "");
             }
@@ -178,7 +183,7 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
                 String host = entry.getKey();
                 Set<String> ids = entry.getValue();
                 for (String id : ids) {
-                    if (!supervisor.isActiveStream(topic, Util.getSourceIdentify(host, id))) {
+                    if (!supervisor.isActiveStream(topic, Util.getSource(host, id))) {
                         return false;
                     }
                 }

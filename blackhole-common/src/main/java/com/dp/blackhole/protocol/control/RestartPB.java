@@ -8,71 +8,192 @@ public final class RestartPB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  public interface RestartOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // repeated string agent_servers = 1;
+    /**
+     * <code>repeated string agent_servers = 1;</code>
+     */
+    java.util.List<java.lang.String>
+    getAgentServersList();
+    /**
+     * <code>repeated string agent_servers = 1;</code>
+     */
+    int getAgentServersCount();
+    /**
+     * <code>repeated string agent_servers = 1;</code>
+     */
+    java.lang.String getAgentServers(int index);
+    /**
+     * <code>repeated string agent_servers = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getAgentServersBytes(int index);
+  }
+  /**
+   * Protobuf type {@code blackhole.Restart}
+   */
   public static final class Restart extends
-      com.google.protobuf.GeneratedMessage {
+      com.google.protobuf.GeneratedMessage
+      implements RestartOrBuilder {
     // Use Restart.newBuilder() to construct.
-    private Restart() {
-      initFields();
+    private Restart(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private Restart(boolean noInit) {}
-    
+    private Restart(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final Restart defaultInstance;
     public static Restart getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public Restart getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private Restart(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                agentServers_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              agentServers_.add(input.readBytes());
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          agentServers_ = new com.google.protobuf.UnmodifiableLazyStringList(agentServers_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.RestartPB.internal_static_blackhole_Restart_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.RestartPB.internal_static_blackhole_Restart_fieldAccessorTable;
+      return com.dp.blackhole.protocol.control.RestartPB.internal_static_blackhole_Restart_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.dp.blackhole.protocol.control.RestartPB.Restart.class, com.dp.blackhole.protocol.control.RestartPB.Restart.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<Restart> PARSER =
+        new com.google.protobuf.AbstractParser<Restart>() {
+      public Restart parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new Restart(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Restart> getParserForType() {
+      return PARSER;
+    }
+
     // repeated string agent_servers = 1;
     public static final int AGENT_SERVERS_FIELD_NUMBER = 1;
-    private java.util.List<java.lang.String> agentServers_ =
-      java.util.Collections.emptyList();
-    public java.util.List<java.lang.String> getAgentServersList() {
+    private com.google.protobuf.LazyStringList agentServers_;
+    /**
+     * <code>repeated string agent_servers = 1;</code>
+     */
+    public java.util.List<java.lang.String>
+        getAgentServersList() {
       return agentServers_;
     }
-    public int getAgentServersCount() { return agentServers_.size(); }
+    /**
+     * <code>repeated string agent_servers = 1;</code>
+     */
+    public int getAgentServersCount() {
+      return agentServers_.size();
+    }
+    /**
+     * <code>repeated string agent_servers = 1;</code>
+     */
     public java.lang.String getAgentServers(int index) {
       return agentServers_.get(index);
     }
-    
-    private void initFields() {
+    /**
+     * <code>repeated string agent_servers = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAgentServersBytes(int index) {
+      return agentServers_.getByteString(index);
     }
+
+    private void initFields() {
+      agentServers_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (java.lang.String element : getAgentServersList()) {
-        output.writeString(1, element);
+      for (int i = 0; i < agentServers_.size(); i++) {
+        output.writeBytes(1, agentServers_.getByteString(i));
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       {
         int dataSize = 0;
-        for (java.lang.String element : getAgentServersList()) {
+        for (int i = 0; i < agentServers_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-            .computeStringSizeNoTag(element);
+            .computeBytesSizeNoTag(agentServers_.getByteString(i));
         }
         size += dataSize;
         size += 1 * getAgentServersList().size();
@@ -81,153 +202,157 @@ public final class RestartPB {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
     public static com.dp.blackhole.protocol.control.RestartPB.Restart parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.RestartPB.Restart parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RestartPB.Restart parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.RestartPB.Restart parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RestartPB.Restart parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.RestartPB.Restart parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RestartPB.Restart parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static com.dp.blackhole.protocol.control.RestartPB.Restart parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RestartPB.Restart parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.RestartPB.Restart parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.RestartPB.Restart prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code blackhole.Restart}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> {
-      private com.dp.blackhole.protocol.control.RestartPB.Restart result;
-      
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.dp.blackhole.protocol.control.RestartPB.RestartOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.dp.blackhole.protocol.control.RestartPB.internal_static_blackhole_Restart_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.dp.blackhole.protocol.control.RestartPB.internal_static_blackhole_Restart_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.dp.blackhole.protocol.control.RestartPB.Restart.class, com.dp.blackhole.protocol.control.RestartPB.Restart.Builder.class);
+      }
+
       // Construct using com.dp.blackhole.protocol.control.RestartPB.Restart.newBuilder()
-      private Builder() {}
-      
-      private static Builder create() {
-        Builder builder = new Builder();
-        builder.result = new com.dp.blackhole.protocol.control.RestartPB.Restart();
-        return builder;
+      private Builder() {
+        maybeForceBuilderInitialization();
       }
-      
-      protected com.dp.blackhole.protocol.control.RestartPB.Restart internalGetResult() {
-        return result;
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
       }
-      
-      public Builder clear() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "Cannot call clear() after build().");
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
         }
-        result = new com.dp.blackhole.protocol.control.RestartPB.Restart();
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        agentServers_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
-        return create().mergeFrom(result);
+        return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.RestartPB.Restart.getDescriptor();
+        return com.dp.blackhole.protocol.control.RestartPB.internal_static_blackhole_Restart_descriptor;
       }
-      
+
       public com.dp.blackhole.protocol.control.RestartPB.Restart getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance();
       }
-      
-      public boolean isInitialized() {
-        return result.isInitialized();
-      }
+
       public com.dp.blackhole.protocol.control.RestartPB.Restart build() {
-        if (result != null && !isInitialized()) {
+        com.dp.blackhole.protocol.control.RestartPB.Restart result = buildPartial();
+        if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return buildPartial();
+        return result;
       }
-      
-      private com.dp.blackhole.protocol.control.RestartPB.Restart buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        if (!isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return buildPartial();
-      }
-      
+
       public com.dp.blackhole.protocol.control.RestartPB.Restart buildPartial() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "build() has already been called on this Builder.");
+        com.dp.blackhole.protocol.control.RestartPB.Restart result = new com.dp.blackhole.protocol.control.RestartPB.Restart(this);
+        int from_bitField0_ = bitField0_;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          agentServers_ = new com.google.protobuf.UnmodifiableLazyStringList(
+              agentServers_);
+          bitField0_ = (bitField0_ & ~0x00000001);
         }
-        if (result.agentServers_ != java.util.Collections.EMPTY_LIST) {
-          result.agentServers_ =
-            java.util.Collections.unmodifiableList(result.agentServers_);
-        }
-        com.dp.blackhole.protocol.control.RestartPB.Restart returnMe = result;
-        result = null;
-        return returnMe;
+        result.agentServers_ = agentServers_;
+        onBuilt();
+        return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.RestartPB.Restart) {
           return mergeFrom((com.dp.blackhole.protocol.control.RestartPB.Restart)other);
@@ -236,107 +361,156 @@ public final class RestartPB {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.dp.blackhole.protocol.control.RestartPB.Restart other) {
         if (other == com.dp.blackhole.protocol.control.RestartPB.Restart.getDefaultInstance()) return this;
         if (!other.agentServers_.isEmpty()) {
-          if (result.agentServers_.isEmpty()) {
-            result.agentServers_ = new java.util.ArrayList<java.lang.String>();
+          if (agentServers_.isEmpty()) {
+            agentServers_ = other.agentServers_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureAgentServersIsMutable();
+            agentServers_.addAll(other.agentServers_);
           }
-          result.agentServers_.addAll(other.agentServers_);
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              addAgentServers(input.readString());
-              break;
-            }
+        com.dp.blackhole.protocol.control.RestartPB.Restart parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.dp.blackhole.protocol.control.RestartPB.Restart) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
-      
+      private int bitField0_;
+
       // repeated string agent_servers = 1;
-      public java.util.List<java.lang.String> getAgentServersList() {
-        return java.util.Collections.unmodifiableList(result.agentServers_);
+      private com.google.protobuf.LazyStringList agentServers_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureAgentServersIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          agentServers_ = new com.google.protobuf.LazyStringArrayList(agentServers_);
+          bitField0_ |= 0x00000001;
+         }
       }
+      /**
+       * <code>repeated string agent_servers = 1;</code>
+       */
+      public java.util.List<java.lang.String>
+          getAgentServersList() {
+        return java.util.Collections.unmodifiableList(agentServers_);
+      }
+      /**
+       * <code>repeated string agent_servers = 1;</code>
+       */
       public int getAgentServersCount() {
-        return result.getAgentServersCount();
+        return agentServers_.size();
       }
+      /**
+       * <code>repeated string agent_servers = 1;</code>
+       */
       public java.lang.String getAgentServers(int index) {
-        return result.getAgentServers(index);
+        return agentServers_.get(index);
       }
-      public Builder setAgentServers(int index, java.lang.String value) {
+      /**
+       * <code>repeated string agent_servers = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAgentServersBytes(int index) {
+        return agentServers_.getByteString(index);
+      }
+      /**
+       * <code>repeated string agent_servers = 1;</code>
+       */
+      public Builder setAgentServers(
+          int index, java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.agentServers_.set(index, value);
+  ensureAgentServersIsMutable();
+        agentServers_.set(index, value);
+        onChanged();
         return this;
       }
-      public Builder addAgentServers(java.lang.String value) {
+      /**
+       * <code>repeated string agent_servers = 1;</code>
+       */
+      public Builder addAgentServers(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  if (result.agentServers_.isEmpty()) {
-          result.agentServers_ = new java.util.ArrayList<java.lang.String>();
-        }
-        result.agentServers_.add(value);
+  ensureAgentServersIsMutable();
+        agentServers_.add(value);
+        onChanged();
         return this;
       }
+      /**
+       * <code>repeated string agent_servers = 1;</code>
+       */
       public Builder addAllAgentServers(
-          java.lang.Iterable<? extends java.lang.String> values) {
-        if (result.agentServers_.isEmpty()) {
-          result.agentServers_ = new java.util.ArrayList<java.lang.String>();
-        }
-        super.addAll(values, result.agentServers_);
+          java.lang.Iterable<java.lang.String> values) {
+        ensureAgentServersIsMutable();
+        super.addAll(values, agentServers_);
+        onChanged();
         return this;
       }
+      /**
+       * <code>repeated string agent_servers = 1;</code>
+       */
       public Builder clearAgentServers() {
-        result.agentServers_ = java.util.Collections.emptyList();
+        agentServers_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>repeated string agent_servers = 1;</code>
+       */
+      public Builder addAgentServersBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureAgentServersIsMutable();
+        agentServers_.add(value);
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.Restart)
     }
-    
+
     static {
       defaultInstance = new Restart(true);
-      com.dp.blackhole.protocol.control.RestartPB.internalForceInit();
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:blackhole.Restart)
   }
-  
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_Restart_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_Restart_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -359,9 +533,7 @@ public final class RestartPB {
           internal_static_blackhole_Restart_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Restart_descriptor,
-              new java.lang.String[] { "AgentServers", },
-              com.dp.blackhole.protocol.control.RestartPB.Restart.class,
-              com.dp.blackhole.protocol.control.RestartPB.Restart.Builder.class);
+              new java.lang.String[] { "AgentServers", });
           return null;
         }
       };
@@ -370,8 +542,6 @@ public final class RestartPB {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-  
-  public static void internalForceInit() {}
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }

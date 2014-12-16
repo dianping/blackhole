@@ -1,4 +1,4 @@
-package com.dp.blackhole.supervisor;
+package com.dp.blackhole.supervisor.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.SimpleConnection;
 
-public class ConnectionDescription {
+public class ConnectionDesc {
     public static final int AGENT = 1;
     public static final int BROKER = 2;
     public static final int CONSUMER = 3;
@@ -15,9 +15,11 @@ public class ConnectionDescription {
     private int type;
     private AtomicLong lastHeartBeat;
     private SimpleConnection connection;
+    //Storm sets up multi-thread(Executors) in a processor(worker),
+    //each executor will register a consumer entity
     private List<NodeDesc> attachments;
     
-    public ConnectionDescription(SimpleConnection connection) {
+    public ConnectionDesc(SimpleConnection connection) {
         this.connection = connection;
         lastHeartBeat = new AtomicLong(Util.getTS());
         attachments = new ArrayList<NodeDesc>();

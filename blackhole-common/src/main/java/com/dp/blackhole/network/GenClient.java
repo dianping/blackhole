@@ -156,6 +156,7 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         SocketChannel channel = (SocketChannel) key.channel();
         key.interestOps(SelectionKey.OP_READ);
         channel.finishConnect();
+        LOG.info("GenClient "+ clientName + " connectted to " + host + ":" + port);
         
         connected.getAndSet(true);
         Connection connection = factory.makeConnection(channel, selector, wrappedFactory);

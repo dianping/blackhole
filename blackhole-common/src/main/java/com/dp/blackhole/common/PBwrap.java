@@ -152,10 +152,10 @@ public class PBwrap {
         return wrapMessage(MessageType.NOAVAILABLENODE, builder.build());
     }
     
-    public static Message wrapTopicReg(String topic, String sourceIdentify, long regTs) {
+    public static Message wrapTopicReg(String topic, String source, long regTs) {
         AppReg.Builder builder = AppReg.newBuilder();
         builder.setTopic(topic);
-        builder.setSourceIdentify(sourceIdentify);
+        builder.setSource(source);
         builder.setRegTs(regTs);
         return wrapMessage(MessageType.APP_REG, builder.build());
     }
@@ -178,45 +178,54 @@ public class PBwrap {
         return wrapMessage(MessageType.ASSIGN_BROKER, builder.build());
     }
     
-    public static Message wrapReadyBroker(String topic, String sourceIdentify, long peroid, String broker_server, long connectedTs) {
+    public static Message wrapReadyBroker(String topic, String source, long peroid, String broker_server, long connectedTs) {
         ReadyBroker.Builder builder = ReadyBroker.newBuilder();
         builder.setTopic(topic);
-        builder.setSourceIdentify(sourceIdentify);
+        builder.setSource(source);
         builder.setPeriod(peroid);
         builder.setBrokerServer(broker_server);
         builder.setConnectedTs(connectedTs);
         return wrapMessage(MessageType.READY_BROKER, builder.build());
     }
     
-    public static Message wrapAppRoll(String topic, String sourceIdentify, long period, long rollTs) {
+    public static Message wrapAppRoll(String topic, String source, long period, long rollTs) {
         AppRoll.Builder builder = AppRoll.newBuilder();
         builder.setTopic(topic);
-        builder.setSourceIdentify(sourceIdentify);
+        builder.setSource(source);
         builder.setPeriod(period);
         builder.setRollTs(rollTs);
         return wrapMessage(MessageType.APP_ROLL, builder.build());
     }
     
-    public static RollID wrapRollID(String topic, String sourceIdentify, long period, long rollTs, boolean isFinal) {
+    public static RollID wrapRollID(String appName, String appServer, long period, long rollTs, boolean isFinal) {
+        return wrapRollID(appName, appServer, period, rollTs, isFinal, "");
+    }
+    
+    public static RollID wrapRollID(String topic, String source, long period, long rollTs, boolean isFinal, String compression) {
         RollID.Builder builder = RollID.newBuilder();
         builder.setTopic(topic);
-        builder.setSourceIdentify(sourceIdentify);
+        builder.setSource(source);
         builder.setPeriod(period);
         builder.setRollTs(rollTs);
         builder.setIsFinal(isFinal);
+        if (compression == null) {
+            builder.setCompression(ParamsKey.COMPRESSION_UNDEFINED);
+        } else {
+            builder.setCompression(compression);
+        }
         return builder.build();
     }
     
-    public static Message wrapUploadRoll(String appName, String sourceIdentify, long period, long rollTs, boolean isFinal) {
-        return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(appName, sourceIdentify, period, rollTs, isFinal));
+    public static Message wrapUploadRoll(String appName, String source, long period, long rollTs, boolean isFinal, String compression) {
+        return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(appName, source, period, rollTs, isFinal, compression));
     }
     
-    public static Message wrapUploadSuccess(String appName, String appServer, long period, long rollTs, boolean isFinal) {
-        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(appName, appServer, period, rollTs, isFinal));
+    public static Message wrapUploadSuccess(String appName, String appServer, long period, long rollTs, boolean isFinal, String compression) {
+        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(appName, appServer, period, rollTs, isFinal, compression));
     }
     
-    public static Message wrapUploadFail(String appName, String sourceIdentify, long period, long rollTs, boolean isFinal) {
-        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, sourceIdentify, period, rollTs, isFinal));
+    public static Message wrapUploadFail(String appName, String source, long period, long rollTs, boolean isFinal, String compression) {
+        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, source, period, rollTs, isFinal, compression));
     }
     
     public static Message wrapRecoveryRoll(String topic, String brokerServer, int port, long rollTs, String instanceId, boolean isFinal) {
@@ -232,37 +241,37 @@ public class PBwrap {
         return wrapMessage(MessageType.RECOVERY_ROLL, builder.build());
     }
     
-    public static Message wrapRecoverySuccess(String appName, String sourceIdentify, long period, long rollTs, boolean isFinal) {
-        return wrapMessage(MessageType.RECOVERY_SUCCESS, wrapRollID(appName, sourceIdentify, period, rollTs, isFinal));
+    public static Message wrapRecoverySuccess(String appName, String source, long period, long rollTs, boolean isFinal) {
+        return wrapMessage(MessageType.RECOVERY_SUCCESS, wrapRollID(appName, source, period, rollTs, isFinal));
     }
     
-    public static Message wrapRecoveryFail(String appName, String sourceIdentify, long period, long rollTs, boolean isFinal) {
-        return wrapMessage(MessageType.RECOVERY_FAIL, wrapRollID(appName, sourceIdentify, period, rollTs, isFinal));
+    public static Message wrapRecoveryFail(String appName, String source, long period, long rollTs, boolean isFinal) {
+        return wrapMessage(MessageType.RECOVERY_FAIL, wrapRollID(appName, source, period, rollTs, isFinal));
     }
     
-    public static Message wrapFailure (String topic, String sourceIdentify, NodeType type, long failTs) {
+    public static Message wrapFailure (String topic, String source, NodeType type, long failTs) {
         Failure.Builder builder = Failure.newBuilder();
         builder.setTopic(topic);
         builder.setType(type);
-        builder.setSourceIdentify(sourceIdentify);
+        builder.setSource(source);
         builder.setFailTs(failTs);
         return wrapMessage(MessageType.FAILURE, builder.build());
     }
     
-    public static Message wrapAppFailure (String app, String sourceIdentify, long failTs) {
-       return wrapFailure(app, sourceIdentify, NodeType.APP_NODE, failTs);
+    public static Message wrapAppFailure (String app, String source, long failTs) {
+       return wrapFailure(app, source, NodeType.APP_NODE, failTs);
     }
     
-    public static Message wrapBrokerFailure (String app, String sourceIdentify, long failTs) {
-        return wrapFailure(app, sourceIdentify, NodeType.BROKER_NODE, failTs);
+    public static Message wrapBrokerFailure (String app, String source, long failTs) {
+        return wrapFailure(app, source, NodeType.BROKER_NODE, failTs);
     }
     
-    public static Message wrapUnrecoverable(String appName, String sourceIdentify, long period, long rollTs, boolean isFinal) {
-        return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, sourceIdentify, period, rollTs, isFinal));
+    public static Message wrapUnrecoverable(String appName, String source, long period, long rollTs, boolean isFinal) {
+        return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, source, period, rollTs, isFinal));
     }
     
-    public static Message wrapManualRecoveryRoll(String appName, String sourceIdentify, long period, long rollTs) {
-        return wrapMessage(MessageType.MANUAL_RECOVERY_ROLL, wrapRollID(appName, sourceIdentify, period, rollTs, false));
+    public static Message wrapManualRecoveryRoll(String appName, String source, long period, long rollTs) {
+        return wrapMessage(MessageType.MANUAL_RECOVERY_ROLL, wrapRollID(appName, source, period, rollTs, false));
     }
     
     public static Message wrapRetireStream(String topic, String agentServer, String instanceId) {
@@ -281,7 +290,8 @@ public class PBwrap {
         return wrapMessage(MessageType.CONF_REQ, null);
     }
     
-    public static AppConfRes wrapAppConfRes (String topic, String watchFile, String period, String maxLineSize) {
+    public static AppConfRes wrapAppConfRes(String topic, String watchFile,
+            String period, String maxLineSize, String readInterval) {
         AppConfRes.Builder builder = AppConfRes.newBuilder();
         builder.setTopic(topic);
         builder.setPeriod(period);
@@ -289,10 +299,12 @@ public class PBwrap {
         if (maxLineSize != null) {
             builder.setMaxLineSize(maxLineSize);
         }
+        builder.setReadInterval(readInterval);
         return builder.build();
     }
     
-    public static LxcConfRes wrapLxcConfRes (String topic, String watchFile, String period, String maxLineSize, Set<String> ids) {
+    public static LxcConfRes wrapLxcConfRes(String topic, String watchFile,
+            String period, String maxLineSize, String readInterval, Set<String> ids) {
         LxcConfRes.Builder builder = LxcConfRes.newBuilder();
         builder.setTopic(topic);
         builder.setPeriod(period);
@@ -300,6 +312,7 @@ public class PBwrap {
         if (maxLineSize != null) {
             builder.setMaxLineSize(maxLineSize);
         }
+        builder.setReadInterval(readInterval);
         builder.addAllInstanceIds(ids);
         return builder.build();
     }
@@ -350,8 +363,8 @@ public class PBwrap {
         return wrapMessage(MessageType.DUMP_APP, builder.build());
     }
 
-    public static Message wrapMarkUnrecoverable(String appName, String sourceIdentify, long period, long rollTs) {
-        return wrapMessage(MessageType.MAKR_UNRECOVERABLE, wrapRollID(appName, sourceIdentify, period, rollTs, false));
+    public static Message wrapMarkUnrecoverable(String appName, String source, long period, long rollTs) {
+        return wrapMessage(MessageType.MAKR_UNRECOVERABLE, wrapRollID(appName, source, period, rollTs, false));
     }
 
     /**
@@ -456,10 +469,10 @@ public class PBwrap {
         return wrapMessage(MessageType.CLEAN, builder.build());
     }
     
-    public static Message wrapRollClean(String topic, String sourceIdentify, long period) {
+    public static Message wrapRollClean(String topic, String source, long period) {
         RollClean.Builder builder = RollClean.newBuilder();
         builder.setTopic(topic);
-        builder.setSourceIdentify(sourceIdentify);
+        builder.setSource(source);
         builder.setPeriod(period);
         return wrapMessage(MessageType.ROLL_CLEAN, builder.build());
     }

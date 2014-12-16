@@ -4,12 +4,12 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.compress.Compressor;
 
 public class HDFSRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(HDFSRecovery.class);
@@ -38,8 +38,13 @@ public class HDFSRecovery implements Runnable{
     @Override
     public void run() {
         OutputStream out = null;
+        String normalPathname;
         try {
-            String normalPathname = mgr.getRollHdfsPath(ident);
+            if (hasCompressed) {
+                normalPathname = mgr.getRollHdfsPath(ident, "gz");
+            } else {
+                normalPathname = mgr.getRollHdfsPath(ident);
+            }
             String tmpPathname = normalPathname + TMP_SUFFIX;
             String recoveryPathname = normalPathname + R_SUFFIX;
             Path normalPath = new Path(normalPathname);
@@ -53,7 +58,9 @@ public class HDFSRecovery implements Runnable{
                 if (hasCompressed) {
                     out = fs.create(recoveryPath);
                 } else {
-                    out = new GZIPOutputStream(fs.create(recoveryPath));
+                    Compressor compressor = mgr.getDefaultCompressionAlgo().getCompressor();
+                    out = mgr.getDefaultCompressionAlgo()
+                            .createCompressionStream(fs.create(recoveryPath), compressor, 0);
                 }
                 DataInputStream in = new DataInputStream(client.getInputStream());
                 while((len = in.read(buf)) != -1) {
@@ -99,7 +106,7 @@ public class HDFSRecovery implements Runnable{
                 try {
                     out.close();
                 } catch (IOException e) {
-                    LOG.warn("Cound not close the gzip output stream", e);
+                    LOG.warn("Cound not close the compression output stream", e);
                 }
                 out = null;
             }

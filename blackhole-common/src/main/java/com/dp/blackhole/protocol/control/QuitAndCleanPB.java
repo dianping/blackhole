@@ -8,86 +8,268 @@ public final class QuitAndCleanPB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  public interface InstanceGroupOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required string topic = 1;
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    boolean hasTopic();
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    java.lang.String getTopic();
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getTopicBytes();
+
+    // repeated string instance_ids = 2;
+    /**
+     * <code>repeated string instance_ids = 2;</code>
+     */
+    java.util.List<java.lang.String>
+    getInstanceIdsList();
+    /**
+     * <code>repeated string instance_ids = 2;</code>
+     */
+    int getInstanceIdsCount();
+    /**
+     * <code>repeated string instance_ids = 2;</code>
+     */
+    java.lang.String getInstanceIds(int index);
+    /**
+     * <code>repeated string instance_ids = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getInstanceIdsBytes(int index);
+  }
+  /**
+   * Protobuf type {@code blackhole.InstanceGroup}
+   */
   public static final class InstanceGroup extends
-      com.google.protobuf.GeneratedMessage {
+      com.google.protobuf.GeneratedMessage
+      implements InstanceGroupOrBuilder {
     // Use InstanceGroup.newBuilder() to construct.
-    private InstanceGroup() {
-      initFields();
+    private InstanceGroup(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private InstanceGroup(boolean noInit) {}
-    
+    private InstanceGroup(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final InstanceGroup defaultInstance;
     public static InstanceGroup getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public InstanceGroup getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private InstanceGroup(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              topic_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                instanceIds_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              instanceIds_.add(input.readBytes());
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          instanceIds_ = new com.google.protobuf.UnmodifiableLazyStringList(instanceIds_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_InstanceGroup_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_InstanceGroup_fieldAccessorTable;
+      return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_InstanceGroup_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.class, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<InstanceGroup> PARSER =
+        new com.google.protobuf.AbstractParser<InstanceGroup>() {
+      public InstanceGroup parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new InstanceGroup(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<InstanceGroup> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
     // required string topic = 1;
     public static final int TOPIC_FIELD_NUMBER = 1;
-    private boolean hasTopic;
-    private java.lang.String topic_ = "";
-    public boolean hasTopic() { return hasTopic; }
-    public java.lang.String getTopic() { return topic_; }
-    
+    private java.lang.Object topic_;
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public boolean hasTopic() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public java.lang.String getTopic() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          topic_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTopicBytes() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        topic_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     // repeated string instance_ids = 2;
     public static final int INSTANCE_IDS_FIELD_NUMBER = 2;
-    private java.util.List<java.lang.String> instanceIds_ =
-      java.util.Collections.emptyList();
-    public java.util.List<java.lang.String> getInstanceIdsList() {
+    private com.google.protobuf.LazyStringList instanceIds_;
+    /**
+     * <code>repeated string instance_ids = 2;</code>
+     */
+    public java.util.List<java.lang.String>
+        getInstanceIdsList() {
       return instanceIds_;
     }
-    public int getInstanceIdsCount() { return instanceIds_.size(); }
+    /**
+     * <code>repeated string instance_ids = 2;</code>
+     */
+    public int getInstanceIdsCount() {
+      return instanceIds_.size();
+    }
+    /**
+     * <code>repeated string instance_ids = 2;</code>
+     */
     public java.lang.String getInstanceIds(int index) {
       return instanceIds_.get(index);
     }
-    
-    private void initFields() {
+    /**
+     * <code>repeated string instance_ids = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getInstanceIdsBytes(int index) {
+      return instanceIds_.getByteString(index);
     }
+
+    private void initFields() {
+      topic_ = "";
+      instanceIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      if (!hasTopic) return false;
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasTopic()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasTopic()) {
-        output.writeString(1, getTopic());
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getTopicBytes());
       }
-      for (java.lang.String element : getInstanceIdsList()) {
-        output.writeString(2, element);
+      for (int i = 0; i < instanceIds_.size(); i++) {
+        output.writeBytes(2, instanceIds_.getByteString(i));
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
-      if (hasTopic()) {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getTopic());
+          .computeBytesSize(1, getTopicBytes());
       }
       {
         int dataSize = 0;
-        for (java.lang.String element : getInstanceIdsList()) {
+        for (int i = 0; i < instanceIds_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-            .computeStringSizeNoTag(element);
+            .computeBytesSizeNoTag(instanceIds_.getByteString(i));
         }
         size += dataSize;
         size += 1 * getInstanceIdsList().size();
@@ -96,153 +278,165 @@ public final class QuitAndCleanPB {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code blackhole.InstanceGroup}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> {
-      private com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup result;
-      
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_InstanceGroup_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_InstanceGroup_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.class, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder.class);
+      }
+
       // Construct using com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.newBuilder()
-      private Builder() {}
-      
-      private static Builder create() {
-        Builder builder = new Builder();
-        builder.result = new com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup();
-        return builder;
+      private Builder() {
+        maybeForceBuilderInitialization();
       }
-      
-      protected com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup internalGetResult() {
-        return result;
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
       }
-      
-      public Builder clear() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "Cannot call clear() after build().");
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
         }
-        result = new com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup();
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        topic_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        instanceIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-      
+
       public Builder clone() {
-        return create().mergeFrom(result);
+        return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.getDescriptor();
+        return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_InstanceGroup_descriptor;
       }
-      
+
       public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.getDefaultInstance();
       }
-      
-      public boolean isInitialized() {
-        return result.isInitialized();
-      }
+
       public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup build() {
-        if (result != null && !isInitialized()) {
+        com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup result = buildPartial();
+        if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return buildPartial();
+        return result;
       }
-      
-      private com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        if (!isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return buildPartial();
-      }
-      
+
       public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup buildPartial() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "build() has already been called on this Builder.");
+        com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup result = new com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
         }
-        if (result.instanceIds_ != java.util.Collections.EMPTY_LIST) {
-          result.instanceIds_ =
-            java.util.Collections.unmodifiableList(result.instanceIds_);
+        result.topic_ = topic_;
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          instanceIds_ = new com.google.protobuf.UnmodifiableLazyStringList(
+              instanceIds_);
+          bitField0_ = (bitField0_ & ~0x00000002);
         }
-        com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup returnMe = result;
-        result = null;
-        return returnMe;
+        result.instanceIds_ = instanceIds_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup) {
           return mergeFrom((com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup)other);
@@ -251,347 +445,598 @@ public final class QuitAndCleanPB {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup other) {
         if (other == com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.getDefaultInstance()) return this;
         if (other.hasTopic()) {
-          setTopic(other.getTopic());
+          bitField0_ |= 0x00000001;
+          topic_ = other.topic_;
+          onChanged();
         }
         if (!other.instanceIds_.isEmpty()) {
-          if (result.instanceIds_.isEmpty()) {
-            result.instanceIds_ = new java.util.ArrayList<java.lang.String>();
+          if (instanceIds_.isEmpty()) {
+            instanceIds_ = other.instanceIds_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+          } else {
+            ensureInstanceIdsIsMutable();
+            instanceIds_.addAll(other.instanceIds_);
           }
-          result.instanceIds_.addAll(other.instanceIds_);
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
+      public final boolean isInitialized() {
+        if (!hasTopic()) {
+          
+          return false;
+        }
+        return true;
+      }
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              setTopic(input.readString());
-              break;
-            }
-            case 18: {
-              addInstanceIds(input.readString());
-              break;
-            }
+        com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
-      
+      private int bitField0_;
+
       // required string topic = 1;
+      private java.lang.Object topic_ = "";
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public boolean hasTopic() {
-        return result.hasTopic();
+        return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public java.lang.String getTopic() {
-        return result.getTopic();
+        java.lang.Object ref = topic_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          topic_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
-      public Builder setTopic(java.lang.String value) {
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTopicBytes() {
+        java.lang.Object ref = topic_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          topic_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public Builder setTopic(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasTopic = true;
-        result.topic_ = value;
+  bitField0_ |= 0x00000001;
+        topic_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public Builder clearTopic() {
-        result.hasTopic = false;
-        result.topic_ = getDefaultInstance().getTopic();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        topic_ = getDefaultInstance().getTopic();
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public Builder setTopicBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        topic_ = value;
+        onChanged();
+        return this;
+      }
+
       // repeated string instance_ids = 2;
-      public java.util.List<java.lang.String> getInstanceIdsList() {
-        return java.util.Collections.unmodifiableList(result.instanceIds_);
+      private com.google.protobuf.LazyStringList instanceIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureInstanceIdsIsMutable() {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+          instanceIds_ = new com.google.protobuf.LazyStringArrayList(instanceIds_);
+          bitField0_ |= 0x00000002;
+         }
       }
+      /**
+       * <code>repeated string instance_ids = 2;</code>
+       */
+      public java.util.List<java.lang.String>
+          getInstanceIdsList() {
+        return java.util.Collections.unmodifiableList(instanceIds_);
+      }
+      /**
+       * <code>repeated string instance_ids = 2;</code>
+       */
       public int getInstanceIdsCount() {
-        return result.getInstanceIdsCount();
+        return instanceIds_.size();
       }
+      /**
+       * <code>repeated string instance_ids = 2;</code>
+       */
       public java.lang.String getInstanceIds(int index) {
-        return result.getInstanceIds(index);
+        return instanceIds_.get(index);
       }
-      public Builder setInstanceIds(int index, java.lang.String value) {
+      /**
+       * <code>repeated string instance_ids = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getInstanceIdsBytes(int index) {
+        return instanceIds_.getByteString(index);
+      }
+      /**
+       * <code>repeated string instance_ids = 2;</code>
+       */
+      public Builder setInstanceIds(
+          int index, java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.instanceIds_.set(index, value);
+  ensureInstanceIdsIsMutable();
+        instanceIds_.set(index, value);
+        onChanged();
         return this;
       }
-      public Builder addInstanceIds(java.lang.String value) {
+      /**
+       * <code>repeated string instance_ids = 2;</code>
+       */
+      public Builder addInstanceIds(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  if (result.instanceIds_.isEmpty()) {
-          result.instanceIds_ = new java.util.ArrayList<java.lang.String>();
-        }
-        result.instanceIds_.add(value);
+  ensureInstanceIdsIsMutable();
+        instanceIds_.add(value);
+        onChanged();
         return this;
       }
+      /**
+       * <code>repeated string instance_ids = 2;</code>
+       */
       public Builder addAllInstanceIds(
-          java.lang.Iterable<? extends java.lang.String> values) {
-        if (result.instanceIds_.isEmpty()) {
-          result.instanceIds_ = new java.util.ArrayList<java.lang.String>();
-        }
-        super.addAll(values, result.instanceIds_);
+          java.lang.Iterable<java.lang.String> values) {
+        ensureInstanceIdsIsMutable();
+        super.addAll(values, instanceIds_);
+        onChanged();
         return this;
       }
+      /**
+       * <code>repeated string instance_ids = 2;</code>
+       */
       public Builder clearInstanceIds() {
-        result.instanceIds_ = java.util.Collections.emptyList();
+        instanceIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>repeated string instance_ids = 2;</code>
+       */
+      public Builder addInstanceIdsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureInstanceIdsIsMutable();
+        instanceIds_.add(value);
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.InstanceGroup)
     }
-    
+
     static {
       defaultInstance = new InstanceGroup(true);
-      com.dp.blackhole.protocol.control.QuitAndCleanPB.internalForceInit();
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:blackhole.InstanceGroup)
   }
-  
+
+  public interface QuitOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // repeated .blackhole.InstanceGroup instanceGroup = 1;
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> 
+        getInstanceGroupList();
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup getInstanceGroup(int index);
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    int getInstanceGroupCount();
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    java.util.List<? extends com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder> 
+        getInstanceGroupOrBuilderList();
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder getInstanceGroupOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code blackhole.Quit}
+   */
   public static final class Quit extends
-      com.google.protobuf.GeneratedMessage {
+      com.google.protobuf.GeneratedMessage
+      implements QuitOrBuilder {
     // Use Quit.newBuilder() to construct.
-    private Quit() {
-      initFields();
+    private Quit(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private Quit(boolean noInit) {}
-    
+    private Quit(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final Quit defaultInstance;
     public static Quit getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public Quit getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private Quit(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                instanceGroup_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              instanceGroup_.add(input.readMessage(com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          instanceGroup_ = java.util.Collections.unmodifiableList(instanceGroup_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_Quit_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_Quit_fieldAccessorTable;
+      return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_Quit_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.class, com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<Quit> PARSER =
+        new com.google.protobuf.AbstractParser<Quit>() {
+      public Quit parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new Quit(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Quit> getParserForType() {
+      return PARSER;
+    }
+
     // repeated .blackhole.InstanceGroup instanceGroup = 1;
     public static final int INSTANCEGROUP_FIELD_NUMBER = 1;
-    private java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> instanceGroup_ =
-      java.util.Collections.emptyList();
+    private java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> instanceGroup_;
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
     public java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> getInstanceGroupList() {
       return instanceGroup_;
     }
-    public int getInstanceGroupCount() { return instanceGroup_.size(); }
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    public java.util.List<? extends com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder> 
+        getInstanceGroupOrBuilderList() {
+      return instanceGroup_;
+    }
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    public int getInstanceGroupCount() {
+      return instanceGroup_.size();
+    }
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
     public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup getInstanceGroup(int index) {
       return instanceGroup_.get(index);
     }
-    
-    private void initFields() {
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder getInstanceGroupOrBuilder(
+        int index) {
+      return instanceGroup_.get(index);
     }
+
+    private void initFields() {
+      instanceGroup_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      for (com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup element : getInstanceGroupList()) {
-        if (!element.isInitialized()) return false;
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      for (int i = 0; i < getInstanceGroupCount(); i++) {
+        if (!getInstanceGroup(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
       }
+      memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup element : getInstanceGroupList()) {
-        output.writeMessage(1, element);
+      for (int i = 0; i < instanceGroup_.size(); i++) {
+        output.writeMessage(1, instanceGroup_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
-      for (com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup element : getInstanceGroupList()) {
+      for (int i = 0; i < instanceGroup_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, element);
+          .computeMessageSize(1, instanceGroup_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-    
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code blackhole.Quit}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> {
-      private com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit result;
-      
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.dp.blackhole.protocol.control.QuitAndCleanPB.QuitOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_Quit_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_Quit_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.class, com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.Builder.class);
+      }
+
       // Construct using com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.newBuilder()
-      private Builder() {}
-      
-      private static Builder create() {
-        Builder builder = new Builder();
-        builder.result = new com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit();
-        return builder;
+      private Builder() {
+        maybeForceBuilderInitialization();
       }
-      
-      protected com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit internalGetResult() {
-        return result;
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
       }
-      
-      public Builder clear() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "Cannot call clear() after build().");
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getInstanceGroupFieldBuilder();
         }
-        result = new com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit();
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        if (instanceGroupBuilder_ == null) {
+          instanceGroup_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          instanceGroupBuilder_.clear();
+        }
         return this;
       }
-      
+
       public Builder clone() {
-        return create().mergeFrom(result);
+        return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.getDescriptor();
+        return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_Quit_descriptor;
       }
-      
+
       public com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.getDefaultInstance();
       }
-      
-      public boolean isInitialized() {
-        return result.isInitialized();
-      }
+
       public com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit build() {
-        if (result != null && !isInitialized()) {
+        com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit result = buildPartial();
+        if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return buildPartial();
+        return result;
       }
-      
-      private com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        if (!isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return buildPartial();
-      }
-      
+
       public com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit buildPartial() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "build() has already been called on this Builder.");
+        com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit result = new com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit(this);
+        int from_bitField0_ = bitField0_;
+        if (instanceGroupBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            instanceGroup_ = java.util.Collections.unmodifiableList(instanceGroup_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.instanceGroup_ = instanceGroup_;
+        } else {
+          result.instanceGroup_ = instanceGroupBuilder_.build();
         }
-        if (result.instanceGroup_ != java.util.Collections.EMPTY_LIST) {
-          result.instanceGroup_ =
-            java.util.Collections.unmodifiableList(result.instanceGroup_);
-        }
-        com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit returnMe = result;
-        result = null;
-        return returnMe;
+        onBuilt();
+        return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit) {
           return mergeFrom((com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit)other);
@@ -600,332 +1045,684 @@ public final class QuitAndCleanPB {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit other) {
         if (other == com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.getDefaultInstance()) return this;
-        if (!other.instanceGroup_.isEmpty()) {
-          if (result.instanceGroup_.isEmpty()) {
-            result.instanceGroup_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup>();
+        if (instanceGroupBuilder_ == null) {
+          if (!other.instanceGroup_.isEmpty()) {
+            if (instanceGroup_.isEmpty()) {
+              instanceGroup_ = other.instanceGroup_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureInstanceGroupIsMutable();
+              instanceGroup_.addAll(other.instanceGroup_);
+            }
+            onChanged();
           }
-          result.instanceGroup_.addAll(other.instanceGroup_);
+        } else {
+          if (!other.instanceGroup_.isEmpty()) {
+            if (instanceGroupBuilder_.isEmpty()) {
+              instanceGroupBuilder_.dispose();
+              instanceGroupBuilder_ = null;
+              instanceGroup_ = other.instanceGroup_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              instanceGroupBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getInstanceGroupFieldBuilder() : null;
+            } else {
+              instanceGroupBuilder_.addAllMessages(other.instanceGroup_);
+            }
+          }
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
+      public final boolean isInitialized() {
+        for (int i = 0; i < getInstanceGroupCount(); i++) {
+          if (!getInstanceGroup(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        return true;
+      }
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder subBuilder = com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addInstanceGroup(subBuilder.buildPartial());
-              break;
-            }
+        com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
-      
+      private int bitField0_;
+
       // repeated .blackhole.InstanceGroup instanceGroup = 1;
+      private java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> instanceGroup_ =
+        java.util.Collections.emptyList();
+      private void ensureInstanceGroupIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          instanceGroup_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup>(instanceGroup_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder> instanceGroupBuilder_;
+
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
       public java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> getInstanceGroupList() {
-        return java.util.Collections.unmodifiableList(result.instanceGroup_);
+        if (instanceGroupBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(instanceGroup_);
+        } else {
+          return instanceGroupBuilder_.getMessageList();
+        }
       }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
       public int getInstanceGroupCount() {
-        return result.getInstanceGroupCount();
+        if (instanceGroupBuilder_ == null) {
+          return instanceGroup_.size();
+        } else {
+          return instanceGroupBuilder_.getCount();
+        }
       }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
       public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup getInstanceGroup(int index) {
-        return result.getInstanceGroup(index);
-      }
-      public Builder setInstanceGroup(int index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup value) {
-        if (value == null) {
-          throw new NullPointerException();
+        if (instanceGroupBuilder_ == null) {
+          return instanceGroup_.get(index);
+        } else {
+          return instanceGroupBuilder_.getMessage(index);
         }
-        result.instanceGroup_.set(index, value);
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public Builder setInstanceGroup(
+          int index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup value) {
+        if (instanceGroupBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.set(index, value);
+          onChanged();
+        } else {
+          instanceGroupBuilder_.setMessage(index, value);
+        }
         return this;
       }
-      public Builder setInstanceGroup(int index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder builderForValue) {
-        result.instanceGroup_.set(index, builderForValue.build());
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public Builder setInstanceGroup(
+          int index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder builderForValue) {
+        if (instanceGroupBuilder_ == null) {
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          instanceGroupBuilder_.setMessage(index, builderForValue.build());
+        }
         return this;
       }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
       public Builder addInstanceGroup(com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup value) {
-        if (value == null) {
-          throw new NullPointerException();
+        if (instanceGroupBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.add(value);
+          onChanged();
+        } else {
+          instanceGroupBuilder_.addMessage(value);
         }
-        if (result.instanceGroup_.isEmpty()) {
-          result.instanceGroup_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup>();
-        }
-        result.instanceGroup_.add(value);
         return this;
       }
-      public Builder addInstanceGroup(com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder builderForValue) {
-        if (result.instanceGroup_.isEmpty()) {
-          result.instanceGroup_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup>();
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public Builder addInstanceGroup(
+          int index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup value) {
+        if (instanceGroupBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.add(index, value);
+          onChanged();
+        } else {
+          instanceGroupBuilder_.addMessage(index, value);
         }
-        result.instanceGroup_.add(builderForValue.build());
         return this;
       }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public Builder addInstanceGroup(
+          com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder builderForValue) {
+        if (instanceGroupBuilder_ == null) {
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.add(builderForValue.build());
+          onChanged();
+        } else {
+          instanceGroupBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public Builder addInstanceGroup(
+          int index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder builderForValue) {
+        if (instanceGroupBuilder_ == null) {
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          instanceGroupBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
       public Builder addAllInstanceGroup(
           java.lang.Iterable<? extends com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> values) {
-        if (result.instanceGroup_.isEmpty()) {
-          result.instanceGroup_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup>();
+        if (instanceGroupBuilder_ == null) {
+          ensureInstanceGroupIsMutable();
+          super.addAll(values, instanceGroup_);
+          onChanged();
+        } else {
+          instanceGroupBuilder_.addAllMessages(values);
         }
-        super.addAll(values, result.instanceGroup_);
         return this;
       }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
       public Builder clearInstanceGroup() {
-        result.instanceGroup_ = java.util.Collections.emptyList();
+        if (instanceGroupBuilder_ == null) {
+          instanceGroup_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          instanceGroupBuilder_.clear();
+        }
         return this;
       }
-      
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public Builder removeInstanceGroup(int index) {
+        if (instanceGroupBuilder_ == null) {
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.remove(index);
+          onChanged();
+        } else {
+          instanceGroupBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder getInstanceGroupBuilder(
+          int index) {
+        return getInstanceGroupFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder getInstanceGroupOrBuilder(
+          int index) {
+        if (instanceGroupBuilder_ == null) {
+          return instanceGroup_.get(index);  } else {
+          return instanceGroupBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public java.util.List<? extends com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder> 
+           getInstanceGroupOrBuilderList() {
+        if (instanceGroupBuilder_ != null) {
+          return instanceGroupBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(instanceGroup_);
+        }
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder addInstanceGroupBuilder() {
+        return getInstanceGroupFieldBuilder().addBuilder(
+            com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder addInstanceGroupBuilder(
+          int index) {
+        return getInstanceGroupFieldBuilder().addBuilder(
+            index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder> 
+           getInstanceGroupBuilderList() {
+        return getInstanceGroupFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder> 
+          getInstanceGroupFieldBuilder() {
+        if (instanceGroupBuilder_ == null) {
+          instanceGroupBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder>(
+                  instanceGroup_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  getParentForChildren(),
+                  isClean());
+          instanceGroup_ = null;
+        }
+        return instanceGroupBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.Quit)
     }
-    
+
     static {
       defaultInstance = new Quit(true);
-      com.dp.blackhole.protocol.control.QuitAndCleanPB.internalForceInit();
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:blackhole.Quit)
   }
-  
+
+  public interface CleanOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // repeated .blackhole.InstanceGroup instanceGroup = 1;
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> 
+        getInstanceGroupList();
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup getInstanceGroup(int index);
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    int getInstanceGroupCount();
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    java.util.List<? extends com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder> 
+        getInstanceGroupOrBuilderList();
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder getInstanceGroupOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code blackhole.Clean}
+   */
   public static final class Clean extends
-      com.google.protobuf.GeneratedMessage {
+      com.google.protobuf.GeneratedMessage
+      implements CleanOrBuilder {
     // Use Clean.newBuilder() to construct.
-    private Clean() {
-      initFields();
+    private Clean(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private Clean(boolean noInit) {}
-    
+    private Clean(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final Clean defaultInstance;
     public static Clean getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public Clean getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private Clean(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                instanceGroup_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              instanceGroup_.add(input.readMessage(com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          instanceGroup_ = java.util.Collections.unmodifiableList(instanceGroup_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_Clean_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_Clean_fieldAccessorTable;
+      return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_Clean_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.class, com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<Clean> PARSER =
+        new com.google.protobuf.AbstractParser<Clean>() {
+      public Clean parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new Clean(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Clean> getParserForType() {
+      return PARSER;
+    }
+
     // repeated .blackhole.InstanceGroup instanceGroup = 1;
     public static final int INSTANCEGROUP_FIELD_NUMBER = 1;
-    private java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> instanceGroup_ =
-      java.util.Collections.emptyList();
+    private java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> instanceGroup_;
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
     public java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> getInstanceGroupList() {
       return instanceGroup_;
     }
-    public int getInstanceGroupCount() { return instanceGroup_.size(); }
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    public java.util.List<? extends com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder> 
+        getInstanceGroupOrBuilderList() {
+      return instanceGroup_;
+    }
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    public int getInstanceGroupCount() {
+      return instanceGroup_.size();
+    }
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
     public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup getInstanceGroup(int index) {
       return instanceGroup_.get(index);
     }
-    
-    private void initFields() {
+    /**
+     * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+     */
+    public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder getInstanceGroupOrBuilder(
+        int index) {
+      return instanceGroup_.get(index);
     }
+
+    private void initFields() {
+      instanceGroup_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      for (com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup element : getInstanceGroupList()) {
-        if (!element.isInitialized()) return false;
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      for (int i = 0; i < getInstanceGroupCount(); i++) {
+        if (!getInstanceGroup(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
       }
+      memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup element : getInstanceGroupList()) {
-        output.writeMessage(1, element);
+      for (int i = 0; i < instanceGroup_.size(); i++) {
+        output.writeMessage(1, instanceGroup_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
-      for (com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup element : getInstanceGroupList()) {
+      for (int i = 0; i < instanceGroup_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, element);
+          .computeMessageSize(1, instanceGroup_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-    
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code blackhole.Clean}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> {
-      private com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean result;
-      
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.dp.blackhole.protocol.control.QuitAndCleanPB.CleanOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_Clean_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_Clean_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.class, com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.Builder.class);
+      }
+
       // Construct using com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.newBuilder()
-      private Builder() {}
-      
-      private static Builder create() {
-        Builder builder = new Builder();
-        builder.result = new com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean();
-        return builder;
+      private Builder() {
+        maybeForceBuilderInitialization();
       }
-      
-      protected com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean internalGetResult() {
-        return result;
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
       }
-      
-      public Builder clear() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "Cannot call clear() after build().");
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getInstanceGroupFieldBuilder();
         }
-        result = new com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean();
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        if (instanceGroupBuilder_ == null) {
+          instanceGroup_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          instanceGroupBuilder_.clear();
+        }
         return this;
       }
-      
+
       public Builder clone() {
-        return create().mergeFrom(result);
+        return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.getDescriptor();
+        return com.dp.blackhole.protocol.control.QuitAndCleanPB.internal_static_blackhole_Clean_descriptor;
       }
-      
+
       public com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.getDefaultInstance();
       }
-      
-      public boolean isInitialized() {
-        return result.isInitialized();
-      }
+
       public com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean build() {
-        if (result != null && !isInitialized()) {
+        com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean result = buildPartial();
+        if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return buildPartial();
+        return result;
       }
-      
-      private com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        if (!isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return buildPartial();
-      }
-      
+
       public com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean buildPartial() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "build() has already been called on this Builder.");
+        com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean result = new com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean(this);
+        int from_bitField0_ = bitField0_;
+        if (instanceGroupBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            instanceGroup_ = java.util.Collections.unmodifiableList(instanceGroup_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.instanceGroup_ = instanceGroup_;
+        } else {
+          result.instanceGroup_ = instanceGroupBuilder_.build();
         }
-        if (result.instanceGroup_ != java.util.Collections.EMPTY_LIST) {
-          result.instanceGroup_ =
-            java.util.Collections.unmodifiableList(result.instanceGroup_);
-        }
-        com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean returnMe = result;
-        result = null;
-        return returnMe;
+        onBuilt();
+        return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean) {
           return mergeFrom((com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean)other);
@@ -934,114 +1731,319 @@ public final class QuitAndCleanPB {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean other) {
         if (other == com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.getDefaultInstance()) return this;
-        if (!other.instanceGroup_.isEmpty()) {
-          if (result.instanceGroup_.isEmpty()) {
-            result.instanceGroup_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup>();
+        if (instanceGroupBuilder_ == null) {
+          if (!other.instanceGroup_.isEmpty()) {
+            if (instanceGroup_.isEmpty()) {
+              instanceGroup_ = other.instanceGroup_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureInstanceGroupIsMutable();
+              instanceGroup_.addAll(other.instanceGroup_);
+            }
+            onChanged();
           }
-          result.instanceGroup_.addAll(other.instanceGroup_);
+        } else {
+          if (!other.instanceGroup_.isEmpty()) {
+            if (instanceGroupBuilder_.isEmpty()) {
+              instanceGroupBuilder_.dispose();
+              instanceGroupBuilder_ = null;
+              instanceGroup_ = other.instanceGroup_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              instanceGroupBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getInstanceGroupFieldBuilder() : null;
+            } else {
+              instanceGroupBuilder_.addAllMessages(other.instanceGroup_);
+            }
+          }
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
+      public final boolean isInitialized() {
+        for (int i = 0; i < getInstanceGroupCount(); i++) {
+          if (!getInstanceGroup(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        return true;
+      }
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder subBuilder = com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addInstanceGroup(subBuilder.buildPartial());
-              break;
-            }
+        com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
-      
+      private int bitField0_;
+
       // repeated .blackhole.InstanceGroup instanceGroup = 1;
+      private java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> instanceGroup_ =
+        java.util.Collections.emptyList();
+      private void ensureInstanceGroupIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          instanceGroup_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup>(instanceGroup_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder> instanceGroupBuilder_;
+
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
       public java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> getInstanceGroupList() {
-        return java.util.Collections.unmodifiableList(result.instanceGroup_);
+        if (instanceGroupBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(instanceGroup_);
+        } else {
+          return instanceGroupBuilder_.getMessageList();
+        }
       }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
       public int getInstanceGroupCount() {
-        return result.getInstanceGroupCount();
+        if (instanceGroupBuilder_ == null) {
+          return instanceGroup_.size();
+        } else {
+          return instanceGroupBuilder_.getCount();
+        }
       }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
       public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup getInstanceGroup(int index) {
-        return result.getInstanceGroup(index);
-      }
-      public Builder setInstanceGroup(int index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup value) {
-        if (value == null) {
-          throw new NullPointerException();
+        if (instanceGroupBuilder_ == null) {
+          return instanceGroup_.get(index);
+        } else {
+          return instanceGroupBuilder_.getMessage(index);
         }
-        result.instanceGroup_.set(index, value);
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public Builder setInstanceGroup(
+          int index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup value) {
+        if (instanceGroupBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.set(index, value);
+          onChanged();
+        } else {
+          instanceGroupBuilder_.setMessage(index, value);
+        }
         return this;
       }
-      public Builder setInstanceGroup(int index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder builderForValue) {
-        result.instanceGroup_.set(index, builderForValue.build());
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public Builder setInstanceGroup(
+          int index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder builderForValue) {
+        if (instanceGroupBuilder_ == null) {
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          instanceGroupBuilder_.setMessage(index, builderForValue.build());
+        }
         return this;
       }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
       public Builder addInstanceGroup(com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup value) {
-        if (value == null) {
-          throw new NullPointerException();
+        if (instanceGroupBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.add(value);
+          onChanged();
+        } else {
+          instanceGroupBuilder_.addMessage(value);
         }
-        if (result.instanceGroup_.isEmpty()) {
-          result.instanceGroup_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup>();
-        }
-        result.instanceGroup_.add(value);
         return this;
       }
-      public Builder addInstanceGroup(com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder builderForValue) {
-        if (result.instanceGroup_.isEmpty()) {
-          result.instanceGroup_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup>();
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public Builder addInstanceGroup(
+          int index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup value) {
+        if (instanceGroupBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.add(index, value);
+          onChanged();
+        } else {
+          instanceGroupBuilder_.addMessage(index, value);
         }
-        result.instanceGroup_.add(builderForValue.build());
         return this;
       }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public Builder addInstanceGroup(
+          com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder builderForValue) {
+        if (instanceGroupBuilder_ == null) {
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.add(builderForValue.build());
+          onChanged();
+        } else {
+          instanceGroupBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public Builder addInstanceGroup(
+          int index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder builderForValue) {
+        if (instanceGroupBuilder_ == null) {
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          instanceGroupBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
       public Builder addAllInstanceGroup(
           java.lang.Iterable<? extends com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup> values) {
-        if (result.instanceGroup_.isEmpty()) {
-          result.instanceGroup_ = new java.util.ArrayList<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup>();
+        if (instanceGroupBuilder_ == null) {
+          ensureInstanceGroupIsMutable();
+          super.addAll(values, instanceGroup_);
+          onChanged();
+        } else {
+          instanceGroupBuilder_.addAllMessages(values);
         }
-        super.addAll(values, result.instanceGroup_);
         return this;
       }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
       public Builder clearInstanceGroup() {
-        result.instanceGroup_ = java.util.Collections.emptyList();
+        if (instanceGroupBuilder_ == null) {
+          instanceGroup_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          instanceGroupBuilder_.clear();
+        }
         return this;
       }
-      
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public Builder removeInstanceGroup(int index) {
+        if (instanceGroupBuilder_ == null) {
+          ensureInstanceGroupIsMutable();
+          instanceGroup_.remove(index);
+          onChanged();
+        } else {
+          instanceGroupBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder getInstanceGroupBuilder(
+          int index) {
+        return getInstanceGroupFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder getInstanceGroupOrBuilder(
+          int index) {
+        if (instanceGroupBuilder_ == null) {
+          return instanceGroup_.get(index);  } else {
+          return instanceGroupBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public java.util.List<? extends com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder> 
+           getInstanceGroupOrBuilderList() {
+        if (instanceGroupBuilder_ != null) {
+          return instanceGroupBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(instanceGroup_);
+        }
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder addInstanceGroupBuilder() {
+        return getInstanceGroupFieldBuilder().addBuilder(
+            com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder addInstanceGroupBuilder(
+          int index) {
+        return getInstanceGroupFieldBuilder().addBuilder(
+            index, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .blackhole.InstanceGroup instanceGroup = 1;</code>
+       */
+      public java.util.List<com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder> 
+           getInstanceGroupBuilderList() {
+        return getInstanceGroupFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder> 
+          getInstanceGroupFieldBuilder() {
+        if (instanceGroupBuilder_ == null) {
+          instanceGroupBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder, com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroupOrBuilder>(
+                  instanceGroup_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  getParentForChildren(),
+                  isClean());
+          instanceGroup_ = null;
+        }
+        return instanceGroupBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.Clean)
     }
-    
+
     static {
       defaultInstance = new Clean(true);
-      com.dp.blackhole.protocol.control.QuitAndCleanPB.internalForceInit();
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:blackhole.Clean)
   }
-  
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_InstanceGroup_descriptor;
   private static
@@ -1057,7 +2059,7 @@ public final class QuitAndCleanPB {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_Clean_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -1084,25 +2086,19 @@ public final class QuitAndCleanPB {
           internal_static_blackhole_InstanceGroup_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_InstanceGroup_descriptor,
-              new java.lang.String[] { "Topic", "InstanceIds", },
-              com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.class,
-              com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup.Builder.class);
+              new java.lang.String[] { "Topic", "InstanceIds", });
           internal_static_blackhole_Quit_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_blackhole_Quit_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Quit_descriptor,
-              new java.lang.String[] { "InstanceGroup", },
-              com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.class,
-              com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit.Builder.class);
+              new java.lang.String[] { "InstanceGroup", });
           internal_static_blackhole_Clean_descriptor =
             getDescriptor().getMessageTypes().get(2);
           internal_static_blackhole_Clean_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Clean_descriptor,
-              new java.lang.String[] { "InstanceGroup", },
-              com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.class,
-              com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean.Builder.class);
+              new java.lang.String[] { "InstanceGroup", });
           return null;
         }
       };
@@ -1111,8 +2107,6 @@ public final class QuitAndCleanPB {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-  
-  public static void internalForceInit() {}
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }
