@@ -28,7 +28,7 @@ import com.dp.blackhole.supervisor.model.Stage;
 import com.dp.blackhole.supervisor.model.Stream;
 import com.dp.blackhole.supervisor.model.TopicConfig;
 
-@Path("topics")
+@Path("/topics")
 public class TopicResource extends BaseResource {
     private static final Log LOG = LogFactory.getLog(TopicResource.class);
     

@@ -19,7 +19,7 @@ import org.mortbay.util.ajax.JSON;
 
 import com.dp.blackhole.supervisor.model.Stream;
 
-@Path("ops")
+@Path("/ops")
 public class OperatorResource extends BaseResource {
     private static final Log LOG = LogFactory.getLog(OperatorResource.class);
     
