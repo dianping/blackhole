@@ -127,15 +127,17 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
     
     private void doAccept(SelectionKey key) throws IOException {
         ServerSocketChannel server = (ServerSocketChannel) key.channel();
-        SocketChannel channel = server.accept();
-        if (channel == null) {
-            throw new IOException("no connection is available to be accepted");
+        SocketChannel channel;
+        while ((channel = server.accept()) != null) {
+            channel.configureBlocking(false);
+            channel.socket().setTcpNoDelay(true);
+            channel.socket().setKeepAlive(true);
+            
+            Connection connection = factory.makeConnection(channel, selector, wrappedFactory);
+            Handler handler = getHandler(connection);
+            handler.addEvent(new EntityEvent(EntityEvent.CONNECTED, null, connection));
+            channel.register(selector, SelectionKey.OP_READ, connection);
         }
-        channel.configureBlocking(false);
-        Connection connection = factory.makeConnection(channel, selector, wrappedFactory);
-        Handler handler = getHandler(connection);
-        handler.addEvent(new EntityEvent(EntityEvent.CONNECTED, null, connection));
-        channel.register(selector, SelectionKey.OP_READ, connection);
     }
     
     public void closeConnection(Connection connection) {
