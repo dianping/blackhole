@@ -254,6 +254,10 @@ public class Supervisor {
         Topic t = topics.get(topic);
         if (t != null) {
             t.removeStream(source);
+            //remove this topic if there is no stream
+            if (t.getAllStreamsOfCopy().size() == 0) {
+                topics.remove(topic);
+            }
         }
     }
     
@@ -499,33 +503,35 @@ public class Supervisor {
         // processing current stage on streams
         if (streams != null) {
             for (Stream stream : streams) {
-                List<Stage> stages = stream.getStages();
-                if (stages.size() == 0) {
-                    continue;
-                }
-                synchronized (stages) {
-                    Stage current = stages.get(stages.size() -1);
-                    if (!current.isCurrent()) {
-                        LOG.error("stage " + current + "should be current stage");
+                //change the status of current stage if stream's host equals to the connection's
+                if (stream.getBrokerHost().equals(connection.getHost())) {
+                    List<Stage> stages = stream.getStages();
+                    if (stages.size() == 0) {
                         continue;
                     }
-                    LOG.info("checking current stage: " + current);
-                    
-                    Issue e = new Issue();
-                    e.setDesc("broker failed");
-                    e.setTs(now);
-                    current.getIssuelist().add(e);
-
-                    // do not reassign broker here, since logreader will find broker fail,
-                    // and do appReg again; otherwise two appReg for the same stream will send 
-                    if (brokersMapping.size() == 0) {
-                        current.setStatus(Stage.PENDING);
-                    } else {
-                        current.setStatus(Stage.BROKERFAIL);
+                    synchronized (stages) {
+                        Stage current = stages.get(stages.size() -1);
+                        if (!current.isCurrent()) {
+                            LOG.error("stage " + current + "should be current stage");
+                            continue;
+                        }
+                        LOG.info("checking current stage: " + current);
+                        
+                        Issue e = new Issue();
+                        e.setDesc("broker failed");
+                        e.setTs(now);
+                        current.getIssuelist().add(e);
+    
+                        // do not reassign broker here, since logreader will find broker fail,
+                        // and do appReg again; otherwise two appReg for the same stream will send 
+                        if (brokersMapping.size() == 0) {
+                            current.setStatus(Stage.PENDING);
+                        } else {
+                            current.setStatus(Stage.BROKERFAIL);
+                        }
+                        LOG.info("after checking current stage: " + current);
                     }
-                    LOG.info("after checking current stage: " + current);
                 }
-                   
                 // remove corresponding appNodes's relationship with the stream
                 String agentHost = Util.getAgentHostFromSource(stream.getSource());
                 SimpleConnection agentConnection = agentsMapping.get(agentHost);
@@ -1919,14 +1925,16 @@ public class Supervisor {
             AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile, period, maxLineSize, readInterval);
             appConfResList.add(appConfRes);
         }
-        message = PBwrap.wrapConfRes(appConfResList, null);
-        send(from, message);
+        if (!appConfResList.isEmpty()) {
+            message = PBwrap.wrapConfRes(appConfResList, null);
+            send(from, message); 
+        }
     }
     
     public void triggerConfResOfPaaS(SimpleConnection connection) {
-        List<LxcConfRes> lxcConfResList = new ArrayList<LxcConfRes>();
         Set<String> topicsAssocHost = configManager.getTopicsByHost(connection.getHost());
         if (topicsAssocHost != null) {
+            List<LxcConfRes> lxcConfResList = new ArrayList<LxcConfRes>();
             for (String topic : topicsAssocHost) {
                 TopicConfig confInfo = configManager.getConfByTopic(topic);
                 if (confInfo == null) {
@@ -1945,8 +1953,10 @@ public class Supervisor {
                 LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, period, maxLineSize, readInterval, ids);
                 lxcConfResList.add(lxcConfRes);
             }
-            Message message = PBwrap.wrapConfRes(null, lxcConfResList);
-            send(connection, message);
+            if (!lxcConfResList.isEmpty()) {
+                Message message = PBwrap.wrapConfRes(null, lxcConfResList);
+                send(connection, message);
+            }
         } else {
             LOG.debug("No topic mapping to " + connection.getHost());
         }
