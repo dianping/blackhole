@@ -196,6 +196,10 @@ public class ConfigManager {
                     confInfo.setMaxLineSize(Util.parseInt(value, 512000));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.READ_INTERVAL)) {
                     confInfo.setReadInterval(Util.parseLong(value, 1L));
+                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT)) {
+                    confInfo.setMinMsgSent(Util.parseInt(value, 30));
+                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE)) {
+                    confInfo.setMsgBufSize(Util.parseInt(value, 512000));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.APP)) {
                     internalFillingCmdbMap(topic, value);
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.OWNER)) {
@@ -403,6 +407,26 @@ public class ConfigManager {
             .append(ParamsKey.TopicConf.MAX_LINE_SIZE)
             .append(" = ")
             .append(confInfo.getMaxLineSize())
+            .append("\n")
+            .append(ParamsKey.TopicConf.READ_INTERVAL)
+            .append(" = ")
+            .append(confInfo.getReadInterval())
+            .append("\n")
+            .append(ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT)
+            .append(" = ")
+            .append(confInfo.getMinMsgSent())
+            .append("\n")
+            .append(ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE)
+            .append(" = ")
+            .append(confInfo.getMsgBufSize())
+            .append("\n")
+            .append(ParamsKey.TopicConf.COMPRESSION)
+            .append(" = ")
+            .append(confInfo.getCompression())
+            .append("\n")
+            .append(ParamsKey.TopicConf.OWNER)
+            .append(" = ")
+            .append(confInfo.getOwner())
             .append("\n")
             .append(ParamsKey.TopicConf.APP)
             .append(" = ")

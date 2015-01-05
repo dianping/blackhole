@@ -10,6 +10,8 @@ public abstract class ParamsKey {
         public static final String OWNER = "owner";
         public static final String COMPRESSION = "compression";
         public static final String UPLOAD_PERIOD = "uploadPeriod";
+        public static final String MINIMUM_MESSAGES_SENT = "minMsgSent";
+        public static final String MESSAGE_BUFFER_SIZE = "msgBufSize";
     }
 
     public static class LionNode {

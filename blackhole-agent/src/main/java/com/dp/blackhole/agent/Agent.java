@@ -191,7 +191,9 @@ public class Agent implements Runnable {
         long rollPeroid = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROLL_PERIOD);
         int maxLineSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MAX_LINE_SIZE, 512000);
         long readInterval = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.READ_INTERVAL, 1L);
-        TopicMeta topicMeta = new TopicMeta(metaKey, path, rollPeroid, maxLineSize, readInterval);
+        int minMsgSent = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, 30);
+        int msgBufSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, 512000);
+        TopicMeta topicMeta = new TopicMeta(metaKey, path, rollPeroid, maxLineSize, readInterval, minMsgSent, msgBufSize);
         logMetas.put(metaKey, topicMeta);
     }
 
@@ -425,6 +427,10 @@ public class Agent implements Runnable {
                                     + ParamsKey.TopicConf.MAX_LINE_SIZE, lxcConfRes.getMaxLineSize());
                             confKeeper.addRawProperty(topic + "."
                                     + ParamsKey.TopicConf.READ_INTERVAL, lxcConfRes.getReadInterval());
+                            confKeeper.addRawProperty(topic + "."
+                                    + ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, lxcConfRes.getMinMsgSent());
+                            confKeeper.addRawProperty(topic + "."
+                                    + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, lxcConfRes.getMsgBufSize());
                             fillUpAppLogsFromConfig(metaKey);
                             register(metaKey, Util.getTS());
                             if (this.heartbeat == null || !this.heartbeat.isAlive()) {
@@ -455,6 +461,10 @@ public class Agent implements Runnable {
                                 + ParamsKey.TopicConf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
                         confKeeper.addRawProperty(topic + "."
                                 + ParamsKey.TopicConf.READ_INTERVAL, appConfRes.getReadInterval());
+                        confKeeper.addRawProperty(topic + "."
+                                + ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, appConfRes.getMinMsgSent());
+                        confKeeper.addRawProperty(topic + "."
+                                + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, appConfRes.getMsgBufSize());
                         fillUpAppLogsFromConfig(metaKey);
                         ++accepted;
                         register(metaKey, Util.getTS());

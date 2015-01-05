@@ -143,7 +143,7 @@ public class LogReader implements Runnable {
             this.lineBuf = new ByteArrayOutputStream(maxLineSize);
             this.accept = true;
             
-            messageBuffer = ByteBuffer.allocate(512 * 1024);
+            messageBuffer = ByteBuffer.allocate(topicMeta.getMsgBufSize());
             channel = SocketChannel.open();
             channel.connect(new InetSocketAddress(broker, brokerPort));
             socket = channel.socket();
@@ -309,7 +309,7 @@ public class LogReader implements Runnable {
             
             Message message = new Message(line); 
             
-            if (messageNum >= 30 || message.getSize() > messageBuffer.remaining()) {
+            if (messageNum >= topicMeta.getMinMsgSent() || message.getSize() > messageBuffer.remaining()) {
                 sendMessage();
             }
             

@@ -250,6 +250,36 @@ public final class ConfResPB {
        */
       com.google.protobuf.ByteString
           getReadIntervalBytes();
+
+      // optional string min_msg_sent = 6 [default = "30"];
+      /**
+       * <code>optional string min_msg_sent = 6 [default = "30"];</code>
+       */
+      boolean hasMinMsgSent();
+      /**
+       * <code>optional string min_msg_sent = 6 [default = "30"];</code>
+       */
+      java.lang.String getMinMsgSent();
+      /**
+       * <code>optional string min_msg_sent = 6 [default = "30"];</code>
+       */
+      com.google.protobuf.ByteString
+          getMinMsgSentBytes();
+
+      // optional string msg_buf_size = 7 [default = "512000"];
+      /**
+       * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
+       */
+      boolean hasMsgBufSize();
+      /**
+       * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
+       */
+      java.lang.String getMsgBufSize();
+      /**
+       * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
+       */
+      com.google.protobuf.ByteString
+          getMsgBufSizeBytes();
     }
     /**
      * Protobuf type {@code blackhole.ConfRes.AppConfRes}
@@ -325,6 +355,16 @@ public final class ConfResPB {
               case 42: {
                 bitField0_ |= 0x00000010;
                 readInterval_ = input.readBytes();
+                break;
+              }
+              case 50: {
+                bitField0_ |= 0x00000020;
+                minMsgSent_ = input.readBytes();
+                break;
+              }
+              case 58: {
+                bitField0_ |= 0x00000040;
+                msgBufSize_ = input.readBytes();
                 break;
               }
             }
@@ -582,12 +622,100 @@ public final class ConfResPB {
         }
       }
 
+      // optional string min_msg_sent = 6 [default = "30"];
+      public static final int MIN_MSG_SENT_FIELD_NUMBER = 6;
+      private java.lang.Object minMsgSent_;
+      /**
+       * <code>optional string min_msg_sent = 6 [default = "30"];</code>
+       */
+      public boolean hasMinMsgSent() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional string min_msg_sent = 6 [default = "30"];</code>
+       */
+      public java.lang.String getMinMsgSent() {
+        java.lang.Object ref = minMsgSent_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            minMsgSent_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string min_msg_sent = 6 [default = "30"];</code>
+       */
+      public com.google.protobuf.ByteString
+          getMinMsgSentBytes() {
+        java.lang.Object ref = minMsgSent_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          minMsgSent_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      // optional string msg_buf_size = 7 [default = "512000"];
+      public static final int MSG_BUF_SIZE_FIELD_NUMBER = 7;
+      private java.lang.Object msgBufSize_;
+      /**
+       * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
+       */
+      public boolean hasMsgBufSize() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
+       */
+      public java.lang.String getMsgBufSize() {
+        java.lang.Object ref = msgBufSize_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            msgBufSize_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
+       */
+      public com.google.protobuf.ByteString
+          getMsgBufSizeBytes() {
+        java.lang.Object ref = msgBufSize_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          msgBufSize_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
       private void initFields() {
         topic_ = "";
         watchFile_ = "";
         period_ = "";
         maxLineSize_ = "512000";
         readInterval_ = "1L";
+        minMsgSent_ = "30";
+        msgBufSize_ = "512000";
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -628,6 +756,12 @@ public final class ConfResPB {
         if (((bitField0_ & 0x00000010) == 0x00000010)) {
           output.writeBytes(5, getReadIntervalBytes());
         }
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          output.writeBytes(6, getMinMsgSentBytes());
+        }
+        if (((bitField0_ & 0x00000040) == 0x00000040)) {
+          output.writeBytes(7, getMsgBufSizeBytes());
+        }
         getUnknownFields().writeTo(output);
       }
 
@@ -656,6 +790,14 @@ public final class ConfResPB {
         if (((bitField0_ & 0x00000010) == 0x00000010)) {
           size += com.google.protobuf.CodedOutputStream
             .computeBytesSize(5, getReadIntervalBytes());
+        }
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(6, getMinMsgSentBytes());
+        }
+        if (((bitField0_ & 0x00000040) == 0x00000040)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(7, getMsgBufSizeBytes());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -783,6 +925,10 @@ public final class ConfResPB {
           bitField0_ = (bitField0_ & ~0x00000008);
           readInterval_ = "1L";
           bitField0_ = (bitField0_ & ~0x00000010);
+          minMsgSent_ = "30";
+          bitField0_ = (bitField0_ & ~0x00000020);
+          msgBufSize_ = "512000";
+          bitField0_ = (bitField0_ & ~0x00000040);
           return this;
         }
 
@@ -831,6 +977,14 @@ public final class ConfResPB {
             to_bitField0_ |= 0x00000010;
           }
           result.readInterval_ = readInterval_;
+          if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+            to_bitField0_ |= 0x00000020;
+          }
+          result.minMsgSent_ = minMsgSent_;
+          if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+            to_bitField0_ |= 0x00000040;
+          }
+          result.msgBufSize_ = msgBufSize_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -870,6 +1024,16 @@ public final class ConfResPB {
           if (other.hasReadInterval()) {
             bitField0_ |= 0x00000010;
             readInterval_ = other.readInterval_;
+            onChanged();
+          }
+          if (other.hasMinMsgSent()) {
+            bitField0_ |= 0x00000020;
+            minMsgSent_ = other.minMsgSent_;
+            onChanged();
+          }
+          if (other.hasMsgBufSize()) {
+            bitField0_ |= 0x00000040;
+            msgBufSize_ = other.msgBufSize_;
             onChanged();
           }
           this.mergeUnknownFields(other.getUnknownFields());
@@ -1281,6 +1445,154 @@ public final class ConfResPB {
           return this;
         }
 
+        // optional string min_msg_sent = 6 [default = "30"];
+        private java.lang.Object minMsgSent_ = "30";
+        /**
+         * <code>optional string min_msg_sent = 6 [default = "30"];</code>
+         */
+        public boolean hasMinMsgSent() {
+          return ((bitField0_ & 0x00000020) == 0x00000020);
+        }
+        /**
+         * <code>optional string min_msg_sent = 6 [default = "30"];</code>
+         */
+        public java.lang.String getMinMsgSent() {
+          java.lang.Object ref = minMsgSent_;
+          if (!(ref instanceof java.lang.String)) {
+            java.lang.String s = ((com.google.protobuf.ByteString) ref)
+                .toStringUtf8();
+            minMsgSent_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string min_msg_sent = 6 [default = "30"];</code>
+         */
+        public com.google.protobuf.ByteString
+            getMinMsgSentBytes() {
+          java.lang.Object ref = minMsgSent_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            minMsgSent_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string min_msg_sent = 6 [default = "30"];</code>
+         */
+        public Builder setMinMsgSent(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000020;
+          minMsgSent_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string min_msg_sent = 6 [default = "30"];</code>
+         */
+        public Builder clearMinMsgSent() {
+          bitField0_ = (bitField0_ & ~0x00000020);
+          minMsgSent_ = getDefaultInstance().getMinMsgSent();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string min_msg_sent = 6 [default = "30"];</code>
+         */
+        public Builder setMinMsgSentBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000020;
+          minMsgSent_ = value;
+          onChanged();
+          return this;
+        }
+
+        // optional string msg_buf_size = 7 [default = "512000"];
+        private java.lang.Object msgBufSize_ = "512000";
+        /**
+         * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
+         */
+        public boolean hasMsgBufSize() {
+          return ((bitField0_ & 0x00000040) == 0x00000040);
+        }
+        /**
+         * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
+         */
+        public java.lang.String getMsgBufSize() {
+          java.lang.Object ref = msgBufSize_;
+          if (!(ref instanceof java.lang.String)) {
+            java.lang.String s = ((com.google.protobuf.ByteString) ref)
+                .toStringUtf8();
+            msgBufSize_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
+         */
+        public com.google.protobuf.ByteString
+            getMsgBufSizeBytes() {
+          java.lang.Object ref = msgBufSize_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            msgBufSize_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
+         */
+        public Builder setMsgBufSize(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000040;
+          msgBufSize_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
+         */
+        public Builder clearMsgBufSize() {
+          bitField0_ = (bitField0_ & ~0x00000040);
+          msgBufSize_ = getDefaultInstance().getMsgBufSize();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
+         */
+        public Builder setMsgBufSizeBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000040;
+          msgBufSize_ = value;
+          onChanged();
+          return this;
+        }
+
         // @@protoc_insertion_point(builder_scope:blackhole.ConfRes.AppConfRes)
       }
 
@@ -1389,6 +1701,36 @@ public final class ConfResPB {
        */
       com.google.protobuf.ByteString
           getInstanceIdsBytes(int index);
+
+      // optional string min_msg_sent = 7 [default = "30"];
+      /**
+       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+       */
+      boolean hasMinMsgSent();
+      /**
+       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+       */
+      java.lang.String getMinMsgSent();
+      /**
+       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+       */
+      com.google.protobuf.ByteString
+          getMinMsgSentBytes();
+
+      // optional string msg_buf_size = 8 [default = "512000"];
+      /**
+       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+       */
+      boolean hasMsgBufSize();
+      /**
+       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+       */
+      java.lang.String getMsgBufSize();
+      /**
+       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+       */
+      com.google.protobuf.ByteString
+          getMsgBufSizeBytes();
     }
     /**
      * Protobuf type {@code blackhole.ConfRes.LxcConfRes}
@@ -1472,6 +1814,16 @@ public final class ConfResPB {
                   mutable_bitField0_ |= 0x00000020;
                 }
                 instanceIds_.add(input.readBytes());
+                break;
+              }
+              case 58: {
+                bitField0_ |= 0x00000020;
+                minMsgSent_ = input.readBytes();
+                break;
+              }
+              case 66: {
+                bitField0_ |= 0x00000040;
+                msgBufSize_ = input.readBytes();
                 break;
               }
             }
@@ -1762,6 +2114,92 @@ public final class ConfResPB {
         return instanceIds_.getByteString(index);
       }
 
+      // optional string min_msg_sent = 7 [default = "30"];
+      public static final int MIN_MSG_SENT_FIELD_NUMBER = 7;
+      private java.lang.Object minMsgSent_;
+      /**
+       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+       */
+      public boolean hasMinMsgSent() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+       */
+      public java.lang.String getMinMsgSent() {
+        java.lang.Object ref = minMsgSent_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            minMsgSent_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+       */
+      public com.google.protobuf.ByteString
+          getMinMsgSentBytes() {
+        java.lang.Object ref = minMsgSent_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          minMsgSent_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      // optional string msg_buf_size = 8 [default = "512000"];
+      public static final int MSG_BUF_SIZE_FIELD_NUMBER = 8;
+      private java.lang.Object msgBufSize_;
+      /**
+       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+       */
+      public boolean hasMsgBufSize() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+       */
+      public java.lang.String getMsgBufSize() {
+        java.lang.Object ref = msgBufSize_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            msgBufSize_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+       */
+      public com.google.protobuf.ByteString
+          getMsgBufSizeBytes() {
+        java.lang.Object ref = msgBufSize_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          msgBufSize_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
       private void initFields() {
         topic_ = "";
         watchFile_ = "";
@@ -1769,6 +2207,8 @@ public final class ConfResPB {
         maxLineSize_ = "512000";
         readInterval_ = "1L";
         instanceIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        minMsgSent_ = "30";
+        msgBufSize_ = "512000";
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -1808,6 +2248,12 @@ public final class ConfResPB {
         for (int i = 0; i < instanceIds_.size(); i++) {
           output.writeBytes(6, instanceIds_.getByteString(i));
         }
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          output.writeBytes(7, getMinMsgSentBytes());
+        }
+        if (((bitField0_ & 0x00000040) == 0x00000040)) {
+          output.writeBytes(8, getMsgBufSizeBytes());
+        }
         getUnknownFields().writeTo(output);
       }
 
@@ -1845,6 +2291,14 @@ public final class ConfResPB {
           }
           size += dataSize;
           size += 1 * getInstanceIdsList().size();
+        }
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(7, getMinMsgSentBytes());
+        }
+        if (((bitField0_ & 0x00000040) == 0x00000040)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(8, getMsgBufSizeBytes());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -1974,6 +2428,10 @@ public final class ConfResPB {
           bitField0_ = (bitField0_ & ~0x00000010);
           instanceIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
           bitField0_ = (bitField0_ & ~0x00000020);
+          minMsgSent_ = "30";
+          bitField0_ = (bitField0_ & ~0x00000040);
+          msgBufSize_ = "512000";
+          bitField0_ = (bitField0_ & ~0x00000080);
           return this;
         }
 
@@ -2028,6 +2486,14 @@ public final class ConfResPB {
             bitField0_ = (bitField0_ & ~0x00000020);
           }
           result.instanceIds_ = instanceIds_;
+          if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+            to_bitField0_ |= 0x00000020;
+          }
+          result.minMsgSent_ = minMsgSent_;
+          if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+            to_bitField0_ |= 0x00000040;
+          }
+          result.msgBufSize_ = msgBufSize_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -2077,6 +2543,16 @@ public final class ConfResPB {
               ensureInstanceIdsIsMutable();
               instanceIds_.addAll(other.instanceIds_);
             }
+            onChanged();
+          }
+          if (other.hasMinMsgSent()) {
+            bitField0_ |= 0x00000040;
+            minMsgSent_ = other.minMsgSent_;
+            onChanged();
+          }
+          if (other.hasMsgBufSize()) {
+            bitField0_ |= 0x00000080;
+            msgBufSize_ = other.msgBufSize_;
             onChanged();
           }
           this.mergeUnknownFields(other.getUnknownFields());
@@ -2573,6 +3049,154 @@ public final class ConfResPB {
   }
   ensureInstanceIdsIsMutable();
           instanceIds_.add(value);
+          onChanged();
+          return this;
+        }
+
+        // optional string min_msg_sent = 7 [default = "30"];
+        private java.lang.Object minMsgSent_ = "30";
+        /**
+         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+         */
+        public boolean hasMinMsgSent() {
+          return ((bitField0_ & 0x00000040) == 0x00000040);
+        }
+        /**
+         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+         */
+        public java.lang.String getMinMsgSent() {
+          java.lang.Object ref = minMsgSent_;
+          if (!(ref instanceof java.lang.String)) {
+            java.lang.String s = ((com.google.protobuf.ByteString) ref)
+                .toStringUtf8();
+            minMsgSent_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+         */
+        public com.google.protobuf.ByteString
+            getMinMsgSentBytes() {
+          java.lang.Object ref = minMsgSent_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            minMsgSent_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+         */
+        public Builder setMinMsgSent(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000040;
+          minMsgSent_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+         */
+        public Builder clearMinMsgSent() {
+          bitField0_ = (bitField0_ & ~0x00000040);
+          minMsgSent_ = getDefaultInstance().getMinMsgSent();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+         */
+        public Builder setMinMsgSentBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000040;
+          minMsgSent_ = value;
+          onChanged();
+          return this;
+        }
+
+        // optional string msg_buf_size = 8 [default = "512000"];
+        private java.lang.Object msgBufSize_ = "512000";
+        /**
+         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+         */
+        public boolean hasMsgBufSize() {
+          return ((bitField0_ & 0x00000080) == 0x00000080);
+        }
+        /**
+         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+         */
+        public java.lang.String getMsgBufSize() {
+          java.lang.Object ref = msgBufSize_;
+          if (!(ref instanceof java.lang.String)) {
+            java.lang.String s = ((com.google.protobuf.ByteString) ref)
+                .toStringUtf8();
+            msgBufSize_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+         */
+        public com.google.protobuf.ByteString
+            getMsgBufSizeBytes() {
+          java.lang.Object ref = msgBufSize_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            msgBufSize_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+         */
+        public Builder setMsgBufSize(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000080;
+          msgBufSize_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+         */
+        public Builder clearMsgBufSize() {
+          bitField0_ = (bitField0_ & ~0x00000080);
+          msgBufSize_ = getDefaultInstance().getMsgBufSize();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+         */
+        public Builder setMsgBufSizeBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000080;
+          msgBufSize_ = value;
           onChanged();
           return this;
         }
@@ -3507,18 +4131,21 @@ public final class ConfResPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rConfRes.proto\022\tblackhole\"\374\002\n\007ConfRes\0221" +
+      "\n\rConfRes.proto\022\tblackhole\"\355\003\n\007ConfRes\0221" +
       "\n\nappConfRes\030\001 \003(\0132\035.blackhole.ConfRes.A" +
       "ppConfRes\0221\n\nlxcConfRes\030\002 \003(\0132\035.blackhol" +
-      "e.ConfRes.LxcConfRes\032y\n\nAppConfRes\022\r\n\005to" +
-      "pic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \002(\t\022\016\n\006period\030" +
-      "\003 \002(\t\022\035\n\rmax_line_size\030\004 \001(\t:\006512000\022\031\n\r" +
-      "read_interval\030\005 \001(\t:\0021L\032\217\001\n\nLxcConfRes\022\r" +
-      "\n\005topic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \001(\t\022\016\n\006per" +
-      "iod\030\003 \002(\t\022\035\n\rmax_line_size\030\004 \001(\t:\006512000" +
-      "\022\031\n\rread_interval\030\005 \001(\t:\0021L\022\024\n\014instance_",
-      "ids\030\006 \003(\tB.\n!com.dp.blackhole.protocol.c" +
-      "ontrolB\tConfResPB"
+      "e.ConfRes.LxcConfRes\032\261\001\n\nAppConfRes\022\r\n\005t" +
+      "opic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \002(\t\022\016\n\006period" +
+      "\030\003 \002(\t\022\035\n\rmax_line_size\030\004 \001(\t:\006512000\022\031\n" +
+      "\rread_interval\030\005 \001(\t:\0021L\022\030\n\014min_msg_sent" +
+      "\030\006 \001(\t:\00230\022\034\n\014msg_buf_size\030\007 \001(\t:\006512000" +
+      "\032\307\001\n\nLxcConfRes\022\r\n\005topic\030\001 \002(\t\022\022\n\nwatch_" +
+      "file\030\002 \001(\t\022\016\n\006period\030\003 \002(\t\022\035\n\rmax_line_s",
+      "ize\030\004 \001(\t:\006512000\022\031\n\rread_interval\030\005 \001(\t" +
+      ":\0021L\022\024\n\014instance_ids\030\006 \003(\t\022\030\n\014min_msg_se" +
+      "nt\030\007 \001(\t:\00230\022\034\n\014msg_buf_size\030\010 \001(\t:\0065120" +
+      "00B.\n!com.dp.blackhole.protocol.controlB" +
+      "\tConfResPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -3536,13 +4163,13 @@ public final class ConfResPB {
           internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_AppConfRes_descriptor,
-              new java.lang.String[] { "Topic", "WatchFile", "Period", "MaxLineSize", "ReadInterval", });
+              new java.lang.String[] { "Topic", "WatchFile", "Period", "MaxLineSize", "ReadInterval", "MinMsgSent", "MsgBufSize", });
           internal_static_blackhole_ConfRes_LxcConfRes_descriptor =
             internal_static_blackhole_ConfRes_descriptor.getNestedTypes().get(1);
           internal_static_blackhole_ConfRes_LxcConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_LxcConfRes_descriptor,
-              new java.lang.String[] { "Topic", "WatchFile", "Period", "MaxLineSize", "ReadInterval", "InstanceIds", });
+              new java.lang.String[] { "Topic", "WatchFile", "Period", "MaxLineSize", "ReadInterval", "InstanceIds", "MinMsgSent", "MsgBufSize", });
           return null;
         }
       };

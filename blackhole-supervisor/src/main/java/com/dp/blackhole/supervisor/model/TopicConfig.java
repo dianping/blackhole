@@ -18,6 +18,9 @@ public class TopicConfig {
     private String owner;
     private String compression;
     private int uploadPeriod;
+    private int minMsgSent;
+    private int msgBufSize;
+    
     public TopicConfig(String topic) {
         this.topic = topic;
     }
@@ -93,6 +96,18 @@ public class TopicConfig {
         } else {
             return null;
         }
+    }
+    public int getMinMsgSent() {
+        return minMsgSent;
+    }
+    public void setMinMsgSent(int minMsgSent) {
+        this.minMsgSent = minMsgSent;
+    }
+    public int getMsgBufSize() {
+        return msgBufSize;
+    }
+    public void setMsgBufSize(int msgBufSize) {
+        this.msgBufSize = msgBufSize;
     }
     public void addIdsByHosts(Map<String, Set<String>> hostIds) {
         if (getInstances() == null) {

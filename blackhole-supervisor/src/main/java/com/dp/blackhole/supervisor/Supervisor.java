@@ -163,7 +163,9 @@ public class Supervisor {
                 confInfo.getWatchLog(),
                 String.valueOf(confInfo.getRollPeriod()),
                 String.valueOf(confInfo.getMaxLineSize()),
-                String.valueOf(confInfo.getReadInterval())
+                String.valueOf(confInfo.getReadInterval()),
+                String.valueOf(confInfo.getMinMsgSent()),
+                String.valueOf(confInfo.getMsgBufSize())
         );
         appConfResList.add(appConfRes);
         Message message = PBwrap.wrapConfRes(appConfResList, null);
@@ -198,6 +200,8 @@ public class Supervisor {
                     String.valueOf(confInfo.getRollPeriod()),
                     String.valueOf(confInfo.getMaxLineSize()),
                     String.valueOf(confInfo.getReadInterval()),
+                    String.valueOf(confInfo.getMinMsgSent()),
+                    String.valueOf(confInfo.getMsgBufSize()),
                     idsInTheSameHost);
             lxcConfResList.add(lxcConfRes);
             Message message = PBwrap.wrapConfRes(null, lxcConfResList);
@@ -1915,6 +1919,8 @@ public class Supervisor {
             String period = String.valueOf(confInfo.getRollPeriod());
             String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
             String readInterval = String.valueOf(confInfo.getReadInterval());
+            String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
+            String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
             String watchFile = confInfo.getWatchLog();
             if (watchFile == null) {
                 LOG.error("Can not get watch file of " + topic);
@@ -1922,7 +1928,9 @@ public class Supervisor {
                 send(from, message);
                 return;
             }
-            AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile, period, maxLineSize, readInterval);
+            AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile,
+                    period, maxLineSize, readInterval, minMsgSent,
+                    msgBufSize);
             appConfResList.add(appConfRes);
         }
         if (!appConfResList.isEmpty()) {
@@ -1945,12 +1953,16 @@ public class Supervisor {
                 String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
                 String readInterval = String.valueOf(confInfo.getReadInterval());
                 String watchFile = confInfo.getWatchLog();
+                String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
+                String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
                 Set<String> ids = confInfo.getInsByHost(connection.getHost());
                 if (ids == null) {
                     LOG.error("Can not get instances by " + topic + " and " + connection.getHost());
                     continue;
                 }
-                LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile, period, maxLineSize, readInterval, ids);
+                LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile,
+                        period, maxLineSize, readInterval, minMsgSent,
+                        msgBufSize, ids);
                 lxcConfResList.add(lxcConfRes);
             }
             if (!lxcConfResList.isEmpty()) {

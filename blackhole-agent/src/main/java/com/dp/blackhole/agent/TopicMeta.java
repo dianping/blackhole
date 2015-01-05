@@ -10,8 +10,12 @@ public class TopicMeta {
     private final int maxLineSize;
     private AtomicBoolean dying;
     private final long readInterval;
+    private int minMsgSent;
+    private int msgBufSize;
     
-    public TopicMeta(MetaKey metaKey, String tailFile, long rollPeriod, int maxLineSize, long readInterval) {
+    public TopicMeta(MetaKey metaKey, String tailFile, long rollPeriod,
+            int maxLineSize, long readInterval,
+            int minMsgSent, int msgBufSize) {
         this.metaKey = metaKey;
         this.tailFile = tailFile;
         this.rollPeriod = rollPeriod;
@@ -19,6 +23,8 @@ public class TopicMeta {
         this.maxLineSize = maxLineSize;
         this.dying = new AtomicBoolean(false);
         this.readInterval = readInterval;
+        this.minMsgSent = minMsgSent;
+        this.msgBufSize = msgBufSize;
     }
 
     public MetaKey getMetaKey() {
@@ -59,6 +65,22 @@ public class TopicMeta {
 
     public long getReadInterval() {
         return readInterval;
+    }
+
+    public int getMinMsgSent() {
+        return minMsgSent;
+    }
+
+    public void setMinMsgSent(int minMsgSent) {
+        this.minMsgSent = minMsgSent;
+    }
+
+    public int getMsgBufSize() {
+        return msgBufSize;
+    }
+
+    public void setMsgBufSize(int msgBufSize) {
+        this.msgBufSize = msgBufSize;
     }
 
     @Override
@@ -106,7 +128,9 @@ public class TopicMeta {
     public String toString() {
         return "TopicMeta [metaKey=" + metaKey + ", tailFile=" + tailFile
                 + ", createTime=" + createTime + ", rollPeriod=" + rollPeriod
-                + ", maxLineSize=" + maxLineSize + "]";
+                + ", maxLineSize=" + maxLineSize + ", dying=" + dying
+                + ", readInterval=" + readInterval + ", minMsgSent="
+                + minMsgSent + ", msgBufSize=" + msgBufSize + "]";
     }
 
     static class MetaKey {
