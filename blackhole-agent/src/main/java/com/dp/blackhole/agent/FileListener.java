@@ -72,12 +72,12 @@ public class FileListener implements JNotifyListener{
                 return false;
             }
             
-            //tag file appending
-            reader.doFileAppendForce();
             lock.lock();
             try {
                 path2wd.put(watchPath, wd);
             } finally {
+                //tag file appending
+                reader.doFileAppendForce();
                 lock.unlock();
             }
             LOG.info("Registerring and monitoring tail file " + watchPath + " \"FILE_MODIFIED\"");
@@ -97,11 +97,12 @@ public class FileListener implements JNotifyListener{
                 path2wd.remove(watchPath);
             }
         } finally {
+            //status reset must be executed
+            reader.resetCurrentLogStatus();
             lock.unlock();
         }
         try {
             iJNotifyInstance.removeWatch(wd);
-            reader.resetCurrentLogStatus();
             LOG.info("Unregister watch path " + watchPath);
         } catch (JNotifyException e) {
             LOG.fatal("Failed to remove wd " + wd + " for " + watchPath + 
@@ -124,7 +125,6 @@ public class FileListener implements JNotifyListener{
         LogReader reader;
         if ((reader = readerMap.get(createdFilePath)) != null) {
             LOG.info("rotate detected of " + createdFilePath);
-            reader.beginLogRotate();
             //Here, we lock to removing the old and adding a new path as a atomic operation.
             lock.lock();
             try {
@@ -137,6 +137,9 @@ public class FileListener implements JNotifyListener{
                 }
                 Integer newWd = iJNotifyInstance.addWatch(createdFilePath, FILE_MODIFIED, false, this);
                 path2wd.put(createdFilePath, newWd);
+                //log status modification must happen after putting newWd to path2wd map,
+                //if not, it may bring a serious bug
+                reader.beginLogRotate();
                 LOG.info("Re-monitoring "+ createdFilePath + " \"FILE_MODIFIED\" for rotate.");
             } catch (JNotifyException e) {
                 LOG.fatal("Failed to add or remove watch for " + createdFilePath, e);

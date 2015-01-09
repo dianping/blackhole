@@ -172,11 +172,9 @@ public class LogReader implements Runnable {
                         break;
                     case ROTATE:
                         processRotate();
-                        finishLogRotate();
                         break;
                     case LAST_ROTATE:
                         processLastRotate();
-                        finishLastLogRotate();
                         break;
                     case TRANSACTION_ATTEPT:
                         break;
@@ -212,6 +210,7 @@ public class LogReader implements Runnable {
                         topicMeta.getRollPeriod());
                 TransferWrap wrap = new TransferWrap(request);
                 wrap.write(channel);
+                finishLogRotate();
             } catch (IOException e) {
                 LOG.error("Oops, got an exception:", e);
                 closeQuietly(reader);
@@ -237,6 +236,7 @@ public class LogReader implements Runnable {
                         topicMeta.getRollPeriod());
                 TransferWrap wrap = new TransferWrap(request);
                 wrap.write(channel);
+                finishLastLogRotate();
             } catch (IOException e) {
                 LOG.error("Oops, got an exception:", e);
                 closeQuietly(reader);
