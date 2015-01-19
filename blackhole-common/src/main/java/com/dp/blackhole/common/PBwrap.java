@@ -32,6 +32,8 @@ import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.protocol.control.RestartPB.Restart;
 import com.dp.blackhole.protocol.control.RollCleanPB.RollClean;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
+import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp;
+import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp.OP;
 import com.dp.blackhole.protocol.control.StreamIDPB.StreamID;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -133,6 +135,9 @@ public class PBwrap {
             msg.setDumpConsumerGroup((DumpConsumerGroup) message);
             break;
         case LIST_CONSUMER_GROUP:
+            break;
+        case SNAPSHOT_OP:
+            msg.setSnapshotOp((SnapshotOp) message);
             break;
         default:
         }
@@ -488,5 +493,13 @@ public class PBwrap {
     
     public static Message wrapListConsumerGroups() {
         return wrapMessage(MessageType.LIST_CONSUMER_GROUP, null);
+    }
+
+    public static Message wrapSnapshotOp(String topic, String source, OP op) {
+        SnapshotOp.Builder builder = SnapshotOp.newBuilder();
+        builder.setTopic(topic);
+        builder.setSource(source);
+        builder.setOp(op);
+        return wrapMessage(MessageType.SNAPSHOT_OP, builder.build());
     }
 }

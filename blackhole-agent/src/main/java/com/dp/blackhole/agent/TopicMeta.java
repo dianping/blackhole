@@ -8,16 +8,16 @@ public class TopicMeta implements Serializable {
     private final TopicId topicId;
     private final String tailFile;
     private final long createTime;
-    private final long logRotatePeriod;
+    private final long rotatePeriod;
     private final int maxLineSize;
     private AtomicBoolean dying;
     private final long readInterval;
     private long rollPeriod;
     
-    public TopicMeta(TopicId topicId, String tailFile, long logRotatePeriod, long rollPeriod, int maxLineSize, long readInterval) {
+    public TopicMeta(TopicId topicId, String tailFile, long rotatePeriod, long rollPeriod, int maxLineSize, long readInterval) {
         this.topicId = topicId;
         this.tailFile = tailFile;
-        this.logRotatePeriod = logRotatePeriod;
+        this.rotatePeriod = rotatePeriod;
         this.rollPeriod = rollPeriod;
         this.createTime = System.currentTimeMillis();
         this.maxLineSize = maxLineSize;
@@ -37,8 +37,8 @@ public class TopicMeta implements Serializable {
         return topicId.getInstanceId();
     }
 
-    public long getLogRotatePeriod() {
-        return logRotatePeriod;
+    public long getRotatePeriod() {
+        return rotatePeriod;
     }
 
     public long getRollPeriod() {
@@ -78,7 +78,7 @@ public class TopicMeta implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((topicId == null) ? 0 : topicId.hashCode());
-        result = prime * result + (int) (logRotatePeriod ^ (logRotatePeriod >>> 32));
+        result = prime * result + (int) (rotatePeriod ^ (rotatePeriod >>> 32));
         result = prime * result
                 + ((tailFile == null) ? 0 : tailFile.hashCode());
         return result;
@@ -98,7 +98,7 @@ public class TopicMeta implements Serializable {
                 return false;
         } else if (!topicId.equals(other.topicId))
             return false;
-        if (logRotatePeriod != other.logRotatePeriod)
+        if (rotatePeriod != other.rotatePeriod)
             return false;
         if (tailFile == null) {
             if (other.tailFile != null)
@@ -111,7 +111,7 @@ public class TopicMeta implements Serializable {
     @Override
     public String toString() {
         return "TopicMeta [topicId=" + topicId + ", tailFile=" + tailFile
-                + ", createTime=" + createTime + ", logRotatePeriod=" + logRotatePeriod
+                + ", createTime=" + createTime + ", logRotatePeriod=" + rotatePeriod
                 + ", rollPeriod=" + rollPeriod + ", maxLineSize=" + maxLineSize
                 + ", dying=" + dying.get() + ", readInterval=" + readInterval + "]";
     }

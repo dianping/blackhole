@@ -67,7 +67,7 @@ public class RollRecovery implements Runnable{
     @Override
     public void run() {
         // check local file existence 
-        long rotatePeriod= topicMeta.getLogRotatePeriod();
+        long rotatePeriod= topicMeta.getRotatePeriod();
         long rollPeriod = topicMeta.getRollPeriod();
         long toTransferSize = 0;
         DataOutputStream out = null;
@@ -98,7 +98,7 @@ public class RollRecovery implements Runnable{
         }
         
         //use origin tail file to recovery because of the rollTs belong to the current rotate stage
-        if (isFinal || Util.belongToSameRotate(Util.getTS(), rollTimestamp, topicMeta.getLogRotatePeriod())) {
+        if (isFinal || Util.belongToSameRotate(Util.getTS(), rollTimestamp, topicMeta.getRotatePeriod())) {
             rolledFile = new File(topicMeta.getTailFile());
         } else {
             rolledFile = Util.findRealFileByIdent(topicMeta.getTailFile(), rotateString);

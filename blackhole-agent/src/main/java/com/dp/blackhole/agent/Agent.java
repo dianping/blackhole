@@ -40,6 +40,8 @@ import com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit;
 import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
+import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp;
+import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp.OP;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Agent implements Runnable {
@@ -402,7 +404,7 @@ public class Agent implements Runnable {
                         LOG.info("duplicated assign broker message: " + assignBroker);
                     }
                 } else {
-                    LOG.error("AppName [" + assignBroker.getTopic()
+                    LOG.error("Topic [" + assignBroker.getTopic()
                             + "] from supervisor message not match with local");
                 }
                 break;
@@ -538,6 +540,46 @@ public class Agent implements Runnable {
                             }
                         }
                     }
+                }
+                break;
+            case SNAPSHOT_OP:
+                SnapshotOp snapshotOp = msg.getSnapshotOp();
+                topic = snapshotOp.getTopic();
+                instanceId = Util.getInstanceIdFromSource(snapshotOp.getSource());
+                OP op = snapshotOp.getOp();
+                
+                topicId = new TopicId(topic, instanceId);
+                if ((topicMeta = logMetas.get(topicId)) != null) {
+                    if ((logReader = topicReaders.get(topicMeta)) != null) {
+                        IState state = logReader.getState();
+                        if (state != null) {
+                            switch (op) {
+                                case log:
+                                    LOG.debug("Snaphost log for " + topicId);
+                                    state.log();
+                                    break;
+                                case clean:
+                                    LOG.debug("Snaphost clean up for " + topicId);
+                                    state.tidy();
+                                    state.log();
+                                    break;
+                                case del:
+                                    LOG.warn("!!! Force delete snapshot file of " + topicId 
+                                            + ". It may lead to a disordered situation, "
+                                            + "please use it just before restart Agent process");
+                                    state.cleanup();
+                                    break;
+                                default:
+                                    break;
+                            }
+                        } else {
+                            LOG.error("Can not find state for " + topicId);
+                        }
+                    } else {
+                        LOG.info("Can not find logReader for " + topicId);
+                    }
+                } else {
+                    LOG.error("Topic [" + topic + "] from supervisor message not match with local");
                 }
                 break;
             default:

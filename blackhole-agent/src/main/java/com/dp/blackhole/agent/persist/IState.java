@@ -14,8 +14,12 @@ public interface IState {
     
     public Record retriveFirstRecord();
     
-    public void cleanup();
+    public void tidy();
     
     public boolean isComplete();
+    
+    public void log();
+
+    public void cleanup();
 
 }

@@ -25,6 +25,7 @@ import "Restart.proto";
 import "QuitAndClean.proto";
 import "RollClean.proto";
 import "DumpConsumerGroup.proto";
+import "SnapshotOp.proto";
 
 message Message {
     enum MessageType {
@@ -67,6 +68,7 @@ message Message {
         ROLL_CLEAN = 37;
         DUMP_CONSUMER_GROUP = 38;
         LIST_CONSUMER_GROUP = 39;
+        SNAPSHOT_OP = 40;
     }
 
     required MessageType type = 1;
@@ -93,4 +95,5 @@ message Message {
     optional Clean clean = 22;
     optional RollClean rollClean = 23;
     optional DumpConsumerGroup dumpConsumerGroup = 24;
+    optional SnapshotOp snapshotOp = 25;
 }

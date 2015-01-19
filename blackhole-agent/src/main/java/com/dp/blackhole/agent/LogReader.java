@@ -192,7 +192,7 @@ public class LogReader implements Runnable {
         @Override
         public void run() {
             long rollPeriod = topicMeta.getRollPeriod();
-            long rotatePeriod = topicMeta.getLogRotatePeriod();
+            long rotatePeriod = topicMeta.getRotatePeriod();
             long resumeRollTs = Util.getLatestRollTsUnderTimeBuf(
                     Util.getTS(),
                     rollPeriod,

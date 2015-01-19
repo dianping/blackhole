@@ -46,6 +46,7 @@ import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.protocol.control.RestartPB.Restart;
 import com.dp.blackhole.protocol.control.RollCleanPB.RollClean;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
+import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp.OP;
 import com.dp.blackhole.protocol.control.StreamIDPB.StreamID;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry;
@@ -898,6 +899,24 @@ public class Supervisor {
                 LOG.info("Can not find stream which from " + agentHost);
             }
         }
+    }
+    
+    public boolean oprateSnapshot(String topic, String source, String opname) {
+        SimpleConnection c = agentsMapping.get(Util.getAgentHostFromSource(source));
+        if (c == null) {
+            LOG.error("can not find connection by host: " + source);
+            return false;
+        }
+        OP op;
+        try {
+            op = OP.valueOf(opname);
+        } catch (Exception e) {
+            LOG.error("Illegal opname: " + opname);
+            op = OP.log;
+        }
+        Message message = PBwrap.wrapSnapshotOp(topic, source, op);
+        send(c, message);
+        return true;
     }
 
     public void removeConf(RemoveConf removeConf, SimpleConnection from) {

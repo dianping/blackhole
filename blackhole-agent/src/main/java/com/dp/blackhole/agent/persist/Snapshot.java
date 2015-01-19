@@ -102,7 +102,7 @@ public class Snapshot implements Serializable {
         return true;
     }
     @Override
-    public String toString() {
+    public synchronized String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Snapshot [topicId=").append(topicId)
         .append(", lastModify=").append(lastModifyTime)

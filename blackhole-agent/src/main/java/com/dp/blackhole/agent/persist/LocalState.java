@@ -8,6 +8,9 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,13 +25,69 @@ import com.dp.blackhole.common.Util;
 
 public class LocalState implements IState {
     private static final Log LOG = LogFactory.getLog(LocalState.class);
+    private TopicMeta topicMeta;
     private File snapshotFile;
     private Snapshot snapshot;
-    private final long rotatePeriod;
+    private ReadWriteLock lock = new ReentrantReadWriteLock();
+    private Lock writeLock = lock.writeLock();
+    private Lock readLock = lock.readLock();
     
-    public LocalState( String persistDir, TopicMeta meta) {
-        this.rotatePeriod = meta.getLogRotatePeriod();
-        TopicId id = meta.getTopicId();
+    public LocalState(String persistDir, TopicMeta meta) {
+        this.topicMeta = meta;
+        this.snapshotFile = getSnapshotFile(persistDir, meta.getTopicId());
+        Snapshot snapshot;
+        try {
+            snapshot = reloadBySnapshotFile();
+            setSnapshot(snapshot);
+        } catch (IOException e) {
+            LOG.info("File '" + this.snapshotFile + "' does not exist, compute and build by skim log files");
+            snapshot = rebuidByActualFiles(meta, meta.getTopicId());
+            setSnapshot(snapshot);
+        }
+    }
+
+    private Snapshot reloadBySnapshotFile() throws IOException {
+        return (Snapshot) Util.deserialize(FileUtils.readFileToByteArray(snapshotFile));
+    }
+    
+    private Snapshot rebuidByActualFiles(final TopicMeta meta, TopicId id) {
+        Snapshot snapshot = new Snapshot(id);
+        final File file = new File(meta.getTailFile());
+        if (file.exists()) {
+            final SortedSet<String> sortTimeStrings = new TreeSet<String>();
+            File parentDir = file.getParentFile();
+            parentDir.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    String acceptFileNameRegex = file.getName() + "\\.(" + Util.getRegexFormPeriod(meta.getRotatePeriod()) + ")";
+                    Pattern p = Pattern.compile(acceptFileNameRegex);
+                    Matcher m = p.matcher(name);
+                    if (m.find()) {
+                        String timeString = m.group(1);
+                        sortTimeStrings.add(timeString);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            });
+            for (String timeString : sortTimeStrings) {
+                try {
+                    snapshot.addRecord(new Record(Record.ROTATE, 
+                            Util.parseTs(timeString, meta.getRotatePeriod())
+                            + (meta.getRotatePeriod() - meta.getRollPeriod()) * 1000L,
+                            LogReader.BOF, LogReader.EOF));
+                } catch (ParseException e1) {
+                    LOG.error("Time pases exception " + timeString);
+                    continue;
+                }
+            }
+            LOG.info("init-snapshot:\n" + snapshot);
+        }
+        return snapshot;
+    }
+
+    private File getSnapshotFile(String persistDir, TopicId id) {
         StringBuilder build = new StringBuilder();
         build.append(persistDir).append("/").append(id.getTopic()).append("/");
         if (id.getInstanceId() != null) {
@@ -42,48 +101,25 @@ public class LocalState implements IState {
             }
         }
         build.append(".snapshot");
-        this.snapshotFile = new File(build.toString());
-        try {
-            this.snapshot = reload();
-        } catch (IOException e) {
-            LOG.info("File '" + this.snapshotFile + "' does not exist, compute and build by skim log files");
-            this.snapshot = new Snapshot(id);
-            final File file = new File(meta.getTailFile());
-            if (file.exists()) {
-                final SortedSet<String> sortTimeStrings = new TreeSet<String>();
-                File parentDir = file.getParentFile();
-                parentDir.listFiles(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String name) {
-                        String acceptFileNameRegex = file.getName() + "\\.(" + Util.getRegexFormPeriod(rotatePeriod) + ")";
-                        Pattern p = Pattern.compile(acceptFileNameRegex);
-                        Matcher m = p.matcher(name);
-                        if (m.find()) {
-                            String timeString = m.group(1);
-                            sortTimeStrings.add(timeString);
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                });
-                for (String timeString : sortTimeStrings) {
-                    try {
-                        this.snapshot.addRecord(new Record(Record.ROTATE, 
-                                Util.parseTs(timeString, rotatePeriod)
-                                + (meta.getLogRotatePeriod() - meta.getRollPeriod()) * 1000L,
-                                LogReader.BOF, LogReader.EOF));
-                    } catch (ParseException e1) {
-                        LOG.error("Time pases exception " + timeString);
-                        continue;
-                    }
-                }
-            }
-        }
+        return new File(build.toString());
     }
     
     public Snapshot getSnapshot() {
-        return snapshot;
+        readLock.lock();
+        try {
+            return snapshot;
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    public void setSnapshot(Snapshot snapshot) {
+        writeLock.lock();
+        try {
+            this.snapshot = snapshot;
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     @Override
@@ -92,7 +128,7 @@ public class LocalState implements IState {
         Record perviousRollRecord = getPerviousRollRecord();
         if (perviousRollRecord == null) {
             startOffset = LogReader.BOF;
-        } else if (!Util.belongToSameRotate(perviousRollRecord.getRollTs(), rollTs, rotatePeriod)) {
+        } else if (!Util.belongToSameRotate(perviousRollRecord.getRollTs(), rollTs, topicMeta.getRotatePeriod())) {
             startOffset = LogReader.BOF;
         } else {
             startOffset = perviousRollRecord.getEndOffset() + 1;
@@ -103,20 +139,20 @@ public class LocalState implements IState {
     @Override 
     public void record(int type, long rollTs, long startOffset, long endOffset) {
         Record record = new Record(type, rollTs, startOffset, endOffset);
-        snapshot.addRecord(record);
+        getSnapshot().addRecord(record);
         LOG.debug("Recorded " + record);
         try {
             persist();
         } catch (IOException e) {
             LOG.error("Persist " + record + " occur an IOException, remove it", e);
-            snapshot.remove(record);;
+            getSnapshot().remove(record);;
         }
     }
     
     @Override
     public Record retrive(long rollTs) {
         Record ret = null;
-        List<Record> records = snapshot.getRecords();
+        List<Record> records = getSnapshot().getRecords();
         if (!records.isEmpty()) {
             for (int i = records.size() - 1; i >= 0; i--) {
                 Record record = records.get(i);
@@ -146,7 +182,7 @@ public class LocalState implements IState {
     
     public Record retriveLastRollRecord() {
         Record ret = null;
-        List<Record> records = snapshot.getRecords();
+        List<Record> records = getSnapshot().getRecords();
         if (!records.isEmpty()) {
             for (int i = records.size() - 1; i >= 0; i--) {
                 Record record = records.get(i);
@@ -163,7 +199,7 @@ public class LocalState implements IState {
     @Override
     public Record retriveLastRecord(int type) {
         Record ret = null;
-        List<Record> records = snapshot.getRecords();
+        List<Record> records = getSnapshot().getRecords();
         if (!records.isEmpty()) {
             for (int i = records.size() - 1; i >= 0; i--) {
                 Record record = records.get(i);
@@ -180,7 +216,7 @@ public class LocalState implements IState {
     @Override
     public Record retriveFirstRecord() {
         Record ret = null;
-        List<Record> records = snapshot.getRecords();
+        List<Record> records = getSnapshot().getRecords();
         if (!records.isEmpty()) {
             ret = records.get(0);
         }
@@ -188,9 +224,25 @@ public class LocalState implements IState {
     }
 
     @Override
+    public void tidy() {
+        Snapshot snapshot = rebuidByActualFiles(this.topicMeta, this.topicMeta.getTopicId());
+        setSnapshot(snapshot);
+        try {
+            persist();
+        } catch (IOException e) {
+            LOG.error("Fail to persist snapshot after cleanup.", e);
+        }
+    }
+
+    
+    /**
+     * clean up the snapshot file(delete force)
+     * so it's a very dangerous opration.
+     * please just invoke it before restart process
+     */
+    @Override
     public void cleanup() {
-        // TODO Auto-generated method stub
-        
+        snapshotFile.delete();
     }
 
     @Override
@@ -198,9 +250,14 @@ public class LocalState implements IState {
         // TODO Auto-generated method stub
         return false;
     }
+
+    @Override
+    public void log() {
+        LOG.info(getSnapshot());
+    }
     
     private Record getPerviousRollRecord() {
-        List<Record> records = snapshot.getRecords();
+        List<Record> records = getSnapshot().getRecords();
         Record perviousRollRecord = null;
         if (!records.isEmpty()) {
             for (int i = records.size() - 1; i >= 0; i--) {
@@ -227,14 +284,10 @@ public class LocalState implements IState {
         return perviousRollRecord;
     }
 
-    private Snapshot reload() throws IOException {
-        return (Snapshot) Util.deserialize(FileUtils.readFileToByteArray(snapshotFile));
-    }
-
     private void persist() throws IOException {
-        snapshot.eliminateExpiredRecord();
-        snapshot.setLastModifyTime(Util.getTS());
-        byte[] toWrite = Util.serialize(snapshot);
+        getSnapshot().eliminateExpiredRecord();
+        getSnapshot().setLastModifyTime(Util.getTS());
+        byte[] toWrite = Util.serialize(getSnapshot());
         FileUtils.writeByteArrayToFile(snapshotFile, toWrite);
     }
 }

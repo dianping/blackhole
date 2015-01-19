@@ -38,7 +38,7 @@ public class RollTrigger {
         public void run() {
             long currentTs = System.currentTimeMillis();
             long currentClosestStepTs = Util.getClosestRollTs(currentTs, topicMeta.getRollPeriod());
-            if (currentClosestStepTs % (topicMeta.getLogRotatePeriod() * 1000) == 0) {
+            if (currentClosestStepTs % (topicMeta.getRotatePeriod() * 1000) == 0) {
                 LOG.debug(topicMeta.getTopicId() + " roll attempt is not triggered cause rotating");
             } else {
                 LOG.debug(topicMeta.getTopicId() + " begin roll attempt.");
