@@ -26,7 +26,7 @@ public class RollTrigger {
     
     public void trigger() {
         long currentTs = Util.getTS();
-        long delay = Util.getNextRollTs(currentTs, topicMeta.getRollPeriod()) - currentTs + 800L;
+        long delay = Util.getNextRollTs(currentTs, topicMeta.getRollPeriod()) - currentTs + 100L;
         this.service.scheduleAtFixedRate(new RollAttemptTask(), delay, topicMeta.getRollPeriod() * 1000L, TimeUnit.MILLISECONDS);
         LOG.info("Roll Attempt will start after " + delay/1000L
                 + " seconds, and repeat at fixed rate "
@@ -37,8 +37,7 @@ public class RollTrigger {
         @Override
         public void run() {
             long currentTs = System.currentTimeMillis();
-            long currentClosestStepTs = Util.getClosestRollTs(currentTs, topicMeta.getRollPeriod());
-            if (currentClosestStepTs % (topicMeta.getRotatePeriod() * 1000) == 0) {
+            if (Util.isRollConcurrentWithRotate(currentTs, topicMeta.getRollPeriod(), topicMeta.getRotatePeriod())) {
                 LOG.debug(topicMeta.getTopicId() + " roll attempt is not triggered cause rotating");
             } else {
                 LOG.debug(topicMeta.getTopicId() + " begin roll attempt.");

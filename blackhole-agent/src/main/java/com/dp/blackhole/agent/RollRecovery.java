@@ -200,7 +200,7 @@ public class RollRecovery implements Runnable{
         head.ignore = ignore;
         head.app = topicMeta.getTopic();
         head.source = source;
-        head.peroid = topicMeta.getRollPeriod();
+        head.period = topicMeta.getRollPeriod();
         head.ts = rollTimestamp;
         head.size = fileSize;
         head.hasCompressed = hasCompressed;

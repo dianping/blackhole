@@ -197,11 +197,11 @@ public class Agent implements Runnable {
     public void fillUpAppLogsFromConfig(TopicId topicId) {
         String topic = topicId.getTopic();
         String path = ConfigKeeper.configMap.get(topic).getString(ParamsKey.TopicConf.WATCH_FILE);
-        long rotatePeroid = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROTATE_PERIOD);
-        long rollPeroid = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROLL_PERIOD);
+        long rotatePeriod = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROTATE_PERIOD);
+        long rollPeriod = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROLL_PERIOD);
         int maxLineSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MAX_LINE_SIZE, 512000);
         long readInterval = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.READ_INTERVAL, 1L);
-        TopicMeta topicMeta = new TopicMeta(topicId, path, rotatePeroid, rollPeroid, maxLineSize, readInterval);
+        TopicMeta topicMeta = new TopicMeta(topicId, path, rotatePeriod, rollPeriod, maxLineSize, readInterval);
         logMetas.put(topicId, topicMeta);
     }
 

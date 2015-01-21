@@ -303,7 +303,7 @@ public class RollManager {
                     RollIdent roll = new RollIdent();
                     roll.topic = head.app;
                     roll.source = head.source;
-                    roll.period = head.peroid;
+                    roll.period = head.period;
                     roll.ts = head.ts;
                     roll.isFinal = head.isFinal;
                     

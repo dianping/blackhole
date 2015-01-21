@@ -10,7 +10,7 @@ public class AgentProtocol {
         public boolean ignore;
         public String app;
         public String source;
-        public long peroid;
+        public long period;
         public long ts;
         public long size;
         public boolean hasCompressed;
@@ -21,7 +21,7 @@ public class AgentProtocol {
         out.writeBoolean(head.ignore);
         Util.writeString(head.app, out);
         Util.writeString(head.source, out);
-        out.writeLong(head.peroid);
+        out.writeLong(head.period);
         out.writeLong(head.ts);
         out.writeLong(head.size);
         out.writeBoolean(head.hasCompressed);
@@ -33,7 +33,7 @@ public class AgentProtocol {
         head.ignore = in.readBoolean();
         head.app = Util.readString(in);
         head.source = Util.readString(in);
-        head.peroid = in.readLong();
+        head.period = in.readLong();
         head.ts = in.readLong();
         head.size = in.readLong();
         head.hasCompressed = in.readBoolean();

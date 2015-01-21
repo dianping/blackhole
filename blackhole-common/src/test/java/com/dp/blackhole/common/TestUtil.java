@@ -22,8 +22,8 @@ import com.dp.blackhole.common.Util;
 public class TestUtil {
     private static final String filepathname = "/tmp/893jfc842.log.2013-01-01.15";
     private static File file;
-    private static final long PEROID_OF_HOUR = 3600l;
-    private static final long PEROID_OF_DAY = 3600 * 24l;
+    private static final long PERIOD_OF_HOUR = 3600l;
+    private static final long PERIOD_OF_DAY = 3600 * 24l;
     enum MONTH {
         JAN,
         FEB,
@@ -99,11 +99,11 @@ public class TestUtil {
         long same = 1386950400000l;     //2013-12-14 00:00:00
         long diff1 = 1386950400001l;    //2013-12-14 00:00:01
         long diff2 = 1386950399999l;    //2013-12-13 23:59:59
-        long result = Util.getCurrentRollTs(same, PEROID_OF_HOUR);
+        long result = Util.getCurrentRollTs(same, PERIOD_OF_HOUR);
         assertEquals(same, result);
         assertFalse(diff1 == result);
         assertFalse(diff2 == result);
-        result = Util.getCurrentRollTs(same, PEROID_OF_DAY);
+        result = Util.getCurrentRollTs(same, PERIOD_OF_DAY);
         assertEquals(same, result);
         assertFalse(diff1 == result);
         assertFalse(diff2 == result);
@@ -116,21 +116,21 @@ public class TestUtil {
         long afterAndInBuf = 1386950401000l; //2013-12-14 00:00:01
         long testValue = 1378443602000l;
         long bufMs = 5000l;
-        long result = Util.getLatestRollTsUnderTimeBuf(beforeAndInBuf, PEROID_OF_HOUR, bufMs);
+        long result = Util.getLatestRollTsUnderTimeBuf(beforeAndInBuf, PERIOD_OF_HOUR, bufMs);
         assertEquals(1386946800000l, result);
-        result = Util.getLatestRollTsUnderTimeBuf(beforeAndOutBuf, PEROID_OF_HOUR, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(beforeAndOutBuf, PERIOD_OF_HOUR, bufMs);
         assertEquals(1386943200000l, result);
-        result = Util.getLatestRollTsUnderTimeBuf(afterAndInBuf, PEROID_OF_HOUR, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(afterAndInBuf, PERIOD_OF_HOUR, bufMs);
         assertEquals(1386946800000l, result);
-        result = Util.getLatestRollTsUnderTimeBuf(beforeAndInBuf, PEROID_OF_DAY, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(beforeAndInBuf, PERIOD_OF_DAY, bufMs);
         assertEquals(1386864000000l, result);
-        result = Util.getLatestRollTsUnderTimeBuf(beforeAndOutBuf, PEROID_OF_DAY, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(beforeAndOutBuf, PERIOD_OF_DAY, bufMs);
         assertEquals(1386777600000l, result);
-        result = Util.getLatestRollTsUnderTimeBuf(afterAndInBuf, PEROID_OF_DAY, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(afterAndInBuf, PERIOD_OF_DAY, bufMs);
         assertEquals(1386864000000l, result);
-        result = Util.getLatestRollTsUnderTimeBuf(testValue, PEROID_OF_HOUR, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(testValue, PERIOD_OF_HOUR, bufMs);
         assertEquals(1378440000000l, result);
-        result = Util.getLatestRollTsUnderTimeBuf(testValue, PEROID_OF_DAY, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(testValue, PERIOD_OF_DAY, bufMs);
         assertEquals(1378310400000l, result);
     }
     
@@ -212,5 +212,17 @@ public class TestUtil {
         writer.write(string);
         writer.close();
         return file;
+    }
+    
+    @Test
+    public void testIsRollConcurrentWithRotate() {
+        long rollPeriod1 = 300;
+        long rotatePeriod1 = 3600;
+        long currentTs1 = 1421683200070L;
+        assertTrue(Util.isRollConcurrentWithRotate(currentTs1, rollPeriod1, rotatePeriod1));
+        long rollPeriod2 = 3600;
+        long rotatePeriod2 = 86400;
+        long currentTs2 = 1421683200070L;
+        assertTrue(Util.isRollConcurrentWithRotate(currentTs2, rollPeriod2, rotatePeriod2));
     }
 }

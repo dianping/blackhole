@@ -78,7 +78,7 @@ public class TestHDFSRecovery {
         
         //deploy some condition
         ConfigKeeper confKeeper = new ConfigKeeper();
-        confKeeper.addRawProperty(MAGIC+".rollPeriod", "3600");
+        confKeeper.addRawProperty(MAGIC + ".rollPeriod", "3600");
         confKeeper.addRawProperty(MAGIC + ".maxLineSize", "1024");
         
         collecotr = new SimBroker(port);

@@ -35,6 +35,7 @@ import java.util.zip.CRC32;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.SimpleConnection;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 
@@ -310,7 +311,7 @@ public class Util {
     
     /*
      * get roll timestamp, for example
-     * now is 16:02, and rollPeroid is 1 hour, then
+     * now is 16:02, and rollPeriod is 1 hour, then
      * return st of 17:00
      */
     public static long getNextRollTs(long ts, long period) {
@@ -323,9 +324,9 @@ public class Util {
     
     /*
      * get the closest step timestamp, for example
-     * now is 16:14, and step peroid is 1 hour, then
+     * now is 16:14, and step period is 1 hour, then
      * return ts of 16:00;
-     * now is 15:47, and rollPeroid is 1 hour, then
+     * now is 15:47, and rollPeriod is 1 hour, then
      * return ts of 16:00
      */
     public static long getClosestRollTs(long ts, long period) {
@@ -343,7 +344,7 @@ public class Util {
     
     /*
      * get roll timestamp, for example
-     * now is 16:02, and rollPeroid is 1 hour, then
+     * now is 16:02, and rollPeriod is 1 hour, then
      * return st of 16:00
      */
     public static long getCurrentRollTs(long ts, long rollPeriod) {
@@ -356,7 +357,7 @@ public class Util {
     
     /*
      * get the stage roll timestamp, for example
-     * now is 16:02, and rollPeroid is 1 hour, then
+     * now is 16:02, and rollPeriod is 1 hour, then
      * return ts of 15:00;
      */
     public static long getLatestRollTs(long ts, long rollPeriod) {
@@ -365,9 +366,9 @@ public class Util {
     
     /*
      * get the stage roll timestamp under a forward delay, for example
-     * timebuf is 5000, now is 15:59:55, and rollPeroid is 1 hour, then
+     * timebuf is 5000, now is 15:59:55, and rollPeriod is 1 hour, then
      * return ts of 15:00;
-     * timebuf is 5000, now is 15:59:54, and rollPeroid is 1 hour, then
+     * timebuf is 5000, now is 15:59:54, and rollPeriod is 1 hour, then
      * return ts of 14:00;
      */
     public static long getLatestRollTsUnderTimeBuf(
@@ -382,9 +383,14 @@ public class Util {
     public static boolean belongToSameRotate(long rollTs1, long rollTs2, long rotatePeriod) {
         return getCurrentRollTs(rollTs1, rotatePeriod) == getCurrentRollTs(rollTs2, rotatePeriod);
     }
+    
+    public static boolean isRollConcurrentWithRotate(long currentTs, long rollPeriod, long rotatePeriod) {
+        long currentClosestStepTs = Util.getClosestRollTs(currentTs, rollPeriod);
+        return (currentClosestStepTs + localTimezoneOffset) % (rotatePeriod * 1000) == 0;
+    }
 
-    public static int getMissRotateRollCount(long lastRotateTs, long resumeRollTs, long logRotatePeriod) {
-        return (int) ((getCurrentRollTs(resumeRollTs, logRotatePeriod) - getNextRollTs(lastRotateTs, logRotatePeriod))/(logRotatePeriod * 1000L));
+    public static int getMissRotateRollCount(long lastRotateTs, long resumeRollTs, long rotatePeriod) {
+        return (int) ((getCurrentRollTs(resumeRollTs, rotatePeriod) - getNextRollTs(lastRotateTs, rotatePeriod))/(rotatePeriod * 1000L));
     }
     
     public static String getParentAbsolutePath(String absolutePath) {

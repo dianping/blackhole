@@ -183,11 +183,11 @@ public class PBwrap {
         return wrapMessage(MessageType.ASSIGN_BROKER, builder.build());
     }
     
-    public static Message wrapReadyStream(String topic, String source, long peroid, String brokerServer, long connectedTs) {
+    public static Message wrapReadyStream(String topic, String source, long period, String brokerServer, long connectedTs) {
         ReadyStream.Builder builder = ReadyStream.newBuilder();
         builder.setTopic(topic);
         builder.setSource(source);
-        builder.setPeriod(peroid);
+        builder.setPeriod(period);
         builder.setBrokerServer(brokerServer);
         builder.setConnectedTs(connectedTs);
         return wrapMessage(MessageType.READY_STREAM, builder.build());

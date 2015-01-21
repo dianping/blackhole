@@ -61,7 +61,7 @@ public class SimRecoveryServer implements Runnable {
             header.add(ignore);
             String appname = head.app;
             header.add(appname);
-            String periodStr = String.valueOf(head.peroid);
+            String periodStr = String.valueOf(head.period);
             header.add(periodStr);
             String ts = String.valueOf(head.ts);
             header.add(ts); 
