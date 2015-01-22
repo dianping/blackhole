@@ -168,7 +168,7 @@ public class RollRecovery implements Runnable{
         try {
             LOG.info(transferFile + " is transferring for " + rollString);
             is.skip(from);
-            while ((len = is.read(inbuf)) != -1) {
+            while (toTransferSize > 0 && (len = is.read(inbuf)) != -1) {
                 if (len > toTransferSize) {
                     len = (int) toTransferSize;
                 }

@@ -271,7 +271,7 @@ public class LogReader implements Runnable {
         
         public void processRoll() {
             try {
-                long currentOffset = readLines(reader);
+                long previousRollEndOffset = readLines(reader) - 1; //minus 1 points out the previous ROLL end offset
                 sendMessage();
                 //do not handle log rotation any more when dying
                 if (topicMeta.isDying()) {
@@ -282,7 +282,7 @@ public class LogReader implements Runnable {
                         topicMeta.getRollPeriod(),
                         ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
                 //record snapshot
-                state.record(Record.ROLL, rollTs, currentOffset);
+                state.record(Record.ROLL, rollTs, previousRollEndOffset);
 
                 //send roll request to broker
                 RollRequest request = new RollRequest(
@@ -303,7 +303,7 @@ public class LogReader implements Runnable {
                 reader = new RandomAccessFile(file, "r");
                 // At this point, we're sure that the old file is rotated
                 // Finish scanning the old file and then we'll start with the new one
-                long currentOffset = readLines(save);
+                long previousRotateEndOffset = readLines(save) - 1;   //minus 1 points out the end offset of old file
                 closeQuietly(save);
                 sendMessage();
                 //do not handle log rotation any more when dying
@@ -316,7 +316,7 @@ public class LogReader implements Runnable {
                         topicMeta.getRollPeriod(),
                         ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
                 //record snapshot
-                state.record(Record.ROTATE, rollTs, currentOffset);
+                state.record(Record.ROTATE, rollTs, previousRotateEndOffset);
                 
                 //send roll request to broker
                 RollRequest request = new RollRequest(
@@ -373,6 +373,13 @@ public class LogReader implements Runnable {
             }
         }
         
+        /**
+         * Read new lines.
+         *
+         * @param reader The file to read
+         * @return The new position after the lines have been read
+         * @throws java.io.IOException if an I/O error occurs.
+         */
         private long readLines(RandomAccessFile reader) throws IOException {
             long pos = reader.getFilePointer();
             long rePos = pos; // position to re-read
