@@ -10,7 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dp.blackhole.agent.TopicMeta.MetaKey;
+import com.dp.blackhole.agent.TopicMeta.TopicId;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
@@ -36,7 +36,8 @@ public class TestAgent {
         tailFile.createNewFile();
         tailFile.deleteOnExit();
         agent = new SimAgent();
-        ConfigKeeper.configMap.put(MAGIC, new Context(ParamsKey.TopicConf.ROLL_PERIOD, "3600"));
+        ConfigKeeper.configMap.put(MAGIC, new Context(ParamsKey.TopicConf.ROTATE_PERIOD, "3600"));
+        ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.TopicConf.ROLL_PERIOD, "3600");
         ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.TopicConf.MAX_LINE_SIZE, "1024");
         ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.TopicConf.WATCH_FILE, tailFile.getAbsolutePath());
     }
@@ -84,8 +85,8 @@ public class TestAgent {
 
     @Test
     public void testAssignBrokerProcess() throws InterruptedException {
-        MetaKey metaKey = new MetaKey(MAGIC, null);
-        agent.fillUpAppLogsFromConfig(metaKey);
+        TopicId topicId = new TopicId(MAGIC, null);
+        agent.fillUpAppLogsFromConfig(topicId);
         Message bad = getMessageOfAssignBroker(MAGIC + MAGIC);
         assertFalse(agent.processor.processInternal(bad));
         Message good = getMessageOfAssignBroker(MAGIC);
@@ -94,8 +95,8 @@ public class TestAgent {
     
     @Test
     public void testRecoveryRollProcess() throws InterruptedException {
-        MetaKey metaKey = new MetaKey(MAGIC, null);
-        agent.fillUpAppLogsFromConfig(metaKey);
+        TopicId topicId = new TopicId(MAGIC, null);
+        agent.fillUpAppLogsFromConfig(topicId);
         Message bad = getMessageOfRecoveryRoll(MAGIC + MAGIC);
         assertFalse(agent.processor.processInternal(bad));
         Message good = getMessageOfRecoveryRoll(MAGIC);
@@ -117,6 +118,6 @@ public class TestAgent {
     }
 
     private Message getUnknowMessage() {
-        return PBwrap.wrapReadyBroker(MAGIC, SimAgent.HOSTNAME, 3600l, SimAgent.HOSTNAME, 1l);
+        return PBwrap.wrapReadyStream(MAGIC, SimAgent.HOSTNAME, 3600l, SimAgent.HOSTNAME, 1l);
     }
 }

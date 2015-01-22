@@ -5,9 +5,9 @@ option java_outer_classname = "MessagePB";
 
 import "AppReg.proto";
 import "AssignBroker.proto";
-import "AppRoll.proto";
 import "RecoveryRoll.proto";
-import "ReadyBroker.proto";
+import "ReadyStream.proto";
+import "ReadyUpload.proto";
 import "RollID.proto";
 import "Failure.proto";
 import "NoAvailableNode.proto";
@@ -25,6 +25,7 @@ import "Restart.proto";
 import "QuitAndClean.proto";
 import "RollClean.proto";
 import "DumpConsumerGroup.proto";
+import "SnapshotOp.proto";
 
 message Message {
     enum MessageType {
@@ -32,8 +33,8 @@ message Message {
         APP_REG = 2;
         BROKER_REG = 3;
         ASSIGN_BROKER = 4;
-        READY_BROKER = 5;
-        APP_ROLL = 6;
+        READY_STREAM = 5;
+        READY_UPLOAD = 6;
         UPLOAD_ROLL = 7;
         UPLOAD_SUCCESS = 8;
         UPLOAD_FAIL = 9;
@@ -67,14 +68,15 @@ message Message {
         ROLL_CLEAN = 37;
         DUMP_CONSUMER_GROUP = 38;
         LIST_CONSUMER_GROUP = 39;
+        SNAPSHOT_OP = 40;
     }
 
     required MessageType type = 1;
     optional AppReg appReg = 2;
     optional AssignBroker assignBroker = 3;
-    optional AppRoll appRoll = 4;
+    optional ReadyUpload readyUpload = 4;
     optional RecoveryRoll recoveryRoll = 5;
-    optional ReadyBroker readyBroker = 6;
+    optional ReadyStream readyStream = 6;
     optional RollID rollID = 7;
     optional Failure failure = 8;
     optional NoAvailableNode noAvailableNode = 9;
@@ -93,4 +95,5 @@ message Message {
     optional Clean clean = 22;
     optional RollClean rollClean = 23;
     optional DumpConsumerGroup dumpConsumerGroup = 24;
+    optional SnapshotOp snapshotOp = 25;
 }

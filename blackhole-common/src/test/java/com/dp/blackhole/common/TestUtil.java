@@ -2,9 +2,13 @@ package com.dp.blackhole.common;
 
 import static org.junit.Assert.*;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.util.Date;
 
 import org.junit.After;
@@ -18,8 +22,8 @@ import com.dp.blackhole.common.Util;
 public class TestUtil {
     private static final String filepathname = "/tmp/893jfc842.log.2013-01-01.15";
     private static File file;
-    private static final long PEROID_OF_HOUR = 3600l;
-    private static final long PEROID_OF_DAY = 3600 * 24l;
+    private static final long PERIOD_OF_HOUR = 3600l;
+    private static final long PERIOD_OF_DAY = 3600 * 24l;
     enum MONTH {
         JAN,
         FEB,
@@ -95,11 +99,11 @@ public class TestUtil {
         long same = 1386950400000l;     //2013-12-14 00:00:00
         long diff1 = 1386950400001l;    //2013-12-14 00:00:01
         long diff2 = 1386950399999l;    //2013-12-13 23:59:59
-        long result = Util.getCurrentRollTs(same, PEROID_OF_HOUR);
+        long result = Util.getCurrentRollTs(same, PERIOD_OF_HOUR);
         assertEquals(same, result);
         assertFalse(diff1 == result);
         assertFalse(diff2 == result);
-        result = Util.getCurrentRollTs(same, PEROID_OF_DAY);
+        result = Util.getCurrentRollTs(same, PERIOD_OF_DAY);
         assertEquals(same, result);
         assertFalse(diff1 == result);
         assertFalse(diff2 == result);
@@ -112,21 +116,21 @@ public class TestUtil {
         long afterAndInBuf = 1386950401000l; //2013-12-14 00:00:01
         long testValue = 1378443602000l;
         long bufMs = 5000l;
-        long result = Util.getLatestRotateRollTsUnderTimeBuf(beforeAndInBuf, PEROID_OF_HOUR, bufMs);
+        long result = Util.getLatestRollTsUnderTimeBuf(beforeAndInBuf, PERIOD_OF_HOUR, bufMs);
         assertEquals(1386946800000l, result);
-        result = Util.getLatestRotateRollTsUnderTimeBuf(beforeAndOutBuf, PEROID_OF_HOUR, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(beforeAndOutBuf, PERIOD_OF_HOUR, bufMs);
         assertEquals(1386943200000l, result);
-        result = Util.getLatestRotateRollTsUnderTimeBuf(afterAndInBuf, PEROID_OF_HOUR, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(afterAndInBuf, PERIOD_OF_HOUR, bufMs);
         assertEquals(1386946800000l, result);
-        result = Util.getLatestRotateRollTsUnderTimeBuf(beforeAndInBuf, PEROID_OF_DAY, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(beforeAndInBuf, PERIOD_OF_DAY, bufMs);
         assertEquals(1386864000000l, result);
-        result = Util.getLatestRotateRollTsUnderTimeBuf(beforeAndOutBuf, PEROID_OF_DAY, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(beforeAndOutBuf, PERIOD_OF_DAY, bufMs);
         assertEquals(1386777600000l, result);
-        result = Util.getLatestRotateRollTsUnderTimeBuf(afterAndInBuf, PEROID_OF_DAY, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(afterAndInBuf, PERIOD_OF_DAY, bufMs);
         assertEquals(1386864000000l, result);
-        result = Util.getLatestRotateRollTsUnderTimeBuf(testValue, PEROID_OF_HOUR, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(testValue, PERIOD_OF_HOUR, bufMs);
         assertEquals(1378440000000l, result);
-        result = Util.getLatestRotateRollTsUnderTimeBuf(testValue, PEROID_OF_DAY, bufMs);
+        result = Util.getLatestRollTsUnderTimeBuf(testValue, PERIOD_OF_DAY, bufMs);
         assertEquals(1378310400000l, result);
     }
     
@@ -162,5 +166,63 @@ public class TestUtil {
         String test3 = Util.toTupleString("id", 123);
         String expect3 = "{id,123}";
         assertEquals(test3, expect3);
+    }
+    
+    @Test
+    public void testFindHeadOfLastLine() throws FileNotFoundException, IOException {
+        String MAGIC = "testFindHeadOfLastLine";
+        File testFile = createTmpFile(MAGIC, "9sdfadfffadff");
+        RandomAccessFile reader = new RandomAccessFile(testFile, "r");
+        int testBufSize = 8;
+        assertEquals(61L, Util.getOffsetOfLastLineHeader(reader, 99L, testBufSize));
+        reader.seek(61);
+        assertTrue("1".getBytes()[0] == reader.readByte());
+        assertEquals(360L, Util.getOffsetOfLastLineHeader(reader, 400L, testBufSize));
+        reader.seek(360);
+        assertTrue("6".getBytes()[0] == reader.readByte());
+        assertEquals(0L, Util.getOffsetOfLastLineHeader(reader, 7L, testBufSize));
+        reader.seek(0);
+        assertTrue("0".getBytes()[0] == reader.readByte());
+        assertEquals(551L, reader.length());
+        assertEquals(537L, Util.getOffsetOfLastLineHeader(reader, reader.length(), testBufSize));
+        reader.seek(537);
+        assertTrue("9".getBytes()[0] == reader.readByte());
+        reader.close();
+        testFile.delete();
+    }
+    
+    private static File createTmpFile(String MAGIC, String expected) 
+            throws IOException, FileNotFoundException {
+        String string = 
+                "0egin>    owefoq jfojnofownfowofnownefowoefojweofjwosfnvvoco\n" +
+                "1lsdfpasjdfaopsdpfaskdfkpasdkpfkasdfas     100>     jcsopdnvon\n" +
+                "2ononoifjopwejf opwjfiop jpwj fopqwejfop qjfopiqjqertgbrtg\n" +
+                "3spd jfoiasj df ioajsiodf asj fasof jasdopjf pasfj asopfjo\n" +
+                "4tgrtghrthrthrthrhrthtrp sjfop asdj fopasj fopsfjopsjf wef\n" +
+                "5 faiosjf opwqejo fjopwej faeopsf jopawefj opsjf opsafj ao\n" +
+                "6wopejf opwj efopqwj epo fjwopefj pwef opw ejfopwj efopwf \n" +
+                "7 wjopef joiqwf io j 9049 fj2490r 0pjfioj fioj qiowegio f \n" +
+                "8f90fj 9034u j90 jgioqpwejf iopwe jfopqwefj opewji fopq934\n" +
+                expected + "\n";
+        //build a app log
+        File file = new File("/tmp/" + MAGIC);
+        file.createNewFile();
+        BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(file)));
+        writer.write(string);
+        writer.close();
+        return file;
+    }
+    
+    @Test
+    public void testIsRollConcurrentWithRotate() {
+        long rollPeriod1 = 300;
+        long rotatePeriod1 = 3600;
+        long currentTs1 = 1421683200070L;
+        assertTrue(Util.isRollConcurrentWithRotate(currentTs1, rollPeriod1, rotatePeriod1));
+        long rollPeriod2 = 3600;
+        long rotatePeriod2 = 86400;
+        long currentTs2 = 1421683200070L;
+        assertTrue(Util.isRollConcurrentWithRotate(currentTs2, rollPeriod2, rotatePeriod2));
     }
 }

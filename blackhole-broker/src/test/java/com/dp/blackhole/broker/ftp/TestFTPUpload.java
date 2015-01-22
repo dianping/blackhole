@@ -67,6 +67,7 @@ public class TestFTPUpload {
     public void tearDown() throws Exception {
         fakeFtpServer.stop();
         expect.delete();
+        SimBroker.deleteTmpFile("testFTPUpload");
     }
 
     @Test
@@ -78,7 +79,7 @@ public class TestFTPUpload {
         appendData(p);
         appendData(p);
         
-        RollPartition roll1 = p.markRotate();
+        RollPartition roll1 = p.markRollPartition();
         
         appendData(p);
         

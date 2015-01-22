@@ -5,15 +5,15 @@ import java.nio.ByteBuffer;
 import com.dp.blackhole.network.GenUtil;
 import com.dp.blackhole.network.NonDelegationTypedWrappable;
 
-public class LastRotateRequest extends NonDelegationTypedWrappable {
+public class RollRequest extends NonDelegationTypedWrappable {
     public String topic;
     public String partitionId;
     public long rollPeriod;
     
-    public LastRotateRequest() {
+    public RollRequest() {
     }
     
-    public LastRotateRequest(String topic, String partitionId, long rollPeriod) {
+    public RollRequest(String topic, String partitionId, long rollPeriod) {
         this.topic = topic;
         this.partitionId = partitionId;
         this.rollPeriod = rollPeriod;
@@ -40,7 +40,6 @@ public class LastRotateRequest extends NonDelegationTypedWrappable {
 
     @Override
     public int getType() {
-        return DataMessageTypeFactory.LastRotateRequest;
+        return DataMessageTypeFactory.RotateOrRollRequest;
     }
-
 }

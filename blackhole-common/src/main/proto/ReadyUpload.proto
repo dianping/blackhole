@@ -1,9 +1,9 @@
 package blackhole;
 
 option java_package = "com.dp.blackhole.protocol.control";
-option java_outer_classname = "AppRollPB";
+option java_outer_classname = "ReadyUploadPB";
 
-message AppRoll {
+message ReadyUpload {
     required string topic = 1;
     required string source = 2;
     required int64 period = 3;

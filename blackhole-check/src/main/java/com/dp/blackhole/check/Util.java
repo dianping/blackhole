@@ -30,7 +30,7 @@ public class Util {
         return dirs.toString();
     }
 
-    public static String getFormatFromPeroid (long period) {
+    public static String getFormatFromPeriod (long period) {
         String format;
         if (period < 60) {
             format = "yyyy-MM-dd.HH.mm.ss";
@@ -74,7 +74,7 @@ public class Util {
     }
 
     public static Path[] getRollHdfsPathByTs (RollIdent ident, long checkTs, String source, boolean hidden) {
-        String format  = Util.getFormatFromPeroid(ident.period);
+        String format  = Util.getFormatFromPeriod(ident.period);
         Date roll = new Date(checkTs);
         SimpleDateFormat dm= new SimpleDateFormat(format);
         if (hidden) {
@@ -166,7 +166,7 @@ public class Util {
     }
 
     public static boolean wasDone (RollIdent ident, long ts) {
-        String format  = Util.getFormatFromPeroid(ident.period);
+        String format  = Util.getFormatFromPeriod(ident.period);
         Date roll = new Date(ts);
         SimpleDateFormat dm= new SimpleDateFormat(format);
         Path done =  new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' +

@@ -69,7 +69,7 @@ public class TestHDFSUpload {
         appendData(p);
         appendData(p);
         
-        RollPartition roll1 = p.markRotate();
+        RollPartition roll1 = p.markRollPartition();
         
         appendData(p);
         

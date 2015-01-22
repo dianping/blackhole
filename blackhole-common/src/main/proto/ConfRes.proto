@@ -7,21 +7,23 @@ message ConfRes{
     message AppConfRes {
         required string topic = 1;
         required string watch_file = 2;
-        required string period = 3;
+        required string rotate_period = 3;
         optional string max_line_size = 4 [default = "512000"];
         optional string read_interval = 5 [default = "1L"];
-        optional string min_msg_sent = 6 [default = "30"];
-        optional string msg_buf_size = 7 [default = "512000"];
+		optional string roll_period = 6;
+        optional string min_msg_sent = 7 [default = "30"];
+        optional string msg_buf_size = 8 [default = "512000"];
     }
     message LxcConfRes {
         required string topic = 1;
         optional string watch_file = 2;
-        required string period = 3;
+        required string rotate_period = 3;
         optional string max_line_size = 4 [default = "512000"];
         optional string read_interval = 5 [default = "1L"];
         repeated string instance_ids = 6;
-        optional string min_msg_sent = 7 [default = "30"];
-        optional string msg_buf_size = 8 [default = "512000"];
+		optional string roll_period = 7;
+        optional string min_msg_sent = 8 [default = "30"];
+        optional string msg_buf_size = 9 [default = "512000"];
     }
     repeated AppConfRes appConfRes = 1;
     repeated LxcConfRes lxcConfRes = 2;

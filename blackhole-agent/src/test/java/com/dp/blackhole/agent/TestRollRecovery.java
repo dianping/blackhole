@@ -1,6 +1,8 @@
 package com.dp.blackhole.agent;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,7 +16,9 @@ import org.junit.Test;
 
 import com.dp.blackhole.agent.TopicMeta;
 import com.dp.blackhole.agent.RollRecovery;
-import com.dp.blackhole.agent.TopicMeta.MetaKey;
+import com.dp.blackhole.agent.TopicMeta.TopicId;
+import com.dp.blackhole.agent.persist.LocalState;
+import com.dp.blackhole.agent.persist.Record;
 import com.dp.blackhole.conf.ConfigKeeper;
 
 public class TestRollRecovery {
@@ -26,6 +30,8 @@ public class TestRollRecovery {
     private static List<String> receives = new ArrayList<String>();
     private Thread serverThread;
     private static SimAgent agent;
+    private LocalState state;
+    
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         agent = new SimAgent();
@@ -44,8 +50,11 @@ public class TestRollRecovery {
 
     @Before
     public void setUp() throws Exception {
-        MetaKey metaKey = new MetaKey(MAGIC, null);
-        appLog = new TopicMeta(metaKey, file.getAbsolutePath(), 3600, 1024, 1L, 5, 4096);
+        state = mock(LocalState.class);
+        when(state.retrive(SimAgent.rollTS)).thenReturn(new Record(Record.ROTATE, SimAgent.rollTS, LogReader.BOF, LogReader.EOF));//or 598
+        
+        TopicId topicId = new TopicId(MAGIC, null);
+        appLog = new TopicMeta(topicId, file.getAbsolutePath(), 3600, 3600, 1024, 1L, 5, 4096);
         SimRecoveryServer server = new SimRecoveryServer(port, header, receives);
         serverThread = new Thread(server);
         serverThread.start();
@@ -58,7 +67,7 @@ public class TestRollRecovery {
 
     @Test
     public void test() {
-        RollRecovery recovery = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false);
+        RollRecovery recovery = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false, state);
         Thread thread = new Thread(recovery);
         thread.start();
         try {
@@ -67,7 +76,7 @@ public class TestRollRecovery {
             e.printStackTrace();
         }
         String[] expectedHeader = new String[4];
-        expectedHeader[0] = "2";
+        expectedHeader[0] = "false";
         expectedHeader[1] = MAGIC;
         expectedHeader[2] = "3600";
         expectedHeader[3] = String.valueOf(SimAgent.rollTS);

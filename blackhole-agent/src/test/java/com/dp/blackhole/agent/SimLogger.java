@@ -14,7 +14,8 @@ import org.apache.commons.logging.LogFactory;
 
 public class SimLogger implements Runnable {
     private static final Log LOG = LogFactory.getLog(SimLogger.class);
-    public static final String TEST_ROLL_FILE = "/tmp/rollfile";
+    public static final String TEST_ROLL_FILE_NAME = "rollfile";
+    public static final String TEST_ROLL_FILE = "/tmp/" + TEST_ROLL_FILE_NAME;
     private long delay;
     private OutputStreamWriter writer;
     private static final int WORD_COUNT_PER_LINE = 256;

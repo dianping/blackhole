@@ -1,23 +1,27 @@
 package com.dp.blackhole.agent;
 
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TopicMeta {
-    private final MetaKey metaKey;
+public class TopicMeta implements Serializable {
+    private static final long serialVersionUID = -1189314942488288669L;
+    private final TopicId topicId;
     private final String tailFile;
     private final long createTime;
-    private final long rollPeriod;
+    private final long rotatePeriod;
     private final int maxLineSize;
     private AtomicBoolean dying;
     private final long readInterval;
     private int minMsgSent;
     private int msgBufSize;
+    private long rollPeriod;
     
-    public TopicMeta(MetaKey metaKey, String tailFile, long rollPeriod,
-            int maxLineSize, long readInterval,
+    public TopicMeta(TopicId topicId, String tailFile, long rotatePeriod,
+            long rollPeriod, int maxLineSize, long readInterval,
             int minMsgSent, int msgBufSize) {
-        this.metaKey = metaKey;
+        this.topicId = topicId;
         this.tailFile = tailFile;
+        this.rotatePeriod = rotatePeriod;
         this.rollPeriod = rollPeriod;
         this.createTime = System.currentTimeMillis();
         this.maxLineSize = maxLineSize;
@@ -27,20 +31,28 @@ public class TopicMeta {
         this.msgBufSize = msgBufSize;
     }
 
-    public MetaKey getMetaKey() {
-        return metaKey;
+    public TopicId getTopicId() {
+        return topicId;
     }
     
     public String getTopic() {
-        return metaKey.getTopic();
+        return topicId.getTopic();
     }
     
     public String getInstanceId() {
-        return metaKey.getInstanceId();
+        return topicId.getInstanceId();
+    }
+
+    public long getRotatePeriod() {
+        return rotatePeriod;
     }
 
     public long getRollPeriod() {
         return rollPeriod;
+    }
+
+    public void setRollPeriod(long rollPeriod) {
+        this.rollPeriod = rollPeriod;
     }
 
     public String getTailFile() {
@@ -87,10 +99,8 @@ public class TopicMeta {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (int) (createTime ^ (createTime >>> 32));
-        result = prime * result + maxLineSize;
-        result = prime * result + ((metaKey == null) ? 0 : metaKey.hashCode());
-        result = prime * result + (int) (rollPeriod ^ (rollPeriod >>> 32));
+        result = prime * result + ((topicId == null) ? 0 : topicId.hashCode());
+        result = prime * result + (int) (rotatePeriod ^ (rotatePeriod >>> 32));
         result = prime * result
                 + ((tailFile == null) ? 0 : tailFile.hashCode());
         return result;
@@ -105,16 +115,12 @@ public class TopicMeta {
         if (getClass() != obj.getClass())
             return false;
         TopicMeta other = (TopicMeta) obj;
-        if (createTime != other.createTime)
-            return false;
-        if (maxLineSize != other.maxLineSize)
-            return false;
-        if (metaKey == null) {
-            if (other.metaKey != null)
+        if (topicId == null) {
+            if (other.topicId != null)
                 return false;
-        } else if (!metaKey.equals(other.metaKey))
+        } else if (!topicId.equals(other.topicId))
             return false;
-        if (rollPeriod != other.rollPeriod)
+        if (rotatePeriod != other.rotatePeriod)
             return false;
         if (tailFile == null) {
             if (other.tailFile != null)
@@ -126,19 +132,21 @@ public class TopicMeta {
 
     @Override
     public String toString() {
-        return "TopicMeta [metaKey=" + metaKey + ", tailFile=" + tailFile
-                + ", createTime=" + createTime + ", rollPeriod=" + rollPeriod
+        return "TopicMeta [topicId=" + topicId + ", tailFile=" + tailFile
+                + ", createTime=" + createTime + ", rotatePeriod="
+                + rotatePeriod + ", rollPeriod=" + rollPeriod
                 + ", maxLineSize=" + maxLineSize + ", dying=" + dying
                 + ", readInterval=" + readInterval + ", minMsgSent="
                 + minMsgSent + ", msgBufSize=" + msgBufSize + "]";
     }
 
-    static class MetaKey {
-
+    public static class TopicId implements Serializable {
+        private static final long serialVersionUID = -7754556493037207950L;
+        
         private String topic;
         private String instanceId;
         
-        public MetaKey(String topic, String instanceId) {
+        public TopicId(String topic, String instanceId) {
             this.topic = topic;
             if (instanceId == null || instanceId.length() == 0) {
                 this.instanceId = null;
@@ -173,7 +181,7 @@ public class TopicMeta {
                 return false;
             if (getClass() != obj.getClass())
                 return false;
-            MetaKey other = (MetaKey) obj;
+            TopicId other = (TopicId) obj;
             if (instanceId == null) {
                 if (other.instanceId != null)
                     return false;

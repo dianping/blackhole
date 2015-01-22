@@ -29,7 +29,6 @@ import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenServer;
 import com.dp.blackhole.network.SimpleConnection;
 import com.dp.blackhole.protocol.control.AppRegPB.AppReg;
-import com.dp.blackhole.protocol.control.AppRollPB.AppRoll;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
 import com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
@@ -41,11 +40,13 @@ import com.dp.blackhole.protocol.control.FailurePB.Failure;
 import com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
-import com.dp.blackhole.protocol.control.ReadyBrokerPB.ReadyBroker;
+import com.dp.blackhole.protocol.control.ReadyStreamPB.ReadyStream;
+import com.dp.blackhole.protocol.control.ReadyUploadPB.ReadyUpload;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.protocol.control.RestartPB.Restart;
 import com.dp.blackhole.protocol.control.RollCleanPB.RollClean;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
+import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp.OP;
 import com.dp.blackhole.protocol.control.StreamIDPB.StreamID;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry;
@@ -161,6 +162,7 @@ public class Supervisor {
         AppConfRes appConfRes = PBwrap.wrapAppConfRes(
                 confInfo.getTopic(),
                 confInfo.getWatchLog(),
+                String.valueOf(confInfo.getRotatePeriod()),
                 String.valueOf(confInfo.getRollPeriod()),
                 String.valueOf(confInfo.getMaxLineSize()),
                 String.valueOf(confInfo.getReadInterval()),
@@ -197,6 +199,7 @@ public class Supervisor {
             LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(
                     confInfo.getTopic(),
                     confInfo.getWatchLog(),
+                    String.valueOf(confInfo.getRotatePeriod()),
                     String.valueOf(confInfo.getRollPeriod()),
                     String.valueOf(confInfo.getMaxLineSize()),
                     String.valueOf(confInfo.getReadInterval()),
@@ -907,6 +910,24 @@ public class Supervisor {
             }
         }
     }
+    
+    public boolean oprateSnapshot(String topic, String source, String opname) {
+        SimpleConnection c = agentsMapping.get(Util.getAgentHostFromSource(source));
+        if (c == null) {
+            LOG.error("can not find connection by host: " + source);
+            return false;
+        }
+        OP op;
+        try {
+            op = OP.valueOf(opname);
+        } catch (Exception e) {
+            LOG.error("Illegal opname: " + opname);
+            op = OP.log;
+        }
+        Message message = PBwrap.wrapSnapshotOp(topic, source, op);
+        send(c, message);
+        return true;
+    }
 
     public void removeConf(RemoveConf removeConf, SimpleConnection from) {
         String topic = removeConf.getTopic();
@@ -1255,11 +1276,11 @@ public class Supervisor {
      * or upload the rolled stage;
      * create next stage as new current stage
      */
-    private void handleRolling(AppRoll appRoll, SimpleConnection from) {
-        Stream stream = getStream(appRoll.getTopic(), appRoll.getSource());
+    private void handleRolling(ReadyUpload readyUpload, SimpleConnection from) {
+        Stream stream = getStream(readyUpload.getTopic(), readyUpload.getSource());
         if (stream != null) {
-            if (appRoll.getRollTs() <= stream.getLastSuccessTs()) {
-                LOG.error("Receive a illegal roll ts (" + appRoll.getRollTs() + ") from broker(" + from.getHost() + ")");
+            if (readyUpload.getRollTs() <= stream.getLastSuccessTs()) {
+                LOG.error("Receive a illegal roll ts (" + readyUpload.getRollTs() + ") from broker(" + from.getHost() + ")");
                 return;
             }
             List<Stage> stages = stream.getStages();
@@ -1267,18 +1288,18 @@ public class Supervisor {
                 synchronized (stages) {
                     Stage current = null;
                     for (Stage stage : stages) {
-                        if (stage.getRollTs() == appRoll.getRollTs()) {
+                        if (stage.getRollTs() == readyUpload.getRollTs()) {
                             current = stage;
                         }
                     }
                     if (current == null) {
                         if (stages.size() > 0) {
                             LOG.warn("Stages may missed from stage:" + stages.get(stages.size() - 1)
-                                    + " to stage:" + appRoll.getRollTs());
+                                    + " to stage:" + readyUpload.getRollTs());
                         } else {
                             LOG.warn("There are no stages in stream " + stream);
                         }
-                        int missedStageCount = getMissedStageCount(stream, appRoll.getRollTs());
+                        int missedStageCount = getMissedStageCount(stream, readyUpload.getRollTs());
                         LOG.info("need recovery missed stages: " + missedStageCount);
                         for (Stage stage : stages) {
                             stage.setCurrent(false);
@@ -1301,16 +1322,15 @@ public class Supervisor {
                         }
                     } else {
                         if (current.isCleanstart() == false || current.getIssuelist().size() != 0) {
-                            current.setCurrent(false);
                             doRecovery(stream, current);
                         } else {
                             current.setStatus(Stage.UPLOADING);
-                            current.setCurrent(false);
                             doUpload(stream, current, from);
                         }
                     }
                     // create next stage if stream is connected
                     if (current.getStatus() != Stage.PENDING && current.getStatus() != Stage.BROKERFAIL) {
+                        current.setCurrent(false);
                         Stage next = new Stage();
                         next.setTopic(stream.getTopic());
                         next.setSource(stream.getSource());
@@ -1327,10 +1347,14 @@ public class Supervisor {
                 LOG.error("can not find stages of stream: " + stream);
             }
         } else {
-            LOG.error("can't find stream by " + appRoll.getTopic() + ":" +appRoll.getSource());
+            LOG.error("can't find stream by " + readyUpload.getTopic() + ":" + readyUpload.getSource());
         }
     }
-
+    
+    private String doUpload(Stream stream, Stage current, SimpleConnection from) {
+        return doUpload(stream, current, from, false);
+    }
+    
     private String doUpload(Stream stream, Stage current, SimpleConnection from, boolean isFinal) {
         TopicConfig config = configManager.getConfByTopic(stream.getTopic());
         String compression = config.getCompression();
@@ -1347,8 +1371,8 @@ public class Supervisor {
         return from.getHost();
     }
     
-    private String doUpload(Stream stream, Stage current, SimpleConnection from) {
-        return doUpload(stream, current, from, false);
+    private String doRecovery(Stream stream, Stage stage) {
+        return doRecovery(stream, stage, false);
     }
     
     /*
@@ -1378,9 +1402,8 @@ public class Supervisor {
                         stage.getRollTs(),
                         Util.getInstanceIdFromSource(stream.getSource()),
                         isFinal
-                );
+            );
             send(c, message);
-            
             stage.setStatus(Stage.RECOVERYING);
             stage.setBrokerHost(broker);
             
@@ -1394,15 +1417,11 @@ public class Supervisor {
         return broker;
     }
     
-    private String doRecovery(Stream stream, Stage stage) {
-        return doRecovery(stream, stage, false);
-    }
-    
     /*
      * record the stream if it is a new stream;
      * do recovery if it is a old stream
      */
-    private void handleReadyStream(ReadyBroker readyBroker, SimpleConnection from) {
+    private void handleReadyStream(ReadyStream readyBroker, SimpleConnection from) {
         long connectedTs = readyBroker.getConnectedTs();
         long currentTs = Util.getCurrentRollTs(connectedTs, readyBroker.getPeriod());
         String brokerHost = readyBroker.getBrokerServer();
@@ -1450,10 +1469,10 @@ public class Supervisor {
             // update broker on stream
             stream.setBrokerHost(readyBroker.getBrokerServer());
 
-            List<Stage> stages = stream.getStages();
-            if (stages != null) {
-                synchronized (stages) {
-                    recoveryStages(stream, stages, connectedTs, currentTs, readyBroker.getBrokerServer());
+            List<Stage> currentStages = stream.getStages();
+            if (currentStages != null) {
+                synchronized (currentStages) {
+                    recoveryStages(stream, currentStages, connectedTs, currentTs, readyBroker.getBrokerServer());
                 }
             } else {
                 LOG.error("can not find stages of stream: " + stream);
@@ -1499,22 +1518,26 @@ public class Supervisor {
      * 2. recovery missed stages (include current stage, but do no recovery)
      * 3. recovery current stage (realtime stream)with broker fail
      */
-    private void recoveryStages(Stream stream, List<Stage> stages, long connectedTs, long currentTs, String newBrokerHost) {
+    private void recoveryStages(Stream stream, List<Stage> currentStages, long connectedTs, long currentTs, String newBrokerHost) {
         Issue issue = new Issue();
         issue.setTs(connectedTs);
         issue.setDesc("stream reconnected");
         
         // recovery Pending and BROKERFAIL stages
-        for (int i=0 ; i < stages.size(); i++) {
-            Stage stage = stages.get(i);
+        for (int i = 0 ; i < currentStages.size(); i++) {
+            Stage stage = currentStages.get(i);
             LOG.info("processing pending stage: " + stage);
-            if (stage.getStatus() == Stage.PENDING || stage.getStatus() == Stage.BROKERFAIL) {
+            stage.setCurrent(false);
+            if (!stage.getIssuelist().contains(issue)) {
                 stage.getIssuelist().add(issue);
+            }
+            if (stage.getStatus() == Stage.PENDING || stage.getStatus() == Stage.BROKERFAIL) {
                 // do not recovery current stage
                 if (stage.getRollTs() != currentTs) {
                     doRecovery(stream, stage);
                 } else {
                     // fix current stage status
+                    stage.setCurrent(true);
                     stage.setStatus(Stage.APPENDING);
                     stage.setBrokerHost(newBrokerHost);
                 }
@@ -1524,42 +1547,21 @@ public class Supervisor {
         // recovery missed stages
         int missedStageCount = getMissedStageCount(stream, connectedTs);
         LOG.info("need recovery possible missed stages: " + missedStageCount);
-
-        if (stages.size() != 0) {
-            Stage oldcurrent = stages.get(stages.size() - 1);
-            if (oldcurrent.getRollTs() != currentTs) {
-                oldcurrent.setCurrent(false);
-            }
-        } else {
-            LOG.error("no stages found on stream: " + stream);
-            return;
-        }
+        
         ArrayList<Stage> missedStages = getMissedStages(stream, missedStageCount, issue);
         for (Stage stage : missedStages) {
-            LOG.info("processing possible missed stages: " + stage);
             // check whether it is missed
-            if (!stages.contains(stage)) {
-                LOG.info("process really missed stage: " + stage);
+            if (!currentStages.contains(stage)) {
+                LOG.info("process missed stage: " + stage);
                 // do not recovery current stage
                 if (stage.getRollTs() != currentTs) {
                     doRecovery(stream, stage);
                 } else {
+                    stage.setCurrent(true);
                     stage.setStatus(Stage.APPENDING);
                     stage.setBrokerHost(newBrokerHost);
                 }
-                stages.add(stage);
-            } else {
-                LOG.info("process not really missed stage: " + stage);
-                int index = stages.indexOf(stage);
-                Stage nmStage = stages.get(index);
-                LOG.info("the not missed stage is " + nmStage);
-                if (nmStage.getRollTs() != currentTs) {
-                    nmStage.setCurrent(false);
-                } else {
-                    if (!nmStage.getIssuelist().contains(issue)) {
-                        nmStage.getIssuelist().add(issue);
-                    }
-                }
+                currentStages.add(stage);
             }
         }
     }
@@ -1743,13 +1745,13 @@ public class Supervisor {
                 LOG.debug("received: " + msg);
                 handleConsumerReg(msg.getConsumerReg(), from);
                 break;
-            case READY_BROKER:
+            case READY_STREAM:
                 LOG.debug("received: " + msg);
-                handleReadyStream(msg.getReadyBroker(), from);
+                handleReadyStream(msg.getReadyStream(), from);
                 break;
-            case APP_ROLL:
+            case READY_UPLOAD:
                 LOG.debug("received: " + msg);
-                handleRolling(msg.getAppRoll(), from);
+                handleRolling(msg.getReadyUpload(), from);
                 break;
             case UPLOAD_SUCCESS:
                 LOG.debug("received: " + msg);
@@ -1916,7 +1918,8 @@ public class Supervisor {
                 send(from, message);
                 return;
             }
-            String period = String.valueOf(confInfo.getRollPeriod());
+            String rotatePeriod = String.valueOf(confInfo.getRotatePeriod());
+            String rollPeriod = String.valueOf(confInfo.getRollPeriod());
             String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
             String readInterval = String.valueOf(confInfo.getReadInterval());
             String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
@@ -1929,8 +1932,8 @@ public class Supervisor {
                 return;
             }
             AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile,
-                    period, maxLineSize, readInterval, minMsgSent,
-                    msgBufSize);
+                    rotatePeriod, rollPeriod, maxLineSize, readInterval,
+                    minMsgSent, msgBufSize);
             appConfResList.add(appConfRes);
         }
         if (!appConfResList.isEmpty()) {
@@ -1949,7 +1952,8 @@ public class Supervisor {
                     LOG.error("Can not get topic: " + topic + " from configMap");
                     continue;
                 }
-                String period = String.valueOf(confInfo.getRollPeriod());
+                String rotatePeriod = String.valueOf(confInfo.getRotatePeriod());
+                String rollPeriod = String.valueOf(confInfo.getRollPeriod());
                 String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
                 String readInterval = String.valueOf(confInfo.getReadInterval());
                 String watchFile = confInfo.getWatchLog();
@@ -1961,8 +1965,8 @@ public class Supervisor {
                     continue;
                 }
                 LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile,
-                        period, maxLineSize, readInterval, minMsgSent,
-                        msgBufSize, ids);
+                        rotatePeriod, rollPeriod, maxLineSize, readInterval,
+                        minMsgSent, msgBufSize, ids);
                 lxcConfResList.add(lxcConfRes);
             }
             if (!lxcConfResList.isEmpty()) {

@@ -190,8 +190,10 @@ public class ConfigManager {
                 LOG.info("topic:" + topic + " K:" + key + " V:" + value);
                 if (key.equalsIgnoreCase(ParamsKey.TopicConf.WATCH_FILE)) {
                     confInfo.setWatchLog(value);
+                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.ROTATE_PERIOD)) {
+                    confInfo.setRotatePeriod(Util.parseInt(value, 3600));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.ROLL_PERIOD)) {
-                    confInfo.setRollPeriod(Util.parseInt(value, 3600));
+                    confInfo.setRollPeriod(Util.parseInt(value, confInfo.getRotatePeriod()));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.MAX_LINE_SIZE)) {
                     confInfo.setMaxLineSize(Util.parseInt(value, 512000));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.READ_INTERVAL)) {
@@ -206,8 +208,6 @@ public class ConfigManager {
                     confInfo.setOwner(value);
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.COMPRESSION)) {
                     confInfo.setCompression(value);
-                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.UPLOAD_PERIOD)) {
-                    confInfo.setUploadPeriod(Util.parseInt(value, confInfo.getRollPeriod()));
                 } else {
                     LOG.error("Unrecognized conf string.");
                 }
@@ -399,6 +399,10 @@ public class ConfigManager {
             .append(ParamsKey.TopicConf.WATCH_FILE)
             .append(" = ")
             .append(confInfo.getWatchLog())
+            .append("\n")
+            .append(ParamsKey.TopicConf.ROTATE_PERIOD)
+            .append(" = ")
+            .append(confInfo.getRotatePeriod())
             .append("\n")
             .append(ParamsKey.TopicConf.ROLL_PERIOD)
             .append(" = ")

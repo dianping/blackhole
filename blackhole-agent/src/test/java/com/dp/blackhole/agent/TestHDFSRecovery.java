@@ -1,5 +1,7 @@
 package com.dp.blackhole.agent;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -23,7 +25,9 @@ import org.junit.Test;
 
 import com.dp.blackhole.agent.RollRecovery;
 import com.dp.blackhole.agent.SimAgent;
-import com.dp.blackhole.agent.TopicMeta.MetaKey;
+import com.dp.blackhole.agent.TopicMeta.TopicId;
+import com.dp.blackhole.agent.persist.LocalState;
+import com.dp.blackhole.agent.persist.Record;
 import com.dp.blackhole.broker.Compression;
 import com.dp.blackhole.broker.Compression.Algorithm;
 import com.dp.blackhole.broker.SimBroker;
@@ -41,9 +45,13 @@ public class TestHDFSRecovery {
     private Path oldPath;
     private SimAgent agent;
     private SimBroker collecotr;
+    private LocalState state;
 
     @Before
     public void setUp() throws Exception {
+        state = mock(LocalState.class);
+        when(state.retrive(SimAgent.rollTS)).thenReturn(new Record(Record.ROTATE, SimAgent.rollTS, LogReader.BOF, LogReader.EOF));//or 598
+        
         APP_HOST = Util.getLocalHost();
         //build a tmp file
         fileBroken = createBrokenTmpFile(MAGIC + "_broken_", SimAgent.expected);
@@ -70,7 +78,7 @@ public class TestHDFSRecovery {
         
         //deploy some condition
         ConfigKeeper confKeeper = new ConfigKeeper();
-        confKeeper.addRawProperty(MAGIC+".rollPeriod", "3600");
+        confKeeper.addRawProperty(MAGIC + ".rollPeriod", "3600");
         confKeeper.addRawProperty(MAGIC + ".maxLineSize", "1024");
         
         collecotr = new SimBroker(port);
@@ -88,9 +96,9 @@ public class TestHDFSRecovery {
 
     @Test
     public void test() throws IOException, InterruptedException {
-        MetaKey metaKey = new MetaKey(MAGIC, null);
-        TopicMeta appLog = new TopicMeta(metaKey, file.getAbsolutePath(), 3600, 1024, 1L, 5, 4096);
-        RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false);
+        TopicId topicId = new TopicId(MAGIC, null);
+        TopicMeta appLog = new TopicMeta(topicId, file.getAbsolutePath(), 3600, 3600, 1024, 1L, 5, 4096);
+        RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false, state);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();
         convertToGZIP(file);
@@ -118,9 +126,12 @@ public class TestHDFSRecovery {
         OutputStream gout = compressionAlgo.createCompressionStream(
                 new FileOutputStream(gzFile), compressor, 0);
         int len;
+        int count = 0;
         while ((len = bin.read(buf)) != -1) {
             gout.write(buf, 0, len);
+            count += len;
         }
+        System.out.println("count " + count);
         gout.close();
         bin.close();
         gzFile.renameTo(file.getAbsoluteFile());
