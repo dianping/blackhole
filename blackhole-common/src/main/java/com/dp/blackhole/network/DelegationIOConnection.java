@@ -2,6 +2,7 @@ package com.dp.blackhole.network;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -61,7 +62,11 @@ public class DelegationIOConnection implements NonblockingConnection<TransferWra
         }
         offer(entity);
         SelectionKey key = keyFor(selector);
-        key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+        try {
+            key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+        } catch (CancelledKeyException e) {
+            LOG.warn("Exception while sending message." + e);
+        }
         selector.wakeup();
     }
 
