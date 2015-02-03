@@ -23,8 +23,8 @@ import com.dp.blackhole.agent.TopicMeta;
 import com.dp.blackhole.agent.TopicMeta.TopicId;
 import com.dp.blackhole.common.Util;
 
-public class LocalState implements IState {
-    private static final Log LOG = LogFactory.getLog(LocalState.class);
+public class LocalRecorder implements IRecoder {
+    private static final Log LOG = LogFactory.getLog(LocalRecorder.class);
     private TopicMeta topicMeta;
     private File snapshotFile;
     private Snapshot snapshot;
@@ -32,7 +32,7 @@ public class LocalState implements IState {
     private Lock writeLock = lock.writeLock();
     private Lock readLock = lock.readLock();
     
-    public LocalState(String persistDir, TopicMeta meta) {
+    public LocalRecorder(String persistDir, TopicMeta meta) {
         this.topicMeta = meta;
         this.snapshotFile = getSnapshotFile(persistDir, meta.getTopicId());
         Snapshot snapshot;
@@ -76,7 +76,7 @@ public class LocalState implements IState {
                     snapshot.addRecord(new Record(Record.ROTATE, 
                             Util.parseTs(timeString, meta.getRotatePeriod())
                             + (meta.getRotatePeriod() - meta.getRollPeriod()) * 1000L,
-                            LogReader.BOF, LogReader.EOF));
+                            LogReader.BEGIN_OFFSET_OF_FILE, LogReader.END_OFFSET_OF_FILE));
                 } catch (ParseException e1) {
                     LOG.error("Time pases exception " + timeString);
                     continue;
@@ -127,9 +127,9 @@ public class LocalState implements IState {
         long startOffset;
         Record perviousRollRecord = getPerviousRollRecord();
         if (perviousRollRecord == null) {
-            startOffset = LogReader.BOF;
+            startOffset = LogReader.BEGIN_OFFSET_OF_FILE;
         } else if (!Util.belongToSameRotate(perviousRollRecord.getRollTs(), rollTs, topicMeta.getRotatePeriod())) {
-            startOffset = LogReader.BOF;
+            startOffset = LogReader.BEGIN_OFFSET_OF_FILE;
         } else {
             startOffset = perviousRollRecord.getEndOffset() + 1;
         }
@@ -139,6 +139,12 @@ public class LocalState implements IState {
     @Override 
     public void record(int type, long rollTs, long startOffset, long endOffset) {
         Record record = new Record(type, rollTs, startOffset, endOffset);
+        if (type != Record.RESUME && endOffset != LogReader.END_OFFSET_OF_FILE && endOffset < startOffset) {
+            // roll or rotation occurs, meanwhile, remote sender do not work
+            // the end offset may be one less than start offset
+            LOG.info("This is a invaild record " + record + ", ignore it.");
+            return;
+        }
         getSnapshot().addRecord(record);
         LOG.debug("Recorded " + record);
         try {

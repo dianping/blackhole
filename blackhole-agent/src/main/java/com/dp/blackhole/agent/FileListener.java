@@ -1,10 +1,7 @@
 package com.dp.blackhole.agent;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -25,23 +22,23 @@ public class FileListener implements JNotifyListener{
     public static final int FILE_RENAMED    = 0x8;
     public static final int FILE_ANY        = FILE_CREATED | FILE_DELETED | FILE_MODIFIED | FILE_RENAMED;
     private IJNotify iJNotifyInstance;
-    private ConcurrentHashMap<String, LogReader> readerMap;
-    private Set<String> parentWathchPathSet;
-    private Map<String, Integer> path2wd;
+    private ConcurrentHashMap<String, LogFSM> fsmMap;
+    private CopyOnWriteArraySet<String> parentWathchPathSet;
+    private ConcurrentHashMap<String, Integer> path2wd;
     // Lock the path2wd map only to avoid non-atomic operation
     private Lock lock = new ReentrantLock();
 
     public FileListener() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         iJNotifyInstance = (IJNotify) Class.forName("net.contentobjects.jnotify.linux.JNotifyAdapterLinux").newInstance();
-        readerMap = new ConcurrentHashMap<String, LogReader>();
+        fsmMap = new ConcurrentHashMap<String, LogFSM>();
         //guarantee by synchronized
-        parentWathchPathSet = new HashSet<String>();
-        path2wd = new HashMap<String, Integer>();
+        parentWathchPathSet = new CopyOnWriteArraySet<String>();
+        path2wd = new ConcurrentHashMap<String, Integer>();
     }
 
-    public synchronized boolean registerLogReader(final String watchPath, final LogReader reader) {
+    public boolean registerLogReader(final String watchPath, final LogFSM logFSM) {
         int fwd, wd;
-        if (readerMap.putIfAbsent(watchPath, reader) == null) {
+        if (fsmMap.putIfAbsent(watchPath, logFSM) == null) {
             String parentPath = Util.getParentAbsolutePath(watchPath);
             if (!parentWathchPathSet.contains(parentPath)) {
                 parentWathchPathSet.add(parentPath);
@@ -49,7 +46,7 @@ public class FileListener implements JNotifyListener{
                     fwd = iJNotifyInstance.addWatch(parentPath, FILE_CREATED, false, this);
                 } catch (JNotifyException e) {
                     LOG.error("Failed to add watch for " + parentPath, e);
-                    readerMap.remove(watchPath);
+                    fsmMap.remove(watchPath);
                     parentWathchPathSet.remove(parentPath);
                     return false;
                 }
@@ -68,7 +65,7 @@ public class FileListener implements JNotifyListener{
                 wd = iJNotifyInstance.addWatch(watchPath, FILE_MODIFIED, false, this);
             } catch (JNotifyException e) {
                 LOG.error("Failed to add watch for " + watchPath, e);
-                readerMap.remove(watchPath);
+                fsmMap.remove(watchPath);
                 return false;
             }
             
@@ -77,7 +74,7 @@ public class FileListener implements JNotifyListener{
                 path2wd.put(watchPath, wd);
             } finally {
                 //tag file appending
-                reader.doFileAppendForce();
+                logFSM.doFileAppendForce();
                 lock.unlock();
             }
             LOG.info("Registerring and monitoring tail file " + watchPath + " \"FILE_MODIFIED\"");
@@ -87,7 +84,7 @@ public class FileListener implements JNotifyListener{
         return true;
     }
     
-    public void unregisterLogReader(final String watchPath, final LogReader reader) {
+    public void unregisterLogReader(final String watchPath, final LogFSM logFSM) {
         Integer wd;
         lock.lock();
         try {
@@ -98,7 +95,7 @@ public class FileListener implements JNotifyListener{
             }
         } finally {
             //status reset must be executed
-            reader.resetCurrentLogStatus();
+            logFSM.resetCurrentLogStatus();
             lock.unlock();
         }
         try {
@@ -110,7 +107,7 @@ public class FileListener implements JNotifyListener{
                     " or fd is not an inotify file descriptor." +
                     " See \"inotify_rm_watch\" for more detail", e);
         }
-        readerMap.remove(watchPath);
+        fsmMap.remove(watchPath);
     }
 
     /**
@@ -122,8 +119,8 @@ public class FileListener implements JNotifyListener{
     @Override
     public void fileCreated(int wd, String rootPath, String name) {
         String createdFilePath = rootPath + "/" + name;
-        LogReader reader;
-        if ((reader = readerMap.get(createdFilePath)) != null) {
+        LogFSM logFSM;
+        if ((logFSM = fsmMap.get(createdFilePath)) != null) {
             LOG.info("rotate detected of " + createdFilePath);
             //Here, we lock to removing the old and adding a new path as a atomic operation.
             lock.lock();
@@ -139,7 +136,7 @@ public class FileListener implements JNotifyListener{
                 path2wd.put(createdFilePath, newWd);
                 //log status modification must happen after putting newWd to path2wd map,
                 //if not, it may bring a serious bug
-                reader.beginLogRotate();
+                logFSM.beginLogRotate();
                 LOG.info("Re-monitoring "+ createdFilePath + " \"FILE_MODIFIED\" for rotate.");
             } catch (JNotifyException e) {
                 LOG.fatal("Failed to add or remove watch for " + createdFilePath, e);
@@ -158,9 +155,9 @@ public class FileListener implements JNotifyListener{
 
     @Override
     public void fileModified(int wd, String rootPath, String name) {
-        LogReader reader; 
-        if ((reader = readerMap.get(rootPath)) != null ) {
-            reader.doFileAppend();
+        LogFSM logFSM; 
+        if ((logFSM = fsmMap.get(rootPath)) != null ) {
+            logFSM.doFileAppend();
         }
     }
 

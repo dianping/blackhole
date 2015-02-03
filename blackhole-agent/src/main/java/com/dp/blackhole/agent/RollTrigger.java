@@ -14,11 +14,11 @@ public class RollTrigger {
     private static final Log LOG = LogFactory.getLog(RollTrigger.class);
     private ScheduledExecutorService service ;
     private TopicMeta topicMeta;
-    private LogReader logReader;
+    private LogFSM logFSM;
 
-    public RollTrigger(TopicMeta topicMeta, LogReader logReader) {
+    public RollTrigger(TopicMeta topicMeta, LogFSM logFSM) {
         this.topicMeta = topicMeta;
-        this.logReader = logReader;
+        this.logFSM = logFSM;
         this.service = Executors
                 .newSingleThreadScheduledExecutor(new DaemonThreadFactory(
                         "RollTrigger-" + topicMeta.getTopicId()));
@@ -41,7 +41,7 @@ public class RollTrigger {
                 LOG.debug(topicMeta.getTopicId() + " roll attempt is not triggered cause rotating");
             } else {
                 LOG.debug(topicMeta.getTopicId() + " begin roll attempt.");
-                logReader.beginRollAttempt();
+                logFSM.beginRollAttempt();
             }
         }
     }

@@ -17,7 +17,7 @@ import org.junit.Test;
 import com.dp.blackhole.agent.TopicMeta;
 import com.dp.blackhole.agent.RollRecovery;
 import com.dp.blackhole.agent.TopicMeta.TopicId;
-import com.dp.blackhole.agent.persist.LocalState;
+import com.dp.blackhole.agent.persist.LocalRecorder;
 import com.dp.blackhole.agent.persist.Record;
 import com.dp.blackhole.conf.ConfigKeeper;
 
@@ -30,7 +30,7 @@ public class TestRollRecovery {
     private static List<String> receives = new ArrayList<String>();
     private Thread serverThread;
     private static SimAgent agent;
-    private LocalState state;
+    private LocalRecorder state;
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -50,8 +50,8 @@ public class TestRollRecovery {
 
     @Before
     public void setUp() throws Exception {
-        state = mock(LocalState.class);
-        when(state.retrive(SimAgent.rollTS)).thenReturn(new Record(Record.ROTATE, SimAgent.rollTS, LogReader.BOF, LogReader.EOF));//or 598
+        state = mock(LocalRecorder.class);
+        when(state.retrive(SimAgent.rollTS)).thenReturn(new Record(Record.ROTATE, SimAgent.rollTS, LogReader.BEGIN_OFFSET_OF_FILE, LogReader.END_OFFSET_OF_FILE));//or 598
         
         TopicId topicId = new TopicId(MAGIC, null);
         appLog = new TopicMeta(topicId, file.getAbsolutePath(), 3600, 3600, 1024, 1L, 5, 4096);

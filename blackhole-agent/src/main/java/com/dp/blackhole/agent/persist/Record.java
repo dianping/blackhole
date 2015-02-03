@@ -75,7 +75,9 @@ public class Record implements Serializable{
     @Override
     public String toString() {
         return "[" + getTypeName() + "\t" + rollTs + "\t"
-                + Util.getTimeString(rollTs) + "\t" + startOffset + "\t" + endOffset
-                + "\t" + recordTs + "]";
+                + Util.getTimeString(rollTs) + "\t"
+                + String.format("% 10d", startOffset) + "\t"
+                + String.format("% 10d", endOffset) + "\t"
+                + recordTs + "]";
     }
 }

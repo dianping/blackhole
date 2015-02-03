@@ -26,7 +26,7 @@ import org.junit.Test;
 import com.dp.blackhole.agent.RollRecovery;
 import com.dp.blackhole.agent.SimAgent;
 import com.dp.blackhole.agent.TopicMeta.TopicId;
-import com.dp.blackhole.agent.persist.LocalState;
+import com.dp.blackhole.agent.persist.LocalRecorder;
 import com.dp.blackhole.agent.persist.Record;
 import com.dp.blackhole.broker.Compression;
 import com.dp.blackhole.broker.Compression.Algorithm;
@@ -45,12 +45,12 @@ public class TestHDFSRecovery {
     private Path oldPath;
     private SimAgent agent;
     private SimBroker collecotr;
-    private LocalState state;
+    private LocalRecorder state;
 
     @Before
     public void setUp() throws Exception {
-        state = mock(LocalState.class);
-        when(state.retrive(SimAgent.rollTS)).thenReturn(new Record(Record.ROTATE, SimAgent.rollTS, LogReader.BOF, LogReader.EOF));//or 598
+        state = mock(LocalRecorder.class);
+        when(state.retrive(SimAgent.rollTS)).thenReturn(new Record(Record.ROTATE, SimAgent.rollTS, LogReader.BEGIN_OFFSET_OF_FILE, LogReader.END_OFFSET_OF_FILE));//or 598
         
         APP_HOST = Util.getLocalHost();
         //build a tmp file

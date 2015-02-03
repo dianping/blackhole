@@ -20,7 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.TopicMeta.TopicId;
-import com.dp.blackhole.agent.persist.IState;
+import com.dp.blackhole.agent.persist.IRecoder;
 import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
@@ -51,9 +51,9 @@ public class Agent implements Runnable {
     private ExecutorService pool;
     private ExecutorService recoveryThreadPool;
     private FileListener listener;
-    private String hostname;
+    private static String hostname;
     private ScheduledThreadPoolExecutor scheduler;
-    private static Map<TopicId, TopicMeta> logMetas = new ConcurrentHashMap<TopicId, TopicMeta>();
+    private static Map<TopicId, TopicMeta> topics = new ConcurrentHashMap<TopicId, TopicMeta>();
     private static Map<TopicMeta, LogReader> topicReaders = new ConcurrentHashMap<TopicMeta, LogReader>();
     private Map<String, RollRecovery> recoveryingMap = new ConcurrentHashMap<String, RollRecovery>();
     
@@ -85,8 +85,12 @@ public class Agent implements Runnable {
         scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
     }
 
-    public String getHost() {
+    public static String getHost() {
         return hostname;
+    }
+    
+    protected static void setHost(String testHostname) {
+        hostname = testHostname;
     }
     
     public String getBaseDirWildcard() {
@@ -194,7 +198,7 @@ public class Agent implements Runnable {
         }
     }
     
-    public void fillUpAppLogsFromConfig(TopicId topicId) {
+    public TopicMeta fillUpAppLogsFromConfig(TopicId topicId) {
         String topic = topicId.getTopic();
         String path = ConfigKeeper.configMap.get(topic).getString(ParamsKey.TopicConf.WATCH_FILE);
         long rotatePeriod = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROTATE_PERIOD);
@@ -204,11 +208,13 @@ public class Agent implements Runnable {
         int minMsgSent = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, 30);
         int msgBufSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, 512000);
         TopicMeta topicMeta = new TopicMeta(topicId, path, rotatePeriod, rollPeriod, maxLineSize, readInterval, minMsgSent, msgBufSize);
-        logMetas.put(topicId, topicMeta);
+        topics.put(topicId, topicMeta);
+        return topicMeta;
     }
 
     private void requireConfigFromSupersivor(int delaySecond) {
         Message msg = PBwrap.wrapConfReq();
+        LOG.info("Require a configuration after " + delaySecond + " seconds.");
         send(msg, delaySecond);
     }
     
@@ -232,12 +238,19 @@ public class Agent implements Runnable {
         this.listener = listener;
     }
 
-    public void reportFailure(TopicId topicId, String source, final long ts) {
+    public void reportLogReaderFailure(TopicId topicId, String source, final long ts) {
         Message message = PBwrap.wrapAppFailure(topicId.getTopic(), source, ts);
         send(message);
-        TopicMeta applog = logMetas.get(topicId);
-        topicReaders.remove(applog);
-        register(topicId, applog.getCreateTime());
+        TopicMeta topicMeta = topics.get(topicId);
+        topicReaders.remove(topicMeta);
+        topics.remove(topicId);
+        requireConfigFromSupersivor(DEFAULT_DELAY_SECOND);
+    }
+    
+    public void reportRemoteSenderFailure(TopicId topicId, String source, final long ts) {
+        Message message = PBwrap.wrapAppFailure(topicId.getTopic(), source, ts);
+        send(message);
+        register(topicId, Util.getTS());
     }
 
     public void reportUnrecoverable(TopicId topicId, String source, final long rollPeriod, final long rollTs, boolean isFinal) {
@@ -253,6 +266,10 @@ public class Agent implements Runnable {
     public void removeRecoverying(TopicId topicId, final long rollTs) {
         String recoveryKey = topicId.toString() + ":" + rollTs;
         recoveryingMap.remove(recoveryKey);
+    }
+
+    public void requireSender(TopicId topicId) {
+        register(topicId, Util.getTS());
     }
     
     public void send(Message message) {
@@ -310,7 +327,7 @@ public class Agent implements Runnable {
                 recovery.stop();
                 recoveryingMap.remove(e.getKey());
             }
-            logMetas.clear();
+            topics.clear();
             ConfigKeeper.configMap.clear();
             
             if (heartbeat != null) {
@@ -331,10 +348,14 @@ public class Agent implements Runnable {
             }
 
             LOG.debug("agent received: " + msg);         
-            processInternal(msg);
+            try {
+                processInternal(msg);
+            } catch (InterruptedException e) {
+                LOG.error("Interrupted", e);
+            }
         }
 
-        boolean processInternal(Message msg) {
+        boolean processInternal(Message msg) throws InterruptedException {
             String topic;
             String broker;
             String instanceId;
@@ -350,7 +371,7 @@ public class Agent implements Runnable {
                 topic = msg.getNoAvailableNode().getTopic();
                 instanceId = msg.getNoAvailableNode().getInstanceId();
                 topicId = new TopicId(topic, instanceId);
-                TopicMeta applog = logMetas.get(topicId);
+                TopicMeta applog = topics.get(topicId);
                 register(topicId, applog.getCreateTime());
                 break;
             case RECOVERY_ROLL:
@@ -359,20 +380,20 @@ public class Agent implements Runnable {
                 instanceId = recoveryRoll.getInstanceId();
                 topicId = new TopicId(topic, instanceId);
                 boolean isFinal = recoveryRoll.getIsFinal();
-                if ((topicMeta = logMetas.get(topicId)) != null) {
+                if ((topicMeta = topics.get(topicId)) != null) {
                     LogReader reader = topicReaders.get(topicMeta);
                     if (reader == null) {
                         LOG.error("Can not find reader by " + topicId + " to recovery");
                         return false;
                     }
-                    IState state = reader.getState();
+                    IRecoder recoder = reader.getRecoder();
                     long rollTs = recoveryRoll.getRollTs();
                     String recoveryKey = topicId.getContent() + ":" + rollTs;
                     if ((rollRecovery = recoveryingMap.get(recoveryKey)) == null) {
                         broker = recoveryRoll.getBrokerServer();
                         int recoveryPort = recoveryRoll.getRecoveryPort();
                         rollRecovery = new RollRecovery(Agent.this,
-                                broker, recoveryPort, topicMeta, rollTs, isFinal, state);
+                                broker, recoveryPort, topicMeta, rollTs, isFinal, recoder);
                         recoveryingMap.put(recoveryKey, rollRecovery);
                         recoveryThreadPool.execute(rollRecovery);
                         return true;
@@ -390,20 +411,25 @@ public class Agent implements Runnable {
                 topic = assignBroker.getTopic();
                 instanceId = assignBroker.getInstanceId();
                 topicId = new TopicId(topic, instanceId);
-                if ((topicMeta = logMetas.get(topicId)) != null) {
-                    if ((logReader = topicReaders.get(topicMeta)) == null) {
-                        if (topicMeta.isDying()) {
-                            LOG.warn(topicMeta + " is dying, do not restart log reader.");
-                            return true;
-                        }
+                if ((topicMeta = topics.get(topicId)) != null) {
+                    if ((logReader = topicReaders.get(topicMeta)) != null) {
                         broker = assignBroker.getBrokerServer();
                         int brokerPort = assignBroker.getBrokerPort();
-                        logReader = new LogReader(Agent.this, hostname, broker, brokerPort, topicMeta, snapshotPersistDir);
-                        topicReaders.put(topicMeta, logReader);
-                        pool.execute(logReader);
+                        RemoteSender sender = new RemoteSender(topicMeta, broker, brokerPort);
+                        try {
+                            sender.initializeRemoteConnection();
+                        } catch (IOException e) {
+                            LOG.error("init remote connection fail " 
+                                    + broker + ":" + brokerPort + ", register again.", e);
+                            register(topicId, Util.getTS());
+                            return false;
+                        }
+                        logReader.assignSender(sender);
                         return true;
                     } else {
-                        LOG.info("duplicated assign broker message: " + assignBroker);
+                        LOG.error("No logreader to be assign for " + topicId + " send ConfReq.");
+                        requireConfigFromSupersivor(DEFAULT_DELAY_SECOND);
+                        return false;
                     }
                 } else {
                     LOG.error("Topic [" + assignBroker.getTopic()
@@ -415,7 +441,6 @@ public class Agent implements Runnable {
                     confLoopFactor = confLoopFactor << 1;
                 }
                 int randomSecond = confLoopFactor * (random.nextInt(21) + 40);
-                LOG.info("Configurations not ready, sleep " + randomSecond + " second.");
                 requireConfigFromSupersivor(randomSecond);
                 break;
             case CONF_RES:
@@ -429,7 +454,7 @@ public class Agent implements Runnable {
                         List<String> ids = lxcConfRes.getInstanceIdsList();
                         for (String id : ids) {
                             topicId = new TopicId(topic, id);
-                            if (logMetas.containsKey(topicId)) {
+                            if (topics.containsKey(topicId)) {
                                 LOG.info(topicId + " has already in used.");
                                 continue;
                             }
@@ -450,6 +475,7 @@ public class Agent implements Runnable {
                             confKeeper.addRawProperty(topic + "."
                                     + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, lxcConfRes.getMsgBufSize());
                             fillUpAppLogsFromConfig(topicId);
+                            startLogReader(topicId);
                             register(topicId, Util.getTS());
                             if (this.heartbeat == null || !this.heartbeat.isAlive()) {
                                 this.heartbeat = new HeartBeat(supervisor);
@@ -464,7 +490,7 @@ public class Agent implements Runnable {
                     for (AppConfRes appConfRes : appConfResList) {
                         topic = appConfRes.getTopic();
                         topicId = new TopicId(topic, null);
-                        if (logMetas.containsKey(topicId)) {
+                        if (topics.containsKey(topicId)) {
                             LOG.info(topicId + " has already in used.");
                             ++accepted;
                             continue;
@@ -487,6 +513,7 @@ public class Agent implements Runnable {
                                 + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, appConfRes.getMsgBufSize());
                         fillUpAppLogsFromConfig(topicId);
                         ++accepted;
+                        startLogReader(topicId);
                         register(topicId, Util.getTS());
                         if (this.heartbeat == null || !this.heartbeat.isAlive()) {
                             this.heartbeat = new HeartBeat(supervisor);
@@ -508,14 +535,14 @@ public class Agent implements Runnable {
                     List<String> ids = instanceGroup.getInstanceIdsList();
                     for (String id : ids) {
                         topicId = new TopicId(topic, id);
-                        if ((topicMeta = logMetas.get(topicId)) != null) {
+                        if ((topicMeta = topics.get(topicId)) != null) {
                             // set a stream status to dying, and send a special rotate message.
                             if (topicMeta.setDying()) {
                                 if (!new File(topicMeta.getTailFile()).exists()) {
                                     LOG.warn("QUIT but " + topicMeta.getTailFile() + " not exists, retire stream and trigger CLEAN.");
                                     send(PBwrap.wrapRetireStream(topic, hostname, id));
                                 } else if ((logReader = topicReaders.get(topicMeta)) != null) {
-                                    logReader.beginLastLogRotate();
+                                    logReader.getLogFSM().beginLastLogRotate();
                                 } else {
                                     LOG.info(topicMeta + " has already stopped.");
                                 }
@@ -534,14 +561,14 @@ public class Agent implements Runnable {
                     List<String> ids = instanceGroup.getInstanceIdsList();
                     for (String id : ids) {
                         topicId = new TopicId(topic, id);
-                        if ((topicMeta = logMetas.get(topicId)) != null) {
+                        if ((topicMeta = topics.get(topicId)) != null) {
                             // set a stream status to dying, and send a special rotate message.
                             if (topicMeta.isDying()) {
                                 if ((logReader = topicReaders.get(topicMeta)) != null) {
                                     LOG.info("Clean up " + topicMeta);
                                     logReader.stop();
                                     topicReaders.remove(topicMeta);
-                                    logMetas.remove(topicId);
+                                    topics.remove(topicId);
                                 } else {
                                     LOG.info(topicMeta + " has already stopped.");
                                 }
@@ -559,25 +586,25 @@ public class Agent implements Runnable {
                 OP op = snapshotOp.getOp();
                 
                 topicId = new TopicId(topic, instanceId);
-                if ((topicMeta = logMetas.get(topicId)) != null) {
+                if ((topicMeta = topics.get(topicId)) != null) {
                     if ((logReader = topicReaders.get(topicMeta)) != null) {
-                        IState state = logReader.getState();
-                        if (state != null) {
+                        IRecoder recoder = logReader.getRecoder();
+                        if (recoder != null) {
                             switch (op) {
                                 case log:
                                     LOG.debug("Snaphost log for " + topicId);
-                                    state.log();
+                                    recoder.log();
                                     break;
                                 case clean:
                                     LOG.debug("Snaphost clean up for " + topicId);
-                                    state.tidy();
-                                    state.log();
+                                    recoder.tidy();
+                                    recoder.log();
                                     break;
                                 case del:
                                     LOG.warn("!!! Force delete snapshot file of " + topicId 
                                             + ". It may lead to a disordered situation, "
                                             + "please use it just before restart Agent process");
-                                    state.cleanup();
+                                    recoder.cleanup();
                                     break;
                                 default:
                                     break;
@@ -596,6 +623,24 @@ public class Agent implements Runnable {
                 LOG.error("Illegal message type " + msg.getType());
             }
             return false;
+        }
+        
+        private void startLogReader(TopicId topicId) {
+            TopicMeta topicMeta;
+            LogReader logReader;
+            if ((topicMeta = topics.get(topicId)) != null) {
+                if ((logReader = topicReaders.get(topicMeta)) == null) {
+                    if (topicMeta.isDying()) {
+                        LOG.warn(topicMeta + " is dying, do not restart log reader.");
+                        return;
+                    }
+                    logReader = new LogReader(Agent.this, topicMeta, snapshotPersistDir);
+                    topicReaders.put(topicMeta, logReader);
+                    pool.execute(logReader);
+                }
+            } else {
+                LOG.error(topicId + " from supervisor message not match with local");
+            }
         }
     }
     

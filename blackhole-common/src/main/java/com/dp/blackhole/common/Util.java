@@ -250,17 +250,17 @@ public class Util {
         }
     }
     /**
-     * get offset of beginning of last line in a file
+     * return the offset of beginning of last line in a file, at which to set file-pointer 
      * @param reader
      * @param fileLength
      * @return return the offset(from 0) of beginning of last line
      * @throws IOException
      */
-    public static long getOffsetOfLastLineHeader(RandomAccessFile reader, long fileLength) throws IOException {
-        return getOffsetOfLastLineHeader(reader, fileLength, 1024 * 8);
+    public static long seekLastLineHeader(RandomAccessFile reader, long fileLength) throws IOException {
+        return seekLastLineHeader(reader, fileLength, 1024 * 8);
     }
     
-    public static long getOffsetOfLastLineHeader(RandomAccessFile reader, long fileLength, int bufSize) throws IOException {
+    public static long seekLastLineHeader(RandomAccessFile reader, long fileLength, int bufSize) throws IOException {
         long headerOffset = 0;
         byte readBuf[] = new byte[bufSize];
         int loop = 0;
@@ -292,6 +292,7 @@ public class Util {
                 }
             }
         }
+        reader.seek(headerOffset);
         return headerOffset;
     }
     

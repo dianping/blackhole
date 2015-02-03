@@ -36,21 +36,27 @@ public class SimAgent extends Agent{
     public SimAgent() {
         super();
         super.processor = new AgentProcessor();
+        super.setHost(HOSTNAME);
+    }
+    
+//    @Override
+//    public static String getHost() {
+//        try {
+//            return Util.getLocalHost();
+//        } catch (UnknownHostException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+    
+    @Override
+    public void reportLogReaderFailure(TopicId topicId, String appHost, long ts) {
+        LOG.debug(topicId + " log reader fail, APP HOST: " + appHost + "ts: " + ts);
     }
     
     @Override
-    public String getHost() {
-        try {
-            return Util.getLocalHost();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    public void reportFailure(TopicId topicId, String appHost, long ts) {
-        LOG.debug(topicId + ", APP HOST: " + appHost + "ts: " + ts);
+    public void reportRemoteSenderFailure(TopicId topicId, String appHost, long ts) {
+        LOG.debug(topicId + " remote sender fail, APP HOST: " + appHost + "ts: " + ts);
     }
     
     @Override

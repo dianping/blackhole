@@ -3,9 +3,12 @@ package com.dp.blackhole.agent;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.dp.blackhole.common.Util;
+
 public class TopicMeta implements Serializable {
     private static final long serialVersionUID = -1189314942488288669L;
     private final TopicId topicId;
+    private final String source;
     private final String tailFile;
     private final long createTime;
     private final long rotatePeriod;
@@ -20,6 +23,7 @@ public class TopicMeta implements Serializable {
             long rollPeriod, int maxLineSize, long readInterval,
             int minMsgSent, int msgBufSize) {
         this.topicId = topicId;
+        this.source = Util.getSource(Agent.getHost(), topicId.getInstanceId());
         this.tailFile = tailFile;
         this.rotatePeriod = rotatePeriod;
         this.rollPeriod = rollPeriod;
@@ -39,8 +43,8 @@ public class TopicMeta implements Serializable {
         return topicId.getTopic();
     }
     
-    public String getInstanceId() {
-        return topicId.getInstanceId();
+    public String getSource() {
+        return source;
     }
 
     public long getRotatePeriod() {
@@ -100,9 +104,7 @@ public class TopicMeta implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((topicId == null) ? 0 : topicId.hashCode());
-        result = prime * result + (int) (rotatePeriod ^ (rotatePeriod >>> 32));
-        result = prime * result
-                + ((tailFile == null) ? 0 : tailFile.hashCode());
+        result = prime * result + ((tailFile == null) ? 0 : tailFile.hashCode());
         return result;
     }
     

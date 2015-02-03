@@ -1,6 +1,6 @@
 package com.dp.blackhole.agent.persist;
 
-public interface IState {
+public interface IRecoder {
     
     public void record(int type, long rollTs, long endOffset);
     
