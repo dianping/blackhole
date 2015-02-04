@@ -85,6 +85,16 @@ public final class RecoveryRollPB {
      * <code>optional bool is_final = 6;</code>
      */
     boolean getIsFinal();
+
+    // optional bool is_persist = 7 [default = true];
+    /**
+     * <code>optional bool is_persist = 7 [default = true];</code>
+     */
+    boolean hasIsPersist();
+    /**
+     * <code>optional bool is_persist = 7 [default = true];</code>
+     */
+    boolean getIsPersist();
   }
   /**
    * Protobuf type {@code blackhole.RecoveryRoll}
@@ -165,6 +175,11 @@ public final class RecoveryRollPB {
             case 48: {
               bitField0_ |= 0x00000020;
               isFinal_ = input.readBool();
+              break;
+            }
+            case 56: {
+              bitField0_ |= 0x00000040;
+              isPersist_ = input.readBool();
               break;
             }
           }
@@ -384,6 +399,22 @@ public final class RecoveryRollPB {
       return isFinal_;
     }
 
+    // optional bool is_persist = 7 [default = true];
+    public static final int IS_PERSIST_FIELD_NUMBER = 7;
+    private boolean isPersist_;
+    /**
+     * <code>optional bool is_persist = 7 [default = true];</code>
+     */
+    public boolean hasIsPersist() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>optional bool is_persist = 7 [default = true];</code>
+     */
+    public boolean getIsPersist() {
+      return isPersist_;
+    }
+
     private void initFields() {
       topic_ = "";
       brokerServer_ = "";
@@ -391,6 +422,7 @@ public final class RecoveryRollPB {
       recoveryPort_ = 0;
       instanceId_ = "";
       isFinal_ = false;
+      isPersist_ = true;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -438,6 +470,9 @@ public final class RecoveryRollPB {
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         output.writeBool(6, isFinal_);
       }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeBool(7, isPersist_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -470,6 +505,10 @@ public final class RecoveryRollPB {
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(6, isFinal_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(7, isPersist_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -599,6 +638,8 @@ public final class RecoveryRollPB {
         bitField0_ = (bitField0_ & ~0x00000010);
         isFinal_ = false;
         bitField0_ = (bitField0_ & ~0x00000020);
+        isPersist_ = true;
+        bitField0_ = (bitField0_ & ~0x00000040);
         return this;
       }
 
@@ -651,6 +692,10 @@ public final class RecoveryRollPB {
           to_bitField0_ |= 0x00000020;
         }
         result.isFinal_ = isFinal_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        result.isPersist_ = isPersist_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -690,6 +735,9 @@ public final class RecoveryRollPB {
         }
         if (other.hasIsFinal()) {
           setIsFinal(other.getIsFinal());
+        }
+        if (other.hasIsPersist()) {
+          setIsPersist(other.getIsPersist());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1055,6 +1103,39 @@ public final class RecoveryRollPB {
         return this;
       }
 
+      // optional bool is_persist = 7 [default = true];
+      private boolean isPersist_ = true;
+      /**
+       * <code>optional bool is_persist = 7 [default = true];</code>
+       */
+      public boolean hasIsPersist() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional bool is_persist = 7 [default = true];</code>
+       */
+      public boolean getIsPersist() {
+        return isPersist_;
+      }
+      /**
+       * <code>optional bool is_persist = 7 [default = true];</code>
+       */
+      public Builder setIsPersist(boolean value) {
+        bitField0_ |= 0x00000040;
+        isPersist_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool is_persist = 7 [default = true];</code>
+       */
+      public Builder clearIsPersist() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        isPersist_ = true;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.RecoveryRoll)
     }
 
@@ -1080,12 +1161,13 @@ public final class RecoveryRollPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022RecoveryRoll.proto\022\tblackhole\"\203\001\n\014Reco" +
+      "\n\022RecoveryRoll.proto\022\tblackhole\"\235\001\n\014Reco" +
       "veryRoll\022\r\n\005topic\030\001 \002(\t\022\025\n\rbroker_server" +
       "\030\002 \002(\t\022\017\n\007roll_ts\030\003 \002(\003\022\025\n\rrecovery_port" +
       "\030\004 \002(\005\022\023\n\013instance_id\030\005 \001(\t\022\020\n\010is_final\030" +
-      "\006 \001(\010B3\n!com.dp.blackhole.protocol.contr" +
-      "olB\016RecoveryRollPB"
+      "\006 \001(\010\022\030\n\nis_persist\030\007 \001(\010:\004trueB3\n!com.d" +
+      "p.blackhole.protocol.controlB\016RecoveryRo" +
+      "llPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1097,7 +1179,7 @@ public final class RecoveryRollPB {
           internal_static_blackhole_RecoveryRoll_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RecoveryRoll_descriptor,
-              new java.lang.String[] { "Topic", "BrokerServer", "RollTs", "RecoveryPort", "InstanceId", "IsFinal", });
+              new java.lang.String[] { "Topic", "BrokerServer", "RollTs", "RecoveryPort", "InstanceId", "IsFinal", "IsPersist", });
           return null;
         }
       };

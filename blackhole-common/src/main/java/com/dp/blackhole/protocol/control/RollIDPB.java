@@ -85,6 +85,16 @@ public final class RollIDPB {
      */
     com.google.protobuf.ByteString
         getCompressionBytes();
+
+    // optional bool is_Persist = 7 [default = true];
+    /**
+     * <code>optional bool is_Persist = 7 [default = true];</code>
+     */
+    boolean hasIsPersist();
+    /**
+     * <code>optional bool is_Persist = 7 [default = true];</code>
+     */
+    boolean getIsPersist();
   }
   /**
    * Protobuf type {@code blackhole.RollID}
@@ -165,6 +175,11 @@ public final class RollIDPB {
             case 50: {
               bitField0_ |= 0x00000020;
               compression_ = input.readBytes();
+              break;
+            }
+            case 56: {
+              bitField0_ |= 0x00000040;
+              isPersist_ = input.readBool();
               break;
             }
           }
@@ -384,6 +399,22 @@ public final class RollIDPB {
       }
     }
 
+    // optional bool is_Persist = 7 [default = true];
+    public static final int IS_PERSIST_FIELD_NUMBER = 7;
+    private boolean isPersist_;
+    /**
+     * <code>optional bool is_Persist = 7 [default = true];</code>
+     */
+    public boolean hasIsPersist() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>optional bool is_Persist = 7 [default = true];</code>
+     */
+    public boolean getIsPersist() {
+      return isPersist_;
+    }
+
     private void initFields() {
       topic_ = "";
       source_ = "";
@@ -391,6 +422,7 @@ public final class RollIDPB {
       rollTs_ = 0L;
       isFinal_ = false;
       compression_ = "";
+      isPersist_ = true;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -438,6 +470,9 @@ public final class RollIDPB {
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         output.writeBytes(6, getCompressionBytes());
       }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeBool(7, isPersist_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -470,6 +505,10 @@ public final class RollIDPB {
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(6, getCompressionBytes());
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(7, isPersist_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -599,6 +638,8 @@ public final class RollIDPB {
         bitField0_ = (bitField0_ & ~0x00000010);
         compression_ = "";
         bitField0_ = (bitField0_ & ~0x00000020);
+        isPersist_ = true;
+        bitField0_ = (bitField0_ & ~0x00000040);
         return this;
       }
 
@@ -651,6 +692,10 @@ public final class RollIDPB {
           to_bitField0_ |= 0x00000020;
         }
         result.compression_ = compression_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        result.isPersist_ = isPersist_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -690,6 +735,9 @@ public final class RollIDPB {
           bitField0_ |= 0x00000020;
           compression_ = other.compression_;
           onChanged();
+        }
+        if (other.hasIsPersist()) {
+          setIsPersist(other.getIsPersist());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1055,6 +1103,39 @@ public final class RollIDPB {
         return this;
       }
 
+      // optional bool is_Persist = 7 [default = true];
+      private boolean isPersist_ = true;
+      /**
+       * <code>optional bool is_Persist = 7 [default = true];</code>
+       */
+      public boolean hasIsPersist() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional bool is_Persist = 7 [default = true];</code>
+       */
+      public boolean getIsPersist() {
+        return isPersist_;
+      }
+      /**
+       * <code>optional bool is_Persist = 7 [default = true];</code>
+       */
+      public Builder setIsPersist(boolean value) {
+        bitField0_ |= 0x00000040;
+        isPersist_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool is_Persist = 7 [default = true];</code>
+       */
+      public Builder clearIsPersist() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        isPersist_ = true;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.RollID)
     }
 
@@ -1080,11 +1161,12 @@ public final class RollIDPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014RollID.proto\022\tblackhole\"o\n\006RollID\022\r\n\005t" +
-      "opic\030\001 \002(\t\022\016\n\006source\030\002 \002(\t\022\016\n\006period\030\003 \002" +
-      "(\003\022\017\n\007roll_ts\030\004 \002(\003\022\020\n\010is_final\030\005 \001(\010\022\023\n" +
-      "\013compression\030\006 \001(\tB-\n!com.dp.blackhole.p" +
-      "rotocol.controlB\010RollIDPB"
+      "\n\014RollID.proto\022\tblackhole\"\211\001\n\006RollID\022\r\n\005" +
+      "topic\030\001 \002(\t\022\016\n\006source\030\002 \002(\t\022\016\n\006period\030\003 " +
+      "\002(\003\022\017\n\007roll_ts\030\004 \002(\003\022\020\n\010is_final\030\005 \001(\010\022\023" +
+      "\n\013compression\030\006 \001(\t\022\030\n\nis_Persist\030\007 \001(\010:" +
+      "\004trueB-\n!com.dp.blackhole.protocol.contr" +
+      "olB\010RollIDPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1096,7 +1178,7 @@ public final class RollIDPB {
           internal_static_blackhole_RollID_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RollID_descriptor,
-              new java.lang.String[] { "Topic", "Source", "Period", "RollTs", "IsFinal", "Compression", });
+              new java.lang.String[] { "Topic", "Source", "Period", "RollTs", "IsFinal", "Compression", "IsPersist", });
           return null;
         }
       };

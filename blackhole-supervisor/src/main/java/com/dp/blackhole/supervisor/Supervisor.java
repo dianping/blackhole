@@ -1358,12 +1358,14 @@ public class Supervisor {
     private String doUpload(Stream stream, Stage current, SimpleConnection from, boolean isFinal) {
         TopicConfig config = configManager.getConfByTopic(stream.getTopic());
         String compression = config.getCompression();
+        boolean isPersist = config.isPersist();
         Message message = PBwrap.wrapUploadRoll(
                 current.getTopic(),
                 current.getSource(),
                 stream.getPeriod(),
                 current.getRollTs(),
                 isFinal,
+                isPersist,
                 compression
         );
         send(from, message);
@@ -1394,14 +1396,16 @@ public class Supervisor {
                 LOG.error("can not find connection by host: " + stream.getSource());
                 return null;
             }
-            
+            TopicConfig config = configManager.getConfByTopic(stream.getTopic());
+            boolean isPersist = config.isPersist();
             Message message = PBwrap.wrapRecoveryRoll(
                         stream.getTopic(),
                         broker,
                         getRecoveryPort(broker),
                         stage.getRollTs(),
                         Util.getInstanceIdFromSource(stream.getSource()),
-                        isFinal
+                        isFinal,
+                        isPersist
             );
             send(c, message);
             stage.setStatus(Stage.RECOVERYING);
@@ -1616,30 +1620,30 @@ public class Supervisor {
      * 1. recored the connection in agent
      * 2. assign a broker to the topic
      */
-    private void handleTopicReg(Message m, SimpleConnection from) {
+    private void handleTopicReg(AppReg appReg, SimpleConnection from) {
         ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
             return;
         }
         desc.setType(ConnectionDesc.AGENT);
-        agentsMapping.putIfAbsent(from.getHost(), from);
-        AppReg message = m.getAppReg();
-        String source = message.getSource();
-        LOG.info("Topic " + message.getTopic() + " registered from " + source);
-        assignBroker(message.getTopic(), from, Util.getInstanceIdFromSource(source));
+        String source = appReg.getSource();
+        if(null == agentsMapping.putIfAbsent(from.getHost(), from)) {
+            LOG.info("Topic " + appReg.getTopic() + " registered from " + source);
+        }
+        assignBroker(appReg.getTopic(), from, source);
     }
 
-    private String assignBroker(String topic, SimpleConnection from, String instanceId) {
-        String broker = getBroker();
-        
+    private String assignBroker(String topic, SimpleConnection from, String source) {
+        String broker = getBrokerToAssign();
+        String instanceId = Util.getInstanceIdFromSource(source);
         Message message;
         if (broker != null) {
             message = PBwrap.wrapAssignBroker(topic, broker, getBrokerPort(broker), instanceId);
         } else {
             message = PBwrap.wrapNoAvailableNode(topic, instanceId);
         }
-
+        LOG.info("assign broker " + broker + " for " + topic + ":" + source);
         send(from, message);
         return broker;
     }
@@ -1670,6 +1674,15 @@ public class Supervisor {
         return broker;
     }
 
+    private String getBrokerToAssign() {
+        if (configManager.brokerAssignmentLimitEnable) {
+            if (brokersMapping.size() < configManager.brokerAssignmentLimitMin) {
+                return null;
+            }
+        }
+        return getBroker();
+    }
+    
     public void handleRollingAndTriggerClean(RollClean rollClean, SimpleConnection from) {
         boolean isFinal = true;
         Stream stream = getStream(rollClean.getTopic(), rollClean.getSource());
@@ -1739,7 +1752,7 @@ public class Supervisor {
                 break;
             case APP_REG:
                 LOG.debug("received: " + msg);
-                handleTopicReg(msg, from);
+                handleTopicReg(msg.getAppReg(), from);
                 break;
             case CONSUMER_REG:
                 LOG.debug("received: " + msg);

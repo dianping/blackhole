@@ -6,6 +6,7 @@ public class RollIdent {
     public String source;
     public long ts;
     public boolean isFinal;
+    public boolean isPersist;
     
     @Override
     public int hashCode() {
@@ -49,6 +50,6 @@ public class RollIdent {
 
     @Override
     public String toString() {
-        return topic + "@" + source + "," + period + "," + ts + ",final:" + isFinal; 
+        return topic + "@" + source + "," + period + "," + ts + ",final:" + isFinal + ",persist:" + isPersist; 
     }
 }

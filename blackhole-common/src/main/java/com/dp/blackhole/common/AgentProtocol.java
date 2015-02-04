@@ -15,6 +15,7 @@ public class AgentProtocol {
         public long size;
         public boolean hasCompressed;
         public boolean isFinal = false;
+        public boolean isPersist = true;
     }
     
     public DataOutputStream sendHead (DataOutputStream out, AgentHead head) throws IOException {
@@ -26,6 +27,7 @@ public class AgentProtocol {
         out.writeLong(head.size);
         out.writeBoolean(head.hasCompressed);
         out.writeBoolean(head.isFinal);
+        out.writeBoolean(head.isPersist);
         return out;
     }
     
@@ -38,6 +40,7 @@ public class AgentProtocol {
         head.size = in.readLong();
         head.hasCompressed = in.readBoolean();
         head.isFinal = in.readBoolean();
+        head.isPersist = in.readBoolean();
         return head;
     }
 }

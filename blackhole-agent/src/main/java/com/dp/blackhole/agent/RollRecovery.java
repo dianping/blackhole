@@ -29,8 +29,12 @@ public class RollRecovery implements Runnable{
     private byte[] inbuf;
     private Agent node;
     private boolean isFinal;
+    private boolean isPersist;
     private final IRecoder state;
-    public RollRecovery(Agent node, String brokerServer, int port, TopicMeta topicMeta, final long rollTimestamp, boolean isFinal, IRecoder state) {
+
+    public RollRecovery(Agent node, String brokerServer, int port,
+            TopicMeta topicMeta, final long rollTimestamp, boolean isFinal,
+            boolean isPersist, IRecoder state) {
         this.node = node;
         this.brokerServer = brokerServer;
         this.port = port;
@@ -38,6 +42,7 @@ public class RollRecovery implements Runnable{
         this.rollTimestamp = rollTimestamp;
         this.inbuf = new byte[DEFAULT_BUFSIZE];
         this.isFinal = isFinal;
+        this.isPersist = isPersist;
         this.state = state;
     }
 
@@ -74,17 +79,23 @@ public class RollRecovery implements Runnable{
         try {
             //retrive record to got recovery offset
             Record record = state.retrive(rollTimestamp);
-            if (record == null) {
-                //loss record, no need to recovery, the missing data will recovery into the last missing stage
+            //no need to recovery:
+            //1. loss record, the missing data will recovery into the last missing stage
+            //2. no persist topic
+            if (record == null || !isPersist) {
                 //send ignorance to broker
                 try {
                     socket = new Socket(brokerServer, port);
                     out = new DataOutputStream(socket.getOutputStream());
-                    LOG.info("Can not found Record for " + rollString + "[" + rollTimestamp + "], send ignorance to broker.");
+                    if (isPersist) {
+                        LOG.info("Can not found Record for " + rollString + "[" + rollTimestamp + "], send ignorance to broker.");
+                    } else {
+                        LOG.info("No need to recovery the topic which no need persist: " + topicMeta.getTopicId());
+                    }
                     wrapSendRecoveryHead(true, out, toTransferSize, hasCompressed, isFinal);
                 } catch (IOException e) {
                     LOG.error("Faild to send ignorance protocol header.", e);
-                    node.reportUnrecoverable(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal);
+                    node.reportUnrecoverable(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal, isPersist);
                 }
                 return;
             }
@@ -104,7 +115,7 @@ public class RollRecovery implements Runnable{
                 hasCompressed = true;
             } else {
                 LOG.error("Can not found both " + rolledFile + " and gzFile");
-                node.reportUnrecoverable(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal);
+                node.reportUnrecoverable(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal, isPersist);
                 return;
             }
             
@@ -187,7 +198,7 @@ public class RollRecovery implements Runnable{
         }
     }
 
-    private AgentProtocol wrapSendRecoveryHead(boolean ignore, DataOutputStream out, long fileSize, boolean hasCompressed, boolean isFinal)
+    public AgentProtocol wrapSendRecoveryHead(boolean ignore, DataOutputStream out, long fileSize, boolean hasCompressed, boolean isFinal)
             throws IOException {
         AgentProtocol protocol = new AgentProtocol();
         AgentHead head = protocol.new AgentHead();

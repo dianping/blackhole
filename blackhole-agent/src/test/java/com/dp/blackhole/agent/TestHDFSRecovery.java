@@ -98,7 +98,7 @@ public class TestHDFSRecovery {
     public void test() throws IOException, InterruptedException {
         TopicId topicId = new TopicId(MAGIC, null);
         TopicMeta appLog = new TopicMeta(topicId, file.getAbsolutePath(), 3600, 3600, 1024, 1L, 5, 4096);
-        RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false, state);
+        RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false, true, state);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();
         convertToGZIP(file);

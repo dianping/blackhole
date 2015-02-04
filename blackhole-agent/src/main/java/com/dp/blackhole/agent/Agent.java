@@ -253,8 +253,8 @@ public class Agent implements Runnable {
         register(topicId, Util.getTS());
     }
 
-    public void reportUnrecoverable(TopicId topicId, String source, final long rollPeriod, final long rollTs, boolean isFinal) {
-        Message message = PBwrap.wrapUnrecoverable(topicId.getTopic(), source, rollPeriod, rollTs, isFinal);
+    public void reportUnrecoverable(TopicId topicId, String source, final long rollPeriod, final long rollTs, boolean isFinal, boolean isPersist) {
+        Message message = PBwrap.wrapUnrecoverable(topicId.getTopic(), source, rollPeriod, rollTs, isFinal, isPersist);
         send(message);
     }
 
@@ -380,6 +380,7 @@ public class Agent implements Runnable {
                 instanceId = recoveryRoll.getInstanceId();
                 topicId = new TopicId(topic, instanceId);
                 boolean isFinal = recoveryRoll.getIsFinal();
+                boolean isPersit = recoveryRoll.getIsPersist();
                 if ((topicMeta = topics.get(topicId)) != null) {
                     LogReader reader = topicReaders.get(topicMeta);
                     if (reader == null) {
@@ -393,7 +394,7 @@ public class Agent implements Runnable {
                         broker = recoveryRoll.getBrokerServer();
                         int recoveryPort = recoveryRoll.getRecoveryPort();
                         rollRecovery = new RollRecovery(Agent.this,
-                                broker, recoveryPort, topicMeta, rollTs, isFinal, recoder);
+                                broker, recoveryPort, topicMeta, rollTs, isFinal, isPersit, recoder);
                         recoveryingMap.put(recoveryKey, rollRecovery);
                         recoveryThreadPool.execute(rollRecovery);
                         return true;

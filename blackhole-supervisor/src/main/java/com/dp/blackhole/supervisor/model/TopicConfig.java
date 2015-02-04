@@ -13,6 +13,7 @@ public class TopicConfig {
     private int rotatePeriod;
     private int rollPeriod;
     private int maxLineSize = DEFAULT_MAX_LINE_SIZE;
+    private boolean isPersist = true;
     private List<String> hosts;
     private Map<String, Set<String>> hostsInstances;
     private long readInterval = DEFAULT_READ_INTERVAL;
@@ -59,6 +60,12 @@ public class TopicConfig {
     }
     public void setMaxLineSize(int maxLineSize) {
         this.maxLineSize = maxLineSize;
+    }
+    public boolean isPersist() {
+        return isPersist;
+    }
+    public void setPersist(boolean isPersist) {
+        this.isPersist = isPersist;
     }
     public List<String> getHosts() {
         return hosts;

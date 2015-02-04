@@ -7,6 +7,7 @@ public abstract class ParamsKey {
         public static final String ROTATE_PERIOD = "rotatePeriod";
         public static final String ROLL_PERIOD = "rollPeriod";
         public static final String MAX_LINE_SIZE = "maxLineSize";
+        public static final String IS_PERSIST = "isPersist";
         public static final String READ_INTERVAL = "readInterval";
         public static final String OWNER = "owner";
         public static final String COMPRESSION = "compression";
@@ -24,6 +25,7 @@ public abstract class ParamsKey {
         public static final String HOSTS_PREFIX = "blackhole.hosts.";
         public static final String CONF_PREFIX = "blackhole.conf.";
         public static final String BLACKLIST = "blackhole.check.blacklist";
+        public static final String BROKER_ASSIGN_LIMIT_MIN = "blackhole.broker-assign.limit.min";
         public static final String OP_SCALEOUT = "+";
         public static final String OP_SCALEIN = "-";
     }

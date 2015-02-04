@@ -141,7 +141,7 @@ public class TestAgent {
     }
     
     private Message getMessageOfRecoveryRoll(String appName) {
-        return PBwrap.wrapRecoveryRoll(appName, SimAgent.HOSTNAME, SimAgent.COLPORT, SimAgent.rollTS, null, false);
+        return PBwrap.wrapRecoveryRoll(appName, SimAgent.HOSTNAME, SimAgent.COLPORT, SimAgent.rollTS, null, false, true);
     }
 
     private Message getUnknowMessage() {

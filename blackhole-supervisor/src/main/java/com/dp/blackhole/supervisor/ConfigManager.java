@@ -55,6 +55,8 @@ public class ConfigManager {
     public int supervisorPort;
     public int jettyPort;
     public int numHandler;
+    public boolean brokerAssignmentLimitEnable;
+    public int brokerAssignmentLimitMin;
     
     public String getPaaSInstanceURLPerfix;
     
@@ -119,6 +121,7 @@ public class ConfigManager {
         jettyPort = Integer.parseInt(prop.getProperty("rest.jetty.port", "8085"));
         numHandler = Integer.parseInt(prop.getProperty("GenServer.handler.count", "3"));
         getPaaSInstanceURLPerfix = prop.getProperty("supervisor.paas.url");
+        brokerAssignmentLimitEnable = Boolean.parseBoolean(prop.getProperty("supervisor.broker-assignment-limit.enable", "false"));
         //create a http client for PaaS
         httpClient = new HttpClientSingle(connectionTimeout, socketTimeout);
         reloadTopicConfig();
@@ -146,6 +149,9 @@ public class ConfigManager {
             String hostsString = definitelyGetProperty(ParamsKey.LionNode.HOSTS_PREFIX + topics[i]);
             fillHostMap(topics[i], hostsString);
         }
+        if (brokerAssignmentLimitEnable) {
+            brokerAssignmentLimitMin = Util.parseInt(definitelyGetProperty(ParamsKey.LionNode.BROKER_ASSIGN_LIMIT_MIN), 1);
+        }
     }
 
     private void addWatchers() {
@@ -159,6 +165,7 @@ public class ConfigManager {
         cache.addChange(agentHostsListener);
         definitelyGetProperty(ParamsKey.LionNode.TOPIC);
         definitelyGetProperty(ParamsKey.LionNode.BLACKLIST);
+        definitelyGetProperty(ParamsKey.LionNode.BROKER_ASSIGN_LIMIT_MIN);
     }
 
     private synchronized String definitelyGetProperty(String watchKey) {
@@ -196,6 +203,8 @@ public class ConfigManager {
                     confInfo.setRollPeriod(Util.parseInt(value, confInfo.getRotatePeriod()));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.MAX_LINE_SIZE)) {
                     confInfo.setMaxLineSize(Util.parseInt(value, 512000));
+                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.IS_PERSIST)) {
+                    confInfo.setPersist(Util.parseBoolean(value, true));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.READ_INTERVAL)) {
                     confInfo.setReadInterval(Util.parseLong(value, 1L));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT)) {
@@ -400,6 +409,10 @@ public class ConfigManager {
             .append(" = ")
             .append(confInfo.getWatchLog())
             .append("\n")
+            .append(ParamsKey.TopicConf.IS_PERSIST)
+            .append(" = ")
+            .append(confInfo.isPersist())
+            .append("\n")
             .append(ParamsKey.TopicConf.ROTATE_PERIOD)
             .append(" = ")
             .append(confInfo.getRotatePeriod())
@@ -548,6 +561,18 @@ public class ConfigManager {
                 if (blacklistArray != null) {
                     LOG.info("black list has been changed.");
                     blacklist.setBlacklist(Arrays.asList(blacklistArray));
+                }
+            }
+        }
+    }
+    
+    class BrokerAssignLimitChangeListener implements ConfigChange {
+
+        @Override
+        public void onChange(String key, String value) {
+            if (brokerAssignmentLimitEnable) {
+                if (key.equals(ParamsKey.LionNode.BROKER_ASSIGN_LIMIT_MIN)) {
+                    brokerAssignmentLimitMin = Util.parseInt(value, 1);
                 }
             }
         }

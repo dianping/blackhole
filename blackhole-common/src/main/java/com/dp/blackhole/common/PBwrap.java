@@ -193,17 +193,18 @@ public class PBwrap {
         return wrapMessage(MessageType.READY_STREAM, builder.build());
     }
     
-    public static RollID wrapRollID(String appName, String appServer, long period, long rollTs, boolean isFinal) {
-        return wrapRollID(appName, appServer, period, rollTs, isFinal, "");
+    public static RollID wrapRollID(String appName, String appServer, long period, long rollTs, boolean isFinal, boolean isPersist) {
+        return wrapRollID(appName, appServer, period, rollTs, isFinal, isPersist, "");
     }
     
-    public static RollID wrapRollID(String topic, String source, long period, long rollTs, boolean isFinal, String compression) {
+    public static RollID wrapRollID(String topic, String source, long period, long rollTs, boolean isFinal, boolean isPersist, String compression) {
         RollID.Builder builder = RollID.newBuilder();
         builder.setTopic(topic);
         builder.setSource(source);
         builder.setPeriod(period);
         builder.setRollTs(rollTs);
         builder.setIsFinal(isFinal);
+        builder.setIsPersist(isPersist);
         if (compression == null) {
             builder.setCompression(ParamsKey.COMPRESSION_UNDEFINED);
         } else {
@@ -221,19 +222,19 @@ public class PBwrap {
         return wrapMessage(MessageType.READY_UPLOAD, builder.build());
     }
     
-    public static Message wrapUploadRoll(String appName, String source, long period, long rollTs, boolean isFinal, String compression) {
-        return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(appName, source, period, rollTs, isFinal, compression));
+    public static Message wrapUploadRoll(String topic, String source, long period, long rollTs, boolean isFinal, boolean isPersist, String compression) {
+        return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(topic, source, period, rollTs, isFinal, isPersist, compression));
     }
     
-    public static Message wrapUploadSuccess(String appName, String appServer, long period, long rollTs, boolean isFinal, String compression) {
-        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(appName, appServer, period, rollTs, isFinal, compression));
+    public static Message wrapUploadSuccess(String topic, String appServer, long period, long rollTs, boolean isFinal, boolean isPersist, String compression) {
+        return wrapMessage(MessageType.UPLOAD_SUCCESS, wrapRollID(topic, appServer, period, rollTs, isFinal, isPersist, compression));
     }
     
-    public static Message wrapUploadFail(String appName, String source, long period, long rollTs, boolean isFinal, String compression) {
-        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(appName, source, period, rollTs, isFinal, compression));
+    public static Message wrapUploadFail(String topic, String source, long period, long rollTs, boolean isFinal, String compression) {
+        return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(topic, source, period, rollTs, isFinal, true, compression));
     }
     
-    public static Message wrapRecoveryRoll(String topic, String brokerServer, int port, long rollTs, String instanceId, boolean isFinal) {
+    public static Message wrapRecoveryRoll(String topic, String brokerServer, int port, long rollTs, String instanceId, boolean isFinal, boolean isPersist) {
         RecoveryRoll.Builder builder = RecoveryRoll.newBuilder();
         builder.setTopic(topic);
         builder.setBrokerServer(brokerServer);
@@ -243,15 +244,16 @@ public class PBwrap {
             builder.setInstanceId(instanceId);
         }
         builder.setIsFinal(isFinal);
+        builder.setIsPersist(isPersist);
         return wrapMessage(MessageType.RECOVERY_ROLL, builder.build());
     }
     
-    public static Message wrapRecoverySuccess(String appName, String source, long period, long rollTs, boolean isFinal) {
-        return wrapMessage(MessageType.RECOVERY_SUCCESS, wrapRollID(appName, source, period, rollTs, isFinal));
+    public static Message wrapRecoverySuccess(String appName, String source, long period, long rollTs, boolean isFinal, boolean isPersist) {
+        return wrapMessage(MessageType.RECOVERY_SUCCESS, wrapRollID(appName, source, period, rollTs, isFinal, isPersist));
     }
     
     public static Message wrapRecoveryFail(String appName, String source, long period, long rollTs, boolean isFinal) {
-        return wrapMessage(MessageType.RECOVERY_FAIL, wrapRollID(appName, source, period, rollTs, isFinal));
+        return wrapMessage(MessageType.RECOVERY_FAIL, wrapRollID(appName, source, period, rollTs, isFinal, true));
     }
     
     public static Message wrapFailure (String topic, String source, NodeType type, long failTs) {
@@ -271,12 +273,12 @@ public class PBwrap {
         return wrapFailure(app, source, NodeType.BROKER_NODE, failTs);
     }
     
-    public static Message wrapUnrecoverable(String appName, String source, long period, long rollTs, boolean isFinal) {
-        return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, source, period, rollTs, isFinal));
+    public static Message wrapUnrecoverable(String appName, String source, long period, long rollTs, boolean isFinal, boolean isPersist) {
+        return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, source, period, rollTs, isFinal, isPersist));
     }
     
     public static Message wrapManualRecoveryRoll(String appName, String source, long period, long rollTs) {
-        return wrapMessage(MessageType.MANUAL_RECOVERY_ROLL, wrapRollID(appName, source, period, rollTs, false));
+        return wrapMessage(MessageType.MANUAL_RECOVERY_ROLL, wrapRollID(appName, source, period, rollTs, false, true));
     }
     
     public static Message wrapRetireStream(String topic, String agentServer, String instanceId) {
@@ -375,7 +377,7 @@ public class PBwrap {
     }
 
     public static Message wrapMarkUnrecoverable(String appName, String source, long period, long rollTs) {
-        return wrapMessage(MessageType.MAKR_UNRECOVERABLE, wrapRollID(appName, source, period, rollTs, false));
+        return wrapMessage(MessageType.MAKR_UNRECOVERABLE, wrapRollID(appName, source, period, rollTs, false, true));
     }
 
     /**
