@@ -30,6 +30,7 @@ public class RemoteSender {
     private ByteBuffer messageBuffer;
     private int messageNum;
     private long minMsgSent;
+    private int reassignDelaySeconds = Agent.DEFAULT_DELAY_SECONDS;
     
     public RemoteSender(TopicMeta topicMeta, String broker, int port) {
         this.topicId = topicMeta.getTopicId();
@@ -40,6 +41,14 @@ public class RemoteSender {
         this.minMsgSent = topicMeta.getMinMsgSent();
     }
     
+    public int getReassignDelaySeconds() {
+        return reassignDelaySeconds;
+    }
+
+    public void setReassignDelaySeconds(int reassignDelaySeconds) {
+        this.reassignDelaySeconds = reassignDelaySeconds;
+    }
+
     public void initializeRemoteConnection() throws IOException {
         messageBuffer = ByteBuffer.allocate(512 * 1024);
         channel = SocketChannel.open();

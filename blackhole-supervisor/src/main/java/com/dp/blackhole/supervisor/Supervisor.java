@@ -929,6 +929,28 @@ public class Supervisor {
         return true;
     }
 
+    public boolean pauseStream(String topic, String source, int delaySeconds) {
+        Stream stream = getStream(topic, source);
+        if (stream == null) {
+            return false;
+        }
+        SimpleConnection c = agentsMapping.get(Util.getAgentHostFromSource(source));
+        if (c == null) {
+            LOG.error("can not find connection by host: " + source);
+            return false;
+        }
+        stream.updateActive(false);
+        List<Stage> stages = stream.getStages();
+        for (Stage stage : stages) {
+            if(stage.isCurrent()) {
+                stage.setStatus(Stage.PAUSE);
+            }
+        }
+        Message message = PBwrap.wrapPauseStream(topic, source, delaySeconds);
+        send(c, message);
+        return true;
+    }
+
     public void removeConf(RemoveConf removeConf, SimpleConnection from) {
         String topic = removeConf.getTopic();
         configManager.removeConf(topic);
@@ -967,8 +989,13 @@ public class Supervisor {
             
             LOG.info("retire stream: " + stream);
             
+            // mark partitions as offline
+            String topic = stream.getTopic();
+            String source = stream.getSource();
+            markPartitionOffline(topic, source);    //partitionId equals source
+            
             // remove from streamIdMap
-            removeStream(stream.getTopic(), stream.getSource());
+            removeStream(topic, source);
             
             // remove the stages from stageConnectionMap
             List<Stage> stages = stream.getStages();
@@ -994,11 +1021,6 @@ public class Supervisor {
             }
             // remove stream from Streams
             stream.setStages(new ArrayList<Stage>());
-            
-            // mark partitions as offline
-            String topic = stream.getTopic();
-            String partitionId = stream.getSource();
-            markPartitionOffline(topic, partitionId);
             return true;
         }
     }
@@ -1535,7 +1557,9 @@ public class Supervisor {
             if (!stage.getIssuelist().contains(issue)) {
                 stage.getIssuelist().add(issue);
             }
-            if (stage.getStatus() == Stage.PENDING || stage.getStatus() == Stage.BROKERFAIL) {
+            if (stage.getStatus() == Stage.PENDING
+                    || stage.getStatus() == Stage.BROKERFAIL
+                    || stage.getStatus() == Stage.PAUSE) {
                 // do not recovery current stage
                 if (stage.getRollTs() != currentTs) {
                     doRecovery(stream, stage);

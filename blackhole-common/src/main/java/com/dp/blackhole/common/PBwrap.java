@@ -22,6 +22,7 @@ import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
+import com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit;
@@ -138,6 +139,9 @@ public class PBwrap {
             break;
         case SNAPSHOT_OP:
             msg.setSnapshotOp((SnapshotOp) message);
+            break;
+        case PAUSE_STREAM:
+            msg.setPauseStream((PauseStream) message);
             break;
         default:
         }
@@ -507,5 +511,13 @@ public class PBwrap {
         builder.setSource(source);
         builder.setOp(op);
         return wrapMessage(MessageType.SNAPSHOT_OP, builder.build());
+    }
+    
+    public static Message wrapPauseStream(String topic, String source, int delaySeconds) {
+        PauseStream.Builder builder = PauseStream.newBuilder();
+        builder.setTopic(topic);
+        builder.setSource(source);
+        builder.setDelaySeconds(delaySeconds);
+        return wrapMessage(MessageType.PAUSE_STREAM, builder.build());
     }
 }

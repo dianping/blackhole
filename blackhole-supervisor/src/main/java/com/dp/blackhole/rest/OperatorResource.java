@@ -18,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.ajax.JSON;
 
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.supervisor.model.Stream;
 
 @Path("/ops")
@@ -109,7 +110,19 @@ public class OperatorResource extends BaseResource {
             @PathParam("opname") final String opname,
             @PathParam("topic") final String topic,
             @PathParam("source") final String source) {
-        supervisorService.oprateSnapshot(topic, source, opname);
-        return Response.ok().build();
+        return supervisorService.oprateSnapshot(topic, source, opname)
+            ? Response.ok().build() : Response.status(Response.Status.BAD_REQUEST).build();
+    }
+    
+    @POST
+    @Path("/pause")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response pauseStream(
+            @Encoded @FormParam("topic") final String topic,
+            @Encoded @FormParam("source") final String source,
+            @Encoded @FormParam("delay") final String delay) {
+        LOG.debug("POST: pause " + topic + " " + source + " in " + delay + " seconds");
+        return supervisorService.pauseStream(topic, source, Util.parseInt(delay, 30))
+                ? Response.ok().build() : Response.status(Response.Status.BAD_REQUEST).build();
     }
 }

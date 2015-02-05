@@ -36,6 +36,7 @@ import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
+import com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit;
@@ -46,7 +47,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Agent implements Runnable {
     private static final Log LOG = LogFactory.getLog(Agent.class);
-    private static final int DEFAULT_DELAY_SECOND = 5;
+    public static final int DEFAULT_DELAY_SECONDS = 5;
     private final ConfigKeeper confKeeper = new ConfigKeeper();
     private ExecutorService pool;
     private ExecutorService recoveryThreadPool;
@@ -106,9 +107,13 @@ public class Agent implements Runnable {
     }
 
     private void register(TopicId topicId, long regTimestamp) {
+        register(topicId, regTimestamp, DEFAULT_DELAY_SECONDS);
+    }
+    
+    private void register(TopicId topicId, long regTimestamp, int delaySecond) {
         Message msg = PBwrap.wrapTopicReg(topicId.getTopic(),
                 Util.getSource(hostname, topicId.getInstanceId()), regTimestamp);
-        send(msg, DEFAULT_DELAY_SECOND);
+        send(msg, delaySecond);
     }
 
     public boolean checkFilesExist(String topic, String pathCandidateStr) {
@@ -244,13 +249,13 @@ public class Agent implements Runnable {
         TopicMeta topicMeta = topics.get(topicId);
         topicReaders.remove(topicMeta);
         topics.remove(topicId);
-        requireConfigFromSupersivor(DEFAULT_DELAY_SECOND);
+        requireConfigFromSupersivor(DEFAULT_DELAY_SECONDS);
     }
     
-    public void reportRemoteSenderFailure(TopicId topicId, String source, final long ts) {
+    public void reportRemoteSenderFailure(TopicId topicId, String source, long ts, int delaySecond) {
         Message message = PBwrap.wrapAppFailure(topicId.getTopic(), source, ts);
         send(message);
-        register(topicId, Util.getTS());
+        register(topicId, Util.getTS(), delaySecond);
     }
 
     public void reportUnrecoverable(TopicId topicId, String source, final long rollPeriod, final long rollTs, boolean isFinal, boolean isPersist) {
@@ -268,10 +273,6 @@ public class Agent implements Runnable {
         recoveryingMap.remove(recoveryKey);
     }
 
-    public void requireSender(TopicId topicId) {
-        register(topicId, Util.getTS());
-    }
-    
     public void send(Message message) {
         LOG.debug("send: " + message);
         Util.send(supervisor, message);
@@ -429,7 +430,7 @@ public class Agent implements Runnable {
                         return true;
                     } else {
                         LOG.error("No logreader to be assign for " + topicId + " send ConfReq.");
-                        requireConfigFromSupersivor(DEFAULT_DELAY_SECOND);
+                        requireConfigFromSupersivor(DEFAULT_DELAY_SECONDS);
                         return false;
                     }
                 } else {
@@ -578,6 +579,26 @@ public class Agent implements Runnable {
                             }
                         }
                     }
+                }
+                break;
+            case PAUSE_STREAM:
+                PauseStream pauseStream = msg.getPauseStream();
+                topic = pauseStream.getTopic();
+                instanceId = Util.getInstanceIdFromSource(pauseStream.getSource());
+                int delaySeconds = pauseStream.getDelaySeconds();
+                topicId = new TopicId(topic, instanceId);
+                if ((topicMeta = topics.get(topicId)) != null) {
+                    if ((logReader = topicReaders.get(topicMeta)) != null) {
+                        RemoteSender sender = logReader.getSender();
+                        sender.setReassignDelaySeconds(delaySeconds);
+                        LOG.info("pause stream " + topicId + " , reconnect after " + delaySeconds + " seconds.");
+                        sender.close();
+                        return true;
+                    } else {
+                        LOG.info("Can not find logReader for " + topicId);
+                    }
+                } else {
+                    LOG.error("Topic [" + topic + "] from supervisor message not match with local");
                 }
                 break;
             case SNAPSHOT_OP:

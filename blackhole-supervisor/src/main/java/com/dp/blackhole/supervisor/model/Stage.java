@@ -13,6 +13,7 @@ public class Stage {
     public static final int RECOVERYING = 4;
     public static final int PENDING = 5;
     public static final int BROKERFAIL = 6;
+    public static final int PAUSE = 7;
     
     private List<Issue> issuelist;
     private String latestIssue;
@@ -114,6 +115,8 @@ public class Stage {
             return "BROKERFAIL";
         case Stage.PENDING:
             return "PENDING";
+        case Stage.PAUSE:
+            return "PAUSE";
         default:
             return "UNKNOWN";
         }

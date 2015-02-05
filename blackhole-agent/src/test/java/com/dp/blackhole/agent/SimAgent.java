@@ -55,8 +55,8 @@ public class SimAgent extends Agent{
     }
     
     @Override
-    public void reportRemoteSenderFailure(TopicId topicId, String appHost, long ts) {
-        LOG.debug(topicId + " remote sender fail, APP HOST: " + appHost + "ts: " + ts);
+    public void reportRemoteSenderFailure(TopicId topicId, String appHost, long ts, int delay) {
+        LOG.debug(topicId + " remote sender fail, APP HOST: " + appHost + "ts: " + ts + "delay: " + delay);
     }
     
     @Override

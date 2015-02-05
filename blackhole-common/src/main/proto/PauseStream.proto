@@ -1,0 +1,10 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "PauseStreamPB";
+
+message PauseStream {
+    required string topic = 1;
+    optional string source = 2;
+    optional int32 delaySeconds = 3 [default = 30];
+}

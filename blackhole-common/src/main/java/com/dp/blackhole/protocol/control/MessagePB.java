@@ -356,6 +356,20 @@ public final class MessagePB {
      * <code>optional .blackhole.SnapshotOp snapshotOp = 25;</code>
      */
     com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOpOrBuilder getSnapshotOpOrBuilder();
+
+    // optional .blackhole.PauseStream pauseStream = 26;
+    /**
+     * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+     */
+    boolean hasPauseStream();
+    /**
+     * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+     */
+    com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream getPauseStream();
+    /**
+     * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+     */
+    com.dp.blackhole.protocol.control.PauseStreamPB.PauseStreamOrBuilder getPauseStreamOrBuilder();
   }
   /**
    * Protobuf type {@code blackhole.Message}
@@ -731,6 +745,19 @@ public final class MessagePB {
               bitField0_ |= 0x01000000;
               break;
             }
+            case 210: {
+              com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.Builder subBuilder = null;
+              if (((bitField0_ & 0x02000000) == 0x02000000)) {
+                subBuilder = pauseStream_.toBuilder();
+              }
+              pauseStream_ = input.readMessage(com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(pauseStream_);
+                pauseStream_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x02000000;
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -935,6 +962,10 @@ public final class MessagePB {
        * <code>SNAPSHOT_OP = 40;</code>
        */
       SNAPSHOT_OP(39, 40),
+      /**
+       * <code>PAUSE_STREAM = 41;</code>
+       */
+      PAUSE_STREAM(40, 41),
       ;
 
       /**
@@ -1097,6 +1128,10 @@ public final class MessagePB {
        * <code>SNAPSHOT_OP = 40;</code>
        */
       public static final int SNAPSHOT_OP_VALUE = 40;
+      /**
+       * <code>PAUSE_STREAM = 41;</code>
+       */
+      public static final int PAUSE_STREAM_VALUE = 41;
 
 
       public final int getNumber() { return value; }
@@ -1143,6 +1178,7 @@ public final class MessagePB {
           case 38: return DUMP_CONSUMER_GROUP;
           case 39: return LIST_CONSUMER_GROUP;
           case 40: return SNAPSHOT_OP;
+          case 41: return PAUSE_STREAM;
           default: return null;
         }
       }
@@ -1739,6 +1775,28 @@ public final class MessagePB {
       return snapshotOp_;
     }
 
+    // optional .blackhole.PauseStream pauseStream = 26;
+    public static final int PAUSESTREAM_FIELD_NUMBER = 26;
+    private com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream pauseStream_;
+    /**
+     * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+     */
+    public boolean hasPauseStream() {
+      return ((bitField0_ & 0x02000000) == 0x02000000);
+    }
+    /**
+     * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+     */
+    public com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream getPauseStream() {
+      return pauseStream_;
+    }
+    /**
+     * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+     */
+    public com.dp.blackhole.protocol.control.PauseStreamPB.PauseStreamOrBuilder getPauseStreamOrBuilder() {
+      return pauseStream_;
+    }
+
     private void initFields() {
       type_ = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance();
@@ -1765,6 +1823,7 @@ public final class MessagePB {
       rollClean_ = com.dp.blackhole.protocol.control.RollCleanPB.RollClean.getDefaultInstance();
       dumpConsumerGroup_ = com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup.getDefaultInstance();
       snapshotOp_ = com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp.getDefaultInstance();
+      pauseStream_ = com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1907,6 +1966,12 @@ public final class MessagePB {
           return false;
         }
       }
+      if (hasPauseStream()) {
+        if (!getPauseStream().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -1988,6 +2053,9 @@ public final class MessagePB {
       }
       if (((bitField0_ & 0x01000000) == 0x01000000)) {
         output.writeMessage(25, snapshotOp_);
+      }
+      if (((bitField0_ & 0x02000000) == 0x02000000)) {
+        output.writeMessage(26, pauseStream_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -2097,6 +2165,10 @@ public final class MessagePB {
       if (((bitField0_ & 0x01000000) == 0x01000000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(25, snapshotOp_);
+      }
+      if (((bitField0_ & 0x02000000) == 0x02000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(26, pauseStream_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -2230,6 +2302,7 @@ public final class MessagePB {
           getRollCleanFieldBuilder();
           getDumpConsumerGroupFieldBuilder();
           getSnapshotOpFieldBuilder();
+          getPauseStreamFieldBuilder();
         }
       }
       private static Builder create() {
@@ -2384,6 +2457,12 @@ public final class MessagePB {
           snapshotOpBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x01000000);
+        if (pauseStreamBuilder_ == null) {
+          pauseStream_ = com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.getDefaultInstance();
+        } else {
+          pauseStreamBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x02000000);
         return this;
       }
 
@@ -2608,6 +2687,14 @@ public final class MessagePB {
         } else {
           result.snapshotOp_ = snapshotOpBuilder_.build();
         }
+        if (((from_bitField0_ & 0x02000000) == 0x02000000)) {
+          to_bitField0_ |= 0x02000000;
+        }
+        if (pauseStreamBuilder_ == null) {
+          result.pauseStream_ = pauseStream_;
+        } else {
+          result.pauseStream_ = pauseStreamBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -2698,6 +2785,9 @@ public final class MessagePB {
         }
         if (other.hasSnapshotOp()) {
           mergeSnapshotOp(other.getSnapshotOp());
+        }
+        if (other.hasPauseStream()) {
+          mergePauseStream(other.getPauseStream());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -2836,6 +2926,12 @@ public final class MessagePB {
         }
         if (hasDumpConsumerGroup()) {
           if (!getDumpConsumerGroup().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasPauseStream()) {
+          if (!getPauseStream().isInitialized()) {
             
             return false;
           }
@@ -5706,6 +5802,123 @@ public final class MessagePB {
         return snapshotOpBuilder_;
       }
 
+      // optional .blackhole.PauseStream pauseStream = 26;
+      private com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream pauseStream_ = com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream, com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.Builder, com.dp.blackhole.protocol.control.PauseStreamPB.PauseStreamOrBuilder> pauseStreamBuilder_;
+      /**
+       * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+       */
+      public boolean hasPauseStream() {
+        return ((bitField0_ & 0x02000000) == 0x02000000);
+      }
+      /**
+       * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+       */
+      public com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream getPauseStream() {
+        if (pauseStreamBuilder_ == null) {
+          return pauseStream_;
+        } else {
+          return pauseStreamBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+       */
+      public Builder setPauseStream(com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream value) {
+        if (pauseStreamBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          pauseStream_ = value;
+          onChanged();
+        } else {
+          pauseStreamBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x02000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+       */
+      public Builder setPauseStream(
+          com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.Builder builderForValue) {
+        if (pauseStreamBuilder_ == null) {
+          pauseStream_ = builderForValue.build();
+          onChanged();
+        } else {
+          pauseStreamBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x02000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+       */
+      public Builder mergePauseStream(com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream value) {
+        if (pauseStreamBuilder_ == null) {
+          if (((bitField0_ & 0x02000000) == 0x02000000) &&
+              pauseStream_ != com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.getDefaultInstance()) {
+            pauseStream_ =
+              com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.newBuilder(pauseStream_).mergeFrom(value).buildPartial();
+          } else {
+            pauseStream_ = value;
+          }
+          onChanged();
+        } else {
+          pauseStreamBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x02000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+       */
+      public Builder clearPauseStream() {
+        if (pauseStreamBuilder_ == null) {
+          pauseStream_ = com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.getDefaultInstance();
+          onChanged();
+        } else {
+          pauseStreamBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x02000000);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+       */
+      public com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.Builder getPauseStreamBuilder() {
+        bitField0_ |= 0x02000000;
+        onChanged();
+        return getPauseStreamFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+       */
+      public com.dp.blackhole.protocol.control.PauseStreamPB.PauseStreamOrBuilder getPauseStreamOrBuilder() {
+        if (pauseStreamBuilder_ != null) {
+          return pauseStreamBuilder_.getMessageOrBuilder();
+        } else {
+          return pauseStream_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream, com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.Builder, com.dp.blackhole.protocol.control.PauseStreamPB.PauseStreamOrBuilder> 
+          getPauseStreamFieldBuilder() {
+        if (pauseStreamBuilder_ == null) {
+          pauseStreamBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream, com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.Builder, com.dp.blackhole.protocol.control.PauseStreamPB.PauseStreamOrBuilder>(
+                  pauseStream_,
+                  getParentForChildren(),
+                  isClean());
+          pauseStream_ = null;
+        }
+        return pauseStreamBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
 
@@ -5742,52 +5955,54 @@ public final class MessagePB {
       "mit.proto\032\021TopicReport.proto\032\rRestart.pr" +
       "oto\032\022QuitAndClean.proto\032\017RollClean.proto",
       "\032\027DumpConsumerGroup.proto\032\020SnapshotOp.pr" +
-      "oto\"\366\r\n\007Message\022,\n\004type\030\001 \002(\0162\036.blackhol" +
-      "e.Message.MessageType\022!\n\006appReg\030\002 \001(\0132\021." +
-      "blackhole.AppReg\022-\n\014assignBroker\030\003 \001(\0132\027" +
-      ".blackhole.AssignBroker\022+\n\013readyUpload\030\004" +
-      " \001(\0132\026.blackhole.ReadyUpload\022-\n\014recovery" +
-      "Roll\030\005 \001(\0132\027.blackhole.RecoveryRoll\022+\n\013r" +
-      "eadyStream\030\006 \001(\0132\026.blackhole.ReadyStream" +
-      "\022!\n\006rollID\030\007 \001(\0132\021.blackhole.RollID\022#\n\007f" +
-      "ailure\030\010 \001(\0132\022.blackhole.Failure\0223\n\017noAv",
-      "ailableNode\030\t \001(\0132\032.blackhole.NoAvailabl" +
-      "eNode\022%\n\010streamId\030\n \001(\0132\023.blackhole.Stre" +
-      "amID\022#\n\007confRes\030\013 \001(\0132\022.blackhole.ConfRe" +
-      "s\022\'\n\tdumpReply\030\014 \001(\0132\024.blackhole.DumpRep" +
-      "ly\022)\n\nremoveConf\030\r \001(\0132\025.blackhole.Remov" +
-      "eConf\022\'\n\tbrokerReg\030\016 \001(\0132\024.blackhole.Bro" +
-      "kerReg\022#\n\007dumpApp\030\017 \001(\0132\022.blackhole.Dump" +
-      "App\022+\n\013consumerReg\030\020 \001(\0132\026.blackhole.Con" +
-      "sumerReg\0221\n\016assignConsumer\030\021 \001(\0132\031.black" +
-      "hole.AssignConsumer\022-\n\014offsetCommit\030\022 \001(",
-      "\0132\027.blackhole.OffsetCommit\022+\n\013topicRepor" +
-      "t\030\023 \001(\0132\026.blackhole.TopicReport\022#\n\007resta" +
-      "rt\030\024 \001(\0132\022.blackhole.Restart\022\035\n\004quit\030\025 \001" +
-      "(\0132\017.blackhole.Quit\022\037\n\005clean\030\026 \001(\0132\020.bla" +
-      "ckhole.Clean\022\'\n\trollClean\030\027 \001(\0132\024.blackh" +
-      "ole.RollClean\0227\n\021dumpConsumerGroup\030\030 \001(\013" +
-      "2\034.blackhole.DumpConsumerGroup\022)\n\nsnapsh" +
-      "otOp\030\031 \001(\0132\025.blackhole.SnapshotOp\"\310\005\n\013Me" +
-      "ssageType\022\016\n\nHEARTBEART\020\001\022\013\n\007APP_REG\020\002\022\016" +
-      "\n\nBROKER_REG\020\003\022\021\n\rASSIGN_BROKER\020\004\022\020\n\014REA",
-      "DY_STREAM\020\005\022\020\n\014READY_UPLOAD\020\006\022\017\n\013UPLOAD_" +
-      "ROLL\020\007\022\022\n\016UPLOAD_SUCCESS\020\010\022\017\n\013UPLOAD_FAI" +
-      "L\020\t\022\021\n\rRECOVERY_ROLL\020\n\022\024\n\020RECOVERY_SUCCE" +
-      "SS\020\013\022\021\n\rRECOVERY_FAIL\020\014\022\013\n\007FAILURE\020\r\022\023\n\017" +
-      "NOAVAILABLENODE\020\016\022\021\n\rUNRECOVERABLE\020\017\022\030\n\024" +
-      "MANUAL_RECOVERY_ROLL\020\020\022\014\n\010DUMPSTAT\020\021\022\020\n\014" +
-      "RETIRESTREAM\020\022\022\014\n\010CONF_REQ\020\023\022\014\n\010CONF_RES" +
-      "\020\024\022\023\n\017NOAVAILABLECONF\020\025\022\014\n\010DUMPCONF\020\026\022\r\n" +
-      "\tDUMPREPLY\020\027\022\014\n\010LISTAPPS\020\030\022\017\n\013REMOVE_CON" +
-      "F\020\031\022\014\n\010DUMP_APP\020\032\022\020\n\014CONSUMER_REG\020\033\022\023\n\017A",
-      "SSIGN_CONSUMER\020\034\022\021\n\rOFFSET_COMMIT\020\035\022\017\n\013T" +
-      "OPICREPORT\020\036\022\023\n\017CONSUMERREGFAIL\020\037\022\026\n\022MAK" +
-      "R_UNRECOVERABLE\020 \022\014\n\010LISTIDLE\020!\022\013\n\007RESTA" +
-      "RT\020\"\022\010\n\004QUIT\020#\022\t\n\005CLEAN\020$\022\016\n\nROLL_CLEAN\020" +
-      "%\022\027\n\023DUMP_CONSUMER_GROUP\020&\022\027\n\023LIST_CONSU" +
-      "MER_GROUP\020\'\022\017\n\013SNAPSHOT_OP\020(B.\n!com.dp.b" +
-      "lackhole.protocol.controlB\tMessagePB"
+      "oto\032\021PauseStream.proto\"\265\016\n\007Message\022,\n\004ty" +
+      "pe\030\001 \002(\0162\036.blackhole.Message.MessageType" +
+      "\022!\n\006appReg\030\002 \001(\0132\021.blackhole.AppReg\022-\n\014a" +
+      "ssignBroker\030\003 \001(\0132\027.blackhole.AssignBrok" +
+      "er\022+\n\013readyUpload\030\004 \001(\0132\026.blackhole.Read" +
+      "yUpload\022-\n\014recoveryRoll\030\005 \001(\0132\027.blackhol" +
+      "e.RecoveryRoll\022+\n\013readyStream\030\006 \001(\0132\026.bl" +
+      "ackhole.ReadyStream\022!\n\006rollID\030\007 \001(\0132\021.bl" +
+      "ackhole.RollID\022#\n\007failure\030\010 \001(\0132\022.blackh",
+      "ole.Failure\0223\n\017noAvailableNode\030\t \001(\0132\032.b" +
+      "lackhole.NoAvailableNode\022%\n\010streamId\030\n \001" +
+      "(\0132\023.blackhole.StreamID\022#\n\007confRes\030\013 \001(\013" +
+      "2\022.blackhole.ConfRes\022\'\n\tdumpReply\030\014 \001(\0132" +
+      "\024.blackhole.DumpReply\022)\n\nremoveConf\030\r \001(" +
+      "\0132\025.blackhole.RemoveConf\022\'\n\tbrokerReg\030\016 " +
+      "\001(\0132\024.blackhole.BrokerReg\022#\n\007dumpApp\030\017 \001" +
+      "(\0132\022.blackhole.DumpApp\022+\n\013consumerReg\030\020 " +
+      "\001(\0132\026.blackhole.ConsumerReg\0221\n\016assignCon" +
+      "sumer\030\021 \001(\0132\031.blackhole.AssignConsumer\022-",
+      "\n\014offsetCommit\030\022 \001(\0132\027.blackhole.OffsetC" +
+      "ommit\022+\n\013topicReport\030\023 \001(\0132\026.blackhole.T" +
+      "opicReport\022#\n\007restart\030\024 \001(\0132\022.blackhole." +
+      "Restart\022\035\n\004quit\030\025 \001(\0132\017.blackhole.Quit\022\037" +
+      "\n\005clean\030\026 \001(\0132\020.blackhole.Clean\022\'\n\trollC" +
+      "lean\030\027 \001(\0132\024.blackhole.RollClean\0227\n\021dump" +
+      "ConsumerGroup\030\030 \001(\0132\034.blackhole.DumpCons" +
+      "umerGroup\022)\n\nsnapshotOp\030\031 \001(\0132\025.blackhol" +
+      "e.SnapshotOp\022+\n\013pauseStream\030\032 \001(\0132\026.blac" +
+      "khole.PauseStream\"\332\005\n\013MessageType\022\016\n\nHEA",
+      "RTBEART\020\001\022\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021" +
+      "\n\rASSIGN_BROKER\020\004\022\020\n\014READY_STREAM\020\005\022\020\n\014R" +
+      "EADY_UPLOAD\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD" +
+      "_SUCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_" +
+      "ROLL\020\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOVERY" +
+      "_FAIL\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAILABLENODE\020" +
+      "\016\022\021\n\rUNRECOVERABLE\020\017\022\030\n\024MANUAL_RECOVERY_" +
+      "ROLL\020\020\022\014\n\010DUMPSTAT\020\021\022\020\n\014RETIRESTREAM\020\022\022\014" +
+      "\n\010CONF_REQ\020\023\022\014\n\010CONF_RES\020\024\022\023\n\017NOAVAILABL" +
+      "ECONF\020\025\022\014\n\010DUMPCONF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010",
+      "LISTAPPS\020\030\022\017\n\013REMOVE_CONF\020\031\022\014\n\010DUMP_APP\020" +
+      "\032\022\020\n\014CONSUMER_REG\020\033\022\023\n\017ASSIGN_CONSUMER\020\034" +
+      "\022\021\n\rOFFSET_COMMIT\020\035\022\017\n\013TOPICREPORT\020\036\022\023\n\017" +
+      "CONSUMERREGFAIL\020\037\022\026\n\022MAKR_UNRECOVERABLE\020" +
+      " \022\014\n\010LISTIDLE\020!\022\013\n\007RESTART\020\"\022\010\n\004QUIT\020#\022\t" +
+      "\n\005CLEAN\020$\022\016\n\nROLL_CLEAN\020%\022\027\n\023DUMP_CONSUM" +
+      "ER_GROUP\020&\022\027\n\023LIST_CONSUMER_GROUP\020\'\022\017\n\013S" +
+      "NAPSHOT_OP\020(\022\020\n\014PAUSE_STREAM\020)B.\n!com.dp" +
+      ".blackhole.protocol.controlB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -5799,7 +6014,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "ReadyUpload", "RecoveryRoll", "ReadyStream", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", "Quit", "Clean", "RollClean", "DumpConsumerGroup", "SnapshotOp", });
+              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "ReadyUpload", "RecoveryRoll", "ReadyStream", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", "Quit", "Clean", "RollClean", "DumpConsumerGroup", "SnapshotOp", "PauseStream", });
           return null;
         }
       };
@@ -5829,6 +6044,7 @@ public final class MessagePB {
           com.dp.blackhole.protocol.control.RollCleanPB.getDescriptor(),
           com.dp.blackhole.protocol.control.DumpConsumerGroupPB.getDescriptor(),
           com.dp.blackhole.protocol.control.SnapshotOpPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.PauseStreamPB.getDescriptor(),
         }, assigner);
   }
 

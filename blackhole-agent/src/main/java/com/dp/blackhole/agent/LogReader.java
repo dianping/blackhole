@@ -37,9 +37,7 @@ public class LogReader implements Runnable {
     private volatile boolean running = true;
     private final ByteArrayOutputStream lineBuf;
     private boolean accept;
-
     private final int maxLineSize;
-    
     
     public LogReader(Agent agent, TopicMeta meta, String snapshotPersistDir) {
         this.agent = agent;
@@ -94,8 +92,9 @@ public class LogReader implements Runnable {
     
     private void reassignSender() {
         currentReaderState.compareAndSet(ReaderState.SENDER_ASSIGNED, ReaderState.REGISTERED);
+        int reassignDelay = sender.getReassignDelaySeconds();
         sender.close();
-        agent.reportRemoteSenderFailure(meta.getTopicId(), meta.getSource(), Util.getTS());
+        agent.reportRemoteSenderFailure(meta.getTopicId(), meta.getSource(), Util.getTS(), reassignDelay);
     }
     
     @Override
