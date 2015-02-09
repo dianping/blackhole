@@ -303,7 +303,15 @@ public class RollManager {
 
                     RollIdent roll = new RollIdent();
                     roll.topic = head.app;
-                    roll.source = head.source;
+                    // be compatible with old version
+                    if (head.version == AgentProtocol.VERSION_MICOR_BATCH) {
+                        roll.source = head.source;
+                    } else {
+                        roll.source = Util.getRemoteHost(socket);
+                        if (head.source != null) {
+                            roll.source += "#" + head.source;
+                        }
+                    }
                     roll.period = head.period;
                     roll.ts = head.ts;
                     roll.isFinal = head.isFinal;

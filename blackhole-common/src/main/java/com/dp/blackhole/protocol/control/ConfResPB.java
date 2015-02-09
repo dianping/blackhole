@@ -251,50 +251,50 @@ public final class ConfResPB {
       com.google.protobuf.ByteString
           getReadIntervalBytes();
 
-      // optional string roll_period = 6;
+      // optional string min_msg_sent = 6 [default = "30"];
       /**
-       * <code>optional string roll_period = 6;</code>
-       */
-      boolean hasRollPeriod();
-      /**
-       * <code>optional string roll_period = 6;</code>
-       */
-      java.lang.String getRollPeriod();
-      /**
-       * <code>optional string roll_period = 6;</code>
-       */
-      com.google.protobuf.ByteString
-          getRollPeriodBytes();
-
-      // optional string min_msg_sent = 7 [default = "30"];
-      /**
-       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+       * <code>optional string min_msg_sent = 6 [default = "30"];</code>
        */
       boolean hasMinMsgSent();
       /**
-       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+       * <code>optional string min_msg_sent = 6 [default = "30"];</code>
        */
       java.lang.String getMinMsgSent();
       /**
-       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+       * <code>optional string min_msg_sent = 6 [default = "30"];</code>
        */
       com.google.protobuf.ByteString
           getMinMsgSentBytes();
 
-      // optional string msg_buf_size = 8 [default = "512000"];
+      // optional string msg_buf_size = 7 [default = "512000"];
       /**
-       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+       * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
        */
       boolean hasMsgBufSize();
       /**
-       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+       * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
        */
       java.lang.String getMsgBufSize();
       /**
-       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+       * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
        */
       com.google.protobuf.ByteString
           getMsgBufSizeBytes();
+
+      // optional string roll_period = 8;
+      /**
+       * <code>optional string roll_period = 8;</code>
+       */
+      boolean hasRollPeriod();
+      /**
+       * <code>optional string roll_period = 8;</code>
+       */
+      java.lang.String getRollPeriod();
+      /**
+       * <code>optional string roll_period = 8;</code>
+       */
+      com.google.protobuf.ByteString
+          getRollPeriodBytes();
     }
     /**
      * Protobuf type {@code blackhole.ConfRes.AppConfRes}
@@ -374,17 +374,17 @@ public final class ConfResPB {
               }
               case 50: {
                 bitField0_ |= 0x00000020;
-                rollPeriod_ = input.readBytes();
+                minMsgSent_ = input.readBytes();
                 break;
               }
               case 58: {
                 bitField0_ |= 0x00000040;
-                minMsgSent_ = input.readBytes();
+                msgBufSize_ = input.readBytes();
                 break;
               }
               case 66: {
                 bitField0_ |= 0x00000080;
-                msgBufSize_ = input.readBytes();
+                rollPeriod_ = input.readBytes();
                 break;
               }
             }
@@ -642,60 +642,17 @@ public final class ConfResPB {
         }
       }
 
-      // optional string roll_period = 6;
-      public static final int ROLL_PERIOD_FIELD_NUMBER = 6;
-      private java.lang.Object rollPeriod_;
+      // optional string min_msg_sent = 6 [default = "30"];
+      public static final int MIN_MSG_SENT_FIELD_NUMBER = 6;
+      private java.lang.Object minMsgSent_;
       /**
-       * <code>optional string roll_period = 6;</code>
+       * <code>optional string min_msg_sent = 6 [default = "30"];</code>
        */
-      public boolean hasRollPeriod() {
+      public boolean hasMinMsgSent() {
         return ((bitField0_ & 0x00000020) == 0x00000020);
       }
       /**
-       * <code>optional string roll_period = 6;</code>
-       */
-      public java.lang.String getRollPeriod() {
-        java.lang.Object ref = rollPeriod_;
-        if (ref instanceof java.lang.String) {
-          return (java.lang.String) ref;
-        } else {
-          com.google.protobuf.ByteString bs = 
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            rollPeriod_ = s;
-          }
-          return s;
-        }
-      }
-      /**
-       * <code>optional string roll_period = 6;</code>
-       */
-      public com.google.protobuf.ByteString
-          getRollPeriodBytes() {
-        java.lang.Object ref = rollPeriod_;
-        if (ref instanceof java.lang.String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          rollPeriod_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-
-      // optional string min_msg_sent = 7 [default = "30"];
-      public static final int MIN_MSG_SENT_FIELD_NUMBER = 7;
-      private java.lang.Object minMsgSent_;
-      /**
-       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
-       */
-      public boolean hasMinMsgSent() {
-        return ((bitField0_ & 0x00000040) == 0x00000040);
-      }
-      /**
-       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+       * <code>optional string min_msg_sent = 6 [default = "30"];</code>
        */
       public java.lang.String getMinMsgSent() {
         java.lang.Object ref = minMsgSent_;
@@ -712,7 +669,7 @@ public final class ConfResPB {
         }
       }
       /**
-       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+       * <code>optional string min_msg_sent = 6 [default = "30"];</code>
        */
       public com.google.protobuf.ByteString
           getMinMsgSentBytes() {
@@ -728,17 +685,17 @@ public final class ConfResPB {
         }
       }
 
-      // optional string msg_buf_size = 8 [default = "512000"];
-      public static final int MSG_BUF_SIZE_FIELD_NUMBER = 8;
+      // optional string msg_buf_size = 7 [default = "512000"];
+      public static final int MSG_BUF_SIZE_FIELD_NUMBER = 7;
       private java.lang.Object msgBufSize_;
       /**
-       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+       * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
        */
       public boolean hasMsgBufSize() {
-        return ((bitField0_ & 0x00000080) == 0x00000080);
+        return ((bitField0_ & 0x00000040) == 0x00000040);
       }
       /**
-       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+       * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
        */
       public java.lang.String getMsgBufSize() {
         java.lang.Object ref = msgBufSize_;
@@ -755,7 +712,7 @@ public final class ConfResPB {
         }
       }
       /**
-       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+       * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
        */
       public com.google.protobuf.ByteString
           getMsgBufSizeBytes() {
@@ -771,15 +728,58 @@ public final class ConfResPB {
         }
       }
 
+      // optional string roll_period = 8;
+      public static final int ROLL_PERIOD_FIELD_NUMBER = 8;
+      private java.lang.Object rollPeriod_;
+      /**
+       * <code>optional string roll_period = 8;</code>
+       */
+      public boolean hasRollPeriod() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>optional string roll_period = 8;</code>
+       */
+      public java.lang.String getRollPeriod() {
+        java.lang.Object ref = rollPeriod_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            rollPeriod_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string roll_period = 8;</code>
+       */
+      public com.google.protobuf.ByteString
+          getRollPeriodBytes() {
+        java.lang.Object ref = rollPeriod_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          rollPeriod_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
       private void initFields() {
         topic_ = "";
         watchFile_ = "";
         rotatePeriod_ = "";
         maxLineSize_ = "512000";
         readInterval_ = "1L";
-        rollPeriod_ = "";
         minMsgSent_ = "30";
         msgBufSize_ = "512000";
+        rollPeriod_ = "";
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -821,13 +821,13 @@ public final class ConfResPB {
           output.writeBytes(5, getReadIntervalBytes());
         }
         if (((bitField0_ & 0x00000020) == 0x00000020)) {
-          output.writeBytes(6, getRollPeriodBytes());
+          output.writeBytes(6, getMinMsgSentBytes());
         }
         if (((bitField0_ & 0x00000040) == 0x00000040)) {
-          output.writeBytes(7, getMinMsgSentBytes());
+          output.writeBytes(7, getMsgBufSizeBytes());
         }
         if (((bitField0_ & 0x00000080) == 0x00000080)) {
-          output.writeBytes(8, getMsgBufSizeBytes());
+          output.writeBytes(8, getRollPeriodBytes());
         }
         getUnknownFields().writeTo(output);
       }
@@ -860,15 +860,15 @@ public final class ConfResPB {
         }
         if (((bitField0_ & 0x00000020) == 0x00000020)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(6, getRollPeriodBytes());
+            .computeBytesSize(6, getMinMsgSentBytes());
         }
         if (((bitField0_ & 0x00000040) == 0x00000040)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(7, getMinMsgSentBytes());
+            .computeBytesSize(7, getMsgBufSizeBytes());
         }
         if (((bitField0_ & 0x00000080) == 0x00000080)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(8, getMsgBufSizeBytes());
+            .computeBytesSize(8, getRollPeriodBytes());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -996,11 +996,11 @@ public final class ConfResPB {
           bitField0_ = (bitField0_ & ~0x00000008);
           readInterval_ = "1L";
           bitField0_ = (bitField0_ & ~0x00000010);
-          rollPeriod_ = "";
-          bitField0_ = (bitField0_ & ~0x00000020);
           minMsgSent_ = "30";
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000020);
           msgBufSize_ = "512000";
+          bitField0_ = (bitField0_ & ~0x00000040);
+          rollPeriod_ = "";
           bitField0_ = (bitField0_ & ~0x00000080);
           return this;
         }
@@ -1053,15 +1053,15 @@ public final class ConfResPB {
           if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
             to_bitField0_ |= 0x00000020;
           }
-          result.rollPeriod_ = rollPeriod_;
+          result.minMsgSent_ = minMsgSent_;
           if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
             to_bitField0_ |= 0x00000040;
           }
-          result.minMsgSent_ = minMsgSent_;
+          result.msgBufSize_ = msgBufSize_;
           if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
             to_bitField0_ |= 0x00000080;
           }
-          result.msgBufSize_ = msgBufSize_;
+          result.rollPeriod_ = rollPeriod_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -1103,19 +1103,19 @@ public final class ConfResPB {
             readInterval_ = other.readInterval_;
             onChanged();
           }
-          if (other.hasRollPeriod()) {
-            bitField0_ |= 0x00000020;
-            rollPeriod_ = other.rollPeriod_;
-            onChanged();
-          }
           if (other.hasMinMsgSent()) {
-            bitField0_ |= 0x00000040;
+            bitField0_ |= 0x00000020;
             minMsgSent_ = other.minMsgSent_;
             onChanged();
           }
           if (other.hasMsgBufSize()) {
-            bitField0_ |= 0x00000080;
+            bitField0_ |= 0x00000040;
             msgBufSize_ = other.msgBufSize_;
+            onChanged();
+          }
+          if (other.hasRollPeriod()) {
+            bitField0_ |= 0x00000080;
+            rollPeriod_ = other.rollPeriod_;
             onChanged();
           }
           this.mergeUnknownFields(other.getUnknownFields());
@@ -1527,90 +1527,16 @@ public final class ConfResPB {
           return this;
         }
 
-        // optional string roll_period = 6;
-        private java.lang.Object rollPeriod_ = "";
+        // optional string min_msg_sent = 6 [default = "30"];
+        private java.lang.Object minMsgSent_ = "30";
         /**
-         * <code>optional string roll_period = 6;</code>
+         * <code>optional string min_msg_sent = 6 [default = "30"];</code>
          */
-        public boolean hasRollPeriod() {
+        public boolean hasMinMsgSent() {
           return ((bitField0_ & 0x00000020) == 0x00000020);
         }
         /**
-         * <code>optional string roll_period = 6;</code>
-         */
-        public java.lang.String getRollPeriod() {
-          java.lang.Object ref = rollPeriod_;
-          if (!(ref instanceof java.lang.String)) {
-            java.lang.String s = ((com.google.protobuf.ByteString) ref)
-                .toStringUtf8();
-            rollPeriod_ = s;
-            return s;
-          } else {
-            return (java.lang.String) ref;
-          }
-        }
-        /**
-         * <code>optional string roll_period = 6;</code>
-         */
-        public com.google.protobuf.ByteString
-            getRollPeriodBytes() {
-          java.lang.Object ref = rollPeriod_;
-          if (ref instanceof String) {
-            com.google.protobuf.ByteString b = 
-                com.google.protobuf.ByteString.copyFromUtf8(
-                    (java.lang.String) ref);
-            rollPeriod_ = b;
-            return b;
-          } else {
-            return (com.google.protobuf.ByteString) ref;
-          }
-        }
-        /**
-         * <code>optional string roll_period = 6;</code>
-         */
-        public Builder setRollPeriod(
-            java.lang.String value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000020;
-          rollPeriod_ = value;
-          onChanged();
-          return this;
-        }
-        /**
-         * <code>optional string roll_period = 6;</code>
-         */
-        public Builder clearRollPeriod() {
-          bitField0_ = (bitField0_ & ~0x00000020);
-          rollPeriod_ = getDefaultInstance().getRollPeriod();
-          onChanged();
-          return this;
-        }
-        /**
-         * <code>optional string roll_period = 6;</code>
-         */
-        public Builder setRollPeriodBytes(
-            com.google.protobuf.ByteString value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000020;
-          rollPeriod_ = value;
-          onChanged();
-          return this;
-        }
-
-        // optional string min_msg_sent = 7 [default = "30"];
-        private java.lang.Object minMsgSent_ = "30";
-        /**
-         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
-         */
-        public boolean hasMinMsgSent() {
-          return ((bitField0_ & 0x00000040) == 0x00000040);
-        }
-        /**
-         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+         * <code>optional string min_msg_sent = 6 [default = "30"];</code>
          */
         public java.lang.String getMinMsgSent() {
           java.lang.Object ref = minMsgSent_;
@@ -1624,7 +1550,7 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+         * <code>optional string min_msg_sent = 6 [default = "30"];</code>
          */
         public com.google.protobuf.ByteString
             getMinMsgSentBytes() {
@@ -1640,51 +1566,51 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+         * <code>optional string min_msg_sent = 6 [default = "30"];</code>
          */
         public Builder setMinMsgSent(
             java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000040;
+  bitField0_ |= 0x00000020;
           minMsgSent_ = value;
           onChanged();
           return this;
         }
         /**
-         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+         * <code>optional string min_msg_sent = 6 [default = "30"];</code>
          */
         public Builder clearMinMsgSent() {
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000020);
           minMsgSent_ = getDefaultInstance().getMinMsgSent();
           onChanged();
           return this;
         }
         /**
-         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
+         * <code>optional string min_msg_sent = 6 [default = "30"];</code>
          */
         public Builder setMinMsgSentBytes(
             com.google.protobuf.ByteString value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000040;
+  bitField0_ |= 0x00000020;
           minMsgSent_ = value;
           onChanged();
           return this;
         }
 
-        // optional string msg_buf_size = 8 [default = "512000"];
+        // optional string msg_buf_size = 7 [default = "512000"];
         private java.lang.Object msgBufSize_ = "512000";
         /**
-         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+         * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
          */
         public boolean hasMsgBufSize() {
-          return ((bitField0_ & 0x00000080) == 0x00000080);
+          return ((bitField0_ & 0x00000040) == 0x00000040);
         }
         /**
-         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+         * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
          */
         public java.lang.String getMsgBufSize() {
           java.lang.Object ref = msgBufSize_;
@@ -1698,7 +1624,7 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+         * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
          */
         public com.google.protobuf.ByteString
             getMsgBufSizeBytes() {
@@ -1714,37 +1640,111 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+         * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
          */
         public Builder setMsgBufSize(
             java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000080;
+  bitField0_ |= 0x00000040;
           msgBufSize_ = value;
           onChanged();
           return this;
         }
         /**
-         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+         * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
          */
         public Builder clearMsgBufSize() {
-          bitField0_ = (bitField0_ & ~0x00000080);
+          bitField0_ = (bitField0_ & ~0x00000040);
           msgBufSize_ = getDefaultInstance().getMsgBufSize();
           onChanged();
           return this;
         }
         /**
-         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
+         * <code>optional string msg_buf_size = 7 [default = "512000"];</code>
          */
         public Builder setMsgBufSizeBytes(
             com.google.protobuf.ByteString value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000080;
+  bitField0_ |= 0x00000040;
           msgBufSize_ = value;
+          onChanged();
+          return this;
+        }
+
+        // optional string roll_period = 8;
+        private java.lang.Object rollPeriod_ = "";
+        /**
+         * <code>optional string roll_period = 8;</code>
+         */
+        public boolean hasRollPeriod() {
+          return ((bitField0_ & 0x00000080) == 0x00000080);
+        }
+        /**
+         * <code>optional string roll_period = 8;</code>
+         */
+        public java.lang.String getRollPeriod() {
+          java.lang.Object ref = rollPeriod_;
+          if (!(ref instanceof java.lang.String)) {
+            java.lang.String s = ((com.google.protobuf.ByteString) ref)
+                .toStringUtf8();
+            rollPeriod_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string roll_period = 8;</code>
+         */
+        public com.google.protobuf.ByteString
+            getRollPeriodBytes() {
+          java.lang.Object ref = rollPeriod_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            rollPeriod_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string roll_period = 8;</code>
+         */
+        public Builder setRollPeriod(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000080;
+          rollPeriod_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string roll_period = 8;</code>
+         */
+        public Builder clearRollPeriod() {
+          bitField0_ = (bitField0_ & ~0x00000080);
+          rollPeriod_ = getDefaultInstance().getRollPeriod();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string roll_period = 8;</code>
+         */
+        public Builder setRollPeriodBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000080;
+          rollPeriod_ = value;
           onChanged();
           return this;
         }
@@ -1858,50 +1858,50 @@ public final class ConfResPB {
       com.google.protobuf.ByteString
           getInstanceIdsBytes(int index);
 
-      // optional string roll_period = 7;
+      // optional string min_msg_sent = 7 [default = "30"];
       /**
-       * <code>optional string roll_period = 7;</code>
-       */
-      boolean hasRollPeriod();
-      /**
-       * <code>optional string roll_period = 7;</code>
-       */
-      java.lang.String getRollPeriod();
-      /**
-       * <code>optional string roll_period = 7;</code>
-       */
-      com.google.protobuf.ByteString
-          getRollPeriodBytes();
-
-      // optional string min_msg_sent = 8 [default = "30"];
-      /**
-       * <code>optional string min_msg_sent = 8 [default = "30"];</code>
+       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
        */
       boolean hasMinMsgSent();
       /**
-       * <code>optional string min_msg_sent = 8 [default = "30"];</code>
+       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
        */
       java.lang.String getMinMsgSent();
       /**
-       * <code>optional string min_msg_sent = 8 [default = "30"];</code>
+       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
        */
       com.google.protobuf.ByteString
           getMinMsgSentBytes();
 
-      // optional string msg_buf_size = 9 [default = "512000"];
+      // optional string msg_buf_size = 8 [default = "512000"];
       /**
-       * <code>optional string msg_buf_size = 9 [default = "512000"];</code>
+       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
        */
       boolean hasMsgBufSize();
       /**
-       * <code>optional string msg_buf_size = 9 [default = "512000"];</code>
+       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
        */
       java.lang.String getMsgBufSize();
       /**
-       * <code>optional string msg_buf_size = 9 [default = "512000"];</code>
+       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
        */
       com.google.protobuf.ByteString
           getMsgBufSizeBytes();
+
+      // optional string roll_period = 9;
+      /**
+       * <code>optional string roll_period = 9;</code>
+       */
+      boolean hasRollPeriod();
+      /**
+       * <code>optional string roll_period = 9;</code>
+       */
+      java.lang.String getRollPeriod();
+      /**
+       * <code>optional string roll_period = 9;</code>
+       */
+      com.google.protobuf.ByteString
+          getRollPeriodBytes();
     }
     /**
      * Protobuf type {@code blackhole.ConfRes.LxcConfRes}
@@ -1989,17 +1989,17 @@ public final class ConfResPB {
               }
               case 58: {
                 bitField0_ |= 0x00000020;
-                rollPeriod_ = input.readBytes();
+                minMsgSent_ = input.readBytes();
                 break;
               }
               case 66: {
                 bitField0_ |= 0x00000040;
-                minMsgSent_ = input.readBytes();
+                msgBufSize_ = input.readBytes();
                 break;
               }
               case 74: {
                 bitField0_ |= 0x00000080;
-                msgBufSize_ = input.readBytes();
+                rollPeriod_ = input.readBytes();
                 break;
               }
             }
@@ -2290,60 +2290,17 @@ public final class ConfResPB {
         return instanceIds_.getByteString(index);
       }
 
-      // optional string roll_period = 7;
-      public static final int ROLL_PERIOD_FIELD_NUMBER = 7;
-      private java.lang.Object rollPeriod_;
+      // optional string min_msg_sent = 7 [default = "30"];
+      public static final int MIN_MSG_SENT_FIELD_NUMBER = 7;
+      private java.lang.Object minMsgSent_;
       /**
-       * <code>optional string roll_period = 7;</code>
+       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
        */
-      public boolean hasRollPeriod() {
+      public boolean hasMinMsgSent() {
         return ((bitField0_ & 0x00000020) == 0x00000020);
       }
       /**
-       * <code>optional string roll_period = 7;</code>
-       */
-      public java.lang.String getRollPeriod() {
-        java.lang.Object ref = rollPeriod_;
-        if (ref instanceof java.lang.String) {
-          return (java.lang.String) ref;
-        } else {
-          com.google.protobuf.ByteString bs = 
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            rollPeriod_ = s;
-          }
-          return s;
-        }
-      }
-      /**
-       * <code>optional string roll_period = 7;</code>
-       */
-      public com.google.protobuf.ByteString
-          getRollPeriodBytes() {
-        java.lang.Object ref = rollPeriod_;
-        if (ref instanceof java.lang.String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          rollPeriod_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-
-      // optional string min_msg_sent = 8 [default = "30"];
-      public static final int MIN_MSG_SENT_FIELD_NUMBER = 8;
-      private java.lang.Object minMsgSent_;
-      /**
-       * <code>optional string min_msg_sent = 8 [default = "30"];</code>
-       */
-      public boolean hasMinMsgSent() {
-        return ((bitField0_ & 0x00000040) == 0x00000040);
-      }
-      /**
-       * <code>optional string min_msg_sent = 8 [default = "30"];</code>
+       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
        */
       public java.lang.String getMinMsgSent() {
         java.lang.Object ref = minMsgSent_;
@@ -2360,7 +2317,7 @@ public final class ConfResPB {
         }
       }
       /**
-       * <code>optional string min_msg_sent = 8 [default = "30"];</code>
+       * <code>optional string min_msg_sent = 7 [default = "30"];</code>
        */
       public com.google.protobuf.ByteString
           getMinMsgSentBytes() {
@@ -2376,17 +2333,17 @@ public final class ConfResPB {
         }
       }
 
-      // optional string msg_buf_size = 9 [default = "512000"];
-      public static final int MSG_BUF_SIZE_FIELD_NUMBER = 9;
+      // optional string msg_buf_size = 8 [default = "512000"];
+      public static final int MSG_BUF_SIZE_FIELD_NUMBER = 8;
       private java.lang.Object msgBufSize_;
       /**
-       * <code>optional string msg_buf_size = 9 [default = "512000"];</code>
+       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
        */
       public boolean hasMsgBufSize() {
-        return ((bitField0_ & 0x00000080) == 0x00000080);
+        return ((bitField0_ & 0x00000040) == 0x00000040);
       }
       /**
-       * <code>optional string msg_buf_size = 9 [default = "512000"];</code>
+       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
        */
       public java.lang.String getMsgBufSize() {
         java.lang.Object ref = msgBufSize_;
@@ -2403,7 +2360,7 @@ public final class ConfResPB {
         }
       }
       /**
-       * <code>optional string msg_buf_size = 9 [default = "512000"];</code>
+       * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
        */
       public com.google.protobuf.ByteString
           getMsgBufSizeBytes() {
@@ -2419,6 +2376,49 @@ public final class ConfResPB {
         }
       }
 
+      // optional string roll_period = 9;
+      public static final int ROLL_PERIOD_FIELD_NUMBER = 9;
+      private java.lang.Object rollPeriod_;
+      /**
+       * <code>optional string roll_period = 9;</code>
+       */
+      public boolean hasRollPeriod() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>optional string roll_period = 9;</code>
+       */
+      public java.lang.String getRollPeriod() {
+        java.lang.Object ref = rollPeriod_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            rollPeriod_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string roll_period = 9;</code>
+       */
+      public com.google.protobuf.ByteString
+          getRollPeriodBytes() {
+        java.lang.Object ref = rollPeriod_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          rollPeriod_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
       private void initFields() {
         topic_ = "";
         watchFile_ = "";
@@ -2426,9 +2426,9 @@ public final class ConfResPB {
         maxLineSize_ = "512000";
         readInterval_ = "1L";
         instanceIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        rollPeriod_ = "";
         minMsgSent_ = "30";
         msgBufSize_ = "512000";
+        rollPeriod_ = "";
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -2469,13 +2469,13 @@ public final class ConfResPB {
           output.writeBytes(6, instanceIds_.getByteString(i));
         }
         if (((bitField0_ & 0x00000020) == 0x00000020)) {
-          output.writeBytes(7, getRollPeriodBytes());
+          output.writeBytes(7, getMinMsgSentBytes());
         }
         if (((bitField0_ & 0x00000040) == 0x00000040)) {
-          output.writeBytes(8, getMinMsgSentBytes());
+          output.writeBytes(8, getMsgBufSizeBytes());
         }
         if (((bitField0_ & 0x00000080) == 0x00000080)) {
-          output.writeBytes(9, getMsgBufSizeBytes());
+          output.writeBytes(9, getRollPeriodBytes());
         }
         getUnknownFields().writeTo(output);
       }
@@ -2517,15 +2517,15 @@ public final class ConfResPB {
         }
         if (((bitField0_ & 0x00000020) == 0x00000020)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(7, getRollPeriodBytes());
+            .computeBytesSize(7, getMinMsgSentBytes());
         }
         if (((bitField0_ & 0x00000040) == 0x00000040)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(8, getMinMsgSentBytes());
+            .computeBytesSize(8, getMsgBufSizeBytes());
         }
         if (((bitField0_ & 0x00000080) == 0x00000080)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(9, getMsgBufSizeBytes());
+            .computeBytesSize(9, getRollPeriodBytes());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -2655,11 +2655,11 @@ public final class ConfResPB {
           bitField0_ = (bitField0_ & ~0x00000010);
           instanceIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
           bitField0_ = (bitField0_ & ~0x00000020);
-          rollPeriod_ = "";
-          bitField0_ = (bitField0_ & ~0x00000040);
           minMsgSent_ = "30";
-          bitField0_ = (bitField0_ & ~0x00000080);
+          bitField0_ = (bitField0_ & ~0x00000040);
           msgBufSize_ = "512000";
+          bitField0_ = (bitField0_ & ~0x00000080);
+          rollPeriod_ = "";
           bitField0_ = (bitField0_ & ~0x00000100);
           return this;
         }
@@ -2718,15 +2718,15 @@ public final class ConfResPB {
           if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
             to_bitField0_ |= 0x00000020;
           }
-          result.rollPeriod_ = rollPeriod_;
+          result.minMsgSent_ = minMsgSent_;
           if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
             to_bitField0_ |= 0x00000040;
           }
-          result.minMsgSent_ = minMsgSent_;
+          result.msgBufSize_ = msgBufSize_;
           if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
             to_bitField0_ |= 0x00000080;
           }
-          result.msgBufSize_ = msgBufSize_;
+          result.rollPeriod_ = rollPeriod_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -2778,19 +2778,19 @@ public final class ConfResPB {
             }
             onChanged();
           }
-          if (other.hasRollPeriod()) {
-            bitField0_ |= 0x00000040;
-            rollPeriod_ = other.rollPeriod_;
-            onChanged();
-          }
           if (other.hasMinMsgSent()) {
-            bitField0_ |= 0x00000080;
+            bitField0_ |= 0x00000040;
             minMsgSent_ = other.minMsgSent_;
             onChanged();
           }
           if (other.hasMsgBufSize()) {
-            bitField0_ |= 0x00000100;
+            bitField0_ |= 0x00000080;
             msgBufSize_ = other.msgBufSize_;
+            onChanged();
+          }
+          if (other.hasRollPeriod()) {
+            bitField0_ |= 0x00000100;
+            rollPeriod_ = other.rollPeriod_;
             onChanged();
           }
           this.mergeUnknownFields(other.getUnknownFields());
@@ -3291,90 +3291,16 @@ public final class ConfResPB {
           return this;
         }
 
-        // optional string roll_period = 7;
-        private java.lang.Object rollPeriod_ = "";
+        // optional string min_msg_sent = 7 [default = "30"];
+        private java.lang.Object minMsgSent_ = "30";
         /**
-         * <code>optional string roll_period = 7;</code>
+         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
          */
-        public boolean hasRollPeriod() {
+        public boolean hasMinMsgSent() {
           return ((bitField0_ & 0x00000040) == 0x00000040);
         }
         /**
-         * <code>optional string roll_period = 7;</code>
-         */
-        public java.lang.String getRollPeriod() {
-          java.lang.Object ref = rollPeriod_;
-          if (!(ref instanceof java.lang.String)) {
-            java.lang.String s = ((com.google.protobuf.ByteString) ref)
-                .toStringUtf8();
-            rollPeriod_ = s;
-            return s;
-          } else {
-            return (java.lang.String) ref;
-          }
-        }
-        /**
-         * <code>optional string roll_period = 7;</code>
-         */
-        public com.google.protobuf.ByteString
-            getRollPeriodBytes() {
-          java.lang.Object ref = rollPeriod_;
-          if (ref instanceof String) {
-            com.google.protobuf.ByteString b = 
-                com.google.protobuf.ByteString.copyFromUtf8(
-                    (java.lang.String) ref);
-            rollPeriod_ = b;
-            return b;
-          } else {
-            return (com.google.protobuf.ByteString) ref;
-          }
-        }
-        /**
-         * <code>optional string roll_period = 7;</code>
-         */
-        public Builder setRollPeriod(
-            java.lang.String value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000040;
-          rollPeriod_ = value;
-          onChanged();
-          return this;
-        }
-        /**
-         * <code>optional string roll_period = 7;</code>
-         */
-        public Builder clearRollPeriod() {
-          bitField0_ = (bitField0_ & ~0x00000040);
-          rollPeriod_ = getDefaultInstance().getRollPeriod();
-          onChanged();
-          return this;
-        }
-        /**
-         * <code>optional string roll_period = 7;</code>
-         */
-        public Builder setRollPeriodBytes(
-            com.google.protobuf.ByteString value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000040;
-          rollPeriod_ = value;
-          onChanged();
-          return this;
-        }
-
-        // optional string min_msg_sent = 8 [default = "30"];
-        private java.lang.Object minMsgSent_ = "30";
-        /**
-         * <code>optional string min_msg_sent = 8 [default = "30"];</code>
-         */
-        public boolean hasMinMsgSent() {
-          return ((bitField0_ & 0x00000080) == 0x00000080);
-        }
-        /**
-         * <code>optional string min_msg_sent = 8 [default = "30"];</code>
+         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
          */
         public java.lang.String getMinMsgSent() {
           java.lang.Object ref = minMsgSent_;
@@ -3388,7 +3314,7 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>optional string min_msg_sent = 8 [default = "30"];</code>
+         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
          */
         public com.google.protobuf.ByteString
             getMinMsgSentBytes() {
@@ -3404,51 +3330,51 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>optional string min_msg_sent = 8 [default = "30"];</code>
+         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
          */
         public Builder setMinMsgSent(
             java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000080;
+  bitField0_ |= 0x00000040;
           minMsgSent_ = value;
           onChanged();
           return this;
         }
         /**
-         * <code>optional string min_msg_sent = 8 [default = "30"];</code>
+         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
          */
         public Builder clearMinMsgSent() {
-          bitField0_ = (bitField0_ & ~0x00000080);
+          bitField0_ = (bitField0_ & ~0x00000040);
           minMsgSent_ = getDefaultInstance().getMinMsgSent();
           onChanged();
           return this;
         }
         /**
-         * <code>optional string min_msg_sent = 8 [default = "30"];</code>
+         * <code>optional string min_msg_sent = 7 [default = "30"];</code>
          */
         public Builder setMinMsgSentBytes(
             com.google.protobuf.ByteString value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000080;
+  bitField0_ |= 0x00000040;
           minMsgSent_ = value;
           onChanged();
           return this;
         }
 
-        // optional string msg_buf_size = 9 [default = "512000"];
+        // optional string msg_buf_size = 8 [default = "512000"];
         private java.lang.Object msgBufSize_ = "512000";
         /**
-         * <code>optional string msg_buf_size = 9 [default = "512000"];</code>
+         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
          */
         public boolean hasMsgBufSize() {
-          return ((bitField0_ & 0x00000100) == 0x00000100);
+          return ((bitField0_ & 0x00000080) == 0x00000080);
         }
         /**
-         * <code>optional string msg_buf_size = 9 [default = "512000"];</code>
+         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
          */
         public java.lang.String getMsgBufSize() {
           java.lang.Object ref = msgBufSize_;
@@ -3462,7 +3388,7 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>optional string msg_buf_size = 9 [default = "512000"];</code>
+         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
          */
         public com.google.protobuf.ByteString
             getMsgBufSizeBytes() {
@@ -3478,37 +3404,111 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>optional string msg_buf_size = 9 [default = "512000"];</code>
+         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
          */
         public Builder setMsgBufSize(
             java.lang.String value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000100;
+  bitField0_ |= 0x00000080;
           msgBufSize_ = value;
           onChanged();
           return this;
         }
         /**
-         * <code>optional string msg_buf_size = 9 [default = "512000"];</code>
+         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
          */
         public Builder clearMsgBufSize() {
-          bitField0_ = (bitField0_ & ~0x00000100);
+          bitField0_ = (bitField0_ & ~0x00000080);
           msgBufSize_ = getDefaultInstance().getMsgBufSize();
           onChanged();
           return this;
         }
         /**
-         * <code>optional string msg_buf_size = 9 [default = "512000"];</code>
+         * <code>optional string msg_buf_size = 8 [default = "512000"];</code>
          */
         public Builder setMsgBufSizeBytes(
             com.google.protobuf.ByteString value) {
           if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000100;
+  bitField0_ |= 0x00000080;
           msgBufSize_ = value;
+          onChanged();
+          return this;
+        }
+
+        // optional string roll_period = 9;
+        private java.lang.Object rollPeriod_ = "";
+        /**
+         * <code>optional string roll_period = 9;</code>
+         */
+        public boolean hasRollPeriod() {
+          return ((bitField0_ & 0x00000100) == 0x00000100);
+        }
+        /**
+         * <code>optional string roll_period = 9;</code>
+         */
+        public java.lang.String getRollPeriod() {
+          java.lang.Object ref = rollPeriod_;
+          if (!(ref instanceof java.lang.String)) {
+            java.lang.String s = ((com.google.protobuf.ByteString) ref)
+                .toStringUtf8();
+            rollPeriod_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string roll_period = 9;</code>
+         */
+        public com.google.protobuf.ByteString
+            getRollPeriodBytes() {
+          java.lang.Object ref = rollPeriod_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            rollPeriod_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string roll_period = 9;</code>
+         */
+        public Builder setRollPeriod(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000100;
+          rollPeriod_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string roll_period = 9;</code>
+         */
+        public Builder clearRollPeriod() {
+          bitField0_ = (bitField0_ & ~0x00000100);
+          rollPeriod_ = getDefaultInstance().getRollPeriod();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string roll_period = 9;</code>
+         */
+        public Builder setRollPeriodBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000100;
+          rollPeriod_ = value;
           onChanged();
           return this;
         }
@@ -4449,15 +4449,15 @@ public final class ConfResPB {
       "e.ConfRes.LxcConfRes\032\315\001\n\nAppConfRes\022\r\n\005t" +
       "opic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \002(\t\022\025\n\rrotate" +
       "_period\030\003 \002(\t\022\035\n\rmax_line_size\030\004 \001(\t:\00651" +
-      "2000\022\031\n\rread_interval\030\005 \001(\t:\0021L\022\023\n\013roll_" +
-      "period\030\006 \001(\t\022\030\n\014min_msg_sent\030\007 \001(\t:\00230\022\034" +
-      "\n\014msg_buf_size\030\010 \001(\t:\006512000\032\343\001\n\nLxcConf" +
+      "2000\022\031\n\rread_interval\030\005 \001(\t:\0021L\022\030\n\014min_m" +
+      "sg_sent\030\006 \001(\t:\00230\022\034\n\014msg_buf_size\030\007 \001(\t:" +
+      "\006512000\022\023\n\013roll_period\030\010 \001(\t\032\343\001\n\nLxcConf" +
       "Res\022\r\n\005topic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \001(\t\022\025",
       "\n\rrotate_period\030\003 \002(\t\022\035\n\rmax_line_size\030\004" +
       " \001(\t:\006512000\022\031\n\rread_interval\030\005 \001(\t:\0021L\022" +
-      "\024\n\014instance_ids\030\006 \003(\t\022\023\n\013roll_period\030\007 \001" +
-      "(\t\022\030\n\014min_msg_sent\030\010 \001(\t:\00230\022\034\n\014msg_buf_" +
-      "size\030\t \001(\t:\006512000B.\n!com.dp.blackhole.p" +
+      "\024\n\014instance_ids\030\006 \003(\t\022\030\n\014min_msg_sent\030\007 " +
+      "\001(\t:\00230\022\034\n\014msg_buf_size\030\010 \001(\t:\006512000\022\023\n" +
+      "\013roll_period\030\t \001(\tB.\n!com.dp.blackhole.p" +
       "rotocol.controlB\tConfResPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
@@ -4476,13 +4476,13 @@ public final class ConfResPB {
           internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_AppConfRes_descriptor,
-              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "RollPeriod", "MinMsgSent", "MsgBufSize", });
+              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "MinMsgSent", "MsgBufSize", "RollPeriod", });
           internal_static_blackhole_ConfRes_LxcConfRes_descriptor =
             internal_static_blackhole_ConfRes_descriptor.getNestedTypes().get(1);
           internal_static_blackhole_ConfRes_LxcConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_LxcConfRes_descriptor,
-              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "InstanceIds", "RollPeriod", "MinMsgSent", "MsgBufSize", });
+              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "InstanceIds", "MinMsgSent", "MsgBufSize", "RollPeriod", });
           return null;
         }
       };

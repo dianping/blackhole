@@ -202,6 +202,7 @@ public class RollRecovery implements Runnable{
             throws IOException {
         AgentProtocol protocol = new AgentProtocol();
         AgentHead head = protocol.new AgentHead();
+        head.version = AgentProtocol.VERSION_MICOR_BATCH;
         head.ignore = ignore;
         head.app = topicMeta.getTopic();
         head.source = topicMeta.getSource();

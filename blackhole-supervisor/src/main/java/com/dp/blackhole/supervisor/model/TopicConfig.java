@@ -7,6 +7,8 @@ import java.util.Set;
 public class TopicConfig {
     private static int DEFAULT_MAX_LINE_SIZE = 512000;
     private static long DEFAULT_READ_INTERVAL = 1L;
+    private static int DEFAULT_MIN_MSG_SENT = 30;
+    private static int DEFAULT_MSG_BUF_SIZE = 512000;
     private String topic;
     private String appName;
     private String watchLog;
@@ -19,8 +21,8 @@ public class TopicConfig {
     private long readInterval = DEFAULT_READ_INTERVAL;
     private String owner;
     private String compression;
-    private int minMsgSent;
-    private int msgBufSize;
+    private int minMsgSent = DEFAULT_MIN_MSG_SENT;
+    private int msgBufSize = DEFAULT_MSG_BUF_SIZE;
     
     public TopicConfig(String topic) {
         this.topic = topic;
