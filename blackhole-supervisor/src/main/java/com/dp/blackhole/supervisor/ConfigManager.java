@@ -55,8 +55,12 @@ public class ConfigManager {
     public int supervisorPort;
     public int jettyPort;
     public int numHandler;
+    
     public boolean brokerAssignmentLimitEnable;
     public int brokerAssignmentLimitMin;
+    
+    public String checkpiontPath;
+    public long checkpiontPeriod;
     
     public String getPaaSInstanceURLPerfix;
     
@@ -122,6 +126,10 @@ public class ConfigManager {
         numHandler = Integer.parseInt(prop.getProperty("GenServer.handler.count", "3"));
         getPaaSInstanceURLPerfix = prop.getProperty("supervisor.paas.url");
         brokerAssignmentLimitEnable = Boolean.parseBoolean(prop.getProperty("supervisor.broker-assignment-limit.enable", "false"));
+        
+        checkpiontPath = prop.getProperty("supervisor.checkpoint.path", "/tmp/checkpoint");
+        checkpiontPeriod = Long.parseLong(prop.getProperty("supervisor.checkpoint.period", "60000"));
+        
         //create a http client for PaaS
         httpClient = new HttpClientSingle(connectionTimeout, socketTimeout);
         reloadTopicConfig();
@@ -485,7 +493,7 @@ public class ConfigManager {
             supervisor.findAndSendLxcConfRes(confInfo);
         }
     }
-
+    
     class TopicsChangeListener implements ConfigChange {
     
         @Override

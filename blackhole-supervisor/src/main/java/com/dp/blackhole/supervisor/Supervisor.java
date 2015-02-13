@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import com.dianping.lion.client.LionException;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.datachecker.Checkpoint;
 import com.dp.blackhole.http.RequestListener;
 import com.dp.blackhole.network.ConnectionFactory;
 import com.dp.blackhole.network.EntityProcessor;
@@ -82,6 +83,8 @@ public class Supervisor {
     private ConcurrentHashMap<SimpleConnection, ConnectionDesc> connections;
     private ConcurrentHashMap<String, SimpleConnection> agentsMapping;
     private ConcurrentHashMap<String, SimpleConnection> brokersMapping;
+    
+    public Checkpoint checkpoint;
 
     public Set<String> getAllTopicNames() {
         return new HashSet<String>(topics.keySet());
@@ -1470,8 +1473,16 @@ public class Supervisor {
             stream.setBrokerHost(readyBroker.getBrokerServer());
             stream.setStartTs(connectedTs);
             stream.setPeriod(readyBroker.getPeriod());
-            stream.updateLastSuccessTs(currentTs - stream.getPeriod() * 1000);
-            
+            long initLastSuccessTs = currentTs - stream.getPeriod() * 1000;
+            long storedLastSuccessTs = checkpoint.getStoredLastSuccessTs(stream);
+            LOG.debug("init ts " + initLastSuccessTs + " stored ts " + storedLastSuccessTs);
+            boolean shouldRecovery = false;
+            if (storedLastSuccessTs != initLastSuccessTs && storedLastSuccessTs != 0) {
+                stream.updateLastSuccessTs(storedLastSuccessTs);
+                shouldRecovery = true;
+            } else {
+                stream.updateLastSuccessTs(initLastSuccessTs);
+            }
             ArrayList<Stage> stages = new ArrayList<Stage>();
             Stage current = new Stage();
             current.setTopic(stream.getTopic());
@@ -1485,6 +1496,26 @@ public class Supervisor {
             stages.add(current);
             stream.setStages(stages);
             addStream(stream);
+            if (shouldRecovery) {
+                synchronized (stages) {
+                    int missedStageCount = getMissedStageCount(stream, initLastSuccessTs);
+                    LOG.info("need recovery possible missed stages: " + missedStageCount);
+                    Issue issue = new Issue();
+                    issue.setTs(connectedTs);
+                    issue.setDesc("stream reconnected but find should recovery");
+                    ArrayList<Stage> missedStages = getMissedStages(stream, missedStageCount, issue);
+                    for (Stage missedStage : missedStages) {
+                        LOG.info("processing missed stages: " + missedStage);
+                        // check whether it is missed
+                        if (!stages.contains(missedStage)) {
+                            stages.add(missedStage);
+                        }
+                        doRecovery(stream, missedStage);
+                    }
+                }
+            } else {
+                LOG.info("no need to recovery any stage.");
+            }
         } else {
             // old stream reconnected
             LOG.info("stream reconnected: " + stream);
@@ -1868,6 +1899,11 @@ public class Supervisor {
     private class LiveChecker extends Thread {
         boolean running = true;
         
+        public LiveChecker() {
+            this.setDaemon(true);
+            this.setName("LiveChecker");
+        }
+        
         @Override
         public void run() {
             int THRESHOLD = 15 * 1000;
@@ -1926,8 +1962,10 @@ public class Supervisor {
         
         // start heart beat checker thread
         LiveChecker checker = new LiveChecker();
-        checker.setDaemon(true);
         checker.start();
+        
+        checkpoint = new Checkpoint(configManager.checkpiontPath, configManager.checkpiontPeriod);
+        checkpoint.start();
         
         SupervisorExecutor executor = new SupervisorExecutor();
         ConnectionFactory<SimpleConnection> factory = new SimpleConnection.SimpleConnectionFactory();

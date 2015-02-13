@@ -1,5 +1,8 @@
 package com.dp.blackhole.rest;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,6 +83,7 @@ public class OperatorResource extends BaseResource {
     @Consumes({MediaType.APPLICATION_JSON})
     public Response restart(
             @Encoded @FormParam("agents") final String agents) {
+        LOG.debug("POST: restart agents " + agents);
         try {
             Object[] raw = (Object[])JSON.parse(agents);
             List<String> agentServers = new ArrayList<String>();
@@ -110,6 +114,7 @@ public class OperatorResource extends BaseResource {
             @PathParam("opname") final String opname,
             @PathParam("topic") final String topic,
             @PathParam("source") final String source) {
+        LOG.debug("GET: snapshot op " + opname + " topic " + topic + " source " + source);
         return supervisorService.oprateSnapshot(topic, source, opname)
             ? Response.ok().build() : Response.status(Response.Status.BAD_REQUEST).build();
     }
@@ -124,5 +129,28 @@ public class OperatorResource extends BaseResource {
         LOG.debug("POST: pause " + topic + " " + source + " in " + delay + " seconds");
         return supervisorService.pauseStream(topic, source, Util.parseInt(delay, 30))
                 ? Response.ok().build() : Response.status(Response.Status.BAD_REQUEST).build();
+    }
+    
+    @GET
+    @Path("/checkpoint/view")
+    public Response checkpiontView() {
+        LOG.debug("GET: checkpoint view asynchronously");
+        File checkpointViewFile = new File("/tmp/checkpoint_view." + Util.getTS());
+        byte[] checkpiontBytes = supervisorService.checkpoint.getStatus().toString().getBytes();
+        FileOutputStream oStream = null;
+        try {
+            oStream = new FileOutputStream(checkpointViewFile);
+            oStream.write(checkpiontBytes);
+            return Response.ok().build();
+        } catch (IOException e) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        } finally {
+            if (oStream != null) {
+                try {
+                    oStream.close();
+                } catch (IOException e1) {
+                }
+            }
+        }
     }
 }
