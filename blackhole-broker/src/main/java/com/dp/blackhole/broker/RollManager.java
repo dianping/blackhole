@@ -33,7 +33,8 @@ import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 
 public class RollManager {
     private final static Log LOG = LogFactory.getLog(RollManager.class);
-    
+    private static final String TMP_SUFFIX = ".tmp";
+    private static final String R_SUFFIX = ".r";
     private ConcurrentHashMap<RollIdent, RollPartition> rolls;
     private String hdfsbase;
     private String defaultCompression;
@@ -190,16 +191,16 @@ public class RollManager {
     /*
      * machine01@appname_2013-11-01.14.08
      */
-    public String getFileName(RollIdent ident, boolean hidden) {
+    public String getFileName(RollIdent ident) {
         String format;
         format = Util.getFormatFromPeriod(ident.period);
         Date roll = new Date(ident.ts);
         SimpleDateFormat dm = new SimpleDateFormat(format);
-        if (hidden) {
-            return "_" + ident.source + '@' + ident.topic + "_" + dm.format(roll);
-        } else {
-            return ident.source + '@' + ident.topic + "_" + dm.format(roll);
-        }
+        return ident.source + '@' + ident.topic + "_" + dm.format(roll);
+    }
+    
+    private String getHiddenFileName(RollIdent ident) {
+        return "_" + getFileName(ident);
     }
     
     public String getCompressedFileName(RollIdent ident) {
@@ -211,7 +212,7 @@ public class RollManager {
     }
     
     public String getCompressedFileName(RollIdent ident, String compressionAlgoName) {
-        return getFileName(ident, false) + "." + compressionAlgoName;
+        return getFileName(ident) + "." + compressionAlgoName;
     }
 
     /*
@@ -227,7 +228,15 @@ public class RollManager {
     }
     
     public String getMarkHdfsPath(RollIdent ident) {
-        return getParentPath(hdfsbase, ident) + getFileName(ident, true);
+        return getParentPath(hdfsbase, ident) + getHiddenFileName(ident);
+    }
+    
+    public String getTempHdfsPath(RollIdent ident) {
+        return getParentPath(hdfsbase, ident) + getFileName(ident) + TMP_SUFFIX;
+    }
+
+    public String getRecoveryHdfsPath(RollIdent ident) {
+        return getParentPath(hdfsbase, ident) + getFileName(ident) + R_SUFFIX;
     }
     
     public void reportRecovery(RollIdent ident, boolean recoverySuccess) {

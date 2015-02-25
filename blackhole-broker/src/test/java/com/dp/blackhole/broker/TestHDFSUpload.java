@@ -75,6 +75,7 @@ public class TestHDFSUpload {
         
         RollManager mgr = mock(RollManager.class);
         when(mgr.getRollHdfsPath(ident, compressionAlgo.getName())).thenReturn(getRealFile()+"."+compressionAlgo.getName());
+        when(mgr.getTempHdfsPath(ident)).thenReturn(getRealFile()+".tmp");
         StorageManager manager = mock(StorageManager.class);
         when(manager.getPartition(ident.topic, ident.source, false)).thenReturn(p);
         

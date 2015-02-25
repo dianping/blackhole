@@ -28,7 +28,6 @@ import com.dp.blackhole.storage.MessageAndOffset;
 
 public class HDFSUpload implements Runnable{
     private static final Log LOG = LogFactory.getLog(HDFSUpload.class);
-    private static final String TMP_SUFFIX = ".tmp";
     private RollManager mgr;
     private StorageManager manager;
     private FileSystem fs;
@@ -67,7 +66,7 @@ public class HDFSUpload implements Runnable{
         }
         try {
             String dfsPath = mgr.getRollHdfsPath(ident, compressionAlgo.getName());
-            Path tmp = new Path(dfsPath + TMP_SUFFIX);
+            Path tmp = new Path(mgr.getTempHdfsPath(ident));
             FSDataOutputStream fsDataOutputStream = fs.create(tmp);
             Compressor compressor = compressionAlgo.getCompressor();
             OutputStream out = compressionAlgo

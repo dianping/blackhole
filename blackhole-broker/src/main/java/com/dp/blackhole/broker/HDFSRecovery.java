@@ -13,9 +13,6 @@ import org.apache.hadoop.io.compress.Compressor;
 
 public class HDFSRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(HDFSRecovery.class);
-    private static final String TMP_SUFFIX = ".tmp";
-    private static final String R_SUFFIX = ".r";
-
     private RollManager mgr;
     private FileSystem fs;
     private static final int DEFAULT_BUFSIZE = 8192;
@@ -45,8 +42,8 @@ public class HDFSRecovery implements Runnable{
             } else {
                 normalPathname = mgr.getRollHdfsPath(ident);
             }
-            String tmpPathname = normalPathname + TMP_SUFFIX;
-            String recoveryPathname = normalPathname + R_SUFFIX;
+            String tmpPathname = mgr.getTempHdfsPath(ident);
+            String recoveryPathname = mgr.getRecoveryHdfsPath(ident);
             Path normalPath = new Path(normalPathname);
             Path tmpPath = new Path(tmpPathname);
             Path recoveryPath = new Path(recoveryPathname);
