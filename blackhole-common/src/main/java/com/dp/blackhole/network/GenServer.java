@@ -147,9 +147,9 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
             channel.socket().setKeepAlive(true);
             
             Connection connection = factory.makeConnection(channel, selector, wrappedFactory);
+            channel.register(selector, SelectionKey.OP_READ, connection);
             Handler handler = getHandler(connection);
             handler.addEvent(new EntityEvent(EntityEvent.CONNECTED, null, connection));
-            channel.register(selector, SelectionKey.OP_READ, connection);
         }
     }
     
