@@ -167,7 +167,11 @@ public class LogReader implements Runnable {
                     processRotate();
                     break;
                 case FINISHED:
-                    running = false;
+                    //Do not end the loop here, it will terminate the thread and release all resources.
+                    //Once the socket (in RemoteSender) closed, broker will lose the agent connection 
+                    //and throw EOFExeception instead of uploading data.
+                    //So, it should not break the loop until agent receives CLEAN event. 
+                    Thread.sleep(1000);
                     break;
                 default:
                     throw new AssertionError("Undefined log status.");
