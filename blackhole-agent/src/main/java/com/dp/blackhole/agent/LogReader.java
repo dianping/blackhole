@@ -38,6 +38,7 @@ public class LogReader implements Runnable {
     private final ByteArrayOutputStream lineBuf;
     private boolean accept;
     private final int maxLineSize;
+    private RollTrigger rollTrigger;
     
     public LogReader(Agent agent, TopicMeta meta, String snapshotPersistDir) {
         this.agent = agent;
@@ -129,7 +130,7 @@ public class LogReader implements Runnable {
                 agent.reportLogReaderFailure(meta.getTopicId(), meta.getSource(), Util.getTS());
                 return;
             }
-            RollTrigger rollTrigger = new RollTrigger(meta, logFSM);
+            rollTrigger = new RollTrigger(meta, logFSM);
             rollTrigger.trigger();
             currentReaderState.compareAndSet(ReaderState.NEW, ReaderState.REGISTERED);
         }
@@ -143,6 +144,7 @@ public class LogReader implements Runnable {
         sender.close();
         sender = null;
         unregister();
+        rollTrigger.stop();
         LOG.warn("terminate log reader " + meta.getTopicId() + ", resources released.");
     }
 

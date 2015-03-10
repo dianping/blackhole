@@ -568,6 +568,10 @@ public class Agent implements Runnable {
                             if (topicMeta.isDying()) {
                                 if ((logReader = topicReaders.get(topicMeta)) != null) {
                                     LOG.info("Clean up " + topicMeta);
+                                    IRecoder recoder = logReader.getRecoder();
+                                    if (recoder != null) {
+                                        recoder.cleanup();
+                                    }
                                     logReader.stop();
                                     topicReaders.remove(topicMeta);
                                     topics.remove(topicId);

@@ -249,6 +249,7 @@ public class LocalRecorder implements IRecoder {
     @Override
     public void cleanup() {
         snapshotFile.delete();
+        snapshotFile = null;
     }
 
     @Override

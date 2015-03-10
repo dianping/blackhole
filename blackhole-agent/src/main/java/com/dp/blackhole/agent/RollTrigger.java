@@ -32,6 +32,11 @@ public class RollTrigger {
                 + " seconds, and repeat at fixed rate "
                 + topicMeta.getRollPeriod() + " seconds");
     }
+
+    public void stop() {
+        service.shutdown();
+        service = null;
+    }
     
     class RollAttemptTask implements Runnable {
         @Override
