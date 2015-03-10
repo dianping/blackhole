@@ -349,9 +349,14 @@ public class Util {
      * return st of 16:00
      */
     public static long getCurrentRollTs(long ts, long rollPeriod) {
+        return getCurrentRollTsUnderTimeBuf(ts, rollPeriod, 0);
+    }
+    
+    public static long getCurrentRollTsUnderTimeBuf(
+            long ts, long rollPeriod, long clockSyncBufMillis) {
         rollPeriod = rollPeriod * 1000;
         ts = ts + localTimezoneOffset;
-        long ret = (ts / rollPeriod) * rollPeriod;
+        long ret = ((ts + clockSyncBufMillis) / rollPeriod) * rollPeriod;
         ret = ret - localTimezoneOffset;
         return ret;
     }

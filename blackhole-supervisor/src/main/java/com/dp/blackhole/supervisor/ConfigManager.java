@@ -163,14 +163,8 @@ public class ConfigManager {
     }
 
     private void addWatchers() {
-        TopicsChangeListener topicsListener = new TopicsChangeListener();
-        cache.addChange(topicsListener);
-        BlacklistChangeListener blacklistListener = new BlacklistChangeListener();
-        cache.addChange(blacklistListener);
-        TopicConfChangeListener topicConfListener = new TopicConfChangeListener();
-        cache.addChange(topicConfListener);
-        AgentHostsChangeListener agentHostsListener = new AgentHostsChangeListener();
-        cache.addChange(agentHostsListener);
+        LionChangeListener listener = new LionChangeListener();
+        cache.addChange(listener);
         definitelyGetProperty(ParamsKey.LionNode.TOPIC);
         definitelyGetProperty(ParamsKey.LionNode.BLACKLIST);
         definitelyGetProperty(ParamsKey.LionNode.BROKER_ASSIGN_LIMIT_MIN);
@@ -494,7 +488,7 @@ public class ConfigManager {
         }
     }
     
-    class TopicsChangeListener implements ConfigChange {
+    class LionChangeListener implements ConfigChange {
     
         @Override
         public void onChange(String key, String value) {
@@ -520,19 +514,25 @@ public class ConfigManager {
                         }
                     }
                 }
-            }
-        }
-    
-        private void addWatherForKey(String watchKey) {
-            definitelyGetProperty(watchKey);
-        }
-    }
-    
-    class AgentHostsChangeListener implements ConfigChange {
-
-        @Override
-        public void onChange(String key, String value) {
-            if (key.startsWith(ParamsKey.LionNode.HOSTS_PREFIX)) {
+            } else if (key.equals(ParamsKey.LionNode.BLACKLIST)) {
+                String[] blacklistArray = Util.getStringListOfLionValue(value);
+                if (blacklistArray != null) {
+                    LOG.info("black list has been changed.");
+                    blacklist.setBlacklist(Arrays.asList(blacklistArray));
+                }
+            } else if (key.equals(ParamsKey.LionNode.BROKER_ASSIGN_LIMIT_MIN)) {
+                if (brokerAssignmentLimitEnable) {
+                    brokerAssignmentLimitMin = Util.parseInt(value, 1);
+                }
+            } else if (key.startsWith(ParamsKey.LionNode.CONF_PREFIX)) {
+                for (String topic : confMap.keySet()) {
+                    if (key.equals(ParamsKey.LionNode.CONF_PREFIX + topic)) {
+                        LOG.info("Topic Conf Change is triggered by " + topic);
+                        fillConfMap(topic, value);
+                        break;
+                    }
+                }
+            } else if (key.startsWith(ParamsKey.LionNode.HOSTS_PREFIX)) {
                 for (String topic : confMap.keySet()) {
                     if (key.equals(ParamsKey.LionNode.HOSTS_PREFIX + topic)) {
                         LOG.info("Agent Hosts Change is triggered by " + topic);
@@ -542,47 +542,9 @@ public class ConfigManager {
                 }
             }
         }
-    }
-
-    class TopicConfChangeListener implements ConfigChange {
     
-        @Override
-        public void onChange(String key, String value) {
-            if (key.startsWith(ParamsKey.LionNode.CONF_PREFIX)) {
-                for (String topic : confMap.keySet()) {
-                    if (key.equals(ParamsKey.LionNode.CONF_PREFIX + topic)) {
-                        LOG.info("Topic Conf Change is triggered by " + topic);
-                        fillConfMap(topic, value);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    
-    class BlacklistChangeListener implements ConfigChange {
-
-        @Override
-        public void onChange(String key, String value) {
-            if (key.equals(ParamsKey.LionNode.BLACKLIST)) {
-                String[] blacklistArray = Util.getStringListOfLionValue(value);
-                if (blacklistArray != null) {
-                    LOG.info("black list has been changed.");
-                    blacklist.setBlacklist(Arrays.asList(blacklistArray));
-                }
-            }
-        }
-    }
-    
-    class BrokerAssignLimitChangeListener implements ConfigChange {
-
-        @Override
-        public void onChange(String key, String value) {
-            if (brokerAssignmentLimitEnable) {
-                if (key.equals(ParamsKey.LionNode.BROKER_ASSIGN_LIMIT_MIN)) {
-                    brokerAssignmentLimitMin = Util.parseInt(value, 1);
-                }
-            }
+        private void addWatherForKey(String watchKey) {
+            definitelyGetProperty(watchKey);
         }
     }
 }

@@ -138,10 +138,9 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
             Map<String, Set<String>> hostIds) {
         HttpResult result = sendAndReceiveForQuit(toBeQuit, app, hostIds);
         if (result.code == HttpResult.SUCCESS) {
-            return sendAndReceiveForClean(toBeClean, app, hostIds);
-        } else {
-            return result;
+            cleanAgentResources(toBeClean, app, hostIds);
         }
+        return result;
     }
     
     private HttpResult sendAndReceiveForQuit(
@@ -165,15 +164,15 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
         return new HttpResult(HttpResult.FAILURE, "timeout");
     }
     
-    private HttpResult sendAndReceiveForClean(
+    private void cleanAgentResources(
             Map<String, Message> toBeClean,
             String app,
             Map<String, Set<String>> hostIds) {
         long currentTime = System.currentTimeMillis();
         long timeout = currentTime + TIMEOUT;
+        supervisor.cachedSend(toBeClean);
         while (currentTime < timeout) {
             if (checkStreamsClean(app, hostIds)) {
-                LOG.info(app + ": all stream empty, instances logout succcss.");
                 Set<String> topicSet = configManager.getTopicsByCmdb(app);
                 for (String topic : topicSet) {
                     //update <topic,<host,ids>> map
@@ -182,17 +181,15 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
                         topicConfig.removeIdsByHosts(hostIds);
                     }
                 }
-                return new HttpResult(HttpResult.SUCCESS, "");
+                LOG.info(app + ": all stream empty, instances logout succcss.");
+                break;
             }
-            supervisor.cachedSend(toBeClean);
             currentTime += CHECK_PERIOD;
             try {
                 Thread.sleep(CHECK_PERIOD);
             } catch (InterruptedException e) {
-                return new HttpResult(HttpResult.FAILURE, "Thread interrupted");
             }
         }
-        return new HttpResult(HttpResult.FAILURE, "timeout");
     }
 
     private boolean checkStreamsEmpty(String app, Map<String, Set<String>> hostIds) {

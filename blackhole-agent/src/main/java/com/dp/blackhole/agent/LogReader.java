@@ -143,7 +143,7 @@ public class LogReader implements Runnable {
         sender.close();
         sender = null;
         unregister();
-        LOG.error("terminate log reader " + meta.getTopicId() + ", resources released.");
+        LOG.warn("terminate log reader " + meta.getTopicId() + ", resources released.");
     }
 
     private void loop() {
@@ -158,13 +158,14 @@ public class LogReader implements Runnable {
                     Thread.sleep(meta.getReadInterval());
                     break;
                 case ROLL:
+                case LAST_ROLL:
                     processRoll();
                     break;
                 case ROTATE:
                     processRotate();
                     break;
-                case HALT:
-                    processHalt();
+                case FINISHED:
+                    running = false;
                     break;
                 default:
                     throw new AssertionError("Undefined log status.");
@@ -225,27 +226,39 @@ public class LogReader implements Runnable {
             LOG.error("Oops, got an exception:", e);
             throw new RuntimeException("log reader loop terminate, prepare to reboot log reader.");
         } finally {
-            Long rollTs = Util.getLatestRollTsUnderTimeBuf(
-                    Util.getTS(),
-                    meta.getRollPeriod(),
-                    ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
+            Long rollTs;
+            if (meta.isDying()) {
+                rollTs = Util.getCurrentRollTsUnderTimeBuf(
+                        Util.getTS(),
+                        meta.getRollPeriod(),
+                        ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
+            } else {
+                rollTs = Util.getLatestRollTsUnderTimeBuf(
+                        Util.getTS(),
+                        meta.getRollPeriod(),
+                        ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
+            }
             //record snapshot
             getRecoder().record(Record.ROLL, rollTs, rollEndOffset);
         }
         try {
-            if (meta.isDying()) {
-                return;
-            }
             if (currentReaderState.get() == ReaderState.SENDER_ASSIGNED) {
                 sender.sendMessage();   //clear buffer
-                sender.sendRollRequest();
+                if (meta.isDying()) {
+                    sender.sendHaltRequest();
+                } else {
+                    sender.sendRollRequest();
+                }
             }
-            
         } catch (Exception e) {
             LOG.error("Fail while sending roll request, reassign sender", e);
             reassignSender();
         } finally {
-            logFSM.finishRoll();
+            if (meta.isDying()) {
+                logFSM.finishLastRoll();
+            } else {
+                logFSM.finishRoll();
+            }
         }
     }
     
@@ -288,35 +301,6 @@ public class LogReader implements Runnable {
         }
     }
 
-    public void processHalt() {
-        final RandomAccessFile save = reader;
-        try {
-            try {
-                reader = new RandomAccessFile(tailFile, "r");
-                // At this point, we're sure that the old file is rotated
-                // Finish scanning the old file and then we'll start with the new one
-                // minus 1 points out the end offset of old file
-                readLines(save);
-            } catch (SocketException e) {
-                throw e;
-            } catch (IOException e) {
-                LOG.warn("Warnning, got an IOException while halting", e);
-            }
-        
-            if (currentReaderState.get() == ReaderState.SENDER_ASSIGNED) {
-                //send left message force
-                sender.sendMessage();
-                //send halt request to broker
-                sender.sendHaltRequest();
-            }
-            // finish halt only haltRequest sent
-            logFSM.finishHalt();
-        } catch (IOException e) {
-            LOG.error("Fail while sending halt request, reassign sender", e);
-            reassignSender();
-        }
-    }
-    
     /**
      * Read new lines.
      *

@@ -277,7 +277,9 @@ public class LocalRecorder implements IRecoder {
                         perviousRollRecord = record;
                     } else {
                         Record perviousPerviousRollRecord = records.get(i - 1);
-                        if (perviousPerviousRollRecord.getRollTs() == record.getRollTs()) {
+                        if (perviousPerviousRollRecord.getType() == Record.RESUME) {
+                            continue;
+                        } else if (perviousPerviousRollRecord.getRollTs() == record.getRollTs()) {
                             perviousRollRecord = perviousPerviousRollRecord;
                         } else {
                             perviousRollRecord = record;

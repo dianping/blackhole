@@ -147,13 +147,17 @@ public class Supervisor {
     
     public void cachedSend(Map<String, Message> toBeSend) {
         for (Map.Entry<String, Message> entry : toBeSend.entrySet()) {
-            SimpleConnection agent = getConnectionByHostname(entry.getKey());
-            if (agent == null) {
-                LOG.info("Can not find any agents connected by " + entry.getKey() + ", message send abort.");
-                continue;
-            }
-            send(agent, entry.getValue());
+            cachedSend(entry.getKey(), entry.getValue());
         }
+    }
+    
+    public void cachedSend(String host, Message toBeSend) {
+        SimpleConnection agent = getConnectionByHostname(host);
+        if (agent == null) {
+            LOG.info("Can not find any agents connected by " + host + ", message send abort.");
+            return;
+        }
+        send(agent, toBeSend);
     }
     
     void findAndSendAppConfRes(TopicConfig confInfo) {

@@ -544,6 +544,7 @@ public class Agent implements Runnable {
                                     LOG.warn("QUIT but " + topicMeta.getTailFile() + " not exists, retire stream and trigger CLEAN.");
                                     send(PBwrap.wrapRetireStream(topic, hostname, id));
                                 } else if ((logReader = topicReaders.get(topicMeta)) != null) {
+                                    LOG.info("begin last log rotate");
                                     logReader.getLogFSM().beginLastLogRotate();
                                 } else {
                                     LOG.info(topicMeta + " has already stopped.");
@@ -564,7 +565,6 @@ public class Agent implements Runnable {
                     for (String id : ids) {
                         topicId = new TopicId(topic, id);
                         if ((topicMeta = topics.get(topicId)) != null) {
-                            // set a stream status to dying, and send a special rotate message.
                             if (topicMeta.isDying()) {
                                 if ((logReader = topicReaders.get(topicMeta)) != null) {
                                     LOG.info("Clean up " + topicMeta);
@@ -575,7 +575,7 @@ public class Agent implements Runnable {
                                     LOG.info(topicMeta + " has already stopped.");
                                 }
                             } else {
-                                LOG.info(topicId + " was dying.");
+                                LOG.info(topicId + " clean ignore due to still alive.");
                             }
                         }
                     }
