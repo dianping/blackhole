@@ -6,6 +6,7 @@ public abstract class ParamsKey {
         public static final String WATCH_FILE = "watchLog";
         public static final String ROLL_PERIOD = "rollPeriod";
         public static final String MAX_LINE_SIZE = "maxLineSize";
+        public static final String CMDB_APP = "app";
     }
 
     public static class LionNode {
