@@ -174,7 +174,8 @@ public class Supervisor {
                 String.valueOf(confInfo.getMaxLineSize()),
                 String.valueOf(confInfo.getReadInterval()),
                 String.valueOf(confInfo.getMinMsgSent()),
-                String.valueOf(confInfo.getMsgBufSize())
+                String.valueOf(confInfo.getMsgBufSize()),
+                String.valueOf(confInfo.getBandwidthPerSec())
         );
         appConfResList.add(appConfRes);
         Message message = PBwrap.wrapConfRes(appConfResList, null);
@@ -212,6 +213,7 @@ public class Supervisor {
                     String.valueOf(confInfo.getReadInterval()),
                     String.valueOf(confInfo.getMinMsgSent()),
                     String.valueOf(confInfo.getMsgBufSize()),
+                    String.valueOf(confInfo.getBandwidthPerSec()),
                     idsInTheSameHost);
             lxcConfResList.add(lxcConfRes);
             Message message = PBwrap.wrapConfRes(null, lxcConfResList);
@@ -2003,6 +2005,7 @@ public class Supervisor {
             String readInterval = String.valueOf(confInfo.getReadInterval());
             String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
             String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
+            String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
             String watchFile = confInfo.getWatchLog();
             if (watchFile == null) {
                 LOG.error("Can not get watch file of " + topic);
@@ -2012,7 +2015,7 @@ public class Supervisor {
             }
             AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile,
                     rotatePeriod, rollPeriod, maxLineSize, readInterval,
-                    minMsgSent, msgBufSize);
+                    minMsgSent, msgBufSize, bandwidthPerSec);
             appConfResList.add(appConfRes);
         }
         if (!appConfResList.isEmpty()) {
@@ -2038,6 +2041,7 @@ public class Supervisor {
                 String watchFile = confInfo.getWatchLog();
                 String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
                 String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
+                String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
                 Set<String> ids = confInfo.getInsByHost(connection.getHost());
                 if (ids == null) {
                     LOG.error("Can not get instances by " + topic + " and " + connection.getHost());
@@ -2045,7 +2049,7 @@ public class Supervisor {
                 }
                 LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile,
                         rotatePeriod, rollPeriod, maxLineSize, readInterval,
-                        minMsgSent, msgBufSize, ids);
+                        minMsgSent, msgBufSize, bandwidthPerSec, ids);
                 lxcConfResList.add(lxcConfRes);
             }
             if (!lxcConfResList.isEmpty()) {

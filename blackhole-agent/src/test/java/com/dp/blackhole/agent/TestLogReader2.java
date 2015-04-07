@@ -24,7 +24,7 @@ public class TestLogReader2 {
     @Test
     public void testRestoreMissingRotationRecords() {
         TopicId topicId = new TopicId(MAGIC, null);
-        TopicMeta meta = new TopicMeta(topicId, SimAgent.TEST_ROLL_FILE, 3600, 3600, 1024, 1L, 5, 4096);
+        TopicMeta meta = new TopicMeta(topicId, SimAgent.TEST_ROLL_FILE, 3600, 3600, 1024, 1L, 5, 4096, 1024*1024);
         LogReader spyReader = spy(new LogReader(new SimAgent(), meta, "/tmp/test1"));
         LocalRecorder spyLocalRecorder = spy(new LocalRecorder("/tmp/test1", meta));
         try {

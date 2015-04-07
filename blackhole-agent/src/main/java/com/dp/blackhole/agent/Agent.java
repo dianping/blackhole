@@ -212,7 +212,8 @@ public class Agent implements Runnable {
         long readInterval = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.READ_INTERVAL, 1L);
         int minMsgSent = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, 30);
         int msgBufSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, 512000);
-        TopicMeta topicMeta = new TopicMeta(topicId, path, rotatePeriod, rollPeriod, maxLineSize, readInterval, minMsgSent, msgBufSize);
+        int bandwidthPerSec = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.BANDWIDTH_PER_SEC, 10 * 1024 * 1024);
+        TopicMeta topicMeta = new TopicMeta(topicId, path, rotatePeriod, rollPeriod, maxLineSize, readInterval, minMsgSent, msgBufSize, bandwidthPerSec);
         topics.put(topicId, topicMeta);
         return topicMeta;
     }
@@ -476,6 +477,8 @@ public class Agent implements Runnable {
                                     + ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, lxcConfRes.getMinMsgSent());
                             confKeeper.addRawProperty(topic + "."
                                     + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, lxcConfRes.getMsgBufSize());
+                            confKeeper.addRawProperty(topic + "."
+                                    + ParamsKey.TopicConf.BANDWIDTH_PER_SEC, lxcConfRes.getBandwidthPerSec());
                             fillUpAppLogsFromConfig(topicId);
                             startLogReader(topicId);
                             register(topicId, Util.getTS());
@@ -513,6 +516,8 @@ public class Agent implements Runnable {
                                 + ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, appConfRes.getMinMsgSent());
                         confKeeper.addRawProperty(topic + "."
                                 + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, appConfRes.getMsgBufSize());
+                        confKeeper.addRawProperty(topic + "."
+                                + ParamsKey.TopicConf.BANDWIDTH_PER_SEC, appConfRes.getBandwidthPerSec());
                         fillUpAppLogsFromConfig(topicId);
                         ++accepted;
                         startLogReader(topicId);

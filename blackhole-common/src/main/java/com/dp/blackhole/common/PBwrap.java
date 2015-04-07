@@ -302,7 +302,7 @@ public class PBwrap {
     }
     
     public static AppConfRes wrapAppConfRes(String topic, String watchFile,
-            String rotatePeriod, String rollPeriod, String maxLineSize, String readInterval, String minMsgSent, String msgBufSize) {
+            String rotatePeriod, String rollPeriod, String maxLineSize, String readInterval, String minMsgSent, String msgBufSize, String bandwidthPerSec) {
         AppConfRes.Builder builder = AppConfRes.newBuilder();
         builder.setTopic(topic);
         builder.setRotatePeriod(rotatePeriod);
@@ -314,11 +314,12 @@ public class PBwrap {
         builder.setReadInterval(readInterval);
         builder.setMinMsgSent(minMsgSent);
         builder.setMsgBufSize(msgBufSize);
+        builder.setBandwidthPerSec(bandwidthPerSec);
         return builder.build();
     }
     
     public static LxcConfRes wrapLxcConfRes(String topic, String watchFile,
-            String rotatePeriod, String rollPeriod, String maxLineSize, String readInterval, String minMsgSent, String msgBufSize, Set<String> ids) {
+            String rotatePeriod, String rollPeriod, String maxLineSize, String readInterval, String minMsgSent, String msgBufSize, String bandwidthPerSec, Set<String> ids) {
         LxcConfRes.Builder builder = LxcConfRes.newBuilder();
         builder.setTopic(topic);
         builder.setRotatePeriod(rotatePeriod);
@@ -331,6 +332,7 @@ public class PBwrap {
         builder.addAllInstanceIds(ids);
         builder.setMinMsgSent(minMsgSent);
         builder.setMsgBufSize(msgBufSize);
+        builder.setBandwidthPerSec(bandwidthPerSec);
         return builder.build();
     }
     

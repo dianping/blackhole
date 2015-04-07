@@ -15,7 +15,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.dp.blackhole.agent.TopicMeta;
-import com.dp.blackhole.agent.RollRecovery;
 import com.dp.blackhole.agent.TopicMeta.TopicId;
 import com.dp.blackhole.agent.persist.LocalRecorder;
 import com.dp.blackhole.agent.persist.Record;
@@ -54,7 +53,7 @@ public class TestRollRecovery {
         when(state.retrive(SimAgent.rollTS)).thenReturn(new Record(Record.ROTATE, SimAgent.rollTS, LogReader.BEGIN_OFFSET_OF_FILE, LogReader.END_OFFSET_OF_FILE));//or 598
         
         TopicId topicId = new TopicId(MAGIC, null);
-        appLog = new TopicMeta(topicId, file.getAbsolutePath(), 3600, 3600, 1024, 1L, 5, 4096);
+        appLog = new TopicMeta(topicId, file.getAbsolutePath(), 3600, 3600, 1024, 1L, 5, 4096, 1024*1024);
         SimRecoveryServer server = new SimRecoveryServer(port, header, receives);
         serverThread = new Thread(server);
         serverThread.start();

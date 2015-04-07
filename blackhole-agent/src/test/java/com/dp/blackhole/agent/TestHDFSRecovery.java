@@ -23,7 +23,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dp.blackhole.agent.RollRecovery;
 import com.dp.blackhole.agent.SimAgent;
 import com.dp.blackhole.agent.TopicMeta.TopicId;
 import com.dp.blackhole.agent.persist.LocalRecorder;
@@ -97,7 +96,7 @@ public class TestHDFSRecovery {
     @Test
     public void test() throws IOException, InterruptedException {
         TopicId topicId = new TopicId(MAGIC, null);
-        TopicMeta appLog = new TopicMeta(topicId, file.getAbsolutePath(), 3600, 3600, 1024, 1L, 5, 4096);
+        TopicMeta appLog = new TopicMeta(topicId, file.getAbsolutePath(), 3600, 3600, 1024, 1L, 5, 4096, 1024*1024);
         RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false, true, state);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();

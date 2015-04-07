@@ -18,10 +18,11 @@ public class TopicMeta implements Serializable {
     private int minMsgSent;
     private int msgBufSize;
     private long rollPeriod;
+    private int bandwidthPerSec;
     
     public TopicMeta(TopicId topicId, String tailFile, long rotatePeriod,
             long rollPeriod, int maxLineSize, long readInterval,
-            int minMsgSent, int msgBufSize) {
+            int minMsgSent, int msgBufSize, int bandwidthPerSec) {
         this.topicId = topicId;
         this.source = Util.getSource(Agent.getHost(), topicId.getInstanceId());
         this.tailFile = tailFile;
@@ -33,6 +34,7 @@ public class TopicMeta implements Serializable {
         this.readInterval = readInterval;
         this.minMsgSent = minMsgSent;
         this.msgBufSize = msgBufSize;
+        this.bandwidthPerSec = bandwidthPerSec;
     }
 
     public TopicId getTopicId() {
@@ -97,6 +99,14 @@ public class TopicMeta implements Serializable {
 
     public void setMsgBufSize(int msgBufSize) {
         this.msgBufSize = msgBufSize;
+    }
+
+    public int getBandwidthPerSec() {
+        return bandwidthPerSec;
+    }
+
+    public void setBandwidthPerSec(int bandwidthPerSec) {
+        this.bandwidthPerSec = bandwidthPerSec;
     }
 
     @Override

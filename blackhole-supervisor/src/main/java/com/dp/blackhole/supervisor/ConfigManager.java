@@ -213,6 +213,8 @@ public class ConfigManager {
                     confInfo.setMinMsgSent(Util.parseInt(value, 30));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE)) {
                     confInfo.setMsgBufSize(Util.parseInt(value, 512000));
+                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.BANDWIDTH_PER_SEC)) {
+                    confInfo.setBandwidthPerSec(Util.parseInt(value, 0));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.APP)) {
                     internalFillingCmdbMap(topic, value);
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.OWNER)) {

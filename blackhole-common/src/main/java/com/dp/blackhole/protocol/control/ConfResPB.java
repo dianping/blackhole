@@ -295,6 +295,21 @@ public final class ConfResPB {
        */
       com.google.protobuf.ByteString
           getRollPeriodBytes();
+
+      // optional string bandwidth_per_sec = 9 [default = "0"];
+      /**
+       * <code>optional string bandwidth_per_sec = 9 [default = "0"];</code>
+       */
+      boolean hasBandwidthPerSec();
+      /**
+       * <code>optional string bandwidth_per_sec = 9 [default = "0"];</code>
+       */
+      java.lang.String getBandwidthPerSec();
+      /**
+       * <code>optional string bandwidth_per_sec = 9 [default = "0"];</code>
+       */
+      com.google.protobuf.ByteString
+          getBandwidthPerSecBytes();
     }
     /**
      * Protobuf type {@code blackhole.ConfRes.AppConfRes}
@@ -385,6 +400,11 @@ public final class ConfResPB {
               case 66: {
                 bitField0_ |= 0x00000080;
                 rollPeriod_ = input.readBytes();
+                break;
+              }
+              case 74: {
+                bitField0_ |= 0x00000100;
+                bandwidthPerSec_ = input.readBytes();
                 break;
               }
             }
@@ -771,6 +791,49 @@ public final class ConfResPB {
         }
       }
 
+      // optional string bandwidth_per_sec = 9 [default = "0"];
+      public static final int BANDWIDTH_PER_SEC_FIELD_NUMBER = 9;
+      private java.lang.Object bandwidthPerSec_;
+      /**
+       * <code>optional string bandwidth_per_sec = 9 [default = "0"];</code>
+       */
+      public boolean hasBandwidthPerSec() {
+        return ((bitField0_ & 0x00000100) == 0x00000100);
+      }
+      /**
+       * <code>optional string bandwidth_per_sec = 9 [default = "0"];</code>
+       */
+      public java.lang.String getBandwidthPerSec() {
+        java.lang.Object ref = bandwidthPerSec_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            bandwidthPerSec_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string bandwidth_per_sec = 9 [default = "0"];</code>
+       */
+      public com.google.protobuf.ByteString
+          getBandwidthPerSecBytes() {
+        java.lang.Object ref = bandwidthPerSec_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          bandwidthPerSec_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
       private void initFields() {
         topic_ = "";
         watchFile_ = "";
@@ -780,6 +843,7 @@ public final class ConfResPB {
         minMsgSent_ = "30";
         msgBufSize_ = "512000";
         rollPeriod_ = "";
+        bandwidthPerSec_ = "0";
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -829,6 +893,9 @@ public final class ConfResPB {
         if (((bitField0_ & 0x00000080) == 0x00000080)) {
           output.writeBytes(8, getRollPeriodBytes());
         }
+        if (((bitField0_ & 0x00000100) == 0x00000100)) {
+          output.writeBytes(9, getBandwidthPerSecBytes());
+        }
         getUnknownFields().writeTo(output);
       }
 
@@ -869,6 +936,10 @@ public final class ConfResPB {
         if (((bitField0_ & 0x00000080) == 0x00000080)) {
           size += com.google.protobuf.CodedOutputStream
             .computeBytesSize(8, getRollPeriodBytes());
+        }
+        if (((bitField0_ & 0x00000100) == 0x00000100)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(9, getBandwidthPerSecBytes());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -1002,6 +1073,8 @@ public final class ConfResPB {
           bitField0_ = (bitField0_ & ~0x00000040);
           rollPeriod_ = "";
           bitField0_ = (bitField0_ & ~0x00000080);
+          bandwidthPerSec_ = "0";
+          bitField0_ = (bitField0_ & ~0x00000100);
           return this;
         }
 
@@ -1062,6 +1135,10 @@ public final class ConfResPB {
             to_bitField0_ |= 0x00000080;
           }
           result.rollPeriod_ = rollPeriod_;
+          if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
+            to_bitField0_ |= 0x00000100;
+          }
+          result.bandwidthPerSec_ = bandwidthPerSec_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -1116,6 +1193,11 @@ public final class ConfResPB {
           if (other.hasRollPeriod()) {
             bitField0_ |= 0x00000080;
             rollPeriod_ = other.rollPeriod_;
+            onChanged();
+          }
+          if (other.hasBandwidthPerSec()) {
+            bitField0_ |= 0x00000100;
+            bandwidthPerSec_ = other.bandwidthPerSec_;
             onChanged();
           }
           this.mergeUnknownFields(other.getUnknownFields());
@@ -1749,6 +1831,80 @@ public final class ConfResPB {
           return this;
         }
 
+        // optional string bandwidth_per_sec = 9 [default = "0"];
+        private java.lang.Object bandwidthPerSec_ = "0";
+        /**
+         * <code>optional string bandwidth_per_sec = 9 [default = "0"];</code>
+         */
+        public boolean hasBandwidthPerSec() {
+          return ((bitField0_ & 0x00000100) == 0x00000100);
+        }
+        /**
+         * <code>optional string bandwidth_per_sec = 9 [default = "0"];</code>
+         */
+        public java.lang.String getBandwidthPerSec() {
+          java.lang.Object ref = bandwidthPerSec_;
+          if (!(ref instanceof java.lang.String)) {
+            java.lang.String s = ((com.google.protobuf.ByteString) ref)
+                .toStringUtf8();
+            bandwidthPerSec_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string bandwidth_per_sec = 9 [default = "0"];</code>
+         */
+        public com.google.protobuf.ByteString
+            getBandwidthPerSecBytes() {
+          java.lang.Object ref = bandwidthPerSec_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            bandwidthPerSec_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string bandwidth_per_sec = 9 [default = "0"];</code>
+         */
+        public Builder setBandwidthPerSec(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000100;
+          bandwidthPerSec_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string bandwidth_per_sec = 9 [default = "0"];</code>
+         */
+        public Builder clearBandwidthPerSec() {
+          bitField0_ = (bitField0_ & ~0x00000100);
+          bandwidthPerSec_ = getDefaultInstance().getBandwidthPerSec();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string bandwidth_per_sec = 9 [default = "0"];</code>
+         */
+        public Builder setBandwidthPerSecBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000100;
+          bandwidthPerSec_ = value;
+          onChanged();
+          return this;
+        }
+
         // @@protoc_insertion_point(builder_scope:blackhole.ConfRes.AppConfRes)
       }
 
@@ -1902,6 +2058,21 @@ public final class ConfResPB {
        */
       com.google.protobuf.ByteString
           getRollPeriodBytes();
+
+      // optional string bandwidth_per_sec = 10 [default = "0"];
+      /**
+       * <code>optional string bandwidth_per_sec = 10 [default = "0"];</code>
+       */
+      boolean hasBandwidthPerSec();
+      /**
+       * <code>optional string bandwidth_per_sec = 10 [default = "0"];</code>
+       */
+      java.lang.String getBandwidthPerSec();
+      /**
+       * <code>optional string bandwidth_per_sec = 10 [default = "0"];</code>
+       */
+      com.google.protobuf.ByteString
+          getBandwidthPerSecBytes();
     }
     /**
      * Protobuf type {@code blackhole.ConfRes.LxcConfRes}
@@ -2000,6 +2171,11 @@ public final class ConfResPB {
               case 74: {
                 bitField0_ |= 0x00000080;
                 rollPeriod_ = input.readBytes();
+                break;
+              }
+              case 82: {
+                bitField0_ |= 0x00000100;
+                bandwidthPerSec_ = input.readBytes();
                 break;
               }
             }
@@ -2419,6 +2595,49 @@ public final class ConfResPB {
         }
       }
 
+      // optional string bandwidth_per_sec = 10 [default = "0"];
+      public static final int BANDWIDTH_PER_SEC_FIELD_NUMBER = 10;
+      private java.lang.Object bandwidthPerSec_;
+      /**
+       * <code>optional string bandwidth_per_sec = 10 [default = "0"];</code>
+       */
+      public boolean hasBandwidthPerSec() {
+        return ((bitField0_ & 0x00000100) == 0x00000100);
+      }
+      /**
+       * <code>optional string bandwidth_per_sec = 10 [default = "0"];</code>
+       */
+      public java.lang.String getBandwidthPerSec() {
+        java.lang.Object ref = bandwidthPerSec_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            bandwidthPerSec_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string bandwidth_per_sec = 10 [default = "0"];</code>
+       */
+      public com.google.protobuf.ByteString
+          getBandwidthPerSecBytes() {
+        java.lang.Object ref = bandwidthPerSec_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          bandwidthPerSec_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
       private void initFields() {
         topic_ = "";
         watchFile_ = "";
@@ -2429,6 +2648,7 @@ public final class ConfResPB {
         minMsgSent_ = "30";
         msgBufSize_ = "512000";
         rollPeriod_ = "";
+        bandwidthPerSec_ = "0";
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -2476,6 +2696,9 @@ public final class ConfResPB {
         }
         if (((bitField0_ & 0x00000080) == 0x00000080)) {
           output.writeBytes(9, getRollPeriodBytes());
+        }
+        if (((bitField0_ & 0x00000100) == 0x00000100)) {
+          output.writeBytes(10, getBandwidthPerSecBytes());
         }
         getUnknownFields().writeTo(output);
       }
@@ -2526,6 +2749,10 @@ public final class ConfResPB {
         if (((bitField0_ & 0x00000080) == 0x00000080)) {
           size += com.google.protobuf.CodedOutputStream
             .computeBytesSize(9, getRollPeriodBytes());
+        }
+        if (((bitField0_ & 0x00000100) == 0x00000100)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(10, getBandwidthPerSecBytes());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -2661,6 +2888,8 @@ public final class ConfResPB {
           bitField0_ = (bitField0_ & ~0x00000080);
           rollPeriod_ = "";
           bitField0_ = (bitField0_ & ~0x00000100);
+          bandwidthPerSec_ = "0";
+          bitField0_ = (bitField0_ & ~0x00000200);
           return this;
         }
 
@@ -2727,6 +2956,10 @@ public final class ConfResPB {
             to_bitField0_ |= 0x00000080;
           }
           result.rollPeriod_ = rollPeriod_;
+          if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
+            to_bitField0_ |= 0x00000100;
+          }
+          result.bandwidthPerSec_ = bandwidthPerSec_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -2791,6 +3024,11 @@ public final class ConfResPB {
           if (other.hasRollPeriod()) {
             bitField0_ |= 0x00000100;
             rollPeriod_ = other.rollPeriod_;
+            onChanged();
+          }
+          if (other.hasBandwidthPerSec()) {
+            bitField0_ |= 0x00000200;
+            bandwidthPerSec_ = other.bandwidthPerSec_;
             onChanged();
           }
           this.mergeUnknownFields(other.getUnknownFields());
@@ -3509,6 +3747,80 @@ public final class ConfResPB {
   }
   bitField0_ |= 0x00000100;
           rollPeriod_ = value;
+          onChanged();
+          return this;
+        }
+
+        // optional string bandwidth_per_sec = 10 [default = "0"];
+        private java.lang.Object bandwidthPerSec_ = "0";
+        /**
+         * <code>optional string bandwidth_per_sec = 10 [default = "0"];</code>
+         */
+        public boolean hasBandwidthPerSec() {
+          return ((bitField0_ & 0x00000200) == 0x00000200);
+        }
+        /**
+         * <code>optional string bandwidth_per_sec = 10 [default = "0"];</code>
+         */
+        public java.lang.String getBandwidthPerSec() {
+          java.lang.Object ref = bandwidthPerSec_;
+          if (!(ref instanceof java.lang.String)) {
+            java.lang.String s = ((com.google.protobuf.ByteString) ref)
+                .toStringUtf8();
+            bandwidthPerSec_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string bandwidth_per_sec = 10 [default = "0"];</code>
+         */
+        public com.google.protobuf.ByteString
+            getBandwidthPerSecBytes() {
+          java.lang.Object ref = bandwidthPerSec_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            bandwidthPerSec_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string bandwidth_per_sec = 10 [default = "0"];</code>
+         */
+        public Builder setBandwidthPerSec(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000200;
+          bandwidthPerSec_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string bandwidth_per_sec = 10 [default = "0"];</code>
+         */
+        public Builder clearBandwidthPerSec() {
+          bitField0_ = (bitField0_ & ~0x00000200);
+          bandwidthPerSec_ = getDefaultInstance().getBandwidthPerSec();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string bandwidth_per_sec = 10 [default = "0"];</code>
+         */
+        public Builder setBandwidthPerSecBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000200;
+          bandwidthPerSec_ = value;
           onChanged();
           return this;
         }
@@ -4443,22 +4755,24 @@ public final class ConfResPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rConfRes.proto\022\tblackhole\"\245\004\n\007ConfRes\0221" +
+      "\n\rConfRes.proto\022\tblackhole\"\341\004\n\007ConfRes\0221" +
       "\n\nappConfRes\030\001 \003(\0132\035.blackhole.ConfRes.A" +
       "ppConfRes\0221\n\nlxcConfRes\030\002 \003(\0132\035.blackhol" +
-      "e.ConfRes.LxcConfRes\032\315\001\n\nAppConfRes\022\r\n\005t" +
+      "e.ConfRes.LxcConfRes\032\353\001\n\nAppConfRes\022\r\n\005t" +
       "opic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \002(\t\022\025\n\rrotate" +
       "_period\030\003 \002(\t\022\035\n\rmax_line_size\030\004 \001(\t:\00651" +
       "2000\022\031\n\rread_interval\030\005 \001(\t:\0021L\022\030\n\014min_m" +
       "sg_sent\030\006 \001(\t:\00230\022\034\n\014msg_buf_size\030\007 \001(\t:" +
-      "\006512000\022\023\n\013roll_period\030\010 \001(\t\032\343\001\n\nLxcConf" +
-      "Res\022\r\n\005topic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \001(\t\022\025",
-      "\n\rrotate_period\030\003 \002(\t\022\035\n\rmax_line_size\030\004" +
-      " \001(\t:\006512000\022\031\n\rread_interval\030\005 \001(\t:\0021L\022" +
-      "\024\n\014instance_ids\030\006 \003(\t\022\030\n\014min_msg_sent\030\007 " +
-      "\001(\t:\00230\022\034\n\014msg_buf_size\030\010 \001(\t:\006512000\022\023\n" +
-      "\013roll_period\030\t \001(\tB.\n!com.dp.blackhole.p" +
-      "rotocol.controlB\tConfResPB"
+      "\006512000\022\023\n\013roll_period\030\010 \001(\t\022\034\n\021bandwidt" +
+      "h_per_sec\030\t \001(\t:\0010\032\201\002\n\nLxcConfRes\022\r\n\005top",
+      "ic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \001(\t\022\025\n\rrotate_p" +
+      "eriod\030\003 \002(\t\022\035\n\rmax_line_size\030\004 \001(\t:\0065120" +
+      "00\022\031\n\rread_interval\030\005 \001(\t:\0021L\022\024\n\014instanc" +
+      "e_ids\030\006 \003(\t\022\030\n\014min_msg_sent\030\007 \001(\t:\00230\022\034\n" +
+      "\014msg_buf_size\030\010 \001(\t:\006512000\022\023\n\013roll_peri" +
+      "od\030\t \001(\t\022\034\n\021bandwidth_per_sec\030\n \001(\t:\0010B." +
+      "\n!com.dp.blackhole.protocol.controlB\tCon" +
+      "fResPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -4476,13 +4790,13 @@ public final class ConfResPB {
           internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_AppConfRes_descriptor,
-              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "MinMsgSent", "MsgBufSize", "RollPeriod", });
+              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "MinMsgSent", "MsgBufSize", "RollPeriod", "BandwidthPerSec", });
           internal_static_blackhole_ConfRes_LxcConfRes_descriptor =
             internal_static_blackhole_ConfRes_descriptor.getNestedTypes().get(1);
           internal_static_blackhole_ConfRes_LxcConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_LxcConfRes_descriptor,
-              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "InstanceIds", "MinMsgSent", "MsgBufSize", "RollPeriod", });
+              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "InstanceIds", "MinMsgSent", "MsgBufSize", "RollPeriod", "BandwidthPerSec", });
           return null;
         }
       };

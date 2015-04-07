@@ -23,6 +23,7 @@ public class TopicConfig {
     private String compression;
     private int minMsgSent = DEFAULT_MIN_MSG_SENT;
     private int msgBufSize = DEFAULT_MSG_BUF_SIZE;
+    private int bandwidthPerSec = 0;
     
     public TopicConfig(String topic) {
         this.topic = topic;
@@ -117,6 +118,12 @@ public class TopicConfig {
     }
     public void setMsgBufSize(int msgBufSize) {
         this.msgBufSize = msgBufSize;
+    }
+    public int getBandwidthPerSec() {
+        return bandwidthPerSec;
+    }
+    public void setBandwidthPerSec(int bandwidthPerSec) {
+        this.bandwidthPerSec = bandwidthPerSec;
     }
     public void addIdsByHosts(Map<String, Set<String>> hostIds) {
         if (getInstances() == null) {
