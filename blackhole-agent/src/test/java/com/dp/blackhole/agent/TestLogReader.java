@@ -1,6 +1,7 @@
 package com.dp.blackhole.agent;
 
 import static org.junit.Assert.*;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -16,11 +17,17 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.dp.blackhole.agent.RemoteSender;
 import com.dp.blackhole.agent.TopicMeta;
 import com.dp.blackhole.agent.FileListener;
 import com.dp.blackhole.agent.LogReader;
-import com.dp.blackhole.agent.TopicMeta.MetaKey;
+import com.dp.blackhole.agent.TopicMeta.TopicId;
 import com.dp.blackhole.broker.BrokerService;
 import com.dp.blackhole.broker.ByteBufferChannel;
 import com.dp.blackhole.broker.SimBroker;
@@ -31,6 +38,9 @@ import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.FileMessageSet;
 import com.dp.blackhole.storage.MessageAndOffset;
 
+@RunWith(PowerMockRunner.class)
+@PowerMockIgnore({"org.apache.hadoop.*", "com.sun.*", "net.contentobjects.*"})
+@PrepareForTest(Agent.class)
 public class TestLogReader {
     private static final String MAGIC = "sdfjiojwe";
     private static final int port = 40001;
@@ -42,6 +52,15 @@ public class TestLogReader {
     public static void setUpBeforeClass() throws Exception {
         ConfigKeeper confKeeper = new ConfigKeeper();
         confKeeper.addRawProperty(MAGIC + ".rollPeriod", "3600");
+        //build a server
+        Properties properties = new Properties();
+        properties.setProperty("GenServer.handlercount", "1");
+        properties.setProperty("broker.service.port", "40001");
+        properties.setProperty("broker.storage.dir", tmpDir);
+        BrokerService pubservice = new BrokerService(properties);
+        new SimBroker(port);
+        SimBroker.getRollMgr().init("/tmp/hdfs", "gz", 40020, 5000, 1, 1, 60000);
+        pubservice.start();
     }
 
     @AfterClass
@@ -50,33 +69,27 @@ public class TestLogReader {
 
     @Before
     public void setUp() throws Exception {
-        //build a server
-        Properties properties = new Properties();
-        properties.setProperty("GenServer.handlercount", "1");
-        properties.setProperty("broker.service.port", "40001");
-        properties.setProperty("broker.storage.dir", tmpDir);
-        BrokerService pubservice = new BrokerService(properties);
-        new SimBroker(port);
-        SimBroker.getRollMgr().init("/tmp/hdfs", ".gz", 40020, 5000, 1, 1, 60000);
-        pubservice.start();
-
         //build a app log
         SimLogger logger = new SimLogger(100);
         loggerThread = new Thread(logger);
+        loggerThread.start();
         expectedLines = logger.getVerifyLines();
     }
 
     @After
     public void tearDown() throws Exception {
         loggerThread.interrupt();
+        SimAgent.deleteTmpFile(SimLogger.TEST_ROLL_FILE_NAME);
         SimAgent.deleteTmpFile(MAGIC);
     }
 
     @Test
     public void testFileRotated() throws IOException {
+        PowerMockito.mockStatic(Agent.class);
         String localhost = Util.getLocalHost();
-        MetaKey metaKey = new MetaKey(MAGIC, null);
-        TopicMeta appLog = new TopicMeta(metaKey, SimAgent.TEST_ROLL_FILE, 3600, 1024);
+        when(Agent.getHost()).thenReturn(localhost);
+        TopicId topicId = new TopicId(MAGIC, null);
+        TopicMeta topicMeta = new TopicMeta(topicId, SimAgent.TEST_ROLL_FILE, 3600, 3600, 1024, 1L, 5, 4096);
         SimAgent agent = new SimAgent();
         FileListener listener;
         try {
@@ -86,15 +99,16 @@ public class TestLogReader {
             return;
         }
         agent.setListener(listener);
-        loggerThread.start();
         Thread readerThread = null;
         try {
-            Thread.sleep(500);
-            LogReader reader = new LogReader(agent, SimAgent.HOSTNAME, localhost,
-                    port, appLog);
+            RemoteSender sender = new RemoteSender(topicMeta, localhost, port);
+            sender.initializeRemoteConnection();
+            verifyStatic();
+            LogReader reader = new LogReader(agent, topicMeta, "/tmp");
+            reader.setSender(sender);
             readerThread = new Thread(reader);
-            Thread.sleep(1000);//ignore file first create
             readerThread.start();
+            reader.getLogFSM().doFileAppendForce();
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -110,11 +124,11 @@ public class TestLogReader {
         Iterator<MessageAndOffset> iter = bms.getItertor();
         Charset charset = Charset.forName("UTF-8");
         CharsetDecoder decoder = charset.newDecoder();
-        int index = 10;
+        MessageAndOffset mo = null;
         while (iter.hasNext()) {
-            MessageAndOffset mo = iter.next();
-            assertEquals(expectedLines.get(index++), decoder.decode(mo.message.payload()).toString());
+            mo = iter.next();
         }
+        assertEquals(expectedLines.get(expectedLines.size() - 12), decoder.decode(mo.message.payload()).toString());
     }
     private void fetchFileMessageSet(GatheringByteChannel channel, FileMessageSet messages) throws IOException {
         int read = 0;

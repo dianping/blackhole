@@ -8,242 +8,511 @@ public final class StreamIDPB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  public interface StreamIDOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required string topic = 1;
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    boolean hasTopic();
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    java.lang.String getTopic();
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getTopicBytes();
+
+    // required string agent_server = 2;
+    /**
+     * <code>required string agent_server = 2;</code>
+     */
+    boolean hasAgentServer();
+    /**
+     * <code>required string agent_server = 2;</code>
+     */
+    java.lang.String getAgentServer();
+    /**
+     * <code>required string agent_server = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getAgentServerBytes();
+
+    // optional string instance_id = 3;
+    /**
+     * <code>optional string instance_id = 3;</code>
+     */
+    boolean hasInstanceId();
+    /**
+     * <code>optional string instance_id = 3;</code>
+     */
+    java.lang.String getInstanceId();
+    /**
+     * <code>optional string instance_id = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getInstanceIdBytes();
+  }
+  /**
+   * Protobuf type {@code blackhole.StreamID}
+   */
   public static final class StreamID extends
-      com.google.protobuf.GeneratedMessage {
+      com.google.protobuf.GeneratedMessage
+      implements StreamIDOrBuilder {
     // Use StreamID.newBuilder() to construct.
-    private StreamID() {
-      initFields();
+    private StreamID(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private StreamID(boolean noInit) {}
-    
+    private StreamID(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final StreamID defaultInstance;
     public static StreamID getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public StreamID getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private StreamID(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              topic_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              agentServer_ = input.readBytes();
+              break;
+            }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              instanceId_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.StreamIDPB.internal_static_blackhole_StreamID_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.StreamIDPB.internal_static_blackhole_StreamID_fieldAccessorTable;
+      return com.dp.blackhole.protocol.control.StreamIDPB.internal_static_blackhole_StreamID_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.dp.blackhole.protocol.control.StreamIDPB.StreamID.class, com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<StreamID> PARSER =
+        new com.google.protobuf.AbstractParser<StreamID>() {
+      public StreamID parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new StreamID(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<StreamID> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
     // required string topic = 1;
     public static final int TOPIC_FIELD_NUMBER = 1;
-    private boolean hasTopic;
-    private java.lang.String topic_ = "";
-    public boolean hasTopic() { return hasTopic; }
-    public java.lang.String getTopic() { return topic_; }
-    
+    private java.lang.Object topic_;
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public boolean hasTopic() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public java.lang.String getTopic() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          topic_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTopicBytes() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        topic_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     // required string agent_server = 2;
     public static final int AGENT_SERVER_FIELD_NUMBER = 2;
-    private boolean hasAgentServer;
-    private java.lang.String agentServer_ = "";
-    public boolean hasAgentServer() { return hasAgentServer; }
-    public java.lang.String getAgentServer() { return agentServer_; }
-    
+    private java.lang.Object agentServer_;
+    /**
+     * <code>required string agent_server = 2;</code>
+     */
+    public boolean hasAgentServer() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required string agent_server = 2;</code>
+     */
+    public java.lang.String getAgentServer() {
+      java.lang.Object ref = agentServer_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          agentServer_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string agent_server = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAgentServerBytes() {
+      java.lang.Object ref = agentServer_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        agentServer_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     // optional string instance_id = 3;
     public static final int INSTANCE_ID_FIELD_NUMBER = 3;
-    private boolean hasInstanceId;
-    private java.lang.String instanceId_ = "";
-    public boolean hasInstanceId() { return hasInstanceId; }
-    public java.lang.String getInstanceId() { return instanceId_; }
-    
-    private void initFields() {
+    private java.lang.Object instanceId_;
+    /**
+     * <code>optional string instance_id = 3;</code>
+     */
+    public boolean hasInstanceId() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
     }
+    /**
+     * <code>optional string instance_id = 3;</code>
+     */
+    public java.lang.String getInstanceId() {
+      java.lang.Object ref = instanceId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          instanceId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string instance_id = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getInstanceIdBytes() {
+      java.lang.Object ref = instanceId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        instanceId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private void initFields() {
+      topic_ = "";
+      agentServer_ = "";
+      instanceId_ = "";
+    }
+    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      if (!hasTopic) return false;
-      if (!hasAgentServer) return false;
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasTopic()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasAgentServer()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasTopic()) {
-        output.writeString(1, getTopic());
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getTopicBytes());
       }
-      if (hasAgentServer()) {
-        output.writeString(2, getAgentServer());
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, getAgentServerBytes());
       }
-      if (hasInstanceId()) {
-        output.writeString(3, getInstanceId());
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, getInstanceIdBytes());
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
-      if (hasTopic()) {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getTopic());
+          .computeBytesSize(1, getTopicBytes());
       }
-      if (hasAgentServer()) {
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(2, getAgentServer());
+          .computeBytesSize(2, getAgentServerBytes());
       }
-      if (hasInstanceId()) {
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(3, getInstanceId());
+          .computeBytesSize(3, getInstanceIdBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-    
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
     public static com.dp.blackhole.protocol.control.StreamIDPB.StreamID parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.StreamIDPB.StreamID parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.StreamIDPB.StreamID parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.StreamIDPB.StreamID parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.StreamIDPB.StreamID parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.StreamIDPB.StreamID parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.StreamIDPB.StreamID parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static com.dp.blackhole.protocol.control.StreamIDPB.StreamID parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.StreamIDPB.StreamID parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.StreamIDPB.StreamID parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.StreamIDPB.StreamID prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code blackhole.StreamID}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> {
-      private com.dp.blackhole.protocol.control.StreamIDPB.StreamID result;
-      
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.dp.blackhole.protocol.control.StreamIDPB.StreamIDOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.dp.blackhole.protocol.control.StreamIDPB.internal_static_blackhole_StreamID_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.dp.blackhole.protocol.control.StreamIDPB.internal_static_blackhole_StreamID_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.dp.blackhole.protocol.control.StreamIDPB.StreamID.class, com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder.class);
+      }
+
       // Construct using com.dp.blackhole.protocol.control.StreamIDPB.StreamID.newBuilder()
-      private Builder() {}
-      
-      private static Builder create() {
-        Builder builder = new Builder();
-        builder.result = new com.dp.blackhole.protocol.control.StreamIDPB.StreamID();
-        return builder;
+      private Builder() {
+        maybeForceBuilderInitialization();
       }
-      
-      protected com.dp.blackhole.protocol.control.StreamIDPB.StreamID internalGetResult() {
-        return result;
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
       }
-      
-      public Builder clear() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "Cannot call clear() after build().");
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
         }
-        result = new com.dp.blackhole.protocol.control.StreamIDPB.StreamID();
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        topic_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        agentServer_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        instanceId_ = "";
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
-      
+
       public Builder clone() {
-        return create().mergeFrom(result);
+        return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDescriptor();
+        return com.dp.blackhole.protocol.control.StreamIDPB.internal_static_blackhole_StreamID_descriptor;
       }
-      
+
       public com.dp.blackhole.protocol.control.StreamIDPB.StreamID getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance();
       }
-      
-      public boolean isInitialized() {
-        return result.isInitialized();
-      }
+
       public com.dp.blackhole.protocol.control.StreamIDPB.StreamID build() {
-        if (result != null && !isInitialized()) {
+        com.dp.blackhole.protocol.control.StreamIDPB.StreamID result = buildPartial();
+        if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return buildPartial();
+        return result;
       }
-      
-      private com.dp.blackhole.protocol.control.StreamIDPB.StreamID buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        if (!isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return buildPartial();
-      }
-      
+
       public com.dp.blackhole.protocol.control.StreamIDPB.StreamID buildPartial() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "build() has already been called on this Builder.");
+        com.dp.blackhole.protocol.control.StreamIDPB.StreamID result = new com.dp.blackhole.protocol.control.StreamIDPB.StreamID(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
         }
-        com.dp.blackhole.protocol.control.StreamIDPB.StreamID returnMe = result;
-        result = null;
-        return returnMe;
+        result.topic_ = topic_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.agentServer_ = agentServer_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.instanceId_ = instanceId_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.StreamIDPB.StreamID) {
           return mergeFrom((com.dp.blackhole.protocol.control.StreamIDPB.StreamID)other);
@@ -252,141 +521,298 @@ public final class StreamIDPB {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.dp.blackhole.protocol.control.StreamIDPB.StreamID other) {
         if (other == com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance()) return this;
         if (other.hasTopic()) {
-          setTopic(other.getTopic());
+          bitField0_ |= 0x00000001;
+          topic_ = other.topic_;
+          onChanged();
         }
         if (other.hasAgentServer()) {
-          setAgentServer(other.getAgentServer());
+          bitField0_ |= 0x00000002;
+          agentServer_ = other.agentServer_;
+          onChanged();
         }
         if (other.hasInstanceId()) {
-          setInstanceId(other.getInstanceId());
+          bitField0_ |= 0x00000004;
+          instanceId_ = other.instanceId_;
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
+      public final boolean isInitialized() {
+        if (!hasTopic()) {
+          
+          return false;
+        }
+        if (!hasAgentServer()) {
+          
+          return false;
+        }
+        return true;
+      }
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              setTopic(input.readString());
-              break;
-            }
-            case 18: {
-              setAgentServer(input.readString());
-              break;
-            }
-            case 26: {
-              setInstanceId(input.readString());
-              break;
-            }
+        com.dp.blackhole.protocol.control.StreamIDPB.StreamID parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.dp.blackhole.protocol.control.StreamIDPB.StreamID) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
-      
+      private int bitField0_;
+
       // required string topic = 1;
+      private java.lang.Object topic_ = "";
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public boolean hasTopic() {
-        return result.hasTopic();
+        return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public java.lang.String getTopic() {
-        return result.getTopic();
+        java.lang.Object ref = topic_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          topic_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
-      public Builder setTopic(java.lang.String value) {
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTopicBytes() {
+        java.lang.Object ref = topic_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          topic_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public Builder setTopic(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasTopic = true;
-        result.topic_ = value;
+  bitField0_ |= 0x00000001;
+        topic_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public Builder clearTopic() {
-        result.hasTopic = false;
-        result.topic_ = getDefaultInstance().getTopic();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        topic_ = getDefaultInstance().getTopic();
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public Builder setTopicBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        topic_ = value;
+        onChanged();
+        return this;
+      }
+
       // required string agent_server = 2;
+      private java.lang.Object agentServer_ = "";
+      /**
+       * <code>required string agent_server = 2;</code>
+       */
       public boolean hasAgentServer() {
-        return result.hasAgentServer();
+        return ((bitField0_ & 0x00000002) == 0x00000002);
       }
+      /**
+       * <code>required string agent_server = 2;</code>
+       */
       public java.lang.String getAgentServer() {
-        return result.getAgentServer();
+        java.lang.Object ref = agentServer_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          agentServer_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
-      public Builder setAgentServer(java.lang.String value) {
+      /**
+       * <code>required string agent_server = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAgentServerBytes() {
+        java.lang.Object ref = agentServer_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          agentServer_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string agent_server = 2;</code>
+       */
+      public Builder setAgentServer(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasAgentServer = true;
-        result.agentServer_ = value;
+  bitField0_ |= 0x00000002;
+        agentServer_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required string agent_server = 2;</code>
+       */
       public Builder clearAgentServer() {
-        result.hasAgentServer = false;
-        result.agentServer_ = getDefaultInstance().getAgentServer();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        agentServer_ = getDefaultInstance().getAgentServer();
+        onChanged();
         return this;
       }
-      
-      // optional string instance_id = 3;
-      public boolean hasInstanceId() {
-        return result.hasInstanceId();
-      }
-      public java.lang.String getInstanceId() {
-        return result.getInstanceId();
-      }
-      public Builder setInstanceId(java.lang.String value) {
+      /**
+       * <code>required string agent_server = 2;</code>
+       */
+      public Builder setAgentServerBytes(
+          com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasInstanceId = true;
-        result.instanceId_ = value;
+  bitField0_ |= 0x00000002;
+        agentServer_ = value;
+        onChanged();
         return this;
       }
+
+      // optional string instance_id = 3;
+      private java.lang.Object instanceId_ = "";
+      /**
+       * <code>optional string instance_id = 3;</code>
+       */
+      public boolean hasInstanceId() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional string instance_id = 3;</code>
+       */
+      public java.lang.String getInstanceId() {
+        java.lang.Object ref = instanceId_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          instanceId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string instance_id = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getInstanceIdBytes() {
+        java.lang.Object ref = instanceId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          instanceId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string instance_id = 3;</code>
+       */
+      public Builder setInstanceId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        instanceId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string instance_id = 3;</code>
+       */
       public Builder clearInstanceId() {
-        result.hasInstanceId = false;
-        result.instanceId_ = getDefaultInstance().getInstanceId();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        instanceId_ = getDefaultInstance().getInstanceId();
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>optional string instance_id = 3;</code>
+       */
+      public Builder setInstanceIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        instanceId_ = value;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.StreamID)
     }
-    
+
     static {
       defaultInstance = new StreamID(true);
-      com.dp.blackhole.protocol.control.StreamIDPB.internalForceInit();
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:blackhole.StreamID)
   }
-  
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_StreamID_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_StreamID_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -410,9 +836,7 @@ public final class StreamIDPB {
           internal_static_blackhole_StreamID_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_StreamID_descriptor,
-              new java.lang.String[] { "Topic", "AgentServer", "InstanceId", },
-              com.dp.blackhole.protocol.control.StreamIDPB.StreamID.class,
-              com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder.class);
+              new java.lang.String[] { "Topic", "AgentServer", "InstanceId", });
           return null;
         }
       };
@@ -421,8 +845,6 @@ public final class StreamIDPB {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-  
-  public static void internalForceInit() {}
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }

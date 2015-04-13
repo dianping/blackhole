@@ -1,6 +1,8 @@
 package com.dp.blackhole.check;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -13,8 +15,8 @@ import org.apache.hadoop.fs.Path;
 public class Util {
     private final static Log LOG = LogFactory.getLog(Util.class);
     private static long localTimezoneOffset = TimeZone.getTimeZone("Asia/Shanghai").getRawOffset();
-    private static final int REPEATE = 3;
-    private static final int RETRY_SLEEP_TIME = 1000;
+    private static final int REPEATE = 2;
+    private static final int RETRY_SLEEP_TIME = 100;
     public static final String DONE_FLAG = "_done";
     public static final String TIMEOUT_FLAG = "_timeout";
     public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -28,7 +30,7 @@ public class Util {
         return dirs.toString();
     }
 
-    public static String getFormatFromPeroid (long period) {
+    public static String getFormatFromPeriod (long period) {
         String format;
         if (period < 60) {
             format = "yyyy-MM-dd.HH.mm.ss";
@@ -67,24 +69,62 @@ public class Util {
      * hdfsbasedir/appname/2013-11-01/14/08/machine01@appname_2013-11-01.14.08.gz.tmp
      * hdfsbasedir/appname/2013-11-01/14/08/machine02@appname_2013-11-01.14.08.gz.tmp
      */
-    public static Path getRollHdfsPath (RollIdent ident, String source) {
+    public static Path[] getRollHdfsPath (RollIdent ident, String source) {
         return getRollHdfsPathByTs(ident, ident.ts, source, false);
     }
 
-    public static Path getRollHdfsPathByTs (RollIdent ident, long checkTs, String source, boolean hidden) {
-        String format  = Util.getFormatFromPeroid(ident.period);
+    public static Path[] getRollHdfsPathByTs (RollIdent ident, long checkTs, String source, boolean hidden) {
+        String format  = Util.getFormatFromPeriod(ident.period);
         Date roll = new Date(checkTs);
         SimpleDateFormat dm= new SimpleDateFormat(format);
         if (hidden) {
-            return new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
+            Path[] hiddenPath = new Path[1];
+            hiddenPath[0] = new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
                     CheckDone.hdfsHiddenfileprefix + source + '@' + ident.app + "_" + dm.format(roll));
+            return hiddenPath;
         } else {
-            return new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
-                    source + '@' + ident.app + "_" + dm.format(roll) + CheckDone.hdfsfilesuffix);
+            int toCheckPathRatio = 2;
+            String ip = null;
+            try {
+                ip = getIpByHostname(source);
+            } catch (UnknownHostException e) {
+                toCheckPathRatio = 1;
+                LOG.error(source + " cann't be solved.", e);
+            }
+            Path[] rollPath = new Path[CheckDone.hdfsfilesuffix.length * toCheckPathRatio];
+            for(int i = 0;i < CheckDone.hdfsfilesuffix.length; i++) {
+                rollPath[i] = new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
+                    source + '@' + ident.app + "_" + dm.format(roll) + "." + CheckDone.hdfsfilesuffix[i]);
+            }
+            if (ip != null) {
+                for(int i = 0;i < CheckDone.hdfsfilesuffix.length; i++) {
+                    rollPath[i + CheckDone.hdfsfilesuffix.length] = new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
+                        ip + '@' + ident.app + "_" + dm.format(roll) + "." + CheckDone.hdfsfilesuffix[i]);
+                }
+            }
+            return rollPath;
         }
+    }
+    
+    public static String getIpByHostname(String hostname) throws UnknownHostException {
+        InetAddress inetAddress = InetAddress.getByName(hostname);
+        return inetAddress.getHostAddress().toString();
+    }
+    
+    public static boolean retryExists(Path[] expecteds) {
+        for (int i = 0; i < expecteds.length; i++) {
+            Path path = expecteds[i];
+            if (retryExists(path)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean retryExists(Path expected) {
+        if (expected == null) {
+            return false;
+        }
         for (int i = 0; i < REPEATE; i++) {
             try {
                 return CheckDone.fs.exists(expected);
@@ -126,7 +166,7 @@ public class Util {
     }
 
     public static boolean wasDone (RollIdent ident, long ts) {
-        String format  = Util.getFormatFromPeroid(ident.period);
+        String format  = Util.getFormatFromPeriod(ident.period);
         Date roll = new Date(ts);
         SimpleDateFormat dm= new SimpleDateFormat(format);
         Path done =  new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' +
@@ -145,8 +185,14 @@ public class Util {
             return null;
         }
         String value = rawValue.trim();
+        if (value.length() < 2) {
+            return null;
+        }
         if (value.charAt(0) != '[' || value.charAt(value.length() - 1) != ']') {
             return null;
+        }
+        if (value.length() == 2) {
+            return new String[]{};
         }
         String[] tmp = value.substring(1, value.length() - 1).split(",");
         String[] result = new String[tmp.length];

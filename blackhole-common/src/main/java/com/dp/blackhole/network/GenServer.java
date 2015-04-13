@@ -3,6 +3,7 @@ package com.dp.blackhole.network;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -50,8 +51,8 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
     }
     
     protected void loop() {
+        SelectionKey key = null;
         while (running) {
-            SelectionKey key = null;
             try {
                 selector.select();
             } catch (IOException e) {
@@ -59,24 +60,28 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
                 running = false;
                 continue;
             }
-            Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
-            while (iter.hasNext()) {
-                key = iter.next();
-                iter.remove();
-                try {
-                    if (key.isValid()) {
-                        if (key.isAcceptable()) {
-                            doAccept(key);
-                        } else if (key.isWritable()) {
-                            doWrite(key);
-                        } else if (key.isReadable()) {
-                            doRead(key);
+            try {
+                Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
+                while (iter.hasNext()) {
+                    key = iter.next();
+                    iter.remove();
+                    try {
+                        if (key.isValid()) {
+                            if (key.isAcceptable()) {
+                                doAccept(key);
+                            } else if (key.isWritable()) {
+                                doWrite(key);
+                            } else if (key.isReadable()) {
+                                doRead(key);
+                            }
                         }
+                    } catch (IOException e) {
+                        LOG.warn("IOE catched: ", e);
+                        closeConnection((Connection) key.attachment());
                     }
-                } catch (IOException e) {
-                    LOG.warn("IOE catched: ", e);
-                    closeConnection((Connection) key.attachment());
                 }
+            } catch (Exception e) {
+                LOG.error("Oops, got an Exception", e);
             }
         }
         releaseResources();
@@ -115,27 +120,37 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
     }
 
     private void doWrite(SelectionKey key) throws IOException {
-        key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
+        try {
+            key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
+        } catch (CancelledKeyException e) {
+            LOG.warn("Exception while server writing." + e);
+        }
         Connection connection = (Connection) key.attachment();
         
         connection.write();
         if (!connection.writeComplete()) {
             // socket buffer is full, register OP_WRITE, wait for next write
-            key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+            try {
+                key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+            } catch (CancelledKeyException e) {
+                LOG.warn("Exception while server writing." + e);
+            }
         }
     }
     
     private void doAccept(SelectionKey key) throws IOException {
         ServerSocketChannel server = (ServerSocketChannel) key.channel();
-        SocketChannel channel = server.accept();
-        if (channel == null) {
-            throw new IOException("no connection is available to be accepted");
+        SocketChannel channel;
+        while ((channel = server.accept()) != null) {
+            channel.configureBlocking(false);
+            channel.socket().setTcpNoDelay(true);
+            channel.socket().setKeepAlive(true);
+            
+            Connection connection = factory.makeConnection(channel, selector, wrappedFactory);
+            channel.register(selector, SelectionKey.OP_READ, connection);
+            Handler handler = getHandler(connection);
+            handler.addEvent(new EntityEvent(EntityEvent.CONNECTED, null, connection));
         }
-        channel.configureBlocking(false);
-        Connection connection = factory.makeConnection(channel, selector, wrappedFactory);
-        Handler handler = getHandler(connection);
-        handler.addEvent(new EntityEvent(EntityEvent.CONNECTED, null, connection));
-        channel.register(selector, SelectionKey.OP_READ, connection);
     }
     
     public void closeConnection(Connection connection) {

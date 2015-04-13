@@ -11,9 +11,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.zip.GZIPOutputStream;
+import java.util.Properties;
 
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.hadoop.io.compress.Compressor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +25,8 @@ import org.mockftpserver.fake.filesystem.FileEntry;
 import org.mockftpserver.fake.filesystem.FileSystem;
 import org.mockftpserver.fake.filesystem.UnixFakeFileSystem;
 
+import com.dp.blackhole.broker.Compression;
+import com.dp.blackhole.broker.Compression.Algorithm;
 import com.dp.blackhole.broker.RollIdent;
 import com.dp.blackhole.broker.RollManager;
 import com.dp.blackhole.broker.SimBroker;
@@ -38,9 +41,13 @@ public class TestFTPUpload {
     private final String MAGIC = "TestFTPUpload_" + Util.getTS();
     private final String FTP_BASE_DIR = "/tmp/ftp";
     private File expect;
+    private Algorithm gzCompressionAlgo;
     
     @Before
     public void setUp() throws Exception {
+        Properties prop = new Properties();
+        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
+        this.gzCompressionAlgo = Compression.getCompressionAlgorithmByName("gz");
         //build a expect file
         expect = createExpectFile(getExpectFile()+".gz");
         fakeFtpServer = new FakeFtpServer();
@@ -60,6 +67,7 @@ public class TestFTPUpload {
     public void tearDown() throws Exception {
         fakeFtpServer.stop();
         expect.delete();
+        SimBroker.deleteTmpFile("testFTPUpload");
     }
 
     @Test
@@ -71,13 +79,13 @@ public class TestFTPUpload {
         appendData(p);
         appendData(p);
         
-        RollPartition roll1 = p.markRotate();
+        RollPartition roll1 = p.markRollPartition();
         
         appendData(p);
         
         RollManager mgr = mock(RollManager.class);
         when(mgr.getParentPath(FTP_BASE_DIR, ident)).thenReturn("/tmp/ftp/" + MAGIC + "/2013-01-01/15");
-        when(mgr.getCompressedFileName(ident)).thenReturn("localhost@" + MAGIC + "_2013-01-01.15.gz");
+        when(mgr.getGZCompressedFileName(ident)).thenReturn("localhost@" + MAGIC + "_2013-01-01.15.gz");
         
         FTPConfigration configration = new FTPConfigration("localhost", fakeFtpServer.getServerControlPort(), "foo", "bar", FTP_BASE_DIR);
         FTPUpload writer = new FTPUpload(mgr, configration, ident, roll1, p);
@@ -111,7 +119,7 @@ public class TestFTPUpload {
         RollIdent rollIdent = new RollIdent();
         rollIdent.topic = appName;
         rollIdent.period = 3600;
-        rollIdent.sourceIdentify = SimBroker.HOSTNAME;
+        rollIdent.source = SimBroker.HOSTNAME;
         rollIdent.ts = SimBroker.rollTS;
         return rollIdent;
     }
@@ -120,19 +128,21 @@ public class TestFTPUpload {
             throws IOException, FileNotFoundException {
         
         File file = new File(filename);
-        GZIPOutputStream gout = new GZIPOutputStream(new FileOutputStream(file));
+        Compressor compressor = gzCompressionAlgo.getCompressor();
+        OutputStream compressionOutput = gzCompressionAlgo
+                .createCompressionStream(new FileOutputStream(file), compressor, 0);
         
         for (int i=0; i < 65; i++) {
-            gout.write(Integer.toString(i).getBytes());
-            gout.write("\n".getBytes());
+            compressionOutput.write(Integer.toString(i).getBytes());
+            compressionOutput.write("\n".getBytes());
         }
         
         for (int i=0; i < 65; i++) {
-            gout.write(Integer.toString(i).getBytes());
-            gout.write("\n".getBytes());
+            compressionOutput.write(Integer.toString(i).getBytes());
+            compressionOutput.write("\n".getBytes());
         }
                
-        gout.close();
+        compressionOutput.close();
         return file;
     }
     

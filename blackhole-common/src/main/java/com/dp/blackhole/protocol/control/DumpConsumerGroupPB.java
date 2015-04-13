@@ -8,228 +8,434 @@ public final class DumpConsumerGroupPB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  public interface DumpConsumerGroupOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required string groupId = 1;
+    /**
+     * <code>required string groupId = 1;</code>
+     */
+    boolean hasGroupId();
+    /**
+     * <code>required string groupId = 1;</code>
+     */
+    java.lang.String getGroupId();
+    /**
+     * <code>required string groupId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getGroupIdBytes();
+
+    // required string topic = 2;
+    /**
+     * <code>required string topic = 2;</code>
+     */
+    boolean hasTopic();
+    /**
+     * <code>required string topic = 2;</code>
+     */
+    java.lang.String getTopic();
+    /**
+     * <code>required string topic = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getTopicBytes();
+  }
+  /**
+   * Protobuf type {@code blackhole.DumpConsumerGroup}
+   */
   public static final class DumpConsumerGroup extends
-      com.google.protobuf.GeneratedMessage {
+      com.google.protobuf.GeneratedMessage
+      implements DumpConsumerGroupOrBuilder {
     // Use DumpConsumerGroup.newBuilder() to construct.
-    private DumpConsumerGroup() {
-      initFields();
+    private DumpConsumerGroup(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private DumpConsumerGroup(boolean noInit) {}
-    
+    private DumpConsumerGroup(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final DumpConsumerGroup defaultInstance;
     public static DumpConsumerGroup getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public DumpConsumerGroup getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private DumpConsumerGroup(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              groupId_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              topic_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.DumpConsumerGroupPB.internal_static_blackhole_DumpConsumerGroup_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.DumpConsumerGroupPB.internal_static_blackhole_DumpConsumerGroup_fieldAccessorTable;
+      return com.dp.blackhole.protocol.control.DumpConsumerGroupPB.internal_static_blackhole_DumpConsumerGroup_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup.class, com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<DumpConsumerGroup> PARSER =
+        new com.google.protobuf.AbstractParser<DumpConsumerGroup>() {
+      public DumpConsumerGroup parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new DumpConsumerGroup(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DumpConsumerGroup> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
     // required string groupId = 1;
     public static final int GROUPID_FIELD_NUMBER = 1;
-    private boolean hasGroupId;
-    private java.lang.String groupId_ = "";
-    public boolean hasGroupId() { return hasGroupId; }
-    public java.lang.String getGroupId() { return groupId_; }
-    
+    private java.lang.Object groupId_;
+    /**
+     * <code>required string groupId = 1;</code>
+     */
+    public boolean hasGroupId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string groupId = 1;</code>
+     */
+    public java.lang.String getGroupId() {
+      java.lang.Object ref = groupId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          groupId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string groupId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getGroupIdBytes() {
+      java.lang.Object ref = groupId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        groupId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     // required string topic = 2;
     public static final int TOPIC_FIELD_NUMBER = 2;
-    private boolean hasTopic;
-    private java.lang.String topic_ = "";
-    public boolean hasTopic() { return hasTopic; }
-    public java.lang.String getTopic() { return topic_; }
-    
-    private void initFields() {
+    private java.lang.Object topic_;
+    /**
+     * <code>required string topic = 2;</code>
+     */
+    public boolean hasTopic() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
     }
+    /**
+     * <code>required string topic = 2;</code>
+     */
+    public java.lang.String getTopic() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          topic_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string topic = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTopicBytes() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        topic_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private void initFields() {
+      groupId_ = "";
+      topic_ = "";
+    }
+    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      if (!hasGroupId) return false;
-      if (!hasTopic) return false;
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasGroupId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasTopic()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasGroupId()) {
-        output.writeString(1, getGroupId());
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getGroupIdBytes());
       }
-      if (hasTopic()) {
-        output.writeString(2, getTopic());
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, getTopicBytes());
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
-      if (hasGroupId()) {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getGroupId());
+          .computeBytesSize(1, getGroupIdBytes());
       }
-      if (hasTopic()) {
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(2, getTopic());
+          .computeBytesSize(2, getTopicBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-    
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
     public static com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code blackhole.DumpConsumerGroup}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> {
-      private com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup result;
-      
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroupOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.dp.blackhole.protocol.control.DumpConsumerGroupPB.internal_static_blackhole_DumpConsumerGroup_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.dp.blackhole.protocol.control.DumpConsumerGroupPB.internal_static_blackhole_DumpConsumerGroup_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup.class, com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup.Builder.class);
+      }
+
       // Construct using com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup.newBuilder()
-      private Builder() {}
-      
-      private static Builder create() {
-        Builder builder = new Builder();
-        builder.result = new com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup();
-        return builder;
+      private Builder() {
+        maybeForceBuilderInitialization();
       }
-      
-      protected com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup internalGetResult() {
-        return result;
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
       }
-      
-      public Builder clear() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "Cannot call clear() after build().");
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
         }
-        result = new com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup();
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        groupId_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        topic_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-      
+
       public Builder clone() {
-        return create().mergeFrom(result);
+        return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup.getDescriptor();
+        return com.dp.blackhole.protocol.control.DumpConsumerGroupPB.internal_static_blackhole_DumpConsumerGroup_descriptor;
       }
-      
+
       public com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup.getDefaultInstance();
       }
-      
-      public boolean isInitialized() {
-        return result.isInitialized();
-      }
+
       public com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup build() {
-        if (result != null && !isInitialized()) {
+        com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup result = buildPartial();
+        if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return buildPartial();
+        return result;
       }
-      
-      private com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        if (!isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return buildPartial();
-      }
-      
+
       public com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup buildPartial() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "build() has already been called on this Builder.");
+        com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup result = new com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
         }
-        com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup returnMe = result;
-        result = null;
-        return returnMe;
+        result.groupId_ = groupId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.topic_ = topic_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup) {
           return mergeFrom((com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup)other);
@@ -238,113 +444,219 @@ public final class DumpConsumerGroupPB {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup other) {
         if (other == com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup.getDefaultInstance()) return this;
         if (other.hasGroupId()) {
-          setGroupId(other.getGroupId());
+          bitField0_ |= 0x00000001;
+          groupId_ = other.groupId_;
+          onChanged();
         }
         if (other.hasTopic()) {
-          setTopic(other.getTopic());
+          bitField0_ |= 0x00000002;
+          topic_ = other.topic_;
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
+      public final boolean isInitialized() {
+        if (!hasGroupId()) {
+          
+          return false;
+        }
+        if (!hasTopic()) {
+          
+          return false;
+        }
+        return true;
+      }
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              setGroupId(input.readString());
-              break;
-            }
-            case 18: {
-              setTopic(input.readString());
-              break;
-            }
+        com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
-      
+      private int bitField0_;
+
       // required string groupId = 1;
+      private java.lang.Object groupId_ = "";
+      /**
+       * <code>required string groupId = 1;</code>
+       */
       public boolean hasGroupId() {
-        return result.hasGroupId();
+        return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required string groupId = 1;</code>
+       */
       public java.lang.String getGroupId() {
-        return result.getGroupId();
+        java.lang.Object ref = groupId_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          groupId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
-      public Builder setGroupId(java.lang.String value) {
+      /**
+       * <code>required string groupId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getGroupIdBytes() {
+        java.lang.Object ref = groupId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          groupId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string groupId = 1;</code>
+       */
+      public Builder setGroupId(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasGroupId = true;
-        result.groupId_ = value;
+  bitField0_ |= 0x00000001;
+        groupId_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required string groupId = 1;</code>
+       */
       public Builder clearGroupId() {
-        result.hasGroupId = false;
-        result.groupId_ = getDefaultInstance().getGroupId();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        groupId_ = getDefaultInstance().getGroupId();
+        onChanged();
         return this;
       }
-      
-      // required string topic = 2;
-      public boolean hasTopic() {
-        return result.hasTopic();
-      }
-      public java.lang.String getTopic() {
-        return result.getTopic();
-      }
-      public Builder setTopic(java.lang.String value) {
+      /**
+       * <code>required string groupId = 1;</code>
+       */
+      public Builder setGroupIdBytes(
+          com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasTopic = true;
-        result.topic_ = value;
+  bitField0_ |= 0x00000001;
+        groupId_ = value;
+        onChanged();
         return this;
       }
+
+      // required string topic = 2;
+      private java.lang.Object topic_ = "";
+      /**
+       * <code>required string topic = 2;</code>
+       */
+      public boolean hasTopic() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required string topic = 2;</code>
+       */
+      public java.lang.String getTopic() {
+        java.lang.Object ref = topic_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          topic_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string topic = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTopicBytes() {
+        java.lang.Object ref = topic_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          topic_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string topic = 2;</code>
+       */
+      public Builder setTopic(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        topic_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string topic = 2;</code>
+       */
       public Builder clearTopic() {
-        result.hasTopic = false;
-        result.topic_ = getDefaultInstance().getTopic();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        topic_ = getDefaultInstance().getTopic();
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>required string topic = 2;</code>
+       */
+      public Builder setTopicBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        topic_ = value;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.DumpConsumerGroup)
     }
-    
+
     static {
       defaultInstance = new DumpConsumerGroup(true);
-      com.dp.blackhole.protocol.control.DumpConsumerGroupPB.internalForceInit();
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:blackhole.DumpConsumerGroup)
   }
-  
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_DumpConsumerGroup_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_DumpConsumerGroup_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -368,9 +680,7 @@ public final class DumpConsumerGroupPB {
           internal_static_blackhole_DumpConsumerGroup_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_DumpConsumerGroup_descriptor,
-              new java.lang.String[] { "GroupId", "Topic", },
-              com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup.class,
-              com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup.Builder.class);
+              new java.lang.String[] { "GroupId", "Topic", });
           return null;
         }
       };
@@ -379,8 +689,6 @@ public final class DumpConsumerGroupPB {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-  
-  public static void internalForceInit() {}
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }

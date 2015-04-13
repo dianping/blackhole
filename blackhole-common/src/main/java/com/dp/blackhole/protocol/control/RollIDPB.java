@@ -8,272 +8,699 @@ public final class RollIDPB {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  public interface RollIDOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required string topic = 1;
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    boolean hasTopic();
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    java.lang.String getTopic();
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getTopicBytes();
+
+    // required string source = 2;
+    /**
+     * <code>required string source = 2;</code>
+     */
+    boolean hasSource();
+    /**
+     * <code>required string source = 2;</code>
+     */
+    java.lang.String getSource();
+    /**
+     * <code>required string source = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getSourceBytes();
+
+    // required int64 period = 3;
+    /**
+     * <code>required int64 period = 3;</code>
+     */
+    boolean hasPeriod();
+    /**
+     * <code>required int64 period = 3;</code>
+     */
+    long getPeriod();
+
+    // required int64 roll_ts = 4;
+    /**
+     * <code>required int64 roll_ts = 4;</code>
+     */
+    boolean hasRollTs();
+    /**
+     * <code>required int64 roll_ts = 4;</code>
+     */
+    long getRollTs();
+
+    // optional bool is_final = 5;
+    /**
+     * <code>optional bool is_final = 5;</code>
+     */
+    boolean hasIsFinal();
+    /**
+     * <code>optional bool is_final = 5;</code>
+     */
+    boolean getIsFinal();
+
+    // optional string compression = 6;
+    /**
+     * <code>optional string compression = 6;</code>
+     */
+    boolean hasCompression();
+    /**
+     * <code>optional string compression = 6;</code>
+     */
+    java.lang.String getCompression();
+    /**
+     * <code>optional string compression = 6;</code>
+     */
+    com.google.protobuf.ByteString
+        getCompressionBytes();
+
+    // optional bool is_Persist = 7 [default = true];
+    /**
+     * <code>optional bool is_Persist = 7 [default = true];</code>
+     */
+    boolean hasIsPersist();
+    /**
+     * <code>optional bool is_Persist = 7 [default = true];</code>
+     */
+    boolean getIsPersist();
+  }
+  /**
+   * Protobuf type {@code blackhole.RollID}
+   */
   public static final class RollID extends
-      com.google.protobuf.GeneratedMessage {
+      com.google.protobuf.GeneratedMessage
+      implements RollIDOrBuilder {
     // Use RollID.newBuilder() to construct.
-    private RollID() {
-      initFields();
+    private RollID(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private RollID(boolean noInit) {}
-    
+    private RollID(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final RollID defaultInstance;
     public static RollID getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public RollID getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RollID(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              topic_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              source_ = input.readBytes();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              period_ = input.readInt64();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              rollTs_ = input.readInt64();
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000010;
+              isFinal_ = input.readBool();
+              break;
+            }
+            case 50: {
+              bitField0_ |= 0x00000020;
+              compression_ = input.readBytes();
+              break;
+            }
+            case 56: {
+              bitField0_ |= 0x00000040;
+              isPersist_ = input.readBool();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.dp.blackhole.protocol.control.RollIDPB.internal_static_blackhole_RollID_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.dp.blackhole.protocol.control.RollIDPB.internal_static_blackhole_RollID_fieldAccessorTable;
+      return com.dp.blackhole.protocol.control.RollIDPB.internal_static_blackhole_RollID_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.dp.blackhole.protocol.control.RollIDPB.RollID.class, com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<RollID> PARSER =
+        new com.google.protobuf.AbstractParser<RollID>() {
+      public RollID parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RollID(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RollID> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
     // required string topic = 1;
     public static final int TOPIC_FIELD_NUMBER = 1;
-    private boolean hasTopic;
-    private java.lang.String topic_ = "";
-    public boolean hasTopic() { return hasTopic; }
-    public java.lang.String getTopic() { return topic_; }
-    
-    // required string source_identify = 2;
-    public static final int SOURCE_IDENTIFY_FIELD_NUMBER = 2;
-    private boolean hasSourceIdentify;
-    private java.lang.String sourceIdentify_ = "";
-    public boolean hasSourceIdentify() { return hasSourceIdentify; }
-    public java.lang.String getSourceIdentify() { return sourceIdentify_; }
-    
+    private java.lang.Object topic_;
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public boolean hasTopic() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public java.lang.String getTopic() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          topic_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string topic = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTopicBytes() {
+      java.lang.Object ref = topic_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        topic_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // required string source = 2;
+    public static final int SOURCE_FIELD_NUMBER = 2;
+    private java.lang.Object source_;
+    /**
+     * <code>required string source = 2;</code>
+     */
+    public boolean hasSource() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required string source = 2;</code>
+     */
+    public java.lang.String getSource() {
+      java.lang.Object ref = source_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          source_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string source = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getSourceBytes() {
+      java.lang.Object ref = source_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        source_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     // required int64 period = 3;
     public static final int PERIOD_FIELD_NUMBER = 3;
-    private boolean hasPeriod;
-    private long period_ = 0L;
-    public boolean hasPeriod() { return hasPeriod; }
-    public long getPeriod() { return period_; }
-    
+    private long period_;
+    /**
+     * <code>required int64 period = 3;</code>
+     */
+    public boolean hasPeriod() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int64 period = 3;</code>
+     */
+    public long getPeriod() {
+      return period_;
+    }
+
     // required int64 roll_ts = 4;
     public static final int ROLL_TS_FIELD_NUMBER = 4;
-    private boolean hasRollTs;
-    private long rollTs_ = 0L;
-    public boolean hasRollTs() { return hasRollTs; }
-    public long getRollTs() { return rollTs_; }
-    
+    private long rollTs_;
+    /**
+     * <code>required int64 roll_ts = 4;</code>
+     */
+    public boolean hasRollTs() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required int64 roll_ts = 4;</code>
+     */
+    public long getRollTs() {
+      return rollTs_;
+    }
+
     // optional bool is_final = 5;
     public static final int IS_FINAL_FIELD_NUMBER = 5;
-    private boolean hasIsFinal;
-    private boolean isFinal_ = false;
-    public boolean hasIsFinal() { return hasIsFinal; }
-    public boolean getIsFinal() { return isFinal_; }
-    
-    private void initFields() {
+    private boolean isFinal_;
+    /**
+     * <code>optional bool is_final = 5;</code>
+     */
+    public boolean hasIsFinal() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
     }
+    /**
+     * <code>optional bool is_final = 5;</code>
+     */
+    public boolean getIsFinal() {
+      return isFinal_;
+    }
+
+    // optional string compression = 6;
+    public static final int COMPRESSION_FIELD_NUMBER = 6;
+    private java.lang.Object compression_;
+    /**
+     * <code>optional string compression = 6;</code>
+     */
+    public boolean hasCompression() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional string compression = 6;</code>
+     */
+    public java.lang.String getCompression() {
+      java.lang.Object ref = compression_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          compression_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string compression = 6;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCompressionBytes() {
+      java.lang.Object ref = compression_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        compression_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // optional bool is_Persist = 7 [default = true];
+    public static final int IS_PERSIST_FIELD_NUMBER = 7;
+    private boolean isPersist_;
+    /**
+     * <code>optional bool is_Persist = 7 [default = true];</code>
+     */
+    public boolean hasIsPersist() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>optional bool is_Persist = 7 [default = true];</code>
+     */
+    public boolean getIsPersist() {
+      return isPersist_;
+    }
+
+    private void initFields() {
+      topic_ = "";
+      source_ = "";
+      period_ = 0L;
+      rollTs_ = 0L;
+      isFinal_ = false;
+      compression_ = "";
+      isPersist_ = true;
+    }
+    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
-      if (!hasTopic) return false;
-      if (!hasSourceIdentify) return false;
-      if (!hasPeriod) return false;
-      if (!hasRollTs) return false;
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasTopic()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasSource()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasPeriod()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasRollTs()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (hasTopic()) {
-        output.writeString(1, getTopic());
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getTopicBytes());
       }
-      if (hasSourceIdentify()) {
-        output.writeString(2, getSourceIdentify());
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, getSourceBytes());
       }
-      if (hasPeriod()) {
-        output.writeInt64(3, getPeriod());
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt64(3, period_);
       }
-      if (hasRollTs()) {
-        output.writeInt64(4, getRollTs());
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt64(4, rollTs_);
       }
-      if (hasIsFinal()) {
-        output.writeBool(5, getIsFinal());
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeBool(5, isFinal_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeBytes(6, getCompressionBytes());
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeBool(7, isPersist_);
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
-      if (hasTopic()) {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(1, getTopic());
+          .computeBytesSize(1, getTopicBytes());
       }
-      if (hasSourceIdentify()) {
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeStringSize(2, getSourceIdentify());
+          .computeBytesSize(2, getSourceBytes());
       }
-      if (hasPeriod()) {
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, getPeriod());
+          .computeInt64Size(3, period_);
       }
-      if (hasRollTs()) {
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(4, getRollTs());
+          .computeInt64Size(4, rollTs_);
       }
-      if (hasIsFinal()) {
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(5, getIsFinal());
+          .computeBoolSize(5, isFinal_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(6, getCompressionBytes());
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(7, isPersist_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-    
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.dp.blackhole.protocol.control.RollIDPB.RollID parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.dp.blackhole.protocol.control.RollIDPB.RollID prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code blackhole.RollID}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> {
-      private com.dp.blackhole.protocol.control.RollIDPB.RollID result;
-      
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.dp.blackhole.protocol.control.RollIDPB.RollIDOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.dp.blackhole.protocol.control.RollIDPB.internal_static_blackhole_RollID_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.dp.blackhole.protocol.control.RollIDPB.internal_static_blackhole_RollID_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.dp.blackhole.protocol.control.RollIDPB.RollID.class, com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder.class);
+      }
+
       // Construct using com.dp.blackhole.protocol.control.RollIDPB.RollID.newBuilder()
-      private Builder() {}
-      
-      private static Builder create() {
-        Builder builder = new Builder();
-        builder.result = new com.dp.blackhole.protocol.control.RollIDPB.RollID();
-        return builder;
+      private Builder() {
+        maybeForceBuilderInitialization();
       }
-      
-      protected com.dp.blackhole.protocol.control.RollIDPB.RollID internalGetResult() {
-        return result;
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
       }
-      
-      public Builder clear() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "Cannot call clear() after build().");
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
         }
-        result = new com.dp.blackhole.protocol.control.RollIDPB.RollID();
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        topic_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        source_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        period_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        rollTs_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        isFinal_ = false;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        compression_ = "";
+        bitField0_ = (bitField0_ & ~0x00000020);
+        isPersist_ = true;
+        bitField0_ = (bitField0_ & ~0x00000040);
         return this;
       }
-      
+
       public Builder clone() {
-        return create().mergeFrom(result);
+        return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.dp.blackhole.protocol.control.RollIDPB.RollID.getDescriptor();
+        return com.dp.blackhole.protocol.control.RollIDPB.internal_static_blackhole_RollID_descriptor;
       }
-      
+
       public com.dp.blackhole.protocol.control.RollIDPB.RollID getDefaultInstanceForType() {
         return com.dp.blackhole.protocol.control.RollIDPB.RollID.getDefaultInstance();
       }
-      
-      public boolean isInitialized() {
-        return result.isInitialized();
-      }
+
       public com.dp.blackhole.protocol.control.RollIDPB.RollID build() {
-        if (result != null && !isInitialized()) {
+        com.dp.blackhole.protocol.control.RollIDPB.RollID result = buildPartial();
+        if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
-        return buildPartial();
+        return result;
       }
-      
-      private com.dp.blackhole.protocol.control.RollIDPB.RollID buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        if (!isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return buildPartial();
-      }
-      
+
       public com.dp.blackhole.protocol.control.RollIDPB.RollID buildPartial() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "build() has already been called on this Builder.");
+        com.dp.blackhole.protocol.control.RollIDPB.RollID result = new com.dp.blackhole.protocol.control.RollIDPB.RollID(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
         }
-        com.dp.blackhole.protocol.control.RollIDPB.RollID returnMe = result;
-        result = null;
-        return returnMe;
+        result.topic_ = topic_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.source_ = source_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.period_ = period_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.rollTs_ = rollTs_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.isFinal_ = isFinal_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.compression_ = compression_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        result.isPersist_ = isPersist_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.dp.blackhole.protocol.control.RollIDPB.RollID) {
           return mergeFrom((com.dp.blackhole.protocol.control.RollIDPB.RollID)other);
@@ -282,14 +709,18 @@ public final class RollIDPB {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.dp.blackhole.protocol.control.RollIDPB.RollID other) {
         if (other == com.dp.blackhole.protocol.control.RollIDPB.RollID.getDefaultInstance()) return this;
         if (other.hasTopic()) {
-          setTopic(other.getTopic());
+          bitField0_ |= 0x00000001;
+          topic_ = other.topic_;
+          onChanged();
         }
-        if (other.hasSourceIdentify()) {
-          setSourceIdentify(other.getSourceIdentify());
+        if (other.hasSource()) {
+          bitField0_ |= 0x00000002;
+          source_ = other.source_;
+          onChanged();
         }
         if (other.hasPeriod()) {
           setPeriod(other.getPeriod());
@@ -300,170 +731,428 @@ public final class RollIDPB {
         if (other.hasIsFinal()) {
           setIsFinal(other.getIsFinal());
         }
+        if (other.hasCompression()) {
+          bitField0_ |= 0x00000020;
+          compression_ = other.compression_;
+          onChanged();
+        }
+        if (other.hasIsPersist()) {
+          setIsPersist(other.getIsPersist());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
+      public final boolean isInitialized() {
+        if (!hasTopic()) {
+          
+          return false;
+        }
+        if (!hasSource()) {
+          
+          return false;
+        }
+        if (!hasPeriod()) {
+          
+          return false;
+        }
+        if (!hasRollTs()) {
+          
+          return false;
+        }
+        return true;
+      }
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              setTopic(input.readString());
-              break;
-            }
-            case 18: {
-              setSourceIdentify(input.readString());
-              break;
-            }
-            case 24: {
-              setPeriod(input.readInt64());
-              break;
-            }
-            case 32: {
-              setRollTs(input.readInt64());
-              break;
-            }
-            case 40: {
-              setIsFinal(input.readBool());
-              break;
-            }
+        com.dp.blackhole.protocol.control.RollIDPB.RollID parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.dp.blackhole.protocol.control.RollIDPB.RollID) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
-      
+      private int bitField0_;
+
       // required string topic = 1;
+      private java.lang.Object topic_ = "";
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public boolean hasTopic() {
-        return result.hasTopic();
+        return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public java.lang.String getTopic() {
-        return result.getTopic();
+        java.lang.Object ref = topic_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          topic_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
-      public Builder setTopic(java.lang.String value) {
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTopicBytes() {
+        java.lang.Object ref = topic_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          topic_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public Builder setTopic(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasTopic = true;
-        result.topic_ = value;
+  bitField0_ |= 0x00000001;
+        topic_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required string topic = 1;</code>
+       */
       public Builder clearTopic() {
-        result.hasTopic = false;
-        result.topic_ = getDefaultInstance().getTopic();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        topic_ = getDefaultInstance().getTopic();
+        onChanged();
         return this;
       }
-      
-      // required string source_identify = 2;
-      public boolean hasSourceIdentify() {
-        return result.hasSourceIdentify();
-      }
-      public java.lang.String getSourceIdentify() {
-        return result.getSourceIdentify();
-      }
-      public Builder setSourceIdentify(java.lang.String value) {
+      /**
+       * <code>required string topic = 1;</code>
+       */
+      public Builder setTopicBytes(
+          com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  result.hasSourceIdentify = true;
-        result.sourceIdentify_ = value;
+  bitField0_ |= 0x00000001;
+        topic_ = value;
+        onChanged();
         return this;
       }
-      public Builder clearSourceIdentify() {
-        result.hasSourceIdentify = false;
-        result.sourceIdentify_ = getDefaultInstance().getSourceIdentify();
+
+      // required string source = 2;
+      private java.lang.Object source_ = "";
+      /**
+       * <code>required string source = 2;</code>
+       */
+      public boolean hasSource() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required string source = 2;</code>
+       */
+      public java.lang.String getSource() {
+        java.lang.Object ref = source_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          source_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string source = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSourceBytes() {
+        java.lang.Object ref = source_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          source_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string source = 2;</code>
+       */
+      public Builder setSource(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        source_ = value;
+        onChanged();
         return this;
       }
-      
+      /**
+       * <code>required string source = 2;</code>
+       */
+      public Builder clearSource() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        source_ = getDefaultInstance().getSource();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string source = 2;</code>
+       */
+      public Builder setSourceBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        source_ = value;
+        onChanged();
+        return this;
+      }
+
       // required int64 period = 3;
+      private long period_ ;
+      /**
+       * <code>required int64 period = 3;</code>
+       */
       public boolean hasPeriod() {
-        return result.hasPeriod();
+        return ((bitField0_ & 0x00000004) == 0x00000004);
       }
+      /**
+       * <code>required int64 period = 3;</code>
+       */
       public long getPeriod() {
-        return result.getPeriod();
+        return period_;
       }
+      /**
+       * <code>required int64 period = 3;</code>
+       */
       public Builder setPeriod(long value) {
-        result.hasPeriod = true;
-        result.period_ = value;
+        bitField0_ |= 0x00000004;
+        period_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required int64 period = 3;</code>
+       */
       public Builder clearPeriod() {
-        result.hasPeriod = false;
-        result.period_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        period_ = 0L;
+        onChanged();
         return this;
       }
-      
+
       // required int64 roll_ts = 4;
+      private long rollTs_ ;
+      /**
+       * <code>required int64 roll_ts = 4;</code>
+       */
       public boolean hasRollTs() {
-        return result.hasRollTs();
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
+      /**
+       * <code>required int64 roll_ts = 4;</code>
+       */
       public long getRollTs() {
-        return result.getRollTs();
+        return rollTs_;
       }
+      /**
+       * <code>required int64 roll_ts = 4;</code>
+       */
       public Builder setRollTs(long value) {
-        result.hasRollTs = true;
-        result.rollTs_ = value;
+        bitField0_ |= 0x00000008;
+        rollTs_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>required int64 roll_ts = 4;</code>
+       */
       public Builder clearRollTs() {
-        result.hasRollTs = false;
-        result.rollTs_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        rollTs_ = 0L;
+        onChanged();
         return this;
       }
-      
+
       // optional bool is_final = 5;
+      private boolean isFinal_ ;
+      /**
+       * <code>optional bool is_final = 5;</code>
+       */
       public boolean hasIsFinal() {
-        return result.hasIsFinal();
+        return ((bitField0_ & 0x00000010) == 0x00000010);
       }
+      /**
+       * <code>optional bool is_final = 5;</code>
+       */
       public boolean getIsFinal() {
-        return result.getIsFinal();
+        return isFinal_;
       }
+      /**
+       * <code>optional bool is_final = 5;</code>
+       */
       public Builder setIsFinal(boolean value) {
-        result.hasIsFinal = true;
-        result.isFinal_ = value;
+        bitField0_ |= 0x00000010;
+        isFinal_ = value;
+        onChanged();
         return this;
       }
+      /**
+       * <code>optional bool is_final = 5;</code>
+       */
       public Builder clearIsFinal() {
-        result.hasIsFinal = false;
-        result.isFinal_ = false;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        isFinal_ = false;
+        onChanged();
         return this;
       }
-      
+
+      // optional string compression = 6;
+      private java.lang.Object compression_ = "";
+      /**
+       * <code>optional string compression = 6;</code>
+       */
+      public boolean hasCompression() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional string compression = 6;</code>
+       */
+      public java.lang.String getCompression() {
+        java.lang.Object ref = compression_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          compression_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string compression = 6;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCompressionBytes() {
+        java.lang.Object ref = compression_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          compression_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string compression = 6;</code>
+       */
+      public Builder setCompression(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000020;
+        compression_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string compression = 6;</code>
+       */
+      public Builder clearCompression() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        compression_ = getDefaultInstance().getCompression();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string compression = 6;</code>
+       */
+      public Builder setCompressionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000020;
+        compression_ = value;
+        onChanged();
+        return this;
+      }
+
+      // optional bool is_Persist = 7 [default = true];
+      private boolean isPersist_ = true;
+      /**
+       * <code>optional bool is_Persist = 7 [default = true];</code>
+       */
+      public boolean hasIsPersist() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional bool is_Persist = 7 [default = true];</code>
+       */
+      public boolean getIsPersist() {
+        return isPersist_;
+      }
+      /**
+       * <code>optional bool is_Persist = 7 [default = true];</code>
+       */
+      public Builder setIsPersist(boolean value) {
+        bitField0_ |= 0x00000040;
+        isPersist_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool is_Persist = 7 [default = true];</code>
+       */
+      public Builder clearIsPersist() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        isPersist_ = true;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.RollID)
     }
-    
+
     static {
       defaultInstance = new RollID(true);
-      com.dp.blackhole.protocol.control.RollIDPB.internalForceInit();
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:blackhole.RollID)
   }
-  
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_blackhole_RollID_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_blackhole_RollID_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -472,11 +1161,12 @@ public final class RollIDPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014RollID.proto\022\tblackhole\"c\n\006RollID\022\r\n\005t" +
-      "opic\030\001 \002(\t\022\027\n\017source_identify\030\002 \002(\t\022\016\n\006p" +
-      "eriod\030\003 \002(\003\022\017\n\007roll_ts\030\004 \002(\003\022\020\n\010is_final" +
-      "\030\005 \001(\010B-\n!com.dp.blackhole.protocol.cont" +
-      "rolB\010RollIDPB"
+      "\n\014RollID.proto\022\tblackhole\"\211\001\n\006RollID\022\r\n\005" +
+      "topic\030\001 \002(\t\022\016\n\006source\030\002 \002(\t\022\016\n\006period\030\003 " +
+      "\002(\003\022\017\n\007roll_ts\030\004 \002(\003\022\020\n\010is_final\030\005 \001(\010\022\023" +
+      "\n\013compression\030\006 \001(\t\022\030\n\nis_Persist\030\007 \001(\010:" +
+      "\004trueB-\n!com.dp.blackhole.protocol.contr" +
+      "olB\010RollIDPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -488,9 +1178,7 @@ public final class RollIDPB {
           internal_static_blackhole_RollID_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RollID_descriptor,
-              new java.lang.String[] { "Topic", "SourceIdentify", "Period", "RollTs", "IsFinal", },
-              com.dp.blackhole.protocol.control.RollIDPB.RollID.class,
-              com.dp.blackhole.protocol.control.RollIDPB.RollID.Builder.class);
+              new java.lang.String[] { "Topic", "Source", "Period", "RollTs", "IsFinal", "Compression", "IsPersist", });
           return null;
         }
       };
@@ -499,8 +1187,6 @@ public final class RollIDPB {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-  
-  public static void internalForceInit() {}
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }

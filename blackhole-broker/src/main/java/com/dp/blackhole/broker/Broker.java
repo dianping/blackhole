@@ -15,6 +15,7 @@ import org.apache.hadoop.security.SecurityUtil;
 import com.dp.blackhole.broker.ftp.FTPConfigrationLoader;
 import com.dp.blackhole.broker.storage.StorageManager.reporter.ReportEntry;
 import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
@@ -51,8 +52,8 @@ public class Broker {
         servicePort =  Integer.parseInt(prop.getProperty("broker.service.port"));
         recoveryPort = Integer.parseInt(prop.getProperty("broker.recovery.port"));
         String hdfsbasedir = prop.getProperty("broker.hdfs.basedir");
-        String suffix = prop.getProperty("broker.hdfs.file.suffix");
-        long clockSyncBufMillis = Long.parseLong(prop.getProperty("broker.rollmanager.clockSyncBufMillis", "5000"));
+        String copmressionAlgoName = prop.getProperty("broker.hdfs.compression.default");
+        long clockSyncBufMillis = Long.parseLong(prop.getProperty("broker.rollmanager.clockSyncBufMillis", String.valueOf(ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS)));
         int maxUploadThreads = Integer.parseInt(prop.getProperty("broker.rollmanager.maxUploadThreads", "20"));
         int maxRecoveryThreads = Integer.parseInt(prop.getProperty("broker.rollmanager.maxRecoveryThreads", "10"));
         int recoverySocketTimeout = Integer.parseInt(prop.getProperty("broker.rollmanager.recoverySocketTimeout", "600000"));
@@ -75,7 +76,7 @@ public class Broker {
             thread.start();
         }
         
-        rollMgr.init(hdfsbasedir, suffix, recoveryPort, clockSyncBufMillis, maxUploadThreads, maxRecoveryThreads, recoverySocketTimeout);
+        rollMgr.init(hdfsbasedir, copmressionAlgoName, recoveryPort, clockSyncBufMillis, maxUploadThreads, maxRecoveryThreads, recoverySocketTimeout);
         
         brokerService = new BrokerService(prop);
         brokerService.setDaemon(true);

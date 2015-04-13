@@ -3,6 +3,7 @@ package com.dp.blackhole.check;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -49,27 +50,27 @@ public class CheckDone implements Runnable{
         //reload sources
         List<String> sources = lionConfChange.getAppToHosts().get(ident.app);
         if (sources == null || sources.isEmpty()) {
-            LOG.error("Alarm, source hosts are all miss for " + ident.app);
+            LOG.error("source hosts are all miss for " + ident.app);
         }
         ident.sources = sources;
         Calendar calendar = Calendar.getInstance();
         long nowTS = calendar.getTimeInMillis();
         List<String> attemptSource = new ArrayList<String>();
         while (ident.ts <= Util.getPrevWholeTs(nowTS, ident.period)) {
-            LOG.info("Try to handle [" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + "]");
+            LOG.debug("Try to handle [" + ident.app + ":" + Util.format.format(new Date(ident.ts)) + "]");
             attemptSource.clear();
             if (!Util.wasDone(ident, ident.ts)) {
-                Path expectedFile = null;
+                Path[] expectedFile = null;
                 for(String source : ident.sources) {
                     expectedFile = Util.getRollHdfsPath(ident, source);
                     if (!Util.retryExists(expectedFile)) {
-                        LOG.info("File " + expectedFile + " not ready.");
+                        LOG.debug("None of " + Arrays.toString(expectedFile) + " is ready.");
                         attemptSource.add(source);
                     }
                 }
                 if (attemptSource.isEmpty()) { //all file ready
                     if (expectedFile != null) {
-                        if (!Util.retryTouch(expectedFile.getParent(), Util.DONE_FLAG)) {
+                        if (!Util.retryTouch(expectedFile[0].getParent(), Util.DONE_FLAG)) {
                             LOG.error("Alarm, failed to touch a done file. " +
                                     "Try in next check cycle. " +
                                     "If you see this message for the second time, " +
@@ -84,7 +85,7 @@ public class CheckDone implements Runnable{
                 } else {
                     if (ident.timeout > 0 && ident.timeout < 60 && calendar.get(Calendar.MINUTE) >= ident.timeout) {
                         if (expectedFile != null) {
-                            if (!Util.retryTouch(expectedFile.getParent(), Util.TIMEOUT_FLAG)) {
+                            if (!Util.retryTouch(expectedFile[0].getParent(), Util.TIMEOUT_FLAG)) {
                                 LOG.error("Alarm, failed to touch a TIMEOUT_FLAG file. " +
                                         "Try in next check cycle. " +
                                         "If you see this message for the second time, " +
@@ -146,7 +147,7 @@ public class CheckDone implements Runnable{
         if (hdfsbasedir.endsWith("/")) {
             hdfsbasedir = hdfsbasedir.substring(0, hdfsbasedir.length() - 1);
         }
-        hdfsfilesuffix = prop.getProperty("HDFS_FILE_SUFFIX");
+        hdfsfilesuffix = prop.getProperty("HDFS_FILE_SUFFIX").split(",");
         checkperiod = Long.parseLong(prop.getProperty("CHECK_PERIOD", "180"));
         fillRollIdent(prop);
         boolean enableSecurity = Boolean.parseBoolean(prop.getProperty("SECURITY.ENABLE", "true"));
@@ -181,7 +182,7 @@ public class CheckDone implements Runnable{
             rollIdent.app = appName;
             List<String> sources = lionConfChange.getAppToHosts().get(appName);
             if (sources == null || sources.isEmpty()) {
-                LOG.error("Alarm, source hosts are all miss.");
+                LOG.error("source hosts are all miss for " + appName);
                 continue;
             }
             rollIdent.sources = sources;
@@ -201,7 +202,7 @@ public class CheckDone implements Runnable{
     public static FileSystem fs;
     public static String successprefix;
     public static String hdfsbasedir;
-    public static String hdfsfilesuffix;
+    public static String[] hdfsfilesuffix;
     public static String hdfsHiddenfileprefix = "_";
     private static int alartTime;
     public static long checkperiod;

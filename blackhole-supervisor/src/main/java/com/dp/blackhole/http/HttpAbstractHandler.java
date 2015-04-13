@@ -7,7 +7,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.supervisor.Supervisor;
 
@@ -17,6 +20,8 @@ public abstract class HttpAbstractHandler {
     public static final String SUCCESS = "SUCCESS";
     public static final String NONEED = "NONEED";
     public static final String FAILURE = "FAILURE";
+    protected ExecutorService httpWorkerPool = Executors.newFixedThreadPool(10, new DaemonThreadFactory("Http Worker"));
+    
     public abstract HttpResult getContent(String app, String[] ... args);
     
     protected Map<String, Set<String>> extractIdMapShuffleByHost(String[] ids, String[] ips) {
@@ -42,7 +47,7 @@ public abstract class HttpAbstractHandler {
         Iterator<String> it = idsInTheSameHost.iterator();
         while(it.hasNext()){
             String ids = it.next();
-            if(expect == supervisor.isActiveStream(topic, Util.getSourceIdentify(host, ids))){
+            if(expect == supervisor.isActiveStream(topic, Util.getSource(host, ids))){
                 it.remove();
             }
         }

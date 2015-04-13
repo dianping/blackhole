@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -22,18 +23,22 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.log4j.Logger;
 
+import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.protocol.control.MessagePB.Message;
+import com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup;
 import com.dp.blackhole.supervisor.ConfigManager;
+import com.dp.blackhole.supervisor.Supervisor;
 
 public class HttpScaleInHandler extends HttpAbstractHandler implements HttpRequestHandler {
     private static Logger LOG = Logger.getLogger(HttpScaleInHandler.class);
     private ConfigManager configManager;
-    private HttpClientSingle httpClient;
+    private Supervisor supervisor;
     
-    public HttpScaleInHandler(ConfigManager configManager, HttpClientSingle httpClient) {
+    public HttpScaleInHandler(ConfigManager configManager) {
         this.configManager = configManager;
-        this.httpClient = httpClient;
+        this.supervisor = configManager.getSupervisor();
     }
     
     @Override
@@ -43,10 +48,10 @@ public class HttpScaleInHandler extends HttpAbstractHandler implements HttpReque
         String method = request.getRequestLine().getMethod()
                 .toUpperCase(Locale.ENGLISH);
 
-        LOG.debug("Frontend: Handling contract; Line = " + request.getRequestLine());
+        LOG.debug("Frontend: Handling scale-in; Line = " + request.getRequestLine());
         if (method.equals("GET")) {
             final String target = request.getRequestLine().getUri();
-            Pattern p = Pattern.compile("/contract\\?app=(.*)&hosts=(.*)$");
+            Pattern p = Pattern.compile("/scalein\\?app=(.*)&hosts=(.*)$");
             Matcher m = p.matcher(target);
             if (m.find()) {
                 String app = m.group(1);
@@ -56,7 +61,7 @@ public class HttpScaleInHandler extends HttpAbstractHandler implements HttpReque
                     response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
                     return;
                 }
-                LOG.debug("Handle contract request, app: " + app + " host: " + Arrays.toString(hostnames));
+                LOG.debug("Handle scale-in request, app: " + app + " host: " + Arrays.toString(hostnames));
                 final HttpResult Content = getContent(app, hostnames);
                 EntityTemplate body = new EntityTemplate(new ContentProducer() {
                     public void writeTo(final OutputStream outstream)
@@ -88,53 +93,84 @@ public class HttpScaleInHandler extends HttpAbstractHandler implements HttpReque
         if (topicList == null || topicList.size() == 0) {
             return new HttpResult(HttpResult.NONEED, "It contains no mapping for the cmdbapp " + app);
         }
-        for (String topic : topicList) {
-            //get string of old hosts of the app
+        for (final String topic : topicList) {
             String watchKey = ParamsKey.LionNode.HOSTS_PREFIX + topic;
-            String url = configManager.generateGetURL(watchKey);
-            String response = httpClient.getResponseText(url);
-            if (response == null) {
-                return new HttpResult(HttpResult.FAILURE, "IO exception was thrown when handle url ." + url);
-            } else if (response.startsWith("1|")) {
-                return new HttpResult(HttpResult.FAILURE, response.substring(2));
-            } else if (response.equals("<null>")) {
-                return new HttpResult(HttpResult.FAILURE, "No configration in lion for key=" + watchKey);
-            } else if (response.length() == 0) {
-                return new HttpResult(HttpResult.FAILURE, "Invalid response");
+            try {
+                configManager.updateLionList(watchKey, ParamsKey.LionNode.OP_SCALEIN, args[0]);
+            } catch (HttpException e) {
+                return new HttpResult(HttpResult.FAILURE, e.getMessage());
             }
-            String[] oldHosts = Util.getStringListOfLionValue(response);
-
-            ArrayList<String> newHostList = new ArrayList<String>();
-            //change it (sub the given hostname)
-            if (oldHosts == null) {
-                LOG.error("Faild to contract hosts cause there is no host in lion for topic " + topic);
-                continue;
-            } else {
-                
-                Set<String> contractSet = new HashSet<String>();
-                for (String contractHost : args[0]) {
-                    contractSet.add(contractHost);
-                }
-                for (String old : oldHosts) {
-                    if (!contractSet.contains(old)) {
-                        newHostList.add(old);
+            for (int i = 0; i < args[0].length; i++) {
+                final String eachHost = args[0][i];
+                httpWorkerPool.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        Set<String> noIds = new HashSet<String>();
+                        noIds.add("");
+                        InstanceGroup quit = PBwrap.wrapInstanceGroup(topic, noIds);
+                        InstanceGroup clean = PBwrap.wrapInstanceGroup(topic, noIds);
+                        List<InstanceGroup> quits = new ArrayList<InstanceGroup>();
+                        List<InstanceGroup> cleans = new ArrayList<InstanceGroup>();
+                        quits.add(quit);
+                        cleans.add(clean);
+                        Message quitMessage = PBwrap.wrapQuit(quits);
+                        Message cleanMessage = PBwrap.wrapClean(cleans);
+                        sendAndReceive(topic, eachHost, quitMessage, cleanMessage);
                     }
-                }
-            }
-            String[] newHosts = new String[newHostList.size()];
-            String newHostsLionString = Util.getLionValueOfStringList(newHostList.toArray(newHosts));
-            url = configManager.generateSetURL(watchKey, newHostsLionString);
-            response = httpClient.getResponseText(url);
-            if (response == null) {
-                return new HttpResult(HttpResult.FAILURE, "IO exception was thrown when handle url ." + url);
-            } else if (response.startsWith("1|")) {
-                return new HttpResult(HttpResult.FAILURE, "No configration in lion for key=" + watchKey);
-            } else if (response.startsWith("0")) {
-            } else {
-                LOG.error("Unkown response.");
-                return new HttpResult(HttpResult.FAILURE, "Unkown response.");
+                });
             }
         }
         return new HttpResult(HttpResult.SUCCESS, "");
+    }
+    
+    public HttpResult sendAndReceive(String topic, String host, Message toBeQuit, Message toBeClean) {
+        HttpResult result = sendAndReceiveForQuit(topic, host, toBeQuit);
+        if (result.code == HttpResult.SUCCESS) {
+            cleanAgentResources(topic, host, toBeClean);
+        }
+        return result;
+    }
+    
+    private HttpResult sendAndReceiveForQuit(String topic, String host, Message toBeQuit) {
+        long currentTime = Util.getTS();
+        long timeout = currentTime + TIMEOUT;
+        while (currentTime < timeout) {
+            supervisor.cachedSend(host, toBeQuit);
+            if (checkStreamEmpty(topic, host)) {
+                return new HttpResult(HttpResult.SUCCESS, "");
+            }
+            currentTime += CHECK_PERIOD;
+            try {
+                Thread.sleep(CHECK_PERIOD);
+            } catch (InterruptedException e) {
+                return new HttpResult(HttpResult.FAILURE, "Thread interrupted");
+            }
+        }
+        return new HttpResult(HttpResult.FAILURE, "timeout");
+    }
+    
+    private void cleanAgentResources(String topic, String host, Message toBeClean) {
+        long currentTime = Util.getTS();
+        long timeout = currentTime + TIMEOUT;
+        supervisor.cachedSend(host, toBeClean);
+        while (currentTime < timeout) {
+            if (checkStreamClean(topic, host)) {
+                LOG.info(topic + "-" + host + " stream empty, logout succcss.");
+                break;
+            }
+            currentTime += CHECK_PERIOD;
+            try {
+                Thread.sleep(CHECK_PERIOD);
+            } catch (InterruptedException e) {
+            }
+        }
+    }
+
+    private boolean checkStreamEmpty(String topic, String source) {
+        return supervisor.isEmptyStream(topic, source);
+    }
+    
+    private boolean checkStreamClean(String topic, String source) {
+        return supervisor.isCleanStream(topic, source);
     }
 }

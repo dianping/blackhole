@@ -1,0 +1,11 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "ReadyUploadPB";
+
+message ReadyUpload {
+    required string topic = 1;
+    required string source = 2;
+    required int64 period = 3;
+    required int64 roll_ts = 4;
+}

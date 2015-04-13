@@ -4,18 +4,15 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.compress.Compressor;
 
 public class HDFSRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(HDFSRecovery.class);
-    private static final String TMP_SUFFIX = ".tmp";
-    private static final String R_SUFFIX = ".r";
-
     private RollManager mgr;
     private FileSystem fs;
     private static final int DEFAULT_BUFSIZE = 8192;
@@ -38,10 +35,15 @@ public class HDFSRecovery implements Runnable{
     @Override
     public void run() {
         OutputStream out = null;
+        String normalPathname;
         try {
-            String normalPathname = mgr.getRollHdfsPath(ident);
-            String tmpPathname = normalPathname + TMP_SUFFIX;
-            String recoveryPathname = normalPathname + R_SUFFIX;
+            if (hasCompressed) {
+                normalPathname = mgr.getRollHdfsPath(ident, "gz");
+            } else {
+                normalPathname = mgr.getRollHdfsPath(ident);
+            }
+            String tmpPathname = mgr.getTempHdfsPath(ident);
+            String recoveryPathname = mgr.getRecoveryHdfsPath(ident);
             Path normalPath = new Path(normalPathname);
             Path tmpPath = new Path(tmpPathname);
             Path recoveryPath = new Path(recoveryPathname);
@@ -53,7 +55,9 @@ public class HDFSRecovery implements Runnable{
                 if (hasCompressed) {
                     out = fs.create(recoveryPath);
                 } else {
-                    out = new GZIPOutputStream(fs.create(recoveryPath));
+                    Compressor compressor = mgr.getDefaultCompressionAlgo().getCompressor();
+                    out = mgr.getDefaultCompressionAlgo()
+                            .createCompressionStream(fs.create(recoveryPath), compressor, 0);
                 }
                 DataInputStream in = new DataInputStream(client.getInputStream());
                 while((len = in.read(buf)) != -1) {
@@ -63,7 +67,7 @@ public class HDFSRecovery implements Runnable{
                 out.close();
                 out = null;
                 if (uploadSize != fileSize) {
-                    throw new IOException(recoveryPathname + " recoverying not finished.");
+                    throw new IOException(recoveryPathname + " recoverying not finished. Except: " + fileSize + " Actual:" + uploadSize);
                 }
                 LOG.info("Finished to write " + recoveryPath);
                 
@@ -99,7 +103,7 @@ public class HDFSRecovery implements Runnable{
                 try {
                     out.close();
                 } catch (IOException e) {
-                    LOG.warn("Cound not close the gzip output stream", e);
+                    LOG.warn("Cound not close the compression output stream", e);
                 }
                 out = null;
             }

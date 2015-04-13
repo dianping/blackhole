@@ -26,14 +26,14 @@ import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.data.DataMessageTypeFactory;
 import com.dp.blackhole.protocol.data.FetchReply;
 import com.dp.blackhole.protocol.data.FetchRequest;
-import com.dp.blackhole.protocol.data.LastRotateRequest;
+import com.dp.blackhole.protocol.data.HaltRequest;
 import com.dp.blackhole.protocol.data.MultiFetchReply;
 import com.dp.blackhole.protocol.data.MultiFetchRequest;
 import com.dp.blackhole.protocol.data.OffsetReply;
 import com.dp.blackhole.protocol.data.OffsetRequest;
 import com.dp.blackhole.protocol.data.ProduceRequest;
 import com.dp.blackhole.protocol.data.RegisterRequest;
-import com.dp.blackhole.protocol.data.RotateRequest;
+import com.dp.blackhole.protocol.data.RollRequest;
 import com.dp.blackhole.storage.FileMessageSet;
 import com.dp.blackhole.storage.MessageAndOffset;
 import com.dp.blackhole.storage.MessageSet;
@@ -175,7 +175,7 @@ public class BrokerService extends Thread {
             from.send(new TransferWrap(new OffsetReply(request.topic, request.partition, p.getEndOffset())));
         }
         
-        public void handleRotateRequest(RotateRequest request, DelegationIOConnection from) {
+        public void handleRollRequest(RollRequest request, DelegationIOConnection from) {
             Partition p = null;
             try {
                 p = manager.getPartition(request.topic, request.partitionId, false);
@@ -183,25 +183,25 @@ public class BrokerService extends Thread {
                     closeClientOfErrorRequest(from, request);
                     return;
                 }
-                RollPartition roll = p.markRotate();
-                Broker.getRollMgr().doRegister(request.topic, request.partitionId, request.rollPeriod, roll);
+                RollPartition roll = p.markRollPartition();
+                Broker.getRollMgr().perpareUpload(request.topic, request.partitionId, request.rollPeriod, roll);
             } catch (IOException e) {
                 LOG.error("Got an IOE", e);
             }
         }
         
         public void handleRegisterRequest(RegisterRequest request, DelegationIOConnection from) {
-            clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT, request.sourceIdentify));
+            clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT, request.source));
             try {
-                manager.getPartition(request.topic, request.sourceIdentify, true);
+                manager.getPartition(request.topic, request.source, true);
             } catch (IOException e) {
                 LOG.error("Got an IOE", e);
             }
-            Message msg = PBwrap.wrapReadyBroker(request.topic, request.sourceIdentify, request.peroid, request.broker, Util.getTS());
+            Message msg = PBwrap.wrapReadyStream(request.topic, request.source, request.period, request.broker, Util.getTS());
             Broker.getSupervisor().send(msg);
         }
         
-        public void handleLastRotateRequest(LastRotateRequest request, DelegationIOConnection from) {
+        public void handleLastRotateRequest(HaltRequest request, DelegationIOConnection from) {
             Partition p = null;
             try {
                 p = manager.getPartition(request.topic, request.partitionId, false);
@@ -209,7 +209,7 @@ public class BrokerService extends Thread {
                     closeClientOfErrorRequest(from, request);
                     return;
                 }
-                RollPartition roll = p.markRotate();
+                RollPartition roll = p.markRollPartition();
                 Broker.getRollMgr().doClean(request.topic, request.partitionId, request.rollPeriod, roll);
             } catch (IOException e) {
                 LOG.error("Got an IOE", e);
@@ -219,6 +219,18 @@ public class BrokerService extends Thread {
         @Override
         public void process(TransferWrap request, DelegationIOConnection from) {
             switch (request.getType()) {
+            case DataMessageTypeFactory.RegisterRequest:
+                handleRegisterRequest((RegisterRequest) request.unwrap(), from);
+                break;
+            case DataMessageTypeFactory.produceRequest:
+                handleProduceRequest((ProduceRequest) request.unwrap(), from);
+                break;
+            case DataMessageTypeFactory.RotateOrRollRequest:
+                handleRollRequest((RollRequest) request.unwrap(), from);
+                break;
+            case DataMessageTypeFactory.LastRotateRequest:
+                handleLastRotateRequest((HaltRequest) request.unwrap(), from);
+                break;
             case DataMessageTypeFactory.MultiFetchRequest:
                 handleMultiFetchRequest((MultiFetchRequest) request.unwrap(), from);
                 break;
@@ -227,18 +239,6 @@ public class BrokerService extends Thread {
                 break;
             case DataMessageTypeFactory.OffsetRequest:
                 handleOffsetRequest((OffsetRequest) request.unwrap(), from);
-                break;
-            case DataMessageTypeFactory.produceRequest:
-                handleProduceRequest((ProduceRequest) request.unwrap(), from);
-                break;
-            case DataMessageTypeFactory.RotateRequest:
-                handleRotateRequest((RotateRequest) request.unwrap(), from);
-                break;
-            case DataMessageTypeFactory.RegisterRequest:
-                handleRegisterRequest((RegisterRequest) request.unwrap(), from);
-                break;
-            case DataMessageTypeFactory.LastRotateRequest:
-                handleLastRotateRequest((LastRotateRequest) request.unwrap(), from);
                 break;
             default:
                 LOG.error("unknown message type: " + request.getType());
@@ -256,8 +256,8 @@ public class BrokerService extends Thread {
             LOG.info(connection + " disconnected");
             ClientDesc desc = clients.get(connection);
             if (desc.type == ClientDesc.AGENT) {
-                manager.removePartition(desc.topic, desc.sourceIdentify);
-                Broker.getRollMgr().reportFailure(desc.topic, desc.sourceIdentify, Util.getTS());
+                manager.removePartition(desc.topic, desc.source);
+                Broker.getRollMgr().reportFailure(desc.topic, desc.source, Util.getTS());
             }
             clients.remove(connection);
         }
@@ -270,12 +270,12 @@ public class BrokerService extends Thread {
         
         public String topic;
         public int type;
-        public String sourceIdentify;
+        public String source;
         
-        public ClientDesc (String topic, int type, String sourceIdentify) {
+        public ClientDesc (String topic, int type, String source) {
             this.topic = topic;
             this.type = type;
-            this.sourceIdentify = sourceIdentify;
+            this.source = source;
         }
         
         public ClientDesc(int type) {

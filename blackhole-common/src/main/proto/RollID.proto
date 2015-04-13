@@ -5,8 +5,10 @@ option java_outer_classname = "RollIDPB";
 
 message RollID {
     required string topic = 1;
-    required string source_identify = 2;
+    required string source = 2;
     required int64 period = 3;
     required int64 roll_ts = 4;
     optional bool is_final = 5;
+    optional string compression = 6;
+    optional bool is_Persist = 7 [default = true];
 }

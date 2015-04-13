@@ -1,0 +1,15 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "SnapshotOpPB";
+
+message SnapshotOp{
+    enum OP {
+        log = 1;
+        clean = 2;
+        del = 3;
+	}
+    optional string topic = 1;
+    optional string source = 2;
+    optional OP op = 3;
+}

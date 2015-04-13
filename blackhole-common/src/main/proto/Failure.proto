@@ -11,6 +11,6 @@ message Failure {
 
   required string topic = 1;
   required NodeType type = 2;
-  required string source_identify = 3;
+  required string source = 3;
   required int64 failTs = 4;
 }

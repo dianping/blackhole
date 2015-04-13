@@ -1,5 +1,7 @@
 package com.dp.blackhole.agent;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -8,22 +10,26 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.compress.Compressor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dp.blackhole.agent.TopicMeta;
 import com.dp.blackhole.agent.RollRecovery;
 import com.dp.blackhole.agent.SimAgent;
-import com.dp.blackhole.agent.TopicMeta.MetaKey;
+import com.dp.blackhole.agent.TopicMeta.TopicId;
+import com.dp.blackhole.agent.persist.LocalRecorder;
+import com.dp.blackhole.agent.persist.Record;
+import com.dp.blackhole.broker.Compression;
+import com.dp.blackhole.broker.Compression.Algorithm;
 import com.dp.blackhole.broker.SimBroker;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
@@ -39,9 +45,13 @@ public class TestHDFSRecovery {
     private Path oldPath;
     private SimAgent agent;
     private SimBroker collecotr;
+    private LocalRecorder state;
 
     @Before
     public void setUp() throws Exception {
+        state = mock(LocalRecorder.class);
+        when(state.retrive(SimAgent.rollTS)).thenReturn(new Record(Record.ROTATE, SimAgent.rollTS, LogReader.BEGIN_OFFSET_OF_FILE, LogReader.END_OFFSET_OF_FILE));//or 598
+        
         APP_HOST = Util.getLocalHost();
         //build a tmp file
         fileBroken = createBrokenTmpFile(MAGIC + "_broken_", SimAgent.expected);
@@ -68,7 +78,7 @@ public class TestHDFSRecovery {
         
         //deploy some condition
         ConfigKeeper confKeeper = new ConfigKeeper();
-        confKeeper.addRawProperty(MAGIC+".rollPeriod", "3600");
+        confKeeper.addRawProperty(MAGIC + ".rollPeriod", "3600");
         confKeeper.addRawProperty(MAGIC + ".maxLineSize", "1024");
         
         collecotr = new SimBroker(port);
@@ -86,9 +96,9 @@ public class TestHDFSRecovery {
 
     @Test
     public void test() throws IOException, InterruptedException {
-        MetaKey metaKey = new MetaKey(MAGIC, null);
-        TopicMeta appLog = new TopicMeta(metaKey, file.getAbsolutePath(), 3600, 1024);
-        RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false);
+        TopicId topicId = new TopicId(MAGIC, null);
+        TopicMeta appLog = new TopicMeta(topicId, file.getAbsolutePath(), 3600, 3600, 1024, 1L, 5, 4096);
+        RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false, true, state);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();
         convertToGZIP(file);
@@ -111,11 +121,17 @@ public class TestHDFSRecovery {
         byte[] buf = new byte[8196];
         BufferedInputStream bin= new BufferedInputStream(new FileInputStream(file));
         File gzFile = new File(file.getAbsoluteFile() + ".tmp");
-        GZIPOutputStream gout = new GZIPOutputStream(new FileOutputStream(gzFile));
+        Algorithm compressionAlgo = Compression.getCompressionAlgorithmByName("gz");
+        Compressor compressor = compressionAlgo.getCompressor();
+        OutputStream gout = compressionAlgo.createCompressionStream(
+                new FileOutputStream(gzFile), compressor, 0);
         int len;
+        int count = 0;
         while ((len = bin.read(buf)) != -1) {
             gout.write(buf, 0, len);
+            count += len;
         }
+        System.out.println("count " + count);
         gout.close();
         bin.close();
         gzFile.renameTo(file.getAbsoluteFile());

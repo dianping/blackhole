@@ -3,6 +3,7 @@ package com.dp.blackhole.network;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -64,8 +65,8 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
                 loopInternal();
             } catch (ClosedChannelException e) {
                 LOG.error("Channel cloesd", e);
-            } catch (IOException e) {
-                LOG.error("Oops, got an IOE", e);
+            } catch (Exception e) {
+                LOG.error("Oops, got an Exception", e);
             } finally {
                 try {
                     if (running) {
@@ -115,12 +116,14 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
                 key = iter.next();
                 iter.remove();
                 try {
-                    if (key.isConnectable()) {
-                        doConnect(key);
-                    } else if (key.isWritable()) {
-                        doWrite(key);
-                    } else if (key.isReadable()) {
-                        doRead(key);
+                    if (key.isValid()) {
+                        if (key.isConnectable()) {
+                            doConnect(key);
+                        } else if (key.isWritable()) {
+                            doWrite(key);
+                        } else if (key.isReadable()) {
+                            doRead(key);
+                        }
                     }
                 } catch (IOException e) {
                     LOG.warn("catch IOE: ", e);
@@ -142,20 +145,33 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
     }
 
     private void doWrite(SelectionKey key) throws IOException {
-        key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
+        try {
+            key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
+        } catch (CancelledKeyException e) {
+            LOG.warn("Exception while client writing." + e);
+        }
         Connection connection = (Connection) key.attachment();
         
         connection.write();
         if (!connection.writeComplete()) {
             // socket buffer is full, register OP_WRITE, wait for next write
-            key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+            try {
+                key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+            } catch (CancelledKeyException e) {
+                LOG.warn("Exception while client writing." + e);
+            }
         }
     }
 
     private void doConnect(SelectionKey key) throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();
-        key.interestOps(SelectionKey.OP_READ);
+        try {
+            key.interestOps(SelectionKey.OP_READ);
+        } catch (CancelledKeyException e) {
+            LOG.warn("Exception while client connecting." + e);
+        }
         channel.finishConnect();
+        LOG.info("GenClient "+ clientName + " connectted to " + host + ":" + port);
         
         connected.getAndSet(true);
         Connection connection = factory.makeConnection(channel, selector, wrappedFactory);

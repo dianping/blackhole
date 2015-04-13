@@ -12,7 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.Agent;
-import com.dp.blackhole.agent.TopicMeta.MetaKey;
+import com.dp.blackhole.agent.TopicMeta.TopicId;
 import com.dp.blackhole.common.Util;
 
 public class SimAgent extends Agent{
@@ -36,26 +36,32 @@ public class SimAgent extends Agent{
     public SimAgent() {
         super();
         super.processor = new AgentProcessor();
+        super.setHost(HOSTNAME);
+    }
+    
+//    @Override
+//    public static String getHost() {
+//        try {
+//            return Util.getLocalHost();
+//        } catch (UnknownHostException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+    
+    @Override
+    public void reportLogReaderFailure(TopicId topicId, String appHost, long ts) {
+        LOG.debug(topicId + " log reader fail, APP HOST: " + appHost + "ts: " + ts);
     }
     
     @Override
-    public String getHost() {
-        try {
-            return Util.getLocalHost();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    public void reportFailure(MetaKey metaKey, String appHost, long ts) {
-        LOG.debug(metaKey + ", APP HOST: " + appHost + "ts: " + ts);
+    public void reportRemoteSenderFailure(TopicId topicId, String appHost, long ts, int delay) {
+        LOG.debug(topicId + " remote sender fail, APP HOST: " + appHost + "ts: " + ts + "delay: " + delay);
     }
     
     @Override
-    public void reportUnrecoverable(MetaKey metaKey, String appHost, final long period, long ts, boolean isFinal) {
-        LOG.debug(metaKey + ", APP HOST: " + appHost  + ", period: " + period + ", roll ts: " + ts + ", final:" + isFinal);
+    public void reportUnrecoverable(TopicId topicId, String appHost, final long period, long ts, boolean isFinal, boolean isPersist) {
+        LOG.debug(topicId + ", APP HOST: " + appHost  + ", period: " + period + ", roll ts: " + ts + ", final:" + isFinal + ", persist:" + isPersist);
     }
     
     public static void deleteTmpFile(String MAGIC) {

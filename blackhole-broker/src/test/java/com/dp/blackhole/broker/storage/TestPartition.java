@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Test;
 
+import com.dp.blackhole.broker.SimBroker;
 import com.dp.blackhole.broker.storage.Partition;
 import com.dp.blackhole.broker.storage.Segment;
 import com.dp.blackhole.common.Util;
@@ -16,6 +18,12 @@ import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.Message;
 
 public class TestPartition {
+    
+    @After
+    public void tearDown() throws Exception {
+        SimBroker.deleteTmpFile("testPartition");
+    }
+    
     @Test
     public void test() throws IOException {
         File testdir = new File("/tmp/testPartition");
