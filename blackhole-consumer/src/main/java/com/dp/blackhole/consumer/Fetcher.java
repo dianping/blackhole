@@ -98,7 +98,7 @@ public class Fetcher extends Thread {
         .append(broker)
         .append(" with ");
         for (PartitionTopicInfo pti : partitionMap.values()) {
-            buf.append(pti.topic).append("-").append(pti.brokerString).append("-").append(pti.partition);
+            buf.append(pti.topic).append("-").append(pti.getBrokerString()).append("-").append(pti.partition);
         }
         buf.append(']');
         return buf.toString();

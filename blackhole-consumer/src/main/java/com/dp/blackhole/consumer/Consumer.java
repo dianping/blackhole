@@ -5,9 +5,14 @@ import java.net.UnknownHostException;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.dianping.lion.client.LionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.dp.blackhole.common.Util;
+import com.dp.blackhole.consumer.exception.ConsumerInitializeException;
 
 public class Consumer {
+    private final Log LOG = LogFactory.getLog(Consumer.class);
     public static final FetchedDataChunk SHUTDOWN_COMMAND = new FetchedDataChunk(null, null, -1);
     
     private LinkedBlockingQueue<FetchedDataChunk> queue;
@@ -17,8 +22,9 @@ public class Consumer {
     private String consumerId;
     private ConsumerConfig config;
     private ConsumerConnector connector;
-    
-    public Consumer(String topic, String group, ConsumerConfig config) throws LionException {
+    private OffsetReferee offsetReferee;
+
+    public Consumer(String topic, String group, ConsumerConfig config) throws ConsumerInitializeException {
         this.topic = topic;
         this.group = group;
         this.config = config;
@@ -26,8 +32,15 @@ public class Consumer {
         queue = new LinkedBlockingQueue<FetchedDataChunk>(this.config.getMaxQueuedChunks());
         
         connector = ConsumerConnector.getInstance();
-        if (!connector.initialized) {
-            connector.init();
+        try {
+            Class<?> offsetRefereeClazz = Class.forName(config.getOffsetRefereeClassName());
+            this.offsetReferee = (OffsetReferee) Util.newInstance(offsetRefereeClazz);
+            if (!connector.initialized) {
+                connector.init();
+            }
+        } catch (Exception e) {
+            LOG.error("Initialize consumer fail.", e);
+            throw new ConsumerInitializeException("Initialize consumer fail.", e);
         }
     }
     
@@ -54,6 +67,10 @@ public class Consumer {
     public String getGroup() {
         return group;
     }
+    
+    public OffsetReferee getOffsetReferee() {
+        return offsetReferee;
+    }
 
     public String getConsumerId() {
         return consumerId;
@@ -63,8 +80,17 @@ public class Consumer {
         return config;
     }
 
-    public MessageStream getStream() {
-        return new MessageStream(topic, queue, config.getConsumerTimeoutMs());
+    public MessageAndOffsetStream getMessageAndOffsetStream() {
+        return new MessageAndOffsetStream(topic, queue, config.getConsumerTimeoutMs());
+    }
+    
+    public StringStream getStringStream() {
+        return new StringStream(topic, queue, config.getConsumerTimeoutMs());
+    }
+
+    @Deprecated
+    public StringStream getStream() {
+        return getStringStream();
     }
 
     /**

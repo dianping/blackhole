@@ -8,7 +8,8 @@ message AssignConsumer {
     message PartitionOffset {
         required string brokerString = 1;
         required string partitionName = 2;
-        required int64 offset = 3;
+        required int64 end_offset = 3;
+        optional int64 committed_offset = 4;
     }
 
     required string group = 1;

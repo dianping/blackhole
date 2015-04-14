@@ -98,7 +98,7 @@ public class HDFSUpload implements Runnable{
                 Iterator<MessageAndOffset> iter = bms.getItertor();
                 while (iter.hasNext()) {
                     MessageAndOffset mo = iter.next();
-                    outChannel.write(mo.message.payload());
+                    outChannel.write(mo.getMessage().payload());
                     outChannel.write(newline);
                     newline.clear();
                 }
@@ -122,7 +122,6 @@ public class HDFSUpload implements Runnable{
                 }
             } catch (IOException e) {
             }
-
         }
     }
 

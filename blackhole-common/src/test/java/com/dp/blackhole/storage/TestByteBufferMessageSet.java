@@ -27,8 +27,8 @@ public class TestByteBufferMessageSet {
         int offset = 0;
         while (iter.hasNext()) {
             MessageAndOffset ms = iter.next();
-            assertEquals("123", Message.toEvent(ms.message));
-            assertEquals(offset, ms.offset);
+            assertEquals("123", ms.getMessageContent());
+            assertEquals(offset, ms.getOffset());
             offset = offset + 16;
         }
         

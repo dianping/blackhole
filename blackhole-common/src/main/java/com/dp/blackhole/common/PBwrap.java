@@ -418,11 +418,12 @@ public class PBwrap {
         return wrapMessage(MessageType.OFFSET_COMMIT, builder.build());
     }
     
-    public static AssignConsumer.PartitionOffset getPartitionOffset(String broker, String partition, long offset) {
+    public static AssignConsumer.PartitionOffset getPartitionOffset(String broker, String partition, long endOffset, long committedOffset) {
         AssignConsumer.PartitionOffset.Builder infoBuilder = AssignConsumer.PartitionOffset.newBuilder();
         infoBuilder.setBrokerString(broker);
         infoBuilder.setPartitionName(partition);
-        infoBuilder.setOffset(offset);
+        infoBuilder.setEndOffset(endOffset);
+        infoBuilder.setCommittedOffset(committedOffset);
         return infoBuilder.build();
     }
     

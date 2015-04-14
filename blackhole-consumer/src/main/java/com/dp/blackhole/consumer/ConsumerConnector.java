@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
+import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.EntityProcessor;
@@ -48,7 +49,7 @@ public class ConsumerConnector implements Runnable {
     private Map<String, List<Fetcher>> consumerThreadsMap;
     // registered consumers
     private ConcurrentHashMap<String, Consumer> consumers;   
-    private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
+    private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1, new DaemonThreadFactory("scheduler"));
 
     private GenClient<ByteBuffer, SimpleConnection, ConsumerProcessor> client;
     private ConsumerProcessor processor;
@@ -263,10 +264,34 @@ public class ConsumerConnector implements Runnable {
                     String topic = assign.getTopic();
                     String brokerString = partitionOffset.getBrokerString();
                     String partitionName = partitionOffset.getPartitionName();
-                    long offset = partitionOffset.getOffset();
+                    long endOffset = partitionOffset.getEndOffset();
+                    long committedOffset = partitionOffset.getCommittedOffset();
+                    
+                    long offset;
+                    //set default value by subscribe strategy 
+                    if (c.getConf().isSubscribeFromTail()) {
+                        offset = endOffset;
+                    } else {
+                        offset = committedOffset;
+                    }
+                    
+                    if (c.getOffsetReferee().isActive()) {
+                        //Notice, the default OffsetReferee(TailOffsetReferee) is always active
+                        long customConsumedOffset = c.getOffsetReferee().getOffsetByPartition(topic, partitionName);
+                        if (customConsumedOffset == OffsetReferee.USELESS_OFFSET) {
+                            //do nothing, offset value will depend on subscribe strategy
+                        } else {
+                            LOG.info("use user specified offset"
+                                    + "[" + customConsumedOffset + "] for topic:"
+                                    + topic + " partition:" + partitionName);
+                            //if strategy is subscribe from tail, but custom offset is set too, use custom offset
+                            offset = customConsumedOffset;
+                        }
+                    }
+                    
                     PartitionTopicInfo info = 
                             new PartitionTopicInfo(topic, partitionName, brokerString, offset, offset);
-
+                    LOG.debug("create a PartitionTopicInfo: " + info);
                     List<PartitionTopicInfo> partitionList = brokerPartitionInfoMap.get(brokerString);
                     if (partitionList == null) {
                         partitionList = new ArrayList<PartitionTopicInfo>();

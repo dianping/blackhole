@@ -11,6 +11,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -679,5 +680,21 @@ public class Util {
         } catch (Exception e) {
             return defaultValue;
         }
+    }
+        
+    public static <T> T newInstance(Class<T> theClass, Object... params) {
+        Class<?>[] paramTypeArray = new Class[params.length];
+        for (int i = 0; i < params.length; i++) {
+            paramTypeArray[i] = params[i].getClass();
+        }
+        T result;
+        try {
+            Constructor<T> meth= theClass.getDeclaredConstructor(paramTypeArray);
+                meth.setAccessible(true);
+            result = meth.newInstance(params);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 }

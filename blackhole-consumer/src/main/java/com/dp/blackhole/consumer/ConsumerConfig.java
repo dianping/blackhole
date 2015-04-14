@@ -15,15 +15,35 @@ public class ConsumerConfig {
     private int consumerTimeoutMs;
     
     private boolean multiFetch;
+    
+    private boolean subscribeFromTail;
+    
+    private String offsetRefereeClassName;
 
+    /**
+     * the properties entry include:<br/>
+     * <b>fetch.size</b> the max number of byes of messages to attempt to fetch, default is 1MB<br/>
+     * <b>queuedchunks.max</b> the max number of messages buffered for consumption, default is 2<br/>
+     * <b>autooffset.reset</b> what to do if an offset is out of range, default is reseted to smallest<br/>
+     * <b>messages.multiFetch</b> whether or not fetch multiple partition message at once, default is false<br/>
+     * <b>consumer.timeout.ms</b> timeout of message fetching, default is -1, standing for waiting until an message becomes available<br/>
+     * <b>consumer.offsetRefereeClass.name</b> user-specified OffsetReferee class name, default is com.dp.blackhole.consumer.TailOffsetReferee.<br/>
+     * <b>consumer.isSubscribeFromTail</b> if subscribe from tail, default is true, if "consumer.offsetRefereeClass.name" was set, this value equals false<br/>
+     */
     public ConsumerConfig(Properties props) {
         this.fetchSize = getInt(props, "fetch.size", 1024 * 1024);//1MB
         this.maxQueuedChunks = getInt(props, "queuedchunks.max", 2);
         this.autoOffsetReset = getString(props, "autooffset.reset", OffsetRequest.SMALLES_TIME_STRING);
         this.multiFetch = getBoolean(props, "messages.multiFetch", false);
         this.consumerTimeoutMs = getInt(props, "consumer.timeout.ms", -1);
+        this.subscribeFromTail = getBoolean(props, "consumer.isSubscribeFromTail", true);
+        this.offsetRefereeClassName = getString(props, "consumer.offsetRefereeClass.name", TailOffsetReferee.class.getCanonicalName());
     }
 
+    /**
+     * all configuration is set to default.
+     * if you want configure by yourself, use ConsumerConfig(Properties props)
+     */
     public ConsumerConfig() {
         this(new Properties());
     }
@@ -63,6 +83,14 @@ public class ConsumerConfig {
         return multiFetch;
     }
     
+    public boolean isSubscribeFromTail() {
+        return subscribeFromTail;
+    }
+
+    public String getOffsetRefereeClassName() {
+        return offsetRefereeClassName;
+    }
+
     public boolean getBoolean(Properties props, String name, boolean defaultValue) {
         if (!props.containsKey(name)) return defaultValue;
         return "true".equalsIgnoreCase(props.getProperty(name));
@@ -71,7 +99,10 @@ public class ConsumerConfig {
     public int getInt(Properties props, String name, int defaultValue) {
         int v = defaultValue;
         if (props.containsKey(name)) {
-            v = Integer.valueOf(props.getProperty(name));
+            try {
+                v = Integer.valueOf(props.getProperty(name));
+            } catch (Exception e) {
+            }
         }
         return v;
     }

@@ -52,9 +52,8 @@ public class Message {
         return checksum() == Util.getCRC32(buffer.array(), buffer.arrayOffset() + headSize(), payloadSize()); 
     }
     
-    
-    public static String toEvent(Message message) {
-        ByteBuffer buf = message.payload();
+    public String getContent() {
+        ByteBuffer buf = this.payload();
         byte[] b = new byte[buf.remaining()];
         buf.get(b);
         return Util.fromBytes(b);

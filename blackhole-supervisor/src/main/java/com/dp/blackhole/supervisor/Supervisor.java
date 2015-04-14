@@ -2,6 +2,7 @@ package com.dp.blackhole.supervisor;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -78,8 +79,8 @@ public class Supervisor {
 
     private ConcurrentHashMap<String, Topic> topics;
 
-    private ConcurrentHashMap<ConsumerGroupKey, ConsumerGroup> consumerGroups;
   
+    private ConcurrentHashMap<ConsumerGroupKey, ConsumerGroup> consumerGroups;
     private ConcurrentHashMap<SimpleConnection, ConnectionDesc> connections;
     private ConcurrentHashMap<String, SimpleConnection> agentsMapping;
     private ConcurrentHashMap<String, SimpleConnection> brokersMapping;
@@ -396,7 +397,9 @@ public class Supervisor {
                 List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(pinfoList.size());
                 for (PartitionInfo info : pinfoList) {
                     String broker = info.getHost()+ ":" + getBrokerPort(info.getHost());
-                    AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(broker, info.getId(), info.getEndOffset());
+                    long endOffset = info.getEndOffset();
+                    long committedOffset = group.getCommittedOffsetByParitionId(info.getId());
+                    AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(broker, info.getId(), endOffset, committedOffset);
                     offsets.add(offset);
                 }
                 Message assign = PBwrap.wrapAssignConsumer(group.getGroupId(), cond.getId(), group.getTopic(), offsets);
@@ -967,6 +970,14 @@ public class Supervisor {
 
     private void handleRetireStream(StreamID streamId, SimpleConnection from) {
         boolean force = false;
+        try {
+            //special case, retire stream as administrator
+            if (from.getHost() == Util.getLocalHost()) {
+                force = true;
+            }
+        } catch (UnknownHostException e) {
+            LOG.error("Cannot get localhost", e);
+        }
         if (getConnectionType(from) == ConnectionDesc.AGENT) {
             force = true;
         }

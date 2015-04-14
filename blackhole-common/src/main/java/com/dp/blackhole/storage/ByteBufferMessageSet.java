@@ -123,7 +123,7 @@ public class ByteBufferMessageSet implements MessageSet{
             return 0;
         }
         // last offset + last message size (message length(4) + real message size)
-        return last.offset + last.message.getSize() - startOffset;
+        return last.getOffset() + last.getMessage().getSize() - startOffset;
     }
     
     public long getValidSize() {
