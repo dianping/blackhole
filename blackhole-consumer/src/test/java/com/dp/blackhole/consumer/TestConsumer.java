@@ -32,9 +32,10 @@ public class TestConsumer {
         String topic = args[2 + debugIndex];
         String group = args[3 + debugIndex];
         int numConsumerInOneProcess = Integer.parseInt(args[4 + debugIndex]);
+        String fromTail = args[5 + debugIndex];
         long durationMills = Long.MAX_VALUE;
         try {
-            durationMills = Long.parseLong(args[5 + debugIndex]);
+            durationMills = Long.parseLong(args[6 + debugIndex]);
         } catch (Exception e) {
         }
 
@@ -46,6 +47,7 @@ public class TestConsumer {
         ConsumerConnector.getInstance().init(supervisorHost, port, true, 6000);
         Properties prop = new Properties();
         prop.put("consumer.offsetRefereeClass.name", TailOffsetReferee.class.getCanonicalName());
+        prop.put("consumer.isSubscribeFromTail", fromTail);
         ConsumerConfig config = new ConsumerConfig(prop);
         
         for (int i = 0; i < numConsumerInOneProcess; i++) {
