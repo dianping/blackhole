@@ -11,7 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import com.dp.blackhole.consumer.exception.ConsumerTimeoutException;
 import com.dp.blackhole.storage.MessageAndOffset;
 
-public class ConsumerIterator implements Iterator<MessageAndOffset> {
+public class ConsumerIterator implements Iterator<ConsumerMessage> {
     
     private final Log logger = LogFactory.getLog(ConsumerIterator.class);
     
@@ -27,7 +27,7 @@ public class ConsumerIterator implements Iterator<MessageAndOffset> {
 
     private State state = State.NOT_READY;
     
-    private MessageAndOffset nextItem = null;
+    private ConsumerMessage nextItem = null;
 
     private Iterator<MessageAndOffset> current = null;
 
@@ -43,10 +43,10 @@ public class ConsumerIterator implements Iterator<MessageAndOffset> {
     }
 
     @Override
-    public MessageAndOffset next() {
+    public ConsumerMessage next() {
         if (!hasNext()) throw new NoSuchElementException();
         state = State.NOT_READY;
-        MessageAndOffset message = nextItem;
+        ConsumerMessage message = nextItem;
         if (consumedOffset < 0) {
             throw new IllegalStateException("Offset returned by the message set is invalid " + consumedOffset);
         }
@@ -54,7 +54,7 @@ public class ConsumerIterator implements Iterator<MessageAndOffset> {
         return message;
     }
 
-    protected MessageAndOffset makeNext() throws InterruptedException, ConsumerTimeoutException {
+    protected ConsumerMessage makeNext() throws InterruptedException, ConsumerTimeoutException {
         FetchedDataChunk currentDataChunk = null;
         if (current == null || !current.hasNext()) {
             if (consumerTimeoutMs < 0) {
@@ -88,7 +88,7 @@ public class ConsumerIterator implements Iterator<MessageAndOffset> {
         }
         consumedOffset = item.getOffset();
 //        logger.debug(item.message + "  @  " +item.offset);
-        return item;
+        return new ConsumerMessage(item, currentTopicInfo.partition);
     }
 
     public void clearCurrentChunk() {
@@ -135,11 +135,11 @@ public class ConsumerIterator implements Iterator<MessageAndOffset> {
 
         @Override
         public String next() {
-            MessageAndOffset messageAndOffset = ConsumerIterator.this.next();
-            if (messageAndOffset == null) {
+            ConsumerMessage message = ConsumerIterator.this.next();
+            if (message == null) {
                 return null;
             }
-            return messageAndOffset.getMessageContent();
+            return message.getContent();
         }
 
         @Override

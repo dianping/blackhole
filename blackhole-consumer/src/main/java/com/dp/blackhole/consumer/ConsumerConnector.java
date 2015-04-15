@@ -275,18 +275,17 @@ public class ConsumerConnector implements Runnable {
                         offset = committedOffset;
                     }
                     
-                    if (c.getOffsetReferee().isActive()) {
-                        //Notice, the default OffsetReferee(TailOffsetReferee) is always active
-                        long customConsumedOffset = c.getOffsetReferee().getOffsetByPartition(topic, partitionName);
-                        if (customConsumedOffset == OffsetReferee.USELESS_OFFSET) {
-                            //do nothing, offset value will depend on subscribe strategy
-                        } else {
-                            LOG.info("use user specified offset"
-                                    + "[" + customConsumedOffset + "] for topic:"
-                                    + topic + " partition:" + partitionName);
-                            //if strategy is subscribe from tail, but custom offset is set too, use custom offset
-                            offset = customConsumedOffset;
-                        }
+                    long customConsumedOffset = c.getOffsetReferee().getOffsetByPartition(topic, partitionName);
+                    if (customConsumedOffset == OffsetReferee.TAIL_OFFSET) {
+                        offset = endOffset;
+                    } else if (customConsumedOffset == OffsetReferee.LAST_COMMITTED_OFFSET) {
+                        offset = committedOffset;
+                    } else {
+                        LOG.info("use user specified offset"
+                                + "[" + customConsumedOffset + "] for topic:"
+                                + topic + " partition:" + partitionName);
+                        //if strategy is subscribe from tail, but custom offset is set too, use custom offset
+                        offset = customConsumedOffset;
                     }
                     
                     PartitionTopicInfo info = 

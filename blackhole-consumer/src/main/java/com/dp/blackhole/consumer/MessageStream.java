@@ -5,7 +5,7 @@ import java.util.concurrent.BlockingQueue;
 
 import com.dp.blackhole.storage.MessageAndOffset;
 
-public class MessageAndOffsetStream implements Iterable<MessageAndOffset> {
+public class MessageStream implements Iterable<ConsumerMessage> {
 
     public final String topic;
 
@@ -13,7 +13,7 @@ public class MessageAndOffsetStream implements Iterable<MessageAndOffset> {
 
     private final ConsumerIterator consumerIterator;
 
-    public MessageAndOffsetStream(String topic, BlockingQueue<FetchedDataChunk> queue, int consumerTimeoutMs) {
+    public MessageStream(String topic, BlockingQueue<FetchedDataChunk> queue, int consumerTimeoutMs) {
         super();
         this.topic = topic;
         this.consumerTimeoutMs = consumerTimeoutMs;
@@ -21,7 +21,7 @@ public class MessageAndOffsetStream implements Iterable<MessageAndOffset> {
     }
 
     @Override
-    public Iterator<MessageAndOffset> iterator() {
+    public Iterator<ConsumerMessage> iterator() {
         return consumerIterator;
     }
 

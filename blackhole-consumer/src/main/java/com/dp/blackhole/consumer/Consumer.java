@@ -80,8 +80,8 @@ public class Consumer {
         return config;
     }
 
-    public MessageAndOffsetStream getMessageAndOffsetStream() {
-        return new MessageAndOffsetStream(topic, queue, config.getConsumerTimeoutMs());
+    public MessageStream getMessageStream() {
+        return new MessageStream(topic, queue, config.getConsumerTimeoutMs());
     }
     
     public StringStream getStringStream() {
