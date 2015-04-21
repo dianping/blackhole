@@ -8,11 +8,12 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.consumer.api.Consumer;
+import com.dp.blackhole.consumer.api.MessagePack;
 import com.dp.blackhole.consumer.exception.ConsumerTimeoutException;
-import com.dp.blackhole.storage.Message;
 import com.dp.blackhole.storage.MessageAndOffset;
 
-public class ConsumerIterator implements Iterator<String> {
+public class ConsumerIterator implements Iterator<MessagePack> {
     
     private final Log logger = LogFactory.getLog(ConsumerIterator.class);
     
@@ -28,7 +29,7 @@ public class ConsumerIterator implements Iterator<String> {
 
     private State state = State.NOT_READY;
     
-    private String nextItem = null;
+    private MessagePack nextItem = null;
 
     private Iterator<MessageAndOffset> current = null;
 
@@ -44,10 +45,10 @@ public class ConsumerIterator implements Iterator<String> {
     }
 
     @Override
-    public String next() {
+    public MessagePack next() {
         if (!hasNext()) throw new NoSuchElementException();
         state = State.NOT_READY;
-        String message = nextItem;
+        MessagePack message = nextItem;
         if (consumedOffset < 0) {
             throw new IllegalStateException("Offset returned by the message set is invalid " + consumedOffset);
         }
@@ -55,7 +56,7 @@ public class ConsumerIterator implements Iterator<String> {
         return message;
     }
 
-    protected String makeNext() throws InterruptedException, ConsumerTimeoutException {
+    protected MessagePack makeNext() throws InterruptedException, ConsumerTimeoutException {
         FetchedDataChunk currentDataChunk = null;
         if (current == null || !current.hasNext()) {
             if (consumerTimeoutMs < 0) {
@@ -84,12 +85,12 @@ public class ConsumerIterator implements Iterator<String> {
             }
         }
         MessageAndOffset item = current.next();
-        while (item.offset < currentTopicInfo.getConsumedOffset() && current.hasNext()) {
+        while (item.getOffset() < currentTopicInfo.getConsumedOffset() && current.hasNext()) {
             item = current.next();
         }
-        consumedOffset = item.offset;
+        consumedOffset = item.getOffset();
 //        logger.debug(item.message + "  @  " +item.offset);
-        return Message.toEvent(item.message);
+        return new MessagePack(item, currentTopicInfo.partition);
     }
 
     public void clearCurrentChunk() {

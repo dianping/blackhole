@@ -1,6 +1,6 @@
 package com.dp.blackhole.consumer.exception;
 
-public class ConsumerTimeoutException extends Exception {
+public class ConsumerTimeoutException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 

@@ -17,6 +17,7 @@ import com.dp.blackhole.agent.persist.Record;
 import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
+import com.dp.blackhole.network.TransferThrottler;
 
 public class RollRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(RollRecovery.class);
@@ -31,6 +32,7 @@ public class RollRecovery implements Runnable{
     private boolean isFinal;
     private boolean isPersist;
     private final IRecoder state;
+    private TransferThrottler throttler;
 
     public RollRecovery(Agent node, String brokerServer, int port,
             TopicMeta topicMeta, final long rollTimestamp, boolean isFinal,
@@ -44,6 +46,9 @@ public class RollRecovery implements Runnable{
         this.isFinal = isFinal;
         this.isPersist = isPersist;
         this.state = state;
+        if (topicMeta.getBandwidthPerSec() > 0) {
+            this.throttler = new TransferThrottler(topicMeta.getBandwidthPerSec());
+        }
     }
 
     public void stop() {
@@ -179,6 +184,9 @@ public class RollRecovery implements Runnable{
                     out.write(inbuf, 0, len);
                     transferBytes += len;
                     toTransferSize -= len;
+                    if (throttler != null) {
+                        throttler.throttle(len);
+                    }
                 }
                 out.flush();
                 LOG.info(transferFile + " transfered, including [" + transferBytes + "] bytes.");

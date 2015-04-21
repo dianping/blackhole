@@ -79,8 +79,8 @@ public class Util {
         SimpleDateFormat dm= new SimpleDateFormat(format);
         if (hidden) {
             Path[] hiddenPath = new Path[1];
-            hiddenPath[0] = new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
-                    CheckDone.hdfsHiddenfileprefix + source + '@' + ident.app + "_" + dm.format(roll));
+            hiddenPath[0] = new Path(CheckDone.hdfsbasedir + '/' + ident.topic + '/' + getDatepathbyFormat(dm.format(roll)) +
+                    CheckDone.hdfsHiddenfileprefix + source + '@' + ident.topic + "_" + dm.format(roll));
             return hiddenPath;
         } else {
             int toCheckPathRatio = 2;
@@ -93,13 +93,13 @@ public class Util {
             }
             Path[] rollPath = new Path[CheckDone.hdfsfilesuffix.length * toCheckPathRatio];
             for(int i = 0;i < CheckDone.hdfsfilesuffix.length; i++) {
-                rollPath[i] = new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
-                    source + '@' + ident.app + "_" + dm.format(roll) + "." + CheckDone.hdfsfilesuffix[i]);
+                rollPath[i] = new Path(CheckDone.hdfsbasedir + '/' + ident.topic + '/' + getDatepathbyFormat(dm.format(roll)) +
+                    source + '@' + ident.topic + "_" + dm.format(roll) + "." + CheckDone.hdfsfilesuffix[i]);
             }
             if (ip != null) {
                 for(int i = 0;i < CheckDone.hdfsfilesuffix.length; i++) {
-                    rollPath[i + CheckDone.hdfsfilesuffix.length] = new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' + getDatepathbyFormat(dm.format(roll)) +
-                        ip + '@' + ident.app + "_" + dm.format(roll) + "." + CheckDone.hdfsfilesuffix[i]);
+                    rollPath[i + CheckDone.hdfsfilesuffix.length] = new Path(CheckDone.hdfsbasedir + '/' + ident.topic + '/' + getDatepathbyFormat(dm.format(roll)) +
+                        ip + '@' + ident.topic + "_" + dm.format(roll) + "." + CheckDone.hdfsfilesuffix[i]);
                 }
             }
             return rollPath;
@@ -169,12 +169,12 @@ public class Util {
         String format  = Util.getFormatFromPeriod(ident.period);
         Date roll = new Date(ts);
         SimpleDateFormat dm= new SimpleDateFormat(format);
-        Path done =  new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' +
+        Path done =  new Path(CheckDone.hdfsbasedir + '/' + ident.topic + '/' +
                 Util.getDatepathbyFormat(dm.format(roll)) + DONE_FLAG);
         if (Util.retryExists(done)) {
             return true;
         } else {
-            Path succ =  new Path(CheckDone.hdfsbasedir + '/' + ident.app + '/' +
+            Path succ =  new Path(CheckDone.hdfsbasedir + '/' + ident.topic + '/' +
                     Util.getDatepathbyFormat(dm.format(roll)) + CheckDone.successprefix + dm.format(roll));
             return Util.retryExists(succ);
         }
@@ -197,7 +197,12 @@ public class Util {
         String[] tmp = value.substring(1, value.length() - 1).split(",");
         String[] result = new String[tmp.length];
         for (int i = 0; i < tmp.length; i++) {
-            result[i] = tmp[i].trim().substring(1, tmp[i].trim().length() -1 );
+            if (tmp[i].trim().length() -1 < 1) {
+                result[i] = new String("");
+            }
+            else {
+                result[i] = tmp[i].trim().substring(1, tmp[i].trim().length() -1 );
+            }
         }
         return result;
     }

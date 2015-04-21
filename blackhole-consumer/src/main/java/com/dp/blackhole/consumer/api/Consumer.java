@@ -1,13 +1,20 @@
-package com.dp.blackhole.consumer;
+package com.dp.blackhole.consumer.api;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.dianping.lion.client.LionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.dp.blackhole.consumer.ConsumerConnector;
+import com.dp.blackhole.consumer.FetchedDataChunk;
+import com.dp.blackhole.consumer.MessageStream;
+import com.dp.blackhole.consumer.exception.ConsumerInitializeException;
 
 public class Consumer {
+    private final Log LOG = LogFactory.getLog(Consumer.class);
     public static final FetchedDataChunk SHUTDOWN_COMMAND = new FetchedDataChunk(null, null, -1);
     
     private LinkedBlockingQueue<FetchedDataChunk> queue;
@@ -17,17 +24,28 @@ public class Consumer {
     private String consumerId;
     private ConsumerConfig config;
     private ConsumerConnector connector;
+    private OffsetStrategy offsetStrategy;
+
+    public Consumer(String topic, String group, ConsumerConfig config) throws ConsumerInitializeException {
+        this(topic, group, config, new TailOffsetStrategy());
+    }
     
-    public Consumer(String topic, String group, ConsumerConfig config) throws LionException {
+    public Consumer(String topic, String group, ConsumerConfig config, OffsetStrategy offsetStrategy) throws ConsumerInitializeException {
         this.topic = topic;
         this.group = group;
         this.config = config;
+        this.offsetStrategy = offsetStrategy;
         consumerId = generateConsumerId(this.group);
         queue = new LinkedBlockingQueue<FetchedDataChunk>(this.config.getMaxQueuedChunks());
         
         connector = ConsumerConnector.getInstance();
-        if (!connector.initialized) {
-            connector.init();
+        try {
+            if (!connector.initialized) {
+                connector.init();
+            }
+        } catch (Exception e) {
+            LOG.error("Initialize consumer fail.", e);
+            throw new ConsumerInitializeException("Initialize consumer fail.", e);
         }
     }
     
@@ -35,12 +53,12 @@ public class Consumer {
         connector.registerConsumer(topic, group, consumerId ,this);
     }
     
-    LinkedBlockingQueue<FetchedDataChunk> getDataQueue() {
+    public LinkedBlockingQueue<FetchedDataChunk> getDataQueue() {
         return queue;
     }
     
     public void clearQueue() {
-        queue.clear();   
+        queue.clear();
     }
     
     public void shutdown() throws InterruptedException {
@@ -53,6 +71,10 @@ public class Consumer {
 
     public String getGroup() {
         return group;
+    }
+    
+    public OffsetStrategy getOffsetStrategy() {
+        return offsetStrategy;
     }
 
     public String getConsumerId() {

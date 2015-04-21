@@ -392,14 +392,14 @@ public class LionConfChange {
             }
             RollIdent ident = new RollIdent();
             ident.period = Long.parseLong(context.getString(ParamsKey.Appconf.ROLL_PERIOD));
-            ident.app = appName;
-            ident.sources = appToHosts.get(appName);
+            ident.topic = appName;
+            ident.kvmSources = appToHosts.get(appName);
             ident.ts = Util.getCurrWholeTs(new Date().getTime(), ident.period);
             ident.timeout = -1;
             CheckDone checker = new CheckDone(ident);
             LOG.info("create a checkdone thread " + checker.toString());
             ScheduledFuture<?> scheduledFuture = CheckDone.checkerThreadPool.scheduleWithFixedDelay(checker, 0, CheckDone.checkperiod, TimeUnit.SECONDS);
-            CheckDone.threadMap.put(ident.app, scheduledFuture);
+            CheckDone.threadMap.put(ident.topic, scheduledFuture);
         }
         
         class AddCheckerLater implements Runnable {

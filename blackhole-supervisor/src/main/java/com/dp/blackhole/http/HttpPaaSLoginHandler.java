@@ -134,9 +134,10 @@ public class HttpPaaSLoginHandler extends HttpAbstractHandler implements HttpReq
                 String readInterval = String.valueOf(topicConfig.getReadInterval());
                 String minMsgSent = String.valueOf(topicConfig.getMinMsgSent());
                 String msgBufSize = String.valueOf(topicConfig.getMsgBufSize());
+                String bandwidthPerSec = String.valueOf(topicConfig.getBandwidthPerSec());
                 LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile,
                         rotatePeriod, rollPeriod, maxLineSize, readInterval,
-                        minMsgSent, msgBufSize, idsInTheSameHost);
+                        minMsgSent, msgBufSize, bandwidthPerSec, idsInTheSameHost);
                 lxcConfResList.add(lxcConfRes);
             }
             Message message = PBwrap.wrapConfRes(null, lxcConfResList);

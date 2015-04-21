@@ -136,7 +136,7 @@ public class FTPUpload implements Runnable {
             Iterator<MessageAndOffset> iter = bms.getItertor();
             while (iter.hasNext()) {
                 MessageAndOffset mo = iter.next();
-                compressionFtpChannel.write(mo.message.payload());
+                compressionFtpChannel.write(mo.getMessage().payload());
                 compressionFtpChannel.write(newline);
                 newline.clear();
             }

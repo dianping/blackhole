@@ -20,8 +20,12 @@ import org.apache.commons.logging.LogFactory;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
+import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.consumer.api.Consumer;
+import com.dp.blackhole.consumer.api.ConsumerConfig;
+import com.dp.blackhole.consumer.api.OffsetStrategy;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
@@ -48,7 +52,7 @@ public class ConsumerConnector implements Runnable {
     private Map<String, List<Fetcher>> consumerThreadsMap;
     // registered consumers
     private ConcurrentHashMap<String, Consumer> consumers;   
-    private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
+    private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1, new DaemonThreadFactory("scheduler"));
 
     private GenClient<ByteBuffer, SimpleConnection, ConsumerProcessor> client;
     private ConsumerProcessor processor;
@@ -139,7 +143,7 @@ public class ConsumerConnector implements Runnable {
      * register consumer data to supervisor
      * @param consumer 
      */
-    void registerConsumer(String topic, String group, String consumerId, Consumer consumer) {
+    public void registerConsumer(String topic, String group, String consumerId, Consumer consumer) {
         configMap.put(consumerId, consumer.getConf());
         consumers.put(consumerId, consumer);
         sendRegConsumer(topic, group, consumerId);
@@ -263,10 +267,13 @@ public class ConsumerConnector implements Runnable {
                     String topic = assign.getTopic();
                     String brokerString = partitionOffset.getBrokerString();
                     String partitionName = partitionOffset.getPartitionName();
-                    long offset = partitionOffset.getOffset();
+                    long endOffset = partitionOffset.getEndOffset();
+                    long committedOffset = partitionOffset.getCommittedOffset();
+                    long offset = c.getOffsetStrategy().getOffset(topic, partitionName, endOffset, committedOffset);
+                    LOG.info("consume from [" + offset + "] for topic:" + topic + " partition:" + partitionName);
                     PartitionTopicInfo info = 
                             new PartitionTopicInfo(topic, partitionName, brokerString, offset, offset);
-
+                    LOG.debug("create a PartitionTopicInfo: " + info);
                     List<PartitionTopicInfo> partitionList = brokerPartitionInfoMap.get(brokerString);
                     if (partitionList == null) {
                         partitionList = new ArrayList<PartitionTopicInfo>();

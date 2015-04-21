@@ -14,6 +14,7 @@ public abstract class ParamsKey {
         public static final String UPLOAD_PERIOD = "uploadPeriod";
         public static final String MINIMUM_MESSAGES_SENT = "minMsgSent";
         public static final String MESSAGE_BUFFER_SIZE = "msgBufSize";
+        public static final String BANDWIDTH_PER_SEC = "bandwidthPerSec";
     }
 
     public static class LionNode {

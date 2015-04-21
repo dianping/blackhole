@@ -89,7 +89,7 @@ public class TestLogReader {
         String localhost = Util.getLocalHost();
         when(Agent.getHost()).thenReturn(localhost);
         TopicId topicId = new TopicId(MAGIC, null);
-        TopicMeta topicMeta = new TopicMeta(topicId, SimAgent.TEST_ROLL_FILE, 3600, 3600, 1024, 1L, 5, 4096);
+        TopicMeta topicMeta = new TopicMeta(topicId, SimAgent.TEST_ROLL_FILE, 3600, 3600, 1024, 1L, 5, 4096, 1024*1024);
         SimAgent agent = new SimAgent();
         FileListener listener;
         try {
@@ -128,7 +128,7 @@ public class TestLogReader {
         while (iter.hasNext()) {
             mo = iter.next();
         }
-        assertEquals(expectedLines.get(expectedLines.size() - 12), decoder.decode(mo.message.payload()).toString());
+        assertEquals(expectedLines.get(expectedLines.size() - 12), decoder.decode(mo.getMessage().payload()).toString());
     }
     private void fetchFileMessageSet(GatheringByteChannel channel, FileMessageSet messages) throws IOException {
         int read = 0;

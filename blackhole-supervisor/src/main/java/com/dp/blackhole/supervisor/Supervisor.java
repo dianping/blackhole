@@ -2,6 +2,7 @@ package com.dp.blackhole.supervisor;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -78,8 +79,8 @@ public class Supervisor {
 
     private ConcurrentHashMap<String, Topic> topics;
 
-    private ConcurrentHashMap<ConsumerGroupKey, ConsumerGroup> consumerGroups;
   
+    private ConcurrentHashMap<ConsumerGroupKey, ConsumerGroup> consumerGroups;
     private ConcurrentHashMap<SimpleConnection, ConnectionDesc> connections;
     private ConcurrentHashMap<String, SimpleConnection> agentsMapping;
     private ConcurrentHashMap<String, SimpleConnection> brokersMapping;
@@ -174,7 +175,8 @@ public class Supervisor {
                 String.valueOf(confInfo.getMaxLineSize()),
                 String.valueOf(confInfo.getReadInterval()),
                 String.valueOf(confInfo.getMinMsgSent()),
-                String.valueOf(confInfo.getMsgBufSize())
+                String.valueOf(confInfo.getMsgBufSize()),
+                String.valueOf(confInfo.getBandwidthPerSec())
         );
         appConfResList.add(appConfRes);
         Message message = PBwrap.wrapConfRes(appConfResList, null);
@@ -212,6 +214,7 @@ public class Supervisor {
                     String.valueOf(confInfo.getReadInterval()),
                     String.valueOf(confInfo.getMinMsgSent()),
                     String.valueOf(confInfo.getMsgBufSize()),
+                    String.valueOf(confInfo.getBandwidthPerSec()),
                     idsInTheSameHost);
             lxcConfResList.add(lxcConfRes);
             Message message = PBwrap.wrapConfRes(null, lxcConfResList);
@@ -394,7 +397,9 @@ public class Supervisor {
                 List<AssignConsumer.PartitionOffset> offsets = new ArrayList<AssignConsumer.PartitionOffset>(pinfoList.size());
                 for (PartitionInfo info : pinfoList) {
                     String broker = info.getHost()+ ":" + getBrokerPort(info.getHost());
-                    AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(broker, info.getId(), info.getEndOffset());
+                    long endOffset = info.getEndOffset();
+                    long committedOffset = group.getCommittedOffsetByParitionId(info.getId());
+                    AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(broker, info.getId(), endOffset, committedOffset);
                     offsets.add(offset);
                 }
                 Message assign = PBwrap.wrapAssignConsumer(group.getGroupId(), cond.getId(), group.getTopic(), offsets);
@@ -965,6 +970,14 @@ public class Supervisor {
 
     private void handleRetireStream(StreamID streamId, SimpleConnection from) {
         boolean force = false;
+        try {
+            //special case, retire stream as administrator
+            if (from.getHost() == Util.getLocalHost()) {
+                force = true;
+            }
+        } catch (UnknownHostException e) {
+            LOG.error("Cannot get localhost", e);
+        }
         if (getConnectionType(from) == ConnectionDesc.AGENT) {
             force = true;
         }
@@ -2003,6 +2016,7 @@ public class Supervisor {
             String readInterval = String.valueOf(confInfo.getReadInterval());
             String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
             String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
+            String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
             String watchFile = confInfo.getWatchLog();
             if (watchFile == null) {
                 LOG.error("Can not get watch file of " + topic);
@@ -2012,7 +2026,7 @@ public class Supervisor {
             }
             AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile,
                     rotatePeriod, rollPeriod, maxLineSize, readInterval,
-                    minMsgSent, msgBufSize);
+                    minMsgSent, msgBufSize, bandwidthPerSec);
             appConfResList.add(appConfRes);
         }
         if (!appConfResList.isEmpty()) {
@@ -2038,6 +2052,7 @@ public class Supervisor {
                 String watchFile = confInfo.getWatchLog();
                 String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
                 String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
+                String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
                 Set<String> ids = confInfo.getInsByHost(connection.getHost());
                 if (ids == null) {
                     LOG.error("Can not get instances by " + topic + " and " + connection.getHost());
@@ -2045,7 +2060,7 @@ public class Supervisor {
                 }
                 LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile,
                         rotatePeriod, rollPeriod, maxLineSize, readInterval,
-                        minMsgSent, msgBufSize, ids);
+                        minMsgSent, msgBufSize, bandwidthPerSec, ids);
                 lxcConfResList.add(lxcConfRes);
             }
             if (!lxcConfResList.isEmpty()) {

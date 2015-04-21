@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -58,9 +59,11 @@ public class TimeChecker extends Thread {
     }
 
     public synchronized void check() {
-        for (Map.Entry<RollIdent, List<Long>> entry : checkerMap.entrySet()) {
+        Iterator<Map.Entry<RollIdent, List<Long>>> iter =  checkerMap.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry<RollIdent, List<Long>> entry = iter.next();
             RollIdent ident = entry.getKey();
-            if (lionConfChange.getAppBlacklist().contains(ident.app)) {
+            if (lionConfChange.getAppBlacklist().contains(ident.topic)) {
                 checkerMap.remove(ident);
                 continue;
             }
@@ -71,9 +74,10 @@ public class TimeChecker extends Thread {
                 boolean shouldDone = true;
                 long checkTs = checkTsList.get(index);
                 if (Util.wasDone(ident, checkTs)) {
+                    unregisterTimeChecker(ident, checkTs);
                     continue;
                 }
-                for(String source : ident.sources) {
+                for(String source : ident.kvmSources) {
                     expectedFile = Util.getRollHdfsPathByTs(ident, checkTs, source, false);
                     hiddenFile = Util.getRollHdfsPathByTs(ident, checkTs, source, true)[0];
                     if (Util.retryExists(expectedFile) || Util.retryExists(hiddenFile)) {
@@ -83,10 +87,21 @@ public class TimeChecker extends Thread {
                         break;
                     }
                 }
+                for(String source : ident.paasSources) {
+                    expectedFile = Util.getRollHdfsPathByTs(ident, checkTs, source, false);
+                    hiddenFile = Util.getRollHdfsPathByTs(ident, checkTs, source, true)[0];
+                    if (Util.retryExists(expectedFile) || Util.retryExists(hiddenFile)) {
+                    } else {
+                        LOG.debug("TimeChecker: File " + expectedFile + " not ready.");
+                        shouldDone = false;
+                        break;
+                    }
+                }
+                
                 if (shouldDone) {
                     if (Util.retryTouch(expectedFile[0].getParent(), Util.DONE_FLAG)) {
-                        LOG.info("TimeChecker: [" + ident.app + ":" + Util.format.format(new Date(checkTs)) + "]....Done!");
-                        checkTsList.remove(index);
+                        LOG.info("TimeChecker: [" + ident.topic + ":" + Util.format.format(new Date(checkTs)) + "]....Done!");
+                        unregisterTimeChecker(ident, checkTsList.get(index));
                     } else {
                         LOG.error("TimeChecker: Alarm, failed to touch a DONE_FLAG file. " +
                                 "Try in next check cycle. " +

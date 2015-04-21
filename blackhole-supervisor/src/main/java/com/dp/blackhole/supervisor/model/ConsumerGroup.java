@@ -9,18 +9,19 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.storage.MessageAndOffset;
 import com.dp.blackhole.supervisor.Supervisor;
 
 public class ConsumerGroup {
     private ConsumerGroupKey groupKey;
-    private Map<String, AtomicLong> commitedOffsetMap;
+    private Map<String, AtomicLong> committedOffsetMap; //partition -> committed offset
     private List<ConsumerDesc> consumes;
     
     public static final Log LOG = LogFactory.getLog(Supervisor.class);
     
     public ConsumerGroup(ConsumerGroupKey groupKey) {
         this.groupKey = groupKey;
-        commitedOffsetMap = new ConcurrentHashMap<String, AtomicLong>();
+        committedOffsetMap = new ConcurrentHashMap<String, AtomicLong>();
     }
 
     public String getTopic() {
@@ -36,7 +37,7 @@ public class ConsumerGroup {
     }
 
     public Map<String, AtomicLong> getCommitedOffsets() {
-        return commitedOffsetMap;
+        return committedOffsetMap;
     }
     
     public synchronized void setConsumers(List<ConsumerDesc> consumes) {
@@ -58,11 +59,20 @@ public class ConsumerGroup {
     }
 
     public void updateOffset(String consumerId, String topic, String partition, long offset) {
-        AtomicLong commitedOffset = commitedOffsetMap.get(partition);
-        if (commitedOffset == null) {
+        AtomicLong committedOffset = committedOffsetMap.get(partition);
+        if (committedOffset == null) {
             LOG.error("can not find PartitionInfo by partition: " + "[" + topic +"]" + partition + " ,request from " + consumerId);
         } else {
-            commitedOffset.set(offset);
+            committedOffset.set(offset);
+        }
+    }
+    
+    public long getCommittedOffsetByParitionId(String partitionId) {
+        AtomicLong committedOffset = committedOffsetMap.get(partitionId);
+        if (committedOffset != null) {
+            return committedOffset.get();
+        } else {
+            return MessageAndOffset.UNINITIALIZED_OFFSET;
         }
     }
 
@@ -76,8 +86,8 @@ public class ConsumerGroup {
         setConsumers(consumes);
         for (PartitionInfo pinfo : partitions) {
             String id = pinfo.getId();
-            if (commitedOffsetMap.get(id) == null) {
-                commitedOffsetMap.put(pinfo.getId(), new AtomicLong(0));
+            if (committedOffsetMap.get(id) == null) {
+                committedOffsetMap.put(pinfo.getId(), new AtomicLong(0));
             }
         }
     }

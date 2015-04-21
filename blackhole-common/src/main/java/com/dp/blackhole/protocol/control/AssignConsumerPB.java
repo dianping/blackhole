@@ -230,15 +230,25 @@ public final class AssignConsumerPB {
       com.google.protobuf.ByteString
           getPartitionNameBytes();
 
-      // required int64 offset = 3;
+      // required int64 end_offset = 3;
       /**
-       * <code>required int64 offset = 3;</code>
+       * <code>required int64 end_offset = 3;</code>
        */
-      boolean hasOffset();
+      boolean hasEndOffset();
       /**
-       * <code>required int64 offset = 3;</code>
+       * <code>required int64 end_offset = 3;</code>
        */
-      long getOffset();
+      long getEndOffset();
+
+      // optional int64 committed_offset = 4;
+      /**
+       * <code>optional int64 committed_offset = 4;</code>
+       */
+      boolean hasCommittedOffset();
+      /**
+       * <code>optional int64 committed_offset = 4;</code>
+       */
+      long getCommittedOffset();
     }
     /**
      * Protobuf type {@code blackhole.AssignConsumer.PartitionOffset}
@@ -303,7 +313,12 @@ public final class AssignConsumerPB {
               }
               case 24: {
                 bitField0_ |= 0x00000004;
-                offset_ = input.readInt64();
+                endOffset_ = input.readInt64();
+                break;
+              }
+              case 32: {
+                bitField0_ |= 0x00000008;
+                committedOffset_ = input.readInt64();
                 break;
               }
             }
@@ -432,26 +447,43 @@ public final class AssignConsumerPB {
         }
       }
 
-      // required int64 offset = 3;
-      public static final int OFFSET_FIELD_NUMBER = 3;
-      private long offset_;
+      // required int64 end_offset = 3;
+      public static final int END_OFFSET_FIELD_NUMBER = 3;
+      private long endOffset_;
       /**
-       * <code>required int64 offset = 3;</code>
+       * <code>required int64 end_offset = 3;</code>
        */
-      public boolean hasOffset() {
+      public boolean hasEndOffset() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>required int64 offset = 3;</code>
+       * <code>required int64 end_offset = 3;</code>
        */
-      public long getOffset() {
-        return offset_;
+      public long getEndOffset() {
+        return endOffset_;
+      }
+
+      // optional int64 committed_offset = 4;
+      public static final int COMMITTED_OFFSET_FIELD_NUMBER = 4;
+      private long committedOffset_;
+      /**
+       * <code>optional int64 committed_offset = 4;</code>
+       */
+      public boolean hasCommittedOffset() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional int64 committed_offset = 4;</code>
+       */
+      public long getCommittedOffset() {
+        return committedOffset_;
       }
 
       private void initFields() {
         brokerString_ = "";
         partitionName_ = "";
-        offset_ = 0L;
+        endOffset_ = 0L;
+        committedOffset_ = 0L;
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -466,7 +498,7 @@ public final class AssignConsumerPB {
           memoizedIsInitialized = 0;
           return false;
         }
-        if (!hasOffset()) {
+        if (!hasEndOffset()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -484,7 +516,10 @@ public final class AssignConsumerPB {
           output.writeBytes(2, getPartitionNameBytes());
         }
         if (((bitField0_ & 0x00000004) == 0x00000004)) {
-          output.writeInt64(3, offset_);
+          output.writeInt64(3, endOffset_);
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          output.writeInt64(4, committedOffset_);
         }
         getUnknownFields().writeTo(output);
       }
@@ -505,7 +540,11 @@ public final class AssignConsumerPB {
         }
         if (((bitField0_ & 0x00000004) == 0x00000004)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeInt64Size(3, offset_);
+            .computeInt64Size(3, endOffset_);
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(4, committedOffset_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -627,8 +666,10 @@ public final class AssignConsumerPB {
           bitField0_ = (bitField0_ & ~0x00000001);
           partitionName_ = "";
           bitField0_ = (bitField0_ & ~0x00000002);
-          offset_ = 0L;
+          endOffset_ = 0L;
           bitField0_ = (bitField0_ & ~0x00000004);
+          committedOffset_ = 0L;
+          bitField0_ = (bitField0_ & ~0x00000008);
           return this;
         }
 
@@ -668,7 +709,11 @@ public final class AssignConsumerPB {
           if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
             to_bitField0_ |= 0x00000004;
           }
-          result.offset_ = offset_;
+          result.endOffset_ = endOffset_;
+          if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+            to_bitField0_ |= 0x00000008;
+          }
+          result.committedOffset_ = committedOffset_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -695,8 +740,11 @@ public final class AssignConsumerPB {
             partitionName_ = other.partitionName_;
             onChanged();
           }
-          if (other.hasOffset()) {
-            setOffset(other.getOffset());
+          if (other.hasEndOffset()) {
+            setEndOffset(other.getEndOffset());
+          }
+          if (other.hasCommittedOffset()) {
+            setCommittedOffset(other.getCommittedOffset());
           }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
@@ -711,7 +759,7 @@ public final class AssignConsumerPB {
             
             return false;
           }
-          if (!hasOffset()) {
+          if (!hasEndOffset()) {
             
             return false;
           }
@@ -885,35 +933,68 @@ public final class AssignConsumerPB {
           return this;
         }
 
-        // required int64 offset = 3;
-        private long offset_ ;
+        // required int64 end_offset = 3;
+        private long endOffset_ ;
         /**
-         * <code>required int64 offset = 3;</code>
+         * <code>required int64 end_offset = 3;</code>
          */
-        public boolean hasOffset() {
+        public boolean hasEndOffset() {
           return ((bitField0_ & 0x00000004) == 0x00000004);
         }
         /**
-         * <code>required int64 offset = 3;</code>
+         * <code>required int64 end_offset = 3;</code>
          */
-        public long getOffset() {
-          return offset_;
+        public long getEndOffset() {
+          return endOffset_;
         }
         /**
-         * <code>required int64 offset = 3;</code>
+         * <code>required int64 end_offset = 3;</code>
          */
-        public Builder setOffset(long value) {
+        public Builder setEndOffset(long value) {
           bitField0_ |= 0x00000004;
-          offset_ = value;
+          endOffset_ = value;
           onChanged();
           return this;
         }
         /**
-         * <code>required int64 offset = 3;</code>
+         * <code>required int64 end_offset = 3;</code>
          */
-        public Builder clearOffset() {
+        public Builder clearEndOffset() {
           bitField0_ = (bitField0_ & ~0x00000004);
-          offset_ = 0L;
+          endOffset_ = 0L;
+          onChanged();
+          return this;
+        }
+
+        // optional int64 committed_offset = 4;
+        private long committedOffset_ ;
+        /**
+         * <code>optional int64 committed_offset = 4;</code>
+         */
+        public boolean hasCommittedOffset() {
+          return ((bitField0_ & 0x00000008) == 0x00000008);
+        }
+        /**
+         * <code>optional int64 committed_offset = 4;</code>
+         */
+        public long getCommittedOffset() {
+          return committedOffset_;
+        }
+        /**
+         * <code>optional int64 committed_offset = 4;</code>
+         */
+        public Builder setCommittedOffset(long value) {
+          bitField0_ |= 0x00000008;
+          committedOffset_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional int64 committed_offset = 4;</code>
+         */
+        public Builder clearCommittedOffset() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          committedOffset_ = 0L;
           onChanged();
           return this;
         }
@@ -1940,14 +2021,15 @@ public final class AssignConsumerPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\024AssignConsumer.proto\022\tblackhole\"\335\001\n\016As" +
+      "\n\024AssignConsumer.proto\022\tblackhole\"\373\001\n\016As" +
       "signConsumer\022\r\n\005group\030\001 \002(\t\022\r\n\005topic\030\002 \002" +
       "(\t\022\030\n\020consumerIdString\030\003 \002(\t\022C\n\020partitio" +
       "nOffsets\030\004 \003(\0132).blackhole.AssignConsume" +
-      "r.PartitionOffset\032N\n\017PartitionOffset\022\024\n\014" +
+      "r.PartitionOffset\032l\n\017PartitionOffset\022\024\n\014" +
       "brokerString\030\001 \002(\t\022\025\n\rpartitionName\030\002 \002(" +
-      "\t\022\016\n\006offset\030\003 \002(\003B5\n!com.dp.blackhole.pr" +
-      "otocol.controlB\020AssignConsumerPB"
+      "\t\022\022\n\nend_offset\030\003 \002(\003\022\030\n\020committed_offse" +
+      "t\030\004 \001(\003B5\n!com.dp.blackhole.protocol.con" +
+      "trolB\020AssignConsumerPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1965,7 +2047,7 @@ public final class AssignConsumerPB {
           internal_static_blackhole_AssignConsumer_PartitionOffset_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_AssignConsumer_PartitionOffset_descriptor,
-              new java.lang.String[] { "BrokerString", "PartitionName", "Offset", });
+              new java.lang.String[] { "BrokerString", "PartitionName", "EndOffset", "CommittedOffset", });
           return null;
         }
       };
