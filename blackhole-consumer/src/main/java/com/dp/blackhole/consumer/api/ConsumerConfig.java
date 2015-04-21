@@ -1,4 +1,4 @@
-package com.dp.blackhole.consumer;
+package com.dp.blackhole.consumer.api;
 
 import java.util.Properties;
 
@@ -15,10 +15,6 @@ public class ConsumerConfig {
     private int consumerTimeoutMs;
     
     private boolean multiFetch;
-    
-    private boolean subscribeFromTail;
-    
-    private String offsetRefereeClassName;
 
     /**
      * the properties entry include:<br/>
@@ -27,8 +23,6 @@ public class ConsumerConfig {
      * <b>autooffset.reset</b> what to do if an offset is out of range, default is reseted to smallest<br/>
      * <b>messages.multiFetch</b> whether or not fetch multiple partition message at once, default is false<br/>
      * <b>consumer.timeout.ms</b> timeout of message fetching, default is -1, standing for waiting until an message becomes available<br/>
-     * <b>consumer.offsetRefereeClass.name</b> user-specified OffsetReferee class name, default is com.dp.blackhole.consumer.TailOffsetReferee.<br/>
-     * <b>consumer.isSubscribeFromTail</b> if subscribe from tail, default is true, if "consumer.offsetRefereeClass.name" was set, this value equals false<br/>
      */
     public ConsumerConfig(Properties props) {
         this.fetchSize = getInt(props, "fetch.size", 1024 * 1024);//1MB
@@ -36,8 +30,6 @@ public class ConsumerConfig {
         this.autoOffsetReset = getString(props, "autooffset.reset", OffsetRequest.SMALLES_TIME_STRING);
         this.multiFetch = getBoolean(props, "messages.multiFetch", false);
         this.consumerTimeoutMs = getInt(props, "consumer.timeout.ms", -1);
-        this.subscribeFromTail = getBoolean(props, "consumer.isSubscribeFromTail", true);
-        this.offsetRefereeClassName = getString(props, "consumer.offsetRefereeClass.name", TailOffsetReferee.class.getCanonicalName());
     }
 
     /**
@@ -83,14 +75,6 @@ public class ConsumerConfig {
         return multiFetch;
     }
     
-    public boolean isSubscribeFromTail() {
-        return subscribeFromTail;
-    }
-
-    public String getOffsetRefereeClassName() {
-        return offsetRefereeClassName;
-    }
-
     public boolean getBoolean(Properties props, String name, boolean defaultValue) {
         if (!props.containsKey(name)) return defaultValue;
         return "true".equalsIgnoreCase(props.getProperty(name));

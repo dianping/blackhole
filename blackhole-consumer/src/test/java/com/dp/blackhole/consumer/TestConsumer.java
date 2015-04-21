@@ -7,9 +7,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.consumer.Consumer;
-import com.dp.blackhole.consumer.ConsumerConfig;
 import com.dp.blackhole.consumer.ConsumerConnector;
+import com.dp.blackhole.consumer.api.CommittedOffsetStrategy;
+import com.dp.blackhole.consumer.api.Consumer;
+import com.dp.blackhole.consumer.api.ConsumerConfig;
+import com.dp.blackhole.consumer.api.MessagePack;
+import com.dp.blackhole.consumer.api.TailOffsetStrategy;
+import com.dp.blackhole.consumer.api.decoder.StringDecoder;
 
 public class TestConsumer {
    
@@ -42,22 +46,22 @@ public class TestConsumer {
         if (numConsumerInOneProcess < 1 || numConsumerInOneProcess > 10) {
             throw new RuntimeException("numConsumerInOneProcess must greater than 0 and less than 10");
         }
-        List<StringStream> messageStreams = new ArrayList<StringStream>();
+        List<MessageStream> messageStreams = new ArrayList<MessageStream>();
 
         ConsumerConnector.getInstance().init(supervisorHost, port, true, 6000);
         Properties prop = new Properties();
-        prop.put("consumer.offsetRefereeClass.name", TailOffsetReferee.class.getCanonicalName());
+        prop.put("consumer.offsetRefereeClass.name", TailOffsetStrategy.class.getCanonicalName());
         prop.put("consumer.isSubscribeFromTail", fromTail);
         ConsumerConfig config = new ConsumerConfig(prop);
         
         for (int i = 0; i < numConsumerInOneProcess; i++) {
-            Consumer consumer = new Consumer(topic, group, config);
+            Consumer consumer = new Consumer(topic, group, config, new CommittedOffsetStrategy());
             consumer.start();
-            StringStream stream = consumer.getStringStream();
+            MessageStream stream = consumer.getStream();
             messageStreams.add(stream);
         }
         long start = Util.getTS();
-        for (StringStream stream : messageStreams) {
+        for (MessageStream stream : messageStreams) {
             MessageConsumeThread t = new MessageConsumeThread(stream, debug);
             t.start();
             runningConsumeThread.add(t);
@@ -78,25 +82,27 @@ public class TestConsumer {
     }
     
     static class MessageConsumeThread extends Thread {
-        private StringStream stream;
+        private MessageStream stream;
         private volatile boolean running;
         private boolean debug;
-        public MessageConsumeThread(StringStream stream, boolean debug) {
+        private StringDecoder decoder;
+        public MessageConsumeThread(MessageStream stream, boolean debug) {
             this.stream = stream;
             this.running = true;
             this.debug = debug;
+            this.decoder = new StringDecoder();
         }
         
         @Override
         public void run() {
             while (running) {
                 long i =0;
-                for (String message : stream) {
+                for (MessagePack entity : stream) {
                     if (i % 100000L == 0) {
                         LOG.info("consumed: " + i);
                     }
                     if (debug) {
-                        System.out.println(message);
+                        System.out.println(decoder.decode(entity));
                     }
                     i++;
                 }

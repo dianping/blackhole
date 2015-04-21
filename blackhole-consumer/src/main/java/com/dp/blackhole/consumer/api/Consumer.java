@@ -1,4 +1,4 @@
-package com.dp.blackhole.consumer;
+package com.dp.blackhole.consumer.api;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -8,7 +8,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.common.Util;
+import com.dp.blackhole.consumer.ConsumerConnector;
+import com.dp.blackhole.consumer.FetchedDataChunk;
+import com.dp.blackhole.consumer.MessageStream;
 import com.dp.blackhole.consumer.exception.ConsumerInitializeException;
 
 public class Consumer {
@@ -22,19 +24,22 @@ public class Consumer {
     private String consumerId;
     private ConsumerConfig config;
     private ConsumerConnector connector;
-    private OffsetReferee offsetReferee;
+    private OffsetStrategy offsetStrategy;
 
     public Consumer(String topic, String group, ConsumerConfig config) throws ConsumerInitializeException {
+        this(topic, group, config, new TailOffsetStrategy());
+    }
+    
+    public Consumer(String topic, String group, ConsumerConfig config, OffsetStrategy offsetStrategy) throws ConsumerInitializeException {
         this.topic = topic;
         this.group = group;
         this.config = config;
+        this.offsetStrategy = offsetStrategy;
         consumerId = generateConsumerId(this.group);
         queue = new LinkedBlockingQueue<FetchedDataChunk>(this.config.getMaxQueuedChunks());
         
         connector = ConsumerConnector.getInstance();
         try {
-            Class<?> offsetRefereeClazz = Class.forName(config.getOffsetRefereeClassName());
-            this.offsetReferee = (OffsetReferee) Util.newInstance(offsetRefereeClazz);
             if (!connector.initialized) {
                 connector.init();
             }
@@ -48,12 +53,12 @@ public class Consumer {
         connector.registerConsumer(topic, group, consumerId ,this);
     }
     
-    LinkedBlockingQueue<FetchedDataChunk> getDataQueue() {
+    public LinkedBlockingQueue<FetchedDataChunk> getDataQueue() {
         return queue;
     }
     
     public void clearQueue() {
-        queue.clear();   
+        queue.clear();
     }
     
     public void shutdown() throws InterruptedException {
@@ -68,8 +73,8 @@ public class Consumer {
         return group;
     }
     
-    public OffsetReferee getOffsetReferee() {
-        return offsetReferee;
+    public OffsetStrategy getOffsetStrategy() {
+        return offsetStrategy;
     }
 
     public String getConsumerId() {
@@ -80,17 +85,8 @@ public class Consumer {
         return config;
     }
 
-    public MessageStream getMessageStream() {
+    public MessageStream getStream() {
         return new MessageStream(topic, queue, config.getConsumerTimeoutMs());
-    }
-    
-    public StringStream getStringStream() {
-        return new StringStream(topic, queue, config.getConsumerTimeoutMs());
-    }
-
-    @Deprecated
-    public StringStream getStream() {
-        return getStringStream();
     }
 
     /**

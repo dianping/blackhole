@@ -8,10 +8,12 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.consumer.api.Consumer;
+import com.dp.blackhole.consumer.api.MessagePack;
 import com.dp.blackhole.consumer.exception.ConsumerTimeoutException;
 import com.dp.blackhole.storage.MessageAndOffset;
 
-public class ConsumerIterator implements Iterator<ConsumerMessage> {
+public class ConsumerIterator implements Iterator<MessagePack> {
     
     private final Log logger = LogFactory.getLog(ConsumerIterator.class);
     
@@ -27,7 +29,7 @@ public class ConsumerIterator implements Iterator<ConsumerMessage> {
 
     private State state = State.NOT_READY;
     
-    private ConsumerMessage nextItem = null;
+    private MessagePack nextItem = null;
 
     private Iterator<MessageAndOffset> current = null;
 
@@ -43,10 +45,10 @@ public class ConsumerIterator implements Iterator<ConsumerMessage> {
     }
 
     @Override
-    public ConsumerMessage next() {
+    public MessagePack next() {
         if (!hasNext()) throw new NoSuchElementException();
         state = State.NOT_READY;
-        ConsumerMessage message = nextItem;
+        MessagePack message = nextItem;
         if (consumedOffset < 0) {
             throw new IllegalStateException("Offset returned by the message set is invalid " + consumedOffset);
         }
@@ -54,7 +56,7 @@ public class ConsumerIterator implements Iterator<ConsumerMessage> {
         return message;
     }
 
-    protected ConsumerMessage makeNext() throws InterruptedException, ConsumerTimeoutException {
+    protected MessagePack makeNext() throws InterruptedException, ConsumerTimeoutException {
         FetchedDataChunk currentDataChunk = null;
         if (current == null || !current.hasNext()) {
             if (consumerTimeoutMs < 0) {
@@ -88,7 +90,7 @@ public class ConsumerIterator implements Iterator<ConsumerMessage> {
         }
         consumedOffset = item.getOffset();
 //        logger.debug(item.message + "  @  " +item.offset);
-        return new ConsumerMessage(item, currentTopicInfo.partition);
+        return new MessagePack(item, currentTopicInfo.partition);
     }
 
     public void clearCurrentChunk() {
@@ -124,27 +126,5 @@ public class ConsumerIterator implements Iterator<ConsumerMessage> {
     @Override
     public void remove() {
         throw new UnsupportedOperationException();
-    }
-    
-    class StringIterator implements Iterator<String> {
-
-        @Override
-        public boolean hasNext() {
-            return ConsumerIterator.this.hasNext();
-        }
-
-        @Override
-        public String next() {
-            ConsumerMessage message = ConsumerIterator.this.next();
-            if (message == null) {
-                return null;
-            }
-            return message.getContent();
-        }
-
-        @Override
-        public void remove() {
-            ConsumerIterator.this.remove();
-        }
     }
 }

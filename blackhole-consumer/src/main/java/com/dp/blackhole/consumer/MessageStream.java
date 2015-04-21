@@ -3,9 +3,9 @@ package com.dp.blackhole.consumer;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 
-import com.dp.blackhole.storage.MessageAndOffset;
+import com.dp.blackhole.consumer.api.MessagePack;
 
-public class MessageStream implements Iterable<ConsumerMessage> {
+public class MessageStream implements Iterable<MessagePack> {
 
     public final String topic;
 
@@ -21,7 +21,7 @@ public class MessageStream implements Iterable<ConsumerMessage> {
     }
 
     @Override
-    public Iterator<ConsumerMessage> iterator() {
+    public Iterator<MessagePack> iterator() {
         return consumerIterator;
     }
 

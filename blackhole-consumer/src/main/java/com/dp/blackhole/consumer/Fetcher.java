@@ -17,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.consumer.api.ConsumerConfig;
 import com.dp.blackhole.network.DelegationIOConnection;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
