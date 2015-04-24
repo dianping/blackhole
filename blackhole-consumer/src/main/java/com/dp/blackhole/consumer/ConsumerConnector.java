@@ -35,6 +35,7 @@ import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.Partiti
 import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
+import com.dp.blackhole.storage.MessageAndOffset;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class ConsumerConnector implements Runnable {
@@ -269,6 +270,10 @@ public class ConsumerConnector implements Runnable {
                     String partitionName = partitionOffset.getPartitionName();
                     long endOffset = partitionOffset.getEndOffset();
                     long committedOffset = partitionOffset.getCommittedOffset();
+                    if (committedOffset == MessageAndOffset.UNINITIALIZED_OFFSET) {
+                        LOG.info("committed offset UNINITIALIZED, replace with end offset " + endOffset);
+                        committedOffset = endOffset;
+                    }
                     long offset = c.getOffsetStrategy().getOffset(topic, partitionName, endOffset, committedOffset);
                     LOG.info("consume from [" + offset + "] for topic:" + topic + " partition:" + partitionName);
                     PartitionTopicInfo info = 
