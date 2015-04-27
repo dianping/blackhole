@@ -80,12 +80,14 @@ public class SimAgent extends Agent{
     }
     
     private static void deleteInnerFile(File[] files) {
-        for (File file : files) {
-            if (file.isDirectory()) {
-                deleteInnerFile(file.listFiles());
-                file.delete();
-            } else {
-                file.delete();
+        if (files != null) {
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isDirectory()) {
+                    deleteInnerFile(files[i].listFiles());
+                    files[i].delete();
+                } else {
+                    files[i].delete();
+                }
             }
         }
     }
