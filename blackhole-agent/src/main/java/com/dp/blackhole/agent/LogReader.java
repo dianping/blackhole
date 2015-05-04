@@ -314,7 +314,7 @@ public class LogReader implements Runnable {
      * @return The new position after the lines have been read
      * @throws java.io.IOException if an I/O error occurs.
      */
-    private long readLines(RandomAccessFile reader) throws IOException {
+    private long readLines(RandomAccessFile reader) throws SocketException, IOException {
         long pos = reader.getFilePointer();
         long rePos = pos; // position to re-read
         int num;
