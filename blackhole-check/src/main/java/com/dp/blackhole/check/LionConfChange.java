@@ -34,6 +34,7 @@ public class LionConfChange {
     private final Map<String, List<String>> appToHosts = Collections.synchronizedMap(new HashMap<String, List<String>>());
     private Set<String> appBlacklist;
     private Set<String> alarmBlackList;
+    private Set<String> skipSourceBlackList;
     private ConfigCache cache;
     private int apiId;
     private final ScheduledThreadPoolExecutor scheduler;
@@ -55,11 +56,15 @@ public class LionConfChange {
     }
     
     public synchronized Set<String> getAppBlacklist() {
-        return appBlacklist;
+        return new HashSet<String>(appBlacklist);
     }
     
     public synchronized Set<String> getAlarmBlackList() {
-        return alarmBlackList;
+        return new HashSet<String>(alarmBlackList);
+    }
+    
+    public synchronized Set<String> getSkipSourceBlackList() {
+        return new HashSet<String>(skipSourceBlackList);
     }
 
     public void initLion() {
@@ -69,19 +74,14 @@ public class LionConfChange {
     private void reloadConf() {
         String blacklistString = definitelyGetProperty(ParamsKey.LionNode.BLACKLIST);
         String alarmBlacklistString = definitelyGetProperty(ParamsKey.LionNode.ALARM_BLACKLIST);
+        String skipSourceBlacklistString = definitelyGetProperty(ParamsKey.LionNode.SKIP_BLACKLIST);
         String[] blacklistArray = Util.getStringListOfLionValue(blacklistString);
-        if (blacklistArray == null) {
-            LOG.info("There are no legacy configurations of blacklist.");
-            return;
-        }
         String[] alarmBlacklistArray = Util.getStringListOfLionValue(alarmBlacklistString);
-        if (alarmBlacklistArray == null) {
-            LOG.info("There are no legacy configurations of alarm blacklist.");
-            return;
-        }
+        String[] skipSourceBlacklistArray = Util.getStringListOfLionValue(skipSourceBlacklistString);
         synchronized (this) {
             appBlacklist = new HashSet<String>(Arrays.asList(blacklistArray));
             alarmBlackList = new HashSet<String>(Arrays.asList(alarmBlacklistArray));
+            skipSourceBlackList = new HashSet<String>(Arrays.asList(skipSourceBlacklistArray));
         }
         
         String appNamesString = definitelyGetProperty(ParamsKey.LionNode.APPS);
@@ -106,16 +106,8 @@ public class LionConfChange {
     }
 
     private void addWatchers() {
-        AppBlacklistChangeListener appBlacklistListener = new AppBlacklistChangeListener();
-        cache.addChange(appBlacklistListener);
-        AlarmBlacklistChangeListener alarmBlacklistChangeListener = new AlarmBlacklistChangeListener();
-        cache.addChange(alarmBlacklistChangeListener);
-        AppsChangeListener appsListener = new AppsChangeListener();
-        cache.addChange(appsListener);
-        AppConfChangeListener appConfListener = new AppConfChangeListener();
-        cache.addChange(appConfListener);
-        AppHostsChangeListener appHostsListener = new AppHostsChangeListener();
-        cache.addChange(appHostsListener);
+        LionChangeListener listener = new LionChangeListener();
+        cache.addChange(listener);
         definitelyGetProperty(ParamsKey.LionNode.APPS);
     }
 
@@ -296,98 +288,21 @@ public class LionConfChange {
                 "&id=" + this.apiId;
     }
     
-    class AppBlacklistChangeListener implements ConfigChange {
-
-        @Override
-        public void onChange(String key, String value) {
-            if (key.equals(ParamsKey.LionNode.BLACKLIST)) {
-                String[] blacklistArray = Util.getStringListOfLionValue(value);
-                if (blacklistArray != null) {
-                    LOG.info("black list has been changed.");
-                    synchronized (this) {
-                        appBlacklist = new HashSet<String>(Arrays.asList(blacklistArray));
-                    }
-                }
-            }
-        }
-    }
-    
-    class AlarmBlacklistChangeListener implements ConfigChange {
-
-        @Override
-        public void onChange(String key, String value) {
-            if (key.equals(ParamsKey.LionNode.ALARM_BLACKLIST)) {
-                String[] alarmBlacklistArray = Util.getStringListOfLionValue(value);
-                if (alarmBlacklistArray != null) {
-                    LOG.info("alarm black list has been changed.");
-                    synchronized (this) {
-                        alarmBlackList = new HashSet<String>(Arrays.asList(alarmBlacklistArray));
-                    }
-                }
-            }
-        }
-    }
-
-    class AppsChangeListener implements ConfigChange {
-    
-        @Override
-        public void onChange(String key, String value) {
-            if (key.equals(ParamsKey.LionNode.APPS)) {
-                String[] appNames = Util.getStringListOfLionValue(value);
-                if (appNames != null) {
-                    Set<String> newAppSet = new HashSet<String>(Arrays.asList(appNames));
-                    for (String newApp : newAppSet) {
-                        if (!appSet.contains(newApp)) {
-                            LOG.info("App changed: " + newApp + " added.");
-                            appSet.add(newApp);
-                            String watchKey = ParamsKey.LionNode.APP_CONF_PREFIX + newApp;
-                            addWatherForKey(watchKey);
-                            watchKey = ParamsKey.LionNode.APP_HOSTS_PREFIX + newApp;
-                            addWatherForKey(watchKey);
-                        }
-                    }
-                    for (String oldApp : appSet) {
-                        if (!newAppSet.contains(oldApp)) {
-                            removeConf(oldApp, new ArrayList<String>());
-                            //remove checker
-                            LOG.info("App changed: " + oldApp + " removed.");
-                            ScheduledFuture<?> scheduledFuture = CheckDone.threadMap.get(oldApp);
-                            scheduledFuture.cancel(false);
-                        }
-                    }
-                }
-            }
-        }
-    
+    class LionChangeListener implements ConfigChange {
+        
         private void addWatherForKey(String watchKey) {
             definitelyGetProperty(watchKey);
         }
-    }
-
-    class AppHostsChangeListener implements ConfigChange {
-
-        @Override
-        public void onChange(String key, String value) {
-            if (key.startsWith(ParamsKey.LionNode.APP_HOSTS_PREFIX)) {
-                for (String appName : appSet) {
-                    if (key.equals(ParamsKey.LionNode.APP_HOSTS_PREFIX + appName)) {
-                        LOG.info("App Hosts Change is triggered by " + appName);
-                        fillHostMap(appName, value);
-                        //add checker
-                        if(!CheckDone.threadMap.containsKey(appName)) {
-                            addChecker(appName);
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        
-        private void addChecker(String appName) {
+        private void addChecker(final String appName) {
             Context context = ConfigKeeper.configMap.get(appName);
             if (context == null) {
                 LOG.error("Can not get app: " + appName + " from configMap now, try in 10 seconds later.");
-                scheduler.schedule(new AddCheckerLater(appName), 10, TimeUnit.SECONDS);
+                scheduler.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        addChecker(appName);
+                    }
+                }, 10, TimeUnit.SECONDS);
                 return;
             }
             RollIdent ident = new RollIdent();
@@ -402,25 +317,61 @@ public class LionConfChange {
             CheckDone.threadMap.put(ident.topic, scheduledFuture);
         }
         
-        class AddCheckerLater implements Runnable {
-
-            private String appName;
-            public AddCheckerLater(String appName) {
-                this.appName = appName;
-            }
-            
-            @Override
-            public void run() {
-                addChecker(appName);
-            }
-        }
-    }
-
-    class AppConfChangeListener implements ConfigChange {
-    
         @Override
         public void onChange(String key, String value) {
-            if (key.startsWith(ParamsKey.LionNode.APP_CONF_PREFIX)) {
+            if (key.equals(ParamsKey.LionNode.BLACKLIST)) {
+                String[] blacklistArray = Util.getStringListOfLionValue(value);
+                LOG.info("black list has been changed.");
+                synchronized (LionConfChange.this) {
+                    appBlacklist = new HashSet<String>(Arrays.asList(blacklistArray));
+                }
+            } else if (key.equals(ParamsKey.LionNode.ALARM_BLACKLIST)) {
+                String[] alarmBlacklistArray = Util.getStringListOfLionValue(value);
+                LOG.info("alarm black list has been changed.");
+                synchronized (LionConfChange.this) {
+                    alarmBlackList = new HashSet<String>(Arrays.asList(alarmBlacklistArray));
+                }
+            } else if (key.equals(ParamsKey.LionNode.SKIP_BLACKLIST)) {
+                String[] skipBlacklistArray = Util.getStringListOfLionValue(value);
+                LOG.info("skip black list has been changed.");
+                synchronized (LionConfChange.this) {
+                    skipSourceBlackList = new HashSet<String>(Arrays.asList(skipBlacklistArray));
+                }
+            } else if (key.equals(ParamsKey.LionNode.APPS)) {
+                String[] appNames = Util.getStringListOfLionValue(value);
+                Set<String> newAppSet = new HashSet<String>(Arrays.asList(appNames));
+                for (String newApp : newAppSet) {
+                    if (!appSet.contains(newApp)) {
+                        LOG.info("App changed: " + newApp + " added.");
+                        appSet.add(newApp);
+                        String watchKey = ParamsKey.LionNode.APP_CONF_PREFIX + newApp;
+                        addWatherForKey(watchKey);
+                        watchKey = ParamsKey.LionNode.APP_HOSTS_PREFIX + newApp;
+                        addWatherForKey(watchKey);
+                    }
+                }
+                for (String oldApp : appSet) {
+                    if (!newAppSet.contains(oldApp)) {
+                        removeConf(oldApp, new ArrayList<String>());
+                        //remove checker
+                        LOG.info("App changed: " + oldApp + " removed.");
+                        ScheduledFuture<?> scheduledFuture = CheckDone.threadMap.get(oldApp);
+                        scheduledFuture.cancel(false);
+                    }
+                }
+            } else if (key.startsWith(ParamsKey.LionNode.APP_HOSTS_PREFIX)) {
+                for (String appName : appSet) {
+                    if (key.equals(ParamsKey.LionNode.APP_HOSTS_PREFIX + appName)) {
+                        LOG.info("App Hosts Change is triggered by " + appName);
+                        fillHostMap(appName, value);
+                        //add checker
+                        if(!CheckDone.threadMap.containsKey(appName)) {
+                            addChecker(appName);
+                        }
+                        break;
+                    }
+                }
+            } else if (key.startsWith(ParamsKey.LionNode.APP_CONF_PREFIX)) {
                 for (String appName : appSet) {
                     if (key.equals(ParamsKey.LionNode.APP_CONF_PREFIX + appName)) {
                         LOG.info("App Conf Change is triggered by " + appName);
@@ -428,6 +379,8 @@ public class LionConfChange {
                         break;
                     }
                 }
+            } else {
+                LOG.warn("unknow lion key change: " + key);
             }
         }
     }

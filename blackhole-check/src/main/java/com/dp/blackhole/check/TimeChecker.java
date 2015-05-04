@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,13 +50,16 @@ public class TimeChecker extends Thread {
     }
 
     public void run() {
-        while (this.running)
+        while (this.running) {
             try {
                 check();
                 Thread.sleep(this.sleepDuration);
             } catch (InterruptedException e) {
                 this.running = false;
+            } catch (Throwable t) {
+                LOG.error("Catch an exception in TimeChecker", t);
             }
+        }
     }
 
     public synchronized void check() {
@@ -64,7 +68,7 @@ public class TimeChecker extends Thread {
             Map.Entry<RollIdent, List<Long>> entry = iter.next();
             RollIdent ident = entry.getKey();
             if (lionConfChange.getAppBlacklist().contains(ident.topic)) {
-                checkerMap.remove(ident);
+                iter.remove();
                 continue;
             }
             List<Long> checkTsList = entry.getValue();
@@ -77,6 +81,10 @@ public class TimeChecker extends Thread {
                     unregisterTimeChecker(ident, checkTs);
                     continue;
                 }
+                //skip source blacklist
+                Set<String> shouldSkip = lionConfChange.getSkipSourceBlackList();
+                ident.kvmSources.removeAll(shouldSkip);
+                ident.paasSources.removeAll(shouldSkip);
                 for(String source : ident.kvmSources) {
                     expectedFile = Util.getRollHdfsPathByTs(ident, checkTs, source, false);
                     hiddenFile = Util.getRollHdfsPathByTs(ident, checkTs, source, true)[0];
