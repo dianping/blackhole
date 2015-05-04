@@ -70,26 +70,26 @@ public class Cli {
                     //recovery -a 3600 1385276400000 1385301600000
                     String[] tokens = getTokens(cmd);
                     String topic = tokens[1];
-                    String agentServer = tokens[2];
+                    String source = tokens[2];
                     long period = Long.parseLong(tokens[3]);
                     long startRollTs = Long.parseLong(tokens[4]);
                     long endRollTs = Long.parseLong(tokens[5]);
                     long recoveryStageCount = (endRollTs - startRollTs) / period / 1000;
                     for (int i = 0; i<= recoveryStageCount; i++) {
                         long rollTs = startRollTs + period * 1000 * (i);
-                        Message msg = PBwrap.wrapManualRecoveryRoll(topic, agentServer, period, rollTs);
+                        Message msg = PBwrap.wrapManualRecoveryRoll(topic, source, period, rollTs);
                         send(msg);
                         out.println("send message: " + msg);
                     }
                 } else if (cmd.startsWith("retire")) {
                     String[] tokens = getTokens(cmd);
                     String topic = tokens[1];
-                    String agentServer = tokens[2];
-                    String instanceId = "";
-                    if (tokens.length > 3) {
-                        instanceId = tokens[3];
+                    String source = tokens[2];
+                    boolean force = false;
+                    if (tokens.length > 3 && tokens[3].equalsIgnoreCase("--force")) {
+                        force = true;
                     }
-                    Message msg = PBwrap.wrapRetireStream(topic, agentServer, instanceId);
+                    Message msg = PBwrap.wrapRetireStream(topic, source, force);
                     send(msg);
                     out.println("send message: " + msg);
                 } else if (cmd.equals("dumpconf")) {

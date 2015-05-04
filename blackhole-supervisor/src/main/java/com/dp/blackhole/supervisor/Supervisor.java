@@ -2,7 +2,6 @@ package com.dp.blackhole.supervisor;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -46,10 +45,10 @@ import com.dp.blackhole.protocol.control.ReadyStreamPB.ReadyStream;
 import com.dp.blackhole.protocol.control.ReadyUploadPB.ReadyUpload;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.protocol.control.RestartPB.Restart;
+import com.dp.blackhole.protocol.control.RetirePB.Retire;
 import com.dp.blackhole.protocol.control.RollCleanPB.RollClean;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp.OP;
-import com.dp.blackhole.protocol.control.StreamIDPB.StreamID;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry;
 import com.dp.blackhole.rest.HttpServer;
@@ -968,21 +967,10 @@ public class Supervisor {
         configManager.removeConf(topic);
     }
 
-    private void handleRetireStream(StreamID streamId, SimpleConnection from) {
-        boolean force = false;
-        try {
-            //special case, retire stream as administrator
-            if (from.getHost() == Util.getLocalHost()) {
-                force = true;
-            }
-        } catch (UnknownHostException e) {
-            LOG.error("Cannot get localhost", e);
-        }
-        if (getConnectionType(from) == ConnectionDesc.AGENT) {
-            force = true;
-        }
-        String topic = streamId.getTopic();
-        String source = Util.getSource(streamId.getAgentServer(), streamId.getInstanceId());
+    private void handleRetireStream(Retire retire, SimpleConnection from) {
+        String topic = retire.getTopic();
+        String source = retire.getSource();
+        boolean force = retire.getForce();
         Stream stream = getStream(topic, source);
         retireStreamInternal(stream, force);
     }
@@ -1875,7 +1863,7 @@ public class Supervisor {
                 dumpstat(from);
                 break;
             case RETIRESTREAM:
-                handleRetireStream(msg.getStreamId(), from);
+                handleRetireStream(msg.getRetire(), from);
                 break;
             case CONF_REQ:
                 handleConfReq(from);

@@ -133,19 +133,19 @@ public final class MessagePB {
      */
     com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNodeOrBuilder getNoAvailableNodeOrBuilder();
 
-    // optional .blackhole.StreamID streamId = 10;
+    // optional .blackhole.Retire retire = 10;
     /**
-     * <code>optional .blackhole.StreamID streamId = 10;</code>
+     * <code>optional .blackhole.Retire retire = 10;</code>
      */
-    boolean hasStreamId();
+    boolean hasRetire();
     /**
-     * <code>optional .blackhole.StreamID streamId = 10;</code>
+     * <code>optional .blackhole.Retire retire = 10;</code>
      */
-    com.dp.blackhole.protocol.control.StreamIDPB.StreamID getStreamId();
+    com.dp.blackhole.protocol.control.RetirePB.Retire getRetire();
     /**
-     * <code>optional .blackhole.StreamID streamId = 10;</code>
+     * <code>optional .blackhole.Retire retire = 10;</code>
      */
-    com.dp.blackhole.protocol.control.StreamIDPB.StreamIDOrBuilder getStreamIdOrBuilder();
+    com.dp.blackhole.protocol.control.RetirePB.RetireOrBuilder getRetireOrBuilder();
 
     // optional .blackhole.ConfRes confRes = 11;
     /**
@@ -538,14 +538,14 @@ public final class MessagePB {
               break;
             }
             case 82: {
-              com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder subBuilder = null;
+              com.dp.blackhole.protocol.control.RetirePB.Retire.Builder subBuilder = null;
               if (((bitField0_ & 0x00000200) == 0x00000200)) {
-                subBuilder = streamId_.toBuilder();
+                subBuilder = retire_.toBuilder();
               }
-              streamId_ = input.readMessage(com.dp.blackhole.protocol.control.StreamIDPB.StreamID.PARSER, extensionRegistry);
+              retire_ = input.readMessage(com.dp.blackhole.protocol.control.RetirePB.Retire.PARSER, extensionRegistry);
               if (subBuilder != null) {
-                subBuilder.mergeFrom(streamId_);
-                streamId_ = subBuilder.buildPartial();
+                subBuilder.mergeFrom(retire_);
+                retire_ = subBuilder.buildPartial();
               }
               bitField0_ |= 0x00000200;
               break;
@@ -1423,26 +1423,26 @@ public final class MessagePB {
       return noAvailableNode_;
     }
 
-    // optional .blackhole.StreamID streamId = 10;
-    public static final int STREAMID_FIELD_NUMBER = 10;
-    private com.dp.blackhole.protocol.control.StreamIDPB.StreamID streamId_;
+    // optional .blackhole.Retire retire = 10;
+    public static final int RETIRE_FIELD_NUMBER = 10;
+    private com.dp.blackhole.protocol.control.RetirePB.Retire retire_;
     /**
-     * <code>optional .blackhole.StreamID streamId = 10;</code>
+     * <code>optional .blackhole.Retire retire = 10;</code>
      */
-    public boolean hasStreamId() {
+    public boolean hasRetire() {
       return ((bitField0_ & 0x00000200) == 0x00000200);
     }
     /**
-     * <code>optional .blackhole.StreamID streamId = 10;</code>
+     * <code>optional .blackhole.Retire retire = 10;</code>
      */
-    public com.dp.blackhole.protocol.control.StreamIDPB.StreamID getStreamId() {
-      return streamId_;
+    public com.dp.blackhole.protocol.control.RetirePB.Retire getRetire() {
+      return retire_;
     }
     /**
-     * <code>optional .blackhole.StreamID streamId = 10;</code>
+     * <code>optional .blackhole.Retire retire = 10;</code>
      */
-    public com.dp.blackhole.protocol.control.StreamIDPB.StreamIDOrBuilder getStreamIdOrBuilder() {
-      return streamId_;
+    public com.dp.blackhole.protocol.control.RetirePB.RetireOrBuilder getRetireOrBuilder() {
+      return retire_;
     }
 
     // optional .blackhole.ConfRes confRes = 11;
@@ -1807,7 +1807,7 @@ public final class MessagePB {
       rollID_ = com.dp.blackhole.protocol.control.RollIDPB.RollID.getDefaultInstance();
       failure_ = com.dp.blackhole.protocol.control.FailurePB.Failure.getDefaultInstance();
       noAvailableNode_ = com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode.getDefaultInstance();
-      streamId_ = com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance();
+      retire_ = com.dp.blackhole.protocol.control.RetirePB.Retire.getDefaultInstance();
       confRes_ = com.dp.blackhole.protocol.control.ConfResPB.ConfRes.getDefaultInstance();
       dumpReply_ = com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply.getDefaultInstance();
       removeConf_ = com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf.getDefaultInstance();
@@ -1882,8 +1882,8 @@ public final class MessagePB {
           return false;
         }
       }
-      if (hasStreamId()) {
-        if (!getStreamId().isInitialized()) {
+      if (hasRetire()) {
+        if (!getRetire().isInitialized()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -2007,7 +2007,7 @@ public final class MessagePB {
         output.writeMessage(9, noAvailableNode_);
       }
       if (((bitField0_ & 0x00000200) == 0x00000200)) {
-        output.writeMessage(10, streamId_);
+        output.writeMessage(10, retire_);
       }
       if (((bitField0_ & 0x00000400) == 0x00000400)) {
         output.writeMessage(11, confRes_);
@@ -2104,7 +2104,7 @@ public final class MessagePB {
       }
       if (((bitField0_ & 0x00000200) == 0x00000200)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(10, streamId_);
+          .computeMessageSize(10, retire_);
       }
       if (((bitField0_ & 0x00000400) == 0x00000400)) {
         size += com.google.protobuf.CodedOutputStream
@@ -2286,7 +2286,7 @@ public final class MessagePB {
           getRollIDFieldBuilder();
           getFailureFieldBuilder();
           getNoAvailableNodeFieldBuilder();
-          getStreamIdFieldBuilder();
+          getRetireFieldBuilder();
           getConfResFieldBuilder();
           getDumpReplyFieldBuilder();
           getRemoveConfFieldBuilder();
@@ -2361,10 +2361,10 @@ public final class MessagePB {
           noAvailableNodeBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000100);
-        if (streamIdBuilder_ == null) {
-          streamId_ = com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance();
+        if (retireBuilder_ == null) {
+          retire_ = com.dp.blackhole.protocol.control.RetirePB.Retire.getDefaultInstance();
         } else {
-          streamIdBuilder_.clear();
+          retireBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000200);
         if (confResBuilder_ == null) {
@@ -2562,10 +2562,10 @@ public final class MessagePB {
         if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
           to_bitField0_ |= 0x00000200;
         }
-        if (streamIdBuilder_ == null) {
-          result.streamId_ = streamId_;
+        if (retireBuilder_ == null) {
+          result.retire_ = retire_;
         } else {
-          result.streamId_ = streamIdBuilder_.build();
+          result.retire_ = retireBuilder_.build();
         }
         if (((from_bitField0_ & 0x00000400) == 0x00000400)) {
           to_bitField0_ |= 0x00000400;
@@ -2738,8 +2738,8 @@ public final class MessagePB {
         if (other.hasNoAvailableNode()) {
           mergeNoAvailableNode(other.getNoAvailableNode());
         }
-        if (other.hasStreamId()) {
-          mergeStreamId(other.getStreamId());
+        if (other.hasRetire()) {
+          mergeRetire(other.getRetire());
         }
         if (other.hasConfRes()) {
           mergeConfRes(other.getConfRes());
@@ -2846,8 +2846,8 @@ public final class MessagePB {
             return false;
           }
         }
-        if (hasStreamId()) {
-          if (!getStreamId().isInitialized()) {
+        if (hasRetire()) {
+          if (!getRetire().isInitialized()) {
             
             return false;
           }
@@ -3930,121 +3930,121 @@ public final class MessagePB {
         return noAvailableNodeBuilder_;
       }
 
-      // optional .blackhole.StreamID streamId = 10;
-      private com.dp.blackhole.protocol.control.StreamIDPB.StreamID streamId_ = com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance();
+      // optional .blackhole.Retire retire = 10;
+      private com.dp.blackhole.protocol.control.RetirePB.Retire retire_ = com.dp.blackhole.protocol.control.RetirePB.Retire.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.StreamIDPB.StreamID, com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder, com.dp.blackhole.protocol.control.StreamIDPB.StreamIDOrBuilder> streamIdBuilder_;
+          com.dp.blackhole.protocol.control.RetirePB.Retire, com.dp.blackhole.protocol.control.RetirePB.Retire.Builder, com.dp.blackhole.protocol.control.RetirePB.RetireOrBuilder> retireBuilder_;
       /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       * <code>optional .blackhole.Retire retire = 10;</code>
        */
-      public boolean hasStreamId() {
+      public boolean hasRetire() {
         return ((bitField0_ & 0x00000200) == 0x00000200);
       }
       /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       * <code>optional .blackhole.Retire retire = 10;</code>
        */
-      public com.dp.blackhole.protocol.control.StreamIDPB.StreamID getStreamId() {
-        if (streamIdBuilder_ == null) {
-          return streamId_;
+      public com.dp.blackhole.protocol.control.RetirePB.Retire getRetire() {
+        if (retireBuilder_ == null) {
+          return retire_;
         } else {
-          return streamIdBuilder_.getMessage();
+          return retireBuilder_.getMessage();
         }
       }
       /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       * <code>optional .blackhole.Retire retire = 10;</code>
        */
-      public Builder setStreamId(com.dp.blackhole.protocol.control.StreamIDPB.StreamID value) {
-        if (streamIdBuilder_ == null) {
+      public Builder setRetire(com.dp.blackhole.protocol.control.RetirePB.Retire value) {
+        if (retireBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          streamId_ = value;
+          retire_ = value;
           onChanged();
         } else {
-          streamIdBuilder_.setMessage(value);
+          retireBuilder_.setMessage(value);
         }
         bitField0_ |= 0x00000200;
         return this;
       }
       /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       * <code>optional .blackhole.Retire retire = 10;</code>
        */
-      public Builder setStreamId(
-          com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder builderForValue) {
-        if (streamIdBuilder_ == null) {
-          streamId_ = builderForValue.build();
+      public Builder setRetire(
+          com.dp.blackhole.protocol.control.RetirePB.Retire.Builder builderForValue) {
+        if (retireBuilder_ == null) {
+          retire_ = builderForValue.build();
           onChanged();
         } else {
-          streamIdBuilder_.setMessage(builderForValue.build());
+          retireBuilder_.setMessage(builderForValue.build());
         }
         bitField0_ |= 0x00000200;
         return this;
       }
       /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       * <code>optional .blackhole.Retire retire = 10;</code>
        */
-      public Builder mergeStreamId(com.dp.blackhole.protocol.control.StreamIDPB.StreamID value) {
-        if (streamIdBuilder_ == null) {
+      public Builder mergeRetire(com.dp.blackhole.protocol.control.RetirePB.Retire value) {
+        if (retireBuilder_ == null) {
           if (((bitField0_ & 0x00000200) == 0x00000200) &&
-              streamId_ != com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance()) {
-            streamId_ =
-              com.dp.blackhole.protocol.control.StreamIDPB.StreamID.newBuilder(streamId_).mergeFrom(value).buildPartial();
+              retire_ != com.dp.blackhole.protocol.control.RetirePB.Retire.getDefaultInstance()) {
+            retire_ =
+              com.dp.blackhole.protocol.control.RetirePB.Retire.newBuilder(retire_).mergeFrom(value).buildPartial();
           } else {
-            streamId_ = value;
+            retire_ = value;
           }
           onChanged();
         } else {
-          streamIdBuilder_.mergeFrom(value);
+          retireBuilder_.mergeFrom(value);
         }
         bitField0_ |= 0x00000200;
         return this;
       }
       /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       * <code>optional .blackhole.Retire retire = 10;</code>
        */
-      public Builder clearStreamId() {
-        if (streamIdBuilder_ == null) {
-          streamId_ = com.dp.blackhole.protocol.control.StreamIDPB.StreamID.getDefaultInstance();
+      public Builder clearRetire() {
+        if (retireBuilder_ == null) {
+          retire_ = com.dp.blackhole.protocol.control.RetirePB.Retire.getDefaultInstance();
           onChanged();
         } else {
-          streamIdBuilder_.clear();
+          retireBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000200);
         return this;
       }
       /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       * <code>optional .blackhole.Retire retire = 10;</code>
        */
-      public com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder getStreamIdBuilder() {
+      public com.dp.blackhole.protocol.control.RetirePB.Retire.Builder getRetireBuilder() {
         bitField0_ |= 0x00000200;
         onChanged();
-        return getStreamIdFieldBuilder().getBuilder();
+        return getRetireFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       * <code>optional .blackhole.Retire retire = 10;</code>
        */
-      public com.dp.blackhole.protocol.control.StreamIDPB.StreamIDOrBuilder getStreamIdOrBuilder() {
-        if (streamIdBuilder_ != null) {
-          return streamIdBuilder_.getMessageOrBuilder();
+      public com.dp.blackhole.protocol.control.RetirePB.RetireOrBuilder getRetireOrBuilder() {
+        if (retireBuilder_ != null) {
+          return retireBuilder_.getMessageOrBuilder();
         } else {
-          return streamId_;
+          return retire_;
         }
       }
       /**
-       * <code>optional .blackhole.StreamID streamId = 10;</code>
+       * <code>optional .blackhole.Retire retire = 10;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
-          com.dp.blackhole.protocol.control.StreamIDPB.StreamID, com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder, com.dp.blackhole.protocol.control.StreamIDPB.StreamIDOrBuilder> 
-          getStreamIdFieldBuilder() {
-        if (streamIdBuilder_ == null) {
-          streamIdBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.dp.blackhole.protocol.control.StreamIDPB.StreamID, com.dp.blackhole.protocol.control.StreamIDPB.StreamID.Builder, com.dp.blackhole.protocol.control.StreamIDPB.StreamIDOrBuilder>(
-                  streamId_,
+          com.dp.blackhole.protocol.control.RetirePB.Retire, com.dp.blackhole.protocol.control.RetirePB.Retire.Builder, com.dp.blackhole.protocol.control.RetirePB.RetireOrBuilder> 
+          getRetireFieldBuilder() {
+        if (retireBuilder_ == null) {
+          retireBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.RetirePB.Retire, com.dp.blackhole.protocol.control.RetirePB.Retire.Builder, com.dp.blackhole.protocol.control.RetirePB.RetireOrBuilder>(
+                  retire_,
                   getParentForChildren(),
                   isClean());
-          streamId_ = null;
+          retire_ = null;
         }
-        return streamIdBuilder_;
+        return retireBuilder_;
       }
 
       // optional .blackhole.ConfRes confRes = 11;
@@ -5948,61 +5948,61 @@ public final class MessagePB {
       "\032\022AssignBroker.proto\032\022RecoveryRoll.proto" +
       "\032\021ReadyStream.proto\032\021ReadyUpload.proto\032\014" +
       "RollID.proto\032\rFailure.proto\032\025NoAvailable" +
-      "Node.proto\032\016StreamID.proto\032\rConfRes.prot" +
-      "o\032\017DumpReply.proto\032\020RemoveConf.proto\032\017Br" +
-      "okerReg.proto\032\rDumpApp.proto\032\021ConsumerRe" +
-      "g.proto\032\024AssignConsumer.proto\032\022OffsetCom" +
-      "mit.proto\032\021TopicReport.proto\032\rRestart.pr" +
-      "oto\032\022QuitAndClean.proto\032\017RollClean.proto",
-      "\032\027DumpConsumerGroup.proto\032\020SnapshotOp.pr" +
-      "oto\032\021PauseStream.proto\"\265\016\n\007Message\022,\n\004ty" +
-      "pe\030\001 \002(\0162\036.blackhole.Message.MessageType" +
-      "\022!\n\006appReg\030\002 \001(\0132\021.blackhole.AppReg\022-\n\014a" +
-      "ssignBroker\030\003 \001(\0132\027.blackhole.AssignBrok" +
-      "er\022+\n\013readyUpload\030\004 \001(\0132\026.blackhole.Read" +
-      "yUpload\022-\n\014recoveryRoll\030\005 \001(\0132\027.blackhol" +
-      "e.RecoveryRoll\022+\n\013readyStream\030\006 \001(\0132\026.bl" +
-      "ackhole.ReadyStream\022!\n\006rollID\030\007 \001(\0132\021.bl" +
-      "ackhole.RollID\022#\n\007failure\030\010 \001(\0132\022.blackh",
-      "ole.Failure\0223\n\017noAvailableNode\030\t \001(\0132\032.b" +
-      "lackhole.NoAvailableNode\022%\n\010streamId\030\n \001" +
-      "(\0132\023.blackhole.StreamID\022#\n\007confRes\030\013 \001(\013" +
-      "2\022.blackhole.ConfRes\022\'\n\tdumpReply\030\014 \001(\0132" +
-      "\024.blackhole.DumpReply\022)\n\nremoveConf\030\r \001(" +
-      "\0132\025.blackhole.RemoveConf\022\'\n\tbrokerReg\030\016 " +
-      "\001(\0132\024.blackhole.BrokerReg\022#\n\007dumpApp\030\017 \001" +
-      "(\0132\022.blackhole.DumpApp\022+\n\013consumerReg\030\020 " +
-      "\001(\0132\026.blackhole.ConsumerReg\0221\n\016assignCon" +
-      "sumer\030\021 \001(\0132\031.blackhole.AssignConsumer\022-",
-      "\n\014offsetCommit\030\022 \001(\0132\027.blackhole.OffsetC" +
-      "ommit\022+\n\013topicReport\030\023 \001(\0132\026.blackhole.T" +
-      "opicReport\022#\n\007restart\030\024 \001(\0132\022.blackhole." +
-      "Restart\022\035\n\004quit\030\025 \001(\0132\017.blackhole.Quit\022\037" +
-      "\n\005clean\030\026 \001(\0132\020.blackhole.Clean\022\'\n\trollC" +
-      "lean\030\027 \001(\0132\024.blackhole.RollClean\0227\n\021dump" +
-      "ConsumerGroup\030\030 \001(\0132\034.blackhole.DumpCons" +
-      "umerGroup\022)\n\nsnapshotOp\030\031 \001(\0132\025.blackhol" +
-      "e.SnapshotOp\022+\n\013pauseStream\030\032 \001(\0132\026.blac" +
-      "khole.PauseStream\"\332\005\n\013MessageType\022\016\n\nHEA",
-      "RTBEART\020\001\022\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021" +
-      "\n\rASSIGN_BROKER\020\004\022\020\n\014READY_STREAM\020\005\022\020\n\014R" +
-      "EADY_UPLOAD\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD" +
-      "_SUCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_" +
-      "ROLL\020\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOVERY" +
-      "_FAIL\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAILABLENODE\020" +
-      "\016\022\021\n\rUNRECOVERABLE\020\017\022\030\n\024MANUAL_RECOVERY_" +
-      "ROLL\020\020\022\014\n\010DUMPSTAT\020\021\022\020\n\014RETIRESTREAM\020\022\022\014" +
-      "\n\010CONF_REQ\020\023\022\014\n\010CONF_RES\020\024\022\023\n\017NOAVAILABL" +
-      "ECONF\020\025\022\014\n\010DUMPCONF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010",
-      "LISTAPPS\020\030\022\017\n\013REMOVE_CONF\020\031\022\014\n\010DUMP_APP\020" +
-      "\032\022\020\n\014CONSUMER_REG\020\033\022\023\n\017ASSIGN_CONSUMER\020\034" +
-      "\022\021\n\rOFFSET_COMMIT\020\035\022\017\n\013TOPICREPORT\020\036\022\023\n\017" +
-      "CONSUMERREGFAIL\020\037\022\026\n\022MAKR_UNRECOVERABLE\020" +
-      " \022\014\n\010LISTIDLE\020!\022\013\n\007RESTART\020\"\022\010\n\004QUIT\020#\022\t" +
-      "\n\005CLEAN\020$\022\016\n\nROLL_CLEAN\020%\022\027\n\023DUMP_CONSUM" +
-      "ER_GROUP\020&\022\027\n\023LIST_CONSUMER_GROUP\020\'\022\017\n\013S" +
-      "NAPSHOT_OP\020(\022\020\n\014PAUSE_STREAM\020)B.\n!com.dp" +
-      ".blackhole.protocol.controlB\tMessagePB"
+      "Node.proto\032\014Retire.proto\032\rConfRes.proto\032" +
+      "\017DumpReply.proto\032\020RemoveConf.proto\032\017Brok" +
+      "erReg.proto\032\rDumpApp.proto\032\021ConsumerReg." +
+      "proto\032\024AssignConsumer.proto\032\022OffsetCommi" +
+      "t.proto\032\021TopicReport.proto\032\rRestart.prot" +
+      "o\032\022QuitAndClean.proto\032\017RollClean.proto\032\027",
+      "DumpConsumerGroup.proto\032\020SnapshotOp.prot" +
+      "o\032\021PauseStream.proto\"\261\016\n\007Message\022,\n\004type" +
+      "\030\001 \002(\0162\036.blackhole.Message.MessageType\022!" +
+      "\n\006appReg\030\002 \001(\0132\021.blackhole.AppReg\022-\n\014ass" +
+      "ignBroker\030\003 \001(\0132\027.blackhole.AssignBroker" +
+      "\022+\n\013readyUpload\030\004 \001(\0132\026.blackhole.ReadyU" +
+      "pload\022-\n\014recoveryRoll\030\005 \001(\0132\027.blackhole." +
+      "RecoveryRoll\022+\n\013readyStream\030\006 \001(\0132\026.blac" +
+      "khole.ReadyStream\022!\n\006rollID\030\007 \001(\0132\021.blac" +
+      "khole.RollID\022#\n\007failure\030\010 \001(\0132\022.blackhol",
+      "e.Failure\0223\n\017noAvailableNode\030\t \001(\0132\032.bla" +
+      "ckhole.NoAvailableNode\022!\n\006retire\030\n \001(\0132\021" +
+      ".blackhole.Retire\022#\n\007confRes\030\013 \001(\0132\022.bla" +
+      "ckhole.ConfRes\022\'\n\tdumpReply\030\014 \001(\0132\024.blac" +
+      "khole.DumpReply\022)\n\nremoveConf\030\r \001(\0132\025.bl" +
+      "ackhole.RemoveConf\022\'\n\tbrokerReg\030\016 \001(\0132\024." +
+      "blackhole.BrokerReg\022#\n\007dumpApp\030\017 \001(\0132\022.b" +
+      "lackhole.DumpApp\022+\n\013consumerReg\030\020 \001(\0132\026." +
+      "blackhole.ConsumerReg\0221\n\016assignConsumer\030" +
+      "\021 \001(\0132\031.blackhole.AssignConsumer\022-\n\014offs",
+      "etCommit\030\022 \001(\0132\027.blackhole.OffsetCommit\022" +
+      "+\n\013topicReport\030\023 \001(\0132\026.blackhole.TopicRe" +
+      "port\022#\n\007restart\030\024 \001(\0132\022.blackhole.Restar" +
+      "t\022\035\n\004quit\030\025 \001(\0132\017.blackhole.Quit\022\037\n\005clea" +
+      "n\030\026 \001(\0132\020.blackhole.Clean\022\'\n\trollClean\030\027" +
+      " \001(\0132\024.blackhole.RollClean\0227\n\021dumpConsum" +
+      "erGroup\030\030 \001(\0132\034.blackhole.DumpConsumerGr" +
+      "oup\022)\n\nsnapshotOp\030\031 \001(\0132\025.blackhole.Snap" +
+      "shotOp\022+\n\013pauseStream\030\032 \001(\0132\026.blackhole." +
+      "PauseStream\"\332\005\n\013MessageType\022\016\n\nHEARTBEAR",
+      "T\020\001\022\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021\n\rASSI" +
+      "GN_BROKER\020\004\022\020\n\014READY_STREAM\020\005\022\020\n\014READY_U" +
+      "PLOAD\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_SUCCE" +
+      "SS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_ROLL\020\n" +
+      "\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOVERY_FAIL\020" +
+      "\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAILABLENODE\020\016\022\021\n\rU" +
+      "NRECOVERABLE\020\017\022\030\n\024MANUAL_RECOVERY_ROLL\020\020" +
+      "\022\014\n\010DUMPSTAT\020\021\022\020\n\014RETIRESTREAM\020\022\022\014\n\010CONF" +
+      "_REQ\020\023\022\014\n\010CONF_RES\020\024\022\023\n\017NOAVAILABLECONF\020" +
+      "\025\022\014\n\010DUMPCONF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010LISTAP",
+      "PS\020\030\022\017\n\013REMOVE_CONF\020\031\022\014\n\010DUMP_APP\020\032\022\020\n\014C" +
+      "ONSUMER_REG\020\033\022\023\n\017ASSIGN_CONSUMER\020\034\022\021\n\rOF" +
+      "FSET_COMMIT\020\035\022\017\n\013TOPICREPORT\020\036\022\023\n\017CONSUM" +
+      "ERREGFAIL\020\037\022\026\n\022MAKR_UNRECOVERABLE\020 \022\014\n\010L" +
+      "ISTIDLE\020!\022\013\n\007RESTART\020\"\022\010\n\004QUIT\020#\022\t\n\005CLEA" +
+      "N\020$\022\016\n\nROLL_CLEAN\020%\022\027\n\023DUMP_CONSUMER_GRO" +
+      "UP\020&\022\027\n\023LIST_CONSUMER_GROUP\020\'\022\017\n\013SNAPSHO" +
+      "T_OP\020(\022\020\n\014PAUSE_STREAM\020)B.\n!com.dp.black" +
+      "hole.protocol.controlB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -6014,7 +6014,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "ReadyUpload", "RecoveryRoll", "ReadyStream", "RollID", "Failure", "NoAvailableNode", "StreamId", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", "Quit", "Clean", "RollClean", "DumpConsumerGroup", "SnapshotOp", "PauseStream", });
+              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "ReadyUpload", "RecoveryRoll", "ReadyStream", "RollID", "Failure", "NoAvailableNode", "Retire", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", "Quit", "Clean", "RollClean", "DumpConsumerGroup", "SnapshotOp", "PauseStream", });
           return null;
         }
       };
@@ -6029,7 +6029,7 @@ public final class MessagePB {
           com.dp.blackhole.protocol.control.RollIDPB.getDescriptor(),
           com.dp.blackhole.protocol.control.FailurePB.getDescriptor(),
           com.dp.blackhole.protocol.control.NoAvailableNodePB.getDescriptor(),
-          com.dp.blackhole.protocol.control.StreamIDPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.RetirePB.getDescriptor(),
           com.dp.blackhole.protocol.control.ConfResPB.getDescriptor(),
           com.dp.blackhole.protocol.control.DumpReplyPB.getDescriptor(),
           com.dp.blackhole.protocol.control.RemoveConfPB.getDescriptor(),
