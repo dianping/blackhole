@@ -73,7 +73,7 @@ public class Stream {
         lastSuccessTs.getAndSet(ts);
     }
     
-    public void setGreatlastSuccessTs(long ts) {
+    public void setGreatlastSuccessTs(long ts) { //TODO lastSuccessTs should set step by step
         for (;;) {
             long current = lastSuccessTs.get();
             if (ts > current) {

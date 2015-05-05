@@ -1102,9 +1102,7 @@ public class Supervisor {
                 synchronized (stages) {
                     for (Stage stage : stages) {
                         if (stage.getRollTs() == rollID.getRollTs()) {
-                            LOG.warn("stage " + stage + " cannot be recovered");
-                            stages.remove(stage);
-                            stageConnectionMap.remove(stage);
+                            LOG.info("handle unrecoverable stage " + stage);
                             String broker = getBroker();
                             if (broker != null) {
                                 SimpleConnection brokerConnection = brokersMapping.get(broker);
@@ -1116,7 +1114,14 @@ public class Supervisor {
                                     Message message = PBwrap.wrapMarkUnrecoverable(topic, source, period, rollTs);
                                     send(brokerConnection, message);
                                 }
+                            } else {
+                                LOG.error("Can not get any brokers when handle unrecoverable");
                             }
+                            
+                            stages.remove(stage);
+                            stageConnectionMap.remove(stage);
+                            //unrecoverable stage also need update lastSuccessTs
+                            stream.setGreatlastSuccessTs(rollID.getRollTs());
                             break;
                         }
                     }
