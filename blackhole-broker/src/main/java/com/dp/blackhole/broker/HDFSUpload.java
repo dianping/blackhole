@@ -71,12 +71,16 @@ public class HDFSUpload implements Runnable{
             Compressor compressor = compressionAlgo.getCompressor();
             OutputStream out = compressionAlgo
                     .createCompressionStream(fsDataOutputStream, compressor, 0);
-            outChannel =  Channels.newChannel(out);
+            outChannel = Channels.newChannel(out);
             
-            Partition p = manager.getPartition(ident.topic, ident.source, false);
             ByteBuffer buffer = ByteBuffer.allocate(BufferSize);
             ByteBufferChannel channel = new ByteBufferChannel(buffer);
             
+            Partition p = manager.getPartition(ident.topic, ident.source, false);
+            if (p == null) {
+                LOG.warn("Can not got partition by " + ident.topic + " " + ident.source);
+                return;
+            }
             long start = roll.startOffset;
             long end = roll.startOffset + roll.length;
             LOG.debug("Uploading " + ident + " in partition: " + p + " [" + start + "~" + end + "]");

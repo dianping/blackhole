@@ -1916,7 +1916,7 @@ public class Supervisor {
         
         @Override
         public void run() {
-            int THRESHOLD = 15 * 1000;
+            int THRESHOLD = 60 * 1000;
             while (running) {
                 try {
                     Thread.sleep(5000);
@@ -1930,13 +1930,17 @@ public class Supervisor {
                         }
                         SimpleConnection conn = entry.getKey();
                         if (now - dsc.getLastHeartBeat() > THRESHOLD) {
-                            LOG.info("failed to get heartbeat for 15 seconds, close connection " + conn);
+                            LOG.info("failed to get heartbeat for 60 seconds, "
+                                    + " last receive heartbeat ts is " + dsc.getLastHeartBeat()
+                                    + ", close connection " + conn);
                             server.closeConnection(conn);
                         }
                     }
                 } catch (InterruptedException e) {
                     LOG.info("LiveChecker thread interrupted");
                     running =false;
+                } catch (Throwable t) {
+                    LOG.error("Oops, catch an exception in LiveChecker, but go on.", t);
                 }
             }
         }

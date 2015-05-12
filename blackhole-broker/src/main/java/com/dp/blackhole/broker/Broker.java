@@ -145,6 +145,7 @@ public class Broker {
         public void OnDisconnected(SimpleConnection connection) {
             supervisor = null;
             brokerService.disconnectClients();
+            LOG.debug("Last HeartBeat ts is " + heartbeat.getLastHeartBeat());
             heartbeat.shutdown();
             heartbeat = null;
         }
