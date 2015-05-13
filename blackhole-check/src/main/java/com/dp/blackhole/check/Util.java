@@ -17,8 +17,6 @@ public class Util {
     private static long localTimezoneOffset = TimeZone.getTimeZone("Asia/Shanghai").getRawOffset();
     private static final int REPEATE = 2;
     private static final int RETRY_SLEEP_TIME = 100;
-    public static final String DONE_FLAG = "_done";
-    public static final String TIMEOUT_FLAG = "_timeout";
     public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public static String getDatepathbyFormat (String format) {
@@ -170,7 +168,7 @@ public class Util {
         Date roll = new Date(ts);
         SimpleDateFormat dm= new SimpleDateFormat(format);
         Path done =  new Path(CheckDone.hdfsbasedir + '/' + ident.topic + '/' +
-                Util.getDatepathbyFormat(dm.format(roll)) + DONE_FLAG);
+                Util.getDatepathbyFormat(dm.format(roll)) + CheckDone.doneFlag);
         if (Util.retryExists(done)) {
             return true;
         } else {

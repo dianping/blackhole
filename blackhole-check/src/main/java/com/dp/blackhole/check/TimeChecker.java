@@ -107,7 +107,7 @@ public class TimeChecker extends Thread {
                 }
                 
                 if (shouldDone) {
-                    if (Util.retryTouch(expectedFile[0].getParent(), Util.DONE_FLAG)) {
+                    if (Util.retryTouch(expectedFile[0].getParent(), CheckDone.doneFlag)) {
                         LOG.info("TimeChecker: [" + ident.topic + ":" + Util.format.format(new Date(checkTs)) + "]....Done!");
                         unregisterTimeChecker(ident, checkTsList.get(index));
                     } else {

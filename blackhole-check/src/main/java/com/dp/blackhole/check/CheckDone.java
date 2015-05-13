@@ -80,7 +80,7 @@ public class CheckDone implements Runnable{
                 
                 if (attemptSource.isEmpty()) { //all file ready
                     if (expectedFile != null) {
-                        if (!Util.retryTouch(expectedFile[0].getParent(), Util.DONE_FLAG)) {
+                        if (!Util.retryTouch(expectedFile[0].getParent(), CheckDone.doneFlag)) {
                             LOG.error("Alarm, failed to touch a done file. " +
                                     "Try in next check cycle. " +
                                     "If you see this message for the second time, " +
@@ -95,7 +95,7 @@ public class CheckDone implements Runnable{
                 } else {
                     if (ident.timeout > 0 && ident.timeout < 60 && calendar.get(Calendar.MINUTE) >= ident.timeout) {
                         if (expectedFile != null) {
-                            if (!Util.retryTouch(expectedFile[0].getParent(), Util.TIMEOUT_FLAG)) {
+                            if (!Util.retryTouch(expectedFile[0].getParent(), CheckDone.timeoutFlag)) {
                                 LOG.error("Alarm, failed to touch a TIMEOUT_FLAG file. " +
                                         "Try in next check cycle. " +
                                         "If you see this message for the second time, " +
@@ -152,9 +152,11 @@ public class CheckDone implements Runnable{
 
     static void init() throws FileNotFoundException, NumberFormatException, IOException, LionException {
         Properties prop = new Properties();
-        prop.load(ClassLoader.getSystemResourceAsStream("checkdone.properties"));
+        prop.load(CheckDone.class.getResourceAsStream("config.properties"));
         alartTime = Integer.parseInt(prop.getProperty("ALARM_TIME"));
         successprefix = prop.getProperty("SUCCESS_PREFIX", "_SUCCESS.");
+        doneFlag = prop.getProperty("DONE_FLAG", "_done");
+        timeoutFlag = prop.getProperty("TIMEOUT_FLAG", "_timeout");
         hdfsbasedir = prop.getProperty("HDFS_BASEDIR");
         if (hdfsbasedir.endsWith("/")) {
             hdfsbasedir = hdfsbasedir.substring(0, hdfsbasedir.length() - 1);
@@ -232,4 +234,6 @@ public class CheckDone implements Runnable{
     public static Map<String, ScheduledFuture<?>> threadMap;
     public static TimeChecker timeChecker;
     public static GetInstanceFromPaas getInstanceFromPaas;
+    public static String doneFlag;
+    public static String timeoutFlag;
 }
