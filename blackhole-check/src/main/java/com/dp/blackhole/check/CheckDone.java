@@ -49,10 +49,18 @@ public class CheckDone implements Runnable{
         }
         //reload sources
         List<String> kvmSources = lionConfChange.getAppToHosts().get(ident.topic);
-        if (kvmSources == null || kvmSources.isEmpty()) {
-            LOG.error("source hosts are all miss for " + ident.topic);
+        if (kvmSources == null) {
+            kvmSources = new ArrayList<String>();
         }
         ident.kvmSources = kvmSources;
+        
+        if (ident.paasSources == null) {
+            ident.paasSources = new ArrayList<String>();
+        }
+        if(kvmSources.isEmpty() && ident.paasSources.isEmpty()) {
+            LOG.warn("source hosts are all miss for " + ident.topic);
+        }
+        
         Calendar calendar = Calendar.getInstance();
         long nowTS = calendar.getTimeInMillis();
         List<String> attemptSource = new ArrayList<String>();
@@ -152,7 +160,9 @@ public class CheckDone implements Runnable{
 
     static void init() throws FileNotFoundException, NumberFormatException, IOException, LionException {
         Properties prop = new Properties();
-        prop.load(CheckDone.class.getResourceAsStream("config.properties"));
+        Thread currentThread = Thread.currentThread();
+        ClassLoader contextClassLoader = currentThread.getContextClassLoader();
+        prop.load(contextClassLoader.getResourceAsStream("config.properties"));
         alartTime = Integer.parseInt(prop.getProperty("ALARM_TIME"));
         successprefix = prop.getProperty("SUCCESS_PREFIX", "_SUCCESS.");
         doneFlag = prop.getProperty("DONE_FLAG", "_done");

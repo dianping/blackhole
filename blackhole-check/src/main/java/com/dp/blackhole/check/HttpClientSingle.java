@@ -37,7 +37,7 @@ public class HttpClientSingle {
         HttpResponse httpResponse = this.httpClient.execute(method);
         int statusCode = httpResponse.getStatusLine().getStatusCode();
         if (HttpStatus.SC_OK == statusCode) {
-            LOG.debug("200 OK request");
+            LOG.trace("200 OK request");
             return httpResponse.getEntity();
         } else {
             throw new IOException("Something went wrong, statusCode is " + statusCode);
@@ -45,7 +45,7 @@ public class HttpClientSingle {
     }
     
     public String getResponseText(String uri) {
-        LOG.debug("http client access uri: " + uri);
+        LOG.trace("http client access uri: " + uri);
         try {
             return EntityUtils.toString(getResource(uri), "utf-8");
         } catch (IOException e) {

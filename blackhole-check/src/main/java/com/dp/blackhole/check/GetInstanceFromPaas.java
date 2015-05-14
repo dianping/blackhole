@@ -94,7 +94,7 @@ public class GetInstanceFromPaas extends Thread {
             String app = (String) layoutObject.get("app");
             JSONArray layoutArray = layoutObject.getJSONArray("layout");
             if (layoutArray.length() == 0) {
-                LOG.warn("Can not get any layout by app " + app);
+                LOG.debug("Can not get any layout by app " + app);
             }
             for (int j = 0; j < layoutArray.length(); j++) {
                 JSONObject hostIdObject = layoutArray.getJSONObject(j);
