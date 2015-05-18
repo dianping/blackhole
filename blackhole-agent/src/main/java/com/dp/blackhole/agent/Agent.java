@@ -305,6 +305,11 @@ public class Agent implements Runnable {
             if (!paasModel) {
                 requireConfigFromSupersivor(0);
             }
+            if (this.heartbeat == null || !this.heartbeat.isAlive()) {
+                this.heartbeat = new HeartBeat(supervisor);
+                this.heartbeat.setDaemon(true);
+                this.heartbeat.start();
+            }
         }
 
         @Override
@@ -482,11 +487,7 @@ public class Agent implements Runnable {
                             fillUpAppLogsFromConfig(topicId);
                             startLogReader(topicId);
                             register(topicId, Util.getTS());
-                            if (this.heartbeat == null || !this.heartbeat.isAlive()) {
-                                this.heartbeat = new HeartBeat(supervisor);
-                                this.heartbeat.setDaemon(true);
-                                this.heartbeat.start();
-                            }
+                            heartbeat.setInterval(5000);
                         }
                     }
                 } else {
@@ -522,11 +523,7 @@ public class Agent implements Runnable {
                         ++accepted;
                         startLogReader(topicId);
                         register(topicId, Util.getTS());
-                        if (this.heartbeat == null || !this.heartbeat.isAlive()) {
-                            this.heartbeat = new HeartBeat(supervisor);
-                            this.heartbeat.setDaemon(true);
-                            this.heartbeat.start();
-                        }
+                        heartbeat.setInterval(5000);
                     }
                     if (accepted < appConfResList.size()) {
                         LOG.error("Not all configurations are accepted, sleep 5 minutes...");

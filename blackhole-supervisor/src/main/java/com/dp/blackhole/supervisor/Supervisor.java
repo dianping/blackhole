@@ -557,14 +557,12 @@ public class Supervisor {
                     LOG.error("can not find agentConnection by host " + agentHost);
                     continue;
                 }
-                if (agentConnection != null) {
-                    ArrayList<Stream> associatedStreams = connectionStreamMap.get(agentConnection);
-                    if (associatedStreams != null) {
-                        synchronized (associatedStreams) {
-                            associatedStreams.remove(stream);
-                            if (associatedStreams.size() == 0) {
-                                connectionStreamMap.remove(agentConnection);
-                            }
+                ArrayList<Stream> associatedStreams = connectionStreamMap.get(agentConnection);
+                if (associatedStreams != null) {
+                    synchronized (associatedStreams) {
+                        associatedStreams.remove(stream);
+                        if (associatedStreams.size() == 0) {
+                            connectionStreamMap.remove(agentConnection);
                         }
                     }
                 }
@@ -1641,11 +1639,8 @@ public class Supervisor {
             return;
         }
         
+        connectionStreamMap.putIfAbsent(connection, new ArrayList<Stream>());
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
-        if (streams == null) {
-            streams = new ArrayList<Stream>();
-            connectionStreamMap.put(connection, streams);
-        }
         synchronized (streams) {
             if (!streams.contains(stream)) {
                 streams.add(stream);
@@ -1907,6 +1902,8 @@ public class Supervisor {
     }
     
     private class LiveChecker extends Thread {
+        private static final int LIVE_CHECK_INTERVAL = 10000;
+        private static final int THRESHOLD = 60000;
         boolean running = true;
         
         public LiveChecker() {
@@ -1916,11 +1913,9 @@ public class Supervisor {
         
         @Override
         public void run() {
-            int THRESHOLD = 60 * 1000;
             while (running) {
                 try {
-                    Thread.sleep(5000);
-                    long now = Util.getTS();
+                    Thread.sleep(LIVE_CHECK_INTERVAL);
                     for (Entry<SimpleConnection, ConnectionDesc> entry : connections.entrySet()) {
                         ConnectionDesc dsc = entry.getValue();
                         if (dsc.getType() != ConnectionDesc.AGENT &&
@@ -1929,6 +1924,7 @@ public class Supervisor {
                             continue;
                         }
                         SimpleConnection conn = entry.getKey();
+                        long now = Util.getTS();
                         if (now - dsc.getLastHeartBeat() > THRESHOLD) {
                             LOG.info("failed to get heartbeat for 60 seconds, "
                                     + " last receive heartbeat ts is " + dsc.getLastHeartBeat()
@@ -1938,7 +1934,7 @@ public class Supervisor {
                     }
                 } catch (InterruptedException e) {
                     LOG.info("LiveChecker thread interrupted");
-                    running =false;
+                    running = false;
                 } catch (Throwable t) {
                     LOG.error("Oops, catch an exception in LiveChecker, but go on.", t);
                 }
