@@ -10,8 +10,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.TopicMeta.TopicId;
+import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.network.TransferWrap;
 import com.dp.blackhole.protocol.data.HaltRequest;
+import com.dp.blackhole.protocol.data.VersionRequest;
 import com.dp.blackhole.protocol.data.ProduceRequest;
 import com.dp.blackhole.protocol.data.RegisterRequest;
 import com.dp.blackhole.protocol.data.RollRequest;
@@ -47,6 +49,10 @@ public class RemoteSender {
 
     public void setReassignDelaySeconds(int reassignDelaySeconds) {
         this.reassignDelaySeconds = reassignDelaySeconds;
+    }
+
+    public ByteBuffer getMessageBuffer() {
+        return messageBuffer;
     }
 
     public void initializeRemoteConnection() throws IOException {
@@ -86,6 +92,12 @@ public class RemoteSender {
         wrap.write(channel);
     }
     
+    public void sendNullRequest() throws IOException {
+        VersionRequest request = new VersionRequest(ParamsKey.VERSION);
+        TransferWrap wrap = new TransferWrap(request);
+        wrap.write(channel);
+    }
+    
     public void sendMessage() throws IOException {
         messageBuffer.flip();
         ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
@@ -118,4 +130,5 @@ public class RemoteSender {
             LOG.warn("Failed to close socket.", e);
         }
     }
+
 }

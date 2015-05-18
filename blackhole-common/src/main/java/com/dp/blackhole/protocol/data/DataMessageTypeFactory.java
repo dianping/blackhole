@@ -9,7 +9,8 @@ import com.dp.blackhole.network.TypedFactory;
 public class DataMessageTypeFactory implements TypedFactory {
     public static final Log LOG = LogFactory.getLog(DataMessageTypeFactory.class);
     
-    public static final int produceRequest = 1;
+    public static final int VersionRequest = 0;
+    public static final int ProduceRequest = 1;
     public static final int FetchRequest = 2;
     public static final int FetchReply = 3;
     public static final int MultiFetchRequest = 4;
@@ -24,6 +25,9 @@ public class DataMessageTypeFactory implements TypedFactory {
     public TypedWrappable getWrappedInstanceFromType(int type) {
         TypedWrappable ret = null;
         switch (type) {
+        case 0:
+            ret = new VersionRequest();
+            break;
         case 1:
             ret = new ProduceRequest();
             break;

@@ -222,7 +222,7 @@ public class BrokerService extends Thread {
             case DataMessageTypeFactory.RegisterRequest:
                 handleRegisterRequest((RegisterRequest) request.unwrap(), from);
                 break;
-            case DataMessageTypeFactory.produceRequest:
+            case DataMessageTypeFactory.ProduceRequest:
                 handleProduceRequest((ProduceRequest) request.unwrap(), from);
                 break;
             case DataMessageTypeFactory.RotateOrRollRequest:
@@ -239,6 +239,8 @@ public class BrokerService extends Thread {
                 break;
             case DataMessageTypeFactory.OffsetRequest:
                 handleOffsetRequest((OffsetRequest) request.unwrap(), from);
+                break;
+            case DataMessageTypeFactory.VersionRequest:
                 break;
             default:
                 LOG.error("unknown message type: " + request.getType());
