@@ -145,9 +145,7 @@ public class TopicResource extends BaseResource {
     @GET
     @Path("/detail/groups")
     @Produces({MediaType.APPLICATION_JSON})
-    public Set<ConsumerGroup> getAllConsumerGroupDetail(
-            @PathParam("topic") final String topic) {
-        LOG.debug("GET: topic[" + topic + "] -> groups detail");
+    public Set<ConsumerGroup> getAllConsumerGroupDetail() {
         return supervisorService.getCopyOfConsumerGroups();
     }
 }
