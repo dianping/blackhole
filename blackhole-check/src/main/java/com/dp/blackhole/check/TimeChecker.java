@@ -67,7 +67,7 @@ public class TimeChecker extends Thread {
         while (iter.hasNext()) {
             Map.Entry<RollIdent, List<Long>> entry = iter.next();
             RollIdent ident = entry.getKey();
-            if (lionConfChange.getAppBlacklist().contains(ident.topic)) {
+            if (lionConfChange.getTopicBlacklist().contains(ident.topic)) {
                 iter.remove();
                 continue;
             }
@@ -78,6 +78,7 @@ public class TimeChecker extends Thread {
                 boolean shouldDone = true;
                 long checkTs = checkTsList.get(index);
                 if (Util.wasDone(ident, checkTs)) {
+                    LOG.info("TimeChecker: [" + ident.topic + ":" + Util.format.format(new Date(checkTs)) + "]....Done!");
                     unregisterTimeChecker(ident, checkTs);
                     continue;
                 }

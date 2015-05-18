@@ -44,11 +44,11 @@ public class CheckDone implements Runnable{
     @Override
     public void run() {
         //pass blacklist
-        if (lionConfChange.getAppBlacklist().contains(ident.topic)) {
+        if (lionConfChange.getTopicBlacklist().contains(ident.topic)) {
             return;
         }
         //reload sources
-        List<String> kvmSources = lionConfChange.getAppToHosts().get(ident.topic);
+        List<String> kvmSources = lionConfChange.getTopicToHostsMap().get(ident.topic);
         if (kvmSources == null) {
             kvmSources = new ArrayList<String>();
         }
@@ -201,25 +201,25 @@ public class CheckDone implements Runnable{
         lionConfChange = new LionConfChange(configCache, apiId);
         lionConfChange.initLion();
         rollIdents = new ArrayList<RollIdent>();
-        for (String appName : lionConfChange.appSet) {
+        for (String topic : lionConfChange.topicSet) {
             RollIdent rollIdent = new RollIdent();
-            rollIdent.topic = appName;
-            List<String> sources = lionConfChange.getAppToHosts().get(appName);
+            rollIdent.topic = topic;
+            List<String> sources = lionConfChange.getTopicToHostsMap().get(topic);
             if (sources == null || sources.isEmpty()) {
-                LOG.error("source hosts are all miss for " + appName);
+                LOG.error("source hosts are all miss for " + topic);
                 continue;
             }
             rollIdent.kvmSources = sources;
-            Context context = ConfigKeeper.configMap.get(appName);
+            Context context = ConfigKeeper.configMap.get(topic);
             if (context == null) {
-                LOG.error("Can not get app: " + appName + " from configMap");
+                LOG.error("Can not get topic: " + topic + " from configMap");
                 continue;
             }
-            rollIdent.period = context.getLong(ParamsKey.Appconf.ROLL_PERIOD);
-            rollIdent.cmdbapp = Arrays.asList(context.getString(ParamsKey.Appconf.CMDB_APP)); 
+            rollIdent.period = context.getLong(ParamsKey.TopicConfig.ROLL_PERIOD);
+            rollIdent.cmdbapp = Arrays.asList(context.getString(ParamsKey.TopicConfig.CMDB_APP)); 
             long rawBeginTs = Long.parseLong(prop.getProperty("BEGIN_TS", String.valueOf(new Date().getTime())));
             rollIdent.ts = Util.getCurrWholeTs(rawBeginTs, rollIdent.period);
-            rollIdent.timeout = Integer.parseInt(prop.getProperty(appName + ".TIMEOUT_MINUTE", "-1"));
+            rollIdent.timeout = Integer.parseInt(prop.getProperty(topic + ".TIMEOUT_MINUTE", "-1"));
             rollIdents.add(rollIdent);
         }
         getPaaSInstanceURLPerfix = prop.getProperty("CHECK.PAAS.URL");
