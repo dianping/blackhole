@@ -37,7 +37,7 @@ public class ApplicationResource extends BaseResource {
             @PathParam("app") final String app) {
         LOG.debug("GET: app[" + app + "] -> topics");
         Set<String> topicSet = configService.getTopicsByCmdb(app);
-        if (topicSet != null) {
+        if (topicSet == null) {
             topicSet = new HashSet<String>();
             LOG.warn("Can not get topics from app: " + app);
         }
