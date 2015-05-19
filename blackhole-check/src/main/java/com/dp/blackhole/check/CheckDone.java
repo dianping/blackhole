@@ -205,9 +205,8 @@ public class CheckDone implements Runnable{
             RollIdent rollIdent = new RollIdent();
             rollIdent.topic = topic;
             List<String> sources = lionConfChange.getTopicToHostsMap().get(topic);
-            if (sources == null || sources.isEmpty()) {
-                LOG.error("source hosts are all miss for " + topic);
-                continue;
+            if (sources == null) {
+                sources = new ArrayList<String>();
             }
             rollIdent.kvmSources = sources;
             Context context = ConfigKeeper.configMap.get(topic);
