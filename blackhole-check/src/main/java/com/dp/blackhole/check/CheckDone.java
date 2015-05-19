@@ -75,6 +75,9 @@ public class CheckDone implements Runnable{
                         attemptSource.add(paasSource);
                     }
                 }
+                //skip the source blacklist
+                attemptSource.removeAll(lionConfChange.getSkipSourceBlackList());
+                
                 if (attemptSource.isEmpty()) { //all file ready
                     if (expectedFile != null) {
                         if (!Util.retryTouch(expectedFile[0].getParent(), Util.DONE_FLAG)) {
@@ -133,6 +136,8 @@ public class CheckDone implements Runnable{
                 threadMap.put(ident.topic, scheduledFuture);
             }
             LOG.info("Start the Time Checker per " + sleepDuration + "millis.");
+            timeChecker.setDaemon(true);
+            timeChecker.setName("TimeChecker");
             timeChecker.start();
         } catch (FileNotFoundException e) {
             LOG.error("Oops, got an exception.", e);

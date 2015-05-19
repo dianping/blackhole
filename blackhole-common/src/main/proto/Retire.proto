@@ -1,0 +1,10 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "RetirePB";
+
+message Retire {
+    required string topic = 1;
+    required string source = 2;
+    optional bool force = 3 [default = false];
+}

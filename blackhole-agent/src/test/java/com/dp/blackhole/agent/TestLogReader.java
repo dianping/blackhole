@@ -128,7 +128,7 @@ public class TestLogReader {
         while (iter.hasNext()) {
             mo = iter.next();
         }
-        assertEquals(expectedLines.get(expectedLines.size() - 12), decoder.decode(mo.getMessage().payload()).toString());
+        assertEquals(expectedLines.get(expectedLines.size() - 1).length(), decoder.decode(mo.getMessage().payload()).toString().length());
     }
     private void fetchFileMessageSet(GatheringByteChannel channel, FileMessageSet messages) throws IOException {
         int read = 0;

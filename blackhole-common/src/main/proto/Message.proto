@@ -11,7 +11,7 @@ import "ReadyUpload.proto";
 import "RollID.proto";
 import "Failure.proto";
 import "NoAvailableNode.proto";
-import "StreamID.proto";
+import "Retire.proto";
 import "ConfRes.proto";
 import "DumpReply.proto";
 import "RemoveConf.proto";
@@ -82,7 +82,7 @@ message Message {
     optional RollID rollID = 7;
     optional Failure failure = 8;
     optional NoAvailableNode noAvailableNode = 9;
-    optional StreamID streamId = 10;
+    optional Retire retire = 10;
     optional ConfRes confRes = 11;
     optional DumpReply dumpReply = 12;
     optional RemoveConf removeConf = 13;

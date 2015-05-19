@@ -2,7 +2,6 @@ package com.dp.blackhole.supervisor;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -46,10 +45,10 @@ import com.dp.blackhole.protocol.control.ReadyStreamPB.ReadyStream;
 import com.dp.blackhole.protocol.control.ReadyUploadPB.ReadyUpload;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.protocol.control.RestartPB.Restart;
+import com.dp.blackhole.protocol.control.RetirePB.Retire;
 import com.dp.blackhole.protocol.control.RollCleanPB.RollClean;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp.OP;
-import com.dp.blackhole.protocol.control.StreamIDPB.StreamID;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry;
 import com.dp.blackhole.rest.HttpServer;
@@ -968,21 +967,10 @@ public class Supervisor {
         configManager.removeConf(topic);
     }
 
-    private void handleRetireStream(StreamID streamId, SimpleConnection from) {
-        boolean force = false;
-        try {
-            //special case, retire stream as administrator
-            if (from.getHost() == Util.getLocalHost()) {
-                force = true;
-            }
-        } catch (UnknownHostException e) {
-            LOG.error("Cannot get localhost", e);
-        }
-        if (getConnectionType(from) == ConnectionDesc.AGENT) {
-            force = true;
-        }
-        String topic = streamId.getTopic();
-        String source = Util.getSource(streamId.getAgentServer(), streamId.getInstanceId());
+    private void handleRetireStream(Retire retire, SimpleConnection from) {
+        String topic = retire.getTopic();
+        String source = retire.getSource();
+        boolean force = retire.getForce();
         Stream stream = getStream(topic, source);
         retireStreamInternal(stream, force);
     }
@@ -1114,9 +1102,7 @@ public class Supervisor {
                 synchronized (stages) {
                     for (Stage stage : stages) {
                         if (stage.getRollTs() == rollID.getRollTs()) {
-                            LOG.warn("stage " + stage + " cannot be recovered");
-                            stages.remove(stage);
-                            stageConnectionMap.remove(stage);
+                            LOG.info("handle unrecoverable stage " + stage);
                             String broker = getBroker();
                             if (broker != null) {
                                 SimpleConnection brokerConnection = brokersMapping.get(broker);
@@ -1128,7 +1114,14 @@ public class Supervisor {
                                     Message message = PBwrap.wrapMarkUnrecoverable(topic, source, period, rollTs);
                                     send(brokerConnection, message);
                                 }
+                            } else {
+                                LOG.error("Can not get any brokers when handle unrecoverable");
                             }
+                            
+                            stages.remove(stage);
+                            stageConnectionMap.remove(stage);
+                            //unrecoverable stage also need update lastSuccessTs
+                            stream.setGreatlastSuccessTs(rollID.getRollTs());
                             break;
                         }
                     }
@@ -1875,7 +1868,7 @@ public class Supervisor {
                 dumpstat(from);
                 break;
             case RETIRESTREAM:
-                handleRetireStream(msg.getStreamId(), from);
+                handleRetireStream(msg.getRetire(), from);
                 break;
             case CONF_REQ:
                 handleConfReq(from);
@@ -1923,7 +1916,7 @@ public class Supervisor {
         
         @Override
         public void run() {
-            int THRESHOLD = 15 * 1000;
+            int THRESHOLD = 60 * 1000;
             while (running) {
                 try {
                     Thread.sleep(5000);
@@ -1937,13 +1930,17 @@ public class Supervisor {
                         }
                         SimpleConnection conn = entry.getKey();
                         if (now - dsc.getLastHeartBeat() > THRESHOLD) {
-                            LOG.info("failed to get heartbeat for 15 seconds, close connection " + conn);
+                            LOG.info("failed to get heartbeat for 60 seconds, "
+                                    + " last receive heartbeat ts is " + dsc.getLastHeartBeat()
+                                    + ", close connection " + conn);
                             server.closeConnection(conn);
                         }
                     }
                 } catch (InterruptedException e) {
                     LOG.info("LiveChecker thread interrupted");
                     running =false;
+                } catch (Throwable t) {
+                    LOG.error("Oops, catch an exception in LiveChecker, but go on.", t);
                 }
             }
         }

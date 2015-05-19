@@ -181,21 +181,22 @@ public class Util {
     }
     
     public static String[] getStringListOfLionValue(String rawValue) {
+        String[] result = new String[0];
         if (rawValue == null) {
-            return null;
+            return result;
         }
         String value = rawValue.trim();
         if (value.length() < 2) {
-            return null;
+            return result;
         }
         if (value.charAt(0) != '[' || value.charAt(value.length() - 1) != ']') {
-            return null;
+            return result;
         }
         if (value.length() == 2) {
-            return new String[]{};
+            return result;
         }
         String[] tmp = value.substring(1, value.length() - 1).split(",");
-        String[] result = new String[tmp.length];
+        result = new String[tmp.length];
         for (int i = 0; i < tmp.length; i++) {
             if (tmp[i].trim().length() -1 < 1) {
                 result[i] = new String("");

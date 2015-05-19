@@ -31,11 +31,11 @@ import com.dp.blackhole.protocol.control.ReadyUploadPB.ReadyUpload;
 import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.protocol.control.RestartPB.Restart;
+import com.dp.blackhole.protocol.control.RetirePB.Retire;
 import com.dp.blackhole.protocol.control.RollCleanPB.RollClean;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp;
 import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp.OP;
-import com.dp.blackhole.protocol.control.StreamIDPB.StreamID;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -84,7 +84,7 @@ public class PBwrap {
             msg.setRollID((RollID) message);
             break;
         case RETIRESTREAM:
-            msg.setStreamId((StreamID) message);
+            msg.setRetire((Retire) message);
             break;
         case DUMPSTAT:
             break;
@@ -285,11 +285,11 @@ public class PBwrap {
         return wrapMessage(MessageType.MANUAL_RECOVERY_ROLL, wrapRollID(appName, source, period, rollTs, false, true));
     }
     
-    public static Message wrapRetireStream(String topic, String agentServer, String instanceId) {
-        StreamID.Builder builder = StreamID.newBuilder();
+    public static Message wrapRetireStream(String topic, String source, boolean force) {
+        Retire.Builder builder = Retire.newBuilder();
         builder.setTopic(topic);
-        builder.setAgentServer(agentServer);
-        builder.setInstanceId(instanceId);
+        builder.setSource(source);
+        builder.setForce(force);
         return wrapMessage(MessageType.RETIRESTREAM, builder.build());
     }
     

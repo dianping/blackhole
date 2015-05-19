@@ -547,7 +547,7 @@ public class Agent implements Runnable {
                             if (topicMeta.setDying()) {
                                 if (!new File(topicMeta.getTailFile()).exists()) {
                                     LOG.warn("QUIT but " + topicMeta.getTailFile() + " not exists, retire stream and trigger CLEAN.");
-                                    send(PBwrap.wrapRetireStream(topic, hostname, id));
+                                    send(PBwrap.wrapRetireStream(topic, topicMeta.getSource(), true));
                                 } else if ((logReader = topicReaders.get(topicMeta)) != null) {
                                     LOG.info("begin last log rotate");
                                     logReader.getLogFSM().beginLastLogRotate();

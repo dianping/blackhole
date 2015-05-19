@@ -1,13 +1,20 @@
 package com.dp.blackhole.network;
 
+import java.util.concurrent.atomic.AtomicLong;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 
 public class HeartBeat extends Thread {
+    private static final Log LOG = LogFactory.getLog(HeartBeat.class);
     private SimpleConnection connection;
     private int interval;
     private volatile boolean running;
+    private AtomicLong lastHeartBeat;
     
     public HeartBeat(SimpleConnection connection) {
         this(connection, 5000);
@@ -16,6 +23,7 @@ public class HeartBeat extends Thread {
     public HeartBeat(SimpleConnection connection, int interval) {
         this.connection = connection;
         this.interval = interval;
+        this.lastHeartBeat = new AtomicLong(Util.getTS());
         running = true;
         setDaemon(true);
     }
@@ -27,12 +35,23 @@ public class HeartBeat extends Thread {
             try {
                 sleep(interval);
                 Util.send(connection, heartbeat);
+                if (connection != null) {
+                    lastHeartBeat.getAndSet(Util.getTS());
+                }
             } catch (InterruptedException e) {
+                LOG.warn("HeartBeat interrupted", e);
+                running = false;
+            } catch (Throwable t) {
+                LOG.error("Oops, catch an exception in HeartBeat, but go on.", t);
             }
         }
     }
     
     public void shutdown() {
         running = false;
+    }
+    
+    public long getLastHeartBeat() {
+        return lastHeartBeat.get();
     }
 }

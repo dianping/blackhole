@@ -81,6 +81,9 @@ public class RollRecovery implements Runnable{
         String rotateString = Util.formatTs(rollTimestamp, rotatePeriod);
         String rollString = Util.formatTs(rollTimestamp, rollPeriod);
         InputStream is = null;
+        LOG.info("Begin to recoverying: broker:" + brokerServer
+                + " rollTS:" + rollTimestamp + " isFinal:" + " isPersist" + isPersist
+                + " topic:" + topicMeta);
         try {
             //retrive record to got recovery offset
             Record record = state.retrive(rollTimestamp);
@@ -146,6 +149,7 @@ public class RollRecovery implements Runnable{
                 
             } catch (IOException e) {
                 LOG.error("Can not open an input stream for " + transferFile, e);
+                node.reportUnrecoverable(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal, isPersist);
                 return;
             }
             
@@ -192,6 +196,7 @@ public class RollRecovery implements Runnable{
                 LOG.info(transferFile + " transfered, including [" + transferBytes + "] bytes.");
             } catch (IOException e) {
                 LOG.error("Recover stream broken.", e);
+                node.reportRecoveryFail(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal);
             }
         } finally {
             if (is != null) {
