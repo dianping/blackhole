@@ -3,11 +3,11 @@ package com.dp.blackhole.check;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,7 +23,7 @@ public class TimeChecker extends Thread {
     public TimeChecker(long sleepDuration, LionConfChange lionConfChange) {
         this.sleepDuration = sleepDuration;
         this.lionConfChange = lionConfChange;
-        checkerMap = new HashMap<RollIdent, List<Long>>();
+        checkerMap = new ConcurrentHashMap<RollIdent, List<Long>>();
     }
     
     public synchronized void registerTimeChecker(RollIdent ident, long checkTs) {
@@ -67,7 +67,7 @@ public class TimeChecker extends Thread {
         while (iter.hasNext()) {
             Map.Entry<RollIdent, List<Long>> entry = iter.next();
             RollIdent ident = entry.getKey();
-            if (lionConfChange.getAppBlacklist().contains(ident.topic)) {
+            if (lionConfChange.getTopicBlacklist().contains(ident.topic)) {
                 iter.remove();
                 continue;
             }
@@ -78,6 +78,7 @@ public class TimeChecker extends Thread {
                 boolean shouldDone = true;
                 long checkTs = checkTsList.get(index);
                 if (Util.wasDone(ident, checkTs)) {
+                    LOG.info("TimeChecker: [" + ident.topic + ":" + Util.format.format(new Date(checkTs)) + "]....Done!");
                     unregisterTimeChecker(ident, checkTs);
                     continue;
                 }
@@ -100,14 +101,14 @@ public class TimeChecker extends Thread {
                     hiddenFile = Util.getRollHdfsPathByTs(ident, checkTs, source, true)[0];
                     if (Util.retryExists(expectedFile) || Util.retryExists(hiddenFile)) {
                     } else {
-                        LOG.debug("TimeChecker: File " + expectedFile + " not ready.");
+                        LOG.debug("TimeChecker: File " + Arrays.toString(expectedFile) + " not ready.");
                         shouldDone = false;
                         break;
                     }
                 }
                 
                 if (shouldDone) {
-                    if (Util.retryTouch(expectedFile[0].getParent(), Util.DONE_FLAG)) {
+                    if (Util.retryTouch(expectedFile[0].getParent(), CheckDone.doneFlag)) {
                         LOG.info("TimeChecker: [" + ident.topic + ":" + Util.format.format(new Date(checkTs)) + "]....Done!");
                         unregisterTimeChecker(ident, checkTsList.get(index));
                     } else {

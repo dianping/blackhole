@@ -11,13 +11,14 @@ import com.dp.blackhole.protocol.control.MessagePB.Message;
 
 public class HeartBeat extends Thread {
     private static final Log LOG = LogFactory.getLog(HeartBeat.class);
+    private static final int DEFAULT_HEARTBEAT_INTERVAL = 20000;
     private SimpleConnection connection;
-    private int interval;
+    private volatile int interval;
     private volatile boolean running;
     private AtomicLong lastHeartBeat;
     
     public HeartBeat(SimpleConnection connection) {
-        this(connection, 5000);
+        this(connection, DEFAULT_HEARTBEAT_INTERVAL);
     }
     
     public HeartBeat(SimpleConnection connection, int interval) {
@@ -53,5 +54,13 @@ public class HeartBeat extends Thread {
     
     public long getLastHeartBeat() {
         return lastHeartBeat.get();
+    }
+
+    public int getInterval() {
+        return interval;
+    }
+
+    public void setInterval(int interval) {
+        this.interval = interval;
     }
 }

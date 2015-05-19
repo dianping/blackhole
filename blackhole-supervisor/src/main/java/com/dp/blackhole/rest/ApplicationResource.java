@@ -1,6 +1,7 @@
 package com.dp.blackhole.rest;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +37,10 @@ public class ApplicationResource extends BaseResource {
             @PathParam("app") final String app) {
         LOG.debug("GET: app[" + app + "] -> topics");
         Set<String> topicSet = configService.getTopicsByCmdb(app);
+        if (topicSet == null) {
+            topicSet = new HashSet<String>();
+            LOG.warn("Can not get topics from app: " + app);
+        }
         String[] topics = topicSet.toArray(new String[topicSet.size()]);
         final String js = JSON.toString(topics);
         return Response.ok(js).build();

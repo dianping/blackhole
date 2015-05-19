@@ -46,4 +46,6 @@ public abstract class ParamsKey {
     public static final String COMPRESSION_NONE = "none";
     public static final String COMPRESSION_UNDEFINED = "undefined";
     public static final long DEFAULT_CLOCK_SYNC_BUF_MILLIS = 20000;
+    
+    public static final short VERSION = 1;   //V1 stand for Blackhole v2.1.0
 }

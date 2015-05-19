@@ -45,7 +45,7 @@ public class ProduceRequest extends NonDelegationTypedWrappable {
 
     @Override
     public int getType() {
-        return DataMessageTypeFactory.produceRequest;
+        return DataMessageTypeFactory.ProduceRequest;
     }
     
 }

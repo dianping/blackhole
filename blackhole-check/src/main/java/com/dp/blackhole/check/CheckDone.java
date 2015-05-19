@@ -44,15 +44,23 @@ public class CheckDone implements Runnable{
     @Override
     public void run() {
         //pass blacklist
-        if (lionConfChange.getAppBlacklist().contains(ident.topic)) {
+        if (lionConfChange.getTopicBlacklist().contains(ident.topic)) {
             return;
         }
         //reload sources
-        List<String> kvmSources = lionConfChange.getAppToHosts().get(ident.topic);
-        if (kvmSources == null || kvmSources.isEmpty()) {
-            LOG.error("source hosts are all miss for " + ident.topic);
+        List<String> kvmSources = lionConfChange.getTopicToHostsMap().get(ident.topic);
+        if (kvmSources == null) {
+            kvmSources = new ArrayList<String>();
         }
         ident.kvmSources = kvmSources;
+        
+        if (ident.paasSources == null) {
+            ident.paasSources = new ArrayList<String>();
+        }
+        if(kvmSources.isEmpty() && ident.paasSources.isEmpty()) {
+            LOG.warn("source hosts are all miss for " + ident.topic);
+        }
+        
         Calendar calendar = Calendar.getInstance();
         long nowTS = calendar.getTimeInMillis();
         List<String> attemptSource = new ArrayList<String>();
@@ -80,7 +88,7 @@ public class CheckDone implements Runnable{
                 
                 if (attemptSource.isEmpty()) { //all file ready
                     if (expectedFile != null) {
-                        if (!Util.retryTouch(expectedFile[0].getParent(), Util.DONE_FLAG)) {
+                        if (!Util.retryTouch(expectedFile[0].getParent(), CheckDone.doneFlag)) {
                             LOG.error("Alarm, failed to touch a done file. " +
                                     "Try in next check cycle. " +
                                     "If you see this message for the second time, " +
@@ -95,7 +103,7 @@ public class CheckDone implements Runnable{
                 } else {
                     if (ident.timeout > 0 && ident.timeout < 60 && calendar.get(Calendar.MINUTE) >= ident.timeout) {
                         if (expectedFile != null) {
-                            if (!Util.retryTouch(expectedFile[0].getParent(), Util.TIMEOUT_FLAG)) {
+                            if (!Util.retryTouch(expectedFile[0].getParent(), CheckDone.timeoutFlag)) {
                                 LOG.error("Alarm, failed to touch a TIMEOUT_FLAG file. " +
                                         "Try in next check cycle. " +
                                         "If you see this message for the second time, " +
@@ -152,9 +160,13 @@ public class CheckDone implements Runnable{
 
     static void init() throws FileNotFoundException, NumberFormatException, IOException, LionException {
         Properties prop = new Properties();
-        prop.load(ClassLoader.getSystemResourceAsStream("checkdone.properties"));
+        Thread currentThread = Thread.currentThread();
+        ClassLoader contextClassLoader = currentThread.getContextClassLoader();
+        prop.load(contextClassLoader.getResourceAsStream("config.properties"));
         alartTime = Integer.parseInt(prop.getProperty("ALARM_TIME"));
         successprefix = prop.getProperty("SUCCESS_PREFIX", "_SUCCESS.");
+        doneFlag = prop.getProperty("DONE_FLAG", "_done");
+        timeoutFlag = prop.getProperty("TIMEOUT_FLAG", "_timeout");
         hdfsbasedir = prop.getProperty("HDFS_BASEDIR");
         if (hdfsbasedir.endsWith("/")) {
             hdfsbasedir = hdfsbasedir.substring(0, hdfsbasedir.length() - 1);
@@ -189,25 +201,24 @@ public class CheckDone implements Runnable{
         lionConfChange = new LionConfChange(configCache, apiId);
         lionConfChange.initLion();
         rollIdents = new ArrayList<RollIdent>();
-        for (String appName : lionConfChange.appSet) {
+        for (String topic : lionConfChange.topicSet) {
             RollIdent rollIdent = new RollIdent();
-            rollIdent.topic = appName;
-            List<String> sources = lionConfChange.getAppToHosts().get(appName);
-            if (sources == null || sources.isEmpty()) {
-                LOG.error("source hosts are all miss for " + appName);
-                continue;
+            rollIdent.topic = topic;
+            List<String> sources = lionConfChange.getTopicToHostsMap().get(topic);
+            if (sources == null) {
+                sources = new ArrayList<String>();
             }
             rollIdent.kvmSources = sources;
-            Context context = ConfigKeeper.configMap.get(appName);
+            Context context = ConfigKeeper.configMap.get(topic);
             if (context == null) {
-                LOG.error("Can not get app: " + appName + " from configMap");
+                LOG.error("Can not get topic: " + topic + " from configMap");
                 continue;
             }
-            rollIdent.period = context.getLong(ParamsKey.Appconf.ROLL_PERIOD);
-            rollIdent.cmdbapp = Arrays.asList(context.getString(ParamsKey.Appconf.CMDB_APP)); 
+            rollIdent.period = context.getLong(ParamsKey.TopicConfig.ROLL_PERIOD);
+            rollIdent.cmdbapp = Arrays.asList(context.getString(ParamsKey.TopicConfig.CMDB_APP)); 
             long rawBeginTs = Long.parseLong(prop.getProperty("BEGIN_TS", String.valueOf(new Date().getTime())));
             rollIdent.ts = Util.getCurrWholeTs(rawBeginTs, rollIdent.period);
-            rollIdent.timeout = Integer.parseInt(prop.getProperty(appName + ".TIMEOUT_MINUTE", "-1"));
+            rollIdent.timeout = Integer.parseInt(prop.getProperty(topic + ".TIMEOUT_MINUTE", "-1"));
             rollIdents.add(rollIdent);
         }
         getPaaSInstanceURLPerfix = prop.getProperty("CHECK.PAAS.URL");
@@ -232,4 +243,6 @@ public class CheckDone implements Runnable{
     public static Map<String, ScheduledFuture<?>> threadMap;
     public static TimeChecker timeChecker;
     public static GetInstanceFromPaas getInstanceFromPaas;
+    public static String doneFlag;
+    public static String timeoutFlag;
 }

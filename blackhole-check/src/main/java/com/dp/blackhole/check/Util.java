@@ -17,8 +17,6 @@ public class Util {
     private static long localTimezoneOffset = TimeZone.getTimeZone("Asia/Shanghai").getRawOffset();
     private static final int REPEATE = 2;
     private static final int RETRY_SLEEP_TIME = 100;
-    public static final String DONE_FLAG = "_done";
-    public static final String TIMEOUT_FLAG = "_timeout";
     public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public static String getDatepathbyFormat (String format) {
@@ -78,32 +76,58 @@ public class Util {
         Date roll = new Date(checkTs);
         SimpleDateFormat dm= new SimpleDateFormat(format);
         if (hidden) {
+            StringBuilder builder = new StringBuilder();
+            builder.append(CheckDone.hdfsbasedir).append("/").append(ident.topic).append("/")
+            .append(getDatepathbyFormat(dm.format(roll))).append(CheckDone.hdfsHiddenfileprefix)
+            .append(source).append("@").append(ident.topic).append("_").append(dm.format(roll));
             Path[] hiddenPath = new Path[1];
-            hiddenPath[0] = new Path(CheckDone.hdfsbasedir + '/' + ident.topic + '/' + getDatepathbyFormat(dm.format(roll)) +
-                    CheckDone.hdfsHiddenfileprefix + source + '@' + ident.topic + "_" + dm.format(roll));
+            hiddenPath[0] = new Path(builder.toString());
             return hiddenPath;
         } else {
             int toCheckPathRatio = 2;
             String ip = null;
+            String hostname = Util.getAgentHostFromSource(source);
             try {
-                ip = getIpByHostname(source);
+                ip = getIpByHostname(hostname);
             } catch (UnknownHostException e) {
                 toCheckPathRatio = 1;
-                LOG.error(source + " cann't be solved.", e);
+                LOG.error(hostname + " cann't be solved.", e);
             }
             Path[] rollPath = new Path[CheckDone.hdfsfilesuffix.length * toCheckPathRatio];
+            StringBuilder builder = new StringBuilder();
             for(int i = 0;i < CheckDone.hdfsfilesuffix.length; i++) {
-                rollPath[i] = new Path(CheckDone.hdfsbasedir + '/' + ident.topic + '/' + getDatepathbyFormat(dm.format(roll)) +
-                    source + '@' + ident.topic + "_" + dm.format(roll) + "." + CheckDone.hdfsfilesuffix[i]);
+                builder.setLength(0);
+                builder.append(CheckDone.hdfsbasedir).append("/").append(ident.topic).append("/")
+                .append(getDatepathbyFormat(dm.format(roll))).append(source).append("@").append(ident.topic)
+                .append("_").append(dm.format(roll)).append(".").append(CheckDone.hdfsfilesuffix[i]);
+                rollPath[i] = new Path(builder.toString());
             }
             if (ip != null) {
                 for(int i = 0;i < CheckDone.hdfsfilesuffix.length; i++) {
-                    rollPath[i + CheckDone.hdfsfilesuffix.length] = new Path(CheckDone.hdfsbasedir + '/' + ident.topic + '/' + getDatepathbyFormat(dm.format(roll)) +
-                        ip + '@' + ident.topic + "_" + dm.format(roll) + "." + CheckDone.hdfsfilesuffix[i]);
+                    builder.setLength(0);
+                    builder.append(CheckDone.hdfsbasedir).append("/").append(ident.topic).append("/")
+                    .append(getDatepathbyFormat(dm.format(roll))).append(ip).append("#")
+                    .append(Util.getInstanceIdFromSource(source)).append("@").append(ident.topic)
+                    .append("_").append(dm.format(roll)).append(".").append(CheckDone.hdfsfilesuffix[i]);
+                    rollPath[i + CheckDone.hdfsfilesuffix.length] = new Path(builder.toString());
                 }
             }
             return rollPath;
         }
+    }
+    
+    public static String getInstanceIdFromSource(String source) {
+        String[] splits = source.split("#");
+        if (splits.length == 2) {
+            return splits[1];
+        } else {
+            return null;
+        }
+    }
+    
+    public static String getAgentHostFromSource(String source) {
+        String[] splits = source.split("#");
+        return splits[0];
     }
     
     public static String getIpByHostname(String hostname) throws UnknownHostException {
@@ -169,13 +193,18 @@ public class Util {
         String format  = Util.getFormatFromPeriod(ident.period);
         Date roll = new Date(ts);
         SimpleDateFormat dm= new SimpleDateFormat(format);
-        Path done =  new Path(CheckDone.hdfsbasedir + '/' + ident.topic + '/' +
-                Util.getDatepathbyFormat(dm.format(roll)) + DONE_FLAG);
+        StringBuilder builder = new StringBuilder();
+        builder.append(CheckDone.hdfsbasedir).append("/").append(ident.topic)
+        .append("/").append(Util.getDatepathbyFormat(dm.format(roll))).append(CheckDone.doneFlag);
+        Path done =  new Path(builder.toString());
         if (Util.retryExists(done)) {
             return true;
         } else {
-            Path succ =  new Path(CheckDone.hdfsbasedir + '/' + ident.topic + '/' +
-                    Util.getDatepathbyFormat(dm.format(roll)) + CheckDone.successprefix + dm.format(roll));
+            builder.setLength(0);
+            builder.append(CheckDone.hdfsbasedir).append("/").append(ident.topic)
+            .append("/").append(Util.getDatepathbyFormat(dm.format(roll))).append(CheckDone.successprefix)
+            .append(dm.format(roll));
+            Path succ =  new Path(builder.toString());
             return Util.retryExists(succ);
         }
     }

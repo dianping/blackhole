@@ -39,6 +39,7 @@ public class LogReader implements Runnable {
     private boolean accept;
     private final int maxLineSize;
     private RollTrigger rollTrigger;
+    private ZombieSocketChecker zombieSocketChecker;
     
     public LogReader(Agent agent, TopicMeta meta, String snapshotPersistDir) {
         this.agent = agent;
@@ -55,6 +56,8 @@ public class LogReader implements Runnable {
         this.lineBuf = new ByteArrayOutputStream(maxLineSize);
         this.tailFile = new File(meta.getTailFile());
         this.accept = true;
+        this.zombieSocketChecker = new ZombieSocketChecker();
+        zombieSocketChecker.start();
     }
     
     public LogFSM getLogFSM() {
@@ -138,6 +141,7 @@ public class LogReader implements Runnable {
         // main loop
         loop();
         
+        zombieSocketChecker.shutdown();
         // after main loop, log reader thread will be shutdown and resources will be released 
         currentReaderState.set(ReaderState.STOPPED);
         closeQuietly(reader);
@@ -365,6 +369,45 @@ public class LogReader implements Runnable {
             }
         } catch (IOException ioe) {
             // ignore
+        }
+    }
+    
+    class ZombieSocketChecker extends Thread {
+        private volatile boolean running;
+        private static final int CHECK_INTERVAL = 5 * 60 * 1000;
+        
+        public ZombieSocketChecker() {
+            this.running = true;
+            setDaemon(true);
+            setName("ZombieSocketChecker");
+        }
+        
+        public void shutdown() {
+            running = false;
+        }
+
+        @Override
+        public void run() {
+            while (running) {
+                if (currentReaderState.get() == ReaderState.SENDER_ASSIGNED) {
+                    try {
+                        if (sender.getMessageBuffer().position() == 0) {
+                            sender.sendNullRequest();
+                        } else {
+                            sender.sendMessage();
+                        }
+                    } catch (IOException e) {
+                        LOG.warn("Find socket dead, reassign remote sender");
+                        reassignSender();
+                    }
+                }
+                try {
+                    Thread.sleep(CHECK_INTERVAL);
+                } catch (InterruptedException e) {
+                    LOG.error("ZombieSocketChecker interrupt", e);
+                    running = false;
+                }
+            }
         }
     }
 }
