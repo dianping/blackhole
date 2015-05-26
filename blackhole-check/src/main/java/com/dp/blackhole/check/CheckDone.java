@@ -58,7 +58,7 @@ public class CheckDone implements Runnable{
             ident.paasSources = new ArrayList<String>();
         }
         if(kvmSources.isEmpty() && ident.paasSources.isEmpty()) {
-            LOG.warn("source hosts are all miss for " + ident.topic);
+            LOG.debug("source hosts are all miss for " + ident.topic);
         }
         
         Calendar calendar = Calendar.getInstance();
@@ -98,7 +98,15 @@ public class CheckDone implements Runnable{
                             LOG.info("[" + ident.topic + ":" + Util.format.format(new Date(ident.ts)) + "]===>Done!");
                         }
                     } else {
-                        LOG.fatal("expectedFile is null. It should not be happen.");
+                        if (!Util.retryTouch(Util.getRollHdfsParentPath(ident), CheckDone.doneFlag)) {
+                            LOG.error("Alarm, failed to touch a done file. " +
+                                    "Try in next check cycle. " +
+                                    "If you see this message for the second time, " +
+                                    "please find out why.");
+                            break;
+                        } else {
+                            LOG.info("Zero data task: [" + ident.topic + ":" + Util.format.format(new Date(ident.ts)) + "]===>Done!");
+                        }
                     }
                 } else {
                     if (ident.timeout > 0 && ident.timeout < 60 && calendar.get(Calendar.MINUTE) >= ident.timeout) {

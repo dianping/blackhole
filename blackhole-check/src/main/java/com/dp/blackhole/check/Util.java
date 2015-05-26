@@ -61,16 +61,30 @@ public class Util {
         ret = ret - localTimezoneOffset;
         return ret;
     }
+    
+    /*
+     * Path format:
+     * hdfsbasedir/topic/2013-11-01/14/08/
+     */
+    public static Path getRollHdfsParentPath(RollIdent ident) {
+        String format  = Util.getFormatFromPeriod(ident.period);
+        Date roll = new Date(ident.ts);
+        SimpleDateFormat dm= new SimpleDateFormat(format);
+        StringBuilder builder = new StringBuilder();
+        builder.append(CheckDone.hdfsbasedir).append("/").append(ident.topic).append("/")
+        .append(getDatepathbyFormat(dm.format(roll)));
+        return new Path(builder.toString());
+    }
 
     /*
      * Path format:
-     * hdfsbasedir/appname/2013-11-01/14/08/machine01@appname_2013-11-01.14.08.gz.tmp
-     * hdfsbasedir/appname/2013-11-01/14/08/machine02@appname_2013-11-01.14.08.gz.tmp
+     * hdfsbasedir/topic/2013-11-01/14/08/machine01@appname_2013-11-01.14.08.gz.tmp
+     * hdfsbasedir/topic/2013-11-01/14/08/machine02@appname_2013-11-01.14.08.gz.tmp
      */
     public static Path[] getRollHdfsPath (RollIdent ident, String source) {
         return getRollHdfsPathByTs(ident, ident.ts, source, false);
     }
-
+    
     public static Path[] getRollHdfsPathByTs (RollIdent ident, long checkTs, String source, boolean hidden) {
         String format  = Util.getFormatFromPeriod(ident.period);
         Date roll = new Date(checkTs);

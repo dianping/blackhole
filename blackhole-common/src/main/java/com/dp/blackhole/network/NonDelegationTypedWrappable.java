@@ -13,17 +13,17 @@ public abstract class NonDelegationTypedWrappable implements TypedWrappable {
 
     @Override
     public final boolean complete() {
-        throw new UnsupportedOperationException("not support in DelegationTypedWrappabe classes");
+        throw new UnsupportedOperationException("not support in NonDelegationTypedWrappabe classes");
     }
     
     @Override
     public final int read(ScatteringByteChannel channel) throws IOException {
-        throw new UnsupportedOperationException("not support in DelegationTypedWrappabe classes");
+        throw new UnsupportedOperationException("not support in NonDelegationTypedWrappabe classes");
     }
 
     @Override
     public final int write(GatheringByteChannel channel) throws IOException {
-        throw new UnsupportedOperationException("not support in DelegationTypedWrappabe classes");
+        throw new UnsupportedOperationException("not support in NonDelegationTypedWrappabe classes");
     }
 
 }

@@ -9,6 +9,7 @@ import com.dp.blackhole.network.TypedFactory;
 public class DataMessageTypeFactory implements TypedFactory {
     public static final Log LOG = LogFactory.getLog(DataMessageTypeFactory.class);
     
+    public static final int UndefinedRequest = -1;
     public static final int VersionRequest = 0;
     public static final int ProduceRequest = 1;
     public static final int FetchRequest = 2;
@@ -59,6 +60,7 @@ public class DataMessageTypeFactory implements TypedFactory {
             ret = new HaltRequest();
             break;
         default:
+            ret = new UndefinedRequest();
             LOG.error("unknown Message Type: " + type);
         }
         return ret;

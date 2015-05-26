@@ -64,6 +64,7 @@ public class TransferWrap implements Typed, IOCompletable {
                 written += GenUtil.retryWrite(channel, content);
                 if (!content.hasRemaining()) {
                     complete = true;
+                    content = null;
                 }
             }
         }
@@ -111,6 +112,7 @@ public class TransferWrap implements Typed, IOCompletable {
                     content.flip();
                     wrapped.read(content);
                     complete = true;
+                    content = null;
                 }
             }
         }
