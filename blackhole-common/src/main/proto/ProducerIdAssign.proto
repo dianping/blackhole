@@ -1,0 +1,12 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "ProducerIdAssignPB";
+
+import "CommonConfRes.proto";
+
+message ProducerIdAssign{
+    required string topic = 1;
+    required string producer_id = 2;
+    optional CommonConfRes conf_res = 3;
+}

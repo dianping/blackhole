@@ -69,8 +69,12 @@ public class Util {
         return remoteAddr.toString();
     }
     
-    public static String getLocalHost() throws UnknownHostException {
-      return InetAddress.getLocalHost().getHostName();
+    public static String getLocalHost() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     public static String getLocalHostIP() throws UnknownHostException, SocketException {
@@ -619,9 +623,13 @@ public class Util {
         }
     }
     
-    public static String getAgentHostFromSource(String source) {
+    public static String getHostFromSource(String source) {
         String[] splits = source.split("#");
         return splits[0];
+    }
+    
+    public static String getProducerIdFromPartitionId(String partitionId) {
+        return getHostFromSource(partitionId);
     }
     
     /**

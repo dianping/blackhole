@@ -9,9 +9,8 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.dp.blackhole.agent.TopicMeta;
 import com.dp.blackhole.agent.LogReader;
-import com.dp.blackhole.agent.TopicMeta.TopicId;
+import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.agent.persist.LocalRecorder;
 import com.dp.blackhole.agent.persist.Record;
 
@@ -24,7 +23,7 @@ public class TestLogReader2 {
     @Test
     public void testRestoreMissingRotationRecords() {
         TopicId topicId = new TopicId(MAGIC, null);
-        TopicMeta meta = new TopicMeta(topicId, SimAgent.TEST_ROLL_FILE, 3600, 3600, 1024, 1L, 5, 4096, 1024*1024);
+        AgentMeta meta = new AgentMeta(topicId, SimAgent.TEST_ROLL_FILE, 3600, 3600, 1024, 1L, 5, 4096, 1024*1024, 1);
         LogReader spyReader = spy(new LogReader(new SimAgent(), meta, "/tmp/test1"));
         LocalRecorder spyLocalRecorder = spy(new LocalRecorder("/tmp/test1", meta));
         try {

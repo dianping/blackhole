@@ -2,7 +2,6 @@ package com.dp.blackhole.broker;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -24,11 +23,8 @@ public class SimBroker extends Broker {
     public static final String expected = " 0f j2390jr092jf2f02jf02qjdf2-3j0 fiopwqejfjwffhg5_p    <end";
     private int port;
     static {
-        try {
-                HOSTNAME = Util.getLocalHost();
-            } catch (UnknownHostException e) {
-            }
-        }
+        HOSTNAME = Util.getLocalHost();
+    }
     public SimBroker(int port) throws IOException {
         super();
         this.port = port;

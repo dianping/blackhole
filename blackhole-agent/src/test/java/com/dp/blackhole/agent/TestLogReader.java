@@ -23,11 +23,10 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.agent.RemoteSender;
-import com.dp.blackhole.agent.TopicMeta;
 import com.dp.blackhole.agent.FileListener;
 import com.dp.blackhole.agent.LogReader;
-import com.dp.blackhole.agent.TopicMeta.TopicId;
 import com.dp.blackhole.broker.BrokerService;
 import com.dp.blackhole.broker.ByteBufferChannel;
 import com.dp.blackhole.broker.SimBroker;
@@ -89,7 +88,7 @@ public class TestLogReader {
         String localhost = Util.getLocalHost();
         when(Agent.getHost()).thenReturn(localhost);
         TopicId topicId = new TopicId(MAGIC, null);
-        TopicMeta topicMeta = new TopicMeta(topicId, SimAgent.TEST_ROLL_FILE, 3600, 3600, 1024, 1L, 5, 4096, 1024*1024);
+        AgentMeta topicMeta = new AgentMeta(topicId, SimAgent.TEST_ROLL_FILE, 3600, 3600, 1024, 1L, 5, 4096, 1024*1024, 1);
         SimAgent agent = new SimAgent();
         FileListener listener;
         try {

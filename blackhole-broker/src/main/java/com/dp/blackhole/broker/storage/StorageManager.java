@@ -85,7 +85,7 @@ public class StorageManager {
             storage.putIfAbsent(topic, newMap);
             map = storage.get(topic);
         }
-           
+
         // add new partition if not exist
         Partition partition = map.get(partitionId);
         if (partition == null) {
@@ -94,6 +94,7 @@ public class StorageManager {
             }
             Partition newPartition = new Partition(basedir, topic, partitionId, splitThreshold, flushThreshold);
             map.putIfAbsent(partitionId, newPartition);
+            //use old partition if it has been put in anther thread
             partition = map.get(partitionId);
         }
         return partition;

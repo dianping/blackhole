@@ -15,7 +15,7 @@ public class TopicConfig {
     private int rotatePeriod;
     private int rollPeriod;
     private int maxLineSize = DEFAULT_MAX_LINE_SIZE;
-    private boolean isPersist = true;
+    private boolean persistent = true;
     private List<String> hosts;
     private Map<String, Set<String>> hostsInstances;
     private long readInterval = DEFAULT_READ_INTERVAL;
@@ -24,6 +24,7 @@ public class TopicConfig {
     private int minMsgSent = DEFAULT_MIN_MSG_SENT;
     private int msgBufSize = DEFAULT_MSG_BUF_SIZE;
     private int bandwidthPerSec = 0;
+    private int partitionFactor = 1;
     
     public TopicConfig(String topic) {
         this.topic = topic;
@@ -64,11 +65,11 @@ public class TopicConfig {
     public void setMaxLineSize(int maxLineSize) {
         this.maxLineSize = maxLineSize;
     }
-    public boolean isPersist() {
-        return isPersist;
+    public boolean isPersistent() {
+        return persistent;
     }
-    public void setPersist(boolean isPersist) {
-        this.isPersist = isPersist;
+    public void setPersistent(boolean persistent) {
+        this.persistent = persistent;
     }
     public List<String> getHosts() {
         return hosts;
@@ -124,6 +125,12 @@ public class TopicConfig {
     }
     public void setBandwidthPerSec(int bandwidthPerSec) {
         this.bandwidthPerSec = bandwidthPerSec;
+    }
+    public int getPartitionFactor() {
+        return partitionFactor;
+    }
+    public void setPartitionFactor(int partitionFactor) {
+        this.partitionFactor = partitionFactor;
     }
     public void addIdsByHosts(Map<String, Set<String>> hostIds) {
         if (getInstances() == null) {

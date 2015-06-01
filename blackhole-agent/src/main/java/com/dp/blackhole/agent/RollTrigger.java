@@ -13,10 +13,10 @@ import com.dp.blackhole.common.Util;
 public class RollTrigger {
     private static final Log LOG = LogFactory.getLog(RollTrigger.class);
     private ScheduledExecutorService service ;
-    private TopicMeta topicMeta;
+    private AgentMeta topicMeta;
     private LogFSM logFSM;
 
-    public RollTrigger(TopicMeta topicMeta, LogFSM logFSM) {
+    public RollTrigger(AgentMeta topicMeta, LogFSM logFSM) {
         this.topicMeta = topicMeta;
         this.logFSM = logFSM;
         this.service = Executors

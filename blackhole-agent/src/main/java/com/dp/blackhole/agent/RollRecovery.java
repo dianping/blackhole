@@ -24,7 +24,7 @@ public class RollRecovery implements Runnable{
     private static final int DEFAULT_BUFSIZE = 8192;
     private String brokerServer;
     private int port;
-    private TopicMeta topicMeta;
+    private AgentMeta topicMeta;
     private final long rollTimestamp;
     private Socket socket;
     private byte[] inbuf;
@@ -35,7 +35,7 @@ public class RollRecovery implements Runnable{
     private TransferThrottler throttler;
 
     public RollRecovery(Agent node, String brokerServer, int port,
-            TopicMeta topicMeta, final long rollTimestamp, boolean isFinal,
+            AgentMeta topicMeta, final long rollTimestamp, boolean isFinal,
             boolean isPersist, IRecoder state) {
         this.node = node;
         this.brokerServer = brokerServer;

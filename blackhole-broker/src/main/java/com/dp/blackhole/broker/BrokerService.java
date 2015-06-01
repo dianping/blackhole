@@ -47,6 +47,7 @@ public class BrokerService extends Thread {
     private Map<DelegationIOConnection, ClientDesc> clients;
     int servicePort;
     int numHandler;
+    String localhost;
     
     public static void reportPartitionInfo(List<ReportEntry> entrylist) {
         Broker.getSupervisor().reportPartitionInfo(entrylist);
@@ -62,6 +63,7 @@ public class BrokerService extends Thread {
     }
     
     public BrokerService(Properties prop) throws IOException {
+        localhost = Util.getLocalHost();
         String storagedir = prop.getProperty("broker.storage.dir");
         int splitThreshold = Integer.parseInt(prop.getProperty("broker.storage.splitThreshold", "536870912"));
         int flushThreshold = Integer.parseInt(prop.getProperty("broker.storage.flushThreshold", "4194304"));
@@ -97,7 +99,18 @@ public class BrokerService extends Thread {
             LOG.info("can't find topic/partition with " + request + " from " + from +" ,close connection");
             server.closeConnection(from);
         }
-        
+
+        public void handleRegisterRequest(RegisterRequest request, DelegationIOConnection from) {
+            clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT, request.partitionId));
+            try {
+                manager.getPartition(request.topic, request.partitionId, true);
+            } catch (IOException e) {
+                LOG.error("Got an IOE", e);
+            }
+            Message msg = PBwrap.wrapReadyStream(request.topic, request.partitionId, request.period, localhost, Util.getTS());
+            Broker.getSupervisor().send(msg);
+        }
+
         public void handleProduceRequest(ProduceRequest request,
                 DelegationIOConnection from) {
             try {
@@ -188,17 +201,6 @@ public class BrokerService extends Thread {
             } catch (IOException e) {
                 LOG.error("Got an IOE", e);
             }
-        }
-        
-        public void handleRegisterRequest(RegisterRequest request, DelegationIOConnection from) {
-            clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT, request.source));
-            try {
-                manager.getPartition(request.topic, request.source, true);
-            } catch (IOException e) {
-                LOG.error("Got an IOE", e);
-            }
-            Message msg = PBwrap.wrapReadyStream(request.topic, request.source, request.period, request.broker, Util.getTS());
-            Broker.getSupervisor().send(msg);
         }
         
         public void handleLastRotateRequest(HaltRequest request, DelegationIOConnection from) {

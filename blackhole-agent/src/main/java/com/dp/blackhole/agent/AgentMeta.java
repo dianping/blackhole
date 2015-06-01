@@ -3,37 +3,31 @@ package com.dp.blackhole.agent;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.dp.blackhole.common.TopicCommonMeta;
 import com.dp.blackhole.common.Util;
 
-public class TopicMeta implements Serializable {
+public class AgentMeta extends TopicCommonMeta implements Serializable {
     private static final long serialVersionUID = -1189314942488288669L;
     private final TopicId topicId;
     private final String source;
     private final String tailFile;
     private final long createTime;
     private final long rotatePeriod;
-    private final int maxLineSize;
     private AtomicBoolean dying;
     private final long readInterval;
-    private int minMsgSent;
-    private int msgBufSize;
-    private long rollPeriod;
     private int bandwidthPerSec;
     
-    public TopicMeta(TopicId topicId, String tailFile, long rotatePeriod,
+    public AgentMeta(TopicId topicId, String tailFile, long rotatePeriod,
             long rollPeriod, int maxLineSize, long readInterval,
-            int minMsgSent, int msgBufSize, int bandwidthPerSec) {
+            int minMsgSent, int msgBufSize, int bandwidthPerSec, int partitionFactor) {
+        super(rollPeriod, maxLineSize, minMsgSent, msgBufSize, partitionFactor);
         this.topicId = topicId;
-        this.source = Util.getSource(Agent.getHost(), topicId.getInstanceId());
+        this.source = Util.getSource(Util.getLocalHost(), topicId.getInstanceId());
         this.tailFile = tailFile;
         this.rotatePeriod = rotatePeriod;
-        this.rollPeriod = rollPeriod;
         this.createTime = System.currentTimeMillis();
-        this.maxLineSize = maxLineSize;
         this.dying = new AtomicBoolean(false);
         this.readInterval = readInterval;
-        this.minMsgSent = minMsgSent;
-        this.msgBufSize = msgBufSize;
         this.bandwidthPerSec = bandwidthPerSec;
     }
 
@@ -53,24 +47,12 @@ public class TopicMeta implements Serializable {
         return rotatePeriod;
     }
 
-    public long getRollPeriod() {
-        return rollPeriod;
-    }
-
-    public void setRollPeriod(long rollPeriod) {
-        this.rollPeriod = rollPeriod;
-    }
-
     public String getTailFile() {
         return tailFile;
     }
 
     public long getCreateTime() {
         return createTime;
-    }
-
-    public int getMaxLineSize() {
-        return maxLineSize;
     }
 
     public boolean isDying() {
@@ -83,22 +65,6 @@ public class TopicMeta implements Serializable {
 
     public long getReadInterval() {
         return readInterval;
-    }
-
-    public int getMinMsgSent() {
-        return minMsgSent;
-    }
-
-    public void setMinMsgSent(int minMsgSent) {
-        this.minMsgSent = minMsgSent;
-    }
-
-    public int getMsgBufSize() {
-        return msgBufSize;
-    }
-
-    public void setMsgBufSize(int msgBufSize) {
-        this.msgBufSize = msgBufSize;
     }
 
     public int getBandwidthPerSec() {
@@ -126,7 +92,7 @@ public class TopicMeta implements Serializable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        TopicMeta other = (TopicMeta) obj;
+        AgentMeta other = (AgentMeta) obj;
         if (topicId == null) {
             if (other.topicId != null)
                 return false;
@@ -146,10 +112,11 @@ public class TopicMeta implements Serializable {
     public String toString() {
         return "TopicMeta [topicId=" + topicId + ", tailFile=" + tailFile
                 + ", createTime=" + createTime + ", rotatePeriod="
-                + rotatePeriod + ", rollPeriod=" + rollPeriod
-                + ", maxLineSize=" + maxLineSize + ", dying=" + dying
+                + rotatePeriod + ", rollPeriod=" + super.getRollPeriod()
+                + ", maxLineSize=" + super.getMaxLineSize() + ", dying=" + dying
                 + ", readInterval=" + readInterval + ", minMsgSent="
-                + minMsgSent + ", msgBufSize=" + msgBufSize + "]";
+                + super.getMinMsgSent() + ", msgBufSize=" + super.getMsgBufSize()
+                + ", partitionFactor" + super.getPartitionFactor() + "]";
     }
 
     public static class TopicId implements Serializable {

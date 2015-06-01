@@ -11,6 +11,7 @@ public class ConnectionDesc {
     public static final int AGENT = 1;
     public static final int BROKER = 2;
     public static final int CONSUMER = 3;
+    public static final int PRODUCER = 4;
     
     private int type;
     private AtomicLong lastHeartBeat;
@@ -65,6 +66,9 @@ public class ConnectionDesc {
             break;
         case CONSUMER:
             typeName = "CONSUMER";
+            break;
+        case PRODUCER:
+            typeName = "PRODUCER";
             break;
         default:
             typeName = "UNKNOW";

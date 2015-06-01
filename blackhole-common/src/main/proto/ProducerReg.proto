@@ -1,0 +1,9 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "ProducerRegPB";
+
+message ProducerReg{
+    required string topic = 1;
+    required string producer_id = 2;
+}

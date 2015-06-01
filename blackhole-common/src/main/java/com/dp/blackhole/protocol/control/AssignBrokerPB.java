@@ -65,6 +65,21 @@ public final class AssignBrokerPB {
      */
     com.google.protobuf.ByteString
         getInstanceIdBytes();
+
+    // optional string partition_id = 5;
+    /**
+     * <code>optional string partition_id = 5;</code>
+     */
+    boolean hasPartitionId();
+    /**
+     * <code>optional string partition_id = 5;</code>
+     */
+    java.lang.String getPartitionId();
+    /**
+     * <code>optional string partition_id = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getPartitionIdBytes();
   }
   /**
    * Protobuf type {@code blackhole.AssignBroker}
@@ -135,6 +150,11 @@ public final class AssignBrokerPB {
             case 34: {
               bitField0_ |= 0x00000008;
               instanceId_ = input.readBytes();
+              break;
+            }
+            case 42: {
+              bitField0_ |= 0x00000010;
+              partitionId_ = input.readBytes();
               break;
             }
           }
@@ -322,11 +342,55 @@ public final class AssignBrokerPB {
       }
     }
 
+    // optional string partition_id = 5;
+    public static final int PARTITION_ID_FIELD_NUMBER = 5;
+    private java.lang.Object partitionId_;
+    /**
+     * <code>optional string partition_id = 5;</code>
+     */
+    public boolean hasPartitionId() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional string partition_id = 5;</code>
+     */
+    public java.lang.String getPartitionId() {
+      java.lang.Object ref = partitionId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          partitionId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string partition_id = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getPartitionIdBytes() {
+      java.lang.Object ref = partitionId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        partitionId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private void initFields() {
       topic_ = "";
       brokerServer_ = "";
       brokerPort_ = 0;
       instanceId_ = "";
+      partitionId_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -364,6 +428,9 @@ public final class AssignBrokerPB {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeBytes(4, getInstanceIdBytes());
       }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeBytes(5, getPartitionIdBytes());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -388,6 +455,10 @@ public final class AssignBrokerPB {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(4, getInstanceIdBytes());
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(5, getPartitionIdBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -513,6 +584,8 @@ public final class AssignBrokerPB {
         bitField0_ = (bitField0_ & ~0x00000004);
         instanceId_ = "";
         bitField0_ = (bitField0_ & ~0x00000008);
+        partitionId_ = "";
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -557,6 +630,10 @@ public final class AssignBrokerPB {
           to_bitField0_ |= 0x00000008;
         }
         result.instanceId_ = instanceId_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.partitionId_ = partitionId_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -589,6 +666,11 @@ public final class AssignBrokerPB {
         if (other.hasInstanceId()) {
           bitField0_ |= 0x00000008;
           instanceId_ = other.instanceId_;
+          onChanged();
+        }
+        if (other.hasPartitionId()) {
+          bitField0_ |= 0x00000010;
+          partitionId_ = other.partitionId_;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -885,6 +967,80 @@ public final class AssignBrokerPB {
         return this;
       }
 
+      // optional string partition_id = 5;
+      private java.lang.Object partitionId_ = "";
+      /**
+       * <code>optional string partition_id = 5;</code>
+       */
+      public boolean hasPartitionId() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional string partition_id = 5;</code>
+       */
+      public java.lang.String getPartitionId() {
+        java.lang.Object ref = partitionId_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          partitionId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string partition_id = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getPartitionIdBytes() {
+        java.lang.Object ref = partitionId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          partitionId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string partition_id = 5;</code>
+       */
+      public Builder setPartitionId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000010;
+        partitionId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string partition_id = 5;</code>
+       */
+      public Builder clearPartitionId() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        partitionId_ = getDefaultInstance().getPartitionId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string partition_id = 5;</code>
+       */
+      public Builder setPartitionIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000010;
+        partitionId_ = value;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.AssignBroker)
     }
 
@@ -910,11 +1066,12 @@ public final class AssignBrokerPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022AssignBroker.proto\022\tblackhole\"^\n\014Assig" +
+      "\n\022AssignBroker.proto\022\tblackhole\"t\n\014Assig" +
       "nBroker\022\r\n\005topic\030\001 \002(\t\022\025\n\rbroker_server\030" +
       "\002 \002(\t\022\023\n\013broker_port\030\003 \002(\005\022\023\n\013instance_i" +
-      "d\030\004 \001(\tB3\n!com.dp.blackhole.protocol.con" +
-      "trolB\016AssignBrokerPB"
+      "d\030\004 \001(\t\022\024\n\014partition_id\030\005 \001(\tB3\n!com.dp." +
+      "blackhole.protocol.controlB\016AssignBroker" +
+      "PB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -926,7 +1083,7 @@ public final class AssignBrokerPB {
           internal_static_blackhole_AssignBroker_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_AssignBroker_descriptor,
-              new java.lang.String[] { "Topic", "BrokerServer", "BrokerPort", "InstanceId", });
+              new java.lang.String[] { "Topic", "BrokerServer", "BrokerPort", "InstanceId", "PartitionId", });
           return null;
         }
       };

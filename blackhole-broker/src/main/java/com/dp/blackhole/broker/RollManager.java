@@ -103,7 +103,7 @@ public class RollManager {
         ident.period = rollID.getPeriod();
         ident.ts = rollID.getRollTs();
         ident.isFinal = rollID.getIsFinal();
-        ident.isPersist = rollID.getIsPersist();
+        ident.persistent = rollID.getPersistent();
         
         RollPartition roll = rolls.get(ident);
         
@@ -242,7 +242,7 @@ public class RollManager {
     public void reportRecovery(RollIdent ident, boolean recoverySuccess) {
         Message message;
         if (recoverySuccess) {
-            message = PBwrap.wrapRecoverySuccess(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal, ident.isPersist);
+            message = PBwrap.wrapRecoverySuccess(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal, ident.persistent);
         } else {
             message = PBwrap.wrapRecoveryFail(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal);
         }
@@ -253,7 +253,7 @@ public class RollManager {
         rolls.remove(ident);
         
         if (uploadSuccess) {
-            Message message = PBwrap.wrapUploadSuccess(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal, ident.isPersist, compression);
+            Message message = PBwrap.wrapUploadSuccess(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal, ident.persistent, compression);
             Broker.getSupervisor().send(message);
         } else {
             Message message = PBwrap.wrapUploadFail(ident.topic, ident.source, ident.period, ident.ts, ident.isFinal, compression);
@@ -324,7 +324,7 @@ public class RollManager {
                     roll.period = head.period;
                     roll.ts = head.ts;
                     roll.isFinal = head.isFinal;
-                    roll.isPersist = head.isPersist;
+                    roll.persistent = head.isPersist;
                     
                     if (head.ignore) {
                         LOG.info("ignore the roll " + roll);

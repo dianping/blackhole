@@ -12,6 +12,7 @@ import "RollID.proto";
 import "Failure.proto";
 import "NoAvailableNode.proto";
 import "Retire.proto";
+import "ConfReq.proto";
 import "ConfRes.proto";
 import "DumpReply.proto";
 import "RemoveConf.proto";
@@ -27,6 +28,11 @@ import "RollClean.proto";
 import "DumpConsumerGroup.proto";
 import "SnapshotOp.proto";
 import "PauseStream.proto";
+import "ProducerReg.proto";
+import "ProducerIdAssign.proto";
+import "NoavailableConf.proto";
+import "AssignPartition.proto";
+import "PartitionRequireBroker.proto";
 
 message Message {
     enum MessageType {
@@ -71,6 +77,10 @@ message Message {
         LIST_CONSUMER_GROUP = 39;
         SNAPSHOT_OP = 40;
         PAUSE_STREAM = 41;
+        PRODUCER_REG = 42;
+        PRODUCER_ID_ASSIGN = 43;
+        ASSIGN_PARTITION = 44;
+        PARTITION_REQUIRE_BROKER = 45;
     }
 
     required MessageType type = 1;
@@ -99,4 +109,10 @@ message Message {
     optional DumpConsumerGroup dumpConsumerGroup = 24;
     optional SnapshotOp snapshotOp = 25;
     optional PauseStream pauseStream = 26;
+    optional ConfReq confReq = 27;
+    optional NoavailableConf noavailableConf = 28;
+    optional ProducerReg producerReg = 29;
+    optional ProducerIdAssign producerIdAssign = 30;
+    optional AssignPartition assignPartition = 31;
+    optional PartitionRequireBroker partitionRequireBroker = 32;
 }

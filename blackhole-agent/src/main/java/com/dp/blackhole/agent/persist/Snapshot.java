@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.dp.blackhole.agent.TopicMeta.TopicId;
+import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.common.Util;
 
 public class Snapshot implements Serializable {

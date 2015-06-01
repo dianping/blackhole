@@ -190,6 +190,10 @@ public final class FailurePB {
        * <code>BROKER_NODE = 2;</code>
        */
       BROKER_NODE(1, 2),
+      /**
+       * <code>PRODUCER = 3;</code>
+       */
+      PRODUCER(2, 3),
       ;
 
       /**
@@ -200,6 +204,10 @@ public final class FailurePB {
        * <code>BROKER_NODE = 2;</code>
        */
       public static final int BROKER_NODE_VALUE = 2;
+      /**
+       * <code>PRODUCER = 3;</code>
+       */
+      public static final int PRODUCER_VALUE = 3;
 
 
       public final int getNumber() { return value; }
@@ -208,6 +216,7 @@ public final class FailurePB {
         switch (value) {
           case 1: return APP_NODE;
           case 2: return BROKER_NODE;
+          case 3: return PRODUCER;
           default: return null;
         }
       }
@@ -934,12 +943,12 @@ public final class FailurePB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rFailure.proto\022\tblackhole\"\216\001\n\007Failure\022\r" +
+      "\n\rFailure.proto\022\tblackhole\"\234\001\n\007Failure\022\r" +
       "\n\005topic\030\001 \002(\t\022)\n\004type\030\002 \002(\0162\033.blackhole." +
       "Failure.NodeType\022\016\n\006source\030\003 \002(\t\022\016\n\006fail" +
-      "Ts\030\004 \002(\003\")\n\010NodeType\022\014\n\010APP_NODE\020\001\022\017\n\013BR" +
-      "OKER_NODE\020\002B.\n!com.dp.blackhole.protocol" +
-      ".controlB\tFailurePB"
+      "Ts\030\004 \002(\003\"7\n\010NodeType\022\014\n\010APP_NODE\020\001\022\017\n\013BR" +
+      "OKER_NODE\020\002\022\014\n\010PRODUCER\020\003B.\n!com.dp.blac" +
+      "khole.protocol.controlB\tFailurePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

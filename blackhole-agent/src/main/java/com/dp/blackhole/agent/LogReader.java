@@ -21,13 +21,13 @@ public class LogReader implements Runnable {
     private static final Log LOG = LogFactory.getLog(LogReader.class);
     public static final long END_OFFSET_OF_FILE = -1L;
     public static final long BEGIN_OFFSET_OF_FILE = 0L;
-    private enum ReaderState {NEW, UNREGISTERED, REGISTERED, SENDER_ASSIGNED, STOPPED}
+    private enum ReaderState {NEW, UNASSIGNED, ASSIGNED, STOPPED}
     private static final int IN_BUF = 1024 * 8;
     private static final int SYS_MAX_LINE_SIZE = 1024 * 512;
     private final byte inbuf[] = new byte[IN_BUF];
     
     private Agent agent;
-    private TopicMeta meta;
+    private AgentMeta meta;
     private RemoteSender sender;
     private LogFSM logFSM;
     private AtomicReference<ReaderState> currentReaderState;
@@ -41,7 +41,7 @@ public class LogReader implements Runnable {
     private RollTrigger rollTrigger;
     private ZombieSocketChecker zombieSocketChecker;
     
-    public LogReader(Agent agent, TopicMeta meta, String snapshotPersistDir) {
+    public LogReader(Agent agent, AgentMeta meta, String snapshotPersistDir) {
         this.agent = agent;
         this.meta = meta;
         this.currentReaderState = new AtomicReference<ReaderState>(ReaderState.NEW);
@@ -90,12 +90,12 @@ public class LogReader implements Runnable {
     
     public void assignSender(RemoteSender newSender) {
         setSender(newSender);
-        ReaderState oldReaderState = currentReaderState.getAndSet(ReaderState.SENDER_ASSIGNED);
+        ReaderState oldReaderState = currentReaderState.getAndSet(ReaderState.ASSIGNED);
         LOG.debug("Assign sender: " + oldReaderState.name() + " -> SENDER_ASSIGNED");
     }
     
     private void reassignSender() {
-        currentReaderState.compareAndSet(ReaderState.SENDER_ASSIGNED, ReaderState.REGISTERED);
+        currentReaderState.compareAndSet(ReaderState.ASSIGNED, ReaderState.UNASSIGNED);
         int reassignDelay = sender.getReassignDelaySeconds();
         sender.close();
         agent.reportRemoteSenderFailure(meta.getTopicId(), meta.getSource(), Util.getTS(), reassignDelay);
@@ -135,7 +135,7 @@ public class LogReader implements Runnable {
             }
             rollTrigger = new RollTrigger(meta, logFSM);
             rollTrigger.trigger();
-            currentReaderState.compareAndSet(ReaderState.NEW, ReaderState.REGISTERED);
+            currentReaderState.compareAndSet(ReaderState.NEW, ReaderState.UNASSIGNED);
         }
         
         // main loop
@@ -215,7 +215,7 @@ public class LogReader implements Runnable {
     
     public void process() {
         try {
-            if (currentReaderState.get() == ReaderState.SENDER_ASSIGNED) {
+            if (currentReaderState.get() == ReaderState.ASSIGNED) {
                 readLines(reader);
             }
         } catch (SocketException e) {
@@ -252,7 +252,7 @@ public class LogReader implements Runnable {
             getRecoder().record(Record.ROLL, rollTs, rollEndOffset);
         }
         try {
-            if (currentReaderState.get() == ReaderState.SENDER_ASSIGNED) {
+            if (currentReaderState.get() == ReaderState.ASSIGNED) {
                 sender.sendMessage();   //clear buffer
                 if (meta.isDying()) {
                     sender.sendHaltRequest();
@@ -297,7 +297,7 @@ public class LogReader implements Runnable {
                 getRecoder().record(Record.ROTATE, rollTs, previousRotateEndOffset);
             }
             
-            if (currentReaderState.get() == ReaderState.SENDER_ASSIGNED) {
+            if (currentReaderState.get() == ReaderState.ASSIGNED) {
                 //send left message force
                 sender.sendMessage();
                 //send roll request to broker
@@ -389,7 +389,7 @@ public class LogReader implements Runnable {
         @Override
         public void run() {
             while (running) {
-                if (currentReaderState.get() == ReaderState.SENDER_ASSIGNED) {
+                if (currentReaderState.get() == ReaderState.ASSIGNED) {
                     try {
                         if (sender.getMessageBuffer().position() == 0) {
                             sender.sendNullRequest();

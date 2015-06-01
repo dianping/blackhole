@@ -7,39 +7,35 @@ import com.dp.blackhole.network.NonDelegationTypedWrappable;
 
 public class RegisterRequest extends NonDelegationTypedWrappable {
     public String topic;
-    public String source;
+    public String partitionId;
     public long period;
-    public String broker;
     
     public RegisterRequest() {
     }
     
-    public RegisterRequest(String topic, String source, long period, String broker) {
+    public RegisterRequest(String topic, String partitionId, long period) {
         this.topic = topic;
-        this.source = source;
+        this.partitionId = partitionId;
         this.period = period;
-        this.broker = broker;
     }
     
     @Override
     public int getSize() {
-        return GenUtil.getStringSize(topic) + GenUtil.getStringSize(source) + Long.SIZE/8 + GenUtil.getStringSize(broker);
+        return GenUtil.getStringSize(topic) + GenUtil.getStringSize(partitionId) + Long.SIZE/8;
     }
 
     @Override
     public void read(ByteBuffer buffer) {
         topic = GenUtil.readString(buffer);
-        source = GenUtil.readString(buffer);
+        partitionId = GenUtil.readString(buffer);
         period = buffer.getLong();
-        broker = GenUtil.readString(buffer);
     }
 
     @Override
     public void write(ByteBuffer buffer) {
         GenUtil.writeString(topic, buffer);
-        GenUtil.writeString(source, buffer);
+        GenUtil.writeString(partitionId, buffer);
         buffer.putLong(period);
-        GenUtil.writeString(broker, buffer);
     }
 
     @Override

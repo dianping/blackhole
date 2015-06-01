@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Properties;
 
@@ -13,7 +12,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.dp.blackhole.agent.TopicMeta.TopicId;
+import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.broker.BrokerService;
 import com.dp.blackhole.broker.SimBroker;
 import com.dp.blackhole.common.PBwrap;
@@ -25,14 +24,10 @@ import com.dp.blackhole.protocol.control.MessagePB.Message;
 
 public class TestAgent {
     private TopicId topicId;
-    private TopicMeta topicMeta;
+    private AgentMeta topicMeta;
     private static String MAGIC;
     static {
-        try {
-            MAGIC = Util.getLocalHost().substring(0, 2);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        MAGIC = Util.getLocalHost().substring(0, 2);
     }
     private static final String tmpDir = "/tmp/" + MAGIC + "/base";
     
@@ -64,13 +59,13 @@ public class TestAgent {
         ConfigKeeper.configMap.get(MAGIC).put(ParamsKey.TopicConf.WATCH_FILE, tailFile.getAbsolutePath());
         topicId = new TopicId(MAGIC, null);
         topicMeta = agent.fillUpAppLogsFromConfig(topicId);
-        Map<TopicMeta, LogReader> map = Agent.getTopicReaders();
+        Map<AgentMeta, LogReader> map = Agent.getTopicReaders();
         map.put(topicMeta, new LogReader(agent, topicMeta, "/tmp/" + MAGIC));
     }
 
     @After
     public void tearDown() throws Exception {
-        Map<TopicMeta, LogReader> map = Agent.getTopicReaders();
+        Map<AgentMeta, LogReader> map = Agent.getTopicReaders();
         map.clear();
         SimAgent.deleteTmpFile(MAGIC);
     }
@@ -136,12 +131,12 @@ public class TestAgent {
         assertFalse(agent.processor.processInternal(unknow));
     }
 
-    private Message getMessageOfAssignBroker(String appName) {
-        return PBwrap.wrapAssignBroker(appName, SimAgent.HOSTNAME, 40008, null);
+    private Message getMessageOfAssignBroker(String topic) {
+        return PBwrap.wrapAssignBroker(PBwrap.assignBroker(topic, SimAgent.HOSTNAME, 40008, null, null));
     }
     
     private Message getMessageOfRecoveryRoll(String appName) {
-        return PBwrap.wrapRecoveryRoll(appName, SimAgent.HOSTNAME, SimAgent.COLPORT, SimAgent.rollTS, null, false, true);
+        return PBwrap.wrapRecoveryRoll(appName, SimAgent.HOSTNAME, SimAgent.COLPORT, SimAgent.rollTS, SimAgent.HOSTNAME, false, true);
     }
 
     private Message getUnknowMessage() {

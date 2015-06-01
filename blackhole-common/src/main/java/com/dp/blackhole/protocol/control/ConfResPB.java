@@ -191,32 +191,32 @@ public final class ConfResPB {
       com.google.protobuf.ByteString
           getTopicBytes();
 
-      // required string watch_file = 2;
+      // optional string watch_file = 2;
       /**
-       * <code>required string watch_file = 2;</code>
+       * <code>optional string watch_file = 2;</code>
        */
       boolean hasWatchFile();
       /**
-       * <code>required string watch_file = 2;</code>
+       * <code>optional string watch_file = 2;</code>
        */
       java.lang.String getWatchFile();
       /**
-       * <code>required string watch_file = 2;</code>
+       * <code>optional string watch_file = 2;</code>
        */
       com.google.protobuf.ByteString
           getWatchFileBytes();
 
-      // required string rotate_period = 3;
+      // optional string rotate_period = 3;
       /**
-       * <code>required string rotate_period = 3;</code>
+       * <code>optional string rotate_period = 3;</code>
        */
       boolean hasRotatePeriod();
       /**
-       * <code>required string rotate_period = 3;</code>
+       * <code>optional string rotate_period = 3;</code>
        */
       java.lang.String getRotatePeriod();
       /**
-       * <code>required string rotate_period = 3;</code>
+       * <code>optional string rotate_period = 3;</code>
        */
       com.google.protobuf.ByteString
           getRotatePeriodBytes();
@@ -310,6 +310,21 @@ public final class ConfResPB {
        */
       com.google.protobuf.ByteString
           getBandwidthPerSecBytes();
+
+      // optional string partitionFactor = 10 [default = "1"];
+      /**
+       * <code>optional string partitionFactor = 10 [default = "1"];</code>
+       */
+      boolean hasPartitionFactor();
+      /**
+       * <code>optional string partitionFactor = 10 [default = "1"];</code>
+       */
+      java.lang.String getPartitionFactor();
+      /**
+       * <code>optional string partitionFactor = 10 [default = "1"];</code>
+       */
+      com.google.protobuf.ByteString
+          getPartitionFactorBytes();
     }
     /**
      * Protobuf type {@code blackhole.ConfRes.AppConfRes}
@@ -407,6 +422,11 @@ public final class ConfResPB {
                 bandwidthPerSec_ = input.readBytes();
                 break;
               }
+              case 82: {
+                bitField0_ |= 0x00000200;
+                partitionFactor_ = input.readBytes();
+                break;
+              }
             }
           }
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -490,17 +510,17 @@ public final class ConfResPB {
         }
       }
 
-      // required string watch_file = 2;
+      // optional string watch_file = 2;
       public static final int WATCH_FILE_FIELD_NUMBER = 2;
       private java.lang.Object watchFile_;
       /**
-       * <code>required string watch_file = 2;</code>
+       * <code>optional string watch_file = 2;</code>
        */
       public boolean hasWatchFile() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required string watch_file = 2;</code>
+       * <code>optional string watch_file = 2;</code>
        */
       public java.lang.String getWatchFile() {
         java.lang.Object ref = watchFile_;
@@ -517,7 +537,7 @@ public final class ConfResPB {
         }
       }
       /**
-       * <code>required string watch_file = 2;</code>
+       * <code>optional string watch_file = 2;</code>
        */
       public com.google.protobuf.ByteString
           getWatchFileBytes() {
@@ -533,17 +553,17 @@ public final class ConfResPB {
         }
       }
 
-      // required string rotate_period = 3;
+      // optional string rotate_period = 3;
       public static final int ROTATE_PERIOD_FIELD_NUMBER = 3;
       private java.lang.Object rotatePeriod_;
       /**
-       * <code>required string rotate_period = 3;</code>
+       * <code>optional string rotate_period = 3;</code>
        */
       public boolean hasRotatePeriod() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>required string rotate_period = 3;</code>
+       * <code>optional string rotate_period = 3;</code>
        */
       public java.lang.String getRotatePeriod() {
         java.lang.Object ref = rotatePeriod_;
@@ -560,7 +580,7 @@ public final class ConfResPB {
         }
       }
       /**
-       * <code>required string rotate_period = 3;</code>
+       * <code>optional string rotate_period = 3;</code>
        */
       public com.google.protobuf.ByteString
           getRotatePeriodBytes() {
@@ -834,6 +854,49 @@ public final class ConfResPB {
         }
       }
 
+      // optional string partitionFactor = 10 [default = "1"];
+      public static final int PARTITIONFACTOR_FIELD_NUMBER = 10;
+      private java.lang.Object partitionFactor_;
+      /**
+       * <code>optional string partitionFactor = 10 [default = "1"];</code>
+       */
+      public boolean hasPartitionFactor() {
+        return ((bitField0_ & 0x00000200) == 0x00000200);
+      }
+      /**
+       * <code>optional string partitionFactor = 10 [default = "1"];</code>
+       */
+      public java.lang.String getPartitionFactor() {
+        java.lang.Object ref = partitionFactor_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            partitionFactor_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string partitionFactor = 10 [default = "1"];</code>
+       */
+      public com.google.protobuf.ByteString
+          getPartitionFactorBytes() {
+        java.lang.Object ref = partitionFactor_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          partitionFactor_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
       private void initFields() {
         topic_ = "";
         watchFile_ = "";
@@ -844,6 +907,7 @@ public final class ConfResPB {
         msgBufSize_ = "512000";
         rollPeriod_ = "";
         bandwidthPerSec_ = "0";
+        partitionFactor_ = "1";
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -851,14 +915,6 @@ public final class ConfResPB {
         if (isInitialized != -1) return isInitialized == 1;
 
         if (!hasTopic()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        if (!hasWatchFile()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        if (!hasRotatePeriod()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -895,6 +951,9 @@ public final class ConfResPB {
         }
         if (((bitField0_ & 0x00000100) == 0x00000100)) {
           output.writeBytes(9, getBandwidthPerSecBytes());
+        }
+        if (((bitField0_ & 0x00000200) == 0x00000200)) {
+          output.writeBytes(10, getPartitionFactorBytes());
         }
         getUnknownFields().writeTo(output);
       }
@@ -940,6 +999,10 @@ public final class ConfResPB {
         if (((bitField0_ & 0x00000100) == 0x00000100)) {
           size += com.google.protobuf.CodedOutputStream
             .computeBytesSize(9, getBandwidthPerSecBytes());
+        }
+        if (((bitField0_ & 0x00000200) == 0x00000200)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(10, getPartitionFactorBytes());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -1075,6 +1138,8 @@ public final class ConfResPB {
           bitField0_ = (bitField0_ & ~0x00000080);
           bandwidthPerSec_ = "0";
           bitField0_ = (bitField0_ & ~0x00000100);
+          partitionFactor_ = "1";
+          bitField0_ = (bitField0_ & ~0x00000200);
           return this;
         }
 
@@ -1139,6 +1204,10 @@ public final class ConfResPB {
             to_bitField0_ |= 0x00000100;
           }
           result.bandwidthPerSec_ = bandwidthPerSec_;
+          if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
+            to_bitField0_ |= 0x00000200;
+          }
+          result.partitionFactor_ = partitionFactor_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -1200,20 +1269,17 @@ public final class ConfResPB {
             bandwidthPerSec_ = other.bandwidthPerSec_;
             onChanged();
           }
+          if (other.hasPartitionFactor()) {
+            bitField0_ |= 0x00000200;
+            partitionFactor_ = other.partitionFactor_;
+            onChanged();
+          }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
         }
 
         public final boolean isInitialized() {
           if (!hasTopic()) {
-            
-            return false;
-          }
-          if (!hasWatchFile()) {
-            
-            return false;
-          }
-          if (!hasRotatePeriod()) {
             
             return false;
           }
@@ -1313,16 +1379,16 @@ public final class ConfResPB {
           return this;
         }
 
-        // required string watch_file = 2;
+        // optional string watch_file = 2;
         private java.lang.Object watchFile_ = "";
         /**
-         * <code>required string watch_file = 2;</code>
+         * <code>optional string watch_file = 2;</code>
          */
         public boolean hasWatchFile() {
           return ((bitField0_ & 0x00000002) == 0x00000002);
         }
         /**
-         * <code>required string watch_file = 2;</code>
+         * <code>optional string watch_file = 2;</code>
          */
         public java.lang.String getWatchFile() {
           java.lang.Object ref = watchFile_;
@@ -1336,7 +1402,7 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>required string watch_file = 2;</code>
+         * <code>optional string watch_file = 2;</code>
          */
         public com.google.protobuf.ByteString
             getWatchFileBytes() {
@@ -1352,7 +1418,7 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>required string watch_file = 2;</code>
+         * <code>optional string watch_file = 2;</code>
          */
         public Builder setWatchFile(
             java.lang.String value) {
@@ -1365,7 +1431,7 @@ public final class ConfResPB {
           return this;
         }
         /**
-         * <code>required string watch_file = 2;</code>
+         * <code>optional string watch_file = 2;</code>
          */
         public Builder clearWatchFile() {
           bitField0_ = (bitField0_ & ~0x00000002);
@@ -1374,7 +1440,7 @@ public final class ConfResPB {
           return this;
         }
         /**
-         * <code>required string watch_file = 2;</code>
+         * <code>optional string watch_file = 2;</code>
          */
         public Builder setWatchFileBytes(
             com.google.protobuf.ByteString value) {
@@ -1387,16 +1453,16 @@ public final class ConfResPB {
           return this;
         }
 
-        // required string rotate_period = 3;
+        // optional string rotate_period = 3;
         private java.lang.Object rotatePeriod_ = "";
         /**
-         * <code>required string rotate_period = 3;</code>
+         * <code>optional string rotate_period = 3;</code>
          */
         public boolean hasRotatePeriod() {
           return ((bitField0_ & 0x00000004) == 0x00000004);
         }
         /**
-         * <code>required string rotate_period = 3;</code>
+         * <code>optional string rotate_period = 3;</code>
          */
         public java.lang.String getRotatePeriod() {
           java.lang.Object ref = rotatePeriod_;
@@ -1410,7 +1476,7 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>required string rotate_period = 3;</code>
+         * <code>optional string rotate_period = 3;</code>
          */
         public com.google.protobuf.ByteString
             getRotatePeriodBytes() {
@@ -1426,7 +1492,7 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>required string rotate_period = 3;</code>
+         * <code>optional string rotate_period = 3;</code>
          */
         public Builder setRotatePeriod(
             java.lang.String value) {
@@ -1439,7 +1505,7 @@ public final class ConfResPB {
           return this;
         }
         /**
-         * <code>required string rotate_period = 3;</code>
+         * <code>optional string rotate_period = 3;</code>
          */
         public Builder clearRotatePeriod() {
           bitField0_ = (bitField0_ & ~0x00000004);
@@ -1448,7 +1514,7 @@ public final class ConfResPB {
           return this;
         }
         /**
-         * <code>required string rotate_period = 3;</code>
+         * <code>optional string rotate_period = 3;</code>
          */
         public Builder setRotatePeriodBytes(
             com.google.protobuf.ByteString value) {
@@ -1905,6 +1971,80 @@ public final class ConfResPB {
           return this;
         }
 
+        // optional string partitionFactor = 10 [default = "1"];
+        private java.lang.Object partitionFactor_ = "1";
+        /**
+         * <code>optional string partitionFactor = 10 [default = "1"];</code>
+         */
+        public boolean hasPartitionFactor() {
+          return ((bitField0_ & 0x00000200) == 0x00000200);
+        }
+        /**
+         * <code>optional string partitionFactor = 10 [default = "1"];</code>
+         */
+        public java.lang.String getPartitionFactor() {
+          java.lang.Object ref = partitionFactor_;
+          if (!(ref instanceof java.lang.String)) {
+            java.lang.String s = ((com.google.protobuf.ByteString) ref)
+                .toStringUtf8();
+            partitionFactor_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string partitionFactor = 10 [default = "1"];</code>
+         */
+        public com.google.protobuf.ByteString
+            getPartitionFactorBytes() {
+          java.lang.Object ref = partitionFactor_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            partitionFactor_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string partitionFactor = 10 [default = "1"];</code>
+         */
+        public Builder setPartitionFactor(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000200;
+          partitionFactor_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string partitionFactor = 10 [default = "1"];</code>
+         */
+        public Builder clearPartitionFactor() {
+          bitField0_ = (bitField0_ & ~0x00000200);
+          partitionFactor_ = getDefaultInstance().getPartitionFactor();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string partitionFactor = 10 [default = "1"];</code>
+         */
+        public Builder setPartitionFactorBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000200;
+          partitionFactor_ = value;
+          onChanged();
+          return this;
+        }
+
         // @@protoc_insertion_point(builder_scope:blackhole.ConfRes.AppConfRes)
       }
 
@@ -1949,17 +2089,17 @@ public final class ConfResPB {
       com.google.protobuf.ByteString
           getWatchFileBytes();
 
-      // required string rotate_period = 3;
+      // optional string rotate_period = 3;
       /**
-       * <code>required string rotate_period = 3;</code>
+       * <code>optional string rotate_period = 3;</code>
        */
       boolean hasRotatePeriod();
       /**
-       * <code>required string rotate_period = 3;</code>
+       * <code>optional string rotate_period = 3;</code>
        */
       java.lang.String getRotatePeriod();
       /**
-       * <code>required string rotate_period = 3;</code>
+       * <code>optional string rotate_period = 3;</code>
        */
       com.google.protobuf.ByteString
           getRotatePeriodBytes();
@@ -2073,6 +2213,21 @@ public final class ConfResPB {
        */
       com.google.protobuf.ByteString
           getBandwidthPerSecBytes();
+
+      // optional string partitionFactor = 11 [default = "1"];
+      /**
+       * <code>optional string partitionFactor = 11 [default = "1"];</code>
+       */
+      boolean hasPartitionFactor();
+      /**
+       * <code>optional string partitionFactor = 11 [default = "1"];</code>
+       */
+      java.lang.String getPartitionFactor();
+      /**
+       * <code>optional string partitionFactor = 11 [default = "1"];</code>
+       */
+      com.google.protobuf.ByteString
+          getPartitionFactorBytes();
     }
     /**
      * Protobuf type {@code blackhole.ConfRes.LxcConfRes}
@@ -2176,6 +2331,11 @@ public final class ConfResPB {
               case 82: {
                 bitField0_ |= 0x00000100;
                 bandwidthPerSec_ = input.readBytes();
+                break;
+              }
+              case 90: {
+                bitField0_ |= 0x00000200;
+                partitionFactor_ = input.readBytes();
                 break;
               }
             }
@@ -2307,17 +2467,17 @@ public final class ConfResPB {
         }
       }
 
-      // required string rotate_period = 3;
+      // optional string rotate_period = 3;
       public static final int ROTATE_PERIOD_FIELD_NUMBER = 3;
       private java.lang.Object rotatePeriod_;
       /**
-       * <code>required string rotate_period = 3;</code>
+       * <code>optional string rotate_period = 3;</code>
        */
       public boolean hasRotatePeriod() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>required string rotate_period = 3;</code>
+       * <code>optional string rotate_period = 3;</code>
        */
       public java.lang.String getRotatePeriod() {
         java.lang.Object ref = rotatePeriod_;
@@ -2334,7 +2494,7 @@ public final class ConfResPB {
         }
       }
       /**
-       * <code>required string rotate_period = 3;</code>
+       * <code>optional string rotate_period = 3;</code>
        */
       public com.google.protobuf.ByteString
           getRotatePeriodBytes() {
@@ -2638,6 +2798,49 @@ public final class ConfResPB {
         }
       }
 
+      // optional string partitionFactor = 11 [default = "1"];
+      public static final int PARTITIONFACTOR_FIELD_NUMBER = 11;
+      private java.lang.Object partitionFactor_;
+      /**
+       * <code>optional string partitionFactor = 11 [default = "1"];</code>
+       */
+      public boolean hasPartitionFactor() {
+        return ((bitField0_ & 0x00000200) == 0x00000200);
+      }
+      /**
+       * <code>optional string partitionFactor = 11 [default = "1"];</code>
+       */
+      public java.lang.String getPartitionFactor() {
+        java.lang.Object ref = partitionFactor_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            partitionFactor_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string partitionFactor = 11 [default = "1"];</code>
+       */
+      public com.google.protobuf.ByteString
+          getPartitionFactorBytes() {
+        java.lang.Object ref = partitionFactor_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          partitionFactor_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
       private void initFields() {
         topic_ = "";
         watchFile_ = "";
@@ -2649,6 +2852,7 @@ public final class ConfResPB {
         msgBufSize_ = "512000";
         rollPeriod_ = "";
         bandwidthPerSec_ = "0";
+        partitionFactor_ = "1";
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -2656,10 +2860,6 @@ public final class ConfResPB {
         if (isInitialized != -1) return isInitialized == 1;
 
         if (!hasTopic()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        if (!hasRotatePeriod()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -2699,6 +2899,9 @@ public final class ConfResPB {
         }
         if (((bitField0_ & 0x00000100) == 0x00000100)) {
           output.writeBytes(10, getBandwidthPerSecBytes());
+        }
+        if (((bitField0_ & 0x00000200) == 0x00000200)) {
+          output.writeBytes(11, getPartitionFactorBytes());
         }
         getUnknownFields().writeTo(output);
       }
@@ -2753,6 +2956,10 @@ public final class ConfResPB {
         if (((bitField0_ & 0x00000100) == 0x00000100)) {
           size += com.google.protobuf.CodedOutputStream
             .computeBytesSize(10, getBandwidthPerSecBytes());
+        }
+        if (((bitField0_ & 0x00000200) == 0x00000200)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(11, getPartitionFactorBytes());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -2890,6 +3097,8 @@ public final class ConfResPB {
           bitField0_ = (bitField0_ & ~0x00000100);
           bandwidthPerSec_ = "0";
           bitField0_ = (bitField0_ & ~0x00000200);
+          partitionFactor_ = "1";
+          bitField0_ = (bitField0_ & ~0x00000400);
           return this;
         }
 
@@ -2960,6 +3169,10 @@ public final class ConfResPB {
             to_bitField0_ |= 0x00000100;
           }
           result.bandwidthPerSec_ = bandwidthPerSec_;
+          if (((from_bitField0_ & 0x00000400) == 0x00000400)) {
+            to_bitField0_ |= 0x00000200;
+          }
+          result.partitionFactor_ = partitionFactor_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -3031,16 +3244,17 @@ public final class ConfResPB {
             bandwidthPerSec_ = other.bandwidthPerSec_;
             onChanged();
           }
+          if (other.hasPartitionFactor()) {
+            bitField0_ |= 0x00000400;
+            partitionFactor_ = other.partitionFactor_;
+            onChanged();
+          }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
         }
 
         public final boolean isInitialized() {
           if (!hasTopic()) {
-            
-            return false;
-          }
-          if (!hasRotatePeriod()) {
             
             return false;
           }
@@ -3214,16 +3428,16 @@ public final class ConfResPB {
           return this;
         }
 
-        // required string rotate_period = 3;
+        // optional string rotate_period = 3;
         private java.lang.Object rotatePeriod_ = "";
         /**
-         * <code>required string rotate_period = 3;</code>
+         * <code>optional string rotate_period = 3;</code>
          */
         public boolean hasRotatePeriod() {
           return ((bitField0_ & 0x00000004) == 0x00000004);
         }
         /**
-         * <code>required string rotate_period = 3;</code>
+         * <code>optional string rotate_period = 3;</code>
          */
         public java.lang.String getRotatePeriod() {
           java.lang.Object ref = rotatePeriod_;
@@ -3237,7 +3451,7 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>required string rotate_period = 3;</code>
+         * <code>optional string rotate_period = 3;</code>
          */
         public com.google.protobuf.ByteString
             getRotatePeriodBytes() {
@@ -3253,7 +3467,7 @@ public final class ConfResPB {
           }
         }
         /**
-         * <code>required string rotate_period = 3;</code>
+         * <code>optional string rotate_period = 3;</code>
          */
         public Builder setRotatePeriod(
             java.lang.String value) {
@@ -3266,7 +3480,7 @@ public final class ConfResPB {
           return this;
         }
         /**
-         * <code>required string rotate_period = 3;</code>
+         * <code>optional string rotate_period = 3;</code>
          */
         public Builder clearRotatePeriod() {
           bitField0_ = (bitField0_ & ~0x00000004);
@@ -3275,7 +3489,7 @@ public final class ConfResPB {
           return this;
         }
         /**
-         * <code>required string rotate_period = 3;</code>
+         * <code>optional string rotate_period = 3;</code>
          */
         public Builder setRotatePeriodBytes(
             com.google.protobuf.ByteString value) {
@@ -3821,6 +4035,80 @@ public final class ConfResPB {
   }
   bitField0_ |= 0x00000200;
           bandwidthPerSec_ = value;
+          onChanged();
+          return this;
+        }
+
+        // optional string partitionFactor = 11 [default = "1"];
+        private java.lang.Object partitionFactor_ = "1";
+        /**
+         * <code>optional string partitionFactor = 11 [default = "1"];</code>
+         */
+        public boolean hasPartitionFactor() {
+          return ((bitField0_ & 0x00000400) == 0x00000400);
+        }
+        /**
+         * <code>optional string partitionFactor = 11 [default = "1"];</code>
+         */
+        public java.lang.String getPartitionFactor() {
+          java.lang.Object ref = partitionFactor_;
+          if (!(ref instanceof java.lang.String)) {
+            java.lang.String s = ((com.google.protobuf.ByteString) ref)
+                .toStringUtf8();
+            partitionFactor_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string partitionFactor = 11 [default = "1"];</code>
+         */
+        public com.google.protobuf.ByteString
+            getPartitionFactorBytes() {
+          java.lang.Object ref = partitionFactor_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            partitionFactor_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string partitionFactor = 11 [default = "1"];</code>
+         */
+        public Builder setPartitionFactor(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000400;
+          partitionFactor_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string partitionFactor = 11 [default = "1"];</code>
+         */
+        public Builder clearPartitionFactor() {
+          bitField0_ = (bitField0_ & ~0x00000400);
+          partitionFactor_ = getDefaultInstance().getPartitionFactor();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string partitionFactor = 11 [default = "1"];</code>
+         */
+        public Builder setPartitionFactorBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000400;
+          partitionFactor_ = value;
           onChanged();
           return this;
         }
@@ -4755,24 +5043,25 @@ public final class ConfResPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rConfRes.proto\022\tblackhole\"\341\004\n\007ConfRes\0221" +
+      "\n\rConfRes.proto\022\tblackhole\"\231\005\n\007ConfRes\0221" +
       "\n\nappConfRes\030\001 \003(\0132\035.blackhole.ConfRes.A" +
       "ppConfRes\0221\n\nlxcConfRes\030\002 \003(\0132\035.blackhol" +
-      "e.ConfRes.LxcConfRes\032\353\001\n\nAppConfRes\022\r\n\005t" +
-      "opic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \002(\t\022\025\n\rrotate" +
-      "_period\030\003 \002(\t\022\035\n\rmax_line_size\030\004 \001(\t:\00651" +
+      "e.ConfRes.LxcConfRes\032\207\002\n\nAppConfRes\022\r\n\005t" +
+      "opic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \001(\t\022\025\n\rrotate" +
+      "_period\030\003 \001(\t\022\035\n\rmax_line_size\030\004 \001(\t:\00651" +
       "2000\022\031\n\rread_interval\030\005 \001(\t:\0021L\022\030\n\014min_m" +
       "sg_sent\030\006 \001(\t:\00230\022\034\n\014msg_buf_size\030\007 \001(\t:" +
       "\006512000\022\023\n\013roll_period\030\010 \001(\t\022\034\n\021bandwidt" +
-      "h_per_sec\030\t \001(\t:\0010\032\201\002\n\nLxcConfRes\022\r\n\005top",
-      "ic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \001(\t\022\025\n\rrotate_p" +
-      "eriod\030\003 \002(\t\022\035\n\rmax_line_size\030\004 \001(\t:\0065120" +
-      "00\022\031\n\rread_interval\030\005 \001(\t:\0021L\022\024\n\014instanc" +
-      "e_ids\030\006 \003(\t\022\030\n\014min_msg_sent\030\007 \001(\t:\00230\022\034\n" +
-      "\014msg_buf_size\030\010 \001(\t:\006512000\022\023\n\013roll_peri" +
-      "od\030\t \001(\t\022\034\n\021bandwidth_per_sec\030\n \001(\t:\0010B." +
-      "\n!com.dp.blackhole.protocol.controlB\tCon" +
-      "fResPB"
+      "h_per_sec\030\t \001(\t:\0010\022\032\n\017partitionFactor\030\n ",
+      "\001(\t:\0011\032\235\002\n\nLxcConfRes\022\r\n\005topic\030\001 \002(\t\022\022\n\n" +
+      "watch_file\030\002 \001(\t\022\025\n\rrotate_period\030\003 \001(\t\022" +
+      "\035\n\rmax_line_size\030\004 \001(\t:\006512000\022\031\n\rread_i" +
+      "nterval\030\005 \001(\t:\0021L\022\024\n\014instance_ids\030\006 \003(\t\022" +
+      "\030\n\014min_msg_sent\030\007 \001(\t:\00230\022\034\n\014msg_buf_siz" +
+      "e\030\010 \001(\t:\006512000\022\023\n\013roll_period\030\t \001(\t\022\034\n\021" +
+      "bandwidth_per_sec\030\n \001(\t:\0010\022\032\n\017partitionF" +
+      "actor\030\013 \001(\t:\0011B.\n!com.dp.blackhole.proto" +
+      "col.controlB\tConfResPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -4790,13 +5079,13 @@ public final class ConfResPB {
           internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_AppConfRes_descriptor,
-              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "MinMsgSent", "MsgBufSize", "RollPeriod", "BandwidthPerSec", });
+              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "MinMsgSent", "MsgBufSize", "RollPeriod", "BandwidthPerSec", "PartitionFactor", });
           internal_static_blackhole_ConfRes_LxcConfRes_descriptor =
             internal_static_blackhole_ConfRes_descriptor.getNestedTypes().get(1);
           internal_static_blackhole_ConfRes_LxcConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_LxcConfRes_descriptor,
-              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "InstanceIds", "MinMsgSent", "MsgBufSize", "RollPeriod", "BandwidthPerSec", });
+              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "InstanceIds", "MinMsgSent", "MsgBufSize", "RollPeriod", "BandwidthPerSec", "PartitionFactor", });
           return null;
         }
       };

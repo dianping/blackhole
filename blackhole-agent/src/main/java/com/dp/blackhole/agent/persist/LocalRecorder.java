@@ -3,7 +3,6 @@ package com.dp.blackhole.agent.persist;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.SortedSet;
@@ -18,21 +17,21 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dp.blackhole.agent.AgentMeta;
 import com.dp.blackhole.agent.LogReader;
-import com.dp.blackhole.agent.TopicMeta;
-import com.dp.blackhole.agent.TopicMeta.TopicId;
+import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.common.Util;
 
 public class LocalRecorder implements IRecoder {
     private static final Log LOG = LogFactory.getLog(LocalRecorder.class);
-    private TopicMeta topicMeta;
+    private AgentMeta topicMeta;
     private File snapshotFile;
     private Snapshot snapshot;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     private Lock writeLock = lock.writeLock();
     private Lock readLock = lock.readLock();
     
-    public LocalRecorder(String persistDir, TopicMeta meta) {
+    public LocalRecorder(String persistDir, AgentMeta meta) {
         this.topicMeta = meta;
         this.snapshotFile = getSnapshotFile(persistDir, meta.getTopicId());
         Snapshot snapshot;
@@ -50,7 +49,7 @@ public class LocalRecorder implements IRecoder {
         return (Snapshot) Util.deserialize(FileUtils.readFileToByteArray(snapshotFile));
     }
     
-    private Snapshot rebuidByActualFiles(final TopicMeta meta, TopicId id) {
+    private Snapshot rebuidByActualFiles(final AgentMeta meta, TopicId id) {
         Snapshot snapshot = new Snapshot(id);
         final File file = new File(meta.getTailFile());
         if (file.exists()) {
@@ -93,12 +92,7 @@ public class LocalRecorder implements IRecoder {
         if (id.getInstanceId() != null) {
             build.append(id.getInstanceId());
         } else {
-            try {
-                build.append(Util.getLocalHost());
-            } catch (UnknownHostException e) {
-                LOG.error("Oops, replace real hostname with 'localhost'", e);
-                build.append("localhost");
-            }
+            build.append(Util.getLocalHost());
         }
         build.append(".snapshot");
         return new File(build.toString());

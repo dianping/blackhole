@@ -40,6 +40,21 @@ public final class NoAvailableNodePB {
      */
     com.google.protobuf.ByteString
         getInstanceIdBytes();
+
+    // optional string source = 3;
+    /**
+     * <code>optional string source = 3;</code>
+     */
+    boolean hasSource();
+    /**
+     * <code>optional string source = 3;</code>
+     */
+    java.lang.String getSource();
+    /**
+     * <code>optional string source = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getSourceBytes();
   }
   /**
    * Protobuf type {@code blackhole.NoAvailableNode}
@@ -100,6 +115,11 @@ public final class NoAvailableNodePB {
             case 18: {
               bitField0_ |= 0x00000002;
               instanceId_ = input.readBytes();
+              break;
+            }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              source_ = input.readBytes();
               break;
             }
           }
@@ -228,9 +248,53 @@ public final class NoAvailableNodePB {
       }
     }
 
+    // optional string source = 3;
+    public static final int SOURCE_FIELD_NUMBER = 3;
+    private java.lang.Object source_;
+    /**
+     * <code>optional string source = 3;</code>
+     */
+    public boolean hasSource() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional string source = 3;</code>
+     */
+    public java.lang.String getSource() {
+      java.lang.Object ref = source_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          source_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string source = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getSourceBytes() {
+      java.lang.Object ref = source_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        source_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private void initFields() {
       topic_ = "";
       instanceId_ = "";
+      source_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -254,6 +318,9 @@ public final class NoAvailableNodePB {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeBytes(2, getInstanceIdBytes());
       }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, getSourceBytes());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -270,6 +337,10 @@ public final class NoAvailableNodePB {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, getInstanceIdBytes());
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, getSourceBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -391,6 +462,8 @@ public final class NoAvailableNodePB {
         bitField0_ = (bitField0_ & ~0x00000001);
         instanceId_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
+        source_ = "";
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -427,6 +500,10 @@ public final class NoAvailableNodePB {
           to_bitField0_ |= 0x00000002;
         }
         result.instanceId_ = instanceId_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.source_ = source_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -451,6 +528,11 @@ public final class NoAvailableNodePB {
         if (other.hasInstanceId()) {
           bitField0_ |= 0x00000002;
           instanceId_ = other.instanceId_;
+          onChanged();
+        }
+        if (other.hasSource()) {
+          bitField0_ |= 0x00000004;
+          source_ = other.source_;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -632,6 +714,80 @@ public final class NoAvailableNodePB {
         return this;
       }
 
+      // optional string source = 3;
+      private java.lang.Object source_ = "";
+      /**
+       * <code>optional string source = 3;</code>
+       */
+      public boolean hasSource() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional string source = 3;</code>
+       */
+      public java.lang.String getSource() {
+        java.lang.Object ref = source_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          source_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string source = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSourceBytes() {
+        java.lang.Object ref = source_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          source_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string source = 3;</code>
+       */
+      public Builder setSource(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        source_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string source = 3;</code>
+       */
+      public Builder clearSource() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        source_ = getDefaultInstance().getSource();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string source = 3;</code>
+       */
+      public Builder setSourceBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        source_ = value;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.NoAvailableNode)
     }
 
@@ -657,10 +813,11 @@ public final class NoAvailableNodePB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\025NoAvailableNode.proto\022\tblackhole\"5\n\017No" +
+      "\n\025NoAvailableNode.proto\022\tblackhole\"E\n\017No" +
       "AvailableNode\022\r\n\005topic\030\001 \002(\t\022\023\n\013instance" +
-      "_id\030\002 \001(\tB6\n!com.dp.blackhole.protocol.c" +
-      "ontrolB\021NoAvailableNodePB"
+      "_id\030\002 \001(\t\022\016\n\006source\030\003 \001(\tB6\n!com.dp.blac" +
+      "khole.protocol.controlB\021NoAvailableNodeP" +
+      "B"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -672,7 +829,7 @@ public final class NoAvailableNodePB {
           internal_static_blackhole_NoAvailableNode_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_NoAvailableNode_descriptor,
-              new java.lang.String[] { "Topic", "InstanceId", });
+              new java.lang.String[] { "Topic", "InstanceId", "Source", });
           return null;
         }
       };
