@@ -2100,16 +2100,16 @@ public class Supervisor {
 
     public void handleConfReq(ConfReq confReq, SimpleConnection from) {
         Message message;
-        String topic = confReq.getTopic();
-        if (topic != null) {
+        String topicFromReq = confReq.getTopic();
+        if (topicFromReq != null && topicFromReq.length() != 0) {
             //producer request
-            TopicConfig topicConfig = configManager.getConfByTopic(topic);
+            TopicConfig topicConfig = configManager.getConfByTopic(topicFromReq);
             if (topicConfig == null) {
-                message = PBwrap.wrapNoAvailableConf(topic);
+                message = PBwrap.wrapNoAvailableConf(topicFromReq);
             } else {
                 int partitionFactor = topicConfig.getPartitionFactor();
-                producerMgrMap.putIfAbsent(topic, new ProducerManager(topic, partitionFactor));
-                ProducerManager manager = producerMgrMap.get(topic);
+                producerMgrMap.putIfAbsent(topicFromReq, new ProducerManager(topicFromReq, partitionFactor));
+                ProducerManager manager = producerMgrMap.get(topicFromReq);
                 String producerId = manager.getProducerId();
                 
                 CommonConfRes commonConfRes = PBwrap.wrapCommonConfRes(
@@ -2118,7 +2118,7 @@ public class Supervisor {
                         topicConfig.getMsgBufSize(),
                         topicConfig.getRollPeriod(),
                         topicConfig.getPartitionFactor());
-                message = PBwrap.wrapProducerIdAssign(topic, producerId, commonConfRes);
+                message = PBwrap.wrapProducerIdAssign(topicFromReq, producerId, commonConfRes);
             }
             send(from, message);
         } else {
@@ -2130,10 +2130,10 @@ public class Supervisor {
                 send(from, message);
                 return;
             }
-            for (String t : topicsAssocHost) {
-                TopicConfig confInfo = configManager.getConfByTopic(t);
+            for (String topic : topicsAssocHost) {
+                TopicConfig confInfo = configManager.getConfByTopic(topic);
                 if (confInfo == null) {
-                    LOG.error("Can not get topic: " + t + " from configMap");
+                    LOG.error("Can not get topic: " + topic + " from configMap");
                     message = PBwrap.wrapNoAvailableConf(null);
                     send(from, message);
                     return;
