@@ -1601,7 +1601,9 @@ public class Supervisor {
         
         // online partitionId in producer manager
         ProducerManager producerManager = producerMgrMap.get(topic);
-        producerManager.switchToOnline(partitionId);
+        if (producerManager != null) {
+            producerManager.switchToOnline(partitionId);
+        }
         
         PartitionInfo pinfo = t.getPartition(partitionId);
         if (pinfo == null) {
