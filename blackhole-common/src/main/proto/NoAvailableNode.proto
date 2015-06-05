@@ -6,4 +6,5 @@ option java_outer_classname = "NoAvailableNodePB";
 message NoAvailableNode {
     required string topic = 1;
     optional string instance_id = 2;
+    optional string source = 3;
 }

@@ -7,6 +7,7 @@ message Failure {
   enum NodeType {
     APP_NODE = 1;
     BROKER_NODE = 2;
+    PRODUCER = 3;
   }
 
   required string topic = 1;

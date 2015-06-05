@@ -30,17 +30,21 @@ import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenServer;
 import com.dp.blackhole.network.SimpleConnection;
 import com.dp.blackhole.protocol.control.AppRegPB.AppReg;
+import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
 import com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg;
+import com.dp.blackhole.protocol.control.CommonConfResPB.CommonConfRes;
+import com.dp.blackhole.protocol.control.ConfReqPB.ConfReq;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
 import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.DumpAppPB.DumpApp;
 import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
-import com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
+import com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker;
+import com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg;
 import com.dp.blackhole.protocol.control.ReadyStreamPB.ReadyStream;
 import com.dp.blackhole.protocol.control.ReadyUploadPB.ReadyUpload;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
@@ -60,7 +64,9 @@ import com.dp.blackhole.supervisor.model.ConsumerGroup;
 import com.dp.blackhole.supervisor.model.ConsumerGroupKey;
 import com.dp.blackhole.supervisor.model.Issue;
 import com.dp.blackhole.supervisor.model.NodeDesc;
+import com.dp.blackhole.supervisor.model.ProducerManager;
 import com.dp.blackhole.supervisor.model.PartitionInfo;
+import com.dp.blackhole.supervisor.model.ProducerDesc;
 import com.dp.blackhole.supervisor.model.Stage;
 import com.dp.blackhole.supervisor.model.Stream;
 import com.dp.blackhole.supervisor.model.Topic;
@@ -81,8 +87,10 @@ public class Supervisor {
   
     private ConcurrentHashMap<ConsumerGroupKey, ConsumerGroup> consumerGroups;
     private ConcurrentHashMap<SimpleConnection, ConnectionDesc> connections;
-    private ConcurrentHashMap<String, SimpleConnection> agentsMapping;
+    //agent hostname -> connection or producerId -> connection
+    private ConcurrentHashMap<String, SimpleConnection> dataSourceMapping;
     private ConcurrentHashMap<String, SimpleConnection> brokersMapping;
+    private ConcurrentHashMap<String, ProducerManager> producerMgrMap; // topic -> manager
     
     public Checkpoint checkpoint;
 
@@ -183,7 +191,7 @@ public class Supervisor {
             //we find the connections from agentMapping instead of all connections map
             //cause if a connection belong to agent type standing for the streams in it
             //have already been enable, its confReq-conRes message loop is termination.
-            SimpleConnection connection = agentsMapping.get(agentHost);
+            SimpleConnection connection = dataSourceMapping.get(agentHost);
             if (connection != null) {
                 send(connection, message);
             }
@@ -551,18 +559,18 @@ public class Supervisor {
                     }
                 }
                 // remove corresponding appNodes's relationship with the stream
-                String agentHost = Util.getAgentHostFromSource(stream.getSource());
-                SimpleConnection agentConnection = agentsMapping.get(agentHost);
-                if (agentConnection == null) {
-                    LOG.error("can not find agentConnection by host " + agentHost);
+                String dataSourceHost = Util.getHostFromSource(stream.getSource());
+                SimpleConnection dataSourceConnection = dataSourceMapping.get(dataSourceHost);
+                if (dataSourceConnection == null) {
+                    LOG.error("can not find dataSourceConnection by host " + dataSourceHost);
                     continue;
                 }
-                ArrayList<Stream> associatedStreams = connectionStreamMap.get(agentConnection);
+                ArrayList<Stream> associatedStreams = connectionStreamMap.get(dataSourceConnection);
                 if (associatedStreams != null) {
                     synchronized (associatedStreams) {
                         associatedStreams.remove(stream);
                         if (associatedStreams.size() == 0) {
-                            connectionStreamMap.remove(agentConnection);
+                            connectionStreamMap.remove(dataSourceConnection);
                         }
                     }
                 }
@@ -641,6 +649,24 @@ public class Supervisor {
         }
     }
     
+    private void handleProducerNodeFail(ConnectionDesc desc, long now) {
+        SimpleConnection connection = desc.getConnection();
+        LOG.info("producer node " + connection + " disconnectted");
+        List<NodeDesc> nodeDescs = desc.getAttachments();
+        if (nodeDescs == null || nodeDescs.size() == 0) {
+            return;
+        }
+        for (NodeDesc nodeDesc : nodeDescs) {
+            ProducerDesc producerDesc = (ProducerDesc) nodeDesc;
+            String producerId = producerDesc.getId();
+            String topic = producerDesc.getTopic();
+            ProducerManager producerManager = producerMgrMap.get(topic);
+            producerManager.inactive(producerId);
+            dataSourceMapping.remove(producerId);
+        }
+        handleAppNodeFail(desc, now);
+    }
+    
     /*
      * cancel the key, remove it from agent or brokers, then revisit streams
      * 1. agent fail, mark the stream as inactive, mark all the stages as pending unless the uploading stage
@@ -657,19 +683,28 @@ public class Supervisor {
             return;
         }
         String host = connection.getHost();
-        if (desc.getType() == ConnectionDesc.AGENT) {
-            agentsMapping.remove(host);
+        switch (desc.getType()) {
+        case ConnectionDesc.AGENT:
+            dataSourceMapping.remove(host);
             LOG.info("close APPNODE: " + host);
             handleAppNodeFail(desc, now);
-        } else if (desc.getType() == ConnectionDesc.BROKER) {
+            break;
+        case ConnectionDesc.BROKER:
             brokersMapping.remove(host);
             LOG.info("close BROKER: " + host);
             handleBrokerNodeFail(desc, now);
-        } else if (desc.getType() == ConnectionDesc.CONSUMER) {
+            break;
+        case ConnectionDesc.CONSUMER:
             LOG.info("close consumer: " + host);
             handleConsumerFail(desc, now);
+            break;
+        case ConnectionDesc.PRODUCER:
+            LOG.info("close producer: " + host);
+            handleProducerNodeFail(desc, now);
+            break;
+        default:
+            break;
         }
-        
         synchronized (connections) {
             connections.remove(connection);
         }
@@ -711,7 +746,7 @@ public class Supervisor {
         sb.append("\n");
         
         sb.append("print agents:\n");
-        for(SimpleConnection connection: agentsMapping.values()) {
+        for(SimpleConnection connection: dataSourceMapping.values()) {
             sb.append("<")
             .append(connection)
             .append(">")
@@ -911,7 +946,7 @@ public class Supervisor {
 
     public void sendRestart(List<String> agentServers) {
         for (String agentHost : agentServers) {
-            SimpleConnection agent = agentsMapping.get(agentHost);
+            SimpleConnection agent = dataSourceMapping.get(agentHost);
             if (agent != null) {
                 server.closeConnection(agent);
             } else {
@@ -921,7 +956,7 @@ public class Supervisor {
     }
     
     public boolean oprateSnapshot(String topic, String source, String opname) {
-        SimpleConnection c = agentsMapping.get(Util.getAgentHostFromSource(source));
+        SimpleConnection c = dataSourceMapping.get(Util.getHostFromSource(source));
         if (c == null) {
             LOG.error("can not find connection by host: " + source);
             return false;
@@ -943,7 +978,7 @@ public class Supervisor {
         if (stream == null) {
             return false;
         }
-        SimpleConnection c = agentsMapping.get(Util.getAgentHostFromSource(source));
+        SimpleConnection c = dataSourceMapping.get(Util.getHostFromSource(source));
         if (c == null) {
             LOG.error("can not find connection by host: " + source);
             return false;
@@ -1168,16 +1203,24 @@ public class Supervisor {
                 LOG.error("failstage not found: " + failure);
                 return;
             }
-            if (failure.getType() == NodeType.APP_NODE) {
-                Issue i = new Issue();
-                i.setTs(failure.getFailTs());
+            Issue i = new Issue();
+            i.setTs(failure.getFailTs());
+            switch (failure.getType()) {
+            case APP_NODE:
                 i.setDesc("logreader failed");
                 failstage.getIssuelist().add(i);
-            } else {
-                Issue i = new Issue();
-                i.setTs(failure.getFailTs());
+                break;
+            case BROKER_NODE:
                 i.setDesc("broker failed");
                 failstage.getIssuelist().add(i);
+                break;
+            case PRODUCER:
+                i.setDesc("producer failed");
+                failstage.getIssuelist().add(i);
+                break;
+            default:
+                LOG.error("Undefined node type!!");
+                break;
             }
         }
     }
@@ -1391,14 +1434,14 @@ public class Supervisor {
     private String doUpload(Stream stream, Stage current, SimpleConnection from, boolean isFinal) {
         TopicConfig config = configManager.getConfByTopic(stream.getTopic());
         String compression = config.getCompression();
-        boolean isPersist = config.isPersist();
+        boolean persistent = config.isPersistent();
         Message message = PBwrap.wrapUploadRoll(
                 current.getTopic(),
                 current.getSource(),
                 stream.getPeriod(),
                 current.getRollTs(),
                 isFinal,
-                isPersist,
+                persistent,
                 compression
         );
         send(from, message);
@@ -1406,8 +1449,8 @@ public class Supervisor {
         return from.getHost();
     }
     
-    private String doRecovery(Stream stream, Stage stage) {
-        return doRecovery(stream, stage, false);
+    private void doRecovery(Stream stream, Stage stage) {
+        doRecovery(stream, stage, false);
     }
     
     /*
@@ -1416,7 +1459,7 @@ public class Supervisor {
      * mark the stream as pending
      * else send recovery message
      */
-    private String doRecovery(Stream stream, Stage stage, boolean isFinal) {
+    private void doRecovery(Stream stream, Stage stage, boolean isFinal) {
         String broker = null;
         broker = getBroker();   
 
@@ -1424,34 +1467,30 @@ public class Supervisor {
             stage.setStatus(Stage.PENDING);
             stageConnectionMap.remove(stage);
         } else {
-            SimpleConnection c = agentsMapping.get(Util.getAgentHostFromSource(stream.getSource()));
-            if (c == null) {
-                LOG.error("can not find connection by host: " + stream.getSource());
-                return null;
-            }
             TopicConfig config = configManager.getConfByTopic(stream.getTopic());
-            boolean isPersist = config.isPersist();
+            boolean persistent = config.isPersistent();
             Message message = PBwrap.wrapRecoveryRoll(
-                        stream.getTopic(),
-                        broker,
-                        getRecoveryPort(broker),
-                        stage.getRollTs(),
-                        Util.getInstanceIdFromSource(stream.getSource()),
-                        isFinal,
-                        isPersist
-            );
-            send(c, message);
+                    stream.getTopic(),
+                    broker,
+                    getRecoveryPort(broker),
+                    stage.getRollTs(),
+                    stream.getSource(),
+                    isFinal,
+                    persistent
+                    );
             stage.setStatus(Stage.RECOVERYING);
             stage.setBrokerHost(broker);
-            
-            SimpleConnection brokerConnection = brokersMapping.get(broker);
-            if (brokerConnection == null) {
-                LOG.error("");
+            SimpleConnection c = dataSourceMapping.get(Util.getHostFromSource(stream.getSource()));
+            if (c != null) {
+                send(c, message);
+            } else {
+                LOG.error("can not find connection by host: " + stream.getSource());
             }
-            stageConnectionMap.put(stage, brokerConnection);
+            SimpleConnection brokerConnection = brokersMapping.get(broker);
+            if (brokerConnection != null) {
+                stageConnectionMap.put(stage, brokerConnection);
+            }
         }
-
-        return broker;
     }
     
     /*
@@ -1470,14 +1509,15 @@ public class Supervisor {
             topics.put(topic, t);
             LOG.info("new topic added: " + t);
         }
-        
-        Stream stream = getStream(readyBroker.getTopic(), readyBroker.getSource());
+        //source is an alias of partitionId in "Batch Mode"
+        String source = readyBroker.getPartitionId();
+        Stream stream = getStream(readyBroker.getTopic(), source);
         // processing stream affairs
         if (stream == null) {
             // record new stream
             stream = new Stream();
             stream.setTopic(readyBroker.getTopic());
-            stream.setSource(readyBroker.getSource());
+            stream.setSource(source);
             stream.setBrokerHost(readyBroker.getBrokerServer());
             stream.setStartTs(connectedTs);
             stream.setPeriod(readyBroker.getPeriod());
@@ -1546,11 +1586,24 @@ public class Supervisor {
         
         // register connection with agent and broker
         recordConnectionStreamMapping(from, stream);
-        SimpleConnection agentConnection = agentsMapping.get(Util.getAgentHostFromSource(stream.getSource()));
-        recordConnectionStreamMapping(agentConnection, stream);
+        //source may be a KVM agent, or a PaaS instance, or a producerId
+        //host may be a KVM agent host, or a PaaS physics machine, or a Storm worker host
+        String host = Util.getHostFromSource(source);
+        SimpleConnection dataSourceConnection = dataSourceMapping.get(host);
+        if (dataSourceConnection == null) {
+            LOG.fatal("Oops, can not get Connection by " + host);
+        } else {
+            recordConnectionStreamMapping(dataSourceConnection, stream);
+        }
         
         // process partition affairs
-        String partitionId = readyBroker.getSource();
+        String partitionId = readyBroker.getPartitionId();
+        
+        // online partitionId in producer manager
+        ProducerManager producerManager = producerMgrMap.get(topic);
+        if (producerManager != null) {
+            producerManager.switchToOnline(partitionId);
+        }
         
         PartitionInfo pinfo = t.getPartition(partitionId);
         if (pinfo == null) {
@@ -1591,7 +1644,6 @@ public class Supervisor {
         // recovery Pending and BROKERFAIL stages
         for (int i = 0 ; i < currentStages.size(); i++) {
             Stage stage = currentStages.get(i);
-            LOG.info("processing pending stage: " + stage);
             stage.setCurrent(false);
             if (!stage.getIssuelist().contains(issue)) {
                 stage.getIssuelist().add(issue);
@@ -1601,6 +1653,7 @@ public class Supervisor {
                     || stage.getStatus() == Stage.PAUSE) {
                 // do not recovery current stage
                 if (stage.getRollTs() != currentTs) {
+                    LOG.info("processing pending stage: " + stage);
                     doRecovery(stream, stage);
                 } else {
                     // fix current stage status
@@ -1634,11 +1687,6 @@ public class Supervisor {
     }
    
     private void recordConnectionStreamMapping(SimpleConnection connection, Stream stream) {
-        if (connection == null) {
-            LOG.fatal("Connection is null");
-            return;
-        }
-        
         connectionStreamMap.putIfAbsent(connection, new ArrayList<Stream>());
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         synchronized (streams) {
@@ -1688,26 +1736,28 @@ public class Supervisor {
         }
         desc.setType(ConnectionDesc.AGENT);
         String source = appReg.getSource();
-        if(null == agentsMapping.putIfAbsent(from.getHost(), from)) {
+        if(null == dataSourceMapping.putIfAbsent(from.getHost(), from)) {
             LOG.info("Topic " + appReg.getTopic() + " registered from " + source);
         }
-        assignBroker(appReg.getTopic(), from, source);
+        assignBroker(appReg.getTopic(), from, source, null);
     }
 
-    private String assignBroker(String topic, SimpleConnection from, String source) {
+    private String assignBroker(String topic, SimpleConnection from, String source, String partitionId) {
+        String instanceId = Util.getInstanceIdFromSource(source);   //null if source is KVM or ProducerId
         String broker = getBrokerToAssign();
-        String instanceId = Util.getInstanceIdFromSource(source);
         Message message;
         if (broker != null) {
-            message = PBwrap.wrapAssignBroker(topic, broker, getBrokerPort(broker), instanceId);
+            message = PBwrap.wrapAssignBroker(PBwrap.assignBroker(topic, broker, getBrokerPort(broker), instanceId, partitionId));
         } else {
-            message = PBwrap.wrapNoAvailableNode(topic, instanceId);
+            message = PBwrap.wrapNoAvailableNode(topic, instanceId, source);
         }
-        LOG.info("assign broker " + broker + " for " + topic + ":" + source);
+        LOG.info("assign broker: " + broker + " for topic: " + topic
+                + " source/producer: " + source
+                + (partitionId == null ? "" : (" partition: " + partitionId)));
         send(from, message);
         return broker;
     }
-    
+
     private void handleBrokerReg(BrokerReg brokerReg, SimpleConnection from) {
         ConnectionDesc desc = connections.get(from);
         if (desc == null) {
@@ -1743,7 +1793,7 @@ public class Supervisor {
         return getBroker();
     }
     
-    public void handleRollingAndTriggerClean(RollClean rollClean, SimpleConnection from) {
+    private void handleRollingAndTriggerClean(RollClean rollClean, SimpleConnection from) {
         boolean isFinal = true;
         Stream stream = getStream(rollClean.getTopic(), rollClean.getSource());
         if (stream != null) {
@@ -1770,6 +1820,63 @@ public class Supervisor {
         }
     }
     
+    private void handleProducerReg(ProducerReg producerReg, SimpleConnection from) {
+        ConnectionDesc desc = connections.get(from);
+        if (desc == null) {
+            LOG.error("can not find ConnectionDesc by connection " + from);
+            return;
+        }
+        desc.setType(ConnectionDesc.PRODUCER);
+        
+        String topic = producerReg.getTopic();
+        String producerId = producerReg.getProducerId();
+        
+        ProducerDesc producerDesc = new ProducerDesc(producerId, topic);
+        desc.attach(producerDesc);
+        if(null == dataSourceMapping.putIfAbsent(producerId, from)) {
+            LOG.info("Topic " + topic + " registered from " + producerId);
+        }
+        assignPartition(topic, producerId, from);
+    }
+
+    private void assignPartition(String topic, String producerId, SimpleConnection from) {
+        Message message = null;
+        ProducerManager producerMgr = producerMgrMap.get(topic);
+        if (producerMgr == null) {
+            LOG.error("Oops, can not find producer manager by " + topic);
+            return;
+        }
+        List<String> partitionIds = producerMgr.generatePartitionId(producerId);
+        int partitionFactor = producerMgr.getPartitionFactor();
+        List<AssignBroker> assigns = new ArrayList<AssignBroker>(partitionFactor);
+        if (partitionIds.isEmpty()) {
+            LOG.error("Oops! can not get any partitions for " + topic + " " + producerId);
+            return;
+        }
+        for (String partitionId : partitionIds) {
+            String broker = getBrokerToAssign();
+            if (broker == null) {
+                message = PBwrap.wrapNoAvailableNode(topic, null, producerId);
+            } else {
+                AssignBroker assignBroker = PBwrap.assignBroker(topic, broker, getBrokerPort(broker), null, partitionId);
+                assigns.add(assignBroker);
+                LOG.info("assign parition "  + partitionId + " with " + broker + " for " + topic);
+                message = PBwrap.wrapAssignParitions(assigns);
+            }
+        }
+        send(from, message);
+    }
+    
+
+    private void handlePartitionRequireBroker(
+            PartitionRequireBroker partitionRequireBroker,
+            SimpleConnection from) {
+        String topic = partitionRequireBroker.getTopic();
+        String produceId = partitionRequireBroker.getProducerId();
+        String partitionId = partitionRequireBroker.getPartitionId();
+        assignBroker(topic, from, produceId, partitionId);
+    }
+
     public class SupervisorExecutor implements EntityProcessor<ByteBuffer, SimpleConnection> {
 
         @Override
@@ -1866,7 +1973,7 @@ public class Supervisor {
                 handleRetireStream(msg.getRetire(), from);
                 break;
             case CONF_REQ:
-                handleConfReq(from);
+                handleConfReq(msg.getConfReq(), from);
                 break;
             case DUMPCONF:
                 dumpconf(from);
@@ -1895,6 +2002,12 @@ public class Supervisor {
             case LIST_CONSUMER_GROUP:
                 listConsumerGroups(from);
                 break;
+            case PRODUCER_REG:
+                handleProducerReg(msg.getProducerReg(), from);
+                break;
+            case PARTITION_REQUIRE_BROKER:
+                handlePartitionRequireBroker(msg.getPartitionRequireBroker(), from);
+                break;
             default:
                 LOG.warn("unknown message: " + msg.toString());
             }
@@ -1920,7 +2033,8 @@ public class Supervisor {
                         ConnectionDesc dsc = entry.getValue();
                         if (dsc.getType() != ConnectionDesc.AGENT &&
                             dsc.getType() != ConnectionDesc.BROKER &&
-                            dsc.getType() != ConnectionDesc.CONSUMER) {
+                            dsc.getType() != ConnectionDesc.CONSUMER &&
+                            dsc.getType() != ConnectionDesc.PRODUCER) {
                             continue;
                         }
                         SimpleConnection conn = entry.getKey();
@@ -1950,8 +2064,9 @@ public class Supervisor {
         consumerGroups = new ConcurrentHashMap<ConsumerGroupKey, ConsumerGroup>();
         
         connections = new ConcurrentHashMap<SimpleConnection, ConnectionDesc>();
-        agentsMapping = new ConcurrentHashMap<String, SimpleConnection>();
+        dataSourceMapping = new ConcurrentHashMap<String, SimpleConnection>();
         brokersMapping = new ConcurrentHashMap<String, SimpleConnection>();
+        producerMgrMap = new ConcurrentHashMap<String, ProducerManager>();
         
         //initConfManager(or lion/zookeeper)
         configManager = new ConfigManager(this);
@@ -1985,46 +2100,69 @@ public class Supervisor {
         server.init("supervisor", configManager.supervisorPort, configManager.numHandler);
     }
 
-    public void handleConfReq(SimpleConnection from) {
+    public void handleConfReq(ConfReq confReq, SimpleConnection from) {
         Message message;
-        List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
-        Set<String> topicsAssocHost = configManager.getTopicsByHost(from.getHost());
-        if (topicsAssocHost == null || topicsAssocHost.size() == 0) {
-            LOG.debug("No topic mapping to " + from.getHost());
-            message = PBwrap.wrapNoAvailableConf();
+        String topicFromReq = confReq.getTopic();
+        if (topicFromReq != null && topicFromReq.length() != 0) {
+            //producer request
+            TopicConfig topicConfig = configManager.getConfByTopic(topicFromReq);
+            if (topicConfig == null) {
+                message = PBwrap.wrapNoAvailableConf(topicFromReq);
+            } else {
+                int partitionFactor = topicConfig.getPartitionFactor();
+                producerMgrMap.putIfAbsent(topicFromReq, new ProducerManager(topicFromReq, partitionFactor));
+                ProducerManager manager = producerMgrMap.get(topicFromReq);
+                String producerId = manager.getProducerId();
+                
+                CommonConfRes commonConfRes = PBwrap.wrapCommonConfRes(
+                        topicConfig.getMaxLineSize(),
+                        topicConfig.getMinMsgSent(),
+                        topicConfig.getMsgBufSize(),
+                        topicConfig.getRollPeriod(),
+                        topicConfig.getPartitionFactor());
+                message = PBwrap.wrapProducerIdAssign(topicFromReq, producerId, commonConfRes);
+            }
             send(from, message);
-            return;
-        }
-        for (String topic : topicsAssocHost) {
-            TopicConfig confInfo = configManager.getConfByTopic(topic);
-            if (confInfo == null) {
-                LOG.error("Can not get topic: " + topic + " from configMap");
-                message = PBwrap.wrapNoAvailableConf();
+        } else {
+            List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
+            Set<String> topicsAssocHost = configManager.getTopicsByHost(from.getHost());
+            if (topicsAssocHost == null || topicsAssocHost.size() == 0) {
+                LOG.debug("No topic mapping to " + from.getHost());
+                message = PBwrap.wrapNoAvailableConf(null);
                 send(from, message);
                 return;
             }
-            String rotatePeriod = String.valueOf(confInfo.getRotatePeriod());
-            String rollPeriod = String.valueOf(confInfo.getRollPeriod());
-            String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
-            String readInterval = String.valueOf(confInfo.getReadInterval());
-            String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
-            String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
-            String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
-            String watchFile = confInfo.getWatchLog();
-            if (watchFile == null) {
-                LOG.error("Can not get watch file of " + topic);
-                message = PBwrap.wrapNoAvailableConf();
-                send(from, message);
-                return;
+            for (String topic : topicsAssocHost) {
+                TopicConfig confInfo = configManager.getConfByTopic(topic);
+                if (confInfo == null) {
+                    LOG.error("Can not get topic: " + topic + " from configMap");
+                    message = PBwrap.wrapNoAvailableConf(null);
+                    send(from, message);
+                    return;
+                }
+                String rotatePeriod = String.valueOf(confInfo.getRotatePeriod());
+                String rollPeriod = String.valueOf(confInfo.getRollPeriod());
+                String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
+                String readInterval = String.valueOf(confInfo.getReadInterval());
+                String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
+                String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
+                String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
+                String watchFile = confInfo.getWatchLog();
+                if (watchFile == null) {
+                    LOG.error("Can not get watch file of " + topic);
+                    message = PBwrap.wrapNoAvailableConf(null);
+                    send(from, message);
+                    return;
+                }
+                AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile,
+                        rotatePeriod, rollPeriod, maxLineSize, readInterval,
+                        minMsgSent, msgBufSize, bandwidthPerSec);
+                appConfResList.add(appConfRes);
             }
-            AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile,
-                    rotatePeriod, rollPeriod, maxLineSize, readInterval,
-                    minMsgSent, msgBufSize, bandwidthPerSec);
-            appConfResList.add(appConfRes);
-        }
-        if (!appConfResList.isEmpty()) {
-            message = PBwrap.wrapConfRes(appConfResList, null);
-            send(from, message); 
+            if (!appConfResList.isEmpty()) {
+                message = PBwrap.wrapConfRes(appConfResList, null);
+                send(from, message); 
+            }
         }
     }
     
@@ -2048,7 +2186,7 @@ public class Supervisor {
                 String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
                 Set<String> ids = confInfo.getInsByHost(connection.getHost());
                 if (ids == null) {
-                    LOG.error("Can not get instances by " + topic + " and " + connection.getHost());
+                    LOG.info("Can not get instances by " + topic + " and " + connection.getHost());
                     continue;
                 }
                 LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile,

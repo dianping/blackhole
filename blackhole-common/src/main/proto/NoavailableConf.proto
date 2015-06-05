@@ -1,0 +1,8 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "NoavailableConfPB";
+
+message NoavailableConf{
+    optional string topic = 1;
+}

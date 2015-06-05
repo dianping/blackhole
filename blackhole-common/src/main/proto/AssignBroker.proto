@@ -8,4 +8,5 @@ message AssignBroker {
     required string broker_server = 2;
     required int32 broker_port = 3;
     optional string instance_id = 4;
+    optional string partition_id = 5;
 }

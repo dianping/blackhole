@@ -9,7 +9,7 @@ import java.nio.channels.SocketChannel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.agent.TopicMeta.TopicId;
+import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.network.TransferWrap;
 import com.dp.blackhole.protocol.data.HaltRequest;
@@ -34,7 +34,7 @@ public class RemoteSender {
     private long minMsgSent;
     private int reassignDelaySeconds = Agent.DEFAULT_DELAY_SECONDS;
     
-    public RemoteSender(TopicMeta topicMeta, String broker, int port) {
+    public RemoteSender(AgentMeta topicMeta, String broker, int port) {
         this.topicId = topicMeta.getTopicId();
         this.source = topicMeta.getSource();
         this.broker = broker;
@@ -68,8 +68,7 @@ public class RemoteSender {
         RegisterRequest request = new RegisterRequest(
                 topicId.getTopic(),
                 source,
-                rollPeriod,
-                broker);
+                rollPeriod);
         TransferWrap wrap = new TransferWrap(request);
         wrap.write(channel);
     }

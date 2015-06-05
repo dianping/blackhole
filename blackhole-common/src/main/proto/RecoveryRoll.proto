@@ -10,5 +10,6 @@ message RecoveryRoll {
     required int32 recovery_port = 4;
     optional string instance_id = 5;
     optional bool is_final = 6;
-    optional bool is_persist = 7 [default = true];
+    optional bool persistent = 7 [default = true];
+    optional string source = 8;
 }

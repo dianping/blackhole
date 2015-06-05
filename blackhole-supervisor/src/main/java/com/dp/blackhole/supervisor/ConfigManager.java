@@ -205,8 +205,8 @@ public class ConfigManager {
                     confInfo.setRollPeriod(Util.parseInt(value, confInfo.getRotatePeriod()));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.MAX_LINE_SIZE)) {
                     confInfo.setMaxLineSize(Util.parseInt(value, 512000));
-                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.IS_PERSIST)) {
-                    confInfo.setPersist(Util.parseBoolean(value, true));
+                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.PERSISTENT)) {
+                    confInfo.setPersistent(Util.parseBoolean(value, true));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.READ_INTERVAL)) {
                     confInfo.setReadInterval(Util.parseLong(value, 1L));
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT)) {
@@ -221,6 +221,9 @@ public class ConfigManager {
                     confInfo.setOwner(value);
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.COMPRESSION)) {
                     confInfo.setCompression(value);
+                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.PARTITION_FACTOR)) {
+                    int factor = Util.parseInt(value, 1);
+                    confInfo.setPartitionFactor(factor < 1 ? 1 : factor);
                 } else {
                     LOG.error("Unrecognized conf string.");
                 }
@@ -413,9 +416,9 @@ public class ConfigManager {
             .append(" = ")
             .append(confInfo.getWatchLog())
             .append("\n")
-            .append(ParamsKey.TopicConf.IS_PERSIST)
+            .append(ParamsKey.TopicConf.PERSISTENT)
             .append(" = ")
-            .append(confInfo.isPersist())
+            .append(confInfo.isPersistent())
             .append("\n")
             .append(ParamsKey.TopicConf.ROTATE_PERIOD)
             .append(" = ")
@@ -444,6 +447,10 @@ public class ConfigManager {
             .append(ParamsKey.TopicConf.COMPRESSION)
             .append(" = ")
             .append(confInfo.getCompression())
+            .append("\n")
+            .append(ParamsKey.TopicConf.PARTITION_FACTOR)
+            .append(" = ")
+            .append(confInfo.getPartitionFactor())
             .append("\n")
             .append(ParamsKey.TopicConf.OWNER)
             .append(" = ")

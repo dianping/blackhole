@@ -5,8 +5,8 @@ option java_outer_classname = "ReadyStreamPB";
 
 message ReadyStream {
     required string topic = 1;
-    required string source = 2;
-    required string broker_server = 3;
-    required int64 period = 4;
-    required int64 connectedTs = 5;
+    optional string partitionId = 2;
+    optional string broker_server = 3;
+    optional int64 period = 4;
+    optional int64 connectedTs = 5;
 }

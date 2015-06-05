@@ -6,13 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.UnknownHostException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.Agent;
-import com.dp.blackhole.agent.TopicMeta.TopicId;
+import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.common.Util;
 
 public class SimAgent extends Agent{
@@ -27,10 +26,7 @@ public class SimAgent extends Agent{
     public static final String TEST_ROLL_FILE = "/tmp/rollfile";
     
     static {
-        try {
-            HOSTNAME = Util.getLocalHost();
-        } catch (UnknownHostException e) {
-        }
+        HOSTNAME = Util.getLocalHost();
     }
     
     public SimAgent() {

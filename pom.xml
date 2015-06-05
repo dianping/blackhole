@@ -31,8 +31,9 @@
 		</plugins>
 	</build>
 	<modules>
-		<module>blackhole-agent</module>
 		<module>blackhole-common</module>
+		<module>blackhole-producer</module>
+		<module>blackhole-agent</module>
 		<module>blackhole-supervisor</module>
 		<module>blackhole-cli</module>
 		<module>blackhole-broker</module>
@@ -56,14 +57,19 @@
 		<dependencies>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>blackhole-agent</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>${project.groupId}</groupId>
 				<artifactId>blackhole-common</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+                        <dependency>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>blackhole-producer</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+                        <dependency>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>blackhole-agent</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>blackhole-supervisor</artifactId>

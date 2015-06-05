@@ -86,15 +86,30 @@ public final class RecoveryRollPB {
      */
     boolean getIsFinal();
 
-    // optional bool is_persist = 7 [default = true];
+    // optional bool persistent = 7 [default = true];
     /**
-     * <code>optional bool is_persist = 7 [default = true];</code>
+     * <code>optional bool persistent = 7 [default = true];</code>
      */
-    boolean hasIsPersist();
+    boolean hasPersistent();
     /**
-     * <code>optional bool is_persist = 7 [default = true];</code>
+     * <code>optional bool persistent = 7 [default = true];</code>
      */
-    boolean getIsPersist();
+    boolean getPersistent();
+
+    // optional string source = 8;
+    /**
+     * <code>optional string source = 8;</code>
+     */
+    boolean hasSource();
+    /**
+     * <code>optional string source = 8;</code>
+     */
+    java.lang.String getSource();
+    /**
+     * <code>optional string source = 8;</code>
+     */
+    com.google.protobuf.ByteString
+        getSourceBytes();
   }
   /**
    * Protobuf type {@code blackhole.RecoveryRoll}
@@ -179,7 +194,12 @@ public final class RecoveryRollPB {
             }
             case 56: {
               bitField0_ |= 0x00000040;
-              isPersist_ = input.readBool();
+              persistent_ = input.readBool();
+              break;
+            }
+            case 66: {
+              bitField0_ |= 0x00000080;
+              source_ = input.readBytes();
               break;
             }
           }
@@ -399,20 +419,63 @@ public final class RecoveryRollPB {
       return isFinal_;
     }
 
-    // optional bool is_persist = 7 [default = true];
-    public static final int IS_PERSIST_FIELD_NUMBER = 7;
-    private boolean isPersist_;
+    // optional bool persistent = 7 [default = true];
+    public static final int PERSISTENT_FIELD_NUMBER = 7;
+    private boolean persistent_;
     /**
-     * <code>optional bool is_persist = 7 [default = true];</code>
+     * <code>optional bool persistent = 7 [default = true];</code>
      */
-    public boolean hasIsPersist() {
+    public boolean hasPersistent() {
       return ((bitField0_ & 0x00000040) == 0x00000040);
     }
     /**
-     * <code>optional bool is_persist = 7 [default = true];</code>
+     * <code>optional bool persistent = 7 [default = true];</code>
      */
-    public boolean getIsPersist() {
-      return isPersist_;
+    public boolean getPersistent() {
+      return persistent_;
+    }
+
+    // optional string source = 8;
+    public static final int SOURCE_FIELD_NUMBER = 8;
+    private java.lang.Object source_;
+    /**
+     * <code>optional string source = 8;</code>
+     */
+    public boolean hasSource() {
+      return ((bitField0_ & 0x00000080) == 0x00000080);
+    }
+    /**
+     * <code>optional string source = 8;</code>
+     */
+    public java.lang.String getSource() {
+      java.lang.Object ref = source_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          source_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string source = 8;</code>
+     */
+    public com.google.protobuf.ByteString
+        getSourceBytes() {
+      java.lang.Object ref = source_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        source_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     private void initFields() {
@@ -422,7 +485,8 @@ public final class RecoveryRollPB {
       recoveryPort_ = 0;
       instanceId_ = "";
       isFinal_ = false;
-      isPersist_ = true;
+      persistent_ = true;
+      source_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -471,7 +535,10 @@ public final class RecoveryRollPB {
         output.writeBool(6, isFinal_);
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
-        output.writeBool(7, isPersist_);
+        output.writeBool(7, persistent_);
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        output.writeBytes(8, getSourceBytes());
       }
       getUnknownFields().writeTo(output);
     }
@@ -508,7 +575,11 @@ public final class RecoveryRollPB {
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(7, isPersist_);
+          .computeBoolSize(7, persistent_);
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(8, getSourceBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -638,8 +709,10 @@ public final class RecoveryRollPB {
         bitField0_ = (bitField0_ & ~0x00000010);
         isFinal_ = false;
         bitField0_ = (bitField0_ & ~0x00000020);
-        isPersist_ = true;
+        persistent_ = true;
         bitField0_ = (bitField0_ & ~0x00000040);
+        source_ = "";
+        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -695,7 +768,11 @@ public final class RecoveryRollPB {
         if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
           to_bitField0_ |= 0x00000040;
         }
-        result.isPersist_ = isPersist_;
+        result.persistent_ = persistent_;
+        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+          to_bitField0_ |= 0x00000080;
+        }
+        result.source_ = source_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -736,8 +813,13 @@ public final class RecoveryRollPB {
         if (other.hasIsFinal()) {
           setIsFinal(other.getIsFinal());
         }
-        if (other.hasIsPersist()) {
-          setIsPersist(other.getIsPersist());
+        if (other.hasPersistent()) {
+          setPersistent(other.getPersistent());
+        }
+        if (other.hasSource()) {
+          bitField0_ |= 0x00000080;
+          source_ = other.source_;
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1103,35 +1185,109 @@ public final class RecoveryRollPB {
         return this;
       }
 
-      // optional bool is_persist = 7 [default = true];
-      private boolean isPersist_ = true;
+      // optional bool persistent = 7 [default = true];
+      private boolean persistent_ = true;
       /**
-       * <code>optional bool is_persist = 7 [default = true];</code>
+       * <code>optional bool persistent = 7 [default = true];</code>
        */
-      public boolean hasIsPersist() {
+      public boolean hasPersistent() {
         return ((bitField0_ & 0x00000040) == 0x00000040);
       }
       /**
-       * <code>optional bool is_persist = 7 [default = true];</code>
+       * <code>optional bool persistent = 7 [default = true];</code>
        */
-      public boolean getIsPersist() {
-        return isPersist_;
+      public boolean getPersistent() {
+        return persistent_;
       }
       /**
-       * <code>optional bool is_persist = 7 [default = true];</code>
+       * <code>optional bool persistent = 7 [default = true];</code>
        */
-      public Builder setIsPersist(boolean value) {
+      public Builder setPersistent(boolean value) {
         bitField0_ |= 0x00000040;
-        isPersist_ = value;
+        persistent_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bool is_persist = 7 [default = true];</code>
+       * <code>optional bool persistent = 7 [default = true];</code>
        */
-      public Builder clearIsPersist() {
+      public Builder clearPersistent() {
         bitField0_ = (bitField0_ & ~0x00000040);
-        isPersist_ = true;
+        persistent_ = true;
+        onChanged();
+        return this;
+      }
+
+      // optional string source = 8;
+      private java.lang.Object source_ = "";
+      /**
+       * <code>optional string source = 8;</code>
+       */
+      public boolean hasSource() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>optional string source = 8;</code>
+       */
+      public java.lang.String getSource() {
+        java.lang.Object ref = source_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          source_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string source = 8;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSourceBytes() {
+        java.lang.Object ref = source_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          source_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string source = 8;</code>
+       */
+      public Builder setSource(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000080;
+        source_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string source = 8;</code>
+       */
+      public Builder clearSource() {
+        bitField0_ = (bitField0_ & ~0x00000080);
+        source_ = getDefaultInstance().getSource();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string source = 8;</code>
+       */
+      public Builder setSourceBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000080;
+        source_ = value;
         onChanged();
         return this;
       }
@@ -1161,13 +1317,13 @@ public final class RecoveryRollPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022RecoveryRoll.proto\022\tblackhole\"\235\001\n\014Reco" +
+      "\n\022RecoveryRoll.proto\022\tblackhole\"\255\001\n\014Reco" +
       "veryRoll\022\r\n\005topic\030\001 \002(\t\022\025\n\rbroker_server" +
       "\030\002 \002(\t\022\017\n\007roll_ts\030\003 \002(\003\022\025\n\rrecovery_port" +
       "\030\004 \002(\005\022\023\n\013instance_id\030\005 \001(\t\022\020\n\010is_final\030" +
-      "\006 \001(\010\022\030\n\nis_persist\030\007 \001(\010:\004trueB3\n!com.d" +
-      "p.blackhole.protocol.controlB\016RecoveryRo" +
-      "llPB"
+      "\006 \001(\010\022\030\n\npersistent\030\007 \001(\010:\004true\022\016\n\006sourc" +
+      "e\030\010 \001(\tB3\n!com.dp.blackhole.protocol.con" +
+      "trolB\016RecoveryRollPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1179,7 +1335,7 @@ public final class RecoveryRollPB {
           internal_static_blackhole_RecoveryRoll_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RecoveryRoll_descriptor,
-              new java.lang.String[] { "Topic", "BrokerServer", "RollTs", "RecoveryPort", "InstanceId", "IsFinal", "IsPersist", });
+              new java.lang.String[] { "Topic", "BrokerServer", "RollTs", "RecoveryPort", "InstanceId", "IsFinal", "Persistent", "Source", });
           return null;
         }
       };

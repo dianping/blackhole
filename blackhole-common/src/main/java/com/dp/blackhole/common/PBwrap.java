@@ -8,7 +8,10 @@ import java.util.Set;
 import com.dp.blackhole.protocol.control.AppRegPB.AppReg;
 import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
+import com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition;
 import com.dp.blackhole.protocol.control.BrokerRegPB.BrokerReg;
+import com.dp.blackhole.protocol.control.CommonConfResPB.CommonConfRes;
+import com.dp.blackhole.protocol.control.ConfReqPB.ConfReq;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
@@ -21,8 +24,12 @@ import com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode;
+import com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
+import com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker;
 import com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream;
+import com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign;
+import com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit;
@@ -89,8 +96,10 @@ public class PBwrap {
         case DUMPSTAT:
             break;
         case NOAVAILABLECONF:
+            msg.setNoavailableConf((NoavailableConf) message);
             break;
         case CONF_REQ:
+            msg.setConfReq((ConfReq) message);
             break;
         case CONF_RES:
             msg.setConfRes((ConfRes) message);
@@ -143,7 +152,20 @@ public class PBwrap {
         case PAUSE_STREAM:
             msg.setPauseStream((PauseStream) message);
             break;
+        case PRODUCER_REG:
+            msg.setProducerReg((ProducerReg) message);
+            break;
+        case PRODUCER_ID_ASSIGN:
+            msg.setProducerIdAssign((ProducerIdAssign) message);
+            break;
+        case ASSIGN_PARTITION:
+            msg.setAssignPartition((AssignPartition) message);
+            break;
+        case PARTITION_REQUIRE_BROKER:
+            msg.setPartitionRequireBroker((PartitionRequireBroker) message);
+            break;
         default:
+            break;
         }
         return msg.build();
     }
@@ -152,11 +174,14 @@ public class PBwrap {
         return wrapMessage(MessageType.HEARTBEART, null);
     }
     
-    public static Message wrapNoAvailableNode(String topic, String instanceId) {
+    public static Message wrapNoAvailableNode(String topic, String instanceId, String source) {
         NoAvailableNode.Builder builder = NoAvailableNode.newBuilder();
         builder.setTopic(topic);
         if (instanceId != null) {
             builder.setInstanceId(instanceId);
+        }
+        if (source != null) {
+            builder.setSource(source);
         }
         return wrapMessage(MessageType.NOAVAILABLENODE, builder.build());
     }
@@ -176,7 +201,7 @@ public class PBwrap {
         return wrapMessage(MessageType.BROKER_REG, builder.build());
     }
     
-    public static Message wrapAssignBroker(String topic, String brokerServer, int port, String instanceId) {
+    public static AssignBroker assignBroker(String topic, String brokerServer, int port, String instanceId, String partitionId) {
         AssignBroker.Builder builder = AssignBroker.newBuilder();
         builder.setTopic(topic);
         builder.setBrokerServer(brokerServer);
@@ -184,31 +209,38 @@ public class PBwrap {
         if (instanceId != null) {
             builder.setInstanceId(instanceId);
         }
-        return wrapMessage(MessageType.ASSIGN_BROKER, builder.build());
+        if (partitionId != null) {
+            builder.setPartitionId(partitionId);
+        }
+        return builder.build();
     }
     
-    public static Message wrapReadyStream(String topic, String source, long period, String brokerServer, long connectedTs) {
+    public static Message wrapAssignBroker(AssignBroker assignBroker) {
+        return wrapMessage(MessageType.ASSIGN_BROKER, assignBroker);
+    }
+    
+    public static Message wrapReadyStream(String topic, String partitionId, long period, String brokerServer, long connectedTs) {
         ReadyStream.Builder builder = ReadyStream.newBuilder();
         builder.setTopic(topic);
-        builder.setSource(source);
+        builder.setPartitionId(partitionId);
         builder.setPeriod(period);
         builder.setBrokerServer(brokerServer);
         builder.setConnectedTs(connectedTs);
         return wrapMessage(MessageType.READY_STREAM, builder.build());
     }
     
-    public static RollID wrapRollID(String appName, String appServer, long period, long rollTs, boolean isFinal, boolean isPersist) {
-        return wrapRollID(appName, appServer, period, rollTs, isFinal, isPersist, "");
+    public static RollID wrapRollID(String appName, String appServer, long period, long rollTs, boolean isFinal, boolean persistent) {
+        return wrapRollID(appName, appServer, period, rollTs, isFinal, persistent, "");
     }
     
-    public static RollID wrapRollID(String topic, String source, long period, long rollTs, boolean isFinal, boolean isPersist, String compression) {
+    public static RollID wrapRollID(String topic, String source, long period, long rollTs, boolean isFinal, boolean persistent, String compression) {
         RollID.Builder builder = RollID.newBuilder();
         builder.setTopic(topic);
         builder.setSource(source);
         builder.setPeriod(period);
         builder.setRollTs(rollTs);
         builder.setIsFinal(isFinal);
-        builder.setIsPersist(isPersist);
+        builder.setPersistent(persistent);
         if (compression == null) {
             builder.setCompression(ParamsKey.COMPRESSION_UNDEFINED);
         } else {
@@ -226,8 +258,8 @@ public class PBwrap {
         return wrapMessage(MessageType.READY_UPLOAD, builder.build());
     }
     
-    public static Message wrapUploadRoll(String topic, String source, long period, long rollTs, boolean isFinal, boolean isPersist, String compression) {
-        return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(topic, source, period, rollTs, isFinal, isPersist, compression));
+    public static Message wrapUploadRoll(String topic, String source, long period, long rollTs, boolean isFinal, boolean persistent, String compression) {
+        return wrapMessage(MessageType.UPLOAD_ROLL, wrapRollID(topic, source, period, rollTs, isFinal, persistent, compression));
     }
     
     public static Message wrapUploadSuccess(String topic, String appServer, long period, long rollTs, boolean isFinal, boolean isPersist, String compression) {
@@ -238,17 +270,19 @@ public class PBwrap {
         return wrapMessage(MessageType.UPLOAD_FAIL, wrapRollID(topic, source, period, rollTs, isFinal, true, compression));
     }
     
-    public static Message wrapRecoveryRoll(String topic, String brokerServer, int port, long rollTs, String instanceId, boolean isFinal, boolean isPersist) {
+    public static Message wrapRecoveryRoll(String topic, String brokerServer, int port, long rollTs, String source, boolean isFinal, boolean persistent) {
         RecoveryRoll.Builder builder = RecoveryRoll.newBuilder();
         builder.setTopic(topic);
         builder.setBrokerServer(brokerServer);
         builder.setRecoveryPort(port);
         builder.setRollTs(rollTs);
-        if (instanceId != null) {
+        builder.setSource(source);
+        String instanceId;
+        if ((instanceId = Util.getInstanceIdFromSource(source)) != null) {
             builder.setInstanceId(instanceId);
         }
         builder.setIsFinal(isFinal);
-        builder.setIsPersist(isPersist);
+        builder.setPersistent(persistent);
         return wrapMessage(MessageType.RECOVERY_ROLL, builder.build());
     }
     
@@ -277,8 +311,12 @@ public class PBwrap {
         return wrapFailure(app, source, NodeType.BROKER_NODE, failTs);
     }
     
-    public static Message wrapUnrecoverable(String appName, String source, long period, long rollTs, boolean isFinal, boolean isPersist) {
-        return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, source, period, rollTs, isFinal, isPersist));
+    public static Message wrapProducerFailure (String app, String source, long failTs) {
+        return wrapFailure(app, source, NodeType.PRODUCER, failTs);
+     }
+    
+    public static Message wrapUnrecoverable(String appName, String source, long period, long rollTs, boolean isFinal, boolean persistent) {
+        return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, source, period, rollTs, isFinal, persistent));
     }
     
     public static Message wrapManualRecoveryRoll(String appName, String source, long period, long rollTs) {
@@ -297,8 +335,12 @@ public class PBwrap {
         return wrapMessage(MessageType.DUMPSTAT, null);
     }
 
-    public static Message wrapConfReq () {
-        return wrapMessage(MessageType.CONF_REQ, null);
+    public static Message wrapConfReq (String topic) {
+        ConfReq.Builder builder = ConfReq.newBuilder();
+        if (topic != null) {
+            builder.setTopic(topic);
+        }
+        return wrapMessage(MessageType.CONF_REQ, builder.build());
     }
     
     public static AppConfRes wrapAppConfRes(String topic, String watchFile,
@@ -347,8 +389,12 @@ public class PBwrap {
         return wrapMessage(MessageType.CONF_RES, builder.build());
     }
     
-    public static Message wrapNoAvailableConf() {
-        return wrapMessage(MessageType.NOAVAILABLECONF, null);
+    public static Message wrapNoAvailableConf(String topic) {
+        NoavailableConf.Builder builder = NoavailableConf.newBuilder();
+        if (topic != null) {
+            builder.setTopic(topic);
+        }
+        return wrapMessage(MessageType.NOAVAILABLECONF, builder.build());
     }
 
     public static Message wrapDumpConf() {
@@ -522,5 +568,46 @@ public class PBwrap {
         builder.setSource(source);
         builder.setDelaySeconds(delaySeconds);
         return wrapMessage(MessageType.PAUSE_STREAM, builder.build());
+    }
+    
+    public static Message wrapProducerReg(String topic, String producerId) {
+        ProducerReg.Builder builder = ProducerReg.newBuilder();
+        builder.setTopic(topic);
+        builder.setProducerId(producerId);
+        return wrapMessage(MessageType.PRODUCER_REG, builder.build());
+    }
+
+    public static CommonConfRes wrapCommonConfRes(int maxLineSize,
+            int minMsgSent, int msgBufSize, int rollPeriod, int partitionFactor) {
+        CommonConfRes.Builder builder = CommonConfRes.newBuilder();
+        builder.setMaxLineSize(maxLineSize);
+        builder.setMinMsgSent(minMsgSent);
+        builder.setMsgBufSize(msgBufSize);
+        builder.setRollPeriod(rollPeriod);
+        builder.setPartitionFactor(partitionFactor);
+        return builder.build();
+    }
+    
+    public static Message wrapProducerIdAssign(String topic, String producerId, CommonConfRes commonConfRes) {
+        ProducerIdAssign.Builder builder = ProducerIdAssign.newBuilder();
+        builder.setTopic(topic);
+        builder.setProducerId(producerId);
+        builder.setConfRes(commonConfRes);
+        return wrapMessage(MessageType.PRODUCER_ID_ASSIGN, builder.build());
+    }
+
+    public static Message wrapAssignParitions(List<AssignBroker> assigns) {
+        AssignPartition.Builder builder = AssignPartition.newBuilder();
+        builder.addAllAssigns(assigns);
+        return wrapMessage(MessageType.ASSIGN_PARTITION, builder.build());
+    }
+
+    public static Message wrapPartitionBrokerRequire(String topic,
+            String produerId, String partitionId) {
+        PartitionRequireBroker.Builder builder = PartitionRequireBroker.newBuilder();
+        builder.setTopic(topic);
+        builder.setProducerId(produerId);
+        builder.setPartitionId(partitionId);
+        return wrapMessage(MessageType.PARTITION_REQUIRE_BROKER, builder.build());
     }
 }

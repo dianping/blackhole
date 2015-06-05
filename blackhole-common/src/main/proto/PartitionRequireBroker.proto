@@ -1,0 +1,10 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "PartitionRequireBrokerPB";
+
+message PartitionRequireBroker{
+    required string topic = 1;
+    required string producer_id = 2;
+    required string partition_id = 3;
+}

@@ -1,0 +1,12 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "CommonConfResPB";
+
+message CommonConfRes {
+    optional int32 max_line_size = 1 [default = 512000];
+    optional int32 min_msg_sent = 2 [default = 30];
+    optional int32 msg_buf_size = 3 [default = 512000];
+    optional int32 roll_period = 4;
+    optional int32 partition_factor = 5 [default = 1];
+}

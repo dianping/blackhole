@@ -1,0 +1,10 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "AssignPartitionPB";
+
+import "AssignBroker.proto";
+
+message AssignPartition {
+	repeated AssignBroker assigns = 1;
+}

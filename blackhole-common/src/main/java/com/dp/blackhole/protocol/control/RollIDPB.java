@@ -86,15 +86,15 @@ public final class RollIDPB {
     com.google.protobuf.ByteString
         getCompressionBytes();
 
-    // optional bool is_Persist = 7 [default = true];
+    // optional bool persistent = 7 [default = true];
     /**
-     * <code>optional bool is_Persist = 7 [default = true];</code>
+     * <code>optional bool persistent = 7 [default = true];</code>
      */
-    boolean hasIsPersist();
+    boolean hasPersistent();
     /**
-     * <code>optional bool is_Persist = 7 [default = true];</code>
+     * <code>optional bool persistent = 7 [default = true];</code>
      */
-    boolean getIsPersist();
+    boolean getPersistent();
   }
   /**
    * Protobuf type {@code blackhole.RollID}
@@ -179,7 +179,7 @@ public final class RollIDPB {
             }
             case 56: {
               bitField0_ |= 0x00000040;
-              isPersist_ = input.readBool();
+              persistent_ = input.readBool();
               break;
             }
           }
@@ -399,20 +399,20 @@ public final class RollIDPB {
       }
     }
 
-    // optional bool is_Persist = 7 [default = true];
-    public static final int IS_PERSIST_FIELD_NUMBER = 7;
-    private boolean isPersist_;
+    // optional bool persistent = 7 [default = true];
+    public static final int PERSISTENT_FIELD_NUMBER = 7;
+    private boolean persistent_;
     /**
-     * <code>optional bool is_Persist = 7 [default = true];</code>
+     * <code>optional bool persistent = 7 [default = true];</code>
      */
-    public boolean hasIsPersist() {
+    public boolean hasPersistent() {
       return ((bitField0_ & 0x00000040) == 0x00000040);
     }
     /**
-     * <code>optional bool is_Persist = 7 [default = true];</code>
+     * <code>optional bool persistent = 7 [default = true];</code>
      */
-    public boolean getIsPersist() {
-      return isPersist_;
+    public boolean getPersistent() {
+      return persistent_;
     }
 
     private void initFields() {
@@ -422,7 +422,7 @@ public final class RollIDPB {
       rollTs_ = 0L;
       isFinal_ = false;
       compression_ = "";
-      isPersist_ = true;
+      persistent_ = true;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -471,7 +471,7 @@ public final class RollIDPB {
         output.writeBytes(6, getCompressionBytes());
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
-        output.writeBool(7, isPersist_);
+        output.writeBool(7, persistent_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -508,7 +508,7 @@ public final class RollIDPB {
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(7, isPersist_);
+          .computeBoolSize(7, persistent_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -638,7 +638,7 @@ public final class RollIDPB {
         bitField0_ = (bitField0_ & ~0x00000010);
         compression_ = "";
         bitField0_ = (bitField0_ & ~0x00000020);
-        isPersist_ = true;
+        persistent_ = true;
         bitField0_ = (bitField0_ & ~0x00000040);
         return this;
       }
@@ -695,7 +695,7 @@ public final class RollIDPB {
         if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
           to_bitField0_ |= 0x00000040;
         }
-        result.isPersist_ = isPersist_;
+        result.persistent_ = persistent_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -736,8 +736,8 @@ public final class RollIDPB {
           compression_ = other.compression_;
           onChanged();
         }
-        if (other.hasIsPersist()) {
-          setIsPersist(other.getIsPersist());
+        if (other.hasPersistent()) {
+          setPersistent(other.getPersistent());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1103,35 +1103,35 @@ public final class RollIDPB {
         return this;
       }
 
-      // optional bool is_Persist = 7 [default = true];
-      private boolean isPersist_ = true;
+      // optional bool persistent = 7 [default = true];
+      private boolean persistent_ = true;
       /**
-       * <code>optional bool is_Persist = 7 [default = true];</code>
+       * <code>optional bool persistent = 7 [default = true];</code>
        */
-      public boolean hasIsPersist() {
+      public boolean hasPersistent() {
         return ((bitField0_ & 0x00000040) == 0x00000040);
       }
       /**
-       * <code>optional bool is_Persist = 7 [default = true];</code>
+       * <code>optional bool persistent = 7 [default = true];</code>
        */
-      public boolean getIsPersist() {
-        return isPersist_;
+      public boolean getPersistent() {
+        return persistent_;
       }
       /**
-       * <code>optional bool is_Persist = 7 [default = true];</code>
+       * <code>optional bool persistent = 7 [default = true];</code>
        */
-      public Builder setIsPersist(boolean value) {
+      public Builder setPersistent(boolean value) {
         bitField0_ |= 0x00000040;
-        isPersist_ = value;
+        persistent_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bool is_Persist = 7 [default = true];</code>
+       * <code>optional bool persistent = 7 [default = true];</code>
        */
-      public Builder clearIsPersist() {
+      public Builder clearPersistent() {
         bitField0_ = (bitField0_ & ~0x00000040);
-        isPersist_ = true;
+        persistent_ = true;
         onChanged();
         return this;
       }
@@ -1164,7 +1164,7 @@ public final class RollIDPB {
       "\n\014RollID.proto\022\tblackhole\"\211\001\n\006RollID\022\r\n\005" +
       "topic\030\001 \002(\t\022\016\n\006source\030\002 \002(\t\022\016\n\006period\030\003 " +
       "\002(\003\022\017\n\007roll_ts\030\004 \002(\003\022\020\n\010is_final\030\005 \001(\010\022\023" +
-      "\n\013compression\030\006 \001(\t\022\030\n\nis_Persist\030\007 \001(\010:" +
+      "\n\013compression\030\006 \001(\t\022\030\n\npersistent\030\007 \001(\010:" +
       "\004trueB-\n!com.dp.blackhole.protocol.contr" +
       "olB\010RollIDPB"
     };
@@ -1178,7 +1178,7 @@ public final class RollIDPB {
           internal_static_blackhole_RollID_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_RollID_descriptor,
-              new java.lang.String[] { "Topic", "Source", "Period", "RollTs", "IsFinal", "Compression", "IsPersist", });
+              new java.lang.String[] { "Topic", "Source", "Period", "RollTs", "IsFinal", "Compression", "Persistent", });
           return null;
         }
       };

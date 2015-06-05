@@ -370,6 +370,90 @@ public final class MessagePB {
      * <code>optional .blackhole.PauseStream pauseStream = 26;</code>
      */
     com.dp.blackhole.protocol.control.PauseStreamPB.PauseStreamOrBuilder getPauseStreamOrBuilder();
+
+    // optional .blackhole.ConfReq confReq = 27;
+    /**
+     * <code>optional .blackhole.ConfReq confReq = 27;</code>
+     */
+    boolean hasConfReq();
+    /**
+     * <code>optional .blackhole.ConfReq confReq = 27;</code>
+     */
+    com.dp.blackhole.protocol.control.ConfReqPB.ConfReq getConfReq();
+    /**
+     * <code>optional .blackhole.ConfReq confReq = 27;</code>
+     */
+    com.dp.blackhole.protocol.control.ConfReqPB.ConfReqOrBuilder getConfReqOrBuilder();
+
+    // optional .blackhole.NoavailableConf noavailableConf = 28;
+    /**
+     * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+     */
+    boolean hasNoavailableConf();
+    /**
+     * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+     */
+    com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf getNoavailableConf();
+    /**
+     * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+     */
+    com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConfOrBuilder getNoavailableConfOrBuilder();
+
+    // optional .blackhole.ProducerReg producerReg = 29;
+    /**
+     * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+     */
+    boolean hasProducerReg();
+    /**
+     * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+     */
+    com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg getProducerReg();
+    /**
+     * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+     */
+    com.dp.blackhole.protocol.control.ProducerRegPB.ProducerRegOrBuilder getProducerRegOrBuilder();
+
+    // optional .blackhole.ProducerIdAssign producerIdAssign = 30;
+    /**
+     * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+     */
+    boolean hasProducerIdAssign();
+    /**
+     * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+     */
+    com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign getProducerIdAssign();
+    /**
+     * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+     */
+    com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssignOrBuilder getProducerIdAssignOrBuilder();
+
+    // optional .blackhole.AssignPartition assignPartition = 31;
+    /**
+     * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+     */
+    boolean hasAssignPartition();
+    /**
+     * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+     */
+    com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition getAssignPartition();
+    /**
+     * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+     */
+    com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartitionOrBuilder getAssignPartitionOrBuilder();
+
+    // optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;
+    /**
+     * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+     */
+    boolean hasPartitionRequireBroker();
+    /**
+     * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+     */
+    com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker getPartitionRequireBroker();
+    /**
+     * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+     */
+    com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBrokerOrBuilder getPartitionRequireBrokerOrBuilder();
   }
   /**
    * Protobuf type {@code blackhole.Message}
@@ -758,6 +842,84 @@ public final class MessagePB {
               bitField0_ |= 0x02000000;
               break;
             }
+            case 218: {
+              com.dp.blackhole.protocol.control.ConfReqPB.ConfReq.Builder subBuilder = null;
+              if (((bitField0_ & 0x04000000) == 0x04000000)) {
+                subBuilder = confReq_.toBuilder();
+              }
+              confReq_ = input.readMessage(com.dp.blackhole.protocol.control.ConfReqPB.ConfReq.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(confReq_);
+                confReq_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x04000000;
+              break;
+            }
+            case 226: {
+              com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf.Builder subBuilder = null;
+              if (((bitField0_ & 0x08000000) == 0x08000000)) {
+                subBuilder = noavailableConf_.toBuilder();
+              }
+              noavailableConf_ = input.readMessage(com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(noavailableConf_);
+                noavailableConf_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x08000000;
+              break;
+            }
+            case 234: {
+              com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg.Builder subBuilder = null;
+              if (((bitField0_ & 0x10000000) == 0x10000000)) {
+                subBuilder = producerReg_.toBuilder();
+              }
+              producerReg_ = input.readMessage(com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(producerReg_);
+                producerReg_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x10000000;
+              break;
+            }
+            case 242: {
+              com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.Builder subBuilder = null;
+              if (((bitField0_ & 0x20000000) == 0x20000000)) {
+                subBuilder = producerIdAssign_.toBuilder();
+              }
+              producerIdAssign_ = input.readMessage(com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(producerIdAssign_);
+                producerIdAssign_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x20000000;
+              break;
+            }
+            case 250: {
+              com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.Builder subBuilder = null;
+              if (((bitField0_ & 0x40000000) == 0x40000000)) {
+                subBuilder = assignPartition_.toBuilder();
+              }
+              assignPartition_ = input.readMessage(com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(assignPartition_);
+                assignPartition_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x40000000;
+              break;
+            }
+            case 258: {
+              com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.Builder subBuilder = null;
+              if (((bitField0_ & 0x80000000) == 0x80000000)) {
+                subBuilder = partitionRequireBroker_.toBuilder();
+              }
+              partitionRequireBroker_ = input.readMessage(com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(partitionRequireBroker_);
+                partitionRequireBroker_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x80000000;
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -966,6 +1128,22 @@ public final class MessagePB {
        * <code>PAUSE_STREAM = 41;</code>
        */
       PAUSE_STREAM(40, 41),
+      /**
+       * <code>PRODUCER_REG = 42;</code>
+       */
+      PRODUCER_REG(41, 42),
+      /**
+       * <code>PRODUCER_ID_ASSIGN = 43;</code>
+       */
+      PRODUCER_ID_ASSIGN(42, 43),
+      /**
+       * <code>ASSIGN_PARTITION = 44;</code>
+       */
+      ASSIGN_PARTITION(43, 44),
+      /**
+       * <code>PARTITION_REQUIRE_BROKER = 45;</code>
+       */
+      PARTITION_REQUIRE_BROKER(44, 45),
       ;
 
       /**
@@ -1132,6 +1310,22 @@ public final class MessagePB {
        * <code>PAUSE_STREAM = 41;</code>
        */
       public static final int PAUSE_STREAM_VALUE = 41;
+      /**
+       * <code>PRODUCER_REG = 42;</code>
+       */
+      public static final int PRODUCER_REG_VALUE = 42;
+      /**
+       * <code>PRODUCER_ID_ASSIGN = 43;</code>
+       */
+      public static final int PRODUCER_ID_ASSIGN_VALUE = 43;
+      /**
+       * <code>ASSIGN_PARTITION = 44;</code>
+       */
+      public static final int ASSIGN_PARTITION_VALUE = 44;
+      /**
+       * <code>PARTITION_REQUIRE_BROKER = 45;</code>
+       */
+      public static final int PARTITION_REQUIRE_BROKER_VALUE = 45;
 
 
       public final int getNumber() { return value; }
@@ -1179,6 +1373,10 @@ public final class MessagePB {
           case 39: return LIST_CONSUMER_GROUP;
           case 40: return SNAPSHOT_OP;
           case 41: return PAUSE_STREAM;
+          case 42: return PRODUCER_REG;
+          case 43: return PRODUCER_ID_ASSIGN;
+          case 44: return ASSIGN_PARTITION;
+          case 45: return PARTITION_REQUIRE_BROKER;
           default: return null;
         }
       }
@@ -1797,6 +1995,138 @@ public final class MessagePB {
       return pauseStream_;
     }
 
+    // optional .blackhole.ConfReq confReq = 27;
+    public static final int CONFREQ_FIELD_NUMBER = 27;
+    private com.dp.blackhole.protocol.control.ConfReqPB.ConfReq confReq_;
+    /**
+     * <code>optional .blackhole.ConfReq confReq = 27;</code>
+     */
+    public boolean hasConfReq() {
+      return ((bitField0_ & 0x04000000) == 0x04000000);
+    }
+    /**
+     * <code>optional .blackhole.ConfReq confReq = 27;</code>
+     */
+    public com.dp.blackhole.protocol.control.ConfReqPB.ConfReq getConfReq() {
+      return confReq_;
+    }
+    /**
+     * <code>optional .blackhole.ConfReq confReq = 27;</code>
+     */
+    public com.dp.blackhole.protocol.control.ConfReqPB.ConfReqOrBuilder getConfReqOrBuilder() {
+      return confReq_;
+    }
+
+    // optional .blackhole.NoavailableConf noavailableConf = 28;
+    public static final int NOAVAILABLECONF_FIELD_NUMBER = 28;
+    private com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf noavailableConf_;
+    /**
+     * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+     */
+    public boolean hasNoavailableConf() {
+      return ((bitField0_ & 0x08000000) == 0x08000000);
+    }
+    /**
+     * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+     */
+    public com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf getNoavailableConf() {
+      return noavailableConf_;
+    }
+    /**
+     * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+     */
+    public com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConfOrBuilder getNoavailableConfOrBuilder() {
+      return noavailableConf_;
+    }
+
+    // optional .blackhole.ProducerReg producerReg = 29;
+    public static final int PRODUCERREG_FIELD_NUMBER = 29;
+    private com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg producerReg_;
+    /**
+     * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+     */
+    public boolean hasProducerReg() {
+      return ((bitField0_ & 0x10000000) == 0x10000000);
+    }
+    /**
+     * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+     */
+    public com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg getProducerReg() {
+      return producerReg_;
+    }
+    /**
+     * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+     */
+    public com.dp.blackhole.protocol.control.ProducerRegPB.ProducerRegOrBuilder getProducerRegOrBuilder() {
+      return producerReg_;
+    }
+
+    // optional .blackhole.ProducerIdAssign producerIdAssign = 30;
+    public static final int PRODUCERIDASSIGN_FIELD_NUMBER = 30;
+    private com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign producerIdAssign_;
+    /**
+     * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+     */
+    public boolean hasProducerIdAssign() {
+      return ((bitField0_ & 0x20000000) == 0x20000000);
+    }
+    /**
+     * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+     */
+    public com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign getProducerIdAssign() {
+      return producerIdAssign_;
+    }
+    /**
+     * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+     */
+    public com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssignOrBuilder getProducerIdAssignOrBuilder() {
+      return producerIdAssign_;
+    }
+
+    // optional .blackhole.AssignPartition assignPartition = 31;
+    public static final int ASSIGNPARTITION_FIELD_NUMBER = 31;
+    private com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition assignPartition_;
+    /**
+     * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+     */
+    public boolean hasAssignPartition() {
+      return ((bitField0_ & 0x40000000) == 0x40000000);
+    }
+    /**
+     * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+     */
+    public com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition getAssignPartition() {
+      return assignPartition_;
+    }
+    /**
+     * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+     */
+    public com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartitionOrBuilder getAssignPartitionOrBuilder() {
+      return assignPartition_;
+    }
+
+    // optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;
+    public static final int PARTITIONREQUIREBROKER_FIELD_NUMBER = 32;
+    private com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker partitionRequireBroker_;
+    /**
+     * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+     */
+    public boolean hasPartitionRequireBroker() {
+      return ((bitField0_ & 0x80000000) == 0x80000000);
+    }
+    /**
+     * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+     */
+    public com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker getPartitionRequireBroker() {
+      return partitionRequireBroker_;
+    }
+    /**
+     * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+     */
+    public com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBrokerOrBuilder getPartitionRequireBrokerOrBuilder() {
+      return partitionRequireBroker_;
+    }
+
     private void initFields() {
       type_ = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance();
@@ -1824,6 +2154,12 @@ public final class MessagePB {
       dumpConsumerGroup_ = com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup.getDefaultInstance();
       snapshotOp_ = com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp.getDefaultInstance();
       pauseStream_ = com.dp.blackhole.protocol.control.PauseStreamPB.PauseStream.getDefaultInstance();
+      confReq_ = com.dp.blackhole.protocol.control.ConfReqPB.ConfReq.getDefaultInstance();
+      noavailableConf_ = com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf.getDefaultInstance();
+      producerReg_ = com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg.getDefaultInstance();
+      producerIdAssign_ = com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.getDefaultInstance();
+      assignPartition_ = com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.getDefaultInstance();
+      partitionRequireBroker_ = com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1972,6 +2308,30 @@ public final class MessagePB {
           return false;
         }
       }
+      if (hasProducerReg()) {
+        if (!getProducerReg().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasProducerIdAssign()) {
+        if (!getProducerIdAssign().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasAssignPartition()) {
+        if (!getAssignPartition().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasPartitionRequireBroker()) {
+        if (!getPartitionRequireBroker().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -2056,6 +2416,24 @@ public final class MessagePB {
       }
       if (((bitField0_ & 0x02000000) == 0x02000000)) {
         output.writeMessage(26, pauseStream_);
+      }
+      if (((bitField0_ & 0x04000000) == 0x04000000)) {
+        output.writeMessage(27, confReq_);
+      }
+      if (((bitField0_ & 0x08000000) == 0x08000000)) {
+        output.writeMessage(28, noavailableConf_);
+      }
+      if (((bitField0_ & 0x10000000) == 0x10000000)) {
+        output.writeMessage(29, producerReg_);
+      }
+      if (((bitField0_ & 0x20000000) == 0x20000000)) {
+        output.writeMessage(30, producerIdAssign_);
+      }
+      if (((bitField0_ & 0x40000000) == 0x40000000)) {
+        output.writeMessage(31, assignPartition_);
+      }
+      if (((bitField0_ & 0x80000000) == 0x80000000)) {
+        output.writeMessage(32, partitionRequireBroker_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -2169,6 +2547,30 @@ public final class MessagePB {
       if (((bitField0_ & 0x02000000) == 0x02000000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(26, pauseStream_);
+      }
+      if (((bitField0_ & 0x04000000) == 0x04000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(27, confReq_);
+      }
+      if (((bitField0_ & 0x08000000) == 0x08000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(28, noavailableConf_);
+      }
+      if (((bitField0_ & 0x10000000) == 0x10000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(29, producerReg_);
+      }
+      if (((bitField0_ & 0x20000000) == 0x20000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(30, producerIdAssign_);
+      }
+      if (((bitField0_ & 0x40000000) == 0x40000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(31, assignPartition_);
+      }
+      if (((bitField0_ & 0x80000000) == 0x80000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(32, partitionRequireBroker_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -2303,6 +2705,12 @@ public final class MessagePB {
           getDumpConsumerGroupFieldBuilder();
           getSnapshotOpFieldBuilder();
           getPauseStreamFieldBuilder();
+          getConfReqFieldBuilder();
+          getNoavailableConfFieldBuilder();
+          getProducerRegFieldBuilder();
+          getProducerIdAssignFieldBuilder();
+          getAssignPartitionFieldBuilder();
+          getPartitionRequireBrokerFieldBuilder();
         }
       }
       private static Builder create() {
@@ -2463,6 +2871,42 @@ public final class MessagePB {
           pauseStreamBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x02000000);
+        if (confReqBuilder_ == null) {
+          confReq_ = com.dp.blackhole.protocol.control.ConfReqPB.ConfReq.getDefaultInstance();
+        } else {
+          confReqBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x04000000);
+        if (noavailableConfBuilder_ == null) {
+          noavailableConf_ = com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf.getDefaultInstance();
+        } else {
+          noavailableConfBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x08000000);
+        if (producerRegBuilder_ == null) {
+          producerReg_ = com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg.getDefaultInstance();
+        } else {
+          producerRegBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x10000000);
+        if (producerIdAssignBuilder_ == null) {
+          producerIdAssign_ = com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.getDefaultInstance();
+        } else {
+          producerIdAssignBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x20000000);
+        if (assignPartitionBuilder_ == null) {
+          assignPartition_ = com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.getDefaultInstance();
+        } else {
+          assignPartitionBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x40000000);
+        if (partitionRequireBrokerBuilder_ == null) {
+          partitionRequireBroker_ = com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.getDefaultInstance();
+        } else {
+          partitionRequireBrokerBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x80000000);
         return this;
       }
 
@@ -2695,6 +3139,54 @@ public final class MessagePB {
         } else {
           result.pauseStream_ = pauseStreamBuilder_.build();
         }
+        if (((from_bitField0_ & 0x04000000) == 0x04000000)) {
+          to_bitField0_ |= 0x04000000;
+        }
+        if (confReqBuilder_ == null) {
+          result.confReq_ = confReq_;
+        } else {
+          result.confReq_ = confReqBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x08000000) == 0x08000000)) {
+          to_bitField0_ |= 0x08000000;
+        }
+        if (noavailableConfBuilder_ == null) {
+          result.noavailableConf_ = noavailableConf_;
+        } else {
+          result.noavailableConf_ = noavailableConfBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x10000000) == 0x10000000)) {
+          to_bitField0_ |= 0x10000000;
+        }
+        if (producerRegBuilder_ == null) {
+          result.producerReg_ = producerReg_;
+        } else {
+          result.producerReg_ = producerRegBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x20000000) == 0x20000000)) {
+          to_bitField0_ |= 0x20000000;
+        }
+        if (producerIdAssignBuilder_ == null) {
+          result.producerIdAssign_ = producerIdAssign_;
+        } else {
+          result.producerIdAssign_ = producerIdAssignBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x40000000) == 0x40000000)) {
+          to_bitField0_ |= 0x40000000;
+        }
+        if (assignPartitionBuilder_ == null) {
+          result.assignPartition_ = assignPartition_;
+        } else {
+          result.assignPartition_ = assignPartitionBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x80000000) == 0x80000000)) {
+          to_bitField0_ |= 0x80000000;
+        }
+        if (partitionRequireBrokerBuilder_ == null) {
+          result.partitionRequireBroker_ = partitionRequireBroker_;
+        } else {
+          result.partitionRequireBroker_ = partitionRequireBrokerBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -2788,6 +3280,24 @@ public final class MessagePB {
         }
         if (other.hasPauseStream()) {
           mergePauseStream(other.getPauseStream());
+        }
+        if (other.hasConfReq()) {
+          mergeConfReq(other.getConfReq());
+        }
+        if (other.hasNoavailableConf()) {
+          mergeNoavailableConf(other.getNoavailableConf());
+        }
+        if (other.hasProducerReg()) {
+          mergeProducerReg(other.getProducerReg());
+        }
+        if (other.hasProducerIdAssign()) {
+          mergeProducerIdAssign(other.getProducerIdAssign());
+        }
+        if (other.hasAssignPartition()) {
+          mergeAssignPartition(other.getAssignPartition());
+        }
+        if (other.hasPartitionRequireBroker()) {
+          mergePartitionRequireBroker(other.getPartitionRequireBroker());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -2932,6 +3442,30 @@ public final class MessagePB {
         }
         if (hasPauseStream()) {
           if (!getPauseStream().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasProducerReg()) {
+          if (!getProducerReg().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasProducerIdAssign()) {
+          if (!getProducerIdAssign().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasAssignPartition()) {
+          if (!getAssignPartition().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasPartitionRequireBroker()) {
+          if (!getPartitionRequireBroker().isInitialized()) {
             
             return false;
           }
@@ -5919,6 +6453,708 @@ public final class MessagePB {
         return pauseStreamBuilder_;
       }
 
+      // optional .blackhole.ConfReq confReq = 27;
+      private com.dp.blackhole.protocol.control.ConfReqPB.ConfReq confReq_ = com.dp.blackhole.protocol.control.ConfReqPB.ConfReq.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.ConfReqPB.ConfReq, com.dp.blackhole.protocol.control.ConfReqPB.ConfReq.Builder, com.dp.blackhole.protocol.control.ConfReqPB.ConfReqOrBuilder> confReqBuilder_;
+      /**
+       * <code>optional .blackhole.ConfReq confReq = 27;</code>
+       */
+      public boolean hasConfReq() {
+        return ((bitField0_ & 0x04000000) == 0x04000000);
+      }
+      /**
+       * <code>optional .blackhole.ConfReq confReq = 27;</code>
+       */
+      public com.dp.blackhole.protocol.control.ConfReqPB.ConfReq getConfReq() {
+        if (confReqBuilder_ == null) {
+          return confReq_;
+        } else {
+          return confReqBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.ConfReq confReq = 27;</code>
+       */
+      public Builder setConfReq(com.dp.blackhole.protocol.control.ConfReqPB.ConfReq value) {
+        if (confReqBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          confReq_ = value;
+          onChanged();
+        } else {
+          confReqBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x04000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ConfReq confReq = 27;</code>
+       */
+      public Builder setConfReq(
+          com.dp.blackhole.protocol.control.ConfReqPB.ConfReq.Builder builderForValue) {
+        if (confReqBuilder_ == null) {
+          confReq_ = builderForValue.build();
+          onChanged();
+        } else {
+          confReqBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x04000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ConfReq confReq = 27;</code>
+       */
+      public Builder mergeConfReq(com.dp.blackhole.protocol.control.ConfReqPB.ConfReq value) {
+        if (confReqBuilder_ == null) {
+          if (((bitField0_ & 0x04000000) == 0x04000000) &&
+              confReq_ != com.dp.blackhole.protocol.control.ConfReqPB.ConfReq.getDefaultInstance()) {
+            confReq_ =
+              com.dp.blackhole.protocol.control.ConfReqPB.ConfReq.newBuilder(confReq_).mergeFrom(value).buildPartial();
+          } else {
+            confReq_ = value;
+          }
+          onChanged();
+        } else {
+          confReqBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x04000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ConfReq confReq = 27;</code>
+       */
+      public Builder clearConfReq() {
+        if (confReqBuilder_ == null) {
+          confReq_ = com.dp.blackhole.protocol.control.ConfReqPB.ConfReq.getDefaultInstance();
+          onChanged();
+        } else {
+          confReqBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x04000000);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ConfReq confReq = 27;</code>
+       */
+      public com.dp.blackhole.protocol.control.ConfReqPB.ConfReq.Builder getConfReqBuilder() {
+        bitField0_ |= 0x04000000;
+        onChanged();
+        return getConfReqFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.ConfReq confReq = 27;</code>
+       */
+      public com.dp.blackhole.protocol.control.ConfReqPB.ConfReqOrBuilder getConfReqOrBuilder() {
+        if (confReqBuilder_ != null) {
+          return confReqBuilder_.getMessageOrBuilder();
+        } else {
+          return confReq_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.ConfReq confReq = 27;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.ConfReqPB.ConfReq, com.dp.blackhole.protocol.control.ConfReqPB.ConfReq.Builder, com.dp.blackhole.protocol.control.ConfReqPB.ConfReqOrBuilder> 
+          getConfReqFieldBuilder() {
+        if (confReqBuilder_ == null) {
+          confReqBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.ConfReqPB.ConfReq, com.dp.blackhole.protocol.control.ConfReqPB.ConfReq.Builder, com.dp.blackhole.protocol.control.ConfReqPB.ConfReqOrBuilder>(
+                  confReq_,
+                  getParentForChildren(),
+                  isClean());
+          confReq_ = null;
+        }
+        return confReqBuilder_;
+      }
+
+      // optional .blackhole.NoavailableConf noavailableConf = 28;
+      private com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf noavailableConf_ = com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf, com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf.Builder, com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConfOrBuilder> noavailableConfBuilder_;
+      /**
+       * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+       */
+      public boolean hasNoavailableConf() {
+        return ((bitField0_ & 0x08000000) == 0x08000000);
+      }
+      /**
+       * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+       */
+      public com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf getNoavailableConf() {
+        if (noavailableConfBuilder_ == null) {
+          return noavailableConf_;
+        } else {
+          return noavailableConfBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+       */
+      public Builder setNoavailableConf(com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf value) {
+        if (noavailableConfBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          noavailableConf_ = value;
+          onChanged();
+        } else {
+          noavailableConfBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x08000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+       */
+      public Builder setNoavailableConf(
+          com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf.Builder builderForValue) {
+        if (noavailableConfBuilder_ == null) {
+          noavailableConf_ = builderForValue.build();
+          onChanged();
+        } else {
+          noavailableConfBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x08000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+       */
+      public Builder mergeNoavailableConf(com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf value) {
+        if (noavailableConfBuilder_ == null) {
+          if (((bitField0_ & 0x08000000) == 0x08000000) &&
+              noavailableConf_ != com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf.getDefaultInstance()) {
+            noavailableConf_ =
+              com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf.newBuilder(noavailableConf_).mergeFrom(value).buildPartial();
+          } else {
+            noavailableConf_ = value;
+          }
+          onChanged();
+        } else {
+          noavailableConfBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x08000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+       */
+      public Builder clearNoavailableConf() {
+        if (noavailableConfBuilder_ == null) {
+          noavailableConf_ = com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf.getDefaultInstance();
+          onChanged();
+        } else {
+          noavailableConfBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x08000000);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+       */
+      public com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf.Builder getNoavailableConfBuilder() {
+        bitField0_ |= 0x08000000;
+        onChanged();
+        return getNoavailableConfFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+       */
+      public com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConfOrBuilder getNoavailableConfOrBuilder() {
+        if (noavailableConfBuilder_ != null) {
+          return noavailableConfBuilder_.getMessageOrBuilder();
+        } else {
+          return noavailableConf_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.NoavailableConf noavailableConf = 28;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf, com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf.Builder, com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConfOrBuilder> 
+          getNoavailableConfFieldBuilder() {
+        if (noavailableConfBuilder_ == null) {
+          noavailableConfBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf, com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConf.Builder, com.dp.blackhole.protocol.control.NoavailableConfPB.NoavailableConfOrBuilder>(
+                  noavailableConf_,
+                  getParentForChildren(),
+                  isClean());
+          noavailableConf_ = null;
+        }
+        return noavailableConfBuilder_;
+      }
+
+      // optional .blackhole.ProducerReg producerReg = 29;
+      private com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg producerReg_ = com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg, com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg.Builder, com.dp.blackhole.protocol.control.ProducerRegPB.ProducerRegOrBuilder> producerRegBuilder_;
+      /**
+       * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+       */
+      public boolean hasProducerReg() {
+        return ((bitField0_ & 0x10000000) == 0x10000000);
+      }
+      /**
+       * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+       */
+      public com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg getProducerReg() {
+        if (producerRegBuilder_ == null) {
+          return producerReg_;
+        } else {
+          return producerRegBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+       */
+      public Builder setProducerReg(com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg value) {
+        if (producerRegBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          producerReg_ = value;
+          onChanged();
+        } else {
+          producerRegBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x10000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+       */
+      public Builder setProducerReg(
+          com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg.Builder builderForValue) {
+        if (producerRegBuilder_ == null) {
+          producerReg_ = builderForValue.build();
+          onChanged();
+        } else {
+          producerRegBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x10000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+       */
+      public Builder mergeProducerReg(com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg value) {
+        if (producerRegBuilder_ == null) {
+          if (((bitField0_ & 0x10000000) == 0x10000000) &&
+              producerReg_ != com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg.getDefaultInstance()) {
+            producerReg_ =
+              com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg.newBuilder(producerReg_).mergeFrom(value).buildPartial();
+          } else {
+            producerReg_ = value;
+          }
+          onChanged();
+        } else {
+          producerRegBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x10000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+       */
+      public Builder clearProducerReg() {
+        if (producerRegBuilder_ == null) {
+          producerReg_ = com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg.getDefaultInstance();
+          onChanged();
+        } else {
+          producerRegBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x10000000);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+       */
+      public com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg.Builder getProducerRegBuilder() {
+        bitField0_ |= 0x10000000;
+        onChanged();
+        return getProducerRegFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+       */
+      public com.dp.blackhole.protocol.control.ProducerRegPB.ProducerRegOrBuilder getProducerRegOrBuilder() {
+        if (producerRegBuilder_ != null) {
+          return producerRegBuilder_.getMessageOrBuilder();
+        } else {
+          return producerReg_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.ProducerReg producerReg = 29;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg, com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg.Builder, com.dp.blackhole.protocol.control.ProducerRegPB.ProducerRegOrBuilder> 
+          getProducerRegFieldBuilder() {
+        if (producerRegBuilder_ == null) {
+          producerRegBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg, com.dp.blackhole.protocol.control.ProducerRegPB.ProducerReg.Builder, com.dp.blackhole.protocol.control.ProducerRegPB.ProducerRegOrBuilder>(
+                  producerReg_,
+                  getParentForChildren(),
+                  isClean());
+          producerReg_ = null;
+        }
+        return producerRegBuilder_;
+      }
+
+      // optional .blackhole.ProducerIdAssign producerIdAssign = 30;
+      private com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign producerIdAssign_ = com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign, com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.Builder, com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssignOrBuilder> producerIdAssignBuilder_;
+      /**
+       * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+       */
+      public boolean hasProducerIdAssign() {
+        return ((bitField0_ & 0x20000000) == 0x20000000);
+      }
+      /**
+       * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+       */
+      public com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign getProducerIdAssign() {
+        if (producerIdAssignBuilder_ == null) {
+          return producerIdAssign_;
+        } else {
+          return producerIdAssignBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+       */
+      public Builder setProducerIdAssign(com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign value) {
+        if (producerIdAssignBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          producerIdAssign_ = value;
+          onChanged();
+        } else {
+          producerIdAssignBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x20000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+       */
+      public Builder setProducerIdAssign(
+          com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.Builder builderForValue) {
+        if (producerIdAssignBuilder_ == null) {
+          producerIdAssign_ = builderForValue.build();
+          onChanged();
+        } else {
+          producerIdAssignBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x20000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+       */
+      public Builder mergeProducerIdAssign(com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign value) {
+        if (producerIdAssignBuilder_ == null) {
+          if (((bitField0_ & 0x20000000) == 0x20000000) &&
+              producerIdAssign_ != com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.getDefaultInstance()) {
+            producerIdAssign_ =
+              com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.newBuilder(producerIdAssign_).mergeFrom(value).buildPartial();
+          } else {
+            producerIdAssign_ = value;
+          }
+          onChanged();
+        } else {
+          producerIdAssignBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x20000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+       */
+      public Builder clearProducerIdAssign() {
+        if (producerIdAssignBuilder_ == null) {
+          producerIdAssign_ = com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.getDefaultInstance();
+          onChanged();
+        } else {
+          producerIdAssignBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x20000000);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+       */
+      public com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.Builder getProducerIdAssignBuilder() {
+        bitField0_ |= 0x20000000;
+        onChanged();
+        return getProducerIdAssignFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+       */
+      public com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssignOrBuilder getProducerIdAssignOrBuilder() {
+        if (producerIdAssignBuilder_ != null) {
+          return producerIdAssignBuilder_.getMessageOrBuilder();
+        } else {
+          return producerIdAssign_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.ProducerIdAssign producerIdAssign = 30;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign, com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.Builder, com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssignOrBuilder> 
+          getProducerIdAssignFieldBuilder() {
+        if (producerIdAssignBuilder_ == null) {
+          producerIdAssignBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign, com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.Builder, com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssignOrBuilder>(
+                  producerIdAssign_,
+                  getParentForChildren(),
+                  isClean());
+          producerIdAssign_ = null;
+        }
+        return producerIdAssignBuilder_;
+      }
+
+      // optional .blackhole.AssignPartition assignPartition = 31;
+      private com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition assignPartition_ = com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition, com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.Builder, com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartitionOrBuilder> assignPartitionBuilder_;
+      /**
+       * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+       */
+      public boolean hasAssignPartition() {
+        return ((bitField0_ & 0x40000000) == 0x40000000);
+      }
+      /**
+       * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+       */
+      public com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition getAssignPartition() {
+        if (assignPartitionBuilder_ == null) {
+          return assignPartition_;
+        } else {
+          return assignPartitionBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+       */
+      public Builder setAssignPartition(com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition value) {
+        if (assignPartitionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          assignPartition_ = value;
+          onChanged();
+        } else {
+          assignPartitionBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x40000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+       */
+      public Builder setAssignPartition(
+          com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.Builder builderForValue) {
+        if (assignPartitionBuilder_ == null) {
+          assignPartition_ = builderForValue.build();
+          onChanged();
+        } else {
+          assignPartitionBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x40000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+       */
+      public Builder mergeAssignPartition(com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition value) {
+        if (assignPartitionBuilder_ == null) {
+          if (((bitField0_ & 0x40000000) == 0x40000000) &&
+              assignPartition_ != com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.getDefaultInstance()) {
+            assignPartition_ =
+              com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.newBuilder(assignPartition_).mergeFrom(value).buildPartial();
+          } else {
+            assignPartition_ = value;
+          }
+          onChanged();
+        } else {
+          assignPartitionBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x40000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+       */
+      public Builder clearAssignPartition() {
+        if (assignPartitionBuilder_ == null) {
+          assignPartition_ = com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.getDefaultInstance();
+          onChanged();
+        } else {
+          assignPartitionBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x40000000);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+       */
+      public com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.Builder getAssignPartitionBuilder() {
+        bitField0_ |= 0x40000000;
+        onChanged();
+        return getAssignPartitionFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+       */
+      public com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartitionOrBuilder getAssignPartitionOrBuilder() {
+        if (assignPartitionBuilder_ != null) {
+          return assignPartitionBuilder_.getMessageOrBuilder();
+        } else {
+          return assignPartition_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.AssignPartition assignPartition = 31;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition, com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.Builder, com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartitionOrBuilder> 
+          getAssignPartitionFieldBuilder() {
+        if (assignPartitionBuilder_ == null) {
+          assignPartitionBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition, com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.Builder, com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartitionOrBuilder>(
+                  assignPartition_,
+                  getParentForChildren(),
+                  isClean());
+          assignPartition_ = null;
+        }
+        return assignPartitionBuilder_;
+      }
+
+      // optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;
+      private com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker partitionRequireBroker_ = com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker, com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.Builder, com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBrokerOrBuilder> partitionRequireBrokerBuilder_;
+      /**
+       * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+       */
+      public boolean hasPartitionRequireBroker() {
+        return ((bitField0_ & 0x80000000) == 0x80000000);
+      }
+      /**
+       * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+       */
+      public com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker getPartitionRequireBroker() {
+        if (partitionRequireBrokerBuilder_ == null) {
+          return partitionRequireBroker_;
+        } else {
+          return partitionRequireBrokerBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+       */
+      public Builder setPartitionRequireBroker(com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker value) {
+        if (partitionRequireBrokerBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          partitionRequireBroker_ = value;
+          onChanged();
+        } else {
+          partitionRequireBrokerBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x80000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+       */
+      public Builder setPartitionRequireBroker(
+          com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.Builder builderForValue) {
+        if (partitionRequireBrokerBuilder_ == null) {
+          partitionRequireBroker_ = builderForValue.build();
+          onChanged();
+        } else {
+          partitionRequireBrokerBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x80000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+       */
+      public Builder mergePartitionRequireBroker(com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker value) {
+        if (partitionRequireBrokerBuilder_ == null) {
+          if (((bitField0_ & 0x80000000) == 0x80000000) &&
+              partitionRequireBroker_ != com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.getDefaultInstance()) {
+            partitionRequireBroker_ =
+              com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.newBuilder(partitionRequireBroker_).mergeFrom(value).buildPartial();
+          } else {
+            partitionRequireBroker_ = value;
+          }
+          onChanged();
+        } else {
+          partitionRequireBrokerBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x80000000;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+       */
+      public Builder clearPartitionRequireBroker() {
+        if (partitionRequireBrokerBuilder_ == null) {
+          partitionRequireBroker_ = com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.getDefaultInstance();
+          onChanged();
+        } else {
+          partitionRequireBrokerBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x80000000);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+       */
+      public com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.Builder getPartitionRequireBrokerBuilder() {
+        bitField0_ |= 0x80000000;
+        onChanged();
+        return getPartitionRequireBrokerFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+       */
+      public com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBrokerOrBuilder getPartitionRequireBrokerOrBuilder() {
+        if (partitionRequireBrokerBuilder_ != null) {
+          return partitionRequireBrokerBuilder_.getMessageOrBuilder();
+        } else {
+          return partitionRequireBroker_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker, com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.Builder, com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBrokerOrBuilder> 
+          getPartitionRequireBrokerFieldBuilder() {
+        if (partitionRequireBrokerBuilder_ == null) {
+          partitionRequireBrokerBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker, com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.Builder, com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBrokerOrBuilder>(
+                  partitionRequireBroker_,
+                  getParentForChildren(),
+                  isClean());
+          partitionRequireBroker_ = null;
+        }
+        return partitionRequireBrokerBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
 
@@ -5948,61 +7184,75 @@ public final class MessagePB {
       "\032\022AssignBroker.proto\032\022RecoveryRoll.proto" +
       "\032\021ReadyStream.proto\032\021ReadyUpload.proto\032\014" +
       "RollID.proto\032\rFailure.proto\032\025NoAvailable" +
-      "Node.proto\032\014Retire.proto\032\rConfRes.proto\032" +
-      "\017DumpReply.proto\032\020RemoveConf.proto\032\017Brok" +
-      "erReg.proto\032\rDumpApp.proto\032\021ConsumerReg." +
-      "proto\032\024AssignConsumer.proto\032\022OffsetCommi" +
-      "t.proto\032\021TopicReport.proto\032\rRestart.prot" +
-      "o\032\022QuitAndClean.proto\032\017RollClean.proto\032\027",
-      "DumpConsumerGroup.proto\032\020SnapshotOp.prot" +
-      "o\032\021PauseStream.proto\"\261\016\n\007Message\022,\n\004type" +
-      "\030\001 \002(\0162\036.blackhole.Message.MessageType\022!" +
-      "\n\006appReg\030\002 \001(\0132\021.blackhole.AppReg\022-\n\014ass" +
-      "ignBroker\030\003 \001(\0132\027.blackhole.AssignBroker" +
-      "\022+\n\013readyUpload\030\004 \001(\0132\026.blackhole.ReadyU" +
-      "pload\022-\n\014recoveryRoll\030\005 \001(\0132\027.blackhole." +
-      "RecoveryRoll\022+\n\013readyStream\030\006 \001(\0132\026.blac" +
-      "khole.ReadyStream\022!\n\006rollID\030\007 \001(\0132\021.blac" +
-      "khole.RollID\022#\n\007failure\030\010 \001(\0132\022.blackhol",
-      "e.Failure\0223\n\017noAvailableNode\030\t \001(\0132\032.bla" +
-      "ckhole.NoAvailableNode\022!\n\006retire\030\n \001(\0132\021" +
-      ".blackhole.Retire\022#\n\007confRes\030\013 \001(\0132\022.bla" +
-      "ckhole.ConfRes\022\'\n\tdumpReply\030\014 \001(\0132\024.blac" +
-      "khole.DumpReply\022)\n\nremoveConf\030\r \001(\0132\025.bl" +
-      "ackhole.RemoveConf\022\'\n\tbrokerReg\030\016 \001(\0132\024." +
-      "blackhole.BrokerReg\022#\n\007dumpApp\030\017 \001(\0132\022.b" +
-      "lackhole.DumpApp\022+\n\013consumerReg\030\020 \001(\0132\026." +
-      "blackhole.ConsumerReg\0221\n\016assignConsumer\030" +
-      "\021 \001(\0132\031.blackhole.AssignConsumer\022-\n\014offs",
-      "etCommit\030\022 \001(\0132\027.blackhole.OffsetCommit\022" +
-      "+\n\013topicReport\030\023 \001(\0132\026.blackhole.TopicRe" +
-      "port\022#\n\007restart\030\024 \001(\0132\022.blackhole.Restar" +
-      "t\022\035\n\004quit\030\025 \001(\0132\017.blackhole.Quit\022\037\n\005clea" +
-      "n\030\026 \001(\0132\020.blackhole.Clean\022\'\n\trollClean\030\027" +
-      " \001(\0132\024.blackhole.RollClean\0227\n\021dumpConsum" +
-      "erGroup\030\030 \001(\0132\034.blackhole.DumpConsumerGr" +
-      "oup\022)\n\nsnapshotOp\030\031 \001(\0132\025.blackhole.Snap" +
-      "shotOp\022+\n\013pauseStream\030\032 \001(\0132\026.blackhole." +
-      "PauseStream\"\332\005\n\013MessageType\022\016\n\nHEARTBEAR",
-      "T\020\001\022\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021\n\rASSI" +
-      "GN_BROKER\020\004\022\020\n\014READY_STREAM\020\005\022\020\n\014READY_U" +
-      "PLOAD\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_SUCCE" +
-      "SS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_ROLL\020\n" +
-      "\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOVERY_FAIL\020" +
-      "\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAILABLENODE\020\016\022\021\n\rU" +
-      "NRECOVERABLE\020\017\022\030\n\024MANUAL_RECOVERY_ROLL\020\020" +
-      "\022\014\n\010DUMPSTAT\020\021\022\020\n\014RETIRESTREAM\020\022\022\014\n\010CONF" +
-      "_REQ\020\023\022\014\n\010CONF_RES\020\024\022\023\n\017NOAVAILABLECONF\020" +
-      "\025\022\014\n\010DUMPCONF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010LISTAP",
-      "PS\020\030\022\017\n\013REMOVE_CONF\020\031\022\014\n\010DUMP_APP\020\032\022\020\n\014C" +
-      "ONSUMER_REG\020\033\022\023\n\017ASSIGN_CONSUMER\020\034\022\021\n\rOF" +
-      "FSET_COMMIT\020\035\022\017\n\013TOPICREPORT\020\036\022\023\n\017CONSUM" +
-      "ERREGFAIL\020\037\022\026\n\022MAKR_UNRECOVERABLE\020 \022\014\n\010L" +
-      "ISTIDLE\020!\022\013\n\007RESTART\020\"\022\010\n\004QUIT\020#\022\t\n\005CLEA" +
-      "N\020$\022\016\n\nROLL_CLEAN\020%\022\027\n\023DUMP_CONSUMER_GRO" +
-      "UP\020&\022\027\n\023LIST_CONSUMER_GROUP\020\'\022\017\n\013SNAPSHO" +
-      "T_OP\020(\022\020\n\014PAUSE_STREAM\020)B.\n!com.dp.black" +
-      "hole.protocol.controlB\tMessagePB"
+      "Node.proto\032\014Retire.proto\032\rConfReq.proto\032" +
+      "\rConfRes.proto\032\017DumpReply.proto\032\020RemoveC" +
+      "onf.proto\032\017BrokerReg.proto\032\rDumpApp.prot" +
+      "o\032\021ConsumerReg.proto\032\024AssignConsumer.pro" +
+      "to\032\022OffsetCommit.proto\032\021TopicReport.prot" +
+      "o\032\rRestart.proto\032\022QuitAndClean.proto\032\017Ro",
+      "llClean.proto\032\027DumpConsumerGroup.proto\032\020" +
+      "SnapshotOp.proto\032\021PauseStream.proto\032\021Pro" +
+      "ducerReg.proto\032\026ProducerIdAssign.proto\032\025" +
+      "NoavailableConf.proto\032\025AssignPartition.p" +
+      "roto\032\034PartitionRequireBroker.proto\"\305\021\n\007M" +
+      "essage\022,\n\004type\030\001 \002(\0162\036.blackhole.Message" +
+      ".MessageType\022!\n\006appReg\030\002 \001(\0132\021.blackhole" +
+      ".AppReg\022-\n\014assignBroker\030\003 \001(\0132\027.blackhol" +
+      "e.AssignBroker\022+\n\013readyUpload\030\004 \001(\0132\026.bl" +
+      "ackhole.ReadyUpload\022-\n\014recoveryRoll\030\005 \001(",
+      "\0132\027.blackhole.RecoveryRoll\022+\n\013readyStrea" +
+      "m\030\006 \001(\0132\026.blackhole.ReadyStream\022!\n\006rollI" +
+      "D\030\007 \001(\0132\021.blackhole.RollID\022#\n\007failure\030\010 " +
+      "\001(\0132\022.blackhole.Failure\0223\n\017noAvailableNo" +
+      "de\030\t \001(\0132\032.blackhole.NoAvailableNode\022!\n\006" +
+      "retire\030\n \001(\0132\021.blackhole.Retire\022#\n\007confR" +
+      "es\030\013 \001(\0132\022.blackhole.ConfRes\022\'\n\tdumpRepl" +
+      "y\030\014 \001(\0132\024.blackhole.DumpReply\022)\n\nremoveC" +
+      "onf\030\r \001(\0132\025.blackhole.RemoveConf\022\'\n\tbrok" +
+      "erReg\030\016 \001(\0132\024.blackhole.BrokerReg\022#\n\007dum",
+      "pApp\030\017 \001(\0132\022.blackhole.DumpApp\022+\n\013consum" +
+      "erReg\030\020 \001(\0132\026.blackhole.ConsumerReg\0221\n\016a" +
+      "ssignConsumer\030\021 \001(\0132\031.blackhole.AssignCo" +
+      "nsumer\022-\n\014offsetCommit\030\022 \001(\0132\027.blackhole" +
+      ".OffsetCommit\022+\n\013topicReport\030\023 \001(\0132\026.bla" +
+      "ckhole.TopicReport\022#\n\007restart\030\024 \001(\0132\022.bl" +
+      "ackhole.Restart\022\035\n\004quit\030\025 \001(\0132\017.blackhol" +
+      "e.Quit\022\037\n\005clean\030\026 \001(\0132\020.blackhole.Clean\022" +
+      "\'\n\trollClean\030\027 \001(\0132\024.blackhole.RollClean" +
+      "\0227\n\021dumpConsumerGroup\030\030 \001(\0132\034.blackhole.",
+      "DumpConsumerGroup\022)\n\nsnapshotOp\030\031 \001(\0132\025." +
+      "blackhole.SnapshotOp\022+\n\013pauseStream\030\032 \001(" +
+      "\0132\026.blackhole.PauseStream\022#\n\007confReq\030\033 \001" +
+      "(\0132\022.blackhole.ConfReq\0223\n\017noavailableCon" +
+      "f\030\034 \001(\0132\032.blackhole.NoavailableConf\022+\n\013p" +
+      "roducerReg\030\035 \001(\0132\026.blackhole.ProducerReg" +
+      "\0225\n\020producerIdAssign\030\036 \001(\0132\033.blackhole.P" +
+      "roducerIdAssign\0223\n\017assignPartition\030\037 \001(\013" +
+      "2\032.blackhole.AssignPartition\022A\n\026partitio" +
+      "nRequireBroker\030  \001(\0132!.blackhole.Partiti",
+      "onRequireBroker\"\270\006\n\013MessageType\022\016\n\nHEART" +
+      "BEART\020\001\022\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021\n\r" +
+      "ASSIGN_BROKER\020\004\022\020\n\014READY_STREAM\020\005\022\020\n\014REA" +
+      "DY_UPLOAD\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_S" +
+      "UCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_RO" +
+      "LL\020\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOVERY_F" +
+      "AIL\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAILABLENODE\020\016\022" +
+      "\021\n\rUNRECOVERABLE\020\017\022\030\n\024MANUAL_RECOVERY_RO" +
+      "LL\020\020\022\014\n\010DUMPSTAT\020\021\022\020\n\014RETIRESTREAM\020\022\022\014\n\010" +
+      "CONF_REQ\020\023\022\014\n\010CONF_RES\020\024\022\023\n\017NOAVAILABLEC",
+      "ONF\020\025\022\014\n\010DUMPCONF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010LI" +
+      "STAPPS\020\030\022\017\n\013REMOVE_CONF\020\031\022\014\n\010DUMP_APP\020\032\022" +
+      "\020\n\014CONSUMER_REG\020\033\022\023\n\017ASSIGN_CONSUMER\020\034\022\021" +
+      "\n\rOFFSET_COMMIT\020\035\022\017\n\013TOPICREPORT\020\036\022\023\n\017CO" +
+      "NSUMERREGFAIL\020\037\022\026\n\022MAKR_UNRECOVERABLE\020 \022" +
+      "\014\n\010LISTIDLE\020!\022\013\n\007RESTART\020\"\022\010\n\004QUIT\020#\022\t\n\005" +
+      "CLEAN\020$\022\016\n\nROLL_CLEAN\020%\022\027\n\023DUMP_CONSUMER" +
+      "_GROUP\020&\022\027\n\023LIST_CONSUMER_GROUP\020\'\022\017\n\013SNA" +
+      "PSHOT_OP\020(\022\020\n\014PAUSE_STREAM\020)\022\020\n\014PRODUCER" +
+      "_REG\020*\022\026\n\022PRODUCER_ID_ASSIGN\020+\022\024\n\020ASSIGN",
+      "_PARTITION\020,\022\034\n\030PARTITION_REQUIRE_BROKER" +
+      "\020-B.\n!com.dp.blackhole.protocol.controlB" +
+      "\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -6014,7 +7264,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "ReadyUpload", "RecoveryRoll", "ReadyStream", "RollID", "Failure", "NoAvailableNode", "Retire", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", "Quit", "Clean", "RollClean", "DumpConsumerGroup", "SnapshotOp", "PauseStream", });
+              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "ReadyUpload", "RecoveryRoll", "ReadyStream", "RollID", "Failure", "NoAvailableNode", "Retire", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", "Quit", "Clean", "RollClean", "DumpConsumerGroup", "SnapshotOp", "PauseStream", "ConfReq", "NoavailableConf", "ProducerReg", "ProducerIdAssign", "AssignPartition", "PartitionRequireBroker", });
           return null;
         }
       };
@@ -6030,6 +7280,7 @@ public final class MessagePB {
           com.dp.blackhole.protocol.control.FailurePB.getDescriptor(),
           com.dp.blackhole.protocol.control.NoAvailableNodePB.getDescriptor(),
           com.dp.blackhole.protocol.control.RetirePB.getDescriptor(),
+          com.dp.blackhole.protocol.control.ConfReqPB.getDescriptor(),
           com.dp.blackhole.protocol.control.ConfResPB.getDescriptor(),
           com.dp.blackhole.protocol.control.DumpReplyPB.getDescriptor(),
           com.dp.blackhole.protocol.control.RemoveConfPB.getDescriptor(),
@@ -6045,6 +7296,11 @@ public final class MessagePB {
           com.dp.blackhole.protocol.control.DumpConsumerGroupPB.getDescriptor(),
           com.dp.blackhole.protocol.control.SnapshotOpPB.getDescriptor(),
           com.dp.blackhole.protocol.control.PauseStreamPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.ProducerRegPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.ProducerIdAssignPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.NoavailableConfPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.AssignPartitionPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.getDescriptor(),
         }, assigner);
   }
 

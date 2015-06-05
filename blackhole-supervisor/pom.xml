@@ -17,6 +17,12 @@
 			<version>0.4.8</version>
 		</dependency>
 		<dependency>
+			<groupId>com.dianping.cat</groupId>
+			<artifactId>cat-client</artifactId>
+			<version>1.2.7</version>
+			<scope>optional</scope>
+		</dependency>
+		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.4</version>

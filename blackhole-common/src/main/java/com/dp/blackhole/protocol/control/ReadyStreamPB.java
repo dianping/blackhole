@@ -26,53 +26,53 @@ public final class ReadyStreamPB {
     com.google.protobuf.ByteString
         getTopicBytes();
 
-    // required string source = 2;
+    // optional string partitionId = 2;
     /**
-     * <code>required string source = 2;</code>
+     * <code>optional string partitionId = 2;</code>
      */
-    boolean hasSource();
+    boolean hasPartitionId();
     /**
-     * <code>required string source = 2;</code>
+     * <code>optional string partitionId = 2;</code>
      */
-    java.lang.String getSource();
+    java.lang.String getPartitionId();
     /**
-     * <code>required string source = 2;</code>
+     * <code>optional string partitionId = 2;</code>
      */
     com.google.protobuf.ByteString
-        getSourceBytes();
+        getPartitionIdBytes();
 
-    // required string broker_server = 3;
+    // optional string broker_server = 3;
     /**
-     * <code>required string broker_server = 3;</code>
+     * <code>optional string broker_server = 3;</code>
      */
     boolean hasBrokerServer();
     /**
-     * <code>required string broker_server = 3;</code>
+     * <code>optional string broker_server = 3;</code>
      */
     java.lang.String getBrokerServer();
     /**
-     * <code>required string broker_server = 3;</code>
+     * <code>optional string broker_server = 3;</code>
      */
     com.google.protobuf.ByteString
         getBrokerServerBytes();
 
-    // required int64 period = 4;
+    // optional int64 period = 4;
     /**
-     * <code>required int64 period = 4;</code>
+     * <code>optional int64 period = 4;</code>
      */
     boolean hasPeriod();
     /**
-     * <code>required int64 period = 4;</code>
+     * <code>optional int64 period = 4;</code>
      */
     long getPeriod();
 
-    // required int64 connectedTs = 5;
+    // optional int64 connectedTs = 5;
     /**
-     * <code>required int64 connectedTs = 5;</code>
+     * <code>optional int64 connectedTs = 5;</code>
      */
     boolean hasConnectedTs();
     /**
-     * <code>required int64 connectedTs = 5;</code>
+     * <code>optional int64 connectedTs = 5;</code>
      */
     long getConnectedTs();
   }
@@ -134,7 +134,7 @@ public final class ReadyStreamPB {
             }
             case 18: {
               bitField0_ |= 0x00000002;
-              source_ = input.readBytes();
+              partitionId_ = input.readBytes();
               break;
             }
             case 26: {
@@ -235,20 +235,20 @@ public final class ReadyStreamPB {
       }
     }
 
-    // required string source = 2;
-    public static final int SOURCE_FIELD_NUMBER = 2;
-    private java.lang.Object source_;
+    // optional string partitionId = 2;
+    public static final int PARTITIONID_FIELD_NUMBER = 2;
+    private java.lang.Object partitionId_;
     /**
-     * <code>required string source = 2;</code>
+     * <code>optional string partitionId = 2;</code>
      */
-    public boolean hasSource() {
+    public boolean hasPartitionId() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>required string source = 2;</code>
+     * <code>optional string partitionId = 2;</code>
      */
-    public java.lang.String getSource() {
-      java.lang.Object ref = source_;
+    public java.lang.String getPartitionId() {
+      java.lang.Object ref = partitionId_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
@@ -256,39 +256,39 @@ public final class ReadyStreamPB {
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
-          source_ = s;
+          partitionId_ = s;
         }
         return s;
       }
     }
     /**
-     * <code>required string source = 2;</code>
+     * <code>optional string partitionId = 2;</code>
      */
     public com.google.protobuf.ByteString
-        getSourceBytes() {
-      java.lang.Object ref = source_;
+        getPartitionIdBytes() {
+      java.lang.Object ref = partitionId_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        source_ = b;
+        partitionId_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
 
-    // required string broker_server = 3;
+    // optional string broker_server = 3;
     public static final int BROKER_SERVER_FIELD_NUMBER = 3;
     private java.lang.Object brokerServer_;
     /**
-     * <code>required string broker_server = 3;</code>
+     * <code>optional string broker_server = 3;</code>
      */
     public boolean hasBrokerServer() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>required string broker_server = 3;</code>
+     * <code>optional string broker_server = 3;</code>
      */
     public java.lang.String getBrokerServer() {
       java.lang.Object ref = brokerServer_;
@@ -305,7 +305,7 @@ public final class ReadyStreamPB {
       }
     }
     /**
-     * <code>required string broker_server = 3;</code>
+     * <code>optional string broker_server = 3;</code>
      */
     public com.google.protobuf.ByteString
         getBrokerServerBytes() {
@@ -321,33 +321,33 @@ public final class ReadyStreamPB {
       }
     }
 
-    // required int64 period = 4;
+    // optional int64 period = 4;
     public static final int PERIOD_FIELD_NUMBER = 4;
     private long period_;
     /**
-     * <code>required int64 period = 4;</code>
+     * <code>optional int64 period = 4;</code>
      */
     public boolean hasPeriod() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>required int64 period = 4;</code>
+     * <code>optional int64 period = 4;</code>
      */
     public long getPeriod() {
       return period_;
     }
 
-    // required int64 connectedTs = 5;
+    // optional int64 connectedTs = 5;
     public static final int CONNECTEDTS_FIELD_NUMBER = 5;
     private long connectedTs_;
     /**
-     * <code>required int64 connectedTs = 5;</code>
+     * <code>optional int64 connectedTs = 5;</code>
      */
     public boolean hasConnectedTs() {
       return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
-     * <code>required int64 connectedTs = 5;</code>
+     * <code>optional int64 connectedTs = 5;</code>
      */
     public long getConnectedTs() {
       return connectedTs_;
@@ -355,7 +355,7 @@ public final class ReadyStreamPB {
 
     private void initFields() {
       topic_ = "";
-      source_ = "";
+      partitionId_ = "";
       brokerServer_ = "";
       period_ = 0L;
       connectedTs_ = 0L;
@@ -366,22 +366,6 @@ public final class ReadyStreamPB {
       if (isInitialized != -1) return isInitialized == 1;
 
       if (!hasTopic()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasSource()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasBrokerServer()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasPeriod()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasConnectedTs()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -396,7 +380,7 @@ public final class ReadyStreamPB {
         output.writeBytes(1, getTopicBytes());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getSourceBytes());
+        output.writeBytes(2, getPartitionIdBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeBytes(3, getBrokerServerBytes());
@@ -422,7 +406,7 @@ public final class ReadyStreamPB {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getSourceBytes());
+          .computeBytesSize(2, getPartitionIdBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
@@ -554,7 +538,7 @@ public final class ReadyStreamPB {
         super.clear();
         topic_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
-        source_ = "";
+        partitionId_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
         brokerServer_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -597,7 +581,7 @@ public final class ReadyStreamPB {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.source_ = source_;
+        result.partitionId_ = partitionId_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
@@ -631,9 +615,9 @@ public final class ReadyStreamPB {
           topic_ = other.topic_;
           onChanged();
         }
-        if (other.hasSource()) {
+        if (other.hasPartitionId()) {
           bitField0_ |= 0x00000002;
-          source_ = other.source_;
+          partitionId_ = other.partitionId_;
           onChanged();
         }
         if (other.hasBrokerServer()) {
@@ -653,22 +637,6 @@ public final class ReadyStreamPB {
 
       public final boolean isInitialized() {
         if (!hasTopic()) {
-          
-          return false;
-        }
-        if (!hasSource()) {
-          
-          return false;
-        }
-        if (!hasBrokerServer()) {
-          
-          return false;
-        }
-        if (!hasPeriod()) {
-          
-          return false;
-        }
-        if (!hasConnectedTs()) {
           
           return false;
         }
@@ -768,90 +736,90 @@ public final class ReadyStreamPB {
         return this;
       }
 
-      // required string source = 2;
-      private java.lang.Object source_ = "";
+      // optional string partitionId = 2;
+      private java.lang.Object partitionId_ = "";
       /**
-       * <code>required string source = 2;</code>
+       * <code>optional string partitionId = 2;</code>
        */
-      public boolean hasSource() {
+      public boolean hasPartitionId() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required string source = 2;</code>
+       * <code>optional string partitionId = 2;</code>
        */
-      public java.lang.String getSource() {
-        java.lang.Object ref = source_;
+      public java.lang.String getPartitionId() {
+        java.lang.Object ref = partitionId_;
         if (!(ref instanceof java.lang.String)) {
           java.lang.String s = ((com.google.protobuf.ByteString) ref)
               .toStringUtf8();
-          source_ = s;
+          partitionId_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
         }
       }
       /**
-       * <code>required string source = 2;</code>
+       * <code>optional string partitionId = 2;</code>
        */
       public com.google.protobuf.ByteString
-          getSourceBytes() {
-        java.lang.Object ref = source_;
+          getPartitionIdBytes() {
+        java.lang.Object ref = partitionId_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          source_ = b;
+          partitionId_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
       /**
-       * <code>required string source = 2;</code>
+       * <code>optional string partitionId = 2;</code>
        */
-      public Builder setSource(
+      public Builder setPartitionId(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000002;
-        source_ = value;
+        partitionId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string source = 2;</code>
+       * <code>optional string partitionId = 2;</code>
        */
-      public Builder clearSource() {
+      public Builder clearPartitionId() {
         bitField0_ = (bitField0_ & ~0x00000002);
-        source_ = getDefaultInstance().getSource();
+        partitionId_ = getDefaultInstance().getPartitionId();
         onChanged();
         return this;
       }
       /**
-       * <code>required string source = 2;</code>
+       * <code>optional string partitionId = 2;</code>
        */
-      public Builder setSourceBytes(
+      public Builder setPartitionIdBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000002;
-        source_ = value;
+        partitionId_ = value;
         onChanged();
         return this;
       }
 
-      // required string broker_server = 3;
+      // optional string broker_server = 3;
       private java.lang.Object brokerServer_ = "";
       /**
-       * <code>required string broker_server = 3;</code>
+       * <code>optional string broker_server = 3;</code>
        */
       public boolean hasBrokerServer() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>required string broker_server = 3;</code>
+       * <code>optional string broker_server = 3;</code>
        */
       public java.lang.String getBrokerServer() {
         java.lang.Object ref = brokerServer_;
@@ -865,7 +833,7 @@ public final class ReadyStreamPB {
         }
       }
       /**
-       * <code>required string broker_server = 3;</code>
+       * <code>optional string broker_server = 3;</code>
        */
       public com.google.protobuf.ByteString
           getBrokerServerBytes() {
@@ -881,7 +849,7 @@ public final class ReadyStreamPB {
         }
       }
       /**
-       * <code>required string broker_server = 3;</code>
+       * <code>optional string broker_server = 3;</code>
        */
       public Builder setBrokerServer(
           java.lang.String value) {
@@ -894,7 +862,7 @@ public final class ReadyStreamPB {
         return this;
       }
       /**
-       * <code>required string broker_server = 3;</code>
+       * <code>optional string broker_server = 3;</code>
        */
       public Builder clearBrokerServer() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -903,7 +871,7 @@ public final class ReadyStreamPB {
         return this;
       }
       /**
-       * <code>required string broker_server = 3;</code>
+       * <code>optional string broker_server = 3;</code>
        */
       public Builder setBrokerServerBytes(
           com.google.protobuf.ByteString value) {
@@ -916,22 +884,22 @@ public final class ReadyStreamPB {
         return this;
       }
 
-      // required int64 period = 4;
+      // optional int64 period = 4;
       private long period_ ;
       /**
-       * <code>required int64 period = 4;</code>
+       * <code>optional int64 period = 4;</code>
        */
       public boolean hasPeriod() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>required int64 period = 4;</code>
+       * <code>optional int64 period = 4;</code>
        */
       public long getPeriod() {
         return period_;
       }
       /**
-       * <code>required int64 period = 4;</code>
+       * <code>optional int64 period = 4;</code>
        */
       public Builder setPeriod(long value) {
         bitField0_ |= 0x00000008;
@@ -940,7 +908,7 @@ public final class ReadyStreamPB {
         return this;
       }
       /**
-       * <code>required int64 period = 4;</code>
+       * <code>optional int64 period = 4;</code>
        */
       public Builder clearPeriod() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -949,22 +917,22 @@ public final class ReadyStreamPB {
         return this;
       }
 
-      // required int64 connectedTs = 5;
+      // optional int64 connectedTs = 5;
       private long connectedTs_ ;
       /**
-       * <code>required int64 connectedTs = 5;</code>
+       * <code>optional int64 connectedTs = 5;</code>
        */
       public boolean hasConnectedTs() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
-       * <code>required int64 connectedTs = 5;</code>
+       * <code>optional int64 connectedTs = 5;</code>
        */
       public long getConnectedTs() {
         return connectedTs_;
       }
       /**
-       * <code>required int64 connectedTs = 5;</code>
+       * <code>optional int64 connectedTs = 5;</code>
        */
       public Builder setConnectedTs(long value) {
         bitField0_ |= 0x00000010;
@@ -973,7 +941,7 @@ public final class ReadyStreamPB {
         return this;
       }
       /**
-       * <code>required int64 connectedTs = 5;</code>
+       * <code>optional int64 connectedTs = 5;</code>
        */
       public Builder clearConnectedTs() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -1007,11 +975,11 @@ public final class ReadyStreamPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\021ReadyStream.proto\022\tblackhole\"h\n\013ReadyS" +
-      "tream\022\r\n\005topic\030\001 \002(\t\022\016\n\006source\030\002 \002(\t\022\025\n\r" +
-      "broker_server\030\003 \002(\t\022\016\n\006period\030\004 \002(\003\022\023\n\013c" +
-      "onnectedTs\030\005 \002(\003B2\n!com.dp.blackhole.pro" +
-      "tocol.controlB\rReadyStreamPB"
+      "\n\021ReadyStream.proto\022\tblackhole\"m\n\013ReadyS" +
+      "tream\022\r\n\005topic\030\001 \002(\t\022\023\n\013partitionId\030\002 \001(" +
+      "\t\022\025\n\rbroker_server\030\003 \001(\t\022\016\n\006period\030\004 \001(\003" +
+      "\022\023\n\013connectedTs\030\005 \001(\003B2\n!com.dp.blackhol" +
+      "e.protocol.controlB\rReadyStreamPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1023,7 +991,7 @@ public final class ReadyStreamPB {
           internal_static_blackhole_ReadyStream_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ReadyStream_descriptor,
-              new java.lang.String[] { "Topic", "Source", "BrokerServer", "Period", "ConnectedTs", });
+              new java.lang.String[] { "Topic", "PartitionId", "BrokerServer", "Period", "ConnectedTs", });
           return null;
         }
       };

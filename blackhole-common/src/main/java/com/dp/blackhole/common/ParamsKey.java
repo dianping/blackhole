@@ -7,7 +7,7 @@ public abstract class ParamsKey {
         public static final String ROTATE_PERIOD = "rotatePeriod";
         public static final String ROLL_PERIOD = "rollPeriod";
         public static final String MAX_LINE_SIZE = "maxLineSize";
-        public static final String IS_PERSIST = "isPersist";
+        public static final String PERSISTENT = "isPersist";
         public static final String READ_INTERVAL = "readInterval";
         public static final String OWNER = "owner";
         public static final String COMPRESSION = "compression";
@@ -15,6 +15,7 @@ public abstract class ParamsKey {
         public static final String MINIMUM_MESSAGES_SENT = "minMsgSent";
         public static final String MESSAGE_BUFFER_SIZE = "msgBufSize";
         public static final String BANDWIDTH_PER_SEC = "bandwidthPerSec";
+        public static final String PARTITION_FACTOR = "partitonFactor";
     }
 
     public static class LionNode {
