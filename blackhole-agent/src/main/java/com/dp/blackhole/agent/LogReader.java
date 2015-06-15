@@ -28,7 +28,7 @@ public class LogReader implements Runnable {
     
     private Agent agent;
     private AgentMeta meta;
-    private RemoteSender sender;
+    private volatile RemoteSender sender;
     private LogFSM logFSM;
     private AtomicReference<ReaderState> currentReaderState;
     private final IRecoder recoder;
@@ -91,7 +91,7 @@ public class LogReader implements Runnable {
     public void assignSender(RemoteSender newSender) {
         setSender(newSender);
         ReaderState oldReaderState = currentReaderState.getAndSet(ReaderState.ASSIGNED);
-        LOG.debug("Assign sender: " + oldReaderState.name() + " -> SENDER_ASSIGNED");
+        LOG.info("Assign sender: " + oldReaderState.name() + " -> SENDER_ASSIGNED");
     }
     
     private void reassignSender() {
@@ -273,6 +273,15 @@ public class LogReader implements Runnable {
     }
     
     public void processRotate() {
+        if (currentReaderState.get() != ReaderState.ASSIGNED) {
+            LOG.warn("RemoteSender not ready for " + meta.getTopicId());
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                LOG.error("Interrupted!", e);
+            }
+            return;
+        }
         final RandomAccessFile save = reader;
         long previousRotateEndOffset = END_OFFSET_OF_FILE;
         try {
