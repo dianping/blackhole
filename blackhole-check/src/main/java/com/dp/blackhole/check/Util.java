@@ -66,9 +66,9 @@ public class Util {
      * Path format:
      * hdfsbasedir/topic/2013-11-01/14/08/
      */
-    public static Path getRollHdfsParentPath(RollIdent ident) {
+    public static Path getRollHdfsParentPath(RollIdent ident, long timeField) {
         String format  = Util.getFormatFromPeriod(ident.period);
-        Date roll = new Date(ident.ts);
+        Date roll = new Date(timeField);
         SimpleDateFormat dm= new SimpleDateFormat(format);
         StringBuilder builder = new StringBuilder();
         builder.append(CheckDone.hdfsbasedir).append("/").append(ident.topic).append("/")
@@ -120,8 +120,12 @@ public class Util {
                 for(int i = 0;i < CheckDone.hdfsfilesuffix.length; i++) {
                     builder.setLength(0);
                     builder.append(CheckDone.hdfsbasedir).append("/").append(ident.topic).append("/")
-                    .append(getDatepathbyFormat(dm.format(roll))).append(ip).append("#")
-                    .append(Util.getInstanceIdFromSource(source)).append("@").append(ident.topic)
+                    .append(getDatepathbyFormat(dm.format(roll))).append(ip);
+                    String instance = Util.getInstanceIdFromSource(source);
+                    if (instance != null) {
+                        builder.append("#").append(Util.getInstanceIdFromSource(source));
+                    }
+                    builder.append("@").append(ident.topic)
                     .append("_").append(dm.format(roll)).append(".").append(CheckDone.hdfsfilesuffix[i]);
                     rollPath[i + CheckDone.hdfsfilesuffix.length] = new Path(builder.toString());
                 }
@@ -178,8 +182,15 @@ public class Util {
     }
 
     public static boolean retryTouch(Path parentPath, String flag) {
+        if (parentPath == null) {
+            LOG.error("parent path is null for " + flag);
+            return false;
+        }
         FSDataOutputStream out = null;
         Path doneFile = new Path(parentPath, flag);
+        if(retryExists(doneFile)) {
+            return true;
+        }
         for (int i = 0; i < REPEATE; i++) {
             try {
                 out = CheckDone.fs.create(doneFile);
@@ -193,6 +204,37 @@ public class Util {
                         LOG.warn("Close hdfs out put stream fail!", e);
                     }
                 }
+            }
+            try {
+                Thread.sleep(RETRY_SLEEP_TIME);
+            } catch (InterruptedException ex) {
+                return false;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean retryDelete(Path path) {
+        return retryDelete(path, null);
+    }
+
+    public static boolean retryDelete(Path parentPath, String flag) {
+        if (parentPath == null) {
+            return true;
+        }
+        Path target;
+        if (flag == null) {
+            target = parentPath;
+        } else {
+            target = new Path(parentPath, flag);
+        }
+        if(!retryExists(target)) {
+            return true;
+        }
+        for (int i = 0; i < REPEATE; i++) {
+            try {
+                return CheckDone.fs.delete(target, true);
+            } catch (IOException e) {
             }
             try {
                 Thread.sleep(RETRY_SLEEP_TIME);

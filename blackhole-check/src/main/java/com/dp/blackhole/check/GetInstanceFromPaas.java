@@ -17,11 +17,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class GetInstanceFromPaas extends Thread {
+    private final static Log LOG = LogFactory.getLog(GetInstanceFromPaas.class);
     private long sleepDuration;
     private List<RollIdent> rollIdents;
     private boolean running = true;
     private HttpClientSingle httpClient;
-    private final static Log LOG = LogFactory.getLog(GetInstanceFromPaas.class);
+    private Set<String> currentBlacklist;
 
     public String getPaaSInstanceURLPerfix;
     public GetInstanceFromPaas(long sleepDuration, List<RollIdent> rollIdents, String getPaaSInstanceURLPerfix) {
@@ -35,7 +36,9 @@ public class GetInstanceFromPaas extends Thread {
     public void run() {
         while (this.running)
             try {
+                currentBlacklist = new HashSet<String>(CheckDone.lionConfChange.getTopicBlacklist());
                 checkPaasSource();
+                currentBlacklist = null;
                 Thread.sleep(this.sleepDuration);
             } catch (InterruptedException e) {
                 this.running = false;
@@ -44,6 +47,9 @@ public class GetInstanceFromPaas extends Thread {
 
     public void checkPaasSource() throws InterruptedException {
         for (RollIdent ident : rollIdents) {
+            if (currentBlacklist.contains(ident.topic)) {
+                continue;
+            }
             Thread.sleep(10);
             Map<String, Set<String>> hostToInstances = new HashMap<String, Set<String>>();
              try {

@@ -45,6 +45,15 @@ public class CheckDone implements Runnable{
     public void run() {
         //pass blacklist
         if (lionConfChange.getTopicBlacklist().contains(ident.topic)) {
+            timeChecker.unregisterTimeChecker(ident, ident.ts);
+            if(timeChecker.isClear(ident)) {
+                ScheduledFuture<?> future = threadMap.get(ident.topic);
+                if (future != null) {
+                    future.cancel(false);
+                    threadMap.remove(ident.topic);
+                    LOG.info("Cancel Schedule for " + ident.topic);
+                }
+            }
             return;
         }
         //reload sources
@@ -69,6 +78,7 @@ public class CheckDone implements Runnable{
             attemptSource.clear();
             if (!Util.wasDone(ident, ident.ts)) {
                 Path[] expectedFile = null;
+                Path parentPath = Util.getRollHdfsParentPath(ident, ident.ts);
                 for(String kvmSource : ident.kvmSources) {
                     expectedFile = Util.getRollHdfsPath(ident, kvmSource);
                     if (!Util.retryExists(expectedFile)) {
@@ -88,7 +98,7 @@ public class CheckDone implements Runnable{
                 
                 if (attemptSource.isEmpty()) { //all file ready
                     if (expectedFile != null) {
-                        if (!Util.retryTouch(expectedFile[0].getParent(), CheckDone.doneFlag)) {
+                        if (!Util.retryTouch(parentPath, CheckDone.doneFlag)) {
                             LOG.error("Alarm, failed to touch a done file. " +
                                     "Try in next check cycle. " +
                                     "If you see this message for the second time, " +
@@ -98,7 +108,7 @@ public class CheckDone implements Runnable{
                             LOG.info("[" + ident.topic + ":" + Util.format.format(new Date(ident.ts)) + "]===>Done!");
                         }
                     } else {
-                        if (!Util.retryTouch(Util.getRollHdfsParentPath(ident), CheckDone.doneFlag)) {
+                        if (!Util.retryTouch(parentPath, CheckDone.doneFlag)) {
                             LOG.error("Alarm, failed to touch a done file. " +
                                     "Try in next check cycle. " +
                                     "If you see this message for the second time, " +
@@ -111,7 +121,7 @@ public class CheckDone implements Runnable{
                 } else {
                     if (ident.timeout > 0 && ident.timeout < 60 && calendar.get(Calendar.MINUTE) >= ident.timeout) {
                         if (expectedFile != null) {
-                            if (!Util.retryTouch(expectedFile[0].getParent(), CheckDone.timeoutFlag)) {
+                            if (!Util.retryTouch(parentPath, CheckDone.timeoutFlag)) {
                                 LOG.error("Alarm, failed to touch a TIMEOUT_FLAG file. " +
                                         "Try in next check cycle. " +
                                         "If you see this message for the second time, " +
@@ -180,6 +190,7 @@ public class CheckDone implements Runnable{
             hdfsbasedir = hdfsbasedir.substring(0, hdfsbasedir.length() - 1);
         }
         hdfsfilesuffix = prop.getProperty("HDFS_FILE_SUFFIX").split(",");
+        missingSourcesDir = prop.getProperty("MISSING_SOURCES_DIR", ".missing");
         checkperiod = Long.parseLong(prop.getProperty("CHECK_PERIOD", "180"));
         fillRollIdent(prop);
         boolean enableSecurity = Boolean.parseBoolean(prop.getProperty("SECURITY.ENABLE", "true"));
@@ -240,6 +251,7 @@ public class CheckDone implements Runnable{
     public static String successprefix;
     public static String hdfsbasedir;
     public static String[] hdfsfilesuffix;
+    public static String missingSourcesDir;
     public static String hdfsHiddenfileprefix = "_";
     private static int alartTime;
     public static long checkperiod;
@@ -247,7 +259,7 @@ public class CheckDone implements Runnable{
     private static List<RollIdent> rollIdents;
     private static long sleepDuration;
     public static String getPaaSInstanceURLPerfix;
-    private static LionConfChange lionConfChange;
+    public static LionConfChange lionConfChange;
     public static Map<String, ScheduledFuture<?>> threadMap;
     public static TimeChecker timeChecker;
     public static GetInstanceFromPaas getInstanceFromPaas;
