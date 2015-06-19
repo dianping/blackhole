@@ -104,11 +104,11 @@ public class TestLogReader {
             sender.initializeRemoteConnection();
             verifyStatic();
             LogReader reader = new LogReader(agent, topicMeta, "/tmp");
-            reader.setSender(sender);
+            reader.assignSender(sender);
             readerThread = new Thread(reader);
             readerThread.start();
             reader.getLogFSM().doFileAppendForce();
-            Thread.sleep(3000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -127,7 +127,9 @@ public class TestLogReader {
         while (iter.hasNext()) {
             mo = iter.next();
         }
-        assertEquals(expectedLines.get(expectedLines.size() - 1).length(), decoder.decode(mo.getMessage().payload()).toString().length());
+        String v1 = expectedLines.get(expectedLines.size() - 1).split(":")[1];
+        String v2 = decoder.decode(mo.getMessage().payload()).toString().split(":")[1];
+        assertEquals(v1.length(), v2.length());
     }
     private void fetchFileMessageSet(GatheringByteChannel channel, FileMessageSet messages) throws IOException {
         int read = 0;
