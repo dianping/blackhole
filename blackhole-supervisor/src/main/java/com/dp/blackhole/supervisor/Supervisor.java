@@ -2136,9 +2136,7 @@ public class Supervisor {
                 TopicConfig confInfo = configManager.getConfByTopic(topic);
                 if (confInfo == null) {
                     LOG.error("Can not get topic: " + topic + " from configMap");
-                    message = PBwrap.wrapNoAvailableConf(null);
-                    send(from, message);
-                    return;
+                    continue;
                 }
                 String rotatePeriod = String.valueOf(confInfo.getRotatePeriod());
                 String rollPeriod = String.valueOf(confInfo.getRollPeriod());
@@ -2150,16 +2148,17 @@ public class Supervisor {
                 String watchFile = confInfo.getWatchLog();
                 if (watchFile == null) {
                     LOG.error("Can not get watch file of " + topic);
-                    message = PBwrap.wrapNoAvailableConf(null);
-                    send(from, message);
-                    return;
+                    continue;
                 }
                 AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile,
                         rotatePeriod, rollPeriod, maxLineSize, readInterval,
                         minMsgSent, msgBufSize, bandwidthPerSec);
                 appConfResList.add(appConfRes);
             }
-            if (!appConfResList.isEmpty()) {
+            if (appConfResList.isEmpty()) {
+                message = PBwrap.wrapNoAvailableConf(null);
+                send(from, message);
+            } else {
                 message = PBwrap.wrapConfRes(appConfResList, null);
                 send(from, message); 
             }
