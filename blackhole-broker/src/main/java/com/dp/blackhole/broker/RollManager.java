@@ -301,6 +301,7 @@ public class RollManager {
             while (running) {
                 try {
                     Socket socket = server.accept();
+                    LOG.debug("Socket(Recovery) connected from " + socket.getInetAddress());
                     socket.setSoTimeout(recoverySocketTimeout);
                     
                     DataInputStream in = new DataInputStream(socket.getInputStream());
@@ -327,7 +328,9 @@ public class RollManager {
                     roll.persistent = head.isPersist;
                     
                     if (head.ignore) {
-                        LOG.info("ignore the roll " + roll);
+                        LOG.info("ignore and mark unrecoverable roll " + roll);
+                        HDFSMarker marker = new HDFSMarker(RollManager.this, fs, roll);
+                        uploadPool.execute(marker);
                         reportRecovery(roll, true);
                     } else {
                         LOG.info("start to recovery roll " + roll);
