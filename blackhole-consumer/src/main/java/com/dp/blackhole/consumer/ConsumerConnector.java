@@ -25,7 +25,6 @@ import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.consumer.api.Consumer;
 import com.dp.blackhole.consumer.api.ConsumerConfig;
-import com.dp.blackhole.consumer.api.OffsetStrategy;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
@@ -270,8 +269,8 @@ public class ConsumerConnector implements Runnable {
                     String partitionName = partitionOffset.getPartitionName();
                     long endOffset = partitionOffset.getEndOffset();
                     long committedOffset = partitionOffset.getCommittedOffset();
-                    if (committedOffset == MessageAndOffset.UNINITIALIZED_OFFSET) {
-                        LOG.info("committed offset UNINITIALIZED, replace with end offset " + endOffset);
+                    if (committedOffset == MessageAndOffset.UNINITIALIZED_OFFSET || committedOffset == 0) {
+                        LOG.info("committed offset UNINITIALIZED or ZERO, replace with end offset " + endOffset);
                         committedOffset = endOffset;
                     }
                     long offset = c.getOffsetStrategy().getOffset(topic, partitionName, endOffset, committedOffset);
