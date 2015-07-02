@@ -182,7 +182,7 @@ public class RollManager {
      */
     public String getParentPath(String baseDir, RollIdent ident) {
         String format;
-        format = Util.getFormatFromPeriod(ident.period);
+        format = Util.getFormatFromPeriodForPath(ident.period);
         Date roll = new Date(ident.ts);
         SimpleDateFormat dm = new SimpleDateFormat(format);
         return baseDir + "/" + ident.topic + '/' + getDatepathbyFormat(dm.format(roll));

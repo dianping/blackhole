@@ -169,6 +169,16 @@ public class Util {
         return format;
     }
     
+    public static String getFormatFromPeriodForPath (long period) {
+        String format;
+        if (period < 86400) {
+            format = "yyyy-MM-dd.HH";
+        } else {
+            format = "yyyy-MM-dd";
+        }
+        return format;
+    }
+    
     public static String getRegexFormPeriod(long period) {
         String pattern;
         if (period < 60) {
