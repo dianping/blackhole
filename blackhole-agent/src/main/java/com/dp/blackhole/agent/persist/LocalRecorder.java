@@ -115,20 +115,6 @@ public class LocalRecorder implements IRecoder {
             writeLock.unlock();
         }
     }
-
-    @Override
-    public void record(int type, long rollTs, long endOffset) {
-        long startOffset;
-        Record perviousRollRecord = getPerviousRollRecord();
-        if (perviousRollRecord == null) {
-            startOffset = LogReader.BEGIN_OFFSET_OF_FILE;
-        } else if (!Util.belongToSameRotate(perviousRollRecord.getRollTs(), rollTs, topicMeta.getRotatePeriod())) {
-            startOffset = LogReader.BEGIN_OFFSET_OF_FILE;
-        } else {
-            startOffset = perviousRollRecord.getEndOffset() + 1;
-        }
-        record(type, rollTs, startOffset, endOffset);
-    }
     
     @Override 
     public void record(int type, long rollTs, long startOffset, long endOffset) {
@@ -257,7 +243,8 @@ public class LocalRecorder implements IRecoder {
         LOG.info(getSnapshot());
     }
     
-    private Record getPerviousRollRecord() {
+    @Override
+    public Record getPerviousRollRecord() {
         List<Record> records = getSnapshot().getRecords();
         Record perviousRollRecord = null;
         if (!records.isEmpty()) {

@@ -3,9 +3,13 @@ package com.dp.blackhole.agent;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.SocketException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
@@ -40,6 +44,7 @@ public class LogReader implements Runnable {
     private final int maxLineSize;
     private RollTrigger rollTrigger;
     private ZombieSocketChecker zombieSocketChecker;
+    private Set<FileDescriptor> currentUnrotateFDs;
     
     public LogReader(Agent agent, AgentMeta meta, String snapshotPersistDir) {
         this.agent = agent;
@@ -56,6 +61,7 @@ public class LogReader implements Runnable {
         this.lineBuf = new ByteArrayOutputStream(maxLineSize);
         this.tailFile = new File(meta.getTailFile());
         this.accept = true;
+        this.currentUnrotateFDs = new HashSet<FileDescriptor>();
         this.zombieSocketChecker = new ZombieSocketChecker();
         zombieSocketChecker.start();
     }
@@ -101,12 +107,30 @@ public class LogReader implements Runnable {
         agent.reportRemoteSenderFailure(meta.getTopicId(), meta.getSource(), Util.getTS(), reassignDelay);
     }
     
+    long computeStartOffset(long rollTs, long rotatePeriod) {
+        long startOffset;
+        Record perviousRollRecord = getRecoder().getPerviousRollRecord();
+        if (perviousRollRecord == null) {
+            startOffset = LogReader.BEGIN_OFFSET_OF_FILE;
+        } else if (!isUnrotated(reader) && !Util.belongToSameRotate(perviousRollRecord.getRollTs(), rollTs, rotatePeriod)) {
+            startOffset = LogReader.BEGIN_OFFSET_OF_FILE;
+        } else {
+            startOffset = perviousRollRecord.getEndOffset() + 1;
+        }
+        return startOffset;
+    }
+    
+    private void record(int type, long rollTs, long endOffset) {
+        long startOffset = computeStartOffset(rollTs, meta.getRotatePeriod());
+        getRecoder().record(type, rollTs, startOffset, endOffset);
+    }
+    
     @Override
     public void run() {
         LOG.info("Log reader for " + meta + " running...");
         try {
-            this.reader = new RandomAccessFile(tailFile, "r");
-            long resumeRollTs = Util.getLatestRollTsUnderTimeBuf(
+            this.reader = openFile();
+            long resumeRollTs = Util.getCurrentRollTsUnderTimeBuf(
                     Util.getTS(),
                     meta.getRollPeriod(),
                     ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
@@ -117,10 +141,10 @@ public class LogReader implements Runnable {
             //minus 1 is back to the end offset of previous line
             //so if seekLastLineHeader() return 0, it declare that it's a new unread file.
             long endOffset = Util.seekLastLineHeader(reader, fileLength) - 1;
-            getRecoder().record(Record.RESUME, resumeRollTs, endOffset);
+            record(Record.RESUME, resumeRollTs, endOffset);
         } catch (IOException e) {
             LOG.error("Oops, resume fail", e);
-            closeQuietly(reader);
+            closeFile(reader);
             agent.reportLogReaderFailure(meta.getTopicId(), meta.getSource(), Util.getTS());
             return;
         }
@@ -129,7 +153,7 @@ public class LogReader implements Runnable {
             if (!register()) {
                 LOG.error("Failed to register a log reader for " + meta.getTopicId() 
                         + " with " + meta.getTailFile() + "log reader will exit.");
-                closeQuietly(reader);
+                closeFile(reader);
                 agent.reportLogReaderFailure(meta.getTopicId(), meta.getSource(), Util.getTS());
                 return;
             }
@@ -144,12 +168,54 @@ public class LogReader implements Runnable {
         zombieSocketChecker.shutdown();
         // after main loop, log reader thread will be shutdown and resources will be released 
         currentReaderState.set(ReaderState.STOPPED);
-        closeQuietly(reader);
+        closeFile(reader);
         sender.close();
         sender = null;
         unregister();
         rollTrigger.stop();
         LOG.warn("terminate log reader " + meta.getTopicId() + ", resources released.");
+    }
+
+    private RandomAccessFile openFile() throws FileNotFoundException {
+        RandomAccessFile raf = new RandomAccessFile(tailFile, "r");
+        setUnrotated(raf);
+        return raf;
+    }
+
+    private void closeFile(RandomAccessFile raf) {
+        cleanUnrotated(raf);
+        closeQuietly(raf);
+    }
+
+    private void setUnrotated(RandomAccessFile raf) {
+        FileDescriptor fd;
+        try {
+            fd = raf.getFD();
+            currentUnrotateFDs.add(fd);
+        } catch (IOException e) {
+            LOG.error("Oops, got an exception", e);
+        }
+    }
+    
+    private void cleanUnrotated(RandomAccessFile raf) {
+        FileDescriptor fd;
+        try {
+            fd = raf.getFD();
+            currentUnrotateFDs.remove(fd);
+        } catch (IOException e) {
+            LOG.error("Oops, got an exception", e);
+        }
+    }
+    
+    private boolean isUnrotated(RandomAccessFile raf) {
+        FileDescriptor fd;
+        try {
+            fd = raf.getFD();
+            return currentUnrotateFDs.contains(fd);
+        } catch (IOException e) {
+            LOG.error("Oops, got an exception", e);
+        }
+        return false;
     }
 
     private void loop() {
@@ -199,16 +265,16 @@ public class LogReader implements Runnable {
             long rotatePeriod, long resumeRollTs) {
         Record lastRollRecord = getRecoder().retriveLastRollRecord();
         if (lastRollRecord != null) {
-            long firstMissRotaeRollTs = Util.getNextRollTs(lastRollRecord.getRollTs(), rotatePeriod) - rollPeriod * 1000;
-            if (firstMissRotaeRollTs > lastRollRecord.getRollTs() && firstMissRotaeRollTs <= resumeRollTs) {
-                getRecoder().record(Record.ROTATE, firstMissRotaeRollTs, END_OFFSET_OF_FILE);
+            long firstMissRotateRollTs = Util.getNextRollTs(lastRollRecord.getRollTs(), rotatePeriod) - rollPeriod * 1000;
+            if (firstMissRotateRollTs > lastRollRecord.getRollTs() && firstMissRotateRollTs <= resumeRollTs) {
+                record(Record.ROTATE, firstMissRotateRollTs, END_OFFSET_OF_FILE);
             }
-            int restMissRotateRollCount = Util.getMissRotateRollCount(firstMissRotaeRollTs, resumeRollTs, rotatePeriod);
+            int restMissRotateRollCount = Util.getMissRotateRollCount(firstMissRotateRollTs, resumeRollTs, rotatePeriod);
             for (int i = 0; i < restMissRotateRollCount; i++) {
                 Record lastRotateRecord = getRecoder().retriveLastRollRecord();
                 long missRotateRollTs = Util.getNextRollTs(lastRotateRecord.getRollTs(), rotatePeriod) + (rotatePeriod  - rollPeriod) * 1000;
                 LOG.debug("find miss rotate roll ts " + missRotateRollTs);
-                getRecoder().record(Record.ROTATE, missRotateRollTs, END_OFFSET_OF_FILE);
+                record(Record.ROTATE, missRotateRollTs, END_OFFSET_OF_FILE);
             }
         }
     }
@@ -249,7 +315,7 @@ public class LogReader implements Runnable {
                         ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
             }
             //record snapshot
-            getRecoder().record(Record.ROLL, rollTs, rollEndOffset);
+            record(Record.ROLL, rollTs, rollEndOffset);
         }
         try {
             if (currentReaderState.get() == ReaderState.ASSIGNED) {
@@ -286,7 +352,7 @@ public class LogReader implements Runnable {
         long previousRotateEndOffset = END_OFFSET_OF_FILE;
         try {
             try {
-                reader = new RandomAccessFile(tailFile, "r");
+                this.reader = openFile();
                 // At this point, we're sure that the old file is rotated
                 // Finish scanning the old file and then we'll start with the new one
                 // minus 1 points out the end offset of old file
@@ -297,13 +363,13 @@ public class LogReader implements Runnable {
                 LOG.error("Oops, got an exception:", e);
                 throw new RuntimeException("log reader loop terminate, prepare to reboot log reader.");
             } finally {
-                closeQuietly(save);
+                closeFile(save);
                 Long rollTs = Util.getLatestRollTsUnderTimeBuf(
                         Util.getTS(),
                         meta.getRollPeriod(),
                         ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
                 //record snapshot
-                getRecoder().record(Record.ROTATE, rollTs, previousRotateEndOffset);
+                record(Record.ROTATE, rollTs, previousRotateEndOffset);
             }
             
             if (currentReaderState.get() == ReaderState.ASSIGNED) {

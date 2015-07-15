@@ -96,7 +96,7 @@ public class RollRecovery implements Runnable{
                     socket = new Socket(brokerServer, port);
                     out = new DataOutputStream(socket.getOutputStream());
                     if (isPersist) {
-                        LOG.info("Can not found Record for " + rollString + "[" + rollTimestamp + "], send ignorance to broker.");
+                        LOG.info("Can not found " + topicMeta.getTopicId() + "'s Record for " + rollString + "[" + rollTimestamp + "], send ignorance to broker.");
                     } else {
                         LOG.info("No need to recovery the topic which no need persist: " + topicMeta.getTopicId());
                     }
@@ -158,7 +158,7 @@ public class RollRecovery implements Runnable{
             // so that the start offset may be bigger than end offset. It should correct to the end of file.
             if (to < from) {
                 to = transferFile.length() - 1;
-                LOG.info(record +  ": from > to, recovery to " + to);
+                LOG.info("Rorrecting " + topicMeta.getTopicId() + "'s record: " + record +  ": from > to, recovery to " + to);
             }
     
             // send recovery head, report fail in agent if catch exception.
