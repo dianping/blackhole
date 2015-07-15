@@ -59,7 +59,7 @@ public class Checkpoint extends Thread {
         while (running) {
             try {
                 Thread.sleep(period);
-                checkpiont();
+                checkpoint();
             } catch (InterruptedException e) {
                 LOG.info("CHECKPOINT thread interrupted");
                 running =false;
@@ -67,7 +67,7 @@ public class Checkpoint extends Thread {
         }
     }
     
-    public void checkpiont() {
+    public void checkpoint() {
         LOG.info("CHECKPOINT begin...");
         boolean shouldPersist = false;
         Set<String> topics = supervisorService.getAllTopicNames();

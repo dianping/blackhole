@@ -258,7 +258,7 @@ public class Supervisor {
     }
     
     public List<Stream> getAllStreams(String topic) {
-        List<Stream> streams = null;
+        List<Stream> streams = new ArrayList<Stream>();
         Topic t = topics.get(topic);
         if (t != null) {
             streams = t.getAllStreamsOfCopy();
@@ -1011,6 +1011,11 @@ public class Supervisor {
     public boolean retireStream(String topic, String source) {
         Stream stream = getStream(topic, source);
         return retireStreamInternal(stream, false);
+    }
+    
+    public boolean retireStream(String topic, String source, boolean force) {
+        Stream stream = getStream(topic, source);
+        return retireStreamInternal(stream, force);
     }
     
     private boolean retireStreamInternal(Stream stream, boolean forceRetire) {

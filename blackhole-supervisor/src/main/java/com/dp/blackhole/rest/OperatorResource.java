@@ -71,9 +71,14 @@ public class OperatorResource extends BaseResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response retire(
             @Encoded @FormParam("topic") final String topic,
-            @Encoded @FormParam("source") final String source) {
+            @Encoded @FormParam("source") final String source,
+            @Encoded @FormParam("force") final String force) {
         LOG.debug("POST: retire " + topic + " " + source);
-        return supervisorService.retireStream(topic, source)
+        boolean forceBoolean = false;
+        if (force != null && !force.isEmpty()) {
+            forceBoolean = Util.parseBoolean(force, false);
+        }
+        return supervisorService.retireStream(topic, source, forceBoolean)
                 ? Response.ok().build() : Response.status(Response.Status.NOT_ACCEPTABLE).build();
     }
     
