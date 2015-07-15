@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import com.dianping.lion.client.LionException;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.datachecker.AbnormalStageChecker;
 import com.dp.blackhole.datachecker.Checkpoint;
 import com.dp.blackhole.http.RequestListener;
 import com.dp.blackhole.network.ConnectionFactory;
@@ -2096,6 +2097,9 @@ public class Supervisor {
         
         checkpoint = new Checkpoint(configManager.checkpiontPath, configManager.checkpiontPeriod);
         checkpoint.start();
+        
+        AbnormalStageChecker abnormalStageChecker = new AbnormalStageChecker(configManager.abnormalStageCheckPeriod, configManager.abnormalStageDuration, configManager.normalStageTTL);
+        abnormalStageChecker.start();
         
         SupervisorExecutor executor = new SupervisorExecutor();
         ConnectionFactory<SimpleConnection> factory = new SimpleConnection.SimpleConnectionFactory();
