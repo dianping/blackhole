@@ -43,6 +43,14 @@ public class RemoteSender {
         this.minMsgSent = topicMeta.getMinMsgSent();
     }
     
+    public TopicId getTopicId() {
+        return topicId;
+    }
+    
+    public String getBroker() {
+        return broker;
+    }
+    
     public int getReassignDelaySeconds() {
         return reassignDelaySeconds;
     }

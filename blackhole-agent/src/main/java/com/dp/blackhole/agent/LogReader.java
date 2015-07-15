@@ -62,8 +62,6 @@ public class LogReader implements Runnable {
         this.tailFile = new File(meta.getTailFile());
         this.accept = true;
         this.currentUnrotateFDs = new HashSet<FileDescriptor>();
-        this.zombieSocketChecker = new ZombieSocketChecker();
-        zombieSocketChecker.start();
     }
     
     public LogFSM getLogFSM() {
@@ -72,10 +70,6 @@ public class LogReader implements Runnable {
 
     public RemoteSender getSender() {
         return sender;
-    }
-
-    public void setSender(RemoteSender sender) {
-        this.sender = sender;
     }
 
     public IRecoder getRecoder() {
@@ -95,16 +89,19 @@ public class LogReader implements Runnable {
     }
     
     public void assignSender(RemoteSender newSender) {
-        setSender(newSender);
+        this.sender = sender;
         ReaderState oldReaderState = currentReaderState.getAndSet(ReaderState.ASSIGNED);
+        new ZombieSocketChecker(this.sender).start();
         LOG.info("Assign sender: " + oldReaderState.name() + " -> SENDER_ASSIGNED");
+        
     }
     
-    private void reassignSender() {
-        currentReaderState.compareAndSet(ReaderState.ASSIGNED, ReaderState.UNASSIGNED);
-        int reassignDelay = sender.getReassignDelaySeconds();
+    private void reassignSender(RemoteSender sender) {
+        if (currentReaderState.compareAndSet(ReaderState.ASSIGNED, ReaderState.UNASSIGNED)) {
+            int reassignDelay = sender.getReassignDelaySeconds();
+            agent.reportRemoteSenderFailure(meta.getTopicId(), meta.getSource(), Util.getTS(), reassignDelay);
+        }
         sender.close();
-        agent.reportRemoteSenderFailure(meta.getTopicId(), meta.getSource(), Util.getTS(), reassignDelay);
     }
     
     long computeStartOffset(long rollTs, long rotatePeriod) {
@@ -286,7 +283,7 @@ public class LogReader implements Runnable {
             }
         } catch (SocketException e) {
             LOG.error("Fail while sending message, reassign sender", e);
-            reassignSender();
+            reassignSender(sender);
         } catch (IOException e) {
             LOG.error("Oops, got an exception:", e);
             throw new RuntimeException("log reader loop terminate, prepare to reboot log reader.");
@@ -328,7 +325,7 @@ public class LogReader implements Runnable {
             }
         } catch (Exception e) {
             LOG.error("Fail while sending roll request, reassign sender", e);
-            reassignSender();
+            reassignSender(sender);
         } finally {
             if (meta.isDying()) {
                 logFSM.finishLastRoll();
@@ -380,7 +377,7 @@ public class LogReader implements Runnable {
             }
         } catch (IOException e) {
             LOG.error("Fail while sending rotate request, reassign sender", e);
-            reassignSender();
+            reassignSender(sender);
         } finally {
             logFSM.finishLogRotate();
         }
@@ -450,11 +447,17 @@ public class LogReader implements Runnable {
     class ZombieSocketChecker extends Thread {
         private volatile boolean running;
         private static final int CHECK_INTERVAL = 5 * 60 * 1000;
+        private RemoteSender sender;
         
-        public ZombieSocketChecker() {
+        public ZombieSocketChecker(RemoteSender sender) {
             this.running = true;
+            this.sender = sender;
+            String name = "ZombieSocketChecker(" 
+                    + sender.getTopicId() + "-->"
+                    + sender.getBroker() + ")";
             setDaemon(true);
-            setName("ZombieSocketChecker");
+            setName(name);
+            LOG.info(name);
         }
         
         public void shutdown() {
@@ -466,23 +469,25 @@ public class LogReader implements Runnable {
             while (running) {
                 if (currentReaderState.get() == ReaderState.ASSIGNED) {
                     try {
-                        if (sender.getMessageBuffer().position() == 0) {
-                            sender.sendNullRequest();
+                        if (this.sender.getMessageBuffer().position() == 0) {
+                            this.sender.sendNullRequest();
                         } else {
-                            sender.sendMessage();
+                            this.sender.sendMessage();
                         }
                     } catch (IOException e) {
                         LOG.warn("Find socket dead, reassign remote sender");
-                        reassignSender();
+                        reassignSender(this.sender);
+                        running = false;
                     }
                 }
                 try {
                     Thread.sleep(CHECK_INTERVAL);
                 } catch (InterruptedException e) {
-                    LOG.error("ZombieSocketChecker interrupt", e);
+                    LOG.error("ZombieSocketChecker " + this.getName() + " interrupt", e);
                     running = false;
                 }
             }
+            LOG.info("ZombieSocketChecker " + this.getName() + " quit gracefully.");
         }
     }
 }
