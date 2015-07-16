@@ -89,7 +89,7 @@ public class LogReader implements Runnable {
     }
     
     public void assignSender(RemoteSender newSender) {
-        this.sender = sender;
+        this.sender = newSender;
         ReaderState oldReaderState = currentReaderState.getAndSet(ReaderState.ASSIGNED);
         new ZombieSocketChecker(this.sender).start();
         LOG.info("Assign sender: " + oldReaderState.name() + " -> SENDER_ASSIGNED");
@@ -97,11 +97,11 @@ public class LogReader implements Runnable {
     }
     
     private void reassignSender(RemoteSender sender) {
+        sender.close();
         if (currentReaderState.compareAndSet(ReaderState.ASSIGNED, ReaderState.UNASSIGNED)) {
             int reassignDelay = sender.getReassignDelaySeconds();
             agent.reportRemoteSenderFailure(meta.getTopicId(), meta.getSource(), Util.getTS(), reassignDelay);
         }
-        sender.close();
     }
     
     long computeStartOffset(long rollTs, long rotatePeriod) {
@@ -447,11 +447,11 @@ public class LogReader implements Runnable {
     class ZombieSocketChecker extends Thread {
         private volatile boolean running;
         private static final int CHECK_INTERVAL = 5 * 60 * 1000;
-        private RemoteSender sender;
+        private RemoteSender checkerHoldSender;
         
         public ZombieSocketChecker(RemoteSender sender) {
             this.running = true;
-            this.sender = sender;
+            this.checkerHoldSender = sender;
             String name = "ZombieSocketChecker(" 
                     + sender.getTopicId() + "-->"
                     + sender.getBroker() + ")";
@@ -469,14 +469,14 @@ public class LogReader implements Runnable {
             while (running) {
                 if (currentReaderState.get() == ReaderState.ASSIGNED) {
                     try {
-                        if (this.sender.getMessageBuffer().position() == 0) {
-                            this.sender.sendNullRequest();
+                        if (checkerHoldSender.getMessageBuffer().position() == 0) {
+                            checkerHoldSender.sendNullRequest();
                         } else {
-                            this.sender.sendMessage();
+                            checkerHoldSender.sendMessage();
                         }
                     } catch (IOException e) {
                         LOG.warn("Find socket dead, reassign remote sender");
-                        reassignSender(this.sender);
+                        reassignSender(checkerHoldSender);
                         running = false;
                     }
                 }

@@ -41,7 +41,7 @@ import com.dp.blackhole.network.SimpleConnection;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 
 public class Util {
-    private static final Log LOG = LogFactory.getLog(Util.class);
+    public static final Log LOG = LogFactory.getLog(Util.class);
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static long localTimezoneOffset = TimeZone.getTimeZone("Asia/Shanghai").getRawOffset();
     private static String zkEnv;
