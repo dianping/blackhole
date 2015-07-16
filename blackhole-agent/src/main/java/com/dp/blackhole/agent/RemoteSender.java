@@ -72,7 +72,7 @@ public class RemoteSender {
         doStreamReg();
     }
     
-    private void doStreamReg() throws IOException {
+    private synchronized void doStreamReg() throws IOException {
         RegisterRequest request = new RegisterRequest(
                 topicId.getTopic(),
                 source,
@@ -105,7 +105,7 @@ public class RemoteSender {
         wrap.write(channel);
     }
     
-    public void sendMessage() throws IOException {
+    public synchronized void sendMessage() throws IOException {
         messageBuffer.flip();
         ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
         ProduceRequest request = new ProduceRequest(topicId.getTopic(), source, messages);
@@ -127,7 +127,7 @@ public class RemoteSender {
         messageNum++;
     }
     
-    public void close() {
+    public synchronized void close() {
         try {
             if (socket != null && !socket.isClosed()) {
                 socket.close();
