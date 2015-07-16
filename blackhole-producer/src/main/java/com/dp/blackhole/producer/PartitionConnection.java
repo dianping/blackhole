@@ -94,7 +94,7 @@ public class PartitionConnection {
         wrap.write(channel);
     }
     
-    public void sendMessage() throws IOException {
+    public synchronized void sendMessage() throws IOException {
         messageBuffer.flip();
         ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
         ProduceRequest request = new ProduceRequest(topic, partitionId, messages);
@@ -116,7 +116,7 @@ public class PartitionConnection {
         messageNum++;
     }
     
-    public void close() {
+    public synchronized void close() {
         try {
             if (socket != null && !socket.isClosed()) {
                 socket.close();

@@ -152,11 +152,13 @@ public class Producer {
     
     private void reassignPartitionConnection(String partitionId) {
         AtomicReference<PartitionConnectionState> currentState = partitionStateMap.get(partitionId);
-        currentState.compareAndSet(PartitionConnectionState.ASSIGNED, PartitionConnectionState.UNASSIGNED);
-        PartitionConnection partitionConnection = partitionConnectionMap.get(partitionId);
-        int reassignDelay = partitionConnection.getReassignDelaySeconds();
-        partitionConnection.close();
-        connector.reportPartitionConnectionFailure(topic, producerId, partitionId, Util.getTS(), reassignDelay);
+        if (currentState.compareAndSet(PartitionConnectionState.ASSIGNED, PartitionConnectionState.UNASSIGNED)) {
+            PartitionConnection partitionConnection = partitionConnectionMap.get(partitionId);
+            int reassignDelay = partitionConnection.getReassignDelaySeconds();
+            partitionConnection.close();
+            partitionConnectionMap.remove(partitionId);
+            connector.reportPartitionConnectionFailure(topic, producerId, partitionId, Util.getTS(), reassignDelay);
+        }
     }
     
     class ZombieConnectionChecker extends Thread {

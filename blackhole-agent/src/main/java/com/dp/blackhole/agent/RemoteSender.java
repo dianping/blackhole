@@ -72,7 +72,7 @@ public class RemoteSender {
         doStreamReg();
     }
     
-    private synchronized void doStreamReg() throws IOException {
+    private void doStreamReg() throws IOException {
         RegisterRequest request = new RegisterRequest(
                 topicId.getTopic(),
                 source,
