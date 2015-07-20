@@ -135,8 +135,8 @@ public class ConfigManager {
         checkpiontPeriod = Long.parseLong(prop.getProperty("supervisor.checkpoint.period", "60000"));
         
         abnormalStageCheckPeriod = Long.parseLong(prop.getProperty("supervisor.abnormalStage.checkPeriod", "600000"));  //10 minutes
-        abnormalStageDuration = Long.parseLong(prop.getProperty("upervisor.abnormalStage.duration", "1200000"));        //20 minutes
-        normalStageTTL = Long.parseLong(prop.getProperty("upervisor.normalStage.ttl", "1800000"));                      //30 minutes
+        abnormalStageDuration = Long.parseLong(prop.getProperty("supervisor.abnormalStage.duration", "1200000"));        //20 minutes
+        normalStageTTL = Long.parseLong(prop.getProperty("supervisor.normalStage.ttl", "1800000"));                      //30 minutes
         
         //create a http client for PaaS
         httpClient = new HttpClientSingle(connectionTimeout, socketTimeout);
