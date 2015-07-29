@@ -58,10 +58,6 @@ public class PartitionConnection implements StreamConnection {
         this.reassignDelaySeconds = reassignDelaySeconds;
     }
 
-    public ByteBuffer getMessageBuffer() {
-        return messageBuffer;
-    }
-
     public void initializeRemoteConnection() throws IOException {
         messageBuffer = ByteBuffer.allocate(512 * 1024);
         channel = SocketChannel.open();

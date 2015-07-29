@@ -259,10 +259,12 @@ public class Supervisor {
     }
     
     public List<Stream> getAllStreams(String topic) {
-        List<Stream> streams = new ArrayList<Stream>();
+        List<Stream> streams;
         Topic t = topics.get(topic);
         if (t != null) {
             streams = t.getAllStreamsOfCopy();
+        } else {
+            streams = new ArrayList<Stream>();
         }
         return streams;
     }

@@ -2,7 +2,6 @@ package com.dp.blackhole.agent;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -29,7 +28,6 @@ public class RemoteSender implements StreamConnection {
     private String broker;
     private int brokerPort;
     private SocketChannel channel;
-    private Socket socket;
     private ByteBuffer messageBuffer;
     private int messageNum;
     private long minMsgSent;
@@ -60,16 +58,11 @@ public class RemoteSender implements StreamConnection {
         this.reassignDelaySeconds = reassignDelaySeconds;
     }
 
-    public ByteBuffer getMessageBuffer() {
-        return messageBuffer;
-    }
-
     public void initializeRemoteConnection() throws IOException {
         messageBuffer = ByteBuffer.allocate(512 * 1024);
         channel = SocketChannel.open();
         channel.connect(new InetSocketAddress(broker, brokerPort));
-        socket = channel.socket();
-        socket.setKeepAlive(true);
+        channel.socket().setKeepAlive(true);
         LOG.info(topicId + " connected broker: " + broker + ":" + brokerPort);
         doStreamReg();
     }
@@ -81,7 +74,7 @@ public class RemoteSender implements StreamConnection {
                 rollPeriod,
                 broker);
         TransferWrap wrap = new TransferWrap(request);
-        wrap.write(channel);
+        syncWrite(wrap);
     }
     
     public void sendRollRequest() throws IOException {
@@ -90,7 +83,7 @@ public class RemoteSender implements StreamConnection {
                 source,
                 rollPeriod);
         TransferWrap wrap = new TransferWrap(request);
-        wrap.write(channel);
+        syncWrite(wrap);
     }
     
     public void sendHaltRequest() throws IOException {
@@ -99,13 +92,13 @@ public class RemoteSender implements StreamConnection {
                 source,
                 rollPeriod);
         TransferWrap wrap = new TransferWrap(request);
-        wrap.write(channel);
+        syncWrite(wrap);
     }
     
     public void sendNullRequest() throws IOException {
         VersionRequest request = new VersionRequest(ParamsKey.VERSION);
         TransferWrap wrap = new TransferWrap(request);
-        wrap.write(channel);
+        syncWrite(wrap);
     }
 
     @Override
@@ -129,43 +122,51 @@ public class RemoteSender implements StreamConnection {
     }
     
     @Override
-    public synchronized void sendMessage() throws IOException {
-        if (messageBuffer.hasRemaining()) {
-            messageBuffer.flip();
-            ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
-            ProduceRequest request = new ProduceRequest(topicId.getTopic(), source, messages);
-            TransferWrap wrap = new TransferWrap(request);
-            wrap.write(channel);
-            messageBuffer.clear();
-            messageNum = 0;
+    public void sendMessage() throws IOException {
+        synchronized (messageBuffer) {
+            if (canSend()) {
+                messageBuffer.flip();
+                ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
+                ProduceRequest request = new ProduceRequest(topicId.getTopic(), source, messages);
+                TransferWrap wrap = new TransferWrap(request);
+                syncWrite(wrap);
+                messageBuffer.clear();
+                messageNum = 0;
+            }
         }
     }
     
     public void cacahAndSendLine(byte[] line) throws IOException {
-        
         Message message = new Message(line); 
         
         if (messageNum >= minMsgSent || message.getSize() > messageBuffer.remaining()) {
             sendMessage();
         }
         
-        message.write(messageBuffer);
+        synchronized (messageBuffer) {
+            message.write(messageBuffer);
+        }
         messageNum++;
     }
     
+    private void syncWrite(TransferWrap wrap) throws IOException {
+        synchronized (channel) {
+            wrap.write(channel);
+        }
+    }
+    
     @Override
-    public synchronized void close() {
-        try {
-            if (channel != null && channel.isOpen()) {
-                channel.close();
-                channel = null;
+    public void close() {
+        synchronized (channel) {
+            try {
+                if (channel != null && channel.isOpen()) {
+                    channel.close();
+                    channel.socket().close();
+                    channel = null;
+                }
+            } catch (IOException e) {
+                LOG.warn("Failed to close socket.", e);
             }
-            if (socket != null && !socket.isClosed()) {
-                socket.close();
-                socket = null;
-            }
-        } catch (IOException e) {
-            LOG.warn("Failed to close socket.", e);
         }
     }
 }

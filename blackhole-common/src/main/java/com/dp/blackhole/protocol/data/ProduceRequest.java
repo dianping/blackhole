@@ -36,6 +36,7 @@ public class ProduceRequest extends NonDelegationTypedWrappable {
         try {
             partitionId = GenUtil.readString(buffer);
         } catch (RuntimeException e) {
+            //TODO reminder we to remove the LOG when the bug is fixed
             Util.LOG.fatal(topic, e);
             throw e;
         }

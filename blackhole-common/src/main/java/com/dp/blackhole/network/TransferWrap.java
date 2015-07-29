@@ -43,34 +43,32 @@ public class TransferWrap implements Typed, IOCompletable {
     
     @Override
     public int write(GatheringByteChannel channel) throws IOException {
-        synchronized (channel) {
-            int written = 0;
-            // write head
+        int written = 0;
+        // write head
+        if (head.hasRemaining()) {
+            written += GenUtil.retryWrite(channel, head);
             if (head.hasRemaining()) {
-                written += GenUtil.retryWrite(channel, head);
-                if (head.hasRemaining()) {
-                    return written;
-                }
+                return written;
             }
-            
-            // delegate write to wrapped object if delegatable
-            // , else write content to channel 
-            if (wrapped.delegatable()) {
-                written += wrapped.write(channel);
-                if (wrapped.complete()) {
-                    complete = true;
-                }
-            } else {
-                if (content.hasRemaining()) {
-                    written += GenUtil.retryWrite(channel, content);
-                    if (!content.hasRemaining()) {
-                        complete = true;
-                        content = null;
-                    }
-                }
-            }
-            return written;
         }
+        
+        // delegate write to wrapped object if delegatable
+        // , else write content to channel 
+        if (wrapped.delegatable()) {
+            written += wrapped.write(channel);
+            if (wrapped.complete()) {
+                complete = true;
+            }
+        } else {
+            if (content.hasRemaining()) {
+                written += GenUtil.retryWrite(channel, content);
+                if (!content.hasRemaining()) {
+                    complete = true;
+                    content = null;
+                }
+            }
+        }
+        return written;
     }
     
     @Override
