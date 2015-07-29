@@ -9,19 +9,21 @@ public class RegisterRequest extends NonDelegationTypedWrappable {
     public String topic;
     public String partitionId;
     public long period;
+    public String broker;
     
     public RegisterRequest() {
     }
     
-    public RegisterRequest(String topic, String partitionId, long period) {
+    public RegisterRequest(String topic, String partitionId, long period, String broker) {
         this.topic = topic;
         this.partitionId = partitionId;
         this.period = period;
+        this.broker = broker;
     }
     
     @Override
     public int getSize() {
-        return GenUtil.getStringSize(topic) + GenUtil.getStringSize(partitionId) + Long.SIZE/8;
+        return GenUtil.getStringSize(topic) + GenUtil.getStringSize(partitionId) + Long.SIZE/8 + GenUtil.getStringSize(broker);
     }
 
     @Override
@@ -29,6 +31,7 @@ public class RegisterRequest extends NonDelegationTypedWrappable {
         topic = GenUtil.readString(buffer);
         partitionId = GenUtil.readString(buffer);
         period = buffer.getLong();
+        broker = GenUtil.readString(buffer);
     }
 
     @Override
@@ -36,6 +39,7 @@ public class RegisterRequest extends NonDelegationTypedWrappable {
         GenUtil.writeString(topic, buffer);
         GenUtil.writeString(partitionId, buffer);
         buffer.putLong(period);
+        GenUtil.writeString(broker, buffer);
     }
 
     @Override

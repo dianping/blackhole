@@ -78,7 +78,8 @@ public class RemoteSender implements StreamConnection {
         RegisterRequest request = new RegisterRequest(
                 topicId.getTopic(),
                 source,
-                rollPeriod);
+                rollPeriod,
+                broker);
         TransferWrap wrap = new TransferWrap(request);
         wrap.write(channel);
     }

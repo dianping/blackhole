@@ -73,7 +73,7 @@ public class PartitionConnection implements StreamConnection {
     }
     
     private void doStreamReg() throws IOException {
-        RegisterRequest request = new RegisterRequest(topic, partitionId, rollPeriod);
+        RegisterRequest request = new RegisterRequest(topic, partitionId, rollPeriod, broker);
         TransferWrap wrap = new TransferWrap(request);
         wrap.write(channel);
     }
