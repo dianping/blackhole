@@ -1883,6 +1883,12 @@ public class Supervisor {
         assignBroker(topic, from, produceId, partitionId);
     }
 
+    public void handleUnresolvedConnection(SimpleConnection from) {
+        LOG.warn("Found an unresolved connection [" + from.getHost() + "<->" + from.getIP() + "]");
+        Message message = PBwrap.wrapUnresolvedConnection();
+        send(from, message);
+    }
+    
     public class SupervisorExecutor implements EntityProcessor<ByteBuffer, SimpleConnection> {
 
         @Override
@@ -1907,6 +1913,10 @@ public class Supervisor {
         
         @Override
         public void process(ByteBuffer request, SimpleConnection from) {
+            if (!from.isResolved()) {
+                handleUnresolvedConnection(from);
+            }
+            
             Message msg = null;
             try {
                 msg = PBwrap.Buf2PB(request);
@@ -2174,6 +2184,7 @@ public class Supervisor {
         }
     }
     
+    //TODO find update of paas catalog
     public void triggerConfResOfPaaS(SimpleConnection connection) {
         Set<String> topicsAssocHost = configManager.getTopicsByHost(connection.getHost());
         if (topicsAssocHost != null) {

@@ -39,7 +39,10 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
     private Selector selector;
     private String remote;
     private String host;
+    private String ip;
     private int port;
+    private boolean resolved;
+
 
     public SimpleConnection(SocketChannel channel, Selector selector) {
         this.channel = channel;
@@ -49,6 +52,10 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
         length = ByteBuffer.allocate(4);
         
         InetSocketAddress remoteAddr = Util.getRemoteAddr(channel.socket());
+        if (!remoteAddr.isUnresolved()) {
+            resolved = Util.isNameResolved(remoteAddr.getAddress());
+            ip = remoteAddr.getAddress().getHostAddress();
+        }
         host = remoteAddr.getHostName();
         port = remoteAddr.getPort();
         remote = host+ ":" + port;
@@ -59,6 +66,11 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
         return active.get();
     }
 
+    @Override
+    public boolean isResolved() {
+        return resolved;
+    }
+    
     @Override
     public SocketChannel getChannel() {
         return channel;
@@ -201,6 +213,10 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
 
     public String getHost() {
         return host;
+    }
+    
+    public String getIP() {
+        return ip;
     }
     
     @Override

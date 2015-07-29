@@ -71,7 +71,13 @@ public class Util {
     
     public static String getLocalHost() {
         try {
-            return InetAddress.getLocalHost().getHostName();
+            InetAddress addr = InetAddress.getLocalHost();
+            String localhost = addr.getHostName();
+            if (isNameResolved(addr)) {
+                return localhost;
+            } else {
+                throw new RuntimeException(localhost + " can not be name resolved.");
+            }
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
@@ -93,6 +99,12 @@ public class Util {
              }
           }
         return ip;
+    }
+    
+    public static boolean isNameResolved(InetAddress address) {
+        String hostname = address.getHostName();
+        String ip = address.getHostAddress();
+        return !hostname.equals(ip);
     }
 
     public static String ts2String(long ts) {

@@ -164,6 +164,8 @@ public class PBwrap {
         case PARTITION_REQUIRE_BROKER:
             msg.setPartitionRequireBroker((PartitionRequireBroker) message);
             break;
+        case UNRESOLVED_CONNECTION:
+            break;
         default:
             break;
         }
@@ -609,5 +611,9 @@ public class PBwrap {
         builder.setProducerId(produerId);
         builder.setPartitionId(partitionId);
         return wrapMessage(MessageType.PARTITION_REQUIRE_BROKER, builder.build());
+    }
+
+    public static Message wrapUnresolvedConnection() {
+        return wrapMessage(MessageType.UNRESOLVED_CONNECTION, null);
     }
 }

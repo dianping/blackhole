@@ -81,6 +81,7 @@ message Message {
         PRODUCER_ID_ASSIGN = 43;
         ASSIGN_PARTITION = 44;
         PARTITION_REQUIRE_BROKER = 45;
+        UNRESOLVED_CONNECTION = 46;
     }
 
     required MessageType type = 1;

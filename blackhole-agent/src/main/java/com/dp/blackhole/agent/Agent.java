@@ -666,6 +666,9 @@ public class Agent implements Runnable {
                     LOG.error("Topic [" + topic + "] from supervisor message not match with local");
                 }
                 break;
+            case UNRESOLVED_CONNECTION:
+                LOG.fatal("Supervisor can not resolve any hostname for this agent: " + Util.getLocalHost());
+                break;
             default:
                 LOG.error("Illegal message type " + msg.getType());
             }

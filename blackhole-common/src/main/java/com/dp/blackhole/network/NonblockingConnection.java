@@ -28,4 +28,6 @@ public interface NonblockingConnection<Entity> {
     public void close();
 
     void send(Entity entity);
+    
+    public boolean isResolved();
 }
