@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.StreamConnection;
 import com.dp.blackhole.common.TopicCommonMeta;
 import com.dp.blackhole.network.TransferWrap;
 import com.dp.blackhole.protocol.data.HaltRequest;
@@ -20,7 +21,7 @@ import com.dp.blackhole.protocol.data.RollRequest;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.Message;
 
-public class PartitionConnection {
+public class PartitionConnection implements StreamConnection {
     private static final Log LOG = LogFactory.getLog(PartitionConnection.class);
     private static final int DEFAULT_DELAY_SECONDS = 5;
     private String topic;
@@ -66,6 +67,7 @@ public class PartitionConnection {
         channel = SocketChannel.open();
         channel.connect(new InetSocketAddress(broker, brokerPort));
         socket = channel.socket();
+        socket.setKeepAlive(true);
         LOG.info(topic + " with " + partitionId + " connected " + broker + ":" + brokerPort);
         doStreamReg();
     }
@@ -94,14 +96,38 @@ public class PartitionConnection {
         wrap.write(channel);
     }
     
+
+    @Override
+    public String getSource() {
+        return partitionId;
+    }
+
+    @Override
+    public String getTarget() {
+        return this.broker + ":" + this.brokerPort;
+    }
+
+    @Override
+    public boolean canSend() {
+        return messageBuffer.position() != 0;
+    }
+    
+    @Override
+    public void sendSignal() throws IOException {
+        sendNullRequest();
+    }
+    
+    @Override
     public synchronized void sendMessage() throws IOException {
-        messageBuffer.flip();
-        ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
-        ProduceRequest request = new ProduceRequest(topic, partitionId, messages);
-        TransferWrap wrap = new TransferWrap(request);
-        wrap.write(channel);
-        messageBuffer.clear();
-        messageNum = 0;
+        if (messageBuffer.hasRemaining()) {
+            messageBuffer.flip();
+            ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
+            ProduceRequest request = new ProduceRequest(topic, partitionId, messages);
+            TransferWrap wrap = new TransferWrap(request);
+            wrap.write(channel);
+            messageBuffer.clear();
+            messageNum = 0;
+        }
     }
     
     public void cacahAndSendLine(byte[] line) throws IOException {
@@ -116,8 +142,13 @@ public class PartitionConnection {
         messageNum++;
     }
     
+    @Override
     public synchronized void close() {
         try {
+            if (channel != null && channel.isOpen()) {
+                channel.close();
+                channel = null;
+            }
             if (socket != null && !socket.isClosed()) {
                 socket.close();
                 socket = null;

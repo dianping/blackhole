@@ -25,7 +25,7 @@ public class LogReader implements Runnable {
     private static final Log LOG = LogFactory.getLog(LogReader.class);
     public static final long END_OFFSET_OF_FILE = -1L;
     public static final long BEGIN_OFFSET_OF_FILE = 0L;
-    private enum ReaderState {NEW, UNASSIGNED, ASSIGNED, STOPPED}
+    private enum ReaderState {UNASSIGNED, ASSIGNED, STOPPED}
     private static final int IN_BUF = 1024 * 8;
     private static final int SYS_MAX_LINE_SIZE = 1024 * 512;
     private final byte inbuf[] = new byte[IN_BUF];
@@ -43,13 +43,12 @@ public class LogReader implements Runnable {
     private boolean accept;
     private final int maxLineSize;
     private RollTrigger rollTrigger;
-    private ZombieSocketChecker zombieSocketChecker;
     private Set<FileDescriptor> currentUnrotateFDs;
     
     public LogReader(Agent agent, AgentMeta meta, String snapshotPersistDir) {
         this.agent = agent;
         this.meta = meta;
-        this.currentReaderState = new AtomicReference<ReaderState>(ReaderState.NEW);
+        this.currentReaderState = new AtomicReference<ReaderState>(ReaderState.UNASSIGNED);
         this.logFSM = new LogFSM();
         this.recoder = new LocalRecorder(snapshotPersistDir, meta);
         if (meta.getMaxLineSize() > SYS_MAX_LINE_SIZE) {
@@ -88,18 +87,18 @@ public class LogReader implements Runnable {
         running = false;
     }
     
-    public void assignSender(RemoteSender newSender) {
-        this.sender = newSender;
+    public void assignSender(RemoteSender sender) {
+        this.sender = sender;
         ReaderState oldReaderState = currentReaderState.getAndSet(ReaderState.ASSIGNED);
-        new ZombieSocketChecker(this.sender).start();
         LOG.info("Assign sender: " + oldReaderState.name() + " -> SENDER_ASSIGNED");
-        
     }
     
     private void reassignSender(RemoteSender sender) {
         sender.close();
         if (currentReaderState.compareAndSet(ReaderState.ASSIGNED, ReaderState.UNASSIGNED)) {
             int reassignDelay = sender.getReassignDelaySeconds();
+            //must unregister from ConnectionChecker before re-assign
+            agent.getStreamHealthChecker().unregister(meta.getTopic(), meta.getSource());
             agent.reportRemoteSenderFailure(meta.getTopicId(), meta.getSource(), Util.getTS(), reassignDelay);
         }
     }
@@ -143,26 +142,24 @@ public class LogReader implements Runnable {
             LOG.error("Oops, resume fail", e);
             closeFile(reader);
             agent.reportLogReaderFailure(meta.getTopicId(), meta.getSource(), Util.getTS());
+            currentReaderState.set(ReaderState.STOPPED);
             return;
         }
         
-        if(currentReaderState.get() == ReaderState.NEW) {
-            if (!register()) {
-                LOG.error("Failed to register a log reader for " + meta.getTopicId() 
-                        + " with " + meta.getTailFile() + "log reader will exit.");
-                closeFile(reader);
-                agent.reportLogReaderFailure(meta.getTopicId(), meta.getSource(), Util.getTS());
-                return;
-            }
-            rollTrigger = new RollTrigger(meta, logFSM);
-            rollTrigger.trigger();
-            currentReaderState.compareAndSet(ReaderState.NEW, ReaderState.UNASSIGNED);
+        if (!register()) {
+            LOG.error("Failed to register a log reader for " + meta.getTopicId() 
+                    + " with " + meta.getTailFile() + "log reader will exit.");
+            closeFile(reader);
+            agent.reportLogReaderFailure(meta.getTopicId(), meta.getSource(), Util.getTS());
+            currentReaderState.set(ReaderState.STOPPED);
+            return;
         }
+        rollTrigger = new RollTrigger(meta, logFSM);
+        rollTrigger.trigger();
         
         // main loop
         loop();
         
-        zombieSocketChecker.shutdown();
         // after main loop, log reader thread will be shutdown and resources will be released 
         currentReaderState.set(ReaderState.STOPPED);
         closeFile(reader);
@@ -441,53 +438,6 @@ public class LogReader implements Runnable {
             }
         } catch (IOException ioe) {
             // ignore
-        }
-    }
-    
-    class ZombieSocketChecker extends Thread {
-        private volatile boolean running;
-        private static final int CHECK_INTERVAL = 5 * 60 * 1000;
-        private RemoteSender checkerHoldSender;
-        
-        public ZombieSocketChecker(RemoteSender sender) {
-            this.running = true;
-            this.checkerHoldSender = sender;
-            String name = "ZombieSocketChecker(" 
-                    + sender.getTopicId() + "-->"
-                    + sender.getBroker() + ")";
-            setDaemon(true);
-            setName(name);
-            LOG.info(name);
-        }
-        
-        public void shutdown() {
-            running = false;
-        }
-
-        @Override
-        public void run() {
-            while (running) {
-                if (currentReaderState.get() == ReaderState.ASSIGNED) {
-                    try {
-                        if (checkerHoldSender.getMessageBuffer().position() == 0) {
-                            checkerHoldSender.sendNullRequest();
-                        } else {
-                            checkerHoldSender.sendMessage();
-                        }
-                    } catch (IOException e) {
-                        LOG.warn("Find socket dead, reassign remote sender");
-                        reassignSender(checkerHoldSender);
-                        running = false;
-                    }
-                }
-                try {
-                    Thread.sleep(CHECK_INTERVAL);
-                } catch (InterruptedException e) {
-                    LOG.error("ZombieSocketChecker " + this.getName() + " interrupt", e);
-                    running = false;
-                }
-            }
-            LOG.info("ZombieSocketChecker " + this.getName() + " quit gracefully.");
         }
     }
 }

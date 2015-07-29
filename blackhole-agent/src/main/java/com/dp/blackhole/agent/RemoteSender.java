@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.StreamConnection;
 import com.dp.blackhole.network.TransferWrap;
 import com.dp.blackhole.protocol.data.HaltRequest;
 import com.dp.blackhole.protocol.data.VersionRequest;
@@ -20,7 +21,7 @@ import com.dp.blackhole.protocol.data.RollRequest;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.Message;
 
-public class RemoteSender {
+public class RemoteSender implements StreamConnection {
     private static final Log LOG = LogFactory.getLog(RemoteSender.class);
     private TopicId topicId;
     private long rollPeriod;
@@ -68,6 +69,7 @@ public class RemoteSender {
         channel = SocketChannel.open();
         channel.connect(new InetSocketAddress(broker, brokerPort));
         socket = channel.socket();
+        socket.setKeepAlive(true);
         LOG.info(topicId + " connected broker: " + broker + ":" + brokerPort);
         doStreamReg();
     }
@@ -104,15 +106,38 @@ public class RemoteSender {
         TransferWrap wrap = new TransferWrap(request);
         wrap.write(channel);
     }
+
+    @Override
+    public String getSource() {
+        return this.source;
+    }
+
+    @Override
+    public String getTarget() {
+        return this.broker + ":" + this.brokerPort;
+    }
     
+    @Override
+    public boolean canSend() {
+        return messageBuffer.position() != 0;
+    }
+    
+    @Override
+    public void sendSignal() throws IOException {
+        sendNullRequest();
+    }
+    
+    @Override
     public synchronized void sendMessage() throws IOException {
-        messageBuffer.flip();
-        ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
-        ProduceRequest request = new ProduceRequest(topicId.getTopic(), source, messages);
-        TransferWrap wrap = new TransferWrap(request);
-        wrap.write(channel);
-        messageBuffer.clear();
-        messageNum = 0;
+        if (messageBuffer.hasRemaining()) {
+            messageBuffer.flip();
+            ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
+            ProduceRequest request = new ProduceRequest(topicId.getTopic(), source, messages);
+            TransferWrap wrap = new TransferWrap(request);
+            wrap.write(channel);
+            messageBuffer.clear();
+            messageNum = 0;
+        }
     }
     
     public void cacahAndSendLine(byte[] line) throws IOException {
@@ -127,8 +152,13 @@ public class RemoteSender {
         messageNum++;
     }
     
+    @Override
     public synchronized void close() {
         try {
+            if (channel != null && channel.isOpen()) {
+                channel.close();
+                channel = null;
+            }
             if (socket != null && !socket.isClosed()) {
                 socket.close();
                 socket = null;
@@ -137,5 +167,4 @@ public class RemoteSender {
             LOG.warn("Failed to close socket.", e);
         }
     }
-
 }

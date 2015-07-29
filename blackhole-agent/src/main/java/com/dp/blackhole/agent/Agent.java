@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.agent.persist.IRecoder;
+import com.dp.blackhole.common.StreamHealthChecker;
 import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
@@ -65,6 +66,8 @@ public class Agent implements Runnable {
     private boolean paasModel = false;
     private String snapshotPersistDir;
     
+    private StreamHealthChecker streamHealthChecker;
+    
     public Agent() {
         this(null);
     }
@@ -103,6 +106,18 @@ public class Agent implements Runnable {
     
     public static Map<AgentMeta, LogReader> getTopicReaders() {
         return topicReaders;
+    }
+
+    public StreamHealthChecker getStreamHealthChecker() {
+        return streamHealthChecker;
+    }
+
+    /**
+     * for unit test
+     * @param streamHealthChecker
+     */
+    void setStreamHealthChecker(StreamHealthChecker streamHealthChecker) {
+        this.streamHealthChecker = streamHealthChecker;
     }
 
     private void register(TopicId topicId, long regTimestamp) {
@@ -180,6 +195,9 @@ public class Agent implements Runnable {
             return;
         }
         
+        this.streamHealthChecker = new StreamHealthChecker();
+        this.streamHealthChecker.start();
+        
         processor = new AgentProcessor();
         client = new GenClient(
                 processor,
@@ -195,6 +213,7 @@ public class Agent implements Runnable {
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
         }
+        this.streamHealthChecker.shutdown();
     }
     
     public AgentMeta fillUpAppLogsFromConfig(TopicId topicId) {
@@ -428,6 +447,7 @@ public class Agent implements Runnable {
                             return false;
                         }
                         logReader.assignSender(sender);
+                        streamHealthChecker.register(topic, topicMeta.getSource(), sender);
                         return true;
                     } else {
                         LOG.error("No logreader to be assign for " + topicId + " send ConfReq.");

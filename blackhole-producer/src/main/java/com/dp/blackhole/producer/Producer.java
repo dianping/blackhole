@@ -27,7 +27,6 @@ public class Producer {
     private ProducerConnector connector;
     private int currentPartitionIndex;
     private ScheduledExecutorService service;
-    private ZombieConnectionChecker checker;
     
     public Producer(String topic) {
         this.topic = topic;
@@ -38,8 +37,6 @@ public class Producer {
         this.partitionConnectionMap = new ConcurrentHashMap<String, PartitionConnection>();
         this.partitionStateMap = new ConcurrentHashMap<String, AtomicReference<PartitionConnectionState>>();
         this.currentPartitionIndex = 0;
-        this.checker = new ZombieConnectionChecker();
-        this.checker.start();
         this.service = Executors.newSingleThreadScheduledExecutor(
                 new DaemonThreadFactory("ProducerRollTask-" + topic));
     }
@@ -157,50 +154,9 @@ public class Producer {
             int reassignDelay = partitionConnection.getReassignDelaySeconds();
             partitionConnection.close();
             partitionConnectionMap.remove(partitionId);
+            //must unregister from ConnectionChecker before re-assign
+            connector.getStreamHealthChecker().unregister(topic, producerId);
             connector.reportPartitionConnectionFailure(topic, producerId, partitionId, Util.getTS(), reassignDelay);
-        }
-    }
-    
-    class ZombieConnectionChecker extends Thread {
-        private volatile boolean running;
-        private static final int CHECK_INTERVAL = 5 * 60 * 1000;
-        
-        public ZombieConnectionChecker() {
-            this.running = true;
-            setDaemon(true);
-            setName("ZombieConnectionChecker");
-        }
-        
-        public void shutdown() {
-            running = false;
-        }
-
-        @Override
-        public void run() {
-            while (running) {
-                for (PartitionConnection connection : partitionConnectionMap.values()) {
-                    String partitionId = connection.getPartitionId();
-                    AtomicReference<PartitionConnectionState> current = partitionStateMap.get(partitionId);
-                    if (current.get() == PartitionConnectionState.ASSIGNED) {
-                        try {
-                            if (connection.getMessageBuffer().position() == 0) {
-                                connection.sendNullRequest();
-                            } else {
-                                connection.sendMessage();
-                            }
-                        } catch (IOException e) {
-                            LOG.warn("Find connection dead, reassign partition connection for " + partitionId);
-                            reassignPartitionConnection(partitionId);
-                        }
-                    }
-                }
-                try {
-                    Thread.sleep(CHECK_INTERVAL);
-                } catch (InterruptedException e) {
-                    LOG.error("ZombieConnectionChecker interrupt", e);
-                    running = false;
-                }
-            }
         }
     }
 }

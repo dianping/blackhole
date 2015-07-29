@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
+import com.dp.blackhole.common.StreamHealthChecker;
 import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.TopicCommonMeta;
@@ -39,6 +40,7 @@ public class ProducerConnector implements Runnable {
     private static final int FIVE_MINUTES = 5 * 60;
     private static final long DEFAULT_PRODUCER_ROLL_PERIOD = 3600;
     private static ProducerConnector instance = new ProducerConnector();
+    private StreamHealthChecker streamHealthChecker;
     
     public static ProducerConnector getInstance() {
         return instance;
@@ -64,6 +66,10 @@ public class ProducerConnector implements Runnable {
         workingProducers = new ConcurrentHashMap<String, Map<String,Producer>>();
     }
     
+    public StreamHealthChecker getStreamHealthChecker() {
+        return streamHealthChecker;
+    }
+
     private void launchScheduler() {
         scheduler = new ScheduledThreadPoolExecutor(1, new DaemonThreadFactory("Scheduler"));
         scheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
@@ -82,6 +88,8 @@ public class ProducerConnector implements Runnable {
             throw new RuntimeException(e);
         }
         launchScheduler();
+        this.streamHealthChecker = new StreamHealthChecker();
+        this.streamHealthChecker.start();
         init(host, port, true, 6000);
     }
 
@@ -268,6 +276,7 @@ public class ProducerConnector implements Runnable {
                         continue;
                     }
                     p.assignPartitionConnection(partitionConnection);
+                    streamHealthChecker.register(topic, partitionId, partitionConnection);
                 }
                 break;
             case RECOVERY_ROLL:
