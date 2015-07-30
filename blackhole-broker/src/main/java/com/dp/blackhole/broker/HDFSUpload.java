@@ -26,7 +26,7 @@ import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.FileMessageSet;
 import com.dp.blackhole.storage.MessageAndOffset;
 
-public class HDFSUpload implements Runnable{
+public class HDFSUpload implements Runnable {
     private static final Log LOG = LogFactory.getLog(HDFSUpload.class);
     private RollManager mgr;
     private StorageManager manager;
@@ -34,11 +34,14 @@ public class HDFSUpload implements Runnable{
     private RollIdent ident;
     private RollPartition roll;
     private boolean uploadSuccess;
-    private ByteBuffer newline;
     private String compression;
     private final int BufferSize = 4 * 1024 * 1024;
-    
-    public HDFSUpload(RollManager mgr, StorageManager manager, FileSystem fs, RollIdent ident, RollPartition roll, String compression) {
+    private final int UPLOAD_RETRY_NUM = 3;
+    private final long WAIT_TIME_MILLIS = 3 * 60 * 1000;
+    private boolean networkError = false;
+
+    public HDFSUpload(RollManager mgr, StorageManager manager, FileSystem fs, RollIdent ident, RollPartition roll,
+            String compression) {
         this.mgr = mgr;
         this.manager = manager;
         this.fs = fs;
@@ -46,16 +49,31 @@ public class HDFSUpload implements Runnable{
         this.roll = roll;
         this.uploadSuccess = false;
         this.compression = compression;
-        newline = ByteBuffer.wrap("\n".getBytes(Charset.forName("UTF-8")));
     }
-    
+
     @Override
     public void run() {
-        uploadRoll();
+        for (int i = 0; i < UPLOAD_RETRY_NUM; i++) {
+            uploadRoll();
+            if (!uploadSuccess && networkError) {
+                if (i + 1 == UPLOAD_RETRY_NUM)
+                    break;
+                try {
+                    Thread.sleep(WAIT_TIME_MILLIS);
+                } catch (InterruptedException e) {
+                    LOG.error("sleep error: " + e);
+                }
+                LOG.warn((i + 1) + " time to retry upload " + ident);
+                networkError = false;
+            } else {
+                break;
+            }
+        }
         mgr.reportUpload(ident, compression, uploadSuccess);
     }
 
     private void uploadRoll() {
+        ByteBuffer newline = ByteBuffer.wrap("\n".getBytes(Charset.forName("UTF-8")));
         WritableByteChannel outChannel = null;
         Algorithm compressionAlgo = null;
         try {
@@ -64,55 +82,68 @@ public class HDFSUpload implements Runnable{
             compressionAlgo = Compression.getCompressionAlgorithmByName(ParamsKey.COMPRESSION_GZ);
             this.compression = ParamsKey.COMPRESSION_GZ;
         }
+
         try {
             String dfsPath = mgr.getRollHdfsPath(ident, compressionAlgo.getName());
             Path tmp = new Path(mgr.getTempHdfsPath(ident));
-            FSDataOutputStream fsDataOutputStream = fs.create(tmp);
+            FSDataOutputStream fsDataOutputStream = fs.create(tmp, true);
             Compressor compressor = compressionAlgo.getCompressor();
-            OutputStream out = compressionAlgo
-                    .createCompressionStream(fsDataOutputStream, compressor, 0);
+            OutputStream out = compressionAlgo.createCompressionStream(fsDataOutputStream, compressor, 0);
             outChannel = Channels.newChannel(out);
-            
+
             ByteBuffer buffer = ByteBuffer.allocate(BufferSize);
             ByteBufferChannel channel = new ByteBufferChannel(buffer);
-            
+
             Partition p = manager.getPartition(ident.topic, ident.source, false);
             if (p == null) {
                 LOG.warn("Can not got partition by " + ident.topic + " " + ident.source);
+                channel.close();
                 return;
             }
             long start = roll.startOffset;
             long end = roll.startOffset + roll.length;
             LOG.debug("Uploading " + ident + " in partition: " + p + " [" + start + "~" + end + "]");
             while (start < end) {
-                long size = end -start;
-                int limit = (int) ((size > BufferSize) ?  BufferSize : size);
-                
+                long size = end - start;
+                int limit = (int) ((size > BufferSize) ? BufferSize : size);
+
                 FileMessageSet fms = p.read(start, limit);
                 if (fms == null) {
                     throw new IOException("can't get FileMessageSet from partition " + p + " with "
                             + Util.toTupleString(start, end, limit) + " when Uploading " + ident);
                 }
+
                 fetchFileMessageSet(channel, fms);
-                
                 buffer.flip();
                 ByteBufferMessageSet bms = new ByteBufferMessageSet(buffer, start);
                 long realRead = bms.getValidSize();
-                
+
                 Iterator<MessageAndOffset> iter = bms.getItertor();
                 while (iter.hasNext()) {
                     MessageAndOffset mo = iter.next();
-                    outChannel.write(mo.getMessage().payload());
-                    outChannel.write(newline);
+                    try {
+                        outChannel.write(mo.getMessage().payload());
+                        outChannel.write(newline);
+                    } catch (IOException e) {
+                        networkError = true;
+                        throw e;
+                    }
                     newline.clear();
+
                 }
                 buffer.clear();
                 start += realRead;
             }
-            outChannel.close();
-                
+            try {
+                outChannel.close();
+            } catch (IOException e) {
+                networkError = true;
+                throw e;
+            }
+
             Path dst = new Path(dfsPath);
             if (!HDFSUtil.retryRename(fs, tmp, dst)) {
+                networkError = true;
                 throw new IOException("Faild to rename tmp to " + dst);
             }
 
@@ -137,7 +168,8 @@ public class HDFSUpload implements Runnable{
         }
     }
 
-    private int fetchChunk(GatheringByteChannel channel, FileMessageSet messages, int start, int limit) throws IOException {
+    private int fetchChunk(GatheringByteChannel channel, FileMessageSet messages, int start, int limit)
+            throws IOException {
         int read = 0;
         while (read < limit) {
             read += messages.write(channel, start + read, limit - read);
