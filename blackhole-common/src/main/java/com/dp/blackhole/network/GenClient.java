@@ -22,7 +22,7 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
     
     public static final Log LOG = LogFactory.getLog(GenClient.class);
     
-    private ConnectionFactory<Connection> factory;
+    private NonblockingConnectionFactory<Connection> factory;
     private TypedFactory wrappedFactory;
     private Processor processor;
     
@@ -52,7 +52,7 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
     
-    public GenClient(Processor processor, ConnectionFactory<Connection> factory, TypedFactory wrappedFactory) {
+    public GenClient(Processor processor, NonblockingConnectionFactory<Connection> factory, TypedFactory wrappedFactory) {
         this.processor = processor;
         this.factory = factory;
         this.wrappedFactory = wrappedFactory;

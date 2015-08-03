@@ -6,17 +6,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
-import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 
 public class ConsumerDesc extends NodeDesc {
     public static final Log LOG = LogFactory.getLog(ConsumerDesc.class);
     
     private String topic;
     private String groupId;
-    private SimpleConnection from;
+    private ByteBufferNonblockingConnection from;
     private List<PartitionInfo> partitions;
     
-    public ConsumerDesc(String consumerId, String groupId, String topic, SimpleConnection from) {
+    public ConsumerDesc(String consumerId, String groupId, String topic, ByteBufferNonblockingConnection from) {
         super(consumerId);
         this.topic = topic;
         this.groupId = groupId;
@@ -32,7 +32,7 @@ public class ConsumerDesc extends NodeDesc {
     }
 
     @JsonIgnore
-    public SimpleConnection getConnection () {
+    public ByteBufferNonblockingConnection getConnection () {
         return from;
     }
     

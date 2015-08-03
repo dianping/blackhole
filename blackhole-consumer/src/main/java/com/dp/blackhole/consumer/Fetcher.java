@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.consumer.api.ConsumerConfig;
-import com.dp.blackhole.network.DelegationIOConnection;
+import com.dp.blackhole.network.TransferWrapNonblockingConnection;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.TransferWrap;
@@ -36,7 +36,7 @@ import com.dp.blackhole.storage.MessageSet;
 public class Fetcher extends Thread {
     private final Log LOG = LogFactory.getLog(Fetcher.class);
     
-    private GenClient<TransferWrap, DelegationIOConnection, FetcherProcessor> client;
+    private GenClient<TransferWrap, TransferWrapNonblockingConnection, FetcherProcessor> client;
     private String groupId;
     private String consumerId; 
     private String broker;
@@ -62,7 +62,7 @@ public class Fetcher extends Thread {
         this.config = config;
         client = new GenClient(
                 new FetcherProcessor(),
-                new DelegationIOConnection.DelegationIOConnectionFactory(),
+                new TransferWrapNonblockingConnection.TransferWrapNonblockingConnectionFactory(),
                 new DataMessageTypeFactory());
     }
 
@@ -105,10 +105,10 @@ public class Fetcher extends Thread {
         return buf.toString();
     }
     
-    class FetcherProcessor implements EntityProcessor<TransferWrap, DelegationIOConnection> {
+    class FetcherProcessor implements EntityProcessor<TransferWrap, TransferWrapNonblockingConnection> {
         
         @Override
-        public void OnConnected(DelegationIOConnection connection) {
+        public void OnConnected(TransferWrapNonblockingConnection connection) {
             LOG.info("Fetcher " + this + " process connected with " + connection);
             if (config.isMultiFetch()) {
                 sendMultiFetchRequest(connection);
@@ -120,7 +120,7 @@ public class Fetcher extends Thread {
         }
 
         @Override
-        public void OnDisconnected(DelegationIOConnection connection) {
+        public void OnDisconnected(TransferWrapNonblockingConnection connection) {
             LOG.info("Fetcher " + this + " process disconnected with " + connection);
             partitionBlockMap.clear();
             partitionMap.clear();
@@ -128,7 +128,7 @@ public class Fetcher extends Thread {
         }
 
         @Override
-        public void process(TransferWrap response, DelegationIOConnection from) {
+        public void process(TransferWrap response, TransferWrapNonblockingConnection from) {
             switch (response.getType()) {
             case DataMessageTypeFactory.FetchReply:
                 handleFetchReply((FetchReply) response.unwrap(), from);
@@ -164,7 +164,7 @@ public class Fetcher extends Thread {
             return size;
         }
         
-        private void handleMultiFetchReply(MultiFetchReply multiFetchReply, DelegationIOConnection from) {
+        private void handleMultiFetchReply(MultiFetchReply multiFetchReply, TransferWrapNonblockingConnection from) {
             List<String> partitions = multiFetchReply.getPartitionList();
             List<MessageSet> messageSets = multiFetchReply.getMessagesList();
             List<Long> offsets = multiFetchReply.getOffsetList();
@@ -190,7 +190,7 @@ public class Fetcher extends Thread {
             }
         }
 
-        private void handleOffsetReply(OffsetReply offsetReply, DelegationIOConnection from) {
+        private void handleOffsetReply(OffsetReply offsetReply, TransferWrapNonblockingConnection from) {
             long resetOffset = offsetReply.getOffset();
             String topic = offsetReply.getTopic();
             String partition = offsetReply.getPartition();
@@ -218,7 +218,7 @@ public class Fetcher extends Thread {
             }
         }
 
-        private void handleFetchReply(FetchReply fetchReply, DelegationIOConnection from) {
+        private void handleFetchReply(FetchReply fetchReply, TransferWrapNonblockingConnection from) {
             ByteBufferMessageSet messageSet = (ByteBufferMessageSet) fetchReply.getMessageSet();
             String partition = fetchReply.getPartition();
             PartitionTopicInfo info = partitionMap.get(partition);
@@ -243,7 +243,7 @@ public class Fetcher extends Thread {
             }
         }
 
-        private void sendMultiFetchRequest(DelegationIOConnection connection) {
+        private void sendMultiFetchRequest(TransferWrapNonblockingConnection connection) {
             List<FetchRequest> fetches = new ArrayList<FetchRequest>();
             for (PartitionTopicInfo info : partitionBlockMap.keySet()) {
                 fetches.add(
@@ -258,7 +258,7 @@ public class Fetcher extends Thread {
             connection.send(new TransferWrap(new MultiFetchRequest(fetches)));
         }
 
-        private void sendOffsetRequest(DelegationIOConnection from,
+        private void sendOffsetRequest(TransferWrapNonblockingConnection from,
                 PartitionTopicInfo info) {
             LOG.info("send offset request for " + info);
             long offset;
@@ -272,7 +272,7 @@ public class Fetcher extends Thread {
             from.send(new TransferWrap(new OffsetRequest(info.topic, info.partition, offset)));
         }
 
-        private void sendFetchRequest(DelegationIOConnection from,
+        private void sendFetchRequest(TransferWrapNonblockingConnection from,
                 PartitionTopicInfo info) {
             LOG.debug("sendFetchRequest " + info.getFetchedOffset());
             from.send(
@@ -295,10 +295,10 @@ public class Fetcher extends Thread {
         }
         
         class RetryTask implements Runnable {
-            private DelegationIOConnection from;
+            private TransferWrapNonblockingConnection from;
             private PartitionTopicInfo info;
             
-            public RetryTask(DelegationIOConnection from, PartitionTopicInfo info) {
+            public RetryTask(TransferWrapNonblockingConnection from, PartitionTopicInfo info) {
                 this.from = from;
                 this.info = info;
             }

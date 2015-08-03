@@ -14,17 +14,17 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.Util;
 
-public class DelegationIOConnection implements NonblockingConnection<TransferWrap> {
+public class TransferWrapNonblockingConnection implements NonblockingConnection<TransferWrap> {
 
-    public static class DelegationIOConnectionFactory implements ConnectionFactory<DelegationIOConnection> {
+    public static class TransferWrapNonblockingConnectionFactory implements NonblockingConnectionFactory<TransferWrapNonblockingConnection> {
 
         @Override
-        public DelegationIOConnection makeConnection(SocketChannel channel, Selector selector, TypedFactory wrappedFactory) {
-            return new DelegationIOConnection(channel, selector, wrappedFactory);
+        public TransferWrapNonblockingConnection makeConnection(SocketChannel channel, Selector selector, TypedFactory wrappedFactory) {
+            return new TransferWrapNonblockingConnection(channel, selector, wrappedFactory);
         }
     }
     
-    public static final Log LOG = LogFactory.getLog(DelegationIOConnection.class);
+    public static final Log LOG = LogFactory.getLog(TransferWrapNonblockingConnection.class);
     
     private Selector selector;
     private SocketChannel channel;
@@ -43,7 +43,7 @@ public class DelegationIOConnection implements NonblockingConnection<TransferWra
   
     private TypedFactory wrappedFactory;
 
-    public DelegationIOConnection(SocketChannel channel, Selector selector, TypedFactory wrappedFactory) {
+    public TransferWrapNonblockingConnection(SocketChannel channel, Selector selector, TypedFactory wrappedFactory) {
         this.channel = channel;
         writeQueue = new ConcurrentLinkedQueue<TransferWrap>();
         active = new AtomicBoolean(true);

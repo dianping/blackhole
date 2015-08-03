@@ -17,7 +17,7 @@ import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
-import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
@@ -26,8 +26,8 @@ public class Cli {
     private static final Log LOG = LogFactory.getLog(Cli.class);
     private String autoCmd;
     private CliProcessor processor;
-    private SimpleConnection supervisor;
-    private GenClient<ByteBuffer, SimpleConnection, CliProcessor> client;
+    private ByteBufferNonblockingConnection supervisor;
+    private GenClient<ByteBuffer, ByteBufferNonblockingConnection, CliProcessor> client;
     private static long terminatePeriod;
 
     class CliInnerProcessor extends Thread {
@@ -206,10 +206,10 @@ public class Cli {
         }
     }
     
-    public class CliProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
+    public class CliProcessor implements EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection> {
         private HeartBeat heartbeat = null;
         @Override
-        public void OnConnected(SimpleConnection connection) {
+        public void OnConnected(ByteBufferNonblockingConnection connection) {
             supervisor = connection;
             if (autoCmd == null) {
                 heartbeat = new HeartBeat(supervisor);
@@ -222,12 +222,12 @@ public class Cli {
         }
 
         @Override
-        public void OnDisconnected(SimpleConnection connection) {
+        public void OnDisconnected(ByteBufferNonblockingConnection connection) {
             supervisor = null;
         }
 
         @Override
-        public void process(ByteBuffer buf, SimpleConnection from) {
+        public void process(ByteBuffer buf, ByteBufferNonblockingConnection from) {
             Message message = null;;
             try {
                 message = PBwrap.Buf2PB(buf);
@@ -262,9 +262,9 @@ public class Cli {
         String supervisorHost = prop.getProperty("supervisor.host");
         int supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
         processor = new CliProcessor();
-        client = new GenClient<ByteBuffer, SimpleConnection, Cli.CliProcessor>(
+        client = new GenClient<ByteBuffer, ByteBufferNonblockingConnection, Cli.CliProcessor>(
                 processor,
-                new SimpleConnection.SimpleConnectionFactory(),
+                new ByteBufferNonblockingConnection.ByteBufferNonblockingConnectionFactory(),
                 null);
         client.init("cli", supervisorHost, supervisorPort);
     }

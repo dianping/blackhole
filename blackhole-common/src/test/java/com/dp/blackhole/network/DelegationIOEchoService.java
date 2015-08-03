@@ -54,22 +54,22 @@ public class DelegationIOEchoService {
     
     public class Server extends Thread {
         
-        class echoProcessor implements EntityProcessor<TransferWrap, DelegationIOConnection> {
+        class echoProcessor implements EntityProcessor<TransferWrap, TransferWrapNonblockingConnection> {
 
             @Override
-            public void OnConnected(DelegationIOConnection connection) {
+            public void OnConnected(TransferWrapNonblockingConnection connection) {
                 // TODO Auto-generated method stub
                 
             }
 
             @Override
-            public void OnDisconnected(DelegationIOConnection connection) {
+            public void OnDisconnected(TransferWrapNonblockingConnection connection) {
                 // TODO Auto-generated method stub
                 
             }
 
             @Override
-            public void process(TransferWrap request, DelegationIOConnection from) {
+            public void process(TransferWrap request, TransferWrapNonblockingConnection from) {
                 System.out.println("server received request: "+((wappedObject)request.unwrap()).data);
                 TransferWrap replay = new TransferWrap((wappedObject)request.unwrap());
                 from.send(replay);
@@ -78,9 +78,9 @@ public class DelegationIOEchoService {
         }
         
         private void startService() {
-            GenServer<TransferWrap, DelegationIOConnection, EntityProcessor<TransferWrap, DelegationIOConnection>> server = new GenServer(
+            GenServer<TransferWrap, TransferWrapNonblockingConnection, EntityProcessor<TransferWrap, TransferWrapNonblockingConnection>> server = new GenServer(
                     new echoProcessor(),
-                    new DelegationIOConnection.DelegationIOConnectionFactory(),
+                    new TransferWrapNonblockingConnection.TransferWrapNonblockingConnectionFactory(),
                     new wappedObjectType());
             try {
                 server.init("echo", 2222, 1);
@@ -98,26 +98,26 @@ public class DelegationIOEchoService {
     }
     
     class Client extends Thread {
-        GenClient<TransferWrap, DelegationIOConnection, echoClientProcessor> client;
+        GenClient<TransferWrap, TransferWrapNonblockingConnection, echoClientProcessor> client;
         private int echotimes;
         
-        class echoClientProcessor implements EntityProcessor<TransferWrap, DelegationIOConnection> {
+        class echoClientProcessor implements EntityProcessor<TransferWrap, TransferWrapNonblockingConnection> {
 
             @Override
-            public void OnConnected(DelegationIOConnection connection) {
+            public void OnConnected(TransferWrapNonblockingConnection connection) {
                 DelegationIOEchoService echo1 = new DelegationIOEchoService();
                 connection.send(new TransferWrap(echo1.new wappedObject("message123")));
                 echotimes++;
             }
 
             @Override
-            public void OnDisconnected(DelegationIOConnection connection) {
+            public void OnDisconnected(TransferWrapNonblockingConnection connection) {
                 
             }
 
             @Override
             public void process(TransferWrap request,
-                    DelegationIOConnection from) {
+                    TransferWrapNonblockingConnection from) {
                 wappedObject a = (wappedObject) request.unwrap();
                 System.out.println("client get reply: "+a.data);
 
@@ -138,7 +138,7 @@ public class DelegationIOEchoService {
         public void run() {
             client = new GenClient(
                             new echoClientProcessor(),
-                            new DelegationIOConnection.DelegationIOConnectionFactory(),
+                            new TransferWrapNonblockingConnection.TransferWrapNonblockingConnectionFactory(),
                             new wappedObjectType());
             try {
                 client.init("echo", "localhost", 2222);

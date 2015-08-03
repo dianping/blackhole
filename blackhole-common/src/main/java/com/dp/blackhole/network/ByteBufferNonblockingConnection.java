@@ -15,18 +15,18 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.Util;
 
-public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
+public class ByteBufferNonblockingConnection implements NonblockingConnection<ByteBuffer> {
 
-    public static class SimpleConnectionFactory implements ConnectionFactory<SimpleConnection> {
+    public static class ByteBufferNonblockingConnectionFactory implements NonblockingConnectionFactory<ByteBufferNonblockingConnection> {
 
         @Override
-        public SimpleConnection makeConnection(SocketChannel channel,
+        public ByteBufferNonblockingConnection makeConnection(SocketChannel channel,
                 Selector selector, TypedFactory wrappedFactory) {
-            return new SimpleConnection(channel, selector);
+            return new ByteBufferNonblockingConnection(channel, selector);
         }
     }
     
-    public static final Log LOG = LogFactory.getLog(SimpleConnection.class);
+    public static final Log LOG = LogFactory.getLog(ByteBufferNonblockingConnection.class);
     
     private SocketChannel channel;
     private ByteBuffer length;
@@ -44,7 +44,7 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
     private boolean resolved;
 
 
-    public SimpleConnection(SocketChannel channel, Selector selector) {
+    public ByteBufferNonblockingConnection(SocketChannel channel, Selector selector) {
         this.channel = channel;
         this.selector = selector;
         writeQueue = new ConcurrentLinkedQueue<ByteBuffer>();

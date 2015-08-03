@@ -16,8 +16,8 @@ import com.dp.blackhole.broker.storage.RollPartition;
 import com.dp.blackhole.broker.storage.StorageManager.reporter.ReportEntry;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.network.ConnectionFactory;
-import com.dp.blackhole.network.DelegationIOConnection;
+import com.dp.blackhole.network.NonblockingConnectionFactory;
+import com.dp.blackhole.network.TransferWrapNonblockingConnection;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenServer;
 import com.dp.blackhole.network.TransferWrap;
@@ -41,10 +41,10 @@ import com.dp.blackhole.storage.MessageSet;
 public class BrokerService extends Thread {
     private final Log LOG = LogFactory.getLog(BrokerService.class);
     
-    GenServer<TransferWrap, DelegationIOConnection, EntityProcessor<TransferWrap, DelegationIOConnection>> server;
+    GenServer<TransferWrap, TransferWrapNonblockingConnection, EntityProcessor<TransferWrap, TransferWrapNonblockingConnection>> server;
     StorageManager manager;
     PublisherExecutor executor;
-    private Map<DelegationIOConnection, ClientDesc> clients;
+    private Map<TransferWrapNonblockingConnection, ClientDesc> clients;
     int servicePort;
     int numHandler;
     String localhost;
@@ -69,12 +69,12 @@ public class BrokerService extends Thread {
         int flushThreshold = Integer.parseInt(prop.getProperty("broker.storage.flushThreshold", "4194304"));
         numHandler = Integer.parseInt(prop.getProperty("GenServer.handler.count", "3"));
         servicePort = Integer.parseInt(prop.getProperty("broker.service.port"));
-        clients = new ConcurrentHashMap<DelegationIOConnection, BrokerService.ClientDesc>();
+        clients = new ConcurrentHashMap<TransferWrapNonblockingConnection, BrokerService.ClientDesc>();
         manager = new StorageManager(storagedir, splitThreshold, flushThreshold);
         executor = new PublisherExecutor();
-        ConnectionFactory<DelegationIOConnection> factory = new DelegationIOConnection.DelegationIOConnectionFactory();
+        NonblockingConnectionFactory<TransferWrapNonblockingConnection> factory = new TransferWrapNonblockingConnection.TransferWrapNonblockingConnectionFactory();
         TypedFactory wrappedFactory = new DataMessageTypeFactory();
-        server = new GenServer<TransferWrap, DelegationIOConnection, EntityProcessor<TransferWrap, DelegationIOConnection>>
+        server = new GenServer<TransferWrap, TransferWrapNonblockingConnection, EntityProcessor<TransferWrap, TransferWrapNonblockingConnection>>
             (executor, factory, wrappedFactory);
     }
     
@@ -87,20 +87,20 @@ public class BrokerService extends Thread {
     }
     
     public void disconnectClients() {
-        for (DelegationIOConnection client : clients.keySet()) {
+        for (TransferWrapNonblockingConnection client : clients.keySet()) {
             server.closeConnection(client);
         }
     }
     
     public class PublisherExecutor implements
-            EntityProcessor<TransferWrap, DelegationIOConnection> {
+            EntityProcessor<TransferWrap, TransferWrapNonblockingConnection> {
         
-        private void closeClientOfErrorRequest(DelegationIOConnection from, Object request) {
+        private void closeClientOfErrorRequest(TransferWrapNonblockingConnection from, Object request) {
             LOG.info("can't find topic/partition with " + request + " from " + from +" ,close connection");
             server.closeConnection(from);
         }
 
-        public void handleRegisterRequest(RegisterRequest request, DelegationIOConnection from) {
+        public void handleRegisterRequest(RegisterRequest request, TransferWrapNonblockingConnection from) {
             clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT, request.partitionId));
             try {
                 manager.getPartition(request.topic, request.partitionId, true);
@@ -112,7 +112,7 @@ public class BrokerService extends Thread {
         }
 
         public void handleProduceRequest(ProduceRequest request,
-                DelegationIOConnection from) {
+                TransferWrapNonblockingConnection from) {
             try {
                 Partition p = manager.getPartition(request.topic,
                         request.partitionId, true);
@@ -123,7 +123,7 @@ public class BrokerService extends Thread {
         }
 
         public void handleFetchRequest(FetchRequest request,
-                DelegationIOConnection from) {
+                TransferWrapNonblockingConnection from) {
             Partition p = null;
             FileMessageSet messages = null;
             try {
@@ -147,7 +147,7 @@ public class BrokerService extends Thread {
         }
 
         public void handleMultiFetchRequest(MultiFetchRequest request,
-                DelegationIOConnection from) {
+                TransferWrapNonblockingConnection from) {
             ArrayList<String> partitionList = new ArrayList<String>();
             ArrayList<MessageSet> messagesList = new ArrayList<MessageSet>();
             ArrayList<Long> offsetList = new ArrayList<Long>();
@@ -174,7 +174,7 @@ public class BrokerService extends Thread {
         }
 
         public void handleOffsetRequest(OffsetRequest request,
-                DelegationIOConnection from) {
+                TransferWrapNonblockingConnection from) {
             Partition p = null;
             try {
                 p = manager.getPartition(request.topic, request.partition, false);
@@ -188,7 +188,7 @@ public class BrokerService extends Thread {
             from.send(new TransferWrap(new OffsetReply(request.topic, request.partition, p.getEndOffset())));
         }
         
-        public void handleRollRequest(RollRequest request, DelegationIOConnection from) {
+        public void handleRollRequest(RollRequest request, TransferWrapNonblockingConnection from) {
             Partition p = null;
             try {
                 p = manager.getPartition(request.topic, request.partitionId, false);
@@ -203,7 +203,7 @@ public class BrokerService extends Thread {
             }
         }
         
-        public void handleLastRotateRequest(HaltRequest request, DelegationIOConnection from) {
+        public void handleLastRotateRequest(HaltRequest request, TransferWrapNonblockingConnection from) {
             Partition p = null;
             try {
                 p = manager.getPartition(request.topic, request.partitionId, false);
@@ -219,7 +219,7 @@ public class BrokerService extends Thread {
         }
         
         @Override
-        public void process(TransferWrap request, DelegationIOConnection from) {
+        public void process(TransferWrap request, TransferWrapNonblockingConnection from) {
             switch (request.getType()) {
             case DataMessageTypeFactory.RegisterRequest:
                 handleRegisterRequest((RegisterRequest) request.unwrap(), from);
@@ -242,7 +242,7 @@ public class BrokerService extends Thread {
             case DataMessageTypeFactory.OffsetRequest:
                 handleOffsetRequest((OffsetRequest) request.unwrap(), from);
                 break;
-            case DataMessageTypeFactory.VersionRequest:
+            case DataMessageTypeFactory.Heartbeat:
                 break;
             default:
                 LOG.error("unknown message type: " + request.getType());
@@ -250,13 +250,13 @@ public class BrokerService extends Thread {
         }
 
         @Override
-        public void OnConnected(DelegationIOConnection connection) {
+        public void OnConnected(TransferWrapNonblockingConnection connection) {
             LOG.info(connection + " connected");
             clients.put(connection, new ClientDesc(ClientDesc.CONSUMER));
         }
 
         @Override
-        public void OnDisconnected(DelegationIOConnection connection) {
+        public void OnDisconnected(TransferWrapNonblockingConnection connection) {
             LOG.info(connection + " disconnected");
             ClientDesc desc = clients.get(connection);
             if (desc.type == ClientDesc.AGENT) {

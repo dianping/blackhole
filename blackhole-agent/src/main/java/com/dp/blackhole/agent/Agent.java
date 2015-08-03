@@ -29,7 +29,7 @@ import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
-import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
@@ -58,9 +58,9 @@ public class Agent implements Runnable {
     private static Map<AgentMeta, LogReader> topicReaders = new ConcurrentHashMap<AgentMeta, LogReader>();
     private Map<String, RollRecovery> recoveryingMap = new ConcurrentHashMap<String, RollRecovery>();
     
-    private GenClient<ByteBuffer, SimpleConnection, AgentProcessor> client;
+    private GenClient<ByteBuffer, ByteBufferNonblockingConnection, AgentProcessor> client;
     AgentProcessor processor;
-    private SimpleConnection supervisor;
+    private ByteBufferNonblockingConnection supervisor;
     private int confLoopFactor = 1;
     private final String baseDirWildcard;
     private boolean paasModel = false;
@@ -201,7 +201,7 @@ public class Agent implements Runnable {
         processor = new AgentProcessor();
         client = new GenClient(
                 processor,
-                new SimpleConnection.SimpleConnectionFactory(),
+                new ByteBufferNonblockingConnection.ByteBufferNonblockingConnectionFactory(),
                 null);
 
         try {
@@ -310,11 +310,11 @@ public class Agent implements Runnable {
         }
     }
 
-    public class AgentProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
+    public class AgentProcessor implements EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection> {
         private HeartBeat heartbeat = null;
 
         @Override
-        public void OnConnected(SimpleConnection connection) {
+        public void OnConnected(ByteBufferNonblockingConnection connection) {
             supervisor = connection;
             if (!paasModel) {
                 requireConfigFromSupersivor(0);
@@ -327,7 +327,7 @@ public class Agent implements Runnable {
         }
 
         @Override
-        public void OnDisconnected(SimpleConnection connection) {
+        public void OnDisconnected(ByteBufferNonblockingConnection connection) {
             confLoopFactor = 1;
             
             supervisor = null;
@@ -358,7 +358,7 @@ public class Agent implements Runnable {
         }
         
         @Override
-        public void process(ByteBuffer reply, SimpleConnection from) {
+        public void process(ByteBuffer reply, ByteBufferNonblockingConnection from) {
 
             Message msg = null;
             try {

@@ -23,7 +23,7 @@ import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
-import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition;
 import com.dp.blackhole.protocol.control.CommonConfResPB.CommonConfRes;
@@ -47,7 +47,7 @@ public class ProducerConnector implements Runnable {
     }
     
     public volatile boolean initialized = false;
-    SimpleConnection supervisor;
+    ByteBufferNonblockingConnection supervisor;
     private volatile ScheduledThreadPoolExecutor scheduler;
     
     
@@ -56,7 +56,7 @@ public class ProducerConnector implements Runnable {
     private ConcurrentHashMap<String, Map<String, Producer>> workingProducers;
     
     
-    private GenClient<ByteBuffer, SimpleConnection, ProducerProcessor> client;
+    private GenClient<ByteBuffer, ByteBufferNonblockingConnection, ProducerProcessor> client;
     private ProducerProcessor processor;
     private String supervisorHost;
     private int supervisorPort;
@@ -160,7 +160,7 @@ public class ProducerConnector implements Runnable {
         processor = new ProducerProcessor();
         client = new GenClient(
                 processor,
-                new SimpleConnection.SimpleConnectionFactory(),
+                new ByteBufferNonblockingConnection.ByteBufferNonblockingConnectionFactory(),
                 null);
 
         try {
@@ -170,7 +170,7 @@ public class ProducerConnector implements Runnable {
         }
     }
     
-    public class ProducerProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
+    public class ProducerProcessor implements EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection> {
 
         private HeartBeat heartbeat;
 
@@ -182,7 +182,7 @@ public class ProducerConnector implements Runnable {
         }
         
         @Override
-        public void OnConnected(SimpleConnection connection) {
+        public void OnConnected(ByteBufferNonblockingConnection connection) {
             LOG.info("ProducerConnector connected");
             supervisor = connection;
             heartbeat = new HeartBeat(supervisor);
@@ -190,7 +190,7 @@ public class ProducerConnector implements Runnable {
         }
 
         @Override
-        public void OnDisconnected(SimpleConnection connection) {
+        public void OnDisconnected(ByteBufferNonblockingConnection connection) {
             LOG.info("ProducerConnector disconnected");
             supervisor = null;
             heartbeat.shutdown();
@@ -198,7 +198,7 @@ public class ProducerConnector implements Runnable {
         }
 
         @Override
-        public void process(ByteBuffer buffer, SimpleConnection connection) {
+        public void process(ByteBuffer buffer, ByteBufferNonblockingConnection connection) {
             Message msg = null;
             try {
                 msg = PBwrap.Buf2PB(buffer);

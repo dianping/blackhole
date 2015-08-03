@@ -28,7 +28,7 @@ import com.dp.blackhole.consumer.api.ConsumerConfig;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
-import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset;
 import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
@@ -54,9 +54,9 @@ public class ConsumerConnector implements Runnable {
     private ConcurrentHashMap<String, Consumer> consumers;   
     private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1, new DaemonThreadFactory("scheduler"));
 
-    private GenClient<ByteBuffer, SimpleConnection, ConsumerProcessor> client;
+    private GenClient<ByteBuffer, ByteBufferNonblockingConnection, ConsumerProcessor> client;
     private ConsumerProcessor processor;
-    private SimpleConnection supervisor;
+    private ByteBufferNonblockingConnection supervisor;
     private String supervisorHost;
     private int supervisorPort;
     private boolean autoCommit;
@@ -126,7 +126,7 @@ public class ConsumerConnector implements Runnable {
         processor = new ConsumerProcessor();
         client = new GenClient(
                 processor,
-                new SimpleConnection.SimpleConnectionFactory(),
+                new ByteBufferNonblockingConnection.ByteBufferNonblockingConnectionFactory(),
                 null);
         
         try {
@@ -186,11 +186,11 @@ public class ConsumerConnector implements Runnable {
         Util.send(supervisor, message);
     }
     
-    public class ConsumerProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
+    public class ConsumerProcessor implements EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection> {
         private HeartBeat heartbeat = null;
         
         @Override
-        public void OnConnected(SimpleConnection connection) {
+        public void OnConnected(ByteBufferNonblockingConnection connection) {
             LOG.info("ConsumerConnector connected");
             supervisor = connection;
             heartbeat = new HeartBeat(supervisor);
@@ -204,7 +204,7 @@ public class ConsumerConnector implements Runnable {
         }
 
         @Override
-        public void OnDisconnected(SimpleConnection connection) {
+        public void OnDisconnected(ByteBufferNonblockingConnection connection) {
             LOG.info("ConsumerConnector disconnected");
             supervisor = null;
             heartbeat.shutdown();
@@ -212,7 +212,7 @@ public class ConsumerConnector implements Runnable {
         }
 
         @Override
-        public void process(ByteBuffer reply, SimpleConnection from) {
+        public void process(ByteBuffer reply, ByteBufferNonblockingConnection from) {
             Message msg = null;
             try {
                 msg = PBwrap.Buf2PB(reply);

@@ -17,30 +17,30 @@ import org.junit.Test;
 public class SimpleEchoService {
 
     public class Server extends Thread {
-        class echoProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
+        class echoProcessor implements EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection> {
             
             @Override
-            public void OnConnected(SimpleConnection connection) {
+            public void OnConnected(ByteBufferNonblockingConnection connection) {
                 // TODO Auto-generated method stub
                 
             }
 
             @Override
-            public void OnDisconnected(SimpleConnection connection) {
+            public void OnDisconnected(ByteBufferNonblockingConnection connection) {
                 // TODO Auto-generated method stub
                 
             }
 
             @Override
-            public void process(ByteBuffer request, SimpleConnection from) {
+            public void process(ByteBuffer request, ByteBufferNonblockingConnection from) {
               from.send(request);
             }
             
         }
         
         public void startService() throws IOException {
-            GenServer<ByteBuffer, SimpleConnection, echoProcessor> server = 
-                    new GenServer(new echoProcessor(), new SimpleConnection.SimpleConnectionFactory(), null);
+            GenServer<ByteBuffer, ByteBufferNonblockingConnection, echoProcessor> server = 
+                    new GenServer(new echoProcessor(), new ByteBufferNonblockingConnection.ByteBufferNonblockingConnectionFactory(), null);
             server.init("echo", 2223, 1);
         }
         

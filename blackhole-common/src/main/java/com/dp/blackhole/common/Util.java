@@ -37,7 +37,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 
 public class Util {
@@ -620,7 +620,7 @@ public class Util {
         return sb.toString();
     }
     
-    public static void send(SimpleConnection connection, Message message) {
+    public static void send(ByteBufferNonblockingConnection connection, Message message) {
         if (connection != null) {
             connection.send(PBwrap.PB2Buf(message));
         } else {
