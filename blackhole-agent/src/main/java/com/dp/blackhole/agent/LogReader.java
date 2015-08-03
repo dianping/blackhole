@@ -98,7 +98,7 @@ public class LogReader implements Runnable {
         if (currentReaderState.compareAndSet(ReaderState.ASSIGNED, ReaderState.UNASSIGNED)) {
             int reassignDelay = sender.getReassignDelaySeconds();
             //must unregister from ConnectionChecker before re-assign
-            agent.getStreamHealthChecker().unregister(meta.getTopic(), meta.getSource());
+            agent.getStreamHealthChecker().unregister(sender);
             agent.reportRemoteSenderFailure(meta.getTopicId(), meta.getSource(), Util.getTS(), reassignDelay);
         }
     }
@@ -388,6 +388,9 @@ public class LogReader implements Runnable {
      * @throws java.io.IOException if an I/O error occurs.
      */
     private long readLines(RandomAccessFile reader) throws SocketException, IOException {
+        if (!sender.isActive()) {
+            throw new SocketException("send is not active");
+        }
         long pos = reader.getFilePointer();
         long rePos = pos; // position to re-read
         int num;

@@ -152,10 +152,10 @@ public class Producer {
         if (currentState.compareAndSet(PartitionConnectionState.ASSIGNED, PartitionConnectionState.UNASSIGNED)) {
             PartitionConnection partitionConnection = partitionConnectionMap.get(partitionId);
             int reassignDelay = partitionConnection.getReassignDelaySeconds();
+            connector.getStreamHealthChecker().unregister(partitionConnection);
             partitionConnection.close();
             partitionConnectionMap.remove(partitionId);
             //must unregister from ConnectionChecker before re-assign
-            connector.getStreamHealthChecker().unregister(topic, producerId);
             connector.reportPartitionConnectionFailure(topic, producerId, partitionId, Util.getTS(), reassignDelay);
         }
     }

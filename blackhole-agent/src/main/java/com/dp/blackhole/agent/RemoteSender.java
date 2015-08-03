@@ -2,6 +2,7 @@ package com.dp.blackhole.agent;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -10,24 +11,28 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.common.ParamsKey;
-import com.dp.blackhole.common.StreamConnection;
+import com.dp.blackhole.common.Sender;
+import com.dp.blackhole.network.BlockingConnection;
 import com.dp.blackhole.network.TransferWrap;
+import com.dp.blackhole.network.TypedFactory;
+import com.dp.blackhole.network.TransferWrapBlockingConnection.TransferWrapBlockingConnectionFactory;
+import com.dp.blackhole.protocol.data.DataMessageTypeFactory;
 import com.dp.blackhole.protocol.data.HaltRequest;
-import com.dp.blackhole.protocol.data.VersionRequest;
+import com.dp.blackhole.protocol.data.HeartBeatRequest;
 import com.dp.blackhole.protocol.data.ProduceRequest;
 import com.dp.blackhole.protocol.data.RegisterRequest;
 import com.dp.blackhole.protocol.data.RollRequest;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.Message;
 
-public class RemoteSender implements StreamConnection {
+public class RemoteSender implements Sender{
     private static final Log LOG = LogFactory.getLog(RemoteSender.class);
     private TopicId topicId;
     private long rollPeriod;
     private String source;
     private String broker;
     private int brokerPort;
-    private SocketChannel channel;
+    private BlockingConnection<TransferWrap> connection;
     private ByteBuffer messageBuffer;
     private int messageNum;
     private long minMsgSent;
@@ -38,6 +43,7 @@ public class RemoteSender implements StreamConnection {
         this.source = topicMeta.getSource();
         this.broker = broker;
         this.brokerPort = port;
+
         this.rollPeriod = topicMeta.getRollPeriod();
         this.minMsgSent = topicMeta.getMinMsgSent();
     }
@@ -60,10 +66,14 @@ public class RemoteSender implements StreamConnection {
 
     public void initializeRemoteConnection() throws IOException {
         messageBuffer = ByteBuffer.allocate(512 * 1024);
-        channel = SocketChannel.open();
-        channel.connect(new InetSocketAddress(broker, brokerPort));
-        channel.socket().setKeepAlive(true);
+        SocketChannel socketChannel = SocketChannel.open();
+        socketChannel.configureBlocking(true);
+        SocketAddress server = new InetSocketAddress(broker, brokerPort);
+        socketChannel.connect(server);
         LOG.info(topicId + " connected broker: " + broker + ":" + brokerPort);
+        TransferWrapBlockingConnectionFactory factory = new TransferWrapBlockingConnectionFactory();
+        TypedFactory wrappedFactory = new DataMessageTypeFactory();
+        connection = factory.makeConnection(socketChannel, wrappedFactory);
         doStreamReg();
     }
     
@@ -74,7 +84,7 @@ public class RemoteSender implements StreamConnection {
                 rollPeriod,
                 broker);
         TransferWrap wrap = new TransferWrap(request);
-        syncWrite(wrap);
+        connection.write(wrap);
     }
     
     public void sendRollRequest() throws IOException {
@@ -83,7 +93,7 @@ public class RemoteSender implements StreamConnection {
                 source,
                 rollPeriod);
         TransferWrap wrap = new TransferWrap(request);
-        syncWrite(wrap);
+        connection.write(wrap);
     }
     
     public void sendHaltRequest() throws IOException {
@@ -92,13 +102,14 @@ public class RemoteSender implements StreamConnection {
                 source,
                 rollPeriod);
         TransferWrap wrap = new TransferWrap(request);
-        syncWrite(wrap);
+        connection.write(wrap);
     }
     
-    public void sendNullRequest() throws IOException {
-        VersionRequest request = new VersionRequest(ParamsKey.VERSION);
+    @Override
+    public void heartbeat() throws IOException {
+        HeartBeatRequest request = new HeartBeatRequest(ParamsKey.SOCKET_HEARTBEAT);
         TransferWrap wrap = new TransferWrap(request);
-        syncWrite(wrap);
+        connection.write(wrap);
     }
 
     @Override
@@ -117,11 +128,6 @@ public class RemoteSender implements StreamConnection {
     }
     
     @Override
-    public void sendSignal() throws IOException {
-        sendNullRequest();
-    }
-    
-    @Override
     public void sendMessage() throws IOException {
         synchronized (messageBuffer) {
             if (canSend()) {
@@ -129,7 +135,7 @@ public class RemoteSender implements StreamConnection {
                 ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
                 ProduceRequest request = new ProduceRequest(topicId.getTopic(), source, messages);
                 TransferWrap wrap = new TransferWrap(request);
-                syncWrite(wrap);
+                connection.write(wrap);
                 messageBuffer.clear();
                 messageNum = 0;
             }
@@ -149,24 +155,13 @@ public class RemoteSender implements StreamConnection {
         messageNum++;
     }
     
-    private void syncWrite(TransferWrap wrap) throws IOException {
-        synchronized (channel) {
-            wrap.write(channel);
-        }
-    }
-    
     @Override
     public void close() {
-        synchronized (channel) {
-            try {
-                if (channel != null && channel.isOpen()) {
-                    channel.close();
-                    channel.socket().close();
-                    channel = null;
-                }
-            } catch (IOException e) {
-                LOG.warn("Failed to close socket.", e);
-            }
-        }
+        connection.close();
+    }
+
+    @Override
+    public boolean isActive() {
+        return connection.isActive();
     }
 }

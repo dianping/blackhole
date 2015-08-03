@@ -11,21 +11,21 @@ public class StreamHealthChecker extends Thread {
     private static final Log LOG = LogFactory.getLog(StreamHealthChecker.class);
     private volatile boolean running;
     private static final int CHECK_INTERVAL = 5 * 60 * 1000;
-    private ConcurrentHashMap<String, StreamConnection> connections;
+    private ConcurrentHashMap<Sender, String> senders;
     
     public StreamHealthChecker() {
-        this.connections = new ConcurrentHashMap<String, StreamConnection>();
+        this.senders = new ConcurrentHashMap<Sender, String>();
         this.running = true;
         setDaemon(true);
         setName("StreamHealthChecker");
     }
     
-    public void register(String topic, String partitionId, StreamConnection connection) {
-        connections.putIfAbsent(topic + ":" + partitionId, connection);
+    public void register(String topic, String partitionId, Sender sender) {
+        senders.putIfAbsent(sender, topic + ":" + partitionId);
     }
     
-    public void unregister(String topic, String partitionId) {
-        connections.remove(topic + ":" + partitionId);
+    public void unregister(Sender sender) {
+        senders.remove(sender);
     }
     
     public void shutdown() {
@@ -41,24 +41,24 @@ public class StreamHealthChecker extends Thread {
                 LOG.error(this.getName() + this.getId() + " interrupt", e);
                 running = false;
             }
-            for (Map.Entry<String, StreamConnection> entry : connections.entrySet()) {
-                String key = entry.getKey();
-                StreamConnection connection = entry.getValue();
-                LOG.debug("connection checking..." + key);
+            for (Map.Entry<Sender, String> entry : senders.entrySet()) {
+                Sender sender = entry.getKey();
+                String connStr = entry.getValue();
+                LOG.debug("sender checking..." + connStr);
                 try {
-                    if (connection.canSend()) {
-                        connection.sendMessage();
+                    if (sender.canSend()) {
+                        sender.sendMessage();
                     } else {
-                        connection.sendSignal();
+                        sender.heartbeat();
                     }
                 } catch (IOException e) {
-                    LOG.warn("Find socket " + connection.getSource() + "-->" + connection.getTarget() + " dead.");
-                    connection.close();
-                    connections.remove(key);
+                    LOG.warn("Find socket " + sender.getSource() + "-->" + sender.getTarget() + " dead.");
+                    sender.close();
+                    senders.remove(sender);
                 }
             }
         }
-        connections.clear();
+        senders.clear();
         LOG.info(this.getName() + this.getId() + " quit gracefully.");
     }
 }

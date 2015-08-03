@@ -2,7 +2,9 @@ package com.dp.blackhole.common;
 
 import java.io.IOException;
 
-public interface StreamConnection {
+public interface Sender {
+    
+    public boolean isActive();
     
     public String getSource();
     
@@ -10,7 +12,7 @@ public interface StreamConnection {
     
     public void sendMessage() throws IOException;
     
-    public void sendSignal() throws IOException;
+    public void heartbeat() throws IOException;
     
     public boolean canSend();
     
