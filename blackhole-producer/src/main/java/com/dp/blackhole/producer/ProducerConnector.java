@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -76,16 +77,31 @@ public class ProducerConnector implements Runnable {
         scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
     }
     
-    public synchronized void init() {
+    public synchronized void init(Properties prop) {
         ConfigCache configCache;
         String host;
         int port;
-        try {
-            configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-            host = configCache.getProperty("blackhole.supervisor.host");
-            port = configCache.getIntProperty("blackhole.supervisor.port");
-        } catch (LionException e) {
-            throw new RuntimeException(e);
+        if (prop != null) {
+            host = prop.getProperty("supervisor.host");
+            port = Integer.parseInt(prop.getProperty("supervisor.port"));
+            LOG.info("get connection info from properties " + host + ":" + port);
+        } else {
+            try {
+                prop = new Properties();
+                prop.load(getClass().getClassLoader().getResourceAsStream("producer.properties"));
+                host = prop.getProperty("supervisor.host");
+                port = Integer.parseInt(prop.getProperty("supervisor.port"));
+                LOG.info("get connection info from file " + host + ":" + port);
+            } catch (Exception e) {
+                try {
+                    configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
+                    host = configCache.getProperty("blackhole.supervisor.host");
+                    port = configCache.getIntProperty("blackhole.supervisor.port");
+                    LOG.info("get connection info from lion " + host + ":" + port);
+                } catch (LionException le) {
+                    throw new RuntimeException(le);
+                }
+            }
         }
         launchScheduler();
         this.streamHealthChecker = new StreamHealthChecker();

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -72,9 +73,23 @@ public class ConsumerConnector implements Runnable {
     }
     
     public synchronized void init() throws LionException {
-        ConfigCache configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-        String host = configCache.getProperty("blackhole.supervisor.host");
-        int port = configCache.getIntProperty("blackhole.supervisor.port");
+        ConfigCache configCache;
+        String host;
+        int port;
+        try {
+            Properties prop = new Properties();
+            prop.load(getClass().getClassLoader().getResourceAsStream("consumer.properties"));
+            host = prop.getProperty("supervisor.host");
+            port = Integer.parseInt(prop.getProperty("supervisor.port"));
+        } catch (Exception e) {
+            try {
+                configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
+                host = configCache.getProperty("blackhole.supervisor.host");
+                port = configCache.getIntProperty("blackhole.supervisor.port");
+            } catch (LionException le) {
+                throw new RuntimeException(le);
+            }
+        }
         init(host, port, true, 6000);
     }
 

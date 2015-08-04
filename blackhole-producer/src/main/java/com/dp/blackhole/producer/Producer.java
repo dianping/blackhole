@@ -3,6 +3,7 @@ package com.dp.blackhole.producer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,10 +30,14 @@ public class Producer {
     private ScheduledExecutorService service;
     
     public Producer(String topic) {
+        this(topic, null);
+    }
+    
+    public Producer(String topic, Properties prop) {
         this.topic = topic;
         this.connector = ProducerConnector.getInstance();
         if (!this.connector.initialized) {
-            this.connector.init();
+            this.connector.init(prop);
         }
         this.partitionConnectionMap = new ConcurrentHashMap<String, PartitionConnection>();
         this.partitionStateMap = new ConcurrentHashMap<String, AtomicReference<PartitionConnectionState>>();
