@@ -23,7 +23,7 @@ public class Producer {
     private final String topic;
     private String producerId;
     private TopicCommonMeta topicMeta;
-    private Map<String, PartitionConnection> partitionConnectionMap;
+    private Map<PartitionConnection, String> partitionConnectionMap;
     private ConcurrentHashMap<String, AtomicReference<PartitionConnectionState>> partitionStateMap;
     private ProducerConnector connector;
     private int currentPartitionIndex;
@@ -36,10 +36,8 @@ public class Producer {
     public Producer(String topic, Properties prop) {
         this.topic = topic;
         this.connector = ProducerConnector.getInstance();
-        if (!this.connector.initialized) {
-            this.connector.init(prop);
-        }
-        this.partitionConnectionMap = new ConcurrentHashMap<String, PartitionConnection>();
+        this.connector.init(prop);
+        this.partitionConnectionMap = new ConcurrentHashMap<PartitionConnection, String>();
         this.partitionStateMap = new ConcurrentHashMap<String, AtomicReference<PartitionConnectionState>>();
         this.currentPartitionIndex = 0;
         this.service = Executors.newSingleThreadScheduledExecutor(
@@ -73,11 +71,14 @@ public class Producer {
         this.service.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                for (PartitionConnection conn : partitionConnectionMap.values()) {
+                for (Map.Entry<PartitionConnection, String> entry : partitionConnectionMap.entrySet()) {
+                    PartitionConnection conn = entry.getKey();
+                    String partitionId = entry.getValue();
                     try {
                         conn.sendRollRequest();
                     } catch (IOException e) {
-                        reassignPartitionConnection(conn.getPartitionId());
+                        LOG.warn("send roll request fail for " + partitionId, e);
+                        reassignPartitionConnection(conn);
                     }
                 }
             }
@@ -103,44 +104,45 @@ public class Producer {
      * @return true if the message sent successfully, or false
      */
     public boolean sendMessage(byte[] message) {
-        String partitionId = getPartitionIdRoundRobin();
-        if (partitionId == null) {
+        PartitionConnection partitionConnection = getPartitionIdRoundRobin();
+        if (partitionConnection == null) {
             return false;
         }
         try {
-            partitionConnectionMap.get(partitionId).cacahAndSendLine(message);
+            partitionConnection.cacahAndSendLine(message);
         } catch (IOException e) {
-            reassignPartitionConnection(partitionId);
+            reassignPartitionConnection(partitionConnection);
             return false;
         }
         return true;
     }
     
     public void closeProducer() {
-        for (PartitionConnection conn : partitionConnectionMap.values()) {
-            AtomicReference<PartitionConnectionState> current = partitionStateMap.get(conn.getPartitionId());
+        for (Map.Entry<PartitionConnection, String> entry : partitionConnectionMap.entrySet()) {
+            PartitionConnection conn = entry.getKey();
+            String partitionId = entry.getValue();
+            AtomicReference<PartitionConnectionState> current = partitionStateMap.get(partitionId);
             current.set(PartitionConnectionState.STOPPED);
             conn.close();
-            LOG.info("close producer " + producerId + " partition " + conn.getPartitionId() + " disconnected.");
+            LOG.info("close producer " + producerId + " partition " + partitionId + " disconnected.");
         }
         partitionConnectionMap.clear();
         partitionStateMap.clear();
         currentPartitionIndex = 0;
     }
     
-    private String getPartitionIdRoundRobin() {
-        int total = partitionConnectionMap.size();
-        if (total == 0) {
+    private PartitionConnection getPartitionIdRoundRobin() {
+        ArrayList<PartitionConnection> connections = new ArrayList<PartitionConnection>(partitionConnectionMap.keySet());
+        if (connections.isEmpty()) {
             return null;
         }
-        int index = (currentPartitionIndex++) % total;
-        ArrayList<String> array = new ArrayList<String>(partitionConnectionMap.keySet());
-        return array.get(index);
+        int index = (currentPartitionIndex++) % connections.size();
+        return connections.get(index);
     }
 
     public void assignPartitionConnection(PartitionConnection partitionConnection) {
         String partitionId = partitionConnection.getPartitionId();
-        partitionConnectionMap.put(partitionId, partitionConnection);
+        partitionConnectionMap.put(partitionConnection, partitionId);
         AtomicReference<PartitionConnectionState> oldState = partitionStateMap.putIfAbsent(
                 partitionId,
                 new AtomicReference<PartitionConnectionState>(
@@ -152,14 +154,14 @@ public class Producer {
         }
     }
     
-    private void reassignPartitionConnection(String partitionId) {
+    private void reassignPartitionConnection(PartitionConnection partitionConnection) {
+        String partitionId = partitionConnection.getPartitionId();
+        partitionConnection.close();
         AtomicReference<PartitionConnectionState> currentState = partitionStateMap.get(partitionId);
-        if (currentState.compareAndSet(PartitionConnectionState.ASSIGNED, PartitionConnectionState.UNASSIGNED)) {
-            PartitionConnection partitionConnection = partitionConnectionMap.get(partitionId);
+        if (currentState != null && currentState.compareAndSet(PartitionConnectionState.ASSIGNED, PartitionConnectionState.UNASSIGNED)) {
             int reassignDelay = partitionConnection.getReassignDelaySeconds();
             connector.getStreamHealthChecker().unregister(partitionConnection);
-            partitionConnection.close();
-            partitionConnectionMap.remove(partitionId);
+            partitionConnectionMap.remove(partitionConnection);
             //must unregister from ConnectionChecker before re-assign
             connector.reportPartitionConnectionFailure(topic, producerId, partitionId, Util.getTS(), reassignDelay);
         }

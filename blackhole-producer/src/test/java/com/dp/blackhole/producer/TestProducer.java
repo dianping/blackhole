@@ -4,7 +4,29 @@ import com.dp.blackhole.common.Util;
 
 public class TestProducer {
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
+        final String[] topic = args;
+        Thread[] threads = new Thread[3];
+        for (int i = 0; i < 3; i++) {
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        sendInThread(topic);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            threads[i] = t;
+            t.start();
+        }
+        for (int i = 0; i < threads.length; i++) {
+            threads[i].join();
+        }
+    }
+    
+    private static void sendInThread(String[] args) throws InterruptedException {
         Producer producer1 = new Producer(args[0]);
         Producer producer2 = new Producer(args[0]);
         producer1.register();

@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,6 +41,7 @@ public class ProducerConnector implements Runnable {
     private final Log LOG = LogFactory.getLog(ProducerConnector.class);
     private static final int FIVE_MINUTES = 5 * 60;
     private static final long DEFAULT_PRODUCER_ROLL_PERIOD = 3600;
+    //this is a static instance, concurrency of all actions should be take to account
     private static ProducerConnector instance = new ProducerConnector();
     private StreamHealthChecker streamHealthChecker;
     
@@ -47,7 +49,7 @@ public class ProducerConnector implements Runnable {
         return instance;
     }
     
-    public volatile boolean initialized = false;
+    private AtomicBoolean initialized = new AtomicBoolean(false);
     ByteBufferNonblockingConnection supervisor;
     private volatile ScheduledThreadPoolExecutor scheduler;
     
@@ -71,55 +73,63 @@ public class ProducerConnector implements Runnable {
         return streamHealthChecker;
     }
 
+    public boolean isInitialized() {
+        return initialized.get();
+    }
+    
     private void launchScheduler() {
         scheduler = new ScheduledThreadPoolExecutor(1, new DaemonThreadFactory("Scheduler"));
         scheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
         scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
     }
     
-    public synchronized void init(Properties prop) {
-        ConfigCache configCache;
-        String host;
-        int port;
-        if (prop != null) {
-            host = prop.getProperty("supervisor.host");
-            port = Integer.parseInt(prop.getProperty("supervisor.port"));
-            LOG.info("get connection info from properties " + host + ":" + port);
-        } else {
-            try {
-                prop = new Properties();
-                prop.load(getClass().getClassLoader().getResourceAsStream("producer.properties"));
-                host = prop.getProperty("supervisor.host");
-                port = Integer.parseInt(prop.getProperty("supervisor.port"));
-                LOG.info("get connection info from file " + host + ":" + port);
-            } catch (Exception e) {
+    public void init(Properties prop) {
+        synchronized (instance) {
+            if (isInitialized()) {
+                return;
+            }
+            ConfigCache configCache;
+            if (prop != null) {
+                supervisorHost = prop.getProperty("supervisor.host");
+                supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
+                LOG.info("get connection info from properties " + supervisorHost + ":" + supervisorPort);
+            } else {
                 try {
-                    configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-                    host = configCache.getProperty("blackhole.supervisor.host");
-                    port = configCache.getIntProperty("blackhole.supervisor.port");
-                    LOG.info("get connection info from lion " + host + ":" + port);
-                } catch (LionException le) {
-                    throw new RuntimeException(le);
+                    prop = new Properties();
+                    prop.load(getClass().getClassLoader().getResourceAsStream("producer.properties"));
+                    supervisorHost = prop.getProperty("supervisor.host");
+                    supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
+                    LOG.info("get connection info from file " + supervisorHost + ":" + supervisorPort);
+                } catch (Exception e) {
+                    try {
+                        configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
+                        supervisorHost = configCache.getProperty("blackhole.supervisor.host");
+                        supervisorPort = configCache.getIntProperty("blackhole.supervisor.port");
+                        LOG.info("get connection info from lion " + supervisorHost + ":" + supervisorPort);
+                    } catch (LionException le) {
+                        throw new RuntimeException(le);
+                    }
                 }
             }
+            processor = new ProducerProcessor();
+            launchScheduler();
+            launchHealthStreamChecker();
+            launch();
+            initialized.getAndSet(true);
         }
-        launchScheduler();
-        this.streamHealthChecker = new StreamHealthChecker();
-        this.streamHealthChecker.start();
-        init(host, port, true, 6000);
     }
 
-    public synchronized void init(String supervisorHost, int supervisorPort, boolean autoCommit, int autoCommitIntervalMs) {
-        if (!instance.initialized) {
-            instance.initialized = true;
-            instance.supervisorHost = supervisorHost;
-            instance.supervisorPort = supervisorPort;
-            Thread thread = new Thread(instance);
-            thread.setDaemon(true);
-            thread.start();
-        } 
+    private void launch() {
+        Thread thread = new Thread(instance);
+        thread.setDaemon(true);
+        thread.start();
     }
-    
+
+    private void launchHealthStreamChecker() {
+        streamHealthChecker = new StreamHealthChecker();
+        streamHealthChecker.start();
+    }
+
     public void prepare(Producer producer) {
         unAssignIdProducers.putIfAbsent(producer.getTopic(), new LinkedBlockingQueue<Producer>());
         LinkedBlockingQueue<Producer> producers = unAssignIdProducers.get(producer.getTopic());
@@ -173,7 +183,6 @@ public class ProducerConnector implements Runnable {
     
     @Override
     public void run() {
-        processor = new ProducerProcessor();
         client = new GenClient(
                 processor,
                 new ByteBufferNonblockingConnection.ByteBufferNonblockingConnectionFactory(),
