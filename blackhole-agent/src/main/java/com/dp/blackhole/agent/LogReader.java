@@ -3,6 +3,7 @@ package com.dp.blackhole.agent;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.SocketException;
@@ -21,7 +22,7 @@ public class LogReader implements Runnable {
     private static final Log LOG = LogFactory.getLog(LogReader.class);
     public static final long END_OFFSET_OF_FILE = -1L;
     public static final long BEGIN_OFFSET_OF_FILE = 0L;
-    private enum ReaderState {NEW, UNASSIGNED, ASSIGNED, STOPPED}
+    private enum ReaderState {UNASSIGNED, ASSIGNED, STOPPED}
     private static final int IN_BUF = 1024 * 8;
     private static final int SYS_MAX_LINE_SIZE = 1024 * 512;
     private final byte inbuf[] = new byte[IN_BUF];
@@ -39,12 +40,12 @@ public class LogReader implements Runnable {
     private boolean accept;
     private final int maxLineSize;
     private RollTrigger rollTrigger;
-    private ZombieSocketChecker zombieSocketChecker;
+    private long actualLatestRotateTs;
     
     public LogReader(Agent agent, AgentMeta meta, String snapshotPersistDir) {
         this.agent = agent;
         this.meta = meta;
-        this.currentReaderState = new AtomicReference<ReaderState>(ReaderState.NEW);
+        this.currentReaderState = new AtomicReference<ReaderState>(ReaderState.UNASSIGNED);
         this.logFSM = new LogFSM();
         this.recoder = new LocalRecorder(snapshotPersistDir, meta);
         if (meta.getMaxLineSize() > SYS_MAX_LINE_SIZE) {
@@ -52,12 +53,10 @@ public class LogReader implements Runnable {
         } else {
             this.maxLineSize = meta.getMaxLineSize();
         }
-
+        this.actualLatestRotateTs = 0;
         this.lineBuf = new ByteArrayOutputStream(maxLineSize);
         this.tailFile = new File(meta.getTailFile());
         this.accept = true;
-        this.zombieSocketChecker = new ZombieSocketChecker();
-        zombieSocketChecker.start();
     }
     
     public LogFSM getLogFSM() {
@@ -68,14 +67,18 @@ public class LogReader implements Runnable {
         return sender;
     }
 
-    public void setSender(RemoteSender sender) {
-        this.sender = sender;
-    }
-
     public IRecoder getRecoder() {
         return recoder;
     }
     
+    public long getActualLatestRotateTs() {
+        return actualLatestRotateTs;
+    }
+    
+    public void setActualLatestRotateTs(long rotateTs) {
+        this.actualLatestRotateTs = rotateTs;
+    }
+
     public boolean register() {
         return agent.getListener().registerLogReader(meta.getTailFile(), logFSM);
     }
@@ -88,25 +91,52 @@ public class LogReader implements Runnable {
         running = false;
     }
     
-    public void assignSender(RemoteSender newSender) {
-        setSender(newSender);
+    public void assignSender(RemoteSender sender) {
+        this.sender = sender;
         ReaderState oldReaderState = currentReaderState.getAndSet(ReaderState.ASSIGNED);
         LOG.info("Assign sender: " + oldReaderState.name() + " -> SENDER_ASSIGNED");
     }
     
-    private void reassignSender() {
-        currentReaderState.compareAndSet(ReaderState.ASSIGNED, ReaderState.UNASSIGNED);
-        int reassignDelay = sender.getReassignDelaySeconds();
+    private void reassignSender(RemoteSender sender) {
         sender.close();
-        agent.reportRemoteSenderFailure(meta.getTopicId(), meta.getSource(), Util.getTS(), reassignDelay);
+        if (currentReaderState.compareAndSet(ReaderState.ASSIGNED, ReaderState.UNASSIGNED)) {
+            int reassignDelay = sender.getReassignDelaySeconds();
+            //must unregister from ConnectionChecker before re-assign
+            agent.getStreamHealthChecker().unregister(sender);
+            agent.reportRemoteSenderFailure(meta.getTopicId(), meta.getSource(), Util.getTS(), reassignDelay);
+        }
+    }
+    
+    long computeStartOffset(long rollTs, long rotatePeriod) {
+        long startOffset;
+        Record perviousRollRecord = getRecoder().getPerviousRollRecord();
+        if (perviousRollRecord == null) {
+            startOffset = LogReader.BEGIN_OFFSET_OF_FILE;
+        } else if (hasRotated(rollTs, rotatePeriod) && !Util.belongToSameRotate(perviousRollRecord.getRollTs(), rollTs, rotatePeriod)) {
+            startOffset = LogReader.BEGIN_OFFSET_OF_FILE;
+        } else {
+            startOffset = perviousRollRecord.getEndOffset() + 1;
+        }
+        return startOffset;
+    }
+    
+    private boolean hasRotated(long ts, long rotatePeriod) {
+        long expectedLatestRotateTs = Util.getLatestRollTsUnderTimeBuf(ts, rotatePeriod, ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
+        long actualLatestRotateTs = getActualLatestRotateTs();
+        return (actualLatestRotateTs == expectedLatestRotateTs) || (actualLatestRotateTs == 0); //equals 0 means first rotation
+    }
+
+    private void record(int type, long rollTs, long endOffset) {
+        long startOffset = computeStartOffset(rollTs, meta.getRotatePeriod());
+        getRecoder().record(type, rollTs, startOffset, endOffset);
     }
     
     @Override
     public void run() {
         LOG.info("Log reader for " + meta + " running...");
         try {
-            this.reader = new RandomAccessFile(tailFile, "r");
-            long resumeRollTs = Util.getLatestRollTsUnderTimeBuf(
+            this.reader = openFile();
+            long resumeRollTs = Util.getCurrentRollTsUnderTimeBuf(
                     Util.getTS(),
                     meta.getRollPeriod(),
                     ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
@@ -117,39 +147,46 @@ public class LogReader implements Runnable {
             //minus 1 is back to the end offset of previous line
             //so if seekLastLineHeader() return 0, it declare that it's a new unread file.
             long endOffset = Util.seekLastLineHeader(reader, fileLength) - 1;
-            getRecoder().record(Record.RESUME, resumeRollTs, endOffset);
+            record(Record.RESUME, resumeRollTs, endOffset);
         } catch (IOException e) {
             LOG.error("Oops, resume fail", e);
-            closeQuietly(reader);
+            closeFile(reader);
             agent.reportLogReaderFailure(meta.getTopicId(), meta.getSource(), Util.getTS());
+            currentReaderState.set(ReaderState.STOPPED);
             return;
         }
         
-        if(currentReaderState.get() == ReaderState.NEW) {
-            if (!register()) {
-                LOG.error("Failed to register a log reader for " + meta.getTopicId() 
-                        + " with " + meta.getTailFile() + "log reader will exit.");
-                closeQuietly(reader);
-                agent.reportLogReaderFailure(meta.getTopicId(), meta.getSource(), Util.getTS());
-                return;
-            }
-            rollTrigger = new RollTrigger(meta, logFSM);
-            rollTrigger.trigger();
-            currentReaderState.compareAndSet(ReaderState.NEW, ReaderState.UNASSIGNED);
+        if (!register()) {
+            LOG.error("Failed to register a log reader for " + meta.getTopicId() 
+                    + " with " + meta.getTailFile() + "log reader will exit.");
+            closeFile(reader);
+            agent.reportLogReaderFailure(meta.getTopicId(), meta.getSource(), Util.getTS());
+            currentReaderState.set(ReaderState.STOPPED);
+            return;
         }
+        rollTrigger = new RollTrigger(meta, logFSM);
+        rollTrigger.trigger();
         
         // main loop
         loop();
         
-        zombieSocketChecker.shutdown();
         // after main loop, log reader thread will be shutdown and resources will be released 
         currentReaderState.set(ReaderState.STOPPED);
-        closeQuietly(reader);
+        closeFile(reader);
         sender.close();
         sender = null;
         unregister();
         rollTrigger.stop();
         LOG.warn("terminate log reader " + meta.getTopicId() + ", resources released.");
+    }
+
+    private RandomAccessFile openFile() throws FileNotFoundException {
+        RandomAccessFile raf = new RandomAccessFile(tailFile, "r");
+        return raf;
+    }
+
+    private void closeFile(RandomAccessFile raf) {
+        closeQuietly(raf);
     }
 
     private void loop() {
@@ -199,16 +236,16 @@ public class LogReader implements Runnable {
             long rotatePeriod, long resumeRollTs) {
         Record lastRollRecord = getRecoder().retriveLastRollRecord();
         if (lastRollRecord != null) {
-            long firstMissRotaeRollTs = Util.getNextRollTs(lastRollRecord.getRollTs(), rotatePeriod) - rollPeriod * 1000;
-            if (firstMissRotaeRollTs > lastRollRecord.getRollTs() && firstMissRotaeRollTs <= resumeRollTs) {
-                getRecoder().record(Record.ROTATE, firstMissRotaeRollTs, END_OFFSET_OF_FILE);
+            long firstMissRotateRollTs = Util.getNextRollTs(lastRollRecord.getRollTs(), rotatePeriod) - rollPeriod * 1000;
+            if (firstMissRotateRollTs > lastRollRecord.getRollTs() && firstMissRotateRollTs <= resumeRollTs) {
+                record(Record.ROTATE, firstMissRotateRollTs, END_OFFSET_OF_FILE);
             }
-            int restMissRotateRollCount = Util.getMissRotateRollCount(firstMissRotaeRollTs, resumeRollTs, rotatePeriod);
+            int restMissRotateRollCount = Util.getMissRotateRollCount(firstMissRotateRollTs, resumeRollTs, rotatePeriod);
             for (int i = 0; i < restMissRotateRollCount; i++) {
                 Record lastRotateRecord = getRecoder().retriveLastRollRecord();
                 long missRotateRollTs = Util.getNextRollTs(lastRotateRecord.getRollTs(), rotatePeriod) + (rotatePeriod  - rollPeriod) * 1000;
                 LOG.debug("find miss rotate roll ts " + missRotateRollTs);
-                getRecoder().record(Record.ROTATE, missRotateRollTs, END_OFFSET_OF_FILE);
+                record(Record.ROTATE, missRotateRollTs, END_OFFSET_OF_FILE);
             }
         }
     }
@@ -220,7 +257,7 @@ public class LogReader implements Runnable {
             }
         } catch (SocketException e) {
             LOG.error("Fail while sending message, reassign sender", e);
-            reassignSender();
+            reassignSender(sender);
         } catch (IOException e) {
             LOG.error("Oops, got an exception:", e);
             throw new RuntimeException("log reader loop terminate, prepare to reboot log reader.");
@@ -249,7 +286,7 @@ public class LogReader implements Runnable {
                         ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
             }
             //record snapshot
-            getRecoder().record(Record.ROLL, rollTs, rollEndOffset);
+            record(Record.ROLL, rollTs, rollEndOffset);
         }
         try {
             if (currentReaderState.get() == ReaderState.ASSIGNED) {
@@ -262,7 +299,7 @@ public class LogReader implements Runnable {
             }
         } catch (Exception e) {
             LOG.error("Fail while sending roll request, reassign sender", e);
-            reassignSender();
+            reassignSender(sender);
         } finally {
             if (meta.isDying()) {
                 logFSM.finishLastRoll();
@@ -286,7 +323,7 @@ public class LogReader implements Runnable {
         long previousRotateEndOffset = END_OFFSET_OF_FILE;
         try {
             try {
-                reader = new RandomAccessFile(tailFile, "r");
+                this.reader = openFile();
                 // At this point, we're sure that the old file is rotated
                 // Finish scanning the old file and then we'll start with the new one
                 // minus 1 points out the end offset of old file
@@ -297,13 +334,18 @@ public class LogReader implements Runnable {
                 LOG.error("Oops, got an exception:", e);
                 throw new RuntimeException("log reader loop terminate, prepare to reboot log reader.");
             } finally {
-                closeQuietly(save);
+                closeFile(save);
+                Long latestRotateTs = Util.getLatestRollTsUnderTimeBuf(
+                        Util.getTS(), meta.getRotatePeriod(),
+                        ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
+                setActualLatestRotateTs(latestRotateTs);
+                LOG.debug(tailFile + "'s actual latest rotate ts is " + latestRotateTs);
                 Long rollTs = Util.getLatestRollTsUnderTimeBuf(
                         Util.getTS(),
                         meta.getRollPeriod(),
                         ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
                 //record snapshot
-                getRecoder().record(Record.ROTATE, rollTs, previousRotateEndOffset);
+                record(Record.ROTATE, rollTs, previousRotateEndOffset);
             }
             
             if (currentReaderState.get() == ReaderState.ASSIGNED) {
@@ -314,7 +356,7 @@ public class LogReader implements Runnable {
             }
         } catch (IOException e) {
             LOG.error("Fail while sending rotate request, reassign sender", e);
-            reassignSender();
+            reassignSender(sender);
         } finally {
             logFSM.finishLogRotate();
         }
@@ -328,6 +370,9 @@ public class LogReader implements Runnable {
      * @throws java.io.IOException if an I/O error occurs.
      */
     private long readLines(RandomAccessFile reader) throws SocketException, IOException {
+        if (!sender.isActive()) {
+            throw new SocketException("send is not active");
+        }
         long pos = reader.getFilePointer();
         long rePos = pos; // position to re-read
         int num;
@@ -378,45 +423,6 @@ public class LogReader implements Runnable {
             }
         } catch (IOException ioe) {
             // ignore
-        }
-    }
-    
-    class ZombieSocketChecker extends Thread {
-        private volatile boolean running;
-        private static final int CHECK_INTERVAL = 5 * 60 * 1000;
-        
-        public ZombieSocketChecker() {
-            this.running = true;
-            setDaemon(true);
-            setName("ZombieSocketChecker");
-        }
-        
-        public void shutdown() {
-            running = false;
-        }
-
-        @Override
-        public void run() {
-            while (running) {
-                if (currentReaderState.get() == ReaderState.ASSIGNED) {
-                    try {
-                        if (sender.getMessageBuffer().position() == 0) {
-                            sender.sendNullRequest();
-                        } else {
-                            sender.sendMessage();
-                        }
-                    } catch (IOException e) {
-                        LOG.warn("Find socket dead, reassign remote sender");
-                        reassignSender();
-                    }
-                }
-                try {
-                    Thread.sleep(CHECK_INTERVAL);
-                } catch (InterruptedException e) {
-                    LOG.error("ZombieSocketChecker interrupt", e);
-                    running = false;
-                }
-            }
         }
     }
 }

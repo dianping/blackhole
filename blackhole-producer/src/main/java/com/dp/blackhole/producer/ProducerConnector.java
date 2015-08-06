@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -15,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
+import com.dp.blackhole.common.StreamHealthChecker;
 import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.TopicCommonMeta;
@@ -22,7 +24,7 @@ import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
-import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition;
 import com.dp.blackhole.protocol.control.CommonConfResPB.CommonConfRes;
@@ -39,13 +41,14 @@ public class ProducerConnector implements Runnable {
     private static final int FIVE_MINUTES = 5 * 60;
     private static final long DEFAULT_PRODUCER_ROLL_PERIOD = 3600;
     private static ProducerConnector instance = new ProducerConnector();
+    private StreamHealthChecker streamHealthChecker;
     
     public static ProducerConnector getInstance() {
         return instance;
     }
     
     public volatile boolean initialized = false;
-    SimpleConnection supervisor;
+    ByteBufferNonblockingConnection supervisor;
     private volatile ScheduledThreadPoolExecutor scheduler;
     
     
@@ -54,7 +57,7 @@ public class ProducerConnector implements Runnable {
     private ConcurrentHashMap<String, Map<String, Producer>> workingProducers;
     
     
-    private GenClient<ByteBuffer, SimpleConnection, ProducerProcessor> client;
+    private GenClient<ByteBuffer, ByteBufferNonblockingConnection, ProducerProcessor> client;
     private ProducerProcessor processor;
     private String supervisorHost;
     private int supervisorPort;
@@ -64,24 +67,45 @@ public class ProducerConnector implements Runnable {
         workingProducers = new ConcurrentHashMap<String, Map<String,Producer>>();
     }
     
+    public StreamHealthChecker getStreamHealthChecker() {
+        return streamHealthChecker;
+    }
+
     private void launchScheduler() {
         scheduler = new ScheduledThreadPoolExecutor(1, new DaemonThreadFactory("Scheduler"));
         scheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
         scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
     }
     
-    public synchronized void init() {
+    public synchronized void init(Properties prop) {
         ConfigCache configCache;
         String host;
         int port;
-        try {
-            configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-            host = configCache.getProperty("blackhole.supervisor.host");
-            port = configCache.getIntProperty("blackhole.supervisor.port");
-        } catch (LionException e) {
-            throw new RuntimeException(e);
+        if (prop != null) {
+            host = prop.getProperty("supervisor.host");
+            port = Integer.parseInt(prop.getProperty("supervisor.port"));
+            LOG.info("get connection info from properties " + host + ":" + port);
+        } else {
+            try {
+                prop = new Properties();
+                prop.load(getClass().getClassLoader().getResourceAsStream("producer.properties"));
+                host = prop.getProperty("supervisor.host");
+                port = Integer.parseInt(prop.getProperty("supervisor.port"));
+                LOG.info("get connection info from file " + host + ":" + port);
+            } catch (Exception e) {
+                try {
+                    configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
+                    host = configCache.getProperty("blackhole.supervisor.host");
+                    port = configCache.getIntProperty("blackhole.supervisor.port");
+                    LOG.info("get connection info from lion " + host + ":" + port);
+                } catch (LionException le) {
+                    throw new RuntimeException(le);
+                }
+            }
         }
         launchScheduler();
+        this.streamHealthChecker = new StreamHealthChecker();
+        this.streamHealthChecker.start();
         init(host, port, true, 6000);
     }
 
@@ -152,7 +176,7 @@ public class ProducerConnector implements Runnable {
         processor = new ProducerProcessor();
         client = new GenClient(
                 processor,
-                new SimpleConnection.SimpleConnectionFactory(),
+                new ByteBufferNonblockingConnection.ByteBufferNonblockingConnectionFactory(),
                 null);
 
         try {
@@ -162,7 +186,7 @@ public class ProducerConnector implements Runnable {
         }
     }
     
-    public class ProducerProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
+    public class ProducerProcessor implements EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection> {
 
         private HeartBeat heartbeat;
 
@@ -174,7 +198,7 @@ public class ProducerConnector implements Runnable {
         }
         
         @Override
-        public void OnConnected(SimpleConnection connection) {
+        public void OnConnected(ByteBufferNonblockingConnection connection) {
             LOG.info("ProducerConnector connected");
             supervisor = connection;
             heartbeat = new HeartBeat(supervisor);
@@ -182,7 +206,7 @@ public class ProducerConnector implements Runnable {
         }
 
         @Override
-        public void OnDisconnected(SimpleConnection connection) {
+        public void OnDisconnected(ByteBufferNonblockingConnection connection) {
             LOG.info("ProducerConnector disconnected");
             supervisor = null;
             heartbeat.shutdown();
@@ -190,7 +214,7 @@ public class ProducerConnector implements Runnable {
         }
 
         @Override
-        public void process(ByteBuffer buffer, SimpleConnection connection) {
+        public void process(ByteBuffer buffer, ByteBufferNonblockingConnection connection) {
             Message msg = null;
             try {
                 msg = PBwrap.Buf2PB(buffer);
@@ -268,6 +292,7 @@ public class ProducerConnector implements Runnable {
                         continue;
                     }
                     p.assignPartitionConnection(partitionConnection);
+                    streamHealthChecker.register(topic, partitionId, partitionConnection);
                 }
                 break;
             case RECOVERY_ROLL:

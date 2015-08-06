@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 
 public class ConnectionDesc {
     public static final int AGENT = 1;
@@ -15,12 +15,12 @@ public class ConnectionDesc {
     
     private int type;
     private AtomicLong lastHeartBeat;
-    private SimpleConnection connection;
+    private ByteBufferNonblockingConnection connection;
     //Storm sets up multi-thread(Executors) in a processor(worker),
     //each executor will register a consumer entity
     private List<NodeDesc> attachments;
     
-    public ConnectionDesc(SimpleConnection connection) {
+    public ConnectionDesc(ByteBufferNonblockingConnection connection) {
         this.connection = connection;
         lastHeartBeat = new AtomicLong(Util.getTS());
         attachments = new ArrayList<NodeDesc>();
@@ -42,7 +42,7 @@ public class ConnectionDesc {
         return lastHeartBeat.get();
     }
     
-    public SimpleConnection getConnection() {
+    public ByteBufferNonblockingConnection getConnection() {
         return connection;
     }
     

@@ -4,14 +4,14 @@ import java.nio.ByteBuffer;
 
 import com.dp.blackhole.network.NonDelegationTypedWrappable;
 
-public class VersionRequest extends NonDelegationTypedWrappable {
-    public short version;
+public class HeartBeatRequest extends NonDelegationTypedWrappable {
+    public short heartbeat;
     
-    public VersionRequest() {
+    public HeartBeatRequest() {
     }
     
-    public VersionRequest(short version) {
-        this.version = version;
+    public HeartBeatRequest(short heartbeat) {
+        this.heartbeat = heartbeat;
     }
     
     @Override
@@ -21,17 +21,17 @@ public class VersionRequest extends NonDelegationTypedWrappable {
 
     @Override
     public void read(ByteBuffer buffer) {
-        version = buffer.getShort();
+        heartbeat = buffer.getShort();
     }
 
     @Override
     public void write(ByteBuffer buffer) {
-        buffer.putShort(version);
+        buffer.putShort(heartbeat);
     }
 
     @Override
     public int getType() {
-        return DataMessageTypeFactory.VersionRequest;
+        return DataMessageTypeFactory.Heartbeat;
     }
 
 }

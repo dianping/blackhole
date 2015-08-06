@@ -101,7 +101,7 @@ public class HttpPaaSLogoutHandler extends HttpAbstractHandler implements HttpRe
         if (topicSet == null || topicSet.size() == 0) {
             return new HttpResult(HttpResult.NONEED, "It contains no mapping for the cmdbapp " + app);
         } else {
-            LOG.info(Arrays.toString(args[0]) + " login, it belong to " + app);
+            LOG.info(Arrays.toString(args[0]) + " logout, it belong to " + app);
         }
         String[] ids = args[0];
         String[] ips = args[1];

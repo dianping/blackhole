@@ -10,7 +10,7 @@ public class DataMessageTypeFactory implements TypedFactory {
     public static final Log LOG = LogFactory.getLog(DataMessageTypeFactory.class);
     
     public static final int UndefinedRequest = -1;
-    public static final int VersionRequest = 0;
+    public static final int Heartbeat = 0;
     public static final int ProduceRequest = 1;
     public static final int FetchRequest = 2;
     public static final int FetchReply = 3;
@@ -27,7 +27,7 @@ public class DataMessageTypeFactory implements TypedFactory {
         TypedWrappable ret = null;
         switch (type) {
         case 0:
-            ret = new VersionRequest();
+            ret = new HeartBeatRequest();
             break;
         case 1:
             ret = new ProduceRequest();

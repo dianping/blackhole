@@ -1,6 +1,7 @@
 package com.dp.blackhole.agent;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyLong;
 import static org.powermock.api.mockito.PowerMockito.*;
 
 import org.junit.Test;
@@ -28,14 +29,15 @@ public class TestLogReader2 {
         LocalRecorder spyLocalRecorder = spy(new LocalRecorder("/tmp/test1", meta));
         try {
             doNothing().when(spyLocalRecorder, "persist");
+            when(spyReader.computeStartOffset(anyLong(), anyLong())).thenReturn(0L);
             when(spyReader.getRecoder()).thenReturn(spyLocalRecorder);
         } catch (Exception e) {
             e.printStackTrace();
         }
         long rollTs1 = 1421036400000L; //2015-01-12 12:20:00
-        spyLocalRecorder.record(Record.ROLL, rollTs1, 100);
+        spyLocalRecorder.record(Record.ROLL, rollTs1, 0, 100);
         long rollTs2 = 1421036700000L; //2015-01-12 12:25:00
-        spyLocalRecorder.record(Record.ROLL, rollTs2, 200);
+        spyLocalRecorder.record(Record.ROLL, rollTs2, 101, 200);
         long resumeRollTs = 1421065320000L; //2015-01-12 20:22:00
         spyReader.restoreMissingRotationRecords(300, 3600, resumeRollTs);
 //        assertEquals(10, spyLocalRecorder.getSnapshot().getRecords().size());

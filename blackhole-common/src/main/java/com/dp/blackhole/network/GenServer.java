@@ -20,7 +20,7 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
 
     public static final Log LOG = LogFactory.getLog(GenServer.class);
     
-    private ConnectionFactory<Connection> factory;
+    private NonblockingConnectionFactory<Connection> factory;
     private TypedFactory wrappedFactory;
     private Processor processor;
     
@@ -44,7 +44,7 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
     
-    public GenServer(Processor processor, ConnectionFactory<Connection> factory, TypedFactory wrappedFactory) {
+    public GenServer(Processor processor, NonblockingConnectionFactory<Connection> factory, TypedFactory wrappedFactory) {
         this.processor = processor;
         this.factory = factory;
         this.wrappedFactory = wrappedFactory;

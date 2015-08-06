@@ -15,18 +15,18 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.Util;
 
-public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
+public class ByteBufferNonblockingConnection implements NonblockingConnection<ByteBuffer> {
 
-    public static class SimpleConnectionFactory implements ConnectionFactory<SimpleConnection> {
+    public static class ByteBufferNonblockingConnectionFactory implements NonblockingConnectionFactory<ByteBufferNonblockingConnection> {
 
         @Override
-        public SimpleConnection makeConnection(SocketChannel channel,
+        public ByteBufferNonblockingConnection makeConnection(SocketChannel channel,
                 Selector selector, TypedFactory wrappedFactory) {
-            return new SimpleConnection(channel, selector);
+            return new ByteBufferNonblockingConnection(channel, selector);
         }
     }
     
-    public static final Log LOG = LogFactory.getLog(SimpleConnection.class);
+    public static final Log LOG = LogFactory.getLog(ByteBufferNonblockingConnection.class);
     
     private SocketChannel channel;
     private ByteBuffer length;
@@ -39,9 +39,12 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
     private Selector selector;
     private String remote;
     private String host;
+    private String ip;
     private int port;
+    private boolean resolved;
 
-    public SimpleConnection(SocketChannel channel, Selector selector) {
+
+    public ByteBufferNonblockingConnection(SocketChannel channel, Selector selector) {
         this.channel = channel;
         this.selector = selector;
         writeQueue = new ConcurrentLinkedQueue<ByteBuffer>();
@@ -49,6 +52,10 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
         length = ByteBuffer.allocate(4);
         
         InetSocketAddress remoteAddr = Util.getRemoteAddr(channel.socket());
+        if (!remoteAddr.isUnresolved()) {
+            resolved = Util.isNameResolved(remoteAddr.getAddress());
+            ip = remoteAddr.getAddress().getHostAddress();
+        }
         host = remoteAddr.getHostName();
         port = remoteAddr.getPort();
         remote = host+ ":" + port;
@@ -59,6 +66,11 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
         return active.get();
     }
 
+    @Override
+    public boolean isResolved() {
+        return resolved;
+    }
+    
     @Override
     public SocketChannel getChannel() {
         return channel;
@@ -201,6 +213,10 @@ public class SimpleConnection implements NonblockingConnection<ByteBuffer> {
 
     public String getHost() {
         return host;
+    }
+    
+    public String getIP() {
+        return ip;
     }
     
     @Override

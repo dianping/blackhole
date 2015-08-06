@@ -44,6 +44,10 @@ public class TimeChecker extends Thread {
             }
         }
     }
+    
+    public synchronized boolean isClear(RollIdent ident) {
+        return !checkerMap.containsKey(ident);
+    }
 
     public void changePeriod(long newSleepDuration) {
         this.sleepDuration = newSleepDuration;
@@ -77,9 +81,14 @@ public class TimeChecker extends Thread {
             for (int index = 0; index < checkTsList.size(); index++) {
                 boolean shouldDone = true;
                 long checkTs = checkTsList.get(index);
+                Path parentPath = Util.getRollHdfsParentPath(ident, checkTs);
+                Path missingDir = new Path(parentPath, CheckDone.missingSourcesDir);
                 if (Util.wasDone(ident, checkTs)) {
-                    LOG.info("TimeChecker: [" + ident.topic + ":" + Util.format.format(new Date(checkTs)) + "]....Done!");
                     unregisterTimeChecker(ident, checkTs);
+                    if(!Util.retryDelete(missingDir)) {
+                        LOG.error("Can not delete missing dir " + missingDir);
+                    }
+                    LOG.info("TimeChecker: [" + ident.topic + ":" + Util.format.format(new Date(checkTs)) + "]....Done!");
                     continue;
                 }
                 //skip source blacklist
@@ -90,27 +99,44 @@ public class TimeChecker extends Thread {
                     expectedFile = Util.getRollHdfsPathByTs(ident, checkTs, source, false);
                     hiddenFile = Util.getRollHdfsPathByTs(ident, checkTs, source, true)[0];
                     if (Util.retryExists(expectedFile) || Util.retryExists(hiddenFile)) {
+                        //remove hidden sources file
+                        if(!Util.retryDelete(missingDir, source)) {
+                            LOG.error("Can not delete missing file " + missingDir + "/" + source);
+                        }
                     } else {
-                        LOG.debug("TimeChecker:  None of " + Arrays.toString(expectedFile) + " is ready.");
                         shouldDone = false;
-                        break;
+                        //add hidden sources file
+                        if(!Util.retryTouch(missingDir, source)) {
+                            LOG.error("Fail to touch missing source file" + missingDir + "/" + source);
+                        }
+                        LOG.debug("TimeChecker: None of " + Arrays.toString(expectedFile) + " is ready.");
                     }
                 }
                 for(String source : ident.paasSources) {
                     expectedFile = Util.getRollHdfsPathByTs(ident, checkTs, source, false);
                     hiddenFile = Util.getRollHdfsPathByTs(ident, checkTs, source, true)[0];
                     if (Util.retryExists(expectedFile) || Util.retryExists(hiddenFile)) {
+                        //remove hidden paas sources file
+                        if(!Util.retryDelete(missingDir, source)) {
+                            LOG.error("Can not delete missing file " + missingDir + "/" + source);
+                        }
                     } else {
-                        LOG.debug("TimeChecker: File " + Arrays.toString(expectedFile) + " not ready.");
                         shouldDone = false;
-                        break;
+                        //add hidden paas sources file
+                        if(!Util.retryTouch(missingDir, source)) {
+                            LOG.error("Fail to touch missing source file" + missingDir + "/" + source);
+                        }
+                        LOG.debug("TimeChecker: None of " + Arrays.toString(expectedFile) + " is ready.");
                     }
                 }
                 
                 if (shouldDone) {
-                    if (Util.retryTouch(expectedFile[0].getParent(), CheckDone.doneFlag)) {
-                        LOG.info("TimeChecker: [" + ident.topic + ":" + Util.format.format(new Date(checkTs)) + "]....Done!");
+                    if (Util.retryTouch(parentPath, CheckDone.doneFlag)) {
                         unregisterTimeChecker(ident, checkTsList.get(index));
+                        if(!Util.retryDelete(missingDir)) {
+                            LOG.error("Can not delete missing dir " + missingDir);
+                        }
+                        LOG.info("TimeChecker: [" + ident.topic + ":" + Util.format.format(new Date(checkTs)) + "]....Done!");
                     } else {
                         LOG.error("TimeChecker: Alarm, failed to touch a DONE_FLAG file. " +
                                 "Try in next check cycle. " +

@@ -2,9 +2,9 @@ package com.dp.blackhole.agent.persist;
 
 public interface IRecoder {
     
-    public void record(int type, long rollTs, long endOffset);
-    
     public void record(int type, long rollTs, long startOffset, long endOffset);
+    
+    public Record getPerviousRollRecord();
     
     public Record retrive(long rollTs);
     

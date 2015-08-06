@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -25,11 +26,10 @@ import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.consumer.api.Consumer;
 import com.dp.blackhole.consumer.api.ConsumerConfig;
-import com.dp.blackhole.consumer.api.OffsetStrategy;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
-import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer.PartitionOffset;
 import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
@@ -55,9 +55,9 @@ public class ConsumerConnector implements Runnable {
     private ConcurrentHashMap<String, Consumer> consumers;   
     private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1, new DaemonThreadFactory("scheduler"));
 
-    private GenClient<ByteBuffer, SimpleConnection, ConsumerProcessor> client;
+    private GenClient<ByteBuffer, ByteBufferNonblockingConnection, ConsumerProcessor> client;
     private ConsumerProcessor processor;
-    private SimpleConnection supervisor;
+    private ByteBufferNonblockingConnection supervisor;
     private String supervisorHost;
     private int supervisorPort;
     private boolean autoCommit;
@@ -73,9 +73,23 @@ public class ConsumerConnector implements Runnable {
     }
     
     public synchronized void init() throws LionException {
-        ConfigCache configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-        String host = configCache.getProperty("blackhole.supervisor.host");
-        int port = configCache.getIntProperty("blackhole.supervisor.port");
+        ConfigCache configCache;
+        String host;
+        int port;
+        try {
+            Properties prop = new Properties();
+            prop.load(getClass().getClassLoader().getResourceAsStream("consumer.properties"));
+            host = prop.getProperty("supervisor.host");
+            port = Integer.parseInt(prop.getProperty("supervisor.port"));
+        } catch (Exception e) {
+            try {
+                configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
+                host = configCache.getProperty("blackhole.supervisor.host");
+                port = configCache.getIntProperty("blackhole.supervisor.port");
+            } catch (LionException le) {
+                throw new RuntimeException(le);
+            }
+        }
         init(host, port, true, 6000);
     }
 
@@ -127,7 +141,7 @@ public class ConsumerConnector implements Runnable {
         processor = new ConsumerProcessor();
         client = new GenClient(
                 processor,
-                new SimpleConnection.SimpleConnectionFactory(),
+                new ByteBufferNonblockingConnection.ByteBufferNonblockingConnectionFactory(),
                 null);
         
         try {
@@ -187,11 +201,11 @@ public class ConsumerConnector implements Runnable {
         Util.send(supervisor, message);
     }
     
-    public class ConsumerProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
+    public class ConsumerProcessor implements EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection> {
         private HeartBeat heartbeat = null;
         
         @Override
-        public void OnConnected(SimpleConnection connection) {
+        public void OnConnected(ByteBufferNonblockingConnection connection) {
             LOG.info("ConsumerConnector connected");
             supervisor = connection;
             heartbeat = new HeartBeat(supervisor);
@@ -205,7 +219,7 @@ public class ConsumerConnector implements Runnable {
         }
 
         @Override
-        public void OnDisconnected(SimpleConnection connection) {
+        public void OnDisconnected(ByteBufferNonblockingConnection connection) {
             LOG.info("ConsumerConnector disconnected");
             supervisor = null;
             heartbeat.shutdown();
@@ -213,7 +227,7 @@ public class ConsumerConnector implements Runnable {
         }
 
         @Override
-        public void process(ByteBuffer reply, SimpleConnection from) {
+        public void process(ByteBuffer reply, ByteBufferNonblockingConnection from) {
             Message msg = null;
             try {
                 msg = PBwrap.Buf2PB(reply);
@@ -270,8 +284,8 @@ public class ConsumerConnector implements Runnable {
                     String partitionName = partitionOffset.getPartitionName();
                     long endOffset = partitionOffset.getEndOffset();
                     long committedOffset = partitionOffset.getCommittedOffset();
-                    if (committedOffset == MessageAndOffset.UNINITIALIZED_OFFSET) {
-                        LOG.info("committed offset UNINITIALIZED, replace with end offset " + endOffset);
+                    if (committedOffset == MessageAndOffset.UNINITIALIZED_OFFSET || committedOffset == 0) {
+                        LOG.info("committed offset UNINITIALIZED or ZERO, replace with end offset " + endOffset);
                         committedOffset = endOffset;
                     }
                     long offset = c.getOffsetStrategy().getOffset(topic, partitionName, endOffset, committedOffset);

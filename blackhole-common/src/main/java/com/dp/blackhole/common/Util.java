@@ -37,11 +37,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 
 public class Util {
-    private static final Log LOG = LogFactory.getLog(Util.class);
+    public static final Log LOG = LogFactory.getLog(Util.class);
     private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static long localTimezoneOffset = TimeZone.getTimeZone("Asia/Shanghai").getRawOffset();
     private static String zkEnv;
@@ -71,7 +71,13 @@ public class Util {
     
     public static String getLocalHost() {
         try {
-            return InetAddress.getLocalHost().getHostName();
+            InetAddress addr = InetAddress.getLocalHost();
+            String localhost = addr.getHostName();
+            if (isNameResolved(addr)) {
+                return localhost;
+            } else {
+                throw new RuntimeException(localhost + " can not be name resolved.");
+            }
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
@@ -93,6 +99,12 @@ public class Util {
              }
           }
         return ip;
+    }
+    
+    public static boolean isNameResolved(InetAddress address) {
+        String hostname = address.getHostName();
+        String ip = address.getHostAddress();
+        return !hostname.equals(ip);
     }
 
     public static String ts2String(long ts) {
@@ -162,6 +174,16 @@ public class Util {
         } else if (period < 3600) {
             format = "yyyy-MM-dd.HH.mm";
         } else if (period < 86400) {
+            format = "yyyy-MM-dd.HH";
+        } else {
+            format = "yyyy-MM-dd";
+        }
+        return format;
+    }
+    
+    public static String getFormatFromPeriodForPath (long period) {
+        String format;
+        if (period < 86400) {
             format = "yyyy-MM-dd.HH";
         } else {
             format = "yyyy-MM-dd";
@@ -598,7 +620,7 @@ public class Util {
         return sb.toString();
     }
     
-    public static void send(SimpleConnection connection, Message message) {
+    public static void send(ByteBufferNonblockingConnection connection, Message message) {
         if (connection != null) {
             connection.send(PBwrap.PB2Buf(message));
         } else {

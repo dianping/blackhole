@@ -23,12 +23,13 @@ import org.apache.commons.logging.LogFactory;
 import com.dianping.lion.client.LionException;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.datachecker.AbnormalStageChecker;
 import com.dp.blackhole.datachecker.Checkpoint;
 import com.dp.blackhole.http.RequestListener;
-import com.dp.blackhole.network.ConnectionFactory;
+import com.dp.blackhole.network.NonblockingConnectionFactory;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenServer;
-import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.dp.blackhole.protocol.control.AppRegPB.AppReg;
 import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
@@ -78,18 +79,18 @@ public class Supervisor {
     public static final Log LOG = LogFactory.getLog(Supervisor.class);
     private ConfigManager configManager;
     
-    private GenServer<ByteBuffer, SimpleConnection, EntityProcessor<ByteBuffer, SimpleConnection>> server;  
-    private ConcurrentHashMap<SimpleConnection, ArrayList<Stream>> connectionStreamMap;
-    private ConcurrentHashMap<Stage, SimpleConnection> stageConnectionMap;
+    private GenServer<ByteBuffer, ByteBufferNonblockingConnection, EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection>> server;  
+    private ConcurrentHashMap<ByteBufferNonblockingConnection, ArrayList<Stream>> connectionStreamMap;
+    private ConcurrentHashMap<Stage, ByteBufferNonblockingConnection> stageConnectionMap;
 
     private ConcurrentHashMap<String, Topic> topics;
 
   
     private ConcurrentHashMap<ConsumerGroupKey, ConsumerGroup> consumerGroups;
-    private ConcurrentHashMap<SimpleConnection, ConnectionDesc> connections;
+    private ConcurrentHashMap<ByteBufferNonblockingConnection, ConnectionDesc> connections;
     //agent hostname -> connection or producerId -> connection
-    private ConcurrentHashMap<String, SimpleConnection> dataSourceMapping;
-    private ConcurrentHashMap<String, SimpleConnection> brokersMapping;
+    private ConcurrentHashMap<String, ByteBufferNonblockingConnection> dataSourceMapping;
+    private ConcurrentHashMap<String, ByteBufferNonblockingConnection> brokersMapping;
     private ConcurrentHashMap<String, ProducerManager> producerMgrMap; // topic -> manager
     
     public Checkpoint checkpoint;
@@ -135,7 +136,7 @@ public class Supervisor {
         return ((stream == null) ? true : false);
     }
 
-    private void send(SimpleConnection connection, Message msg) {
+    private void send(ByteBufferNonblockingConnection connection, Message msg) {
         if (connection == null || !connection.isActive()) {
             LOG.error("connection is null or closed, message sending abort: " + msg);
             return;
@@ -160,7 +161,7 @@ public class Supervisor {
     }
     
     public void cachedSend(String host, Message toBeSend) {
-        SimpleConnection agent = getConnectionByHostname(host);
+        ByteBufferNonblockingConnection agent = getConnectionByHostname(host);
         if (agent == null) {
             LOG.info("Can not find any agents connected by " + host + ", message send abort.");
             return;
@@ -191,7 +192,7 @@ public class Supervisor {
             //we find the connections from agentMapping instead of all connections map
             //cause if a connection belong to agent type standing for the streams in it
             //have already been enable, its confReq-conRes message loop is termination.
-            SimpleConnection connection = dataSourceMapping.get(agentHost);
+            ByteBufferNonblockingConnection connection = dataSourceMapping.get(agentHost);
             if (connection != null) {
                 send(connection, message);
             }
@@ -232,7 +233,7 @@ public class Supervisor {
         }
     }
     
-    private void handleHeartBeat(SimpleConnection from) {
+    private void handleHeartBeat(ByteBufferNonblockingConnection from) {
         ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
@@ -258,10 +259,12 @@ public class Supervisor {
     }
     
     public List<Stream> getAllStreams(String topic) {
-        List<Stream> streams = null;
+        List<Stream> streams;
         Topic t = topics.get(topic);
         if (t != null) {
             streams = t.getAllStreamsOfCopy();
+        } else {
+            streams = new ArrayList<Stream>();
         }
         return streams;
     }
@@ -302,7 +305,7 @@ public class Supervisor {
         }
     }
     
-    private void handleTopicReport(TopicReport report, SimpleConnection from) { 
+    private void handleTopicReport(TopicReport report, ByteBufferNonblockingConnection from) { 
         for (TopicEntry entry : report.getEntriesList()) {
             String topic = entry.getTopic();
             String partitionId = entry.getPartitionId();
@@ -321,12 +324,12 @@ public class Supervisor {
         }
     }
     
-    private void sendConsumerRegFail(SimpleConnection from, String group, String consumerId, String topic) {
+    private void sendConsumerRegFail(ByteBufferNonblockingConnection from, String group, String consumerId, String topic) {
         Message message = PBwrap.wrapConsumerRegFail(group, consumerId, topic);
         send(from, message);
     }
     
-    private void handleConsumerReg(ConsumerReg consumerReg, SimpleConnection from) {
+    private void handleConsumerReg(ConsumerReg consumerReg, ByteBufferNonblockingConnection from) {
         ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
@@ -471,7 +474,7 @@ public class Supervisor {
      * remove the relationship of the corresponding broker and streams
      */
     private void handleAppNodeFail(ConnectionDesc desc, long now) {
-        SimpleConnection connection = desc.getConnection();
+        ByteBufferNonblockingConnection connection = desc.getConnection();
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         if (streams != null) {
             for (Stream stream : streams) {
@@ -495,7 +498,7 @@ public class Supervisor {
                 
                 // remove corresponding broker's relationship with the stream
                 String brokerHost = stream.getBrokerHost();
-                SimpleConnection brokerConnection = brokersMapping.get(brokerHost);
+                ByteBufferNonblockingConnection brokerConnection = brokersMapping.get(brokerHost);
                 if (brokerConnection != null) {
                     ArrayList<Stream> associatedStreams = connectionStreamMap.get(brokerConnection);
                     if (associatedStreams != null) {
@@ -524,7 +527,7 @@ public class Supervisor {
      * 3. processing uploading and recovery stages
      */
     private void handleBrokerNodeFail(ConnectionDesc desc, long now) {
-        SimpleConnection connection = desc.getConnection();
+        ByteBufferNonblockingConnection connection = desc.getConnection();
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         // processing current stage on streams
         if (streams != null) {
@@ -560,7 +563,7 @@ public class Supervisor {
                 }
                 // remove corresponding appNodes's relationship with the stream
                 String dataSourceHost = Util.getHostFromSource(stream.getSource());
-                SimpleConnection dataSourceConnection = dataSourceMapping.get(dataSourceHost);
+                ByteBufferNonblockingConnection dataSourceConnection = dataSourceMapping.get(dataSourceHost);
                 if (dataSourceConnection == null) {
                     LOG.error("can not find dataSourceConnection by host " + dataSourceHost);
                     continue;
@@ -585,7 +588,7 @@ public class Supervisor {
         }
         
         // processing uploading and recovery stages
-        for (Entry<Stage, SimpleConnection> entry : stageConnectionMap.entrySet()) {
+        for (Entry<Stage, ByteBufferNonblockingConnection> entry : stageConnectionMap.entrySet()) {
             if (connection.equals(entry.getValue())) {
                 LOG.info("processing entry: "+ entry);
                 Stage stage = entry.getKey();
@@ -612,7 +615,7 @@ public class Supervisor {
     
 
     private void handleConsumerFail(ConnectionDesc desc, long now) {
-        SimpleConnection connection = desc.getConnection();
+        ByteBufferNonblockingConnection connection = desc.getConnection();
         LOG.info("consumer " + connection + " disconnectted");
         
         List<NodeDesc> nodeDescs = desc.getAttachments();
@@ -650,7 +653,7 @@ public class Supervisor {
     }
     
     private void handleProducerNodeFail(ConnectionDesc desc, long now) {
-        SimpleConnection connection = desc.getConnection();
+        ByteBufferNonblockingConnection connection = desc.getConnection();
         LOG.info("producer node " + connection + " disconnectted");
         List<NodeDesc> nodeDescs = desc.getAttachments();
         if (nodeDescs == null || nodeDescs.size() == 0) {
@@ -673,7 +676,7 @@ public class Supervisor {
      * 2. broker fail, reassign broker if it is current stage, mark the stream as pending when no available broker;
      *  do recovery if the stage is not current stage, mark the stage as pending when no available broker
      */
-    private void closeConnection(SimpleConnection connection) {
+    private void closeConnection(ByteBufferNonblockingConnection connection) {
         LOG.info("close connection: " + connection);
         
         long now = Util.getTS();
@@ -711,7 +714,7 @@ public class Supervisor {
         connectionStreamMap.remove(connection);
     }
 
-    private void dumpstat(SimpleConnection from) {
+    private void dumpstat(ByteBufferNonblockingConnection from) {
         StringBuilder sb = new StringBuilder();
         sb.append("dumpstat:\n");
         sb.append("############################## dump ##############################\n");
@@ -735,7 +738,7 @@ public class Supervisor {
         }
         sb.append("\n");
         sb.append("print stageConnectionMap:\n");
-        for(Entry<Stage, SimpleConnection> entry : stageConnectionMap.entrySet()) {
+        for(Entry<Stage, ByteBufferNonblockingConnection> entry : stageConnectionMap.entrySet()) {
             sb.append("<")
             .append(entry.getKey())
             .append(", ")
@@ -746,7 +749,7 @@ public class Supervisor {
         sb.append("\n");
         
         sb.append("print agents:\n");
-        for(SimpleConnection connection: dataSourceMapping.values()) {
+        for(ByteBufferNonblockingConnection connection: dataSourceMapping.values()) {
             sb.append("<")
             .append(connection)
             .append(">")
@@ -755,7 +758,7 @@ public class Supervisor {
         sb.append("\n");
         
         sb.append("print brokers:\n");
-        for(SimpleConnection connection: brokersMapping.values()) {
+        for(ByteBufferNonblockingConnection connection: brokersMapping.values()) {
             sb.append("<")
             .append(connection)
             .append(">")
@@ -764,8 +767,8 @@ public class Supervisor {
         sb.append("\n");
         
         sb.append("print connectionStreamMap:\n");
-        for(Entry<SimpleConnection, ArrayList<Stream>> entry : connectionStreamMap.entrySet()) {
-            SimpleConnection conn = entry.getKey();
+        for(Entry<ByteBufferNonblockingConnection, ArrayList<Stream>> entry : connectionStreamMap.entrySet()) {
+            ByteBufferNonblockingConnection conn = entry.getKey();
             ConnectionDesc desc = connections.get(conn);
             if (desc != null) {
                 sb.append(desc).append("\n");
@@ -787,7 +790,7 @@ public class Supervisor {
         send(from, message);
     }
     
-    private void dumpTopic(DumpApp dumpApp, SimpleConnection from) {
+    private void dumpTopic(DumpApp dumpApp, ByteBufferNonblockingConnection from) {
         String topic = dumpApp.getTopic();
         StringBuilder sb = new StringBuilder();
         sb.append("dump topic:\n");
@@ -823,14 +826,14 @@ public class Supervisor {
         send(from, message);
     }
     
-    public void dumpconf(SimpleConnection from) {
+    public void dumpconf(ByteBufferNonblockingConnection from) {
         String dumpconf = configManager.dumpconf();
         Message message = PBwrap.wrapDumpReply(dumpconf);
         send(from, message);
     }
 
     public void dumpConsumerGroup(DumpConsumerGroup dumpConsumerGroup,
-            SimpleConnection from) {
+            ByteBufferNonblockingConnection from) {
         String topic = dumpConsumerGroup.getTopic();
         String groupId = dumpConsumerGroup.getGroupId();
         ConsumerGroupKey groupKey = new ConsumerGroupKey(groupId, topic);
@@ -863,7 +866,7 @@ public class Supervisor {
         send(from, message);
     }
 
-    public void listTopics(SimpleConnection from) {
+    public void listTopics(ByteBufferNonblockingConnection from) {
         StringBuilder sb = new StringBuilder();
         SortedSet<String> topicSet = new TreeSet<String>(topics.keySet());
         sb.append("list topics:\n");
@@ -881,7 +884,7 @@ public class Supervisor {
         send(from, message);
     }
     
-    public void listIdle(SimpleConnection from) {
+    public void listIdle(ByteBufferNonblockingConnection from) {
         StringBuilder sb = new StringBuilder();
         sb.append("list idle hosts:\n");
         sb.append("############################## dump ##############################\n");
@@ -915,7 +918,7 @@ public class Supervisor {
         send(from, message);
     }
     
-    public void listConsumerGroups(SimpleConnection from) {
+    public void listConsumerGroups(ByteBufferNonblockingConnection from) {
         StringBuilder sb = new StringBuilder();
         sb.append("list consumer groups:\n");
         sb.append("############################## dump ##############################\n");
@@ -946,7 +949,7 @@ public class Supervisor {
 
     public void sendRestart(List<String> agentServers) {
         for (String agentHost : agentServers) {
-            SimpleConnection agent = dataSourceMapping.get(agentHost);
+            ByteBufferNonblockingConnection agent = dataSourceMapping.get(agentHost);
             if (agent != null) {
                 server.closeConnection(agent);
             } else {
@@ -956,7 +959,7 @@ public class Supervisor {
     }
     
     public boolean oprateSnapshot(String topic, String source, String opname) {
-        SimpleConnection c = dataSourceMapping.get(Util.getHostFromSource(source));
+        ByteBufferNonblockingConnection c = dataSourceMapping.get(Util.getHostFromSource(source));
         if (c == null) {
             LOG.error("can not find connection by host: " + source);
             return false;
@@ -978,7 +981,7 @@ public class Supervisor {
         if (stream == null) {
             return false;
         }
-        SimpleConnection c = dataSourceMapping.get(Util.getHostFromSource(source));
+        ByteBufferNonblockingConnection c = dataSourceMapping.get(Util.getHostFromSource(source));
         if (c == null) {
             LOG.error("can not find connection by host: " + source);
             return false;
@@ -995,12 +998,12 @@ public class Supervisor {
         return true;
     }
 
-    public void removeConf(RemoveConf removeConf, SimpleConnection from) {
+    public void removeConf(RemoveConf removeConf, ByteBufferNonblockingConnection from) {
         String topic = removeConf.getTopic();
         configManager.removeConf(topic);
     }
 
-    private void handleRetireStream(Retire retire, SimpleConnection from) {
+    private void handleRetireStream(Retire retire, ByteBufferNonblockingConnection from) {
         String topic = retire.getTopic();
         String source = retire.getSource();
         boolean force = retire.getForce();
@@ -1011,6 +1014,11 @@ public class Supervisor {
     public boolean retireStream(String topic, String source) {
         Stream stream = getStream(topic, source);
         return retireStreamInternal(stream, false);
+    }
+    
+    public boolean retireStream(String topic, String source, boolean force) {
+        Stream stream = getStream(topic, source);
+        return retireStreamInternal(stream, force);
     }
     
     private boolean retireStreamInternal(Stream stream, boolean forceRetire) {
@@ -1051,7 +1059,7 @@ public class Supervisor {
             }
             
             // remove stream from connectionStreamMap
-            for (Entry<SimpleConnection, ArrayList<Stream>> e : connectionStreamMap.entrySet()) {
+            for (Entry<ByteBufferNonblockingConnection, ArrayList<Stream>> e : connectionStreamMap.entrySet()) {
                 ArrayList<Stream> associatedStreams = e.getValue();
                 synchronized (associatedStreams) {
                     associatedStreams.remove(stream);
@@ -1138,7 +1146,7 @@ public class Supervisor {
                             LOG.info("handle unrecoverable stage " + stage);
                             String broker = getBroker();
                             if (broker != null) {
-                                SimpleConnection brokerConnection = brokersMapping.get(broker);
+                                ByteBufferNonblockingConnection brokerConnection = brokersMapping.get(broker);
                                 if (brokerConnection != null) {
                                     String topic = rollID.getTopic();
                                     String source = rollID.getSource();
@@ -1315,7 +1323,7 @@ public class Supervisor {
      * update the stream's lastSuccessTs
      * make the uploaded stage as uploaded and remove it from Streams
      */
-    private void handleUploadSuccess(RollID rollID, SimpleConnection from) {
+    private void handleUploadSuccess(RollID rollID, ByteBufferNonblockingConnection from) {
         Stream stream = getStream(rollID.getTopic(), rollID.getSource());
         if (stream != null) {
             if (rollID.getIsFinal()) {
@@ -1352,7 +1360,7 @@ public class Supervisor {
      * or upload the rolled stage;
      * create next stage as new current stage
      */
-    private void handleRolling(ReadyUpload readyUpload, SimpleConnection from) {
+    private void handleRolling(ReadyUpload readyUpload, ByteBufferNonblockingConnection from) {
         Stream stream = getStream(readyUpload.getTopic(), readyUpload.getSource());
         if (stream != null) {
             if (readyUpload.getRollTs() <= stream.getLastSuccessTs()) {
@@ -1427,11 +1435,11 @@ public class Supervisor {
         }
     }
     
-    private String doUpload(Stream stream, Stage current, SimpleConnection from) {
+    private String doUpload(Stream stream, Stage current, ByteBufferNonblockingConnection from) {
         return doUpload(stream, current, from, false);
     }
     
-    private String doUpload(Stream stream, Stage current, SimpleConnection from, boolean isFinal) {
+    private String doUpload(Stream stream, Stage current, ByteBufferNonblockingConnection from, boolean isFinal) {
         TopicConfig config = configManager.getConfByTopic(stream.getTopic());
         String compression = config.getCompression();
         boolean persistent = config.isPersistent();
@@ -1480,13 +1488,13 @@ public class Supervisor {
                     );
             stage.setStatus(Stage.RECOVERYING);
             stage.setBrokerHost(broker);
-            SimpleConnection c = dataSourceMapping.get(Util.getHostFromSource(stream.getSource()));
+            ByteBufferNonblockingConnection c = dataSourceMapping.get(Util.getHostFromSource(stream.getSource()));
             if (c != null) {
                 send(c, message);
             } else {
                 LOG.error("can not find connection by host: " + stream.getSource());
             }
-            SimpleConnection brokerConnection = brokersMapping.get(broker);
+            ByteBufferNonblockingConnection brokerConnection = brokersMapping.get(broker);
             if (brokerConnection != null) {
                 stageConnectionMap.put(stage, brokerConnection);
             }
@@ -1497,7 +1505,7 @@ public class Supervisor {
      * record the stream if it is a new stream;
      * do recovery if it is a old stream
      */
-    private void handleReadyStream(ReadyStream readyBroker, SimpleConnection from) {
+    private void handleReadyStream(ReadyStream readyBroker, ByteBufferNonblockingConnection from) {
         long connectedTs = readyBroker.getConnectedTs();
         long currentTs = Util.getCurrentRollTs(connectedTs, readyBroker.getPeriod());
         String brokerHost = readyBroker.getBrokerServer();
@@ -1589,7 +1597,7 @@ public class Supervisor {
         //source may be a KVM agent, or a PaaS instance, or a producerId
         //host may be a KVM agent host, or a PaaS physics machine, or a Storm worker host
         String host = Util.getHostFromSource(source);
-        SimpleConnection dataSourceConnection = dataSourceMapping.get(host);
+        ByteBufferNonblockingConnection dataSourceConnection = dataSourceMapping.get(host);
         if (dataSourceConnection == null) {
             LOG.fatal("Oops, can not get Connection by " + host);
         } else {
@@ -1686,7 +1694,7 @@ public class Supervisor {
         }
     }
    
-    private void recordConnectionStreamMapping(SimpleConnection connection, Stream stream) {
+    private void recordConnectionStreamMapping(ByteBufferNonblockingConnection connection, Stream stream) {
         connectionStreamMap.putIfAbsent(connection, new ArrayList<Stream>());
         ArrayList<Stream> streams = connectionStreamMap.get(connection);
         synchronized (streams) {
@@ -1728,7 +1736,7 @@ public class Supervisor {
      * 1. recored the connection in agent
      * 2. assign a broker to the topic
      */
-    private void handleTopicReg(AppReg appReg, SimpleConnection from) {
+    private void handleTopicReg(AppReg appReg, ByteBufferNonblockingConnection from) {
         ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
@@ -1742,7 +1750,7 @@ public class Supervisor {
         assignBroker(appReg.getTopic(), from, source, null);
     }
 
-    private String assignBroker(String topic, SimpleConnection from, String source, String partitionId) {
+    private String assignBroker(String topic, ByteBufferNonblockingConnection from, String source, String partitionId) {
         String instanceId = Util.getInstanceIdFromSource(source);   //null if source is KVM or ProducerId
         String broker = getBrokerToAssign();
         Message message;
@@ -1758,7 +1766,7 @@ public class Supervisor {
         return broker;
     }
 
-    private void handleBrokerReg(BrokerReg brokerReg, SimpleConnection from) {
+    private void handleBrokerReg(BrokerReg brokerReg, ByteBufferNonblockingConnection from) {
         ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
@@ -1793,7 +1801,7 @@ public class Supervisor {
         return getBroker();
     }
     
-    private void handleRollingAndTriggerClean(RollClean rollClean, SimpleConnection from) {
+    private void handleRollingAndTriggerClean(RollClean rollClean, ByteBufferNonblockingConnection from) {
         boolean isFinal = true;
         Stream stream = getStream(rollClean.getTopic(), rollClean.getSource());
         if (stream != null) {
@@ -1820,7 +1828,7 @@ public class Supervisor {
         }
     }
     
-    private void handleProducerReg(ProducerReg producerReg, SimpleConnection from) {
+    private void handleProducerReg(ProducerReg producerReg, ByteBufferNonblockingConnection from) {
         ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
@@ -1839,7 +1847,7 @@ public class Supervisor {
         assignPartition(topic, producerId, from);
     }
 
-    private void assignPartition(String topic, String producerId, SimpleConnection from) {
+    private void assignPartition(String topic, String producerId, ByteBufferNonblockingConnection from) {
         Message message = null;
         ProducerManager producerMgr = producerMgrMap.get(topic);
         if (producerMgr == null) {
@@ -1870,17 +1878,23 @@ public class Supervisor {
 
     private void handlePartitionRequireBroker(
             PartitionRequireBroker partitionRequireBroker,
-            SimpleConnection from) {
+            ByteBufferNonblockingConnection from) {
         String topic = partitionRequireBroker.getTopic();
         String produceId = partitionRequireBroker.getProducerId();
         String partitionId = partitionRequireBroker.getPartitionId();
         assignBroker(topic, from, produceId, partitionId);
     }
 
-    public class SupervisorExecutor implements EntityProcessor<ByteBuffer, SimpleConnection> {
+    public void handleUnresolvedConnection(ByteBufferNonblockingConnection from) {
+        LOG.warn("Found an unresolved connection [" + from.getHost() + "<->" + from.getIP() + "]");
+        Message message = PBwrap.wrapUnresolvedConnection();
+        send(from, message);
+    }
+    
+    public class SupervisorExecutor implements EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection> {
 
         @Override
-        public void OnConnected(SimpleConnection connection) {
+        public void OnConnected(ByteBufferNonblockingConnection connection) {
             ConnectionDesc desc = connections.get(connection);
             if (desc == null) {
                 LOG.info("client " + connection + " connected");
@@ -1895,12 +1909,16 @@ public class Supervisor {
         }
 
         @Override
-        public void OnDisconnected(SimpleConnection connection) {
+        public void OnDisconnected(ByteBufferNonblockingConnection connection) {
             closeConnection(connection);
         }
         
         @Override
-        public void process(ByteBuffer request, SimpleConnection from) {
+        public void process(ByteBuffer request, ByteBufferNonblockingConnection from) {
+            if (!from.isResolved()) {
+                handleUnresolvedConnection(from);
+            }
+            
             Message msg = null;
             try {
                 msg = PBwrap.Buf2PB(request);
@@ -2029,7 +2047,7 @@ public class Supervisor {
             while (running) {
                 try {
                     Thread.sleep(LIVE_CHECK_INTERVAL);
-                    for (Entry<SimpleConnection, ConnectionDesc> entry : connections.entrySet()) {
+                    for (Entry<ByteBufferNonblockingConnection, ConnectionDesc> entry : connections.entrySet()) {
                         ConnectionDesc dsc = entry.getValue();
                         if (dsc.getType() != ConnectionDesc.AGENT &&
                             dsc.getType() != ConnectionDesc.BROKER &&
@@ -2037,7 +2055,7 @@ public class Supervisor {
                             dsc.getType() != ConnectionDesc.PRODUCER) {
                             continue;
                         }
-                        SimpleConnection conn = entry.getKey();
+                        ByteBufferNonblockingConnection conn = entry.getKey();
                         long now = Util.getTS();
                         if (now - dsc.getLastHeartBeat() > THRESHOLD) {
                             LOG.info("failed to get heartbeat for 60 seconds, "
@@ -2058,14 +2076,14 @@ public class Supervisor {
        
     private void init() throws IOException, LionException {
         topics = new ConcurrentHashMap<String, Topic>();
-        connectionStreamMap = new ConcurrentHashMap<SimpleConnection, ArrayList<Stream>>();
-        stageConnectionMap = new ConcurrentHashMap<Stage, SimpleConnection>();
+        connectionStreamMap = new ConcurrentHashMap<ByteBufferNonblockingConnection, ArrayList<Stream>>();
+        stageConnectionMap = new ConcurrentHashMap<Stage, ByteBufferNonblockingConnection>();
 
         consumerGroups = new ConcurrentHashMap<ConsumerGroupKey, ConsumerGroup>();
         
-        connections = new ConcurrentHashMap<SimpleConnection, ConnectionDesc>();
-        dataSourceMapping = new ConcurrentHashMap<String, SimpleConnection>();
-        brokersMapping = new ConcurrentHashMap<String, SimpleConnection>();
+        connections = new ConcurrentHashMap<ByteBufferNonblockingConnection, ConnectionDesc>();
+        dataSourceMapping = new ConcurrentHashMap<String, ByteBufferNonblockingConnection>();
+        brokersMapping = new ConcurrentHashMap<String, ByteBufferNonblockingConnection>();
         producerMgrMap = new ConcurrentHashMap<String, ProducerManager>();
         
         //initConfManager(or lion/zookeeper)
@@ -2092,15 +2110,18 @@ public class Supervisor {
         checkpoint = new Checkpoint(configManager.checkpiontPath, configManager.checkpiontPeriod);
         checkpoint.start();
         
+        AbnormalStageChecker abnormalStageChecker = new AbnormalStageChecker(configManager.abnormalStageCheckPeriod, configManager.abnormalStageDuration, configManager.normalStageTTL);
+        abnormalStageChecker.start();
+        
         SupervisorExecutor executor = new SupervisorExecutor();
-        ConnectionFactory<SimpleConnection> factory = new SimpleConnection.SimpleConnectionFactory();
-        server = new GenServer<ByteBuffer, SimpleConnection, EntityProcessor<ByteBuffer, SimpleConnection>>
+        NonblockingConnectionFactory<ByteBufferNonblockingConnection> factory = new ByteBufferNonblockingConnection.ByteBufferNonblockingConnectionFactory();
+        server = new GenServer<ByteBuffer, ByteBufferNonblockingConnection, EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection>>
             (executor, factory, null);
 
         server.init("supervisor", configManager.supervisorPort, configManager.numHandler);
     }
 
-    public void handleConfReq(ConfReq confReq, SimpleConnection from) {
+    public void handleConfReq(ConfReq confReq, ByteBufferNonblockingConnection from) {
         Message message;
         String topicFromReq = confReq.getTopic();
         if (topicFromReq != null && topicFromReq.length() != 0) {
@@ -2136,9 +2157,7 @@ public class Supervisor {
                 TopicConfig confInfo = configManager.getConfByTopic(topic);
                 if (confInfo == null) {
                     LOG.error("Can not get topic: " + topic + " from configMap");
-                    message = PBwrap.wrapNoAvailableConf(null);
-                    send(from, message);
-                    return;
+                    continue;
                 }
                 String rotatePeriod = String.valueOf(confInfo.getRotatePeriod());
                 String rollPeriod = String.valueOf(confInfo.getRollPeriod());
@@ -2150,23 +2169,25 @@ public class Supervisor {
                 String watchFile = confInfo.getWatchLog();
                 if (watchFile == null) {
                     LOG.error("Can not get watch file of " + topic);
-                    message = PBwrap.wrapNoAvailableConf(null);
-                    send(from, message);
-                    return;
+                    continue;
                 }
                 AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile,
                         rotatePeriod, rollPeriod, maxLineSize, readInterval,
                         minMsgSent, msgBufSize, bandwidthPerSec);
                 appConfResList.add(appConfRes);
             }
-            if (!appConfResList.isEmpty()) {
+            if (appConfResList.isEmpty()) {
+                message = PBwrap.wrapNoAvailableConf(null);
+                send(from, message);
+            } else {
                 message = PBwrap.wrapConfRes(appConfResList, null);
                 send(from, message); 
             }
         }
     }
     
-    public void triggerConfResOfPaaS(SimpleConnection connection) {
+    //TODO find update of paas catalog
+    public void triggerConfResOfPaaS(ByteBufferNonblockingConnection connection) {
         Set<String> topicsAssocHost = configManager.getTopicsByHost(connection.getHost());
         if (topicsAssocHost != null) {
             List<LxcConfRes> lxcConfResList = new ArrayList<LxcConfRes>();
@@ -2204,7 +2225,7 @@ public class Supervisor {
     }
         
     private int getBrokerPort(String host) {
-        SimpleConnection connection = brokersMapping.get(host);
+        ByteBufferNonblockingConnection connection = brokersMapping.get(host);
         if (connection == null) {
             LOG.error("can not get connection from host: " + host);
             return 0;
@@ -2220,7 +2241,7 @@ public class Supervisor {
     }
     
     private int getRecoveryPort(String host) {
-        SimpleConnection connection = brokersMapping.get(host);
+        ByteBufferNonblockingConnection connection = brokersMapping.get(host);
         if (connection == null) {
             LOG.error("can not get connection from host: " + host);
             return 0;
@@ -2240,9 +2261,9 @@ public class Supervisor {
      * @param hostname
      * @return
      */
-    public SimpleConnection getConnectionByHostname(String hostname) {
+    public ByteBufferNonblockingConnection getConnectionByHostname(String hostname) {
         synchronized (connections) {
-            for (Map.Entry<SimpleConnection, ConnectionDesc> connectionEntry : connections.entrySet()) {
+            for (Map.Entry<ByteBufferNonblockingConnection, ConnectionDesc> connectionEntry : connections.entrySet()) {
                 if (connectionEntry.getKey().getHost().equals(hostname)
                         && connectionEntry.getValue().getType() != ConnectionDesc.BROKER
                         && connectionEntry.getValue().getType() != ConnectionDesc.CONSUMER) {
@@ -2253,7 +2274,7 @@ public class Supervisor {
         return null;
     }
     
-    public int getConnectionType(SimpleConnection connection) {
+    public int getConnectionType(ByteBufferNonblockingConnection connection) {
         ConnectionDesc des = connections.get(connection);
         if (des == null) {
             return 0;

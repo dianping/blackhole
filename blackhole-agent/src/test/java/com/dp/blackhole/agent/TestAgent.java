@@ -1,6 +1,7 @@
 package com.dp.blackhole.agent;
 
 import static org.junit.Assert.*;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,17 +12,23 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.broker.BrokerService;
 import com.dp.blackhole.broker.SimBroker;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.StreamHealthChecker;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.conf.Context;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 
+@RunWith(PowerMockRunner.class)
+@PowerMockIgnore({"org.apache.hadoop.*", "com.sun.*", "net.contentobjects.*"})
 public class TestAgent {
     private TopicId topicId;
     private AgentMeta topicMeta;
@@ -109,6 +116,13 @@ public class TestAgent {
 
     @Test
     public void testAssignBrokerProcess() throws InterruptedException {
+        StreamHealthChecker mockChecker = spy(new StreamHealthChecker());
+        agent.setStreamHealthChecker(mockChecker);
+        try {
+            doNothing().when(mockChecker, "register");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         topicMeta = agent.fillUpAppLogsFromConfig(topicId);
         Message bad = getMessageOfAssignBroker(MAGIC + MAGIC);
         assertFalse(agent.processor.processInternal(bad));

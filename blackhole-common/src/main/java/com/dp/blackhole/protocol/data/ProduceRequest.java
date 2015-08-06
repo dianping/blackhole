@@ -2,6 +2,7 @@ package com.dp.blackhole.protocol.data;
 
 import java.nio.ByteBuffer;
 
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.GenUtil;
 import com.dp.blackhole.network.NonDelegationTypedWrappable;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
@@ -32,7 +33,13 @@ public class ProduceRequest extends NonDelegationTypedWrappable {
     @Override
     public void read(ByteBuffer buffer) {
         topic = GenUtil.readString(buffer);
-        partitionId = GenUtil.readString(buffer);
+        try {
+            partitionId = GenUtil.readString(buffer);
+        } catch (RuntimeException e) {
+            //TODO reminder we to remove the LOG when the bug is fixed
+            Util.LOG.fatal(topic, e);
+            throw e;
+        }
         messages = new ByteBufferMessageSet(buffer.slice());
     }
 

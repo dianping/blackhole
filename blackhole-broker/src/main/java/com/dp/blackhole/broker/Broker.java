@@ -20,7 +20,7 @@ import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
-import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
@@ -34,8 +34,8 @@ public class Broker {
     private static BrokerService brokerService;
     private static RollManager rollMgr;
     private BrokerProcessor processor;
-    private SimpleConnection supervisor;
-    private GenClient<ByteBuffer, SimpleConnection, BrokerProcessor> client;
+    private ByteBufferNonblockingConnection supervisor;
+    private GenClient<ByteBuffer, ByteBufferNonblockingConnection, BrokerProcessor> client;
     private int servicePort;
     private int recoveryPort;
     
@@ -86,7 +86,7 @@ public class Broker {
         processor = new BrokerProcessor();
         client = new GenClient(
                 processor,
-                new SimpleConnection.SimpleConnectionFactory(),
+                new ByteBufferNonblockingConnection.ByteBufferNonblockingConnectionFactory(),
                 null);
         client.init("broker", supervisorHost, supervisorPort);
         
@@ -130,11 +130,11 @@ public class Broker {
         return brokerService;
     }
     
-    class BrokerProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
+    class BrokerProcessor implements EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection> {
         private HeartBeat heartbeat = null;
         
         @Override
-        public void OnConnected(SimpleConnection connection) {
+        public void OnConnected(ByteBufferNonblockingConnection connection) {
             supervisor = connection;          
             registerNode();
             heartbeat = new HeartBeat(supervisor);
@@ -142,7 +142,7 @@ public class Broker {
         }
 
         @Override
-        public void OnDisconnected(SimpleConnection connection) {
+        public void OnDisconnected(ByteBufferNonblockingConnection connection) {
             supervisor = null;
             brokerService.disconnectClients();
             LOG.debug("Last HeartBeat ts is " + heartbeat.getLastHeartBeat());
@@ -151,7 +151,7 @@ public class Broker {
         }
 
         @Override
-        public void process(ByteBuffer buf, SimpleConnection from) {
+        public void process(ByteBuffer buf, ByteBufferNonblockingConnection from) {
             Message message = null;;
             try {
                 message = PBwrap.Buf2PB(buf);

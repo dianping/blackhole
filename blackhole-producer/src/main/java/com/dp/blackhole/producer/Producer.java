@@ -3,6 +3,7 @@ package com.dp.blackhole.producer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,19 +28,20 @@ public class Producer {
     private ProducerConnector connector;
     private int currentPartitionIndex;
     private ScheduledExecutorService service;
-    private ZombieConnectionChecker checker;
     
     public Producer(String topic) {
+        this(topic, null);
+    }
+    
+    public Producer(String topic, Properties prop) {
         this.topic = topic;
         this.connector = ProducerConnector.getInstance();
         if (!this.connector.initialized) {
-            this.connector.init();
+            this.connector.init(prop);
         }
         this.partitionConnectionMap = new ConcurrentHashMap<String, PartitionConnection>();
         this.partitionStateMap = new ConcurrentHashMap<String, AtomicReference<PartitionConnectionState>>();
         this.currentPartitionIndex = 0;
-        this.checker = new ZombieConnectionChecker();
-        this.checker.start();
         this.service = Executors.newSingleThreadScheduledExecutor(
                 new DaemonThreadFactory("ProducerRollTask-" + topic));
     }
@@ -152,53 +154,14 @@ public class Producer {
     
     private void reassignPartitionConnection(String partitionId) {
         AtomicReference<PartitionConnectionState> currentState = partitionStateMap.get(partitionId);
-        currentState.compareAndSet(PartitionConnectionState.ASSIGNED, PartitionConnectionState.UNASSIGNED);
-        PartitionConnection partitionConnection = partitionConnectionMap.get(partitionId);
-        int reassignDelay = partitionConnection.getReassignDelaySeconds();
-        partitionConnection.close();
-        connector.reportPartitionConnectionFailure(topic, producerId, partitionId, Util.getTS(), reassignDelay);
-    }
-    
-    class ZombieConnectionChecker extends Thread {
-        private volatile boolean running;
-        private static final int CHECK_INTERVAL = 5 * 60 * 1000;
-        
-        public ZombieConnectionChecker() {
-            this.running = true;
-            setDaemon(true);
-            setName("ZombieConnectionChecker");
-        }
-        
-        public void shutdown() {
-            running = false;
-        }
-
-        @Override
-        public void run() {
-            while (running) {
-                for (PartitionConnection connection : partitionConnectionMap.values()) {
-                    String partitionId = connection.getPartitionId();
-                    AtomicReference<PartitionConnectionState> current = partitionStateMap.get(partitionId);
-                    if (current.get() == PartitionConnectionState.ASSIGNED) {
-                        try {
-                            if (connection.getMessageBuffer().position() == 0) {
-                                connection.sendNullRequest();
-                            } else {
-                                connection.sendMessage();
-                            }
-                        } catch (IOException e) {
-                            LOG.warn("Find connection dead, reassign partition connection for " + partitionId);
-                            reassignPartitionConnection(partitionId);
-                        }
-                    }
-                }
-                try {
-                    Thread.sleep(CHECK_INTERVAL);
-                } catch (InterruptedException e) {
-                    LOG.error("ZombieConnectionChecker interrupt", e);
-                    running = false;
-                }
-            }
+        if (currentState.compareAndSet(PartitionConnectionState.ASSIGNED, PartitionConnectionState.UNASSIGNED)) {
+            PartitionConnection partitionConnection = partitionConnectionMap.get(partitionId);
+            int reassignDelay = partitionConnection.getReassignDelaySeconds();
+            connector.getStreamHealthChecker().unregister(partitionConnection);
+            partitionConnection.close();
+            partitionConnectionMap.remove(partitionId);
+            //must unregister from ConnectionChecker before re-assign
+            connector.reportPartitionConnectionFailure(topic, producerId, partitionId, Util.getTS(), reassignDelay);
         }
     }
 }

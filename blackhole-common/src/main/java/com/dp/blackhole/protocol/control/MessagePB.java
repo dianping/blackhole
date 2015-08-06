@@ -1144,6 +1144,10 @@ public final class MessagePB {
        * <code>PARTITION_REQUIRE_BROKER = 45;</code>
        */
       PARTITION_REQUIRE_BROKER(44, 45),
+      /**
+       * <code>UNRESOLVED_CONNECTION = 46;</code>
+       */
+      UNRESOLVED_CONNECTION(45, 46),
       ;
 
       /**
@@ -1326,6 +1330,10 @@ public final class MessagePB {
        * <code>PARTITION_REQUIRE_BROKER = 45;</code>
        */
       public static final int PARTITION_REQUIRE_BROKER_VALUE = 45;
+      /**
+       * <code>UNRESOLVED_CONNECTION = 46;</code>
+       */
+      public static final int UNRESOLVED_CONNECTION_VALUE = 46;
 
 
       public final int getNumber() { return value; }
@@ -1377,6 +1385,7 @@ public final class MessagePB {
           case 43: return PRODUCER_ID_ASSIGN;
           case 44: return ASSIGN_PARTITION;
           case 45: return PARTITION_REQUIRE_BROKER;
+          case 46: return UNRESOLVED_CONNECTION;
           default: return null;
         }
       }
@@ -7194,7 +7203,7 @@ public final class MessagePB {
       "SnapshotOp.proto\032\021PauseStream.proto\032\021Pro" +
       "ducerReg.proto\032\026ProducerIdAssign.proto\032\025" +
       "NoavailableConf.proto\032\025AssignPartition.p" +
-      "roto\032\034PartitionRequireBroker.proto\"\305\021\n\007M" +
+      "roto\032\034PartitionRequireBroker.proto\"\340\021\n\007M" +
       "essage\022,\n\004type\030\001 \002(\0162\036.blackhole.Message" +
       ".MessageType\022!\n\006appReg\030\002 \001(\0132\021.blackhole" +
       ".AppReg\022-\n\014assignBroker\030\003 \001(\0132\027.blackhol" +
@@ -7230,7 +7239,7 @@ public final class MessagePB {
       "roducerIdAssign\0223\n\017assignPartition\030\037 \001(\013" +
       "2\032.blackhole.AssignPartition\022A\n\026partitio" +
       "nRequireBroker\030  \001(\0132!.blackhole.Partiti",
-      "onRequireBroker\"\270\006\n\013MessageType\022\016\n\nHEART" +
+      "onRequireBroker\"\323\006\n\013MessageType\022\016\n\nHEART" +
       "BEART\020\001\022\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021\n\r" +
       "ASSIGN_BROKER\020\004\022\020\n\014READY_STREAM\020\005\022\020\n\014REA" +
       "DY_UPLOAD\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_S" +
@@ -7251,8 +7260,8 @@ public final class MessagePB {
       "PSHOT_OP\020(\022\020\n\014PAUSE_STREAM\020)\022\020\n\014PRODUCER" +
       "_REG\020*\022\026\n\022PRODUCER_ID_ASSIGN\020+\022\024\n\020ASSIGN",
       "_PARTITION\020,\022\034\n\030PARTITION_REQUIRE_BROKER" +
-      "\020-B.\n!com.dp.blackhole.protocol.controlB" +
-      "\tMessagePB"
+      "\020-\022\031\n\025UNRESOLVED_CONNECTION\020.B.\n!com.dp." +
+      "blackhole.protocol.controlB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.agent.persist.IRecoder;
+import com.dp.blackhole.common.StreamHealthChecker;
 import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
@@ -28,7 +29,7 @@ import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
-import com.dp.blackhole.network.SimpleConnection;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
@@ -57,13 +58,15 @@ public class Agent implements Runnable {
     private static Map<AgentMeta, LogReader> topicReaders = new ConcurrentHashMap<AgentMeta, LogReader>();
     private Map<String, RollRecovery> recoveryingMap = new ConcurrentHashMap<String, RollRecovery>();
     
-    private GenClient<ByteBuffer, SimpleConnection, AgentProcessor> client;
+    private GenClient<ByteBuffer, ByteBufferNonblockingConnection, AgentProcessor> client;
     AgentProcessor processor;
-    private SimpleConnection supervisor;
+    private ByteBufferNonblockingConnection supervisor;
     private int confLoopFactor = 1;
     private final String baseDirWildcard;
     private boolean paasModel = false;
     private String snapshotPersistDir;
+    
+    private StreamHealthChecker streamHealthChecker;
     
     public Agent() {
         this(null);
@@ -103,6 +106,18 @@ public class Agent implements Runnable {
     
     public static Map<AgentMeta, LogReader> getTopicReaders() {
         return topicReaders;
+    }
+
+    public StreamHealthChecker getStreamHealthChecker() {
+        return streamHealthChecker;
+    }
+
+    /**
+     * for unit test
+     * @param streamHealthChecker
+     */
+    void setStreamHealthChecker(StreamHealthChecker streamHealthChecker) {
+        this.streamHealthChecker = streamHealthChecker;
     }
 
     private void register(TopicId topicId, long regTimestamp) {
@@ -180,10 +195,13 @@ public class Agent implements Runnable {
             return;
         }
         
+        this.streamHealthChecker = new StreamHealthChecker();
+        this.streamHealthChecker.start();
+        
         processor = new AgentProcessor();
         client = new GenClient(
                 processor,
-                new SimpleConnection.SimpleConnectionFactory(),
+                new ByteBufferNonblockingConnection.ByteBufferNonblockingConnectionFactory(),
                 null);
 
         try {
@@ -195,6 +213,7 @@ public class Agent implements Runnable {
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
         }
+        this.streamHealthChecker.shutdown();
     }
     
     public AgentMeta fillUpAppLogsFromConfig(TopicId topicId) {
@@ -291,11 +310,11 @@ public class Agent implements Runnable {
         }
     }
 
-    public class AgentProcessor implements EntityProcessor<ByteBuffer, SimpleConnection> {
+    public class AgentProcessor implements EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection> {
         private HeartBeat heartbeat = null;
 
         @Override
-        public void OnConnected(SimpleConnection connection) {
+        public void OnConnected(ByteBufferNonblockingConnection connection) {
             supervisor = connection;
             if (!paasModel) {
                 requireConfigFromSupersivor(0);
@@ -308,7 +327,7 @@ public class Agent implements Runnable {
         }
 
         @Override
-        public void OnDisconnected(SimpleConnection connection) {
+        public void OnDisconnected(ByteBufferNonblockingConnection connection) {
             confLoopFactor = 1;
             
             supervisor = null;
@@ -339,7 +358,7 @@ public class Agent implements Runnable {
         }
         
         @Override
-        public void process(ByteBuffer reply, SimpleConnection from) {
+        public void process(ByteBuffer reply, ByteBufferNonblockingConnection from) {
 
             Message msg = null;
             try {
@@ -428,6 +447,7 @@ public class Agent implements Runnable {
                             return false;
                         }
                         logReader.assignSender(sender);
+                        streamHealthChecker.register(topic, topicMeta.getSource(), sender);
                         return true;
                     } else {
                         LOG.error("No logreader to be assign for " + topicId + " send ConfReq.");
@@ -645,6 +665,9 @@ public class Agent implements Runnable {
                 } else {
                     LOG.error("Topic [" + topic + "] from supervisor message not match with local");
                 }
+                break;
+            case UNRESOLVED_CONNECTION:
+                LOG.fatal("Supervisor can not resolve any hostname for this agent: " + Util.getLocalHost());
                 break;
             default:
                 LOG.error("Illegal message type " + msg.getType());

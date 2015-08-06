@@ -62,6 +62,10 @@ public class ConfigManager {
     public String checkpiontPath;
     public long checkpiontPeriod;
     
+    public long abnormalStageCheckPeriod;
+    public long abnormalStageDuration;
+    public long normalStageTTL;
+    
     public String getPaaSInstanceURLPerfix;
     
     public ConfigManager(Supervisor supervisor) throws LionException {
@@ -129,6 +133,10 @@ public class ConfigManager {
         
         checkpiontPath = prop.getProperty("supervisor.checkpoint.path", "/tmp/checkpoint");
         checkpiontPeriod = Long.parseLong(prop.getProperty("supervisor.checkpoint.period", "60000"));
+        
+        abnormalStageCheckPeriod = Long.parseLong(prop.getProperty("supervisor.abnormalStage.checkPeriod", "600000"));  //10 minutes
+        abnormalStageDuration = Long.parseLong(prop.getProperty("supervisor.abnormalStage.duration", "1200000"));        //20 minutes
+        normalStageTTL = Long.parseLong(prop.getProperty("supervisor.normalStage.ttl", "1800000"));                      //30 minutes
         
         //create a http client for PaaS
         httpClient = new HttpClientSingle(connectionTimeout, socketTimeout);

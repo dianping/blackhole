@@ -14,17 +14,17 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.Util;
 
-public class DelegationIOConnection implements NonblockingConnection<TransferWrap> {
+public class TransferWrapNonblockingConnection implements NonblockingConnection<TransferWrap> {
 
-    public static class DelegationIOConnectionFactory implements ConnectionFactory<DelegationIOConnection> {
+    public static class TransferWrapNonblockingConnectionFactory implements NonblockingConnectionFactory<TransferWrapNonblockingConnection> {
 
         @Override
-        public DelegationIOConnection makeConnection(SocketChannel channel, Selector selector, TypedFactory wrappedFactory) {
-            return new DelegationIOConnection(channel, selector, wrappedFactory);
+        public TransferWrapNonblockingConnection makeConnection(SocketChannel channel, Selector selector, TypedFactory wrappedFactory) {
+            return new TransferWrapNonblockingConnection(channel, selector, wrappedFactory);
         }
     }
     
-    public static final Log LOG = LogFactory.getLog(DelegationIOConnection.class);
+    public static final Log LOG = LogFactory.getLog(TransferWrapNonblockingConnection.class);
     
     private Selector selector;
     private SocketChannel channel;
@@ -37,11 +37,13 @@ public class DelegationIOConnection implements NonblockingConnection<TransferWra
     
     private String remote;
     private String host;
+    private String ip;
     private int port;
+    private boolean resolved;
   
     private TypedFactory wrappedFactory;
 
-    public DelegationIOConnection(SocketChannel channel, Selector selector, TypedFactory wrappedFactory) {
+    public TransferWrapNonblockingConnection(SocketChannel channel, Selector selector, TypedFactory wrappedFactory) {
         this.channel = channel;
         writeQueue = new ConcurrentLinkedQueue<TransferWrap>();
         active = new AtomicBoolean(true);
@@ -49,6 +51,10 @@ public class DelegationIOConnection implements NonblockingConnection<TransferWra
         this.wrappedFactory = wrappedFactory;
         
         InetSocketAddress remoteAddr = Util.getRemoteAddr(channel.socket());
+        if (!remoteAddr.isUnresolved()) {
+            resolved = Util.isNameResolved(remoteAddr.getAddress());
+            ip = remoteAddr.getAddress().getHostAddress();
+        }
         host = remoteAddr.getHostName();
         port = remoteAddr.getPort();
         remote = host+ ":" + port;
@@ -75,6 +81,11 @@ public class DelegationIOConnection implements NonblockingConnection<TransferWra
         return active.get();
     }
 
+    @Override
+    public boolean isResolved() {
+        return resolved;
+    }
+    
     @Override
     public SocketChannel getChannel() {
         return channel;
@@ -167,6 +178,10 @@ public class DelegationIOConnection implements NonblockingConnection<TransferWra
     
     public String getHost() {
         return host;
+    }
+    
+    public String getIP() {
+        return ip;
     }
     
     @Override

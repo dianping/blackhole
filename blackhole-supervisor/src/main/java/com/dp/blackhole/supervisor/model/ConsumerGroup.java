@@ -87,7 +87,7 @@ public class ConsumerGroup {
         for (PartitionInfo pinfo : partitions) {
             String id = pinfo.getId();
             if (committedOffsetMap.get(id) == null) {
-                committedOffsetMap.put(pinfo.getId(), new AtomicLong(0));
+                committedOffsetMap.put(pinfo.getId(), new AtomicLong(MessageAndOffset.UNINITIALIZED_OFFSET));
             }
         }
     }
