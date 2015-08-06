@@ -131,14 +131,15 @@ public class PartitionConnection implements Sender {
     }
     
     public void cacahAndSendLine(byte[] line) throws IOException {
-        
         Message message = new Message(line); 
         
         if (messageNum >= minMsgSent || message.getSize() > messageBuffer.remaining()) {
             sendMessage();
         }
         
-        message.write(messageBuffer);
+        synchronized (messageBuffer) {
+            message.write(messageBuffer);
+        }
         messageNum++;
     }
     
