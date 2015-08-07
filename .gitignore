@@ -10,3 +10,4 @@ bin/.settings
 target
 *.iml
 *.versionsBackup
+*.DS_Store
