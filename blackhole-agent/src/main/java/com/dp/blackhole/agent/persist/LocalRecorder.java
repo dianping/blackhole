@@ -38,8 +38,8 @@ public class LocalRecorder implements IRecoder {
         try {
             snapshot = reloadBySnapshotFile();
             setSnapshot(snapshot);
-        } catch (IOException e) {
-            LOG.info("File '" + this.snapshotFile + "' does not exist, compute and build by skim log files");
+        } catch (Exception e) {
+            LOG.info("Load '" + this.snapshotFile + "' faild, compute and build by skimming log files");
             snapshot = rebuidByActualFiles(meta, meta.getTopicId());
             setSnapshot(snapshot);
         }
