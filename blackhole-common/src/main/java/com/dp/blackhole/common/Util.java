@@ -389,15 +389,6 @@ public class Util {
     }
     
     /*
-     * get the stage roll timestamp, for example
-     * now is 16:02, and rollPeriod is 1 hour, then
-     * return ts of 15:00;
-     */
-    public static long getLatestRollTs(long ts, long rollPeriod) {
-        return getLatestRollTsUnderTimeBuf(ts, rollPeriod, 0);
-    }
-    
-    /*
      * get the stage roll timestamp under a forward delay, for example
      * timebuf is 5000, now is 15:59:55, and rollPeriod is 1 hour, then
      * return ts of 15:00;
@@ -411,6 +402,16 @@ public class Util {
         long ret = ((ts + clockSyncBufMillis) / rollPeriod -1) * rollPeriod;
         ret = ret - localTimezoneOffset;
         return ret;
+    }
+    
+    public static long getCurrentRotationUnderTimeBuf(
+            long ts, long rotatePeriod, long clockSyncBufMillis) {
+        return getCurrentRollTsUnderTimeBuf(ts, rotatePeriod, clockSyncBufMillis);
+    }
+    
+    public static long getLatestRotateTsAssociateWithRollPeriodUnderTimeBuf(
+            long ts, long rollPeriod, long rotatePeriod, long clockSyncBufMillis) {
+        return getLatestRollTsUnderTimeBuf(ts, rotatePeriod, clockSyncBufMillis) + (rotatePeriod - rollPeriod) * 1000L;
     }
 
     public static boolean belongToSameRotate(long rollTs1, long rollTs2, long rotatePeriod) {

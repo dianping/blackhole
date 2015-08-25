@@ -225,4 +225,27 @@ public class TestUtil {
         long currentTs2 = 1421683200070L;
         assertTrue(Util.isRollConcurrentWithRotate(currentTs2, rollPeriod2, rotatePeriod2));
     }
+    
+    @Test
+    public void testGetLatestRotateTsUnderTimeBuf() {
+        long minutelyPeriod = 300;
+        long hourlyPeriod = 3600;
+        long daylyPeriod = 86400;
+        long currentTs = 1421683200070L;            //2015-01-20 00:00:00
+        long exceptCurrentRotation = 1421683200000L;
+        long exceptValueHourly = 1421679600000L;    //2015-01-19 23:00:00
+        long exceptValueMinutely = 1421682900000L;  //2015-01-19 23:55:00
+        long exceptValueDayly = 1421596800000L;     //2015-01-19 00:00:00
+        assertEquals(exceptCurrentRotation, Util.getCurrentRotationUnderTimeBuf(currentTs, hourlyPeriod, 200));
+        assertEquals(exceptValueHourly, Util.getLatestRollTsUnderTimeBuf(currentTs, hourlyPeriod, 200));
+        assertEquals(exceptValueMinutely, Util.getLatestRollTsUnderTimeBuf(currentTs, minutelyPeriod, 200));
+        assertEquals(exceptCurrentRotation, Util.getCurrentRotationUnderTimeBuf(currentTs, daylyPeriod, 200));
+        assertEquals(exceptValueDayly, Util.getLatestRollTsUnderTimeBuf(currentTs, daylyPeriod, 200));
+        assertEquals(exceptValueHourly, Util.getLatestRollTsUnderTimeBuf(currentTs, hourlyPeriod, 200));
+    }
+    
+    @Test
+    public void testBelongToSameRotate() {
+        assertFalse(Util.belongToSameRotate(1441080300000L, 1441079400000L, 3600));
+    }
 }

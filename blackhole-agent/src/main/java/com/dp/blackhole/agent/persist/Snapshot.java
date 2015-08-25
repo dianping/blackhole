@@ -10,7 +10,7 @@ import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.common.Util;
 
 public class Snapshot implements Serializable {
-    private static final long serialVersionUID = 6034321879136783566L;
+    private static final long serialVersionUID = 6034321879036783566L;
     
     private TopicId topicId;
     private long lastModifyTime;
@@ -60,6 +60,9 @@ public class Snapshot implements Serializable {
     }
     public synchronized void remove(Record record) {
         this.records.remove(record);
+    }
+    public synchronized void clear() {
+        this.records.clear();
     }
     public synchronized void eliminateExpiredRecord() {
         if (lastCleanTime > Util.getTS(-1, TimeUnit.DAYS)) {

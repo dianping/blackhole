@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
@@ -33,6 +34,8 @@ public class RollRecovery implements Runnable{
     private boolean isPersist;
     private final IRecoder state;
     private TransferThrottler throttler;
+    private File transferFile;
+    private boolean isTransferFileCompressed;
 
     public RollRecovery(Agent node, String brokerServer, int port,
             AgentMeta topicMeta, final long rollTimestamp, boolean isFinal,
@@ -69,21 +72,14 @@ public class RollRecovery implements Runnable{
 
     @Override
     public void run() {
-        // check local file existence 
-        long rotatePeriod= topicMeta.getRotatePeriod();
         long rollPeriod = topicMeta.getRollPeriod();
         long toTransferSize = 0;
         DataOutputStream out = null;
-        File transferFile = null;
-        File rolledFile = null;
-        File gzFile = null;
-        boolean hasCompressed = false;
-        String rotateString = Util.formatTs(rollTimestamp, rotatePeriod);
         String rollString = Util.formatTs(rollTimestamp, rollPeriod);
         InputStream is = null;
-        LOG.info("Begin to recoverying: broker:" + brokerServer
-                + " rollTS:" + rollTimestamp + " isFinal:" + " isPersist" + isPersist
-                + " topic:" + topicMeta);
+        LOG.info("Begin to recoverying: broker=" + brokerServer
+                + " rollTS=" + rollTimestamp + " isFinal=" + " isPersist=" + isPersist
+                + " meta=" + topicMeta);
         try {
             //retrive record to got recovery offset
             Record record = state.retrive(rollTimestamp);
@@ -91,38 +87,14 @@ public class RollRecovery implements Runnable{
             //1. loss record, the missing data will recovery into the last missing stage
             //2. no persist topic
             if (record == null || !isPersist) {
-                //send ignorance to broker
-                try {
-                    socket = new Socket(brokerServer, port);
-                    out = new DataOutputStream(socket.getOutputStream());
-                    if (isPersist) {
-                        LOG.info("Can not found " + topicMeta.getTopicId() + "'s Record for " + rollString + "[" + rollTimestamp + "], send ignorance to broker.");
-                    } else {
-                        LOG.info("No need to recovery the topic which no need persist: " + topicMeta.getTopicId());
-                    }
-                    wrapSendRecoveryHead(true, out, toTransferSize, hasCompressed, isFinal);
-                } catch (IOException e) {
-                    LOG.error("Faild to send ignorance protocol header.", e);
-                    node.reportUnrecoverable(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal, isPersist);
-                }
+                sendIgnoranceToBroker(rollPeriod, toTransferSize, isTransferFileCompressed, rollString);
                 return;
             }
             
-            //use origin tail file to recovery because of the rollTs belong to the current rotate stage
-            if (isFinal || Util.belongToSameRotate(Util.getTS(), rollTimestamp, topicMeta.getRotatePeriod())) {
-                rolledFile = new File(topicMeta.getTailFile());
-            } else {
-                rolledFile = Util.findRealFileByIdent(topicMeta.getTailFile(), rotateString);
-                gzFile = Util.findGZFileByIdent(topicMeta.getTailFile(), rotateString);
-            }
-            
-            if (rolledFile.exists()) {
-                transferFile = rolledFile;
-            } else if (gzFile != null && gzFile.exists()) {
-                transferFile = gzFile;
-                hasCompressed = true;
-            } else {
-                LOG.error("Can not found both " + rolledFile + " and gzFile");
+            try {
+                findAppropriateTransferFile(record);
+            } catch (FileNotFoundException e) {
+                LOG.error(e.getMessage());
                 node.reportUnrecoverable(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal, isPersist);
                 return;
             }
@@ -131,13 +103,13 @@ public class RollRecovery implements Runnable{
             long from = record.getStartOffset();
             long to = record.getEndOffset();
             try {
-                if (hasCompressed && to == LogReader.END_OFFSET_OF_FILE) {
+                if (isTransferFileCompressed && to == LogReader.END_OFFSET_OF_FILE) {
                     //If file compressed and end offset was EOF,
                     //end offset set to length of compressed file and transfer it.
                     is = new BufferedInputStream(new FileInputStream(transferFile), 65536);
                     from = LogReader.BEGIN_OFFSET_OF_FILE;
                     to = transferFile.length() - 1; //minus one to convert offset (from 0)
-                } else if (hasCompressed) {
+                } else if (isTransferFileCompressed) {
                     //If file compressed but end offset was specified,
                     //transfer the decompressed file with this specified end offset.
                     is = new GZIPInputStream(new FileInputStream(transferFile), 65536);
@@ -166,38 +138,17 @@ public class RollRecovery implements Runnable{
                 socket = new Socket(brokerServer, port);
                 out = new DataOutputStream(socket.getOutputStream());
                 toTransferSize = to - from + 1;
-                LOG.info("Perpare to Recovery " + rollString 
+                LOG.info("Perpare to Recovery " + transferFile + " for " + rollString 
                         + " offset [" + from + "~" + to + "] " 
                         + " include " + toTransferSize);
-                wrapSendRecoveryHead(false, out, toTransferSize, hasCompressed, isFinal);
+                wrapSendRecoveryHead(false, out, toTransferSize, isTransferFileCompressed, isFinal);
             } catch (IOException e) {
                 LOG.error("Faild to build recovery stream or send protocol header.", e);
                 node.reportRecoveryFail(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal);
                 return;
             }
     
-            int len = 0;
-            long transferBytes = 0;
-            try {
-                LOG.info(transferFile + " is transferring for " + rollString);
-                is.skip(from);
-                while (toTransferSize > 0 && (len = is.read(inbuf)) != -1) {
-                    if (len > toTransferSize) {
-                        len = (int) toTransferSize;
-                    }
-                    out.write(inbuf, 0, len);
-                    transferBytes += len;
-                    toTransferSize -= len;
-                    if (throttler != null) {
-                        throttler.throttle(len);
-                    }
-                }
-                out.flush();
-                LOG.info(transferFile + " transfered, including [" + transferBytes + "] bytes.");
-            } catch (IOException e) {
-                LOG.error("Recover stream broken.", e);
-                node.reportRecoveryFail(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal);
-            }
+            transferData(rollPeriod, toTransferSize, out, rollString, is, from);
         } finally {
             if (is != null) {
                 try {
@@ -208,6 +159,78 @@ public class RollRecovery implements Runnable{
                 is = null;
             }
             stopRecoverying();
+        }
+    }
+
+    private void transferData(long rollPeriod, long toTransferSize,
+            DataOutputStream out, String rollString, InputStream is, long from) {
+        int len = 0;
+        long transferBytes = 0;
+        try {
+            LOG.info(transferFile + " is transferring for " + rollString);
+            is.skip(from);
+            while (toTransferSize > 0 && (len = is.read(inbuf)) != -1) {
+                if (len > toTransferSize) {
+                    len = (int) toTransferSize;
+                }
+                out.write(inbuf, 0, len);
+                transferBytes += len;
+                toTransferSize -= len;
+                if (throttler != null) {
+                    throttler.throttle(len);
+                }
+            }
+            out.flush();
+            LOG.info(transferFile + " transfered for " + rollString + ", including [" + transferBytes + "] bytes.");
+        } catch (IOException e) {
+            LOG.error("Recover stream broken.", e);
+            node.reportRecoveryFail(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal);
+        }
+    }
+
+    private void findAppropriateTransferFile(Record record) throws FileNotFoundException {
+        File rolledFile;
+        File gzFile = null;
+        long rotatePeriod= topicMeta.getRotatePeriod();
+        //use origin tail file to recovery because that the rotation is belong to the current rotate stage
+        long rotation = record.getRotation();
+        if (isFinal || Util.belongToSameRotate(Util.getTS(), rotation, topicMeta.getRotatePeriod())) {
+            rolledFile = new File(topicMeta.getTailFile());
+        } else {
+            String rotateString = Util.formatTs(rotation, rotatePeriod);
+            rolledFile = Util.findRealFileByIdent(topicMeta.getTailFile(), rotateString);
+            gzFile = Util.findGZFileByIdent(topicMeta.getTailFile(), rotateString);
+        }
+        
+        if (rolledFile.exists()) {
+            transferFile = rolledFile;
+        } else if (gzFile != null && gzFile.exists()) {
+            transferFile = gzFile;
+            isTransferFileCompressed = true;
+        } else if (!Util.belongToSameRotate(record.getRollTs(), rotation, topicMeta.getRotatePeriod())) {
+            //use current watching file again because that this is a special case which file rotate hasn't happened yet
+            transferFile = new File(topicMeta.getTailFile());
+            LOG.warn("using SPECIAL TRANSFER FILE(" + transferFile + ") because file rotate hasn't happened yet");
+        } else {
+            throw new FileNotFoundException("Can not found both " + rolledFile + " and gzFile");
+        }
+    }
+
+    private void sendIgnoranceToBroker(final long rollPeriod,
+            final long toTransferSize, final boolean hasCompressed,
+            final String rollString) {
+        try {
+            socket = new Socket(brokerServer, port);
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            if (isPersist) {
+                LOG.info("Can not found " + topicMeta.getTopicId() + "'s Record for " + rollString + "[" + rollTimestamp + "], send ignorance to broker.");
+            } else {
+                LOG.info("No need to recovery the topic which no need persist: " + topicMeta.getTopicId());
+            }
+            wrapSendRecoveryHead(true, out, toTransferSize, hasCompressed, isFinal);
+        } catch (IOException e) {
+            LOG.error("Faild to send ignorance protocol header.", e);
+            node.reportUnrecoverable(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal, isPersist);
         }
     }
 

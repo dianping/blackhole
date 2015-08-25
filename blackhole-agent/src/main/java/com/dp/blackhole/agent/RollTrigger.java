@@ -45,7 +45,6 @@ public class RollTrigger {
             if (Util.isRollConcurrentWithRotate(currentTs, topicMeta.getRollPeriod(), topicMeta.getRotatePeriod())) {
                 LOG.debug(topicMeta.getTopicId() + " roll attempt is not triggered cause rotating");
             } else {
-                LOG.debug(topicMeta.getTopicId() + " begin roll attempt.");
                 logFSM.beginRollAttempt();
             }
         }

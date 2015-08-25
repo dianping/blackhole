@@ -40,7 +40,7 @@ public class LogReader implements Runnable {
     private boolean accept;
     private final int maxLineSize;
     private RollTrigger rollTrigger;
-    private long actualLatestRotateTs;
+    private long currentRotation;
     
     public LogReader(Agent agent, AgentMeta meta, String snapshotPersistDir) {
         this.agent = agent;
@@ -53,7 +53,7 @@ public class LogReader implements Runnable {
         } else {
             this.maxLineSize = meta.getMaxLineSize();
         }
-        this.actualLatestRotateTs = 0;
+        this.currentRotation = setCurrentRotation();
         this.lineBuf = new ByteArrayOutputStream(maxLineSize);
         this.tailFile = new File(meta.getTailFile());
         this.accept = true;
@@ -71,12 +71,12 @@ public class LogReader implements Runnable {
         return recoder;
     }
     
-    public long getActualLatestRotateTs() {
-        return actualLatestRotateTs;
+    public long getCurrentRotation() {
+        return currentRotation;
     }
     
-    public void setActualLatestRotateTs(long rotateTs) {
-        this.actualLatestRotateTs = rotateTs;
+    public void setCurrentRotation(long rotateTs) {
+        this.currentRotation = rotateTs;
     }
 
     public boolean register() {
@@ -112,23 +112,47 @@ public class LogReader implements Runnable {
         Record perviousRollRecord = getRecoder().getPerviousRollRecord();
         if (perviousRollRecord == null) {
             startOffset = LogReader.BEGIN_OFFSET_OF_FILE;
-        } else if (hasRotated(rollTs, rotatePeriod) && !Util.belongToSameRotate(perviousRollRecord.getRollTs(), rollTs, rotatePeriod)) {
-            startOffset = LogReader.BEGIN_OFFSET_OF_FILE;
-        } else {
+        } else if (Util.belongToSameRotate(perviousRollRecord.getRollTs(), rollTs, rotatePeriod)
+                && Util.belongToSameRotate(perviousRollRecord.getRotation(), rollTs, rotatePeriod)) {
             startOffset = perviousRollRecord.getEndOffset() + 1;
+        } else if (hasNotRotated(rollTs, rotatePeriod)) {
+            startOffset = perviousRollRecord.getEndOffset() + 1;
+        } else {
+            startOffset = LogReader.BEGIN_OFFSET_OF_FILE;
         }
         return startOffset;
     }
     
-    private boolean hasRotated(long ts, long rotatePeriod) {
-        long expectedLatestRotateTs = Util.getLatestRollTsUnderTimeBuf(ts, rotatePeriod, ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
-        long actualLatestRotateTs = getActualLatestRotateTs();
-        return (actualLatestRotateTs == expectedLatestRotateTs) || (actualLatestRotateTs == 0); //equals 0 means first rotation
+    private boolean hasNotRotated(long ts, long rotatePeriod) {
+        long currentRotation = getCurrentRotation();
+        long expectedCurrentRotation = Util.getCurrentRotationUnderTimeBuf(ts, rotatePeriod, ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
+        LOG.debug(ts + "'s currentRotation: " + currentRotation + ", expectedCurrentRotation: " + expectedCurrentRotation);
+        return (currentRotation != 0) && (currentRotation < expectedCurrentRotation);
     }
 
-    private void record(int type, long rollTs, long endOffset) {
+    public void record(int type, long rollTs, long endOffset) {
         long startOffset = computeStartOffset(rollTs, meta.getRotatePeriod());
-        getRecoder().record(type, rollTs, startOffset, endOffset);
+        if (endOffset != LogReader.END_OFFSET_OF_FILE && endOffset < startOffset) {
+            // roll or rotation occurs, meanwhile, remote sender do not work
+            // the end offset may be one less than start offset
+            LOG.info("This is a invaild record for " + rollTs + " " +  endOffset + "(end)<" + startOffset +"(start) , ignore it.");
+        } else {
+            getRecoder().record(type, rollTs, startOffset, endOffset, getCurrentRotation());
+        }
+        if (type == Record.ROTATE) {
+            setCurrentRotation();
+        }
+    }
+
+    long setCurrentRotation() {
+        long currentTs = Util.getTS();
+        long currentRotation = Util.getCurrentRotationUnderTimeBuf(
+                currentTs,
+                meta.getRotatePeriod(),
+                ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
+        setCurrentRotation(currentRotation);
+        LOG.info("Set current rotation " + currentRotation + " for " + meta.getTopic());
+        return currentRotation;
     }
     
     @Override
@@ -141,13 +165,6 @@ public class LogReader implements Runnable {
                     meta.getRollPeriod(),
                     ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
             restoreMissingRotationRecords(meta.getRollPeriod(), meta.getRotatePeriod(), resumeRollTs);
-
-            //record the offset of agent resuming
-            long fileLength = reader.length();
-            //minus 1 is back to the end offset of previous line
-            //so if seekLastLineHeader() return 0, it declare that it's a new unread file.
-            long endOffset = Util.seekLastLineHeader(reader, fileLength) - 1;
-            record(Record.RESUME, resumeRollTs, endOffset);
         } catch (IOException e) {
             LOG.error("Oops, resume fail", e);
             closeFile(reader);
@@ -234,7 +251,7 @@ public class LogReader implements Runnable {
      */
     public void restoreMissingRotationRecords(long rollPeriod,
             long rotatePeriod, long resumeRollTs) {
-        Record lastRollRecord = getRecoder().retriveLastRollRecord();
+        Record lastRollRecord = getRecoder().getPerviousRollRecord();
         if (lastRollRecord != null) {
             long firstMissRotateRollTs = Util.getNextRollTs(lastRollRecord.getRollTs(), rotatePeriod) - rollPeriod * 1000;
             if (firstMissRotateRollTs > lastRollRecord.getRollTs() && firstMissRotateRollTs <= resumeRollTs) {
@@ -242,7 +259,7 @@ public class LogReader implements Runnable {
             }
             int restMissRotateRollCount = Util.getMissRotateRollCount(firstMissRotateRollTs, resumeRollTs, rotatePeriod);
             for (int i = 0; i < restMissRotateRollCount; i++) {
-                Record lastRotateRecord = getRecoder().retriveLastRollRecord();
+                Record lastRotateRecord = getRecoder().getPerviousRollRecord();
                 long missRotateRollTs = Util.getNextRollTs(lastRotateRecord.getRollTs(), rotatePeriod) + (rotatePeriod  - rollPeriod) * 1000;
                 LOG.debug("find miss rotate roll ts " + missRotateRollTs);
                 record(Record.ROTATE, missRotateRollTs, END_OFFSET_OF_FILE);
@@ -335,17 +352,13 @@ public class LogReader implements Runnable {
                 throw new RuntimeException("log reader loop terminate, prepare to reboot log reader.");
             } finally {
                 closeFile(save);
-                Long latestRotateTs = Util.getLatestRollTsUnderTimeBuf(
-                        Util.getTS(), meta.getRotatePeriod(),
-                        ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
-                setActualLatestRotateTs(latestRotateTs);
-                LOG.debug(tailFile + "'s actual latest rotate ts is " + latestRotateTs);
-                Long rollTs = Util.getLatestRollTsUnderTimeBuf(
-                        Util.getTS(),
+                long currentTs = Util.getTS();
+                Long rotateTs = Util.getLatestRollTsUnderTimeBuf(
+                        currentTs,
                         meta.getRollPeriod(),
                         ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
                 //record snapshot
-                record(Record.ROTATE, rollTs, previousRotateEndOffset);
+                record(Record.ROTATE, rotateTs, previousRotateEndOffset);
             }
             
             if (currentReaderState.get() == ReaderState.ASSIGNED) {
