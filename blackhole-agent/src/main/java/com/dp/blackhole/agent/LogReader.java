@@ -143,6 +143,17 @@ public class LogReader implements Runnable {
             setCurrentRotation();
         }
     }
+    
+    private void recordMissingRotation(long missRotateRollTs, long rotatePeriod) {
+        long startOffset = computeStartOffset(missRotateRollTs, rotatePeriod);
+        getRecoder().record(
+                Record.ROTATE,
+                missRotateRollTs,
+                startOffset,
+                END_OFFSET_OF_FILE,
+                Util.getCurrentRotationUnderTimeBuf(missRotateRollTs, rotatePeriod, ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS)
+        );
+    }
 
     long setCurrentRotation() {
         long currentTs = Util.getTS();
@@ -160,6 +171,8 @@ public class LogReader implements Runnable {
         LOG.info("Log reader for " + meta + " running...");
         try {
             this.reader = openFile();
+            long tailPosition = Util.seekLastLineHeader(reader, reader.length());
+            LOG.info("tail " + tailFile + " from " + tailPosition);
             long resumeRollTs = Util.getCurrentRollTsUnderTimeBuf(
                     Util.getTS(),
                     meta.getRollPeriod(),
@@ -255,18 +268,18 @@ public class LogReader implements Runnable {
         if (lastRollRecord != null) {
             long firstMissRotateRollTs = Util.getNextRollTs(lastRollRecord.getRollTs(), rotatePeriod) - rollPeriod * 1000;
             if (firstMissRotateRollTs > lastRollRecord.getRollTs() && firstMissRotateRollTs <= resumeRollTs) {
-                record(Record.ROTATE, firstMissRotateRollTs, END_OFFSET_OF_FILE);
+                recordMissingRotation(firstMissRotateRollTs, rotatePeriod);
             }
             int restMissRotateRollCount = Util.getMissRotateRollCount(firstMissRotateRollTs, resumeRollTs, rotatePeriod);
             for (int i = 0; i < restMissRotateRollCount; i++) {
                 Record lastRotateRecord = getRecoder().getPerviousRollRecord();
                 long missRotateRollTs = Util.getNextRollTs(lastRotateRecord.getRollTs(), rotatePeriod) + (rotatePeriod  - rollPeriod) * 1000;
                 LOG.debug("find miss rotate roll ts " + missRotateRollTs);
-                record(Record.ROTATE, missRotateRollTs, END_OFFSET_OF_FILE);
+                recordMissingRotation(missRotateRollTs, rotatePeriod);
             }
         }
     }
-    
+
     public void process() {
         try {
             if (currentReaderState.get() == ReaderState.ASSIGNED) {
