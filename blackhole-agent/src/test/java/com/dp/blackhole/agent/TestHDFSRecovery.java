@@ -49,8 +49,8 @@ public class TestHDFSRecovery {
     @Before
     public void setUp() throws Exception {
         state = mock(LocalRecorder.class);
-        when(state.retrive(SimAgent.rollTS)).thenReturn(new Record(Record.ROTATE, SimAgent.rollTS, LogReader.BEGIN_OFFSET_OF_FILE, LogReader.END_OFFSET_OF_FILE));//or 598
-        
+        when(state.retrive(SimAgent.rollTS))
+            .thenReturn(new Record(Record.ROTATE, SimAgent.rollTS, LogReader.BEGIN_OFFSET_OF_FILE, LogReader.END_OFFSET_OF_FILE, Util.getCurrentRotationUnderTimeBuf(SimAgent.rollTS, 3600, 0)));//or 598
         APP_HOST = Util.getLocalHost();
         //build a tmp file
         fileBroken = createBrokenTmpFile(MAGIC + "_broken_", SimAgent.expected);

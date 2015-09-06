@@ -17,6 +17,7 @@ import org.junit.Test;
 import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.agent.persist.LocalRecorder;
 import com.dp.blackhole.agent.persist.Record;
+import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
 
 public class TestRollRecovery {
@@ -49,8 +50,8 @@ public class TestRollRecovery {
     @Before
     public void setUp() throws Exception {
         state = mock(LocalRecorder.class);
-        when(state.retrive(SimAgent.rollTS)).thenReturn(new Record(Record.ROTATE, SimAgent.rollTS, LogReader.BEGIN_OFFSET_OF_FILE, LogReader.END_OFFSET_OF_FILE));//or 598
-        
+        when(state.retrive(SimAgent.rollTS))
+            .thenReturn(new Record(Record.ROTATE, SimAgent.rollTS, LogReader.BEGIN_OFFSET_OF_FILE, LogReader.END_OFFSET_OF_FILE, Util.getCurrentRotationUnderTimeBuf(SimAgent.rollTS, 3600, 0)));//or 598
         TopicId topicId = new TopicId(MAGIC, null);
         appLog = new AgentMeta(topicId, file.getAbsolutePath(), 3600, 3600, 1024, 1L, 5, 4096, 1024*1024, 1);
         SimRecoveryServer server = new SimRecoveryServer(port, header, receives);
@@ -80,5 +81,12 @@ public class TestRollRecovery {
         expectedHeader[3] = String.valueOf(SimAgent.rollTS);
         assertArrayEquals("head not match", expectedHeader, header.toArray());
         assertEquals("loader function fail.", SimAgent.expected, receives.get(receives.size()-1));
+    }
+    
+    @Test
+    public void testTransferFileSelection() {
+        RollRecovery recovery = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false, true, state);
+        recovery.run();
+        
     }
 }

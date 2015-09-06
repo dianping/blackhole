@@ -44,7 +44,7 @@ public class StreamHealthChecker extends Thread {
             for (Map.Entry<Sender, String> entry : senders.entrySet()) {
                 Sender sender = entry.getKey();
                 String connStr = entry.getValue();
-                LOG.debug("sender checking..." + connStr);
+                LOG.trace("sender checking..." + connStr);
                 try {
                     if (sender.canSend()) {
                         sender.sendMessage();

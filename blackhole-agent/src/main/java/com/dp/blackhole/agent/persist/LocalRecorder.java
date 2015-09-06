@@ -38,8 +38,8 @@ public class LocalRecorder implements IRecoder {
         try {
             snapshot = reloadBySnapshotFile();
             setSnapshot(snapshot);
-        } catch (IOException e) {
-            LOG.info("File '" + this.snapshotFile + "' does not exist, compute and build by skim log files");
+        } catch (Exception e) {
+            LOG.info("Load '" + this.snapshotFile + "' faild, compute and build by skimming log files");
             snapshot = rebuidByActualFiles(meta, meta.getTopicId());
             setSnapshot(snapshot);
         }
@@ -72,10 +72,10 @@ public class LocalRecorder implements IRecoder {
             });
             for (String timeString : sortTimeStrings) {
                 try {
+                    long rotation = Util.parseTs(timeString, meta.getRotatePeriod());
                     snapshot.addRecord(new Record(Record.ROTATE, 
-                            Util.parseTs(timeString, meta.getRotatePeriod())
-                            + (meta.getRotatePeriod() - meta.getRollPeriod()) * 1000L,
-                            LogReader.BEGIN_OFFSET_OF_FILE, LogReader.END_OFFSET_OF_FILE));
+                            rotation + (meta.getRotatePeriod() - meta.getRollPeriod()) * 1000L,
+                            LogReader.BEGIN_OFFSET_OF_FILE, LogReader.END_OFFSET_OF_FILE, rotation));
                 } catch (ParseException e1) {
                     LOG.error("Time pases exception " + timeString);
                     continue;
@@ -117,16 +117,10 @@ public class LocalRecorder implements IRecoder {
     }
     
     @Override 
-    public void record(int type, long rollTs, long startOffset, long endOffset) {
-        Record record = new Record(type, rollTs, startOffset, endOffset);
-        if (type != Record.RESUME && endOffset != LogReader.END_OFFSET_OF_FILE && endOffset < startOffset) {
-            // roll or rotation occurs, meanwhile, remote sender do not work
-            // the end offset may be one less than start offset
-            LOG.info("This is a invaild record " + record + ", ignore it.");
-            return;
-        }
+    public void record(int type, long rollTs, long startOffset, long endOffset, long currentRotation) {
+        Record record = new Record(type, rollTs, startOffset, endOffset, currentRotation);
         getSnapshot().addRecord(record);
-        LOG.debug("Recorded " + record);
+        LOG.info("Recorded " + record);
         try {
             persist();
         } catch (IOException e) {
@@ -143,37 +137,6 @@ public class LocalRecorder implements IRecoder {
             for (int i = records.size() - 1; i >= 0; i--) {
                 Record record = records.get(i);
                 if (record.getRollTs() == rollTs) {
-                    if (record.getType() == Record.ROLL
-                            || record.getType() == Record.ROTATE) {
-                        ret = record;
-                        break;
-                    } else if (record.getType() == Record.RESUME) {
-                        if (i - 1 < 0) {
-                            ret = record;
-                        } else {
-                            Record perviousRollRecord = records.get(i - 1);
-                            if (perviousRollRecord.getRollTs() == record.getRollTs()) {
-                                ret = perviousRollRecord;
-                            } else {
-                                ret = record;
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        return ret;
-    }
-    
-    public Record retriveLastRollRecord() {
-        Record ret = null;
-        List<Record> records = getSnapshot().getRecords();
-        if (!records.isEmpty()) {
-            for (int i = records.size() - 1; i >= 0; i--) {
-                Record record = records.get(i);
-                if (record.getType() == Record.ROLL
-                        || record.getType() == Record.ROTATE) {
                     ret = record;
                     break;
                 }
@@ -181,7 +144,7 @@ public class LocalRecorder implements IRecoder {
         }
         return ret;
     }
-
+    
     @Override
     public Record retriveLastRecord(int type) {
         Record ret = null;
@@ -248,28 +211,7 @@ public class LocalRecorder implements IRecoder {
         List<Record> records = getSnapshot().getRecords();
         Record perviousRollRecord = null;
         if (!records.isEmpty()) {
-            for (int i = records.size() - 1; i >= 0; i--) {
-                Record record = records.get(i);
-                if (record.getType() == Record.ROLL
-                        || record.getType() == Record.ROTATE) {
-                    perviousRollRecord = record;
-                    break;
-                } else if (record.getType() == Record.RESUME) {
-                    if (i - 1 < 0) {
-                        perviousRollRecord = record;
-                    } else {
-                        Record perviousPerviousRollRecord = records.get(i - 1);
-                        if (perviousPerviousRollRecord.getType() == Record.RESUME) {
-                            continue;
-                        } else if (perviousPerviousRollRecord.getRollTs() == record.getRollTs()) {
-                            perviousRollRecord = perviousPerviousRollRecord;
-                        } else {
-                            perviousRollRecord = record;
-                        }
-                    }
-                    break;
-                }
-            }
+            perviousRollRecord = records.get(records.size() - 1);
         }
         return perviousRollRecord;
     }

@@ -116,7 +116,7 @@ public class AgentMeta extends TopicCommonMeta implements Serializable {
                 + ", maxLineSize=" + super.getMaxLineSize() + ", dying=" + dying
                 + ", readInterval=" + readInterval + ", minMsgSent="
                 + super.getMinMsgSent() + ", msgBufSize=" + super.getMsgBufSize()
-                + ", partitionFactor" + super.getPartitionFactor() + "]";
+                + ", partitionFactor=" + super.getPartitionFactor() + "]";
     }
 
     public static class TopicId implements Serializable {
