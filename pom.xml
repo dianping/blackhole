@@ -39,6 +39,7 @@
 		<module>blackhole-broker</module>
 		<module>blackhole-check</module>
 		<module>blackhole-consumer</module>
+		<module>blackhole-agent-guarder</module>
 	</modules>
 	<distributionManagement>
 		<repository>
@@ -95,6 +96,11 @@
 				<artifactId>blackhole-consumer</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>blackhole-agent-guarder</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
