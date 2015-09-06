@@ -13,7 +13,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.SecurityUtil;
 
 import com.dp.blackhole.broker.ftp.FTPConfigrationLoader;
-import com.dp.blackhole.broker.storage.StorageManager.reporter.ReportEntry;
+import com.dp.blackhole.broker.storage.StorageManager.Reporter.ReportEntry;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;

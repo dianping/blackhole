@@ -13,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import com.dp.blackhole.broker.storage.Partition;
 import com.dp.blackhole.broker.storage.StorageManager;
 import com.dp.blackhole.broker.storage.RollPartition;
-import com.dp.blackhole.broker.storage.StorageManager.reporter.ReportEntry;
+import com.dp.blackhole.broker.storage.StorageManager.Reporter.ReportEntry;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.NonblockingConnectionFactory;
@@ -109,6 +109,7 @@ public class BrokerService extends Thread {
             }
             Message msg = PBwrap.wrapReadyStream(request.topic, request.partitionId, request.period, localhost, Util.getTS());
             Broker.getSupervisor().send(msg);
+            manager.storageRollPeriod(request.topic, request.period);
         }
 
         public void handleProduceRequest(ProduceRequest request,

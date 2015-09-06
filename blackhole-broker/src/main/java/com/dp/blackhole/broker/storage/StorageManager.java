@@ -24,24 +24,31 @@ public class StorageManager {
     private int flushThreshold;
     private int splitThreshold;
     
+    private ConcurrentHashMap<String, Long> rollPeriodMap;
+    
     public StorageManager(String basedir, int splitThreshold, int flushThreshold) throws IOException {
         this.basedir = basedir;
         this.splitThreshold = splitThreshold;
         this.flushThreshold = flushThreshold;
         storage = new ConcurrentHashMap<String, ConcurrentHashMap<String,Partition>>();
+        rollPeriodMap = new ConcurrentHashMap<String, Long>();
         
         // currently, clean storage when broker start for simplicity;
         // so load() has not effect
         Util.rmr(new File(basedir));
         load();
         
-        reporter r = new reporter();
+        Reporter r = new Reporter();
         r.setDaemon(true);
         r.start();
         
-        cleanner c = new cleanner();
+        Cleanner c = new Cleanner();
         c.setDaemon(true);
         c.start();
+    }
+    
+    public void storageRollPeriod(String topic, long period) {
+        rollPeriodMap.put(topic, period);
     }
     
     public void removePartition(String topic, String partitionId) {
@@ -108,7 +115,7 @@ public class StorageManager {
         return splitThreshold;
     }
     
-    public class reporter extends Thread {
+    public class Reporter extends Thread {
         
         public class ReportEntry {
             public final String topic;
@@ -125,7 +132,7 @@ public class StorageManager {
         private Map<String, Long> reportedOffsets;
         private long interval = 3000;
         
-        public reporter() {
+        public Reporter() {
             reportedOffsets = new HashMap<String, Long>();
         }
         
@@ -176,15 +183,39 @@ public class StorageManager {
         }
     }
     
-    public class cleanner extends Thread {
-        private long threshold = 24 * 3600 * 1000l;
-        private long interval = 3600 * 1000l;
+    public class Cleanner extends Thread {
+        private long thresholdDaily = 24 * 3600 * 1000l;
+        private long thresholdCritical = 6 * 3600 * 1000l;
+        private long interval = 600 * 1000l;
+        private File storageDir;
+        private long totalSpace;
+        
+        public Cleanner() {
+            this.storageDir = new File(StorageManager.this.basedir);
+            this.totalSpace = storageDir.getTotalSpace();
+        }
         
         private void cleanup() {
             long current = Util.getTS();
             for (Map<String, Partition> m : storage.values()) {
                 for (Partition p : m.values()) {
-                    p.cleanupSegments(current, threshold);
+                    p.cleanupSegments(current, thresholdDaily);
+                }
+            }
+            long usableSpace = storageDir.getUsableSpace();
+            // usable space is less than 1/5 total space
+            if (5 * usableSpace < totalSpace) {
+                Log.info(storageDir + " disk usage over 80%, cleanup segments which preserved over "
+                        + thresholdCritical / 1000 + " seconds");
+                for (Map.Entry<String, ConcurrentHashMap<String, Partition>> entry : storage.entrySet()) {
+                    String topic = entry.getKey();
+                    Long rollPeriod = rollPeriodMap.get(topic);
+                    if (rollPeriod != null && rollPeriod.longValue() <= 3600) {
+                        Map<String, Partition> m = entry.getValue();
+                        for (Partition p : m.values()) {
+                            p.cleanupSegments(current, thresholdCritical);
+                        }
+                    }
                 }
             }
         }
@@ -201,6 +232,5 @@ public class StorageManager {
                 cleanup();
             }
         }
-                
     }
 }
