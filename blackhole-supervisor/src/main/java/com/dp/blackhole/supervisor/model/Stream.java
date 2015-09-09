@@ -10,29 +10,27 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import com.dp.blackhole.common.Util;
 
 public class Stream {
-    private String topic;
-    private String source;
+    private StreamId streamId;
     private String brokerHost;
     private long period;
     private long startTs;
-    private AtomicLong lastSuccessTs = new AtomicLong();
-    private AtomicBoolean active = new AtomicBoolean(true);
-    private List<Stage> stages = new ArrayList<Stage>();
+    private AtomicLong lastSuccessTs;
+    private AtomicBoolean active;
+    private List<Stage> stages;
+    
+    public Stream(String topic, String partition) {
+        this.streamId = new StreamId(topic, partition);
+        this.lastSuccessTs = new AtomicLong();
+        this.active = new AtomicBoolean(true);
+        this.stages = new ArrayList<Stage>();
+    }
     
     public String getTopic() {
-        return topic;
-    }
-
-    public void setTopic(String topic) {
-        this.topic = topic;
+        return streamId.topic;
     }
 
     public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
+        return streamId.partition;
     }
 
     public long getPeriod() {
@@ -102,12 +100,13 @@ public class Stream {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((topic == null) ? 0 : topic.hashCode());
-        result = prime * result + ((source == null) ? 0 : source.hashCode());
         result = prime * result + (int) (period ^ (period >>> 32));
         result = prime * result + (int) (startTs ^ (startTs >>> 32));
+        result = prime * result
+                + ((streamId == null) ? 0 : streamId.hashCode());
         return result;
     }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -117,25 +116,75 @@ public class Stream {
         if (getClass() != obj.getClass())
             return false;
         Stream other = (Stream) obj;
-        if (topic == null) {
-            if (other.topic != null)
-                return false;
-        } else if (!topic.equals(other.topic))
-            return false;
-        if (source == null) {
-            if (other.source != null)
-                return false;
-        } else if (!source.equals(other.source))
-            return false;
         if (period != other.period)
             return false;
         if (startTs != other.startTs)
+            return false;
+        if (streamId == null) {
+            if (other.streamId != null)
+                return false;
+        } else if (!streamId.equals(other.streamId))
             return false;
         return true;
     }
     
     @Override
     public String toString() {
-        return topic+"@"+source+",period:" + period+ ",starttime:"+Util.formatTs(startTs)+",lastSuccessTs:"+lastSuccessTs.get()+",isActive:"+isActive();
+        return streamId + ",period:" + period+ ",starttime:"+Util.formatTs(startTs)+",lastSuccessTs:"+lastSuccessTs.get()+",isActive:"+isActive();
+    }
+    
+    public static class StreamId {
+        private final String topic;
+        private final String partition;
+
+        public StreamId(String topic, String partition) {
+            this.topic = topic;
+            this.partition = partition;
+        }
+
+        public String getTopic() {
+            return topic;
+        }
+
+        public String getPartition() {
+            return partition;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result
+                    + ((partition == null) ? 0 : partition.hashCode());
+            result = prime * result + ((topic == null) ? 0 : topic.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            StreamId other = (StreamId) obj;
+            if (partition == null) {
+                if (other.partition != null)
+                    return false;
+            } else if (!partition.equals(other.partition))
+                return false;
+            if (topic == null) {
+                if (other.topic != null)
+                    return false;
+            } else if (!topic.equals(other.topic))
+                return false;
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return topic + "@" + partition;
+        }
     }
 }

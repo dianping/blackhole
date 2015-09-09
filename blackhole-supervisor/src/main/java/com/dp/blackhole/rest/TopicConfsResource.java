@@ -1,7 +1,9 @@
 package com.dp.blackhole.rest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -21,7 +23,9 @@ import org.apache.http.HttpException;
 
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.supervisor.model.Blacklist;
+import com.dp.blackhole.supervisor.model.Topic;
 import com.dp.blackhole.supervisor.model.TopicConfig;
+import com.dp.blackhole.supervisor.model.Stream.StreamId;
 
 @Path("/confs")
 public class TopicConfsResource extends BaseResource {
@@ -82,5 +86,31 @@ public class TopicConfsResource extends BaseResource {
                     .entity(e).build();
         }
         return Response.ok().build();
+    }
+    
+    @GET
+    @Path("/preassign/{broker}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<String> listPreassignment(
+            @PathParam("broker") String broker) {
+        LOG.debug("GET: list " + broker + "'s Preassignment");
+        List<String> streamIdString = new ArrayList<String>();
+        Map<StreamId, String> brokerPressignmentMap = configService.getBrokerPreassignmentCopy();
+        for (Map.Entry<StreamId, String> entry : brokerPressignmentMap.entrySet()) {
+            if (entry.getValue().equals(broker)) {
+                streamIdString.add(entry.getKey().toString());
+            }
+        }
+        return streamIdString;
+    }
+
+    @GET
+    @Path("/preassign/{topic}/{partition}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public String getBrokerPreassignmentByPartition(
+            @PathParam("topic") String topic,
+            @PathParam("partition") String partition) {
+        LOG.debug("GET: get broker preassignment by " + topic + "@" + partition);
+        return configService.getBrokerPreassignmentByPartition(topic, partition);
     }
 }

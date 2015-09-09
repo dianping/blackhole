@@ -15,7 +15,7 @@ public abstract class ParamsKey {
         public static final String MINIMUM_MESSAGES_SENT = "minMsgSent";
         public static final String MESSAGE_BUFFER_SIZE = "msgBufSize";
         public static final String BANDWIDTH_PER_SEC = "bandwidthPerSec";
-        public static final String PARTITION_FACTOR = "partitonFactor";
+        public static final String PARTITION_FACTOR = "partitionFactor";
     }
 
     public static class LionNode {
@@ -28,6 +28,7 @@ public abstract class ParamsKey {
         public static final String CONF_PREFIX = "blackhole.conf.";
         public static final String BLACKLIST = "blackhole.check.blacklist";
         public static final String BROKER_ASSIGN_LIMIT_MIN = "blackhole.broker-assign.limit.min";
+        public static final String PERASSIGNMENT = "blackhole.broker.preassignment";
         public static final String OP_SCALEOUT = "+";
         public static final String OP_SCALEIN = "-";
     }
@@ -49,4 +50,8 @@ public abstract class ParamsKey {
     public static final long DEFAULT_CLOCK_SYNC_BUF_MILLIS = 20000;
     
     public static final short SOCKET_HEARTBEAT = 0xea;
+    
+    public static final String TOPIC_KEY = "topic";
+    public static final String PARTITION_KEY = "partition";
+    public static final String BROKER_KEY = "broker";
 }
