@@ -60,6 +60,7 @@ import com.dp.blackhole.rest.HttpServer;
 import com.dp.blackhole.rest.ServiceFactory;
 import com.dp.blackhole.supervisor.model.BrokerDesc;
 import com.dp.blackhole.supervisor.model.ConnectionDesc;
+import com.dp.blackhole.supervisor.model.ConnectionDesc.ConnectionInfo;
 import com.dp.blackhole.supervisor.model.ConsumerDesc;
 import com.dp.blackhole.supervisor.model.ConsumerGroup;
 import com.dp.blackhole.supervisor.model.ConsumerGroupKey;
@@ -2288,6 +2289,21 @@ public class Supervisor {
             }
         }
         return null;
+    }
+    
+    public ConnectionInfo getConnectionInfoByHostname(String hostname) {
+        ConnectionInfo connInfo = null;
+        ByteBufferNonblockingConnection connection = getConnectionByHostname(hostname);
+        if (connection == null) {
+            connection = brokersMapping.get(hostname);
+        }
+        if (connection != null) {
+            ConnectionDesc connDesc = connections.get(connection);
+            if (connDesc != null) {
+                connInfo = connDesc.getConnectionInfo();
+            }
+        }
+        return connInfo;
     }
     
     public int getConnectionType(ByteBufferNonblockingConnection connection) {

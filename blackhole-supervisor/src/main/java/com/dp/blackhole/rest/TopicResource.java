@@ -3,6 +3,7 @@ package com.dp.blackhole.rest;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.ajax.JSON;
 
+import com.dp.blackhole.common.Util;
+import com.dp.blackhole.supervisor.model.ConnectionDesc.ConnectionInfo;
 import com.dp.blackhole.supervisor.model.ConsumerDesc;
 import com.dp.blackhole.supervisor.model.ConsumerGroup;
 import com.dp.blackhole.supervisor.model.ConsumerGroupKey;
@@ -103,6 +106,28 @@ public class TopicResource extends BaseResource {
     }
     
     @GET
+    @Path("/{topic}/sources")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<ConnectionInfo> getAllSources(
+            @PathParam("topic") final String topic) {
+        LOG.debug("GET: topic[" + topic + "] -> sources/producers");
+        List<Stream> streams = supervisorService.getAllStreams(topic);
+        Set<String> hosts = new HashSet<String>();
+        for (Stream stream : streams) {
+            String host = Util.getHostFromSource(stream.getSource());
+            hosts.add(host);
+        }
+        List<ConnectionInfo> connectionInfos = new ArrayList<ConnectionInfo>(hosts.size());
+        for (String host : hosts) {
+            ConnectionInfo agent = supervisorService.getConnectionInfoByHostname(host);
+            if (agent != null) {
+                connectionInfos.add(agent);
+            }
+        }
+        return connectionInfos;
+    }
+    
+    @GET
     @Path("/{topic}/groups")
     @Produces({MediaType.APPLICATION_JSON})
     public Set<ConsumerGroupKey> getAllConsumerGroup(
@@ -123,7 +148,7 @@ public class TopicResource extends BaseResource {
         }
         return groupsSorted;
     }
-    
+
     @GET
     @Path("/detail/groups")
     @Produces({MediaType.APPLICATION_JSON})
