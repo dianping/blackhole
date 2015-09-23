@@ -267,7 +267,7 @@ public class LogReader implements Runnable {
         Record lastRollRecord = getRecoder().getPerviousRollRecord();
         if (lastRollRecord != null) {
             long firstMissRotateRollTs = Util.getNextRollTs(lastRollRecord.getRollTs(), rotatePeriod) - rollPeriod * 1000;
-            if (firstMissRotateRollTs > lastRollRecord.getRollTs() && firstMissRotateRollTs <= resumeRollTs) {
+            if (firstMissRotateRollTs > lastRollRecord.getRollTs() && firstMissRotateRollTs < resumeRollTs) {
                 recordMissingRotation(firstMissRotateRollTs, rotatePeriod);
             }
             int restMissRotateRollCount = Util.getMissRotateRollCount(firstMissRotateRollTs, resumeRollTs, rotatePeriod);
