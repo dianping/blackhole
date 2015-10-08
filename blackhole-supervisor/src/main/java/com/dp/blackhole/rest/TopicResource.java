@@ -110,7 +110,7 @@ public class TopicResource extends BaseResource {
     @Produces({MediaType.APPLICATION_JSON})
     public List<ConnectionInfo> getAllSources(
             @PathParam("topic") final String topic) {
-        LOG.debug("GET: topic[" + topic + "] -> sources/producers");
+        LOG.debug("GET: topic[" + topic + "] -> sources connection info");
         List<Stream> streams = supervisorService.getAllStreams(topic);
         Set<String> hosts = new HashSet<String>();
         for (Stream stream : streams) {

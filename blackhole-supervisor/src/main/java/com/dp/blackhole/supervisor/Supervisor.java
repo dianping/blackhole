@@ -162,7 +162,7 @@ public class Supervisor {
     }
     
     public void cachedSend(String host, Message toBeSend) {
-        ByteBufferNonblockingConnection agent = getConnectionByHostname(host);
+        ByteBufferNonblockingConnection agent = getDataSourceConnectionByHostname(host);
         if (agent == null) {
             LOG.info("Can not find any agents connected by " + host + ", message send abort.");
             return;
@@ -173,6 +173,7 @@ public class Supervisor {
     void findAndSendAppConfRes(TopicConfig confInfo) {
         List<String> hosts = confInfo.getHosts();
         if (hosts == null || hosts.isEmpty()) {
+            LOG.error("Not found any hosts for " + confInfo.getTopic() + ", it's abnormal.");
             return;
         }
         List<AppConfRes> appConfResList = new ArrayList<AppConfRes>(1);
@@ -190,11 +191,12 @@ public class Supervisor {
         appConfResList.add(appConfRes);
         Message message = PBwrap.wrapConfRes(appConfResList, null);
         for (String agentHost : hosts) {
-            //we find the connections from agentMapping instead of all connections map
-            //cause if a connection belong to agent type standing for the streams in it
-            //have already been enable, its confReq-conRes message loop is termination.
-            ByteBufferNonblockingConnection connection = dataSourceMapping.get(agentHost);
-            if (connection != null) {
+            //we first find the connections from datasourceMapping cause its confReq-conRes message loop is termination.
+            ByteBufferNonblockingConnection connection = getDataSourceConnectionByHostname(agentHost);
+            if (connection == null) {
+                connection = getIdleConnectionByHostname(agentHost);
+            }
+            if (connection == null) {
                 send(connection, message);
             }
         }
@@ -898,6 +900,7 @@ public class Supervisor {
             if (desc.getType() != ConnectionDesc.AGENT &&
                 desc.getType() != ConnectionDesc.BROKER &&
                 desc.getType() != ConnectionDesc.CONSUMER &&
+                desc.getType() != ConnectionDesc.PRODUCER &&
                 desc.getConnection() != from) {
                 idleHosts.add(desc.getConnection().getHost());
             }
@@ -2278,12 +2281,19 @@ public class Supervisor {
      * @param hostname
      * @return
      */
-    public ByteBufferNonblockingConnection getConnectionByHostname(String hostname) {
+    public ByteBufferNonblockingConnection getIdleConnectionByHostname(String hostname) {
+        ByteBufferNonblockingConnection conn;
+        conn = getDataSourceConnectionByHostname(hostname);
+        if (conn != null) {
+            return null;
+        }
         synchronized (connections) {
             for (Map.Entry<ByteBufferNonblockingConnection, ConnectionDesc> connectionEntry : connections.entrySet()) {
                 if (connectionEntry.getKey().getHost().equals(hostname)
+                        && connectionEntry.getValue().getType() != ConnectionDesc.AGENT
                         && connectionEntry.getValue().getType() != ConnectionDesc.BROKER
-                        && connectionEntry.getValue().getType() != ConnectionDesc.CONSUMER) {
+                        && connectionEntry.getValue().getType() != ConnectionDesc.CONSUMER
+                        && connectionEntry.getValue().getType() != ConnectionDesc.PRODUCER) {
                     return connectionEntry.getKey();
                 }
             }
@@ -2291,12 +2301,17 @@ public class Supervisor {
         return null;
     }
     
+    public ByteBufferNonblockingConnection getDataSourceConnectionByHostname(String hostname) {
+        return dataSourceMapping.get(hostname);
+    }
+    
+    public ByteBufferNonblockingConnection getBrokerConnectionByHostname(String hostname) {
+        return brokersMapping.get(hostname);
+    }
+    
     public ConnectionInfo getConnectionInfoByHostname(String hostname) {
         ConnectionInfo connInfo = null;
-        ByteBufferNonblockingConnection connection = getConnectionByHostname(hostname);
-        if (connection == null) {
-            connection = brokersMapping.get(hostname);
-        }
+        ByteBufferNonblockingConnection connection = getDataSourceConnectionByHostname(hostname);
         if (connection != null) {
             ConnectionDesc connDesc = connections.get(connection);
             if (connDesc != null) {

@@ -468,6 +468,7 @@ public class Agent implements Runnable {
                 break;
             case CONF_RES:
                 confLoopFactor = 1;
+                scheduler.getQueue().clear();
                 ConfRes confRes = msg.getConfRes();
                 if (isPaasModel()) {
                     LOG.info("paas model, receive conf response.");
