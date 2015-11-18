@@ -123,7 +123,7 @@ public class Partition {
     }
     
     public void append(MessageSet messages) throws IOException {
-        Segment segment = unprotectedGetLastSegment();
+        Segment segment = getLastSegment();
         if (segment == null) {
             segment = addSegment(0);
         }
@@ -138,17 +138,12 @@ public class Partition {
     public RollPartition markRollPartition() throws IOException {
         RollPartition ret = null;
         long endoffset;
-        lock.writeLock().lock();
-        try {
-            Segment segment = unprotectedGetLastSegment();
-            if (segment == null) {
-                throw new IOException("segment should not be null when mark rotate");
-            }
-            segment.flush();
-            endoffset = segment.getEndOffset();
-        } finally {
-            lock.writeLock().unlock();
+        Segment segment = getLastSegment();
+        if (segment == null) {
+            throw new IOException("segment should not be null when mark rotate");
         }
+        segment.flush();
+        endoffset = segment.getEndOffset();
         
         roll.length = endoffset - roll.startOffset;
         ret = roll;
