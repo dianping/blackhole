@@ -15,6 +15,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,6 +34,7 @@ import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.http.HttpClientSingle;
 import com.dp.blackhole.supervisor.model.Blacklist;
+import com.dp.blackhole.supervisor.model.Stream.StreamId;
 import com.dp.blackhole.supervisor.model.TopicConfig;
 
 public class ConfigManager {
@@ -41,7 +45,10 @@ public class ConfigManager {
     // key is a topic name which is just maintained in configurations but may not be using.
     private final Map<String, TopicConfig> confMap = new ConcurrentHashMap<String, TopicConfig>();
     private final Set<String> newTopicToBroadcast = new CopyOnWriteArraySet<String>();
-    
+    private Map<StreamId, String> brokerPreassignment = new HashMap<StreamId, String>();
+    private ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    private Lock rLock = rwLock.readLock();
+    private Lock wLock = rwLock.writeLock();
     private final ConfigCache cache;
     private final Supervisor supervisor;
     private final Blacklist blacklist;
@@ -56,8 +63,8 @@ public class ConfigManager {
     public int jettyPort;
     public int numHandler;
     
-    public boolean brokerAssignmentLimitEnable;
-    public int brokerAssignmentLimitMin;
+    public volatile boolean brokerAssignmentLimitEnable;
+    public volatile int brokerAssignmentLimitMin;
     
     public String checkpiontPath;
     public long checkpiontPeriod;
@@ -80,6 +87,34 @@ public class ConfigManager {
     
     public Blacklist getBlacklist() {
         return blacklist;
+    }
+    
+    public Map<StreamId, String> getBrokerPreassignmentCopy() {
+        rLock.lock();
+        try {
+            return new HashMap<StreamId, String>(brokerPreassignment);
+        } finally {
+            this.rLock.unlock();
+        }
+    }
+
+    public String getBrokerPreassignmentByPartition(String topic, String partition) {
+        StreamId streamId = new StreamId(topic, partition);
+        rLock.lock();
+        try {
+            return brokerPreassignment.get(streamId);
+        } finally {
+            rLock.unlock();
+        }
+    }
+
+    public void setBrokerPreassignment(Map<StreamId, String> brokerPreassignment) {
+        wLock.lock();
+        try {
+            this.brokerPreassignment = brokerPreassignment;
+        } finally {
+            wLock.unlock();
+        }
     }
 
     public HttpClientSingle getHttpClient() {
@@ -155,18 +190,22 @@ public class ConfigManager {
             LOG.info("There are no legacy configurations.");
             return;
         }
+
         String blacklistString = definitelyGetProperty(ParamsKey.LionNode.BLACKLIST);
-        String[] blacklist = Util.getStringListOfLionValue(blacklistString);
-        this.blacklist.setBlacklist(Arrays.asList(blacklist));
+        loadBlacklist(blacklistString);
+
+        String preassignString = definitelyGetProperty(ParamsKey.LionNode.PERASSIGNMENT);
+        loadBrokerPerassignment(preassignString);
+
+        String assignLimit = definitelyGetProperty(ParamsKey.LionNode.BROKER_ASSIGN_LIMIT_MIN);
+        loadBrokerAssignLimit(assignLimit);
+        
         for (int i = 0; i < topics.length; i++) {
             confMap.put(topics[i], new TopicConfig(topics[i]));
             String confString = definitelyGetProperty(ParamsKey.LionNode.CONF_PREFIX + topics[i]);
             fillConfMap(topics[i], confString);
             String hostsString = definitelyGetProperty(ParamsKey.LionNode.HOSTS_PREFIX + topics[i]);
             fillHostMap(topics[i], hostsString);
-        }
-        if (brokerAssignmentLimitEnable) {
-            brokerAssignmentLimitMin = Util.parseInt(definitelyGetProperty(ParamsKey.LionNode.BROKER_ASSIGN_LIMIT_MIN), 1);
         }
     }
 
@@ -176,6 +215,7 @@ public class ConfigManager {
         definitelyGetProperty(ParamsKey.LionNode.TOPIC);
         definitelyGetProperty(ParamsKey.LionNode.BLACKLIST);
         definitelyGetProperty(ParamsKey.LionNode.BROKER_ASSIGN_LIMIT_MIN);
+        definitelyGetProperty(ParamsKey.LionNode.PERASSIGNMENT);
     }
 
     private synchronized String definitelyGetProperty(String watchKey) {
@@ -505,6 +545,37 @@ public class ConfigManager {
         }
     }
     
+    private void loadBrokerPerassignment(String value) {
+        try {
+            Map<StreamId, String> preassignmentMap = new HashMap<StreamId, String>();
+            JSONArray assignmentArray = new JSONArray(value);
+            for (int i = 0; i < assignmentArray.length(); i++) {
+                JSONObject assignmentObject = assignmentArray.getJSONObject(i);
+                String topic = assignmentObject.getString(ParamsKey.TOPIC_KEY);
+                String partition = assignmentObject.getString(ParamsKey.PARTITION_KEY);
+                String broker = assignmentObject.getString(ParamsKey.BROKER_KEY);
+                StreamId streamId = new StreamId(topic, partition);
+                preassignmentMap.put(streamId, broker);
+            }
+            setBrokerPreassignment(preassignmentMap);
+        } catch (JSONException e) {
+            LOG.error("Invaild json string, skip replace", e);
+        }
+    }
+
+    private void loadBlacklist(String value) {
+        String[] blacklistArray = Util.getStringListOfLionValue(value);
+        if (blacklistArray != null) {
+            blacklist.setBlacklist(Arrays.asList(blacklistArray));
+        }
+    }
+
+    private void loadBrokerAssignLimit(String value) {
+        if (brokerAssignmentLimitEnable) {
+            brokerAssignmentLimitMin = Util.parseInt(value, 1);
+        }
+    }
+    
     class LionChangeListener implements ConfigChange {
     
         @Override
@@ -532,11 +603,8 @@ public class ConfigManager {
                     }
                 }
             } else if (key.equals(ParamsKey.LionNode.BLACKLIST)) {
-                String[] blacklistArray = Util.getStringListOfLionValue(value);
-                if (blacklistArray != null) {
-                    LOG.info("black list has been changed.");
-                    blacklist.setBlacklist(Arrays.asList(blacklistArray));
-                }
+                LOG.info("black list has been changed.");
+                loadBlacklist(value);
             } else if (key.equals(ParamsKey.LionNode.BROKER_ASSIGN_LIMIT_MIN)) {
                 if (brokerAssignmentLimitEnable) {
                     brokerAssignmentLimitMin = Util.parseInt(value, 1);
@@ -557,6 +625,9 @@ public class ConfigManager {
                         break;
                     }
                 }
+            } else if (key.equals(ParamsKey.LionNode.PERASSIGNMENT)) {
+                LOG.info("Preassignment broker Change is triggered");
+                loadBrokerPerassignment(value);
             }
         }
     

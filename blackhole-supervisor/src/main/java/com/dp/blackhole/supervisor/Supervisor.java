@@ -1144,7 +1144,7 @@ public class Supervisor {
                     for (Stage stage : stages) {
                         if (stage.getRollTs() == rollID.getRollTs()) {
                             LOG.info("handle unrecoverable stage " + stage);
-                            String broker = getBroker();
+                            String broker = getBrokerRandom();
                             if (broker != null) {
                                 ByteBufferNonblockingConnection brokerConnection = brokersMapping.get(broker);
                                 if (brokerConnection != null) {
@@ -1469,7 +1469,7 @@ public class Supervisor {
      */
     private void doRecovery(Stream stream, Stage stage, boolean isFinal) {
         String broker = null;
-        broker = getBroker();   
+        broker = getBrokerRandom();
 
         if (broker == null || !stream.isActive()) {
             stage.setStatus(Stage.PENDING);
@@ -1523,9 +1523,7 @@ public class Supervisor {
         // processing stream affairs
         if (stream == null) {
             // record new stream
-            stream = new Stream();
-            stream.setTopic(readyBroker.getTopic());
-            stream.setSource(source);
+            stream = new Stream(readyBroker.getTopic(), source);
             stream.setBrokerHost(readyBroker.getBrokerServer());
             stream.setStartTs(connectedTs);
             stream.setPeriod(readyBroker.getPeriod());
@@ -1747,12 +1745,12 @@ public class Supervisor {
         if(null == dataSourceMapping.putIfAbsent(from.getHost(), from)) {
             LOG.info("Topic " + appReg.getTopic() + " registered from " + source);
         }
-        assignBroker(appReg.getTopic(), from, source, null);
+        assignBroker(appReg.getTopic(), from, source, source);
     }
 
     private String assignBroker(String topic, ByteBufferNonblockingConnection from, String source, String partitionId) {
         String instanceId = Util.getInstanceIdFromSource(source);   //null if source is KVM or ProducerId
-        String broker = getBrokerToAssign();
+        String broker = getBroker(topic, partitionId);
         Message message;
         if (broker != null) {
             message = PBwrap.wrapAssignBroker(PBwrap.assignBroker(topic, broker, getBrokerPort(broker), instanceId, partitionId));
@@ -1779,26 +1777,44 @@ public class Supervisor {
     }
 
     /* 
-     * random return a broker
+     * get broker by pre-assignment
+     * or return a broker randomly
      * if no brokers now, return null
      */
-    private String getBroker() {
-        ArrayList<String> array = new ArrayList<String>(brokersMapping.keySet());
-        if (array.size() == 0 ) {
+    private String getBroker(String topic, String partition) {
+        if ((configManager.brokerAssignmentLimitEnable)
+                && (brokersMapping.size() < configManager.brokerAssignmentLimitMin)) {
+            LOG.info("Can not get any broker! Alive broker number "
+                    + brokersMapping.size() + " < limit min "
+                    + configManager.brokerAssignmentLimitMin);
             return null;
         }
-        Random random = new Random();
-        String broker = array.get(random.nextInt(array.size()));
-        return broker;
+
+        String broker = configManager.getBrokerPreassignmentByPartition(topic, partition);
+        if (broker != null) {
+            if (brokersMapping.containsKey(broker)) {
+                LOG.info(topic + "@" + partition
+                        + " get the preassignment broker " + broker);
+                return broker;
+            } else {
+                LOG.info(topic + "@" + partition
+                        + " can not get the preassignment broker " + broker
+                        + " because of absence, get anther randomly");
+                return getBrokerRandom();
+            }
+        } else {
+            return getBrokerRandom();
+        }
     }
 
-    private String getBrokerToAssign() {
-        if (configManager.brokerAssignmentLimitEnable) {
-            if (brokersMapping.size() < configManager.brokerAssignmentLimitMin) {
-                return null;
-            }
+    private String getBrokerRandom() {
+        String broker = null;
+        ArrayList<String> array = new ArrayList<String>(brokersMapping.keySet());
+        if (array.size() != 0) {
+            Random random = new Random();
+            broker = array.get(random.nextInt(array.size()));
         }
-        return getBroker();
+        return broker;
     }
     
     private void handleRollingAndTriggerClean(RollClean rollClean, ByteBufferNonblockingConnection from) {
@@ -1862,7 +1878,7 @@ public class Supervisor {
             return;
         }
         for (String partitionId : partitionIds) {
-            String broker = getBrokerToAssign();
+            String broker = getBroker(topic, partitionId);
             if (broker == null) {
                 message = PBwrap.wrapNoAvailableNode(topic, null, producerId);
             } else {

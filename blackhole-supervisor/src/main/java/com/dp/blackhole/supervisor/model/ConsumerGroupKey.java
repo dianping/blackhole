@@ -16,6 +16,10 @@ public class ConsumerGroupKey {
     public String getTopic() {
         return topic;
     }
+    
+    public boolean belongTo(String topic) {
+        return this.topic.equals(topic);
+    }
 
     @Override
     public int hashCode() {

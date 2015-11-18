@@ -2,6 +2,7 @@ package com.dp.blackhole.rest;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -114,8 +115,20 @@ public class TopicResource extends BaseResource {
                 return topicResult == 0 ? o1.getGroupId().compareTo(o2.getGroupId()) : topicResult;
             }
         });
-        groupsSorted.addAll(supervisorService.getAllConsumerGroupKeys());
+        Set<ConsumerGroupKey> allKeys = supervisorService.getAllConsumerGroupKeys();
+        for (ConsumerGroupKey consumerGroupKey : allKeys) {
+            if(consumerGroupKey.belongTo(topic)) {
+                groupsSorted.add(consumerGroupKey);
+            }
+        }
         return groupsSorted;
+    }
+    
+    @GET
+    @Path("/detail/groups")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Set<ConsumerGroup> getAllConsumerGroupDetail() {
+        return supervisorService.getCopyOfConsumerGroups();
     }
     
     @GET
@@ -127,6 +140,10 @@ public class TopicResource extends BaseResource {
         LOG.debug("GET: topic[" + topic + "] groupId[" + groupId + "] -> consumer");
         ConsumerGroupKey groupKey = new ConsumerGroupKey(groupId, topic);
         ConsumerGroup group = supervisorService.getConsumerGroup(groupKey);
+        if (group == null) {
+            LOG.info("Can not get group by " + groupKey);
+            return new ArrayList<ConsumerDesc>();
+        }
         return group.getConsumes();
     }
     
@@ -139,13 +156,10 @@ public class TopicResource extends BaseResource {
         LOG.debug("GET: topic[" + topic + "] groupId[" + groupId + "] -> conmitted offsets");
         ConsumerGroupKey groupKey = new ConsumerGroupKey(groupId, topic);
         ConsumerGroup group = supervisorService.getConsumerGroup(groupKey);
+        if (group == null) {
+            LOG.info("Can not get group by " + groupKey);
+            return new HashMap<String, AtomicLong>();
+        }
         return group.getCommitedOffsets();
-    }
-    
-    @GET
-    @Path("/detail/groups")
-    @Produces({MediaType.APPLICATION_JSON})
-    public Set<ConsumerGroup> getAllConsumerGroupDetail() {
-        return supervisorService.getCopyOfConsumerGroups();
     }
 }
