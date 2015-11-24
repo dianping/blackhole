@@ -289,7 +289,9 @@ public class RollManager {
         
         public RecoveryAcceptor(int recoverySocketTimeout) throws IOException {
             this.recoverySocketTimeout = recoverySocketTimeout;
-            server = new ServerSocket(port);
+            this.server = new ServerSocket(port);
+            this.setName("RecoveryAcceptor");
+            this.setDaemon(true);
         }
         
         public void close() throws IOException {
@@ -301,7 +303,7 @@ public class RollManager {
             while (running) {
                 try {
                     Socket socket = server.accept();
-                    LOG.debug("Socket(Recovery) connected from " + socket.getInetAddress());
+                    LOG.debug("Socket(Recovery) connected from " + socket.getInetAddress().getHostName());
                     socket.setSoTimeout(recoverySocketTimeout);
                     
                     DataInputStream in = new DataInputStream(socket.getInputStream());

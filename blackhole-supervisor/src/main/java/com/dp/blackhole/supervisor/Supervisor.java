@@ -1461,7 +1461,7 @@ public class Supervisor {
         return from.getHost();
     }
     
-    private void doRecovery(Stream stream, Stage stage) {
+    public void doRecovery(Stream stream, Stage stage) {
         doRecovery(stream, stage, false);
     }
     

@@ -63,6 +63,7 @@ public class BrokerService extends Thread {
     }
     
     public BrokerService(Properties prop) throws IOException {
+        this.setName("BrokerService");
         localhost = Util.getLocalHost();
         String storagedir = prop.getProperty("broker.storage.dir");
         int splitThreshold = Integer.parseInt(prop.getProperty("broker.storage.splitThreshold", "536870912"));

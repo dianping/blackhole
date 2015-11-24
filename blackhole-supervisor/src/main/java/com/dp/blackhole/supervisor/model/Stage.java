@@ -1,6 +1,8 @@
 package com.dp.blackhole.supervisor.model;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -22,9 +24,9 @@ public class Stage {
     private String source;
     private String brokerHost;
     private boolean cleanstart;
-    private int status;
+    private AtomicInteger status;
     private long rollTs;
-    private boolean isCurrent;
+    private AtomicBoolean isCurrent;
     
     @JsonIgnore
     public List<Issue> getIssuelist() {
@@ -78,11 +80,11 @@ public class Stage {
     }
 
     public int getStatus() {
-        return status;
+        return status.get();
     }
 
     public void setStatus(int status) {
-        this.status = status;
+        this.status.set(status);
     }
 
     public long getRollTs() {
@@ -94,11 +96,11 @@ public class Stage {
     }
 
     public boolean isCurrent() {
-        return isCurrent;
+        return isCurrent.get();
     }
     
     public void setCurrent(boolean isCurrent) {
-        this.isCurrent = isCurrent;
+        this.isCurrent.set(isCurrent);
     }
 
     private String getStatusString(int status) {
@@ -123,7 +125,7 @@ public class Stage {
     }
     
     public String toString() {
-        String summary = topic + "@" + source + "," + getStatusString(status) + "," + Util.formatTs(rollTs);
+        String summary = topic + "@" + source + "," + getStatusString(status.get()) + "," + Util.formatTs(rollTs);
         if (!cleanstart) {
             summary = summary + ",not cleanstart";
         }
