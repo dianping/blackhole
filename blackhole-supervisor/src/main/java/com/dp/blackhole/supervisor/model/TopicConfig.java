@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.ParamsKey.TopicConf;
+
 public class TopicConfig {
     private static int DEFAULT_MAX_LINE_SIZE = 512000;
     private static long DEFAULT_READ_INTERVAL = 1L;
@@ -20,11 +23,12 @@ public class TopicConfig {
     private Map<String, Set<String>> hostsInstances;
     private long readInterval = DEFAULT_READ_INTERVAL;
     private String owner;
-    private String compression;
+    private String compression = ParamsKey.COMPRESSION_GZ;
     private int minMsgSent = DEFAULT_MIN_MSG_SENT;
     private int msgBufSize = DEFAULT_MSG_BUF_SIZE;
     private int bandwidthPerSec = 0;
     private int partitionFactor = 1;
+    private long tailPosition = TopicConf.FILE_TAIL;
     
     public TopicConfig(String topic) {
         this.topic = topic;
@@ -131,6 +135,12 @@ public class TopicConfig {
     }
     public void setPartitionFactor(int partitionFactor) {
         this.partitionFactor = partitionFactor;
+    }
+    public long getTailPosition() {
+        return tailPosition;
+    }
+    public void setTailPosition(long tailPosition) {
+        this.tailPosition = tailPosition;
     }
     public void addIdsByHosts(Map<String, Set<String>> hostIds) {
         if (getInstances() == null) {

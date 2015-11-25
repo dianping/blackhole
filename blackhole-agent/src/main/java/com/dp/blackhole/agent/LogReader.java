@@ -17,6 +17,7 @@ import com.dp.blackhole.agent.persist.LocalRecorder;
 import com.dp.blackhole.agent.persist.Record;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.common.ParamsKey.TopicConf;
 
 public class LogReader implements Runnable {
     private static final Log LOG = LogFactory.getLog(LogReader.class);
@@ -24,7 +25,6 @@ public class LogReader implements Runnable {
     public static final long BEGIN_OFFSET_OF_FILE = 0L;
     private enum ReaderState {UNASSIGNED, ASSIGNED, STOPPED}
     private static final int IN_BUF = 1024 * 8;
-    private static final int SYS_MAX_LINE_SIZE = 1024 * 512;
     private final byte inbuf[] = new byte[IN_BUF];
     
     private Agent agent;
@@ -48,11 +48,7 @@ public class LogReader implements Runnable {
         this.currentReaderState = new AtomicReference<ReaderState>(ReaderState.UNASSIGNED);
         this.logFSM = new LogFSM();
         this.recoder = new LocalRecorder(snapshotPersistDir, meta);
-        if (meta.getMaxLineSize() > SYS_MAX_LINE_SIZE) {
-            this.maxLineSize = SYS_MAX_LINE_SIZE;
-        } else {
-            this.maxLineSize = meta.getMaxLineSize();
-        }
+        this.maxLineSize = meta.getMaxLineSize();
         this.currentRotation = setCurrentRotation();
         this.lineBuf = new ByteArrayOutputStream(maxLineSize);
         this.tailFile = new File(meta.getTailFile());
@@ -171,7 +167,16 @@ public class LogReader implements Runnable {
         LOG.info("Log reader for " + meta + " running...");
         try {
             this.reader = openFile();
-            long tailPosition = Util.seekLastLineHeader(reader, reader.length());
+            long tailPosition = meta.getTailPosition();
+            if (tailPosition == TopicConf.FILE_TAIL) {
+                tailPosition = Util.seekLastLineHeader(reader, reader.length());
+            } else if (tailPosition == TopicConf.FILE_HEAD) {
+                //do nothing
+            } else {
+                //TODO tail from specified offset that should point out the tail file.
+                // Fix it in future and now tail from tail instead
+                tailPosition = Util.seekLastLineHeader(reader, reader.length());
+            }
             LOG.info("tail " + tailFile + " from " + tailPosition);
             long resumeRollTs = Util.getCurrentRollTsUnderTimeBuf(
                     Util.getTS(),

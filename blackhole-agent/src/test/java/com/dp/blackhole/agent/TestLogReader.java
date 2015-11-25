@@ -88,7 +88,7 @@ public class TestLogReader {
         String localhost = Util.getLocalHost();
         when(Agent.getHost()).thenReturn(localhost);
         TopicId topicId = new TopicId(MAGIC, null);
-        AgentMeta topicMeta = new AgentMeta(topicId, SimAgent.TEST_ROLL_FILE, 3600, 3600, 1024, 1L, 5, 4096, 1024*1024, 1);
+        AgentMeta topicMeta = new AgentMeta(topicId, SimAgent.TEST_ROLL_FILE, 3600, 3600, 1024, 1L, 5, 4096, 1024*1024, 1, -1);
         SimAgent agent = new SimAgent();
         FileListener listener;
         try {

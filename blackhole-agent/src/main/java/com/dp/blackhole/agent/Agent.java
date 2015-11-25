@@ -25,6 +25,7 @@ import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
+import com.dp.blackhole.common.ParamsKey.TopicConf;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
@@ -227,7 +228,10 @@ public class Agent implements Runnable {
         int msgBufSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, 512000);
         int bandwidthPerSec = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.BANDWIDTH_PER_SEC, 10 * 1024 * 1024);
         int partitionFactor = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.PARTITION_FACTOR, 1);
-        AgentMeta topicMeta = new AgentMeta(topicId, path, rotatePeriod, rollPeriod, maxLineSize, readInterval, minMsgSent, msgBufSize, bandwidthPerSec, partitionFactor);
+        long tailPosition = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.TAIL_POSITION, TopicConf.FILE_TAIL);
+        AgentMeta topicMeta = new AgentMeta(topicId, path, rotatePeriod,
+                rollPeriod, maxLineSize, readInterval, minMsgSent, msgBufSize,
+                bandwidthPerSec, partitionFactor, tailPosition);
         topics.put(topicId, topicMeta);
         return topicMeta;
     }
@@ -486,22 +490,7 @@ public class Agent implements Runnable {
                             if (!checkFilesExist(topic, lxcConfRes.getWatchFile(), id)) {
                                 continue;
                             }
-                            confKeeper.addRawProperty(topic + "."
-                                    + ParamsKey.TopicConf.ROTATE_PERIOD, lxcConfRes.getRotatePeriod());
-                            confKeeper.addRawProperty(topic + "."
-                                    + ParamsKey.TopicConf.ROLL_PERIOD, lxcConfRes.getRollPeriod());
-                            confKeeper.addRawProperty(topic + "."
-                                    + ParamsKey.TopicConf.MAX_LINE_SIZE, lxcConfRes.getMaxLineSize());
-                            confKeeper.addRawProperty(topic + "."
-                                    + ParamsKey.TopicConf.READ_INTERVAL, lxcConfRes.getReadInterval());
-                            confKeeper.addRawProperty(topic + "."
-                                    + ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, lxcConfRes.getMinMsgSent());
-                            confKeeper.addRawProperty(topic + "."
-                                    + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, lxcConfRes.getMsgBufSize());
-                            confKeeper.addRawProperty(topic + "."
-                                    + ParamsKey.TopicConf.BANDWIDTH_PER_SEC, lxcConfRes.getBandwidthPerSec());
-                            confKeeper.addRawProperty(topic + "."
-                                    + ParamsKey.TopicConf.PARTITION_FACTOR, lxcConfRes.getPartitionFactor());
+                            buildConfMap(topic, lxcConfRes);
                             fillUpAppLogsFromConfig(topicId);
                             startLogReader(topicId);
                             register(topicId, Util.getTS());
@@ -523,22 +512,7 @@ public class Agent implements Runnable {
                         if (!checkFilesExist(topic, appConfRes.getWatchFile())) {
                             continue;
                         }
-                        confKeeper.addRawProperty(topic + "."
-                                + ParamsKey.TopicConf.ROTATE_PERIOD, appConfRes.getRotatePeriod());
-                        confKeeper.addRawProperty(topic + "."
-                                + ParamsKey.TopicConf.ROLL_PERIOD, appConfRes.getRollPeriod());
-                        confKeeper.addRawProperty(topic + "."
-                                + ParamsKey.TopicConf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
-                        confKeeper.addRawProperty(topic + "."
-                                + ParamsKey.TopicConf.READ_INTERVAL, appConfRes.getReadInterval());
-                        confKeeper.addRawProperty(topic + "."
-                                + ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, appConfRes.getMinMsgSent());
-                        confKeeper.addRawProperty(topic + "."
-                                + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, appConfRes.getMsgBufSize());
-                        confKeeper.addRawProperty(topic + "."
-                                + ParamsKey.TopicConf.BANDWIDTH_PER_SEC, appConfRes.getBandwidthPerSec());
-                        confKeeper.addRawProperty(topic + "."
-                                + ParamsKey.TopicConf.PARTITION_FACTOR, appConfRes.getPartitionFactor());
+                        buildConfMap(topic, appConfRes);
                         fillUpAppLogsFromConfig(topicId);
                         ++accepted;
                         startLogReader(topicId);
@@ -674,6 +648,48 @@ public class Agent implements Runnable {
                 LOG.error("Illegal message type " + msg.getType());
             }
             return false;
+        }
+
+        private void buildConfMap(String topic, AppConfRes appConfRes) {
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.ROTATE_PERIOD, appConfRes.getRotatePeriod());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.ROLL_PERIOD, appConfRes.getRollPeriod());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.READ_INTERVAL, appConfRes.getReadInterval());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, appConfRes.getMinMsgSent());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, appConfRes.getMsgBufSize());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.BANDWIDTH_PER_SEC, appConfRes.getBandwidthPerSec());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.PARTITION_FACTOR, appConfRes.getPartitionFactor());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.TAIL_POSITION, String.valueOf(appConfRes.getTailPosition()));
+        }
+
+        private void buildConfMap(String topic, LxcConfRes lxcConfRes) {
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.ROTATE_PERIOD, lxcConfRes.getRotatePeriod());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.ROLL_PERIOD, lxcConfRes.getRollPeriod());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.MAX_LINE_SIZE, lxcConfRes.getMaxLineSize());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.READ_INTERVAL, lxcConfRes.getReadInterval());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, lxcConfRes.getMinMsgSent());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, lxcConfRes.getMsgBufSize());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.BANDWIDTH_PER_SEC, lxcConfRes.getBandwidthPerSec());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.PARTITION_FACTOR, lxcConfRes.getPartitionFactor());
+            confKeeper.addRawProperty(topic + "."
+                    + ParamsKey.TopicConf.TAIL_POSITION, String.valueOf(lxcConfRes.getTailPosition()));
         }
         
         private void startLogReader(TopicId topicId) {

@@ -325,6 +325,16 @@ public final class ConfResPB {
        */
       com.google.protobuf.ByteString
           getPartitionFactorBytes();
+
+      // optional int64 tail_position = 11 [default = -1];
+      /**
+       * <code>optional int64 tail_position = 11 [default = -1];</code>
+       */
+      boolean hasTailPosition();
+      /**
+       * <code>optional int64 tail_position = 11 [default = -1];</code>
+       */
+      long getTailPosition();
     }
     /**
      * Protobuf type {@code blackhole.ConfRes.AppConfRes}
@@ -425,6 +435,11 @@ public final class ConfResPB {
               case 82: {
                 bitField0_ |= 0x00000200;
                 partitionFactor_ = input.readBytes();
+                break;
+              }
+              case 88: {
+                bitField0_ |= 0x00000400;
+                tailPosition_ = input.readInt64();
                 break;
               }
             }
@@ -897,6 +912,22 @@ public final class ConfResPB {
         }
       }
 
+      // optional int64 tail_position = 11 [default = -1];
+      public static final int TAIL_POSITION_FIELD_NUMBER = 11;
+      private long tailPosition_;
+      /**
+       * <code>optional int64 tail_position = 11 [default = -1];</code>
+       */
+      public boolean hasTailPosition() {
+        return ((bitField0_ & 0x00000400) == 0x00000400);
+      }
+      /**
+       * <code>optional int64 tail_position = 11 [default = -1];</code>
+       */
+      public long getTailPosition() {
+        return tailPosition_;
+      }
+
       private void initFields() {
         topic_ = "";
         watchFile_ = "";
@@ -908,6 +939,7 @@ public final class ConfResPB {
         rollPeriod_ = "";
         bandwidthPerSec_ = "0";
         partitionFactor_ = "1";
+        tailPosition_ = -1L;
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -954,6 +986,9 @@ public final class ConfResPB {
         }
         if (((bitField0_ & 0x00000200) == 0x00000200)) {
           output.writeBytes(10, getPartitionFactorBytes());
+        }
+        if (((bitField0_ & 0x00000400) == 0x00000400)) {
+          output.writeInt64(11, tailPosition_);
         }
         getUnknownFields().writeTo(output);
       }
@@ -1003,6 +1038,10 @@ public final class ConfResPB {
         if (((bitField0_ & 0x00000200) == 0x00000200)) {
           size += com.google.protobuf.CodedOutputStream
             .computeBytesSize(10, getPartitionFactorBytes());
+        }
+        if (((bitField0_ & 0x00000400) == 0x00000400)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(11, tailPosition_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -1140,6 +1179,8 @@ public final class ConfResPB {
           bitField0_ = (bitField0_ & ~0x00000100);
           partitionFactor_ = "1";
           bitField0_ = (bitField0_ & ~0x00000200);
+          tailPosition_ = -1L;
+          bitField0_ = (bitField0_ & ~0x00000400);
           return this;
         }
 
@@ -1208,6 +1249,10 @@ public final class ConfResPB {
             to_bitField0_ |= 0x00000200;
           }
           result.partitionFactor_ = partitionFactor_;
+          if (((from_bitField0_ & 0x00000400) == 0x00000400)) {
+            to_bitField0_ |= 0x00000400;
+          }
+          result.tailPosition_ = tailPosition_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -1273,6 +1318,9 @@ public final class ConfResPB {
             bitField0_ |= 0x00000200;
             partitionFactor_ = other.partitionFactor_;
             onChanged();
+          }
+          if (other.hasTailPosition()) {
+            setTailPosition(other.getTailPosition());
           }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
@@ -2045,6 +2093,39 @@ public final class ConfResPB {
           return this;
         }
 
+        // optional int64 tail_position = 11 [default = -1];
+        private long tailPosition_ = -1L;
+        /**
+         * <code>optional int64 tail_position = 11 [default = -1];</code>
+         */
+        public boolean hasTailPosition() {
+          return ((bitField0_ & 0x00000400) == 0x00000400);
+        }
+        /**
+         * <code>optional int64 tail_position = 11 [default = -1];</code>
+         */
+        public long getTailPosition() {
+          return tailPosition_;
+        }
+        /**
+         * <code>optional int64 tail_position = 11 [default = -1];</code>
+         */
+        public Builder setTailPosition(long value) {
+          bitField0_ |= 0x00000400;
+          tailPosition_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional int64 tail_position = 11 [default = -1];</code>
+         */
+        public Builder clearTailPosition() {
+          bitField0_ = (bitField0_ & ~0x00000400);
+          tailPosition_ = -1L;
+          onChanged();
+          return this;
+        }
+
         // @@protoc_insertion_point(builder_scope:blackhole.ConfRes.AppConfRes)
       }
 
@@ -2228,6 +2309,16 @@ public final class ConfResPB {
        */
       com.google.protobuf.ByteString
           getPartitionFactorBytes();
+
+      // optional int64 tail_position = 12 [default = -1];
+      /**
+       * <code>optional int64 tail_position = 12 [default = -1];</code>
+       */
+      boolean hasTailPosition();
+      /**
+       * <code>optional int64 tail_position = 12 [default = -1];</code>
+       */
+      long getTailPosition();
     }
     /**
      * Protobuf type {@code blackhole.ConfRes.LxcConfRes}
@@ -2336,6 +2427,11 @@ public final class ConfResPB {
               case 90: {
                 bitField0_ |= 0x00000200;
                 partitionFactor_ = input.readBytes();
+                break;
+              }
+              case 96: {
+                bitField0_ |= 0x00000400;
+                tailPosition_ = input.readInt64();
                 break;
               }
             }
@@ -2841,6 +2937,22 @@ public final class ConfResPB {
         }
       }
 
+      // optional int64 tail_position = 12 [default = -1];
+      public static final int TAIL_POSITION_FIELD_NUMBER = 12;
+      private long tailPosition_;
+      /**
+       * <code>optional int64 tail_position = 12 [default = -1];</code>
+       */
+      public boolean hasTailPosition() {
+        return ((bitField0_ & 0x00000400) == 0x00000400);
+      }
+      /**
+       * <code>optional int64 tail_position = 12 [default = -1];</code>
+       */
+      public long getTailPosition() {
+        return tailPosition_;
+      }
+
       private void initFields() {
         topic_ = "";
         watchFile_ = "";
@@ -2853,6 +2965,7 @@ public final class ConfResPB {
         rollPeriod_ = "";
         bandwidthPerSec_ = "0";
         partitionFactor_ = "1";
+        tailPosition_ = -1L;
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -2902,6 +3015,9 @@ public final class ConfResPB {
         }
         if (((bitField0_ & 0x00000200) == 0x00000200)) {
           output.writeBytes(11, getPartitionFactorBytes());
+        }
+        if (((bitField0_ & 0x00000400) == 0x00000400)) {
+          output.writeInt64(12, tailPosition_);
         }
         getUnknownFields().writeTo(output);
       }
@@ -2960,6 +3076,10 @@ public final class ConfResPB {
         if (((bitField0_ & 0x00000200) == 0x00000200)) {
           size += com.google.protobuf.CodedOutputStream
             .computeBytesSize(11, getPartitionFactorBytes());
+        }
+        if (((bitField0_ & 0x00000400) == 0x00000400)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(12, tailPosition_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -3099,6 +3219,8 @@ public final class ConfResPB {
           bitField0_ = (bitField0_ & ~0x00000200);
           partitionFactor_ = "1";
           bitField0_ = (bitField0_ & ~0x00000400);
+          tailPosition_ = -1L;
+          bitField0_ = (bitField0_ & ~0x00000800);
           return this;
         }
 
@@ -3173,6 +3295,10 @@ public final class ConfResPB {
             to_bitField0_ |= 0x00000200;
           }
           result.partitionFactor_ = partitionFactor_;
+          if (((from_bitField0_ & 0x00000800) == 0x00000800)) {
+            to_bitField0_ |= 0x00000400;
+          }
+          result.tailPosition_ = tailPosition_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -3248,6 +3374,9 @@ public final class ConfResPB {
             bitField0_ |= 0x00000400;
             partitionFactor_ = other.partitionFactor_;
             onChanged();
+          }
+          if (other.hasTailPosition()) {
+            setTailPosition(other.getTailPosition());
           }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
@@ -4109,6 +4238,39 @@ public final class ConfResPB {
   }
   bitField0_ |= 0x00000400;
           partitionFactor_ = value;
+          onChanged();
+          return this;
+        }
+
+        // optional int64 tail_position = 12 [default = -1];
+        private long tailPosition_ = -1L;
+        /**
+         * <code>optional int64 tail_position = 12 [default = -1];</code>
+         */
+        public boolean hasTailPosition() {
+          return ((bitField0_ & 0x00000800) == 0x00000800);
+        }
+        /**
+         * <code>optional int64 tail_position = 12 [default = -1];</code>
+         */
+        public long getTailPosition() {
+          return tailPosition_;
+        }
+        /**
+         * <code>optional int64 tail_position = 12 [default = -1];</code>
+         */
+        public Builder setTailPosition(long value) {
+          bitField0_ |= 0x00000800;
+          tailPosition_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional int64 tail_position = 12 [default = -1];</code>
+         */
+        public Builder clearTailPosition() {
+          bitField0_ = (bitField0_ & ~0x00000800);
+          tailPosition_ = -1L;
           onChanged();
           return this;
         }
@@ -5043,25 +5205,26 @@ public final class ConfResPB {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rConfRes.proto\022\tblackhole\"\231\005\n\007ConfRes\0221" +
+      "\n\rConfRes.proto\022\tblackhole\"\317\005\n\007ConfRes\0221" +
       "\n\nappConfRes\030\001 \003(\0132\035.blackhole.ConfRes.A" +
       "ppConfRes\0221\n\nlxcConfRes\030\002 \003(\0132\035.blackhol" +
-      "e.ConfRes.LxcConfRes\032\207\002\n\nAppConfRes\022\r\n\005t" +
+      "e.ConfRes.LxcConfRes\032\242\002\n\nAppConfRes\022\r\n\005t" +
       "opic\030\001 \002(\t\022\022\n\nwatch_file\030\002 \001(\t\022\025\n\rrotate" +
       "_period\030\003 \001(\t\022\035\n\rmax_line_size\030\004 \001(\t:\00651" +
       "2000\022\031\n\rread_interval\030\005 \001(\t:\0021L\022\030\n\014min_m" +
       "sg_sent\030\006 \001(\t:\00230\022\034\n\014msg_buf_size\030\007 \001(\t:" +
       "\006512000\022\023\n\013roll_period\030\010 \001(\t\022\034\n\021bandwidt" +
       "h_per_sec\030\t \001(\t:\0010\022\032\n\017partitionFactor\030\n ",
-      "\001(\t:\0011\032\235\002\n\nLxcConfRes\022\r\n\005topic\030\001 \002(\t\022\022\n\n" +
-      "watch_file\030\002 \001(\t\022\025\n\rrotate_period\030\003 \001(\t\022" +
-      "\035\n\rmax_line_size\030\004 \001(\t:\006512000\022\031\n\rread_i" +
-      "nterval\030\005 \001(\t:\0021L\022\024\n\014instance_ids\030\006 \003(\t\022" +
-      "\030\n\014min_msg_sent\030\007 \001(\t:\00230\022\034\n\014msg_buf_siz" +
-      "e\030\010 \001(\t:\006512000\022\023\n\013roll_period\030\t \001(\t\022\034\n\021" +
-      "bandwidth_per_sec\030\n \001(\t:\0010\022\032\n\017partitionF" +
-      "actor\030\013 \001(\t:\0011B.\n!com.dp.blackhole.proto" +
-      "col.controlB\tConfResPB"
+      "\001(\t:\0011\022\031\n\rtail_position\030\013 \001(\003:\002-1\032\270\002\n\nLx" +
+      "cConfRes\022\r\n\005topic\030\001 \002(\t\022\022\n\nwatch_file\030\002 " +
+      "\001(\t\022\025\n\rrotate_period\030\003 \001(\t\022\035\n\rmax_line_s" +
+      "ize\030\004 \001(\t:\006512000\022\031\n\rread_interval\030\005 \001(\t" +
+      ":\0021L\022\024\n\014instance_ids\030\006 \003(\t\022\030\n\014min_msg_se" +
+      "nt\030\007 \001(\t:\00230\022\034\n\014msg_buf_size\030\010 \001(\t:\0065120" +
+      "00\022\023\n\013roll_period\030\t \001(\t\022\034\n\021bandwidth_per" +
+      "_sec\030\n \001(\t:\0010\022\032\n\017partitionFactor\030\013 \001(\t:\001" +
+      "1\022\031\n\rtail_position\030\014 \001(\003:\002-1B.\n!com.dp.b" +
+      "lackhole.protocol.controlB\tConfResPB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -5079,13 +5242,13 @@ public final class ConfResPB {
           internal_static_blackhole_ConfRes_AppConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_AppConfRes_descriptor,
-              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "MinMsgSent", "MsgBufSize", "RollPeriod", "BandwidthPerSec", "PartitionFactor", });
+              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "MinMsgSent", "MsgBufSize", "RollPeriod", "BandwidthPerSec", "PartitionFactor", "TailPosition", });
           internal_static_blackhole_ConfRes_LxcConfRes_descriptor =
             internal_static_blackhole_ConfRes_descriptor.getNestedTypes().get(1);
           internal_static_blackhole_ConfRes_LxcConfRes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_ConfRes_LxcConfRes_descriptor,
-              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "InstanceIds", "MinMsgSent", "MsgBufSize", "RollPeriod", "BandwidthPerSec", "PartitionFactor", });
+              new java.lang.String[] { "Topic", "WatchFile", "RotatePeriod", "MaxLineSize", "ReadInterval", "InstanceIds", "MinMsgSent", "MsgBufSize", "RollPeriod", "BandwidthPerSec", "PartitionFactor", "TailPosition", });
           return null;
         }
       };

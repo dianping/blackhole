@@ -16,6 +16,10 @@ public abstract class ParamsKey {
         public static final String MESSAGE_BUFFER_SIZE = "msgBufSize";
         public static final String BANDWIDTH_PER_SEC = "bandwidthPerSec";
         public static final String PARTITION_FACTOR = "partitionFactor";
+        public static final String TAIL_POSITION = "tailPosition";
+        
+        public static final Long FILE_TAIL = -1L;
+        public static final Long FILE_HEAD = 0L;
     }
 
     public static class LionNode {
