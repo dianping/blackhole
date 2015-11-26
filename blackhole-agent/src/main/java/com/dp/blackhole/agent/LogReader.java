@@ -345,8 +345,19 @@ public class LogReader implements Runnable {
     }
     
     public void processRotate() {
+        long previousRotateEndOffset = END_OFFSET_OF_FILE;
+        long currentTs = Util.getTS();
+        Long rotateTs = Util.getLatestRollTsUnderTimeBuf(
+                currentTs,
+                meta.getRollPeriod(),
+                ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
         if (currentReaderState.get() != ReaderState.ASSIGNED) {
             LOG.warn("RemoteSender not ready for " + meta.getTopicId());
+            //record rotation if not been recorded
+            Record record = getRecoder().retrive(rotateTs);
+            if (record == null || record.getType() != Record.ROTATE) {
+                record(Record.ROTATE, rotateTs, previousRotateEndOffset);
+            }
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -354,9 +365,9 @@ public class LogReader implements Runnable {
             }
             return;
         }
-        final RandomAccessFile save = reader;
-        long previousRotateEndOffset = END_OFFSET_OF_FILE;
+        
         try {
+            final RandomAccessFile save = reader;
             try {
                 this.reader = openFile();
                 // At this point, we're sure that the old file is rotated
@@ -370,13 +381,11 @@ public class LogReader implements Runnable {
                 throw new RuntimeException("log reader loop terminate, prepare to reboot log reader.");
             } finally {
                 closeFile(save);
-                long currentTs = Util.getTS();
-                Long rotateTs = Util.getLatestRollTsUnderTimeBuf(
-                        currentTs,
-                        meta.getRollPeriod(),
-                        ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
-                //record snapshot
-                record(Record.ROTATE, rotateTs, previousRotateEndOffset);
+                //record rotation if not been recorded
+                Record record = getRecoder().retrive(rotateTs);
+                if (record == null || record.getType() != Record.ROTATE) {
+                    record(Record.ROTATE, rotateTs, previousRotateEndOffset);
+                }
             }
             
             if (currentReaderState.get() == ReaderState.ASSIGNED) {
