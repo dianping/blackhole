@@ -76,7 +76,6 @@ public class AbnormalStageChecker extends Thread {
                     case Stage.UPLOADING:
                         if (verifyStatusExpired(uploadingStages, stage, abnormalStageDuration)) {
                             LOG.warn("Find an expired UPLOADING stage " + stage);
-                            stage.setStatus(Stage.PENDING);
                             supervisorService.doRecovery(stream, stage);
                         }
                         break;
