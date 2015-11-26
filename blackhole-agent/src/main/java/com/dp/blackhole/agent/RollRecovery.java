@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.Random;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.logging.Log;
@@ -80,6 +81,14 @@ public class RollRecovery implements Runnable{
         LOG.info("Begin to recoverying: broker=" + brokerServer
                 + " rollTS=" + rollTimestamp + " isFinal=" + " isPersist=" + isPersist
                 + " meta=" + topicMeta);
+        try {
+            //sleep random seconds to avoid the rarely situation which latest rotation record not found
+            Thread.sleep((new Random().nextInt(10) + 10) * 1000);
+        } catch (InterruptedException e) {
+            LOG.warn("Thread interrupted. ", e);
+            node.reportRecoveryFail(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal);
+            return;
+        }
         try {
             //retrive record to got recovery offset
             Record record = state.retrive(rollTimestamp);

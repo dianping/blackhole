@@ -272,6 +272,9 @@ public class ConfigManager {
                 } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.PARTITION_FACTOR)) {
                     int factor = Util.parseInt(value, 1);
                     confInfo.setPartitionFactor(factor < 1 ? 1 : factor);
+                } else if (key.equalsIgnoreCase(ParamsKey.TopicConf.TAIL_POSITION)) {
+                    long tailPosition = Util.parseLong(value, -1);
+                    confInfo.setTailPosition(tailPosition);
                 } else {
                     LOG.error("Unrecognized conf string.");
                 }

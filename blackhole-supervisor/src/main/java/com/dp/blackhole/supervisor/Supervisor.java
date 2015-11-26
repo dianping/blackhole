@@ -60,6 +60,7 @@ import com.dp.blackhole.rest.HttpServer;
 import com.dp.blackhole.rest.ServiceFactory;
 import com.dp.blackhole.supervisor.model.BrokerDesc;
 import com.dp.blackhole.supervisor.model.ConnectionDesc;
+import com.dp.blackhole.supervisor.model.ConnectionDesc.ConnectionInfo;
 import com.dp.blackhole.supervisor.model.ConsumerDesc;
 import com.dp.blackhole.supervisor.model.ConsumerGroup;
 import com.dp.blackhole.supervisor.model.ConsumerGroupKey;
@@ -161,7 +162,7 @@ public class Supervisor {
     }
     
     public void cachedSend(String host, Message toBeSend) {
-        ByteBufferNonblockingConnection agent = getConnectionByHostname(host);
+        ByteBufferNonblockingConnection agent = getDataSourceConnectionByHostname(host);
         if (agent == null) {
             LOG.info("Can not find any agents connected by " + host + ", message send abort.");
             return;
@@ -172,6 +173,7 @@ public class Supervisor {
     void findAndSendAppConfRes(TopicConfig confInfo) {
         List<String> hosts = confInfo.getHosts();
         if (hosts == null || hosts.isEmpty()) {
+            LOG.error("Not found any hosts for " + confInfo.getTopic() + ", it's abnormal.");
             return;
         }
         List<AppConfRes> appConfResList = new ArrayList<AppConfRes>(1);
@@ -184,16 +186,18 @@ public class Supervisor {
                 String.valueOf(confInfo.getReadInterval()),
                 String.valueOf(confInfo.getMinMsgSent()),
                 String.valueOf(confInfo.getMsgBufSize()),
-                String.valueOf(confInfo.getBandwidthPerSec())
+                String.valueOf(confInfo.getBandwidthPerSec()),
+                confInfo.getTailPosition()
         );
         appConfResList.add(appConfRes);
         Message message = PBwrap.wrapConfRes(appConfResList, null);
         for (String agentHost : hosts) {
-            //we find the connections from agentMapping instead of all connections map
-            //cause if a connection belong to agent type standing for the streams in it
-            //have already been enable, its confReq-conRes message loop is termination.
-            ByteBufferNonblockingConnection connection = dataSourceMapping.get(agentHost);
-            if (connection != null) {
+            //we first find the connections from datasourceMapping cause its confReq-conRes message loop is termination.
+            ByteBufferNonblockingConnection connection = getDataSourceConnectionByHostname(agentHost);
+            if (connection == null) {
+                connection = getIdleConnectionByHostname(agentHost);
+            }
+            if (connection == null) {
                 send(connection, message);
             }
         }
@@ -223,6 +227,7 @@ public class Supervisor {
                     String.valueOf(confInfo.getMinMsgSent()),
                     String.valueOf(confInfo.getMsgBufSize()),
                     String.valueOf(confInfo.getBandwidthPerSec()),
+                    confInfo.getTailPosition(),
                     idsInTheSameHost);
             lxcConfResList.add(lxcConfRes);
             Message message = PBwrap.wrapConfRes(null, lxcConfResList);
@@ -897,6 +902,7 @@ public class Supervisor {
             if (desc.getType() != ConnectionDesc.AGENT &&
                 desc.getType() != ConnectionDesc.BROKER &&
                 desc.getType() != ConnectionDesc.CONSUMER &&
+                desc.getType() != ConnectionDesc.PRODUCER &&
                 desc.getConnection() != from) {
                 idleHosts.add(desc.getConnection().getHost());
             }
@@ -1457,7 +1463,7 @@ public class Supervisor {
         return from.getHost();
     }
     
-    private void doRecovery(Stream stream, Stage stage) {
+    public void doRecovery(Stream stream, Stage stage) {
         doRecovery(stream, stage, false);
     }
     
@@ -2182,6 +2188,7 @@ public class Supervisor {
                 String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
                 String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
                 String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
+                long tailPosition = confInfo.getTailPosition();
                 String watchFile = confInfo.getWatchLog();
                 if (watchFile == null) {
                     LOG.error("Can not get watch file of " + topic);
@@ -2189,7 +2196,7 @@ public class Supervisor {
                 }
                 AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile,
                         rotatePeriod, rollPeriod, maxLineSize, readInterval,
-                        minMsgSent, msgBufSize, bandwidthPerSec);
+                        minMsgSent, msgBufSize, bandwidthPerSec, tailPosition);
                 appConfResList.add(appConfRes);
             }
             if (appConfResList.isEmpty()) {
@@ -2221,6 +2228,7 @@ public class Supervisor {
                 String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
                 String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
                 String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
+                long tailPosition = confInfo.getTailPosition();
                 Set<String> ids = confInfo.getInsByHost(connection.getHost());
                 if (ids == null) {
                     LOG.info("Can not get instances by " + topic + " and " + connection.getHost());
@@ -2228,7 +2236,7 @@ public class Supervisor {
                 }
                 LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile,
                         rotatePeriod, rollPeriod, maxLineSize, readInterval,
-                        minMsgSent, msgBufSize, bandwidthPerSec, ids);
+                        minMsgSent, msgBufSize, bandwidthPerSec, tailPosition, ids);
                 lxcConfResList.add(lxcConfRes);
             }
             if (!lxcConfResList.isEmpty()) {
@@ -2277,17 +2285,44 @@ public class Supervisor {
      * @param hostname
      * @return
      */
-    public ByteBufferNonblockingConnection getConnectionByHostname(String hostname) {
+    public ByteBufferNonblockingConnection getIdleConnectionByHostname(String hostname) {
+        ByteBufferNonblockingConnection conn;
+        conn = getDataSourceConnectionByHostname(hostname);
+        if (conn != null) {
+            return null;
+        }
         synchronized (connections) {
             for (Map.Entry<ByteBufferNonblockingConnection, ConnectionDesc> connectionEntry : connections.entrySet()) {
                 if (connectionEntry.getKey().getHost().equals(hostname)
+                        && connectionEntry.getValue().getType() != ConnectionDesc.AGENT
                         && connectionEntry.getValue().getType() != ConnectionDesc.BROKER
-                        && connectionEntry.getValue().getType() != ConnectionDesc.CONSUMER) {
+                        && connectionEntry.getValue().getType() != ConnectionDesc.CONSUMER
+                        && connectionEntry.getValue().getType() != ConnectionDesc.PRODUCER) {
                     return connectionEntry.getKey();
                 }
             }
         }
         return null;
+    }
+    
+    public ByteBufferNonblockingConnection getDataSourceConnectionByHostname(String hostname) {
+        return dataSourceMapping.get(hostname);
+    }
+    
+    public ByteBufferNonblockingConnection getBrokerConnectionByHostname(String hostname) {
+        return brokersMapping.get(hostname);
+    }
+    
+    public ConnectionInfo getConnectionInfoByHostname(String hostname) {
+        ConnectionInfo connInfo = null;
+        ByteBufferNonblockingConnection connection = getDataSourceConnectionByHostname(hostname);
+        if (connection != null) {
+            ConnectionDesc connDesc = connections.get(connection);
+            if (connDesc != null) {
+                connInfo = connDesc.getConnectionInfo();
+            }
+        }
+        return connInfo;
     }
     
     public int getConnectionType(ByteBufferNonblockingConnection connection) {

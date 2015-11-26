@@ -85,7 +85,6 @@ public class OperatorResource extends BaseResource {
     @POST
     @Path("/restart")
     @Produces({MediaType.APPLICATION_JSON})
-    @Consumes({MediaType.APPLICATION_JSON})
     public Response restart(
             @Encoded @FormParam("agents") final String agents) {
         LOG.debug("POST: restart agents " + agents);

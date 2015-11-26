@@ -69,15 +69,14 @@ public class AbnormalStageChecker extends Thread {
                             //trigger to re-recovery
                             List<String> agentServers = new ArrayList<String>(1);
                             agentServers.add(Util.getHostFromSource(stream.getSource()));
+                            LOG.warn("Find an expired RECOVERYING stage " + stage);
                             supervisorService.sendRestart(agentServers);
                         }
                         break;
                     case Stage.UPLOADING:
                         if (verifyStatusExpired(uploadingStages, stage, abnormalStageDuration)) {
-                            //trigger to recovery form broker in the future, now just restart
-                            List<String> agentServers = new ArrayList<String>(1);
-                            agentServers.add(Util.getHostFromSource(stream.getSource()));
-                            supervisorService.sendRestart(agentServers);
+                            LOG.warn("Find an expired UPLOADING stage " + stage);
+                            supervisorService.doRecovery(stream, stage);
                         }
                         break;
                     default:

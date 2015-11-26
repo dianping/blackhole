@@ -30,7 +30,7 @@ public class TestLocalRecorder {
     
     private void init(long rotatePeriod, long rollPeriod) {
         topicId = new TopicId(MAGIC, null);
-        meta = new AgentMeta(topicId, SimAgent.TEST_ROLL_FILE, rotatePeriod, rollPeriod, 1024, 1L, 5, 4096, 1024*1024, 1);
+        meta = new AgentMeta(topicId, SimAgent.TEST_ROLL_FILE, rotatePeriod, rollPeriod, 1024, 1L, 5, 4096, 1024*1024, 1, -1);
         spyReader = spy(new LogReader(new SimAgent(), meta, "/tmp/test1"));
         spyLocalRecorder = spy(new LocalRecorder("/tmp/test1", meta));
         when(spyReader.getRecoder()).thenReturn(spyLocalRecorder);

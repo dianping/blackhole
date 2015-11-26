@@ -296,7 +296,7 @@ public class Util {
             loop++;
             long repos = (fileLength - 1) - bufSize * loop; //fileLength - 1 cause offset index begin from 0
             if (repos < 0) {
-                //there is not entire line in line, reset to header of file.
+                //if date is less then 8k or there is not entire line in line, reset to header of file.
                 headerOffset = 0;
                 break;
             } else {

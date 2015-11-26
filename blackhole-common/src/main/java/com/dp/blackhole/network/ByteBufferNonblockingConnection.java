@@ -219,6 +219,10 @@ public class ByteBufferNonblockingConnection implements NonblockingConnection<By
         return ip;
     }
     
+    public int getPort() {
+        return port;
+    }
+
     @Override
     public String toString() {
         return remote;

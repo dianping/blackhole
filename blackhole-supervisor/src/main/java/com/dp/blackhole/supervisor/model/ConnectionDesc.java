@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 
@@ -15,13 +17,15 @@ public class ConnectionDesc {
     
     private int type;
     private AtomicLong lastHeartBeat;
-    private ByteBufferNonblockingConnection connection;
+    private final ByteBufferNonblockingConnection connection;
+    private final ConnectionInfo connectionInfo;
     //Storm sets up multi-thread(Executors) in a processor(worker),
     //each executor will register a consumer entity
     private List<NodeDesc> attachments;
     
     public ConnectionDesc(ByteBufferNonblockingConnection connection) {
         this.connection = connection;
+        this.connectionInfo = new ConnectionInfo(connection.getHost(), connection.getIP(), connection.getPort());
         lastHeartBeat = new AtomicLong(Util.getTS());
         attachments = new ArrayList<NodeDesc>();
     }
@@ -42,14 +46,21 @@ public class ConnectionDesc {
         return lastHeartBeat.get();
     }
     
+    @JsonIgnore
     public ByteBufferNonblockingConnection getConnection() {
         return connection;
     }
-    
+
+    public ConnectionInfo getConnectionInfo() {
+        return connectionInfo;
+    }
+
+    @JsonIgnore
     public List<NodeDesc> getAttachments() {
         return attachments;
     }
 
+    @JsonIgnore
     public void attach(NodeDesc desc) {
         attachments.add(desc);
     }
@@ -75,5 +86,27 @@ public class ConnectionDesc {
             break;
         }
         return connection.toString() + " type: " + typeName;
+    }
+    
+    public static class ConnectionInfo {
+        private final String host;
+        private final String ip;
+        private final int port;
+        
+        public ConnectionInfo(String host, String ip, int port) {
+            this.host = host;
+            this.ip = ip;
+            this.port = port;
+        }
+        
+        public String getHost() {
+            return host;
+        }
+        public String getIp() {
+            return ip;
+        }
+        public int getPort() {
+            return port;
+        }
     }
 }

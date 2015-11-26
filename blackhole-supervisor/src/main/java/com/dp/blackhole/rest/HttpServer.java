@@ -154,7 +154,7 @@ public final class HttpServer {
     }
 
     private HttpServer(final Builder b) throws IOException {
-        final String appDir = getWebAppsPath(b.name);
+        final String appDir = getWebAppsPath();
         this.webServer = new Server();
         this.webAppContext = createWebAppContext(b.name, appDir);
         this.findPort = b.findPort;
@@ -375,12 +375,11 @@ public final class HttpServer {
      * @throws FileNotFoundException
      *             if 'webapps' directory cannot be found on CLASSPATH.
      */
-    protected String getWebAppsPath(String appName)
+    protected String getWebAppsPath()
             throws FileNotFoundException {
-        URL url = getClass().getClassLoader().getResource("webapps/" + appName);
+        URL url = getClass().getClassLoader().getResource(".");
         if (url == null)
-            throw new FileNotFoundException("webapps/" + appName
-                    + " not found in CLASSPATH");
+            throw new FileNotFoundException(". not found in CLASSPATH");
         return url.toString();
     }
 

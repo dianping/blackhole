@@ -16,10 +16,12 @@ public class AgentMeta extends TopicCommonMeta implements Serializable {
     private AtomicBoolean dying;
     private final long readInterval;
     private int bandwidthPerSec;
+    private long tailPosition;
     
     public AgentMeta(TopicId topicId, String tailFile, long rotatePeriod,
             long rollPeriod, int maxLineSize, long readInterval,
-            int minMsgSent, int msgBufSize, int bandwidthPerSec, int partitionFactor) {
+            int minMsgSent, int msgBufSize, int bandwidthPerSec,
+            int partitionFactor, long tailPosition) {
         super(rollPeriod, maxLineSize, minMsgSent, msgBufSize, partitionFactor);
         this.topicId = topicId;
         this.source = Util.getSource(Util.getLocalHost(), topicId.getInstanceId());
@@ -29,6 +31,7 @@ public class AgentMeta extends TopicCommonMeta implements Serializable {
         this.dying = new AtomicBoolean(false);
         this.readInterval = readInterval;
         this.bandwidthPerSec = bandwidthPerSec;
+        this.tailPosition = tailPosition;
     }
 
     public TopicId getTopicId() {
@@ -75,6 +78,14 @@ public class AgentMeta extends TopicCommonMeta implements Serializable {
         this.bandwidthPerSec = bandwidthPerSec;
     }
 
+    public long getTailPosition() {
+        return tailPosition;
+    }
+
+    public void setTailPosition(long tailPosition) {
+        this.tailPosition = tailPosition;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -116,7 +127,8 @@ public class AgentMeta extends TopicCommonMeta implements Serializable {
                 + ", maxLineSize=" + super.getMaxLineSize() + ", dying=" + dying
                 + ", readInterval=" + readInterval + ", minMsgSent="
                 + super.getMinMsgSent() + ", msgBufSize=" + super.getMsgBufSize()
-                + ", partitionFactor=" + super.getPartitionFactor() + "]";
+                + ", partitionFactor=" + super.getPartitionFactor()
+                + ", tailPosition=" + tailPosition + "]";
     }
 
     public static class TopicId implements Serializable {

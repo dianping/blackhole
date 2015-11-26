@@ -15,6 +15,7 @@ message ConfRes{
         optional string roll_period = 8;
         optional string bandwidth_per_sec = 9 [default = "0"];
         optional string partitionFactor = 10 [default = "1"];
+        optional int64 tail_position = 11 [default = -1];
     }
     message LxcConfRes {
         required string topic = 1;
@@ -28,6 +29,7 @@ message ConfRes{
         optional string roll_period = 9;
         optional string bandwidth_per_sec = 10 [default = "0"];
         optional string partitionFactor = 11 [default = "1"];
+        optional int64 tail_position = 12 [default = -1];
     }
     repeated AppConfRes appConfRes = 1;
     repeated LxcConfRes lxcConfRes = 2;

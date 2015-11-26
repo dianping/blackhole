@@ -35,7 +35,8 @@ public class RemoteSender implements Sender{
     private BlockingConnection<TransferWrap> connection;
     private ByteBuffer messageBuffer;
     private int messageNum;
-    private long minMsgSent;
+    private int minMsgSent;
+    private int msgBufSize;
     private int reassignDelaySeconds = Agent.DEFAULT_DELAY_SECONDS;
     
     public RemoteSender(AgentMeta topicMeta, String broker, int port) {
@@ -46,6 +47,7 @@ public class RemoteSender implements Sender{
 
         this.rollPeriod = topicMeta.getRollPeriod();
         this.minMsgSent = topicMeta.getMinMsgSent();
+        this.msgBufSize = topicMeta.getMsgBufSize();
     }
     
     public TopicId getTopicId() {
@@ -65,7 +67,7 @@ public class RemoteSender implements Sender{
     }
 
     public void initializeRemoteConnection() throws IOException {
-        messageBuffer = ByteBuffer.allocate(512 * 1024);
+        messageBuffer = ByteBuffer.allocate(msgBufSize);
         SocketChannel socketChannel = SocketChannel.open();
         socketChannel.configureBlocking(true);
         SocketAddress server = new InetSocketAddress(broker, brokerPort);
