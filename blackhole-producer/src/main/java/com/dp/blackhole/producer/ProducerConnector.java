@@ -113,7 +113,8 @@ public class ProducerConnector implements Runnable {
             }
             processor = new ProducerProcessor();
             launchScheduler();
-            launchHealthStreamChecker();
+            String lingerMs = prop.getProperty("producer.linger.ms");
+            launchHealthStreamChecker(lingerMs);
             launch();
             initialized.getAndSet(true);
         }
@@ -125,8 +126,15 @@ public class ProducerConnector implements Runnable {
         thread.start();
     }
 
-    private void launchHealthStreamChecker() {
-        streamHealthChecker = new StreamHealthChecker();
+    private void launchHealthStreamChecker(String lingerMs) {
+        if (lingerMs == null) {
+            //start health stream checker only for socket health check
+            streamHealthChecker = new StreamHealthChecker();
+        } else {
+            //start health stream checker but only for producer flush interval
+            boolean enableStreamHealthCheckerHeartbeatFunction = false;
+            streamHealthChecker = new StreamHealthChecker(Util.parseInt(lingerMs, 5000), enableStreamHealthCheckerHeartbeatFunction);
+        }
         streamHealthChecker.start();
     }
 
