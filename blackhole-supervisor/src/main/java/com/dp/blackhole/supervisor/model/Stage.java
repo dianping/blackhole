@@ -84,7 +84,11 @@ public class Stage {
     }
 
     public void setStatus(int status) {
-        this.status.set(status);
+        if (this.status == null) {
+            this.status = new AtomicInteger(status);
+        } else {
+            this.status.set(status);
+        }
     }
 
     public long getRollTs() {
@@ -100,7 +104,11 @@ public class Stage {
     }
     
     public void setCurrent(boolean isCurrent) {
-        this.isCurrent.set(isCurrent);
+        if (this.isCurrent == null) {
+            this.isCurrent = new AtomicBoolean(isCurrent);
+        } else {
+            this.isCurrent.set(isCurrent);
+        }
     }
 
     private String getStatusString(int status) {
