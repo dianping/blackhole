@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -384,6 +385,7 @@ public class Supervisor {
                 }
                 consumes.add(consumer);
             }
+            Collections.shuffle(consumes);
             
             // get online partitions
             ArrayList<PartitionInfo> partitions = getAvailPartitions(group.getTopic());
