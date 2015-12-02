@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.SecurityUtil;
 
+import com.dianping.cat.Cat;
 import com.dp.blackhole.broker.ftp.FTPConfigrationLoader;
 import com.dp.blackhole.broker.storage.StorageManager.Reporter.ReportEntry;
 import com.dp.blackhole.common.PBwrap;
@@ -42,6 +43,7 @@ public class Broker {
     public Broker() throws IOException {
         rollMgr = new RollManager();
         broker = this;
+        Cat.logEvent("startup", Util.formatTs(Util.getTS()));
     }
 
     private void start() throws FileNotFoundException, IOException {
