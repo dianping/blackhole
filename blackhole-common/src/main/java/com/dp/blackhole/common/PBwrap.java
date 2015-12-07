@@ -167,6 +167,9 @@ public class PBwrap {
             break;
         case UNRESOLVED_CONNECTION:
             break;
+        case CONSUMER_EXIT:
+            msg.setConsumerExit((ConsumerExit) message);
+            break;
         default:
             break;
         }
