@@ -43,7 +43,6 @@ public class Broker {
     public Broker() throws IOException {
         rollMgr = new RollManager();
         broker = this;
-        Cat.logEvent("startup", Util.formatTs(Util.getTS()));
     }
 
     private void start() throws FileNotFoundException, IOException {
@@ -78,6 +77,7 @@ public class Broker {
             thread.start();
         }
         
+        Cat.logEvent("startup", Util.formatTs(Util.getTS()));
         rollMgr.init(hdfsbasedir, copmressionAlgoName, recoveryPort, clockSyncBufMillis, maxUploadThreads, maxRecoveryThreads, recoverySocketTimeout);
         
         brokerService = new BrokerService(prop);
