@@ -39,6 +39,7 @@ import com.dp.blackhole.protocol.control.CommonConfResPB.CommonConfRes;
 import com.dp.blackhole.protocol.control.ConfReqPB.ConfReq;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
+import com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit;
 import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.DumpAppPB.DumpApp;
 import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
@@ -384,6 +385,9 @@ public class Supervisor {
                     return;
                 }
                 consumes.add(consumer);
+            }
+            if (consumes.isEmpty()) {
+                return;
             }
             Collections.shuffle(consumes);
             
@@ -2050,6 +2054,9 @@ public class Supervisor {
             case PARTITION_REQUIRE_BROKER:
                 handlePartitionRequireBroker(msg.getPartitionRequireBroker(), from);
                 break;
+            case CONSUMER_EXIT:
+                handleConsumerExit(msg.getConsumerExit(), from);
+                break;
             default:
                 LOG.warn("unknown message: " + msg.toString());
             }
@@ -2143,6 +2150,38 @@ public class Supervisor {
             (executor, factory, null);
 
         server.init("supervisor", configManager.supervisorPort, configManager.numHandler);
+    }
+
+    public void handleConsumerExit(ConsumerExit consumerExit,
+            ByteBufferNonblockingConnection from) {
+        ConnectionDesc desc = connections.get(from);
+        if (desc == null) {
+            LOG.error("can not find ConnectionDesc by connection " + from);
+            return;
+        }
+        String groupId = consumerExit.getGroupId();
+        String consumerId = consumerExit.getConsumerId();
+        String topic = consumerExit.getTopic();
+        
+        ConsumerGroupKey groupKey = new ConsumerGroupKey(groupId, topic);
+        ConsumerGroup group = consumerGroups.get(groupKey);
+        if (group == null) {
+            LOG.warn("Can not find group by " + groupKey);
+            return;
+        }
+        ConsumerDesc consumerDesc = new ConsumerDesc(consumerId, groupId, topic, from);
+        desc.detach(consumerDesc);
+        
+        group.unregisterConsumer(consumerDesc);
+        
+        if (group.getConsumerCount() == 0) {
+            LOG.info("consumerGroup " + groupKey +" has not live consumer, thus be removed");
+            consumerGroups.remove(groupKey);
+        } else {
+            // consumer user thread maybe not work, reassign to avoid data loss
+            LOG.info("handle consumer exit " + consumerDesc + ", try re-assign consumer");
+            tryAssignConsumer(null, group);
+        }
     }
 
     public void handleConfReq(ConfReq confReq, ByteBufferNonblockingConnection from) {

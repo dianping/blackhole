@@ -3,6 +3,7 @@ package com.dp.blackhole.consumer.api;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.logging.Log;
@@ -25,7 +26,9 @@ public class Consumer {
     private ConsumerConfig config;
     private ConsumerConnector connector;
     private OffsetStrategy offsetStrategy;
-
+    
+    private ConcurrentHashMap<String, MessageStream> currentStreams;
+    
     public Consumer(String topic, String group, ConsumerConfig config) throws ConsumerInitializeException {
         this(topic, group, config, new TailOffsetStrategy());
     }
@@ -37,7 +40,7 @@ public class Consumer {
         this.offsetStrategy = offsetStrategy;
         consumerId = generateConsumerId(this.group);
         queue = new LinkedBlockingQueue<FetchedDataChunk>(this.config.getMaxQueuedChunks());
-        
+        currentStreams = new ConcurrentHashMap<String, MessageStream>();
         connector = ConsumerConnector.getInstance();
         try {
             if (!connector.initialized) {
@@ -84,9 +87,11 @@ public class Consumer {
     public ConsumerConfig getConf() {
         return config;
     }
-
+    
     public MessageStream getStream() {
-        return new MessageStream(topic, queue, config.getConsumerTimeoutMs());
+        MessageStream stream = new MessageStream(topic, queue, config.getConsumerTimeoutMs());
+        currentStreams.putIfAbsent(topic, stream);
+        return currentStreams.get(topic);
     }
 
     /**
@@ -103,6 +108,15 @@ public class Consumer {
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException(
                     "can not generate consume id by auto, set the 'consumerid' parameter to fix this");
+        }
+    }
+    
+    public Thread getUserWorkThread() {
+        MessageStream stream = currentStreams.get(topic);
+        if (stream == null) {
+            return null;
+        } else {
+            return stream.getUserWorkThread();
         }
     }
 }

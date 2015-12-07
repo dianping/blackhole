@@ -12,6 +12,8 @@ public class MessageStream implements Iterable<MessagePack> {
     public final int consumerTimeoutMs;
 
     private final ConsumerIterator consumerIterator;
+    
+    private Thread userWorkThread;
 
     public MessageStream(String topic, BlockingQueue<FetchedDataChunk> queue, int consumerTimeoutMs) {
         super();
@@ -20,8 +22,13 @@ public class MessageStream implements Iterable<MessagePack> {
         this.consumerIterator = new ConsumerIterator(topic, queue, consumerTimeoutMs);
     }
 
+    public Thread getUserWorkThread() {
+        return userWorkThread;
+    }
+
     @Override
     public Iterator<MessagePack> iterator() {
+        this.userWorkThread = Thread.currentThread();
         return consumerIterator;
     }
 

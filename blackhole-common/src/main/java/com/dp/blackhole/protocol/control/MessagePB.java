@@ -454,6 +454,20 @@ public final class MessagePB {
      * <code>optional .blackhole.PartitionRequireBroker partitionRequireBroker = 32;</code>
      */
     com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBrokerOrBuilder getPartitionRequireBrokerOrBuilder();
+
+    // optional .blackhole.ConsumerExit consumerExit = 33;
+    /**
+     * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+     */
+    boolean hasConsumerExit();
+    /**
+     * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+     */
+    com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit getConsumerExit();
+    /**
+     * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+     */
+    com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExitOrBuilder getConsumerExitOrBuilder();
   }
   /**
    * Protobuf type {@code blackhole.Message}
@@ -489,6 +503,7 @@ public final class MessagePB {
         throws com.google.protobuf.InvalidProtocolBufferException {
       initFields();
       int mutable_bitField0_ = 0;
+      int mutable_bitField1_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -920,6 +935,19 @@ public final class MessagePB {
               bitField0_ |= 0x80000000;
               break;
             }
+            case 266: {
+              com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit.Builder subBuilder = null;
+              if (((bitField1_ & 0x00000001) == 0x00000001)) {
+                subBuilder = consumerExit_.toBuilder();
+              }
+              consumerExit_ = input.readMessage(com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(consumerExit_);
+                consumerExit_ = subBuilder.buildPartial();
+              }
+              bitField1_ |= 0x00000001;
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -1148,6 +1176,10 @@ public final class MessagePB {
        * <code>UNRESOLVED_CONNECTION = 46;</code>
        */
       UNRESOLVED_CONNECTION(45, 46),
+      /**
+       * <code>CONSUMER_EXIT = 47;</code>
+       */
+      CONSUMER_EXIT(46, 47),
       ;
 
       /**
@@ -1334,6 +1366,10 @@ public final class MessagePB {
        * <code>UNRESOLVED_CONNECTION = 46;</code>
        */
       public static final int UNRESOLVED_CONNECTION_VALUE = 46;
+      /**
+       * <code>CONSUMER_EXIT = 47;</code>
+       */
+      public static final int CONSUMER_EXIT_VALUE = 47;
 
 
       public final int getNumber() { return value; }
@@ -1386,6 +1422,7 @@ public final class MessagePB {
           case 44: return ASSIGN_PARTITION;
           case 45: return PARTITION_REQUIRE_BROKER;
           case 46: return UNRESOLVED_CONNECTION;
+          case 47: return CONSUMER_EXIT;
           default: return null;
         }
       }
@@ -1438,6 +1475,7 @@ public final class MessagePB {
     }
 
     private int bitField0_;
+    private int bitField1_;
     // required .blackhole.Message.MessageType type = 1;
     public static final int TYPE_FIELD_NUMBER = 1;
     private com.dp.blackhole.protocol.control.MessagePB.Message.MessageType type_;
@@ -2136,6 +2174,28 @@ public final class MessagePB {
       return partitionRequireBroker_;
     }
 
+    // optional .blackhole.ConsumerExit consumerExit = 33;
+    public static final int CONSUMEREXIT_FIELD_NUMBER = 33;
+    private com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit consumerExit_;
+    /**
+     * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+     */
+    public boolean hasConsumerExit() {
+      return ((bitField1_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+     */
+    public com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit getConsumerExit() {
+      return consumerExit_;
+    }
+    /**
+     * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+     */
+    public com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExitOrBuilder getConsumerExitOrBuilder() {
+      return consumerExit_;
+    }
+
     private void initFields() {
       type_ = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance();
@@ -2169,6 +2229,7 @@ public final class MessagePB {
       producerIdAssign_ = com.dp.blackhole.protocol.control.ProducerIdAssignPB.ProducerIdAssign.getDefaultInstance();
       assignPartition_ = com.dp.blackhole.protocol.control.AssignPartitionPB.AssignPartition.getDefaultInstance();
       partitionRequireBroker_ = com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker.getDefaultInstance();
+      consumerExit_ = com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -2341,6 +2402,12 @@ public final class MessagePB {
           return false;
         }
       }
+      if (hasConsumerExit()) {
+        if (!getConsumerExit().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -2443,6 +2510,9 @@ public final class MessagePB {
       }
       if (((bitField0_ & 0x80000000) == 0x80000000)) {
         output.writeMessage(32, partitionRequireBroker_);
+      }
+      if (((bitField1_ & 0x00000001) == 0x00000001)) {
+        output.writeMessage(33, consumerExit_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -2580,6 +2650,10 @@ public final class MessagePB {
       if (((bitField0_ & 0x80000000) == 0x80000000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(32, partitionRequireBroker_);
+      }
+      if (((bitField1_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(33, consumerExit_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -2720,6 +2794,7 @@ public final class MessagePB {
           getProducerIdAssignFieldBuilder();
           getAssignPartitionFieldBuilder();
           getPartitionRequireBrokerFieldBuilder();
+          getConsumerExitFieldBuilder();
         }
       }
       private static Builder create() {
@@ -2916,6 +2991,12 @@ public final class MessagePB {
           partitionRequireBrokerBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x80000000);
+        if (consumerExitBuilder_ == null) {
+          consumerExit_ = com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit.getDefaultInstance();
+        } else {
+          consumerExitBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000001);
         return this;
       }
 
@@ -2943,7 +3024,9 @@ public final class MessagePB {
       public com.dp.blackhole.protocol.control.MessagePB.Message buildPartial() {
         com.dp.blackhole.protocol.control.MessagePB.Message result = new com.dp.blackhole.protocol.control.MessagePB.Message(this);
         int from_bitField0_ = bitField0_;
+        int from_bitField1_ = bitField1_;
         int to_bitField0_ = 0;
+        int to_bitField1_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
@@ -3196,7 +3279,16 @@ public final class MessagePB {
         } else {
           result.partitionRequireBroker_ = partitionRequireBrokerBuilder_.build();
         }
+        if (((from_bitField1_ & 0x00000001) == 0x00000001)) {
+          to_bitField1_ |= 0x00000001;
+        }
+        if (consumerExitBuilder_ == null) {
+          result.consumerExit_ = consumerExit_;
+        } else {
+          result.consumerExit_ = consumerExitBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
+        result.bitField1_ = to_bitField1_;
         onBuilt();
         return result;
       }
@@ -3307,6 +3399,9 @@ public final class MessagePB {
         }
         if (other.hasPartitionRequireBroker()) {
           mergePartitionRequireBroker(other.getPartitionRequireBroker());
+        }
+        if (other.hasConsumerExit()) {
+          mergeConsumerExit(other.getConsumerExit());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -3479,6 +3574,12 @@ public final class MessagePB {
             return false;
           }
         }
+        if (hasConsumerExit()) {
+          if (!getConsumerExit().isInitialized()) {
+            
+            return false;
+          }
+        }
         return true;
       }
 
@@ -3500,6 +3601,7 @@ public final class MessagePB {
         return this;
       }
       private int bitField0_;
+      private int bitField1_;
 
       // required .blackhole.Message.MessageType type = 1;
       private com.dp.blackhole.protocol.control.MessagePB.Message.MessageType type_ = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.HEARTBEART;
@@ -7164,6 +7266,123 @@ public final class MessagePB {
         return partitionRequireBrokerBuilder_;
       }
 
+      // optional .blackhole.ConsumerExit consumerExit = 33;
+      private com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit consumerExit_ = com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit, com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit.Builder, com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExitOrBuilder> consumerExitBuilder_;
+      /**
+       * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+       */
+      public boolean hasConsumerExit() {
+        return ((bitField1_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+       */
+      public com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit getConsumerExit() {
+        if (consumerExitBuilder_ == null) {
+          return consumerExit_;
+        } else {
+          return consumerExitBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+       */
+      public Builder setConsumerExit(com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit value) {
+        if (consumerExitBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          consumerExit_ = value;
+          onChanged();
+        } else {
+          consumerExitBuilder_.setMessage(value);
+        }
+        bitField1_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+       */
+      public Builder setConsumerExit(
+          com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit.Builder builderForValue) {
+        if (consumerExitBuilder_ == null) {
+          consumerExit_ = builderForValue.build();
+          onChanged();
+        } else {
+          consumerExitBuilder_.setMessage(builderForValue.build());
+        }
+        bitField1_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+       */
+      public Builder mergeConsumerExit(com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit value) {
+        if (consumerExitBuilder_ == null) {
+          if (((bitField1_ & 0x00000001) == 0x00000001) &&
+              consumerExit_ != com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit.getDefaultInstance()) {
+            consumerExit_ =
+              com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit.newBuilder(consumerExit_).mergeFrom(value).buildPartial();
+          } else {
+            consumerExit_ = value;
+          }
+          onChanged();
+        } else {
+          consumerExitBuilder_.mergeFrom(value);
+        }
+        bitField1_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+       */
+      public Builder clearConsumerExit() {
+        if (consumerExitBuilder_ == null) {
+          consumerExit_ = com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit.getDefaultInstance();
+          onChanged();
+        } else {
+          consumerExitBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000001);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+       */
+      public com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit.Builder getConsumerExitBuilder() {
+        bitField1_ |= 0x00000001;
+        onChanged();
+        return getConsumerExitFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+       */
+      public com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExitOrBuilder getConsumerExitOrBuilder() {
+        if (consumerExitBuilder_ != null) {
+          return consumerExitBuilder_.getMessageOrBuilder();
+        } else {
+          return consumerExit_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.ConsumerExit consumerExit = 33;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit, com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit.Builder, com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExitOrBuilder> 
+          getConsumerExitFieldBuilder() {
+        if (consumerExitBuilder_ == null) {
+          consumerExitBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit, com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit.Builder, com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExitOrBuilder>(
+                  consumerExit_,
+                  getParentForChildren(),
+                  isClean());
+          consumerExit_ = null;
+        }
+        return consumerExitBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
 
@@ -7203,65 +7422,68 @@ public final class MessagePB {
       "SnapshotOp.proto\032\021PauseStream.proto\032\021Pro" +
       "ducerReg.proto\032\026ProducerIdAssign.proto\032\025" +
       "NoavailableConf.proto\032\025AssignPartition.p" +
-      "roto\032\034PartitionRequireBroker.proto\"\340\021\n\007M" +
-      "essage\022,\n\004type\030\001 \002(\0162\036.blackhole.Message" +
-      ".MessageType\022!\n\006appReg\030\002 \001(\0132\021.blackhole" +
-      ".AppReg\022-\n\014assignBroker\030\003 \001(\0132\027.blackhol" +
-      "e.AssignBroker\022+\n\013readyUpload\030\004 \001(\0132\026.bl" +
-      "ackhole.ReadyUpload\022-\n\014recoveryRoll\030\005 \001(",
-      "\0132\027.blackhole.RecoveryRoll\022+\n\013readyStrea" +
-      "m\030\006 \001(\0132\026.blackhole.ReadyStream\022!\n\006rollI" +
-      "D\030\007 \001(\0132\021.blackhole.RollID\022#\n\007failure\030\010 " +
-      "\001(\0132\022.blackhole.Failure\0223\n\017noAvailableNo" +
-      "de\030\t \001(\0132\032.blackhole.NoAvailableNode\022!\n\006" +
-      "retire\030\n \001(\0132\021.blackhole.Retire\022#\n\007confR" +
-      "es\030\013 \001(\0132\022.blackhole.ConfRes\022\'\n\tdumpRepl" +
-      "y\030\014 \001(\0132\024.blackhole.DumpReply\022)\n\nremoveC" +
-      "onf\030\r \001(\0132\025.blackhole.RemoveConf\022\'\n\tbrok" +
-      "erReg\030\016 \001(\0132\024.blackhole.BrokerReg\022#\n\007dum",
-      "pApp\030\017 \001(\0132\022.blackhole.DumpApp\022+\n\013consum" +
-      "erReg\030\020 \001(\0132\026.blackhole.ConsumerReg\0221\n\016a" +
-      "ssignConsumer\030\021 \001(\0132\031.blackhole.AssignCo" +
-      "nsumer\022-\n\014offsetCommit\030\022 \001(\0132\027.blackhole" +
-      ".OffsetCommit\022+\n\013topicReport\030\023 \001(\0132\026.bla" +
-      "ckhole.TopicReport\022#\n\007restart\030\024 \001(\0132\022.bl" +
-      "ackhole.Restart\022\035\n\004quit\030\025 \001(\0132\017.blackhol" +
-      "e.Quit\022\037\n\005clean\030\026 \001(\0132\020.blackhole.Clean\022" +
-      "\'\n\trollClean\030\027 \001(\0132\024.blackhole.RollClean" +
-      "\0227\n\021dumpConsumerGroup\030\030 \001(\0132\034.blackhole.",
-      "DumpConsumerGroup\022)\n\nsnapshotOp\030\031 \001(\0132\025." +
-      "blackhole.SnapshotOp\022+\n\013pauseStream\030\032 \001(" +
-      "\0132\026.blackhole.PauseStream\022#\n\007confReq\030\033 \001" +
-      "(\0132\022.blackhole.ConfReq\0223\n\017noavailableCon" +
-      "f\030\034 \001(\0132\032.blackhole.NoavailableConf\022+\n\013p" +
-      "roducerReg\030\035 \001(\0132\026.blackhole.ProducerReg" +
-      "\0225\n\020producerIdAssign\030\036 \001(\0132\033.blackhole.P" +
-      "roducerIdAssign\0223\n\017assignPartition\030\037 \001(\013" +
-      "2\032.blackhole.AssignPartition\022A\n\026partitio" +
-      "nRequireBroker\030  \001(\0132!.blackhole.Partiti",
-      "onRequireBroker\"\323\006\n\013MessageType\022\016\n\nHEART" +
-      "BEART\020\001\022\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021\n\r" +
-      "ASSIGN_BROKER\020\004\022\020\n\014READY_STREAM\020\005\022\020\n\014REA" +
-      "DY_UPLOAD\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_S" +
-      "UCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_RO" +
-      "LL\020\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOVERY_F" +
-      "AIL\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAILABLENODE\020\016\022" +
-      "\021\n\rUNRECOVERABLE\020\017\022\030\n\024MANUAL_RECOVERY_RO" +
-      "LL\020\020\022\014\n\010DUMPSTAT\020\021\022\020\n\014RETIRESTREAM\020\022\022\014\n\010" +
-      "CONF_REQ\020\023\022\014\n\010CONF_RES\020\024\022\023\n\017NOAVAILABLEC",
-      "ONF\020\025\022\014\n\010DUMPCONF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010LI" +
-      "STAPPS\020\030\022\017\n\013REMOVE_CONF\020\031\022\014\n\010DUMP_APP\020\032\022" +
-      "\020\n\014CONSUMER_REG\020\033\022\023\n\017ASSIGN_CONSUMER\020\034\022\021" +
-      "\n\rOFFSET_COMMIT\020\035\022\017\n\013TOPICREPORT\020\036\022\023\n\017CO" +
-      "NSUMERREGFAIL\020\037\022\026\n\022MAKR_UNRECOVERABLE\020 \022" +
-      "\014\n\010LISTIDLE\020!\022\013\n\007RESTART\020\"\022\010\n\004QUIT\020#\022\t\n\005" +
-      "CLEAN\020$\022\016\n\nROLL_CLEAN\020%\022\027\n\023DUMP_CONSUMER" +
-      "_GROUP\020&\022\027\n\023LIST_CONSUMER_GROUP\020\'\022\017\n\013SNA" +
-      "PSHOT_OP\020(\022\020\n\014PAUSE_STREAM\020)\022\020\n\014PRODUCER" +
-      "_REG\020*\022\026\n\022PRODUCER_ID_ASSIGN\020+\022\024\n\020ASSIGN",
-      "_PARTITION\020,\022\034\n\030PARTITION_REQUIRE_BROKER" +
-      "\020-\022\031\n\025UNRESOLVED_CONNECTION\020.B.\n!com.dp." +
-      "blackhole.protocol.controlB\tMessagePB"
+      "roto\032\034PartitionRequireBroker.proto\032\022Cons" +
+      "umerExit.proto\"\242\022\n\007Message\022,\n\004type\030\001 \002(\016" +
+      "2\036.blackhole.Message.MessageType\022!\n\006appR" +
+      "eg\030\002 \001(\0132\021.blackhole.AppReg\022-\n\014assignBro" +
+      "ker\030\003 \001(\0132\027.blackhole.AssignBroker\022+\n\013re" +
+      "adyUpload\030\004 \001(\0132\026.blackhole.ReadyUpload\022",
+      "-\n\014recoveryRoll\030\005 \001(\0132\027.blackhole.Recove" +
+      "ryRoll\022+\n\013readyStream\030\006 \001(\0132\026.blackhole." +
+      "ReadyStream\022!\n\006rollID\030\007 \001(\0132\021.blackhole." +
+      "RollID\022#\n\007failure\030\010 \001(\0132\022.blackhole.Fail" +
+      "ure\0223\n\017noAvailableNode\030\t \001(\0132\032.blackhole" +
+      ".NoAvailableNode\022!\n\006retire\030\n \001(\0132\021.black" +
+      "hole.Retire\022#\n\007confRes\030\013 \001(\0132\022.blackhole" +
+      ".ConfRes\022\'\n\tdumpReply\030\014 \001(\0132\024.blackhole." +
+      "DumpReply\022)\n\nremoveConf\030\r \001(\0132\025.blackhol" +
+      "e.RemoveConf\022\'\n\tbrokerReg\030\016 \001(\0132\024.blackh",
+      "ole.BrokerReg\022#\n\007dumpApp\030\017 \001(\0132\022.blackho" +
+      "le.DumpApp\022+\n\013consumerReg\030\020 \001(\0132\026.blackh" +
+      "ole.ConsumerReg\0221\n\016assignConsumer\030\021 \001(\0132" +
+      "\031.blackhole.AssignConsumer\022-\n\014offsetComm" +
+      "it\030\022 \001(\0132\027.blackhole.OffsetCommit\022+\n\013top" +
+      "icReport\030\023 \001(\0132\026.blackhole.TopicReport\022#" +
+      "\n\007restart\030\024 \001(\0132\022.blackhole.Restart\022\035\n\004q" +
+      "uit\030\025 \001(\0132\017.blackhole.Quit\022\037\n\005clean\030\026 \001(" +
+      "\0132\020.blackhole.Clean\022\'\n\trollClean\030\027 \001(\0132\024" +
+      ".blackhole.RollClean\0227\n\021dumpConsumerGrou",
+      "p\030\030 \001(\0132\034.blackhole.DumpConsumerGroup\022)\n" +
+      "\nsnapshotOp\030\031 \001(\0132\025.blackhole.SnapshotOp" +
+      "\022+\n\013pauseStream\030\032 \001(\0132\026.blackhole.PauseS" +
+      "tream\022#\n\007confReq\030\033 \001(\0132\022.blackhole.ConfR" +
+      "eq\0223\n\017noavailableConf\030\034 \001(\0132\032.blackhole." +
+      "NoavailableConf\022+\n\013producerReg\030\035 \001(\0132\026.b" +
+      "lackhole.ProducerReg\0225\n\020producerIdAssign" +
+      "\030\036 \001(\0132\033.blackhole.ProducerIdAssign\0223\n\017a" +
+      "ssignPartition\030\037 \001(\0132\032.blackhole.AssignP" +
+      "artition\022A\n\026partitionRequireBroker\030  \001(\013",
+      "2!.blackhole.PartitionRequireBroker\022-\n\014c" +
+      "onsumerExit\030! \001(\0132\027.blackhole.ConsumerEx" +
+      "it\"\346\006\n\013MessageType\022\016\n\nHEARTBEART\020\001\022\013\n\007AP" +
+      "P_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021\n\rASSIGN_BROKER" +
+      "\020\004\022\020\n\014READY_STREAM\020\005\022\020\n\014READY_UPLOAD\020\006\022\017" +
+      "\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_SUCCESS\020\010\022\017\n\013U" +
+      "PLOAD_FAIL\020\t\022\021\n\rRECOVERY_ROLL\020\n\022\024\n\020RECOV" +
+      "ERY_SUCCESS\020\013\022\021\n\rRECOVERY_FAIL\020\014\022\013\n\007FAIL" +
+      "URE\020\r\022\023\n\017NOAVAILABLENODE\020\016\022\021\n\rUNRECOVERA" +
+      "BLE\020\017\022\030\n\024MANUAL_RECOVERY_ROLL\020\020\022\014\n\010DUMPS",
+      "TAT\020\021\022\020\n\014RETIRESTREAM\020\022\022\014\n\010CONF_REQ\020\023\022\014\n" +
+      "\010CONF_RES\020\024\022\023\n\017NOAVAILABLECONF\020\025\022\014\n\010DUMP" +
+      "CONF\020\026\022\r\n\tDUMPREPLY\020\027\022\014\n\010LISTAPPS\020\030\022\017\n\013R" +
+      "EMOVE_CONF\020\031\022\014\n\010DUMP_APP\020\032\022\020\n\014CONSUMER_R" +
+      "EG\020\033\022\023\n\017ASSIGN_CONSUMER\020\034\022\021\n\rOFFSET_COMM" +
+      "IT\020\035\022\017\n\013TOPICREPORT\020\036\022\023\n\017CONSUMERREGFAIL" +
+      "\020\037\022\026\n\022MAKR_UNRECOVERABLE\020 \022\014\n\010LISTIDLE\020!" +
+      "\022\013\n\007RESTART\020\"\022\010\n\004QUIT\020#\022\t\n\005CLEAN\020$\022\016\n\nRO" +
+      "LL_CLEAN\020%\022\027\n\023DUMP_CONSUMER_GROUP\020&\022\027\n\023L" +
+      "IST_CONSUMER_GROUP\020\'\022\017\n\013SNAPSHOT_OP\020(\022\020\n",
+      "\014PAUSE_STREAM\020)\022\020\n\014PRODUCER_REG\020*\022\026\n\022PRO" +
+      "DUCER_ID_ASSIGN\020+\022\024\n\020ASSIGN_PARTITION\020,\022" +
+      "\034\n\030PARTITION_REQUIRE_BROKER\020-\022\031\n\025UNRESOL" +
+      "VED_CONNECTION\020.\022\021\n\rCONSUMER_EXIT\020/B.\n!c" +
+      "om.dp.blackhole.protocol.controlB\tMessag" +
+      "ePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -7273,7 +7495,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "ReadyUpload", "RecoveryRoll", "ReadyStream", "RollID", "Failure", "NoAvailableNode", "Retire", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", "Quit", "Clean", "RollClean", "DumpConsumerGroup", "SnapshotOp", "PauseStream", "ConfReq", "NoavailableConf", "ProducerReg", "ProducerIdAssign", "AssignPartition", "PartitionRequireBroker", });
+              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "ReadyUpload", "RecoveryRoll", "ReadyStream", "RollID", "Failure", "NoAvailableNode", "Retire", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", "Quit", "Clean", "RollClean", "DumpConsumerGroup", "SnapshotOp", "PauseStream", "ConfReq", "NoavailableConf", "ProducerReg", "ProducerIdAssign", "AssignPartition", "PartitionRequireBroker", "ConsumerExit", });
           return null;
         }
       };
@@ -7310,6 +7532,7 @@ public final class MessagePB {
           com.dp.blackhole.protocol.control.NoavailableConfPB.getDescriptor(),
           com.dp.blackhole.protocol.control.AssignPartitionPB.getDescriptor(),
           com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.ConsumerExitPB.getDescriptor(),
         }, assigner);
   }
 

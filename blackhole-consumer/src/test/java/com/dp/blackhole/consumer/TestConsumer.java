@@ -95,6 +95,7 @@ public class TestConsumer {
         
         @Override
         public void run() {
+            LOG.info("WORK THREAD " + Thread.currentThread().getName());
             while (running) {
                 long i =0;
                 for (MessagePack entity : stream) {

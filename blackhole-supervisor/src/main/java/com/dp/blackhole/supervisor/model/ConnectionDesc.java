@@ -65,6 +65,11 @@ public class ConnectionDesc {
         attachments.add(desc);
     }
     
+    @JsonIgnore
+    public void detach(NodeDesc desc) {
+        attachments.remove(desc);
+    }
+    
     @Override
     public String toString() {
         String typeName = "";
