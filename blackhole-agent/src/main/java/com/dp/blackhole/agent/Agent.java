@@ -20,7 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.agent.persist.IRecoder;
-import com.dp.blackhole.common.StreamHealthChecker;
+import com.dp.blackhole.common.LingeringSender;
 import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
@@ -67,7 +67,7 @@ public class Agent implements Runnable {
     private boolean paasModel = false;
     private String snapshotPersistDir;
     
-    private StreamHealthChecker streamHealthChecker;
+    private LingeringSender streamHealthChecker;
     
     public Agent() {
         this(null);
@@ -109,7 +109,7 @@ public class Agent implements Runnable {
         return topicReaders;
     }
 
-    public StreamHealthChecker getStreamHealthChecker() {
+    public LingeringSender getStreamHealthChecker() {
         return streamHealthChecker;
     }
 
@@ -117,7 +117,7 @@ public class Agent implements Runnable {
      * for unit test
      * @param streamHealthChecker
      */
-    void setStreamHealthChecker(StreamHealthChecker streamHealthChecker) {
+    void setStreamHealthChecker(LingeringSender streamHealthChecker) {
         this.streamHealthChecker = streamHealthChecker;
     }
 
@@ -196,7 +196,7 @@ public class Agent implements Runnable {
             return;
         }
         
-        this.streamHealthChecker = new StreamHealthChecker();
+        this.streamHealthChecker = new LingeringSender();
         this.streamHealthChecker.start();
         
         processor = new AgentProcessor();

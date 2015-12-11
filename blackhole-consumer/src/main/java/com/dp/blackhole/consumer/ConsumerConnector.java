@@ -72,24 +72,35 @@ public class ConsumerConnector implements Runnable {
         consumers = new ConcurrentHashMap<String, Consumer>();
     }
     
-    public synchronized void init() throws LionException {
-        ConfigCache configCache;
-        String host;
-        int port;
-        try {
-            Properties prop = new Properties();
-            prop.load(getClass().getClassLoader().getResourceAsStream("consumer.properties"));
-            host = prop.getProperty("supervisor.host");
-            port = Integer.parseInt(prop.getProperty("supervisor.port"));
-        } catch (Exception e) {
+    public synchronized void init(ConsumerConfig config) throws LionException {
+        String configSource = null;
+        String host = config.getSupervisorHost();
+        int port = config.getSupervisorPort();
+        if (host != null && port != 0) {
+            configSource = "CODE";
+        } else {
             try {
-                configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-                host = configCache.getProperty("blackhole.supervisor.host");
-                port = configCache.getIntProperty("blackhole.supervisor.port");
-            } catch (LionException le) {
-                throw new RuntimeException(le);
+                Properties prop = new Properties();
+                prop.load(getClass().getClassLoader().getResourceAsStream("consumer.properties"));
+                host = prop.getProperty("supervisor.host");
+                port = Integer.parseInt(prop.getProperty("supervisor.port"));
+                configSource = "RESOURCE";
+            } catch (Exception e) {
+                try {
+                    ConfigCache configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
+                    host = configCache.getProperty("blackhole.supervisor.host");
+                    port = configCache.getIntProperty("blackhole.supervisor.port");
+                    configSource = "LION";
+                } catch (Exception le) {
+                }
             }
         }
+        
+        if (host == null || port == 0 || configSource == null) {
+            throw new RuntimeException("Can not get supervisorHost or supervisorPort");
+        }
+        LOG.info("get connection " + host + ":" + port + " from " + configSource);
+        
         init(host, port, true, 6000);
     }
 

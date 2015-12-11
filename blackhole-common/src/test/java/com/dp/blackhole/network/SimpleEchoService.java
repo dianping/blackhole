@@ -69,7 +69,7 @@ public class SimpleEchoService {
         
         Thread.sleep(1000);
         
-        SocketAddress addr = new InetSocketAddress("localhost", 2222);
+        SocketAddress addr = new InetSocketAddress("localhost", 2223);
         SocketChannel channel = SocketChannel.open();
         channel.connect(addr);
         

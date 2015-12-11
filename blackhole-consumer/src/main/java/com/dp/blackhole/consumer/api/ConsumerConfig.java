@@ -15,6 +15,10 @@ public class ConsumerConfig {
     private int consumerTimeoutMs;
     
     private boolean multiFetch;
+    
+    private String supervisorHost;
+    
+    private int supervisorPort;
 
     /**
      * the properties entry include:<br/>
@@ -23,23 +27,53 @@ public class ConsumerConfig {
      * <b>autooffset.reset</b> what to do if an offset is out of range, default is reseted to smallest<br/>
      * <b>messages.multiFetch</b> whether or not fetch multiple partition message at once, default is false<br/>
      * <b>consumer.timeout.ms</b> timeout of message fetching, default is -1, standing for waiting until an message becomes available<br/>
-     */
-    public ConsumerConfig(Properties props) {
-        this.fetchSize = getInt(props, "fetch.size", 1024 * 1024);//1MB
-        this.maxQueuedChunks = getInt(props, "queuedchunks.max", 2);
-        this.autoOffsetReset = getString(props, "autooffset.reset", OffsetRequest.SMALLES_TIME_STRING);
-        this.multiFetch = getBoolean(props, "messages.multiFetch", false);
-        this.consumerTimeoutMs = getInt(props, "consumer.timeout.ms", -1);
-    }
-
-    /**
      * all configuration is set to default.
-     * if you want configure by yourself, use ConsumerConfig(Properties props)
+     * if you want configure by yourself, use setXX() to overwrite
      */
     public ConsumerConfig() {
-        this(new Properties());
+        this.fetchSize = 1024 * 1024;//1MB
+        this.maxQueuedChunks = 2;
+        this.autoOffsetReset = OffsetRequest.SMALLES_TIME_STRING;
+        this.multiFetch = false;
+        this.consumerTimeoutMs = -1;
     }
     
+    public String getSupervisorHost() {
+        return supervisorHost;
+    }
+
+    public void setSupervisorHost(String supervisorHost) {
+        this.supervisorHost = supervisorHost;
+    }
+
+    public int getSupervisorPort() {
+        return supervisorPort;
+    }
+
+    public void setSupervisorPort(int supervisorPort) {
+        this.supervisorPort = supervisorPort;
+    }
+
+    public void setFetchSize(int fetchSize) {
+        this.fetchSize = fetchSize;
+    }
+
+    public void setMaxQueuedChunks(int maxQueuedChunks) {
+        this.maxQueuedChunks = maxQueuedChunks;
+    }
+
+    public void setAutoOffsetReset(String autoOffsetReset) {
+        this.autoOffsetReset = autoOffsetReset;
+    }
+
+    public void setConsumerTimeoutMs(int consumerTimeoutMs) {
+        this.consumerTimeoutMs = consumerTimeoutMs;
+    }
+
+    public void setMultiFetch(boolean multiFetch) {
+        this.multiFetch = multiFetch;
+    }
+
     /** the number of byes of messages to attempt to fetch */
     public int getFetchSize() {
         return fetchSize;

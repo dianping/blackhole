@@ -16,8 +16,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
-import com.dianping.lion.client.LionException;
-import com.dp.blackhole.common.StreamHealthChecker;
+import com.dp.blackhole.common.LingeringSender;
 import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.TopicCommonMeta;
@@ -43,7 +42,7 @@ public class ProducerConnector implements Runnable {
     private static final long DEFAULT_PRODUCER_ROLL_PERIOD = 3600;
     //this is a static instance, concurrency of all actions should be take to account
     private static ProducerConnector instance = new ProducerConnector();
-    private StreamHealthChecker streamHealthChecker;
+    private LingeringSender streamHealthChecker;
     
     public static ProducerConnector getInstance() {
         return instance;
@@ -69,7 +68,7 @@ public class ProducerConnector implements Runnable {
         workingProducers = new ConcurrentHashMap<String, Map<String,Producer>>();
     }
     
-    public StreamHealthChecker getStreamHealthChecker() {
+    public LingeringSender getStreamHealthChecker() {
         return streamHealthChecker;
     }
 
@@ -88,32 +87,30 @@ public class ProducerConnector implements Runnable {
             if (isInitialized()) {
                 return;
             }
-            ConfigCache configCache;
+            String lingerMs = null;
+            String configSource = null;
+            String supervisorHost = null;
+            String supervisorPort = null;
             if (prop != null) {
+                configSource = "CODE";
                 supervisorHost = prop.getProperty("supervisor.host");
-                supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
-                LOG.info("get connection info from properties " + supervisorHost + ":" + supervisorPort);
-            } else {
-                try {
-                    prop = new Properties();
-                    prop.load(getClass().getClassLoader().getResourceAsStream("producer.properties"));
-                    supervisorHost = prop.getProperty("supervisor.host");
-                    supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
-                    LOG.info("get connection info from file " + supervisorHost + ":" + supervisorPort);
-                } catch (Exception e) {
-                    try {
-                        configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-                        supervisorHost = configCache.getProperty("blackhole.supervisor.host");
-                        supervisorPort = configCache.getIntProperty("blackhole.supervisor.port");
-                        LOG.info("get connection info from lion " + supervisorHost + ":" + supervisorPort);
-                    } catch (LionException le) {
-                        throw new RuntimeException(le);
-                    }
-                }
+                supervisorPort = prop.getProperty("supervisor.port");
+                lingerMs       = prop.getProperty("producer.linger.ms");
             }
+            if (supervisorHost == null || supervisorPort == null) {
+                configSource = "LION";
+                ConfigCache configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
+                supervisorHost = configCache.getProperty("blackhole.supervisor.host");
+                supervisorPort = configCache.getProperty("blackhole.supervisor.port");
+            }
+            if (supervisorHost == null || supervisorPort == null) {
+                throw new RuntimeException("Can not get supervisorHost or supervisorPort");
+            }
+            LOG.info("get connection " + supervisorHost + ":" + supervisorPort + " from " + configSource);
+            this.supervisorHost = supervisorHost;
+            this.supervisorPort = Integer.parseInt(supervisorPort);
             processor = new ProducerProcessor();
             launchScheduler();
-            String lingerMs = prop.getProperty("producer.linger.ms");
             launchHealthStreamChecker(lingerMs);
             launch();
             initialized.getAndSet(true);
@@ -127,14 +124,7 @@ public class ProducerConnector implements Runnable {
     }
 
     private void launchHealthStreamChecker(String lingerMs) {
-        if (lingerMs == null) {
-            //start health stream checker only for socket health check
-            streamHealthChecker = new StreamHealthChecker();
-        } else {
-            //start health stream checker but only for producer flush interval
-            boolean enableStreamHealthCheckerHeartbeatFunction = false;
-            streamHealthChecker = new StreamHealthChecker(Util.parseInt(lingerMs, 5000), enableStreamHealthCheckerHeartbeatFunction);
-        }
+        streamHealthChecker = new LingeringSender(Util.parseInt(lingerMs, LingeringSender.DEFAULT_LINGER_MS));
         streamHealthChecker.start();
     }
 

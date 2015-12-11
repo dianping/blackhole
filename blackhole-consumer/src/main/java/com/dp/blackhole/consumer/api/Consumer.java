@@ -44,7 +44,7 @@ public class Consumer {
         connector = ConsumerConnector.getInstance();
         try {
             if (!connector.initialized) {
-                connector.init();
+                connector.init(config);
             }
         } catch (Exception e) {
             LOG.error("Initialize consumer fail.", e);

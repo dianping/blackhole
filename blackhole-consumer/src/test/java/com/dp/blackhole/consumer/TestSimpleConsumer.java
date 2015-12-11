@@ -1,10 +1,8 @@
 package com.dp.blackhole.consumer;
-import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.consumer.ConsumerConnector;
 import com.dp.blackhole.consumer.api.CommittedOffsetStrategy;
 import com.dp.blackhole.consumer.api.Consumer;
 import com.dp.blackhole.consumer.api.ConsumerConfig;
@@ -18,9 +16,9 @@ public class TestSimpleConsumer {
         String topic = "localtest";
         String group = "t123";
         boolean debug = false;
-        ConsumerConnector.getInstance().init("localhost", 8080, true, 6000);
-        Properties prop = new Properties();
-        ConsumerConfig config = new ConsumerConfig(prop);
+        ConsumerConfig config = new ConsumerConfig();
+        config.setSupervisorHost("localhost");
+        config.setSupervisorPort(8080);
         Consumer consumer = new Consumer(topic, group, config, new CommittedOffsetStrategy());
         consumer.start();
         MessageStream stream = consumer.getStream();
@@ -33,10 +31,11 @@ public class TestSimpleConsumer {
             if (count == 20) {
                 consumer.shutdown();
             }
-            if (count == 40) {
+            if (count == 30) {
                 break;
             }
         }
+        t.shutdown();
     }
     
     static class MessageConsumeThread extends Thread {

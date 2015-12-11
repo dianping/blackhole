@@ -21,7 +21,7 @@ import com.dp.blackhole.broker.BrokerService;
 import com.dp.blackhole.broker.SimBroker;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
-import com.dp.blackhole.common.StreamHealthChecker;
+import com.dp.blackhole.common.LingeringSender;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.conf.Context;
@@ -116,7 +116,7 @@ public class TestAgent {
 
     @Test
     public void testAssignBrokerProcess() throws InterruptedException {
-        StreamHealthChecker mockChecker = spy(new StreamHealthChecker());
+        LingeringSender mockChecker = spy(new LingeringSender());
         agent.setStreamHealthChecker(mockChecker);
         try {
             doNothing().when(mockChecker, "register");

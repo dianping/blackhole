@@ -8,31 +8,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class StreamHealthChecker extends Thread {
-    private static final Log LOG = LogFactory.getLog(StreamHealthChecker.class);
+public class LingeringSender extends Thread {
+    private static final Log LOG = LogFactory.getLog(LingeringSender.class);
     private volatile boolean running;
-    private static final int DEFAULT_CHECK_INTERVAL = 5 * 60 * 1000;
-    private static final int MINIMUM_CHECK_INTERVAL = 1000;
+    public static final int DEFAULT_LINGER_MS = 10000;
+    private static final int MINIMUM_LINGER_MS = 1000;
     private ConcurrentHashMap<Sender, String> senders;
-    private AtomicInteger checkInteralMs = new AtomicInteger();
-    private volatile boolean enableHeartbeat;
+    private AtomicInteger lingerMs = new AtomicInteger();
     
-    public StreamHealthChecker() {
-        this(DEFAULT_CHECK_INTERVAL, true);
+    public LingeringSender() {
+        this(DEFAULT_LINGER_MS);
     }
     
-    public StreamHealthChecker(int checkInteralMs, boolean enableHeartbeat) {
+    public LingeringSender(int lingerMs) {
         this.senders = new ConcurrentHashMap<Sender, String>();
         this.running = true;
-        this.enableHeartbeat = enableHeartbeat;
-        if (checkInteralMs < MINIMUM_CHECK_INTERVAL) {
-            this.checkInteralMs.set(MINIMUM_CHECK_INTERVAL);
-            LOG.warn("checkInteralMs is less than " + MINIMUM_CHECK_INTERVAL
+        if (lingerMs < MINIMUM_LINGER_MS) {
+            this.lingerMs.set(MINIMUM_LINGER_MS);
+            LOG.warn("lingerMs is less than " + MINIMUM_LINGER_MS
                     + "(MINIMUM_CHECK_INTERVAL) ,reset to it");
         } else {
-            this.checkInteralMs.set(checkInteralMs);
+            this.lingerMs.set(lingerMs);
         }
-        setName("StreamHealthChecker");
+        setName("LingeringSender");
         setDaemon(true);
     }
     
@@ -48,34 +46,28 @@ public class StreamHealthChecker extends Thread {
         running = false;
     }
     
-    public void enableHeartbeat() {
-        LOG.info("enble StreamHealthChecker's heartbeat");
-        this.enableHeartbeat = true;
-    }
-    
-    public void disableHeartbeat() {
-        LOG.info("disable StreamHealthChecker's heartbeat");
-        this.enableHeartbeat = false;
+    public int getLingerMs() {
+        return lingerMs.get();
     }
 
-    public int getCheckInteralMs() {
-        return checkInteralMs.get();
-    }
-
-    public void setCheckInteralMs(int checkInteralMs) {
-        this.checkInteralMs.set(checkInteralMs);;
+    public void setLingerMs(int lingerMs) {
+        this.lingerMs.set(lingerMs);;
     }
 
     @Override
     public void run() {
-        LOG.info("StreamHealthChecker start, checkInteralMs is " + checkInteralMs
-                + ", current enableHeartbeat is " + enableHeartbeat);
+        LOG.info("LingeringSender start, lingerMs is " + lingerMs);
+        int heartbeatWaitTime = 0;
         while (running) {
             try {
-                Thread.sleep(checkInteralMs.get());
+                Thread.sleep(lingerMs.get());
+                heartbeatWaitTime += 1;
             } catch (InterruptedException e) {
                 LOG.error(this.getName() + this.getId() + " interrupt", e);
                 running = false;
+            }
+            if (heartbeatWaitTime % 10 == 0) {
+                heartbeatWaitTime = 0;
             }
             for (Map.Entry<Sender, String> entry : senders.entrySet()) {
                 Sender sender = entry.getKey();
@@ -85,7 +77,7 @@ public class StreamHealthChecker extends Thread {
                     if (sender.canSend()) {
                         sender.sendMessage();
                     } else {
-                        if (enableHeartbeat) {
+                        if (heartbeatWaitTime == 0) {
                             sender.heartbeat();
                         }
                     }
