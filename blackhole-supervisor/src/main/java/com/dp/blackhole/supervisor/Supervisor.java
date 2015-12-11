@@ -1747,6 +1747,10 @@ public class Supervisor {
      * 2. assign a broker to the topic
      */
     private void handleTopicReg(AppReg appReg, ByteBufferNonblockingConnection from) {
+        if (!from.isResolved()) {
+            handleUnresolvedConnection(from);
+            return;
+        }
         ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
@@ -1777,6 +1781,10 @@ public class Supervisor {
     }
 
     private void handleBrokerReg(BrokerReg brokerReg, ByteBufferNonblockingConnection from) {
+        if (!from.isResolved()) {
+            handleUnresolvedConnection(from);
+            return;
+        }
         ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
@@ -1943,10 +1951,6 @@ public class Supervisor {
         
         @Override
         public void process(ByteBuffer request, ByteBufferNonblockingConnection from) {
-            if (!from.isResolved()) {
-                handleUnresolvedConnection(from);
-            }
-            
             Message msg = null;
             try {
                 msg = PBwrap.Buf2PB(request);
