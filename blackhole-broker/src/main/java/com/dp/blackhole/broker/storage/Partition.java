@@ -47,7 +47,7 @@ public class Partition {
     }
     
     long getFileOffset(File f) {
-        int dot = f.getName().lastIndexOf('.');   
+        int dot = f.getName().lastIndexOf('.');
         String offset = f.getName().substring(0, dot);
         return Long.parseLong(offset);
     }
@@ -219,12 +219,12 @@ public class Partition {
             Iterator<Segment> iter = segments.iterator();
             while(iter.hasNext()) {
                 Segment s = iter.next();
-                // the segment has not been closed (splitted)
-                if (s.getCloseTimestamp() == 0) {
-                    continue;
+                if (threshold == 0) {
+                    s.setCloseTimestamp(current);
                 }
-                if (current - s.getCloseTimestamp() >= threshold) {
-                    Log.info("cleanup segment: " + s);
+                // the segment has not been closed (splitted)
+                if (s.getCloseTimestamp() != 0 && current - s.getCloseTimestamp() >= threshold) {
+                    Log.info("cleanup segment: " + s + " for " + id);
                     iter.remove();
                     s.destory();
                 }
