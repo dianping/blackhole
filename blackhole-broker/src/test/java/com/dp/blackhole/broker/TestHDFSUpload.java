@@ -77,7 +77,7 @@ public class TestHDFSUpload {
         when(mgr.getRollHdfsPath(ident, compressionAlgo.getName())).thenReturn(getRealFile()+"."+compressionAlgo.getName());
         when(mgr.getTempHdfsPath(ident)).thenReturn(getRealFile()+".tmp");
         StorageManager manager = mock(StorageManager.class);
-        when(manager.getPartition(ident.topic, ident.source, false)).thenReturn(p);
+        when(manager.getPartition(ident.topic, ident.source)).thenReturn(p);
         
         HDFSUpload writer = new HDFSUpload(mgr, manager, fs, ident, roll1, compressionAlgo.getName());
         Thread thread = new Thread(writer);

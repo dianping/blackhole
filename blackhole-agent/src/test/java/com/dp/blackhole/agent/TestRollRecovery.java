@@ -67,6 +67,7 @@ public class TestRollRecovery {
     @Test
     public void test() {
         RollRecovery recovery = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false, true, state);
+        recovery.setStartWaitTime(0);
         Thread thread = new Thread(recovery);
         thread.start();
         try {
@@ -86,7 +87,7 @@ public class TestRollRecovery {
     @Test
     public void testTransferFileSelection() {
         RollRecovery recovery = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false, true, state);
+        recovery.setStartWaitTime(0);
         recovery.run();
-        
     }
 }

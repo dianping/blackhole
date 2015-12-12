@@ -72,24 +72,36 @@ public class ConsumerConnector implements Runnable {
         consumers = new ConcurrentHashMap<String, Consumer>();
     }
     
-    public synchronized void init() throws LionException {
-        ConfigCache configCache;
-        String host;
-        int port;
-        try {
-            Properties prop = new Properties();
-            prop.load(getClass().getClassLoader().getResourceAsStream("consumer.properties"));
-            host = prop.getProperty("supervisor.host");
-            port = Integer.parseInt(prop.getProperty("supervisor.port"));
-        } catch (Exception e) {
+    public synchronized void init(ConsumerConfig config) throws LionException {
+        String configSource = null;
+        String host = config.getSupervisorHost();
+        int port = config.getSupervisorPort();
+        if (host != null && port != 0) {
+            configSource = "CODE";
+        } else {
             try {
-                configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-                host = configCache.getProperty("blackhole.supervisor.host");
-                port = configCache.getIntProperty("blackhole.supervisor.port");
-            } catch (LionException le) {
-                throw new RuntimeException(le);
+                Properties prop = new Properties();
+                prop.load(getClass().getClassLoader().getResourceAsStream("consumer.properties"));
+                host = prop.getProperty("supervisor.host");
+                port = Integer.parseInt(prop.getProperty("supervisor.port"));
+                configSource = "RESOURCE";
+            } catch (Exception e) {
+                try {
+                    ConfigCache configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
+                    host = configCache.getProperty("blackhole.supervisor.host");
+                    port = configCache.getIntProperty("blackhole.supervisor.port");
+                    configSource = "LION";
+                } catch (Exception le) {
+                    LOG.warn("Finally, getting config from lion faild too", le);
+                }
             }
         }
+        
+        if (host == null || port == 0 || configSource == null) {
+            throw new RuntimeException("Can not get supervisorHost or supervisorPort");
+        }
+        LOG.info("get connection " + host + ":" + port + " from " + configSource);
+        
         init(host, port, true, 6000);
     }
 
@@ -104,7 +116,13 @@ public class ConsumerConnector implements Runnable {
             
             Thread thread = new Thread(instance);
             thread.setDaemon(true);
+            thread.setName("ConsumerConnector");
             thread.start();
+            
+            UserLiveCheck checkThread = new UserLiveCheck();
+            checkThread.setDaemon(true);
+            checkThread.setName("UserLiveCheck");
+            checkThread.start();
         } 
     }
 
@@ -188,6 +206,12 @@ public class ConsumerConnector implements Runnable {
     private void sendRegConsumer(String topic, String group, String consumerId) {
         Message message = PBwrap.wrapConsumerReg(group, consumerId, topic);
         LOG.info("register consumer to supervisor " + consumerId + " => " + topic);
+        send(message);
+    }
+    
+    private void sendConsumerExit(String topic, String group, String consumerId) {
+        Message message = PBwrap.wrapConsumerExit(group, consumerId, topic);
+        LOG.info("exit consumer " + consumerId + " => " + topic);
         send(message);
     }
     
@@ -345,6 +369,47 @@ public class ConsumerConnector implements Runnable {
         @Override
         public void run() {
             sendRegConsumer(topic, group, consumerId);
+        }
+    }
+    
+    class UserLiveCheck extends Thread {
+        private static final long DEFUALT_CHECK_PERIOD = 5 * 60 * 1000L;
+        @Override
+        public void run() {
+            LOG.info("start user live check thread with period " + DEFUALT_CHECK_PERIOD + " millisecond");
+            while (true) {
+                try {
+                    Thread.sleep(DEFUALT_CHECK_PERIOD);
+                } catch (InterruptedException e) {
+                    LOG.error("live check interrupted", e);
+                    break;
+                }
+                try {
+                    checkThreadLive();
+                } catch (Throwable e) {
+                    LOG.error("exception during user live checking: ", e);
+                }
+            }
+        }
+        
+        private void checkThreadLive() {
+            for (Map.Entry<String, Consumer> entry : consumers.entrySet()) {
+                String consumerId = entry.getKey();
+                Consumer consumer = entry.getValue();
+                Thread userThread = consumer.getUserWorkThread();
+                if (userThread == null) {
+                    continue;
+                }
+                if (userThread.isAlive()) {
+                    LOG.info("user thread: " + userThread.getName() + " for " + consumerId + " is alive");
+                    continue;
+                } else {
+                    LOG.warn("user thread " + userThread.getName() + " has died, clean consumer " + consumerId);
+                    consumer.clearQueue();
+                    sendConsumerExit(consumer.getTopic(), consumer.getGroup(), consumerId);
+                    consumers.remove(consumerId);
+                }
+            }
         }
     }
 }

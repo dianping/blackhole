@@ -117,6 +117,20 @@ public class Producer {
         return true;
     }
     
+    /**
+     * force flush to socket if there are some context in buffer
+     */
+    public void flush() {
+        for (Map.Entry<PartitionConnection, String> entry : partitionConnectionMap.entrySet()) {
+            PartitionConnection conn = entry.getKey();
+            try {
+                conn.sendMessage();
+            } catch (IOException e) {
+                reassignPartitionConnection(conn);
+            }
+        }
+    }
+    
     public void closeProducer() {
         for (Map.Entry<PartitionConnection, String> entry : partitionConnectionMap.entrySet()) {
             PartitionConnection conn = entry.getKey();
@@ -140,7 +154,7 @@ public class Producer {
         return connections.get(index);
     }
 
-    public void assignPartitionConnection(PartitionConnection partitionConnection) {
+    void assignPartitionConnection(PartitionConnection partitionConnection) {
         String partitionId = partitionConnection.getPartitionId();
         partitionConnectionMap.put(partitionConnection, partitionId);
         AtomicReference<PartitionConnectionState> oldState = partitionStateMap.putIfAbsent(
@@ -160,7 +174,7 @@ public class Producer {
         AtomicReference<PartitionConnectionState> currentState = partitionStateMap.get(partitionId);
         if (currentState != null && currentState.compareAndSet(PartitionConnectionState.ASSIGNED, PartitionConnectionState.UNASSIGNED)) {
             int reassignDelay = partitionConnection.getReassignDelaySeconds();
-            connector.getStreamHealthChecker().unregister(partitionConnection);
+            connector.getLingeringSender().unregister(partitionConnection);
             partitionConnectionMap.remove(partitionConnection);
             //must unregister from ConnectionChecker before re-assign
             connector.reportPartitionConnectionFailure(topic, producerId, partitionId, Util.getTS(), reassignDelay);

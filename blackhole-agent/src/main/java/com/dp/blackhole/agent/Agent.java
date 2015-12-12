@@ -20,7 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.AgentMeta.TopicId;
 import com.dp.blackhole.agent.persist.IRecoder;
-import com.dp.blackhole.common.StreamHealthChecker;
+import com.dp.blackhole.common.LingeringSender;
 import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
@@ -67,7 +67,7 @@ public class Agent implements Runnable {
     private boolean paasModel = false;
     private String snapshotPersistDir;
     
-    private StreamHealthChecker streamHealthChecker;
+    private LingeringSender linger;
     
     public Agent() {
         this(null);
@@ -109,16 +109,16 @@ public class Agent implements Runnable {
         return topicReaders;
     }
 
-    public StreamHealthChecker getStreamHealthChecker() {
-        return streamHealthChecker;
+    public LingeringSender getLingeringSender() {
+        return linger;
     }
 
     /**
      * for unit test
-     * @param streamHealthChecker
+     * @param linger
      */
-    void setStreamHealthChecker(StreamHealthChecker streamHealthChecker) {
-        this.streamHealthChecker = streamHealthChecker;
+    void setLingeringSender(LingeringSender linger) {
+        this.linger = linger;
     }
 
     private void register(TopicId topicId, long regTimestamp) {
@@ -196,8 +196,8 @@ public class Agent implements Runnable {
             return;
         }
         
-        this.streamHealthChecker = new StreamHealthChecker();
-        this.streamHealthChecker.start();
+        this.linger = new LingeringSender();
+        this.linger.start();
         
         processor = new AgentProcessor();
         client = new GenClient(
@@ -214,7 +214,7 @@ public class Agent implements Runnable {
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
         }
-        this.streamHealthChecker.shutdown();
+        this.linger.shutdown();
     }
     
     public AgentMeta fillUpAppLogsFromConfig(TopicId topicId) {
@@ -443,7 +443,15 @@ public class Agent implements Runnable {
                         int brokerPort = assignBroker.getBrokerPort();
                         RemoteSender sender = new RemoteSender(topicMeta, broker, brokerPort);
                         try {
-                            sender.initializeRemoteConnection();
+                            boolean success = sender.initializeRemoteConnection();
+                            if (success) {
+                                LOG.info(topicId + " TopicReg with ["
+                                        + broker + ":" + brokerPort + "] successfully");
+                            } else {
+                                throw new IOException(topicId + " TopicReg with ["
+                                        + broker + ":" + brokerPort
+                                        + "] unsuccessfully cause broker create partition faild");
+                            }
                         } catch (IOException e) {
                             LOG.error("init remote connection fail " 
                                     + broker + ":" + brokerPort + ", register again.", e);
@@ -451,7 +459,7 @@ public class Agent implements Runnable {
                             return false;
                         }
                         logReader.assignSender(sender);
-                        streamHealthChecker.register(topic, topicMeta.getSource(), sender);
+                        linger.register(topic, topicMeta.getSource(), sender);
                         return true;
                     } else {
                         LOG.error("No logreader to be assign for " + topicId + " send ConfReq.");

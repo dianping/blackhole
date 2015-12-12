@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.SecurityUtil;
 
+import com.dianping.cat.Cat;
 import com.dp.blackhole.broker.ftp.FTPConfigrationLoader;
 import com.dp.blackhole.broker.storage.StorageManager.Reporter.ReportEntry;
 import com.dp.blackhole.common.PBwrap;
@@ -76,6 +77,7 @@ public class Broker {
             thread.start();
         }
         
+        Cat.logEvent("startup", Util.formatTs(Util.getTS()));
         rollMgr.init(hdfsbasedir, copmressionAlgoName, recoveryPort, clockSyncBufMillis, maxUploadThreads, maxRecoveryThreads, recoverySocketTimeout);
         
         brokerService = new BrokerService(prop);

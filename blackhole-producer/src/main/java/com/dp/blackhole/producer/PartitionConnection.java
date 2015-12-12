@@ -20,6 +20,7 @@ import com.dp.blackhole.protocol.data.DataMessageTypeFactory;
 import com.dp.blackhole.protocol.data.HaltRequest;
 import com.dp.blackhole.protocol.data.HeartBeatRequest;
 import com.dp.blackhole.protocol.data.ProduceRequest;
+import com.dp.blackhole.protocol.data.ProducerRegReply;
 import com.dp.blackhole.protocol.data.RegisterRequest;
 import com.dp.blackhole.protocol.data.RollRequest;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
@@ -36,7 +37,8 @@ public class PartitionConnection implements Sender {
     private BlockingConnection<TransferWrap> connection;
     private ByteBuffer messageBuffer;
     private int messageNum;
-    private long minMsgSent;
+    private int minMsgSent;
+    private int msgBufSize;
     private int reassignDelaySeconds = DEFAULT_DELAY_SECONDS;
     
     
@@ -47,6 +49,7 @@ public class PartitionConnection implements Sender {
         this.partitionId = partitionId;
         this.rollPeriod = topicMeta.getRollPeriod();
         this.minMsgSent = topicMeta.getMinMsgSent();
+        this.msgBufSize = topicMeta.getMsgBufSize();
     }
     
     public String getPartitionId() {
@@ -61,8 +64,8 @@ public class PartitionConnection implements Sender {
         this.reassignDelaySeconds = reassignDelaySeconds;
     }
 
-    public void initializeRemoteConnection() throws IOException {
-        messageBuffer = ByteBuffer.allocate(512 * 1024);
+    public boolean initializeRemoteConnection() throws IOException {
+        messageBuffer = ByteBuffer.allocate(msgBufSize);
         SocketChannel socketChannel = SocketChannel.open();
         socketChannel.configureBlocking(true);
         SocketAddress server = new InetSocketAddress(broker, brokerPort);
@@ -72,6 +75,9 @@ public class PartitionConnection implements Sender {
         TypedFactory wrappedFactory = new DataMessageTypeFactory();
         connection = factory.makeConnection(socketChannel, wrappedFactory);
         doStreamReg();
+        TransferWrap response = connection.read();//TODO good design is set read timeout
+        ProducerRegReply reply = (ProducerRegReply) response.unwrap();
+        return reply.getResult();
     }
     
     private void doStreamReg() throws IOException {

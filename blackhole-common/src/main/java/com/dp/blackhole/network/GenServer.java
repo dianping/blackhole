@@ -76,7 +76,7 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
                             }
                         }
                     } catch (IOException e) {
-                        LOG.warn("IOE catched: ", e);
+                        LOG.warn("IOE catched: " + e.getMessage());
                         closeConnection((Connection) key.attachment());
                     }
                 }

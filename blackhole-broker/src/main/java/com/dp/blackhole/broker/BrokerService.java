@@ -32,6 +32,7 @@ import com.dp.blackhole.protocol.data.MultiFetchRequest;
 import com.dp.blackhole.protocol.data.OffsetReply;
 import com.dp.blackhole.protocol.data.OffsetRequest;
 import com.dp.blackhole.protocol.data.ProduceRequest;
+import com.dp.blackhole.protocol.data.ProducerRegReply;
 import com.dp.blackhole.protocol.data.RegisterRequest;
 import com.dp.blackhole.protocol.data.RollRequest;
 import com.dp.blackhole.storage.FileMessageSet;
@@ -103,41 +104,43 @@ public class BrokerService extends Thread {
 
         public void handleRegisterRequest(RegisterRequest request, TransferWrapNonblockingConnection from) {
             clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT, request.partitionId));
+            boolean success = false;
             try {
-                manager.getPartition(request.topic, request.partitionId, true);
+                success = manager.createPartition(request.topic, request.partitionId);
             } catch (IOException e) {
                 LOG.error("Got an IOE", e);
             }
-            Message msg = PBwrap.wrapReadyStream(request.topic, request.partitionId, request.period, localhost, Util.getTS());
-            Broker.getSupervisor().send(msg);
-            manager.storageRollPeriod(request.topic, request.period);
+            if (success) {
+                Message msg = PBwrap.wrapReadyStream(request.topic, request.partitionId, request.period, localhost, Util.getTS());
+                Broker.getSupervisor().send(msg);
+                manager.storageRollPeriod(request.topic, request.period);
+            }
+            ProducerRegReply reply = new ProducerRegReply(success);
+            from.send(new TransferWrap(reply));
         }
 
         public void handleProduceRequest(ProduceRequest request,
                 TransferWrapNonblockingConnection from) {
-            try {
-                Partition p = manager.getPartition(request.topic,
-                        request.partitionId, true);
-                p.append(request.getMesssageSet());
-            } catch (IOException e) {
-                LOG.error("IOE catched", e);
+            Partition p = manager.getPartition(request.topic, request.partitionId);
+            if (p != null) {
+                try {
+                    p.append(request.getMesssageSet());
+                } catch (IOException e) {
+                    LOG.error("IOE catched", e);
+                }
+            } else {
+                Util.logError(LOG, null, "can not get partition", request.topic, request.partitionId);
             }
         }
 
         public void handleFetchRequest(FetchRequest request,
                 TransferWrapNonblockingConnection from) {
-            Partition p = null;
-            FileMessageSet messages = null;
-            try {
-                p = manager.getPartition(request.topic, request.partitionId, false);
-                if (p == null) {
-                    closeClientOfErrorRequest(from, request);
-                    return;
-                }
-                messages = p.read(request.offset, request.limit);
-            } catch (IOException e) {
-                LOG.error("IOE catched", e);
+            Partition p = manager.getPartition(request.topic, request.partitionId);
+            if (p == null) {
+                closeClientOfErrorRequest(from, request);
+                return;
             }
+            FileMessageSet messages = p.read(request.offset, request.limit);
             
             TransferWrap reply = null;
             if (messages == null) {
@@ -154,18 +157,12 @@ public class BrokerService extends Thread {
             ArrayList<MessageSet> messagesList = new ArrayList<MessageSet>();
             ArrayList<Long> offsetList = new ArrayList<Long>();
             for (FetchRequest f : request.fetches) {
-                Partition p = null;
-                FileMessageSet messages = null;
-                try {
-                    p = manager.getPartition(f.topic, f.partitionId, false);
-                    if (p == null) {
-                        closeClientOfErrorRequest(from, request);
-                        return;
-                    }
-                    messages = p.read(f.offset, f.limit);
-                } catch (IOException e) {
-                    LOG.error("IOE catched", e);
+                Partition p = manager.getPartition(f.topic, f.partitionId);
+                if (p == null) {
+                    closeClientOfErrorRequest(from, request);
+                    return;
                 }
+                FileMessageSet messages = p.read(f.offset, f.limit);
                 partitionList.add(p.getId());
                 messagesList.add(messages);
                 offsetList.add(messages.getOffset());
@@ -177,27 +174,21 @@ public class BrokerService extends Thread {
 
         public void handleOffsetRequest(OffsetRequest request,
                 TransferWrapNonblockingConnection from) {
-            Partition p = null;
-            try {
-                p = manager.getPartition(request.topic, request.partition, false);
-                if (p == null) {
-                    closeClientOfErrorRequest(from, request);
-                    return;
-                }
-            } catch (IOException e) {
-                LOG.error("IOE catched", e);
+            Partition p = manager.getPartition(request.topic, request.partition);
+            if (p == null) {
+                closeClientOfErrorRequest(from, request);
+                return;
             }
             from.send(new TransferWrap(new OffsetReply(request.topic, request.partition, p.getEndOffset())));
         }
         
         public void handleRollRequest(RollRequest request, TransferWrapNonblockingConnection from) {
-            Partition p = null;
+            Partition p = manager.getPartition(request.topic, request.partitionId);
+            if (p == null) {
+                closeClientOfErrorRequest(from, request);
+                return;
+            }
             try {
-                p = manager.getPartition(request.topic, request.partitionId, false);
-                if (p == null) {
-                    closeClientOfErrorRequest(from, request);
-                    return;
-                }
                 RollPartition roll = p.markRollPartition();
                 Broker.getRollMgr().perpareUpload(request.topic, request.partitionId, request.rollPeriod, roll);
             } catch (IOException e) {
@@ -206,13 +197,12 @@ public class BrokerService extends Thread {
         }
         
         public void handleLastRotateRequest(HaltRequest request, TransferWrapNonblockingConnection from) {
-            Partition p = null;
+            Partition p = manager.getPartition(request.topic, request.partitionId);
+            if (p == null) {
+                closeClientOfErrorRequest(from, request);
+                return;
+            }
             try {
-                p = manager.getPartition(request.topic, request.partitionId, false);
-                if (p == null) {
-                    closeClientOfErrorRequest(from, request);
-                    return;
-                }
                 RollPartition roll = p.markRollPartition();
                 Broker.getRollMgr().doClean(request.topic, request.partitionId, request.rollPeriod, roll);
             } catch (IOException e) {

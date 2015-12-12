@@ -1,18 +1,15 @@
 package com.dp.blackhole.consumer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.consumer.ConsumerConnector;
 import com.dp.blackhole.consumer.api.CommittedOffsetStrategy;
 import com.dp.blackhole.consumer.api.Consumer;
 import com.dp.blackhole.consumer.api.ConsumerConfig;
 import com.dp.blackhole.consumer.api.MessagePack;
-import com.dp.blackhole.consumer.api.TailOffsetStrategy;
 import com.dp.blackhole.consumer.api.decoder.StringDecoder;
 
 public class TestConsumer {
@@ -36,7 +33,6 @@ public class TestConsumer {
         String topic = args[2 + debugIndex];
         String group = args[3 + debugIndex];
         int numConsumerInOneProcess = Integer.parseInt(args[4 + debugIndex]);
-        String fromTail = args[5 + debugIndex];
         long durationMills = Long.MAX_VALUE;
         try {
             durationMills = Long.parseLong(args[6 + debugIndex]);
@@ -48,11 +44,9 @@ public class TestConsumer {
         }
         List<MessageStream> messageStreams = new ArrayList<MessageStream>();
 
-        ConsumerConnector.getInstance().init(supervisorHost, port, true, 6000);
-        Properties prop = new Properties();
-        prop.put("consumer.offsetRefereeClass.name", TailOffsetStrategy.class.getCanonicalName());
-        prop.put("consumer.isSubscribeFromTail", fromTail);
-        ConsumerConfig config = new ConsumerConfig(prop);
+        ConsumerConfig config = new ConsumerConfig();
+        config.setSupervisorHost(supervisorHost);
+        config.setSupervisorPort(port);
         
         for (int i = 0; i < numConsumerInOneProcess; i++) {
             Consumer consumer = new Consumer(topic, group, config, new CommittedOffsetStrategy());
@@ -95,6 +89,7 @@ public class TestConsumer {
         
         @Override
         public void run() {
+            LOG.info("WORK THREAD " + Thread.currentThread().getName());
             while (running) {
                 long i =0;
                 for (MessagePack entity : stream) {

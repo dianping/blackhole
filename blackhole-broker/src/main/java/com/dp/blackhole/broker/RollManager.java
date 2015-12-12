@@ -121,16 +121,11 @@ public class RollManager {
         //ftp uploader use gz compression algo by default
         FTPConfigration ftpConf;
         if ((ftpConf = FTPConfigrationLoader.getFTPConfigration(ident.topic)) != null) {
-            Partition p;
-            try {
-                p = manager.getPartition(ident.topic, ident.source, false);
-                LOG.info("start to ftp " + ident);
-                FTPUpload ftpUpload = new FTPUpload(this, ftpConf, ident, roll, p);
-                Thread ftpThread = new Thread(ftpUpload);
-                ftpThread.start();
-            } catch (IOException e) {
-                LOG.error("Can not get a partition to upload with FTP of ident: " + ident, e);
-            }
+            Partition p = manager.getPartition(ident.topic, ident.source);
+            LOG.info("start to ftp " + ident);
+            FTPUpload ftpUpload = new FTPUpload(this, ftpConf, ident, roll, p);
+            Thread ftpThread = new Thread(ftpUpload);
+            ftpThread.start();
         }
         return true;
     }

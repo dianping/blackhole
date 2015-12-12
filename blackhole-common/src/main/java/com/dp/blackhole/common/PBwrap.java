@@ -15,6 +15,7 @@ import com.dp.blackhole.protocol.control.ConfReqPB.ConfReq;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.AppConfRes;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes.LxcConfRes;
+import com.dp.blackhole.protocol.control.ConsumerExitPB.ConsumerExit;
 import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.DumpAppPB.DumpApp;
 import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
@@ -165,6 +166,9 @@ public class PBwrap {
             msg.setPartitionRequireBroker((PartitionRequireBroker) message);
             break;
         case UNRESOLVED_CONNECTION:
+            break;
+        case CONSUMER_EXIT:
+            msg.setConsumerExit((ConsumerExit) message);
             break;
         default:
             break;
@@ -453,6 +457,14 @@ public class PBwrap {
         builder.setConsumerId(consumerId);
         builder.setTopic(topic);
         return wrapMessage(MessageType.CONSUMERREGFAIL, builder.build());
+    }
+    
+    public static Message wrapConsumerExit(String group, String consumerId, String topic) {
+        ConsumerExit.Builder builder = ConsumerExit.newBuilder();
+        builder.setGroupId(group);
+        builder.setConsumerId(consumerId);
+        builder.setTopic(topic);
+        return wrapMessage(MessageType.CONSUMER_EXIT, builder.build());
     }
     
     /**

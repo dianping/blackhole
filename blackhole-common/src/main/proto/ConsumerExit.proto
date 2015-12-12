@@ -1,0 +1,10 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "ConsumerExitPB";
+
+message ConsumerExit {
+    required string groupId = 1;
+    required string consumerId = 2;
+    required string topic = 3;
+}

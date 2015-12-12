@@ -33,6 +33,7 @@ import "ProducerIdAssign.proto";
 import "NoavailableConf.proto";
 import "AssignPartition.proto";
 import "PartitionRequireBroker.proto";
+import "ConsumerExit.proto";
 
 message Message {
     enum MessageType {
@@ -82,6 +83,7 @@ message Message {
         ASSIGN_PARTITION = 44;
         PARTITION_REQUIRE_BROKER = 45;
         UNRESOLVED_CONNECTION = 46;
+        CONSUMER_EXIT = 47;
     }
 
     required MessageType type = 1;
@@ -116,4 +118,5 @@ message Message {
     optional ProducerIdAssign producerIdAssign = 30;
     optional AssignPartition assignPartition = 31;
     optional PartitionRequireBroker partitionRequireBroker = 32;
+    optional ConsumerExit consumerExit = 33;
 }

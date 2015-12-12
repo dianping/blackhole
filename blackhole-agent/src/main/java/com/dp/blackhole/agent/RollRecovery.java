@@ -37,6 +37,7 @@ public class RollRecovery implements Runnable{
     private TransferThrottler throttler;
     private File transferFile;
     private boolean isTransferFileCompressed;
+    private long startWaitTime;
 
     public RollRecovery(Agent node, String brokerServer, int port,
             AgentMeta topicMeta, final long rollTimestamp, boolean isFinal,
@@ -53,6 +54,15 @@ public class RollRecovery implements Runnable{
         if (topicMeta.getBandwidthPerSec() > 0) {
             this.throttler = new TransferThrottler(topicMeta.getBandwidthPerSec());
         }
+        this.setStartWaitTime((new Random().nextInt(10) + 10) * 1000);
+    }
+
+    public long getStartWaitTime() {
+        return startWaitTime;
+    }
+
+    public void setStartWaitTime(long startWaitTime) {
+        this.startWaitTime = startWaitTime;
     }
 
     public void stop() {
@@ -83,7 +93,7 @@ public class RollRecovery implements Runnable{
                 + " meta=" + topicMeta);
         try {
             //sleep random seconds to avoid the rarely situation which latest rotation record not found
-            Thread.sleep((new Random().nextInt(10) + 10) * 1000);
+            Thread.sleep(startWaitTime);
         } catch (InterruptedException e) {
             LOG.warn("Thread interrupted. ", e);
             node.reportRecoveryFail(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal);

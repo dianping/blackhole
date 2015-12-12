@@ -98,7 +98,7 @@ public class LogReader implements Runnable {
         if (currentReaderState.compareAndSet(ReaderState.ASSIGNED, ReaderState.UNASSIGNED)) {
             int reassignDelay = sender.getReassignDelaySeconds();
             //must unregister from ConnectionChecker before re-assign
-            agent.getStreamHealthChecker().unregister(sender);
+            agent.getLingeringSender().unregister(sender);
             agent.reportRemoteSenderFailure(meta.getTopicId(), meta.getSource(), Util.getTS(), reassignDelay);
         }
     }
