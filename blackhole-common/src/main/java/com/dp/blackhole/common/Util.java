@@ -728,4 +728,16 @@ public class Util {
         }
         return result;
     }
+    
+    public static void logError(Log log, Throwable t, String... args) {
+        StringBuffer sb = new StringBuffer();
+        for (String arg : args) {
+            sb.append(arg).append(" ");
+        }
+        if (t == null) {
+            log.error(sb.toString());
+        } else {
+            log.error(sb.toString(), t);
+        }
+    }
 }

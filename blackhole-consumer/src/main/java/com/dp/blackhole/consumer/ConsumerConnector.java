@@ -92,6 +92,7 @@ public class ConsumerConnector implements Runnable {
                     port = configCache.getIntProperty("blackhole.supervisor.port");
                     configSource = "LION";
                 } catch (Exception le) {
+                    LOG.warn("Finally, getting config from lion faild too", le);
                 }
             }
         }
@@ -372,7 +373,7 @@ public class ConsumerConnector implements Runnable {
     }
     
     class UserLiveCheck extends Thread {
-        private static final long DEFUALT_CHECK_PERIOD = 6 * 1000L;
+        private static final long DEFUALT_CHECK_PERIOD = 5 * 60 * 1000L;
         @Override
         public void run() {
             LOG.info("start user live check thread with period " + DEFUALT_CHECK_PERIOD + " millisecond");

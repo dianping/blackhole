@@ -2,6 +2,7 @@ package com.dp.blackhole.consumer;
 
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.dp.blackhole.consumer.api.MessagePack;
 
@@ -13,7 +14,7 @@ public class MessageStream implements Iterable<MessagePack> {
 
     private final ConsumerIterator consumerIterator;
     
-    private Thread userWorkThread;
+    private AtomicReference<Thread> userWorkThread;
 
     public MessageStream(String topic, BlockingQueue<FetchedDataChunk> queue, int consumerTimeoutMs) {
         super();
@@ -23,12 +24,12 @@ public class MessageStream implements Iterable<MessagePack> {
     }
 
     public Thread getUserWorkThread() {
-        return userWorkThread;
+        return userWorkThread.get();
     }
 
     @Override
     public Iterator<MessagePack> iterator() {
-        this.userWorkThread = Thread.currentThread();
+        this.userWorkThread = new AtomicReference<Thread>(Thread.currentThread());
         return consumerIterator;
     }
 

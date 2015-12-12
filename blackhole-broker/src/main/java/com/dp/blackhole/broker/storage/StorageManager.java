@@ -58,6 +58,8 @@ public class StorageManager {
             if (p != null) {
                 p.cleanupSegments(Util.getTS(), 0);
                 map.remove(partitionId);
+            } else {
+                Util.logError(Log, null, "can to get partition when remove", topic, partitionId);
             }
         }
     }
@@ -96,7 +98,7 @@ public class StorageManager {
         }
     }
     
-    public boolean setPartition(String topic, String partitionId) throws IOException {
+    public boolean createPartition(String topic, String partitionId) throws IOException {
         if (topic == null || partitionId == null) {
             Log.error("topic " + topic + " or partition " + partitionId + " should not be null");
             return false;

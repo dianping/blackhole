@@ -42,7 +42,7 @@ public class ProducerConnector implements Runnable {
     private static final long DEFAULT_PRODUCER_ROLL_PERIOD = 3600;
     //this is a static instance, concurrency of all actions should be take to account
     private static ProducerConnector instance = new ProducerConnector();
-    private LingeringSender streamHealthChecker;
+    private LingeringSender linger;
     
     public static ProducerConnector getInstance() {
         return instance;
@@ -68,8 +68,8 @@ public class ProducerConnector implements Runnable {
         workingProducers = new ConcurrentHashMap<String, Map<String,Producer>>();
     }
     
-    public LingeringSender getStreamHealthChecker() {
-        return streamHealthChecker;
+    public LingeringSender getLingeringSender() {
+        return linger;
     }
 
     public boolean isInitialized() {
@@ -124,8 +124,8 @@ public class ProducerConnector implements Runnable {
     }
 
     private void launchHealthStreamChecker(String lingerMs) {
-        streamHealthChecker = new LingeringSender(Util.parseInt(lingerMs, LingeringSender.DEFAULT_LINGER_MS));
-        streamHealthChecker.start();
+        linger = new LingeringSender(Util.parseInt(lingerMs, LingeringSender.DEFAULT_LINGER_MS));
+        linger.start();
     }
 
     public void prepare(Producer producer) {
@@ -299,7 +299,7 @@ public class ProducerConnector implements Runnable {
                         } else {
                             throw new IOException(producerId + " TopicReg with ["
                                     + broker + ":" + brokerPort
-                                    + "] unsuccessfully cause broker set partition faild");
+                                    + "] unsuccessfully cause broker create partition faild");
                         }
                     } catch (IOException e) {
                         LOG.error("init remote connection fail, register again.", e);
@@ -307,7 +307,7 @@ public class ProducerConnector implements Runnable {
                         continue;
                     }
                     p.assignPartitionConnection(partitionConnection);
-                    streamHealthChecker.register(topic, partitionId, partitionConnection);
+                    linger.register(topic, partitionId, partitionConnection);
                 }
                 break;
             case RECOVERY_ROLL:

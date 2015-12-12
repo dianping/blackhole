@@ -106,7 +106,7 @@ public class BrokerService extends Thread {
             clients.put(from, new ClientDesc(request.topic, ClientDesc.AGENT, request.partitionId));
             boolean success = false;
             try {
-                success = manager.setPartition(request.topic, request.partitionId);
+                success = manager.createPartition(request.topic, request.partitionId);
             } catch (IOException e) {
                 LOG.error("Got an IOE", e);
             }
@@ -114,11 +114,6 @@ public class BrokerService extends Thread {
                 Message msg = PBwrap.wrapReadyStream(request.topic, request.partitionId, request.period, localhost, Util.getTS());
                 Broker.getSupervisor().send(msg);
                 manager.storageRollPeriod(request.topic, request.period);
-            } else {
-//                //this is the fast way to let agent/producer know its connection be refused,
-//                //so agent/producer should handle the IOException it would cache
-//                LOG.warn("faild to set Partition for " + request.topic + " " + request.partitionId + ", refuse connection");
-//                from.close();
             }
             ProducerRegReply reply = new ProducerRegReply(success);
             from.send(new TransferWrap(reply));
@@ -127,13 +122,14 @@ public class BrokerService extends Thread {
         public void handleProduceRequest(ProduceRequest request,
                 TransferWrapNonblockingConnection from) {
             Partition p = manager.getPartition(request.topic, request.partitionId);
-            //partition may not be find cause set partition unsuccessfully
             if (p != null) {
                 try {
                     p.append(request.getMesssageSet());
                 } catch (IOException e) {
                     LOG.error("IOE catched", e);
                 }
+            } else {
+                Util.logError(LOG, null, "can not get partition", request.topic, request.partitionId);
             }
         }
 

@@ -174,7 +174,7 @@ public class Producer {
         AtomicReference<PartitionConnectionState> currentState = partitionStateMap.get(partitionId);
         if (currentState != null && currentState.compareAndSet(PartitionConnectionState.ASSIGNED, PartitionConnectionState.UNASSIGNED)) {
             int reassignDelay = partitionConnection.getReassignDelaySeconds();
-            connector.getStreamHealthChecker().unregister(partitionConnection);
+            connector.getLingeringSender().unregister(partitionConnection);
             partitionConnectionMap.remove(partitionConnection);
             //must unregister from ConnectionChecker before re-assign
             connector.reportPartitionConnectionFailure(topic, producerId, partitionId, Util.getTS(), reassignDelay);
