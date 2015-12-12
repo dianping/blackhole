@@ -38,7 +38,7 @@ public class SimLogger implements Runnable {
             int i = 0;
             int j = 0;
             while (!Thread.interrupted()) {
-                if (i%10 == 0) {
+                if (i%1000 == 0) {
                     if (file.exists()) {
                         target = new File(TEST_ROLL_FILE + '.' + (j++));
                         LOG.debug("Renaming file " + file + " to " + target);

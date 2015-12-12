@@ -56,6 +56,8 @@ public class TestLogReader {
         properties.setProperty("GenServer.handlercount", "1");
         properties.setProperty("broker.service.port", "40001");
         properties.setProperty("broker.storage.dir", tmpDir);
+        properties.setProperty("broker.storage.splitThreshold", "536870912");
+        properties.setProperty("broker.storage.flushThreshold", "4096");
         BrokerService pubservice = new BrokerService(properties);
         new SimBroker(port);
         SimBroker.getRollMgr().init("/tmp/hdfs", "gz", 40020, 5000, 1, 1, 60000);
@@ -99,20 +101,19 @@ public class TestLogReader {
         }
         agent.setListener(listener);
         Thread readerThread = null;
+        RemoteSender sender = new RemoteSender(topicMeta, localhost, port);
+        sender.initializeRemoteConnection();
+        verifyStatic();
+        LogReader reader = new LogReader(agent, topicMeta, "/tmp");
+        reader.assignSender(sender);
+        readerThread = new Thread(reader);
+        readerThread.start();
+        reader.getLogFSM().doFileAppendForce();
         try {
-            RemoteSender sender = new RemoteSender(topicMeta, localhost, port);
-            sender.initializeRemoteConnection();
-            verifyStatic();
-            LogReader reader = new LogReader(agent, topicMeta, "/tmp");
-            reader.assignSender(sender);
-            readerThread = new Thread(reader);
-            readerThread.start();
-            reader.getLogFSM().doFileAppendForce();
-            Thread.sleep(5000);
+            Thread.sleep(6000);// wait sending 10s
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        readerThread.interrupt();
         ByteBuffer buffer = ByteBuffer.allocate(1024*1024);
         ByteBufferChannel channel = new ByteBufferChannel(buffer);
         Segment segment = new Segment(tmpDir + "/" + MAGIC + "/"+ localhost, 0, false, false, 1024, 108);
@@ -130,6 +131,7 @@ public class TestLogReader {
         String v1 = expectedLines.get(expectedLines.size() - 1).split(":")[1];
         String v2 = decoder.decode(mo.getMessage().payload()).toString().split(":")[1];
         assertEquals(v1.length(), v2.length());
+        readerThread.interrupt();
     }
     private void fetchFileMessageSet(GatheringByteChannel channel, FileMessageSet messages) throws IOException {
         int read = 0;

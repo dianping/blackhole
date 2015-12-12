@@ -98,6 +98,7 @@ public class TestHDFSRecovery {
         TopicId topicId = new TopicId(MAGIC, null);
         AgentMeta appLog = new AgentMeta(topicId, file.getAbsolutePath(), 3600, 3600, 1024, 1L, 5, 4096, 1024*1024, 1, -1);
         RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false, true, state);
+        clientTask.setStartWaitTime(0);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();
         convertToGZIP(file);
