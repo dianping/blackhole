@@ -21,6 +21,7 @@ public class DataMessageTypeFactory implements TypedFactory {
     public static final int RotateOrRollRequest = 8;
     public static final int RegisterRequest = 9;
     public static final int LastRotateRequest = 10;
+    public static final int ProducerRegReply = 11;
     
     @Override
     public TypedWrappable getWrappedInstanceFromType(int type) {
@@ -58,6 +59,9 @@ public class DataMessageTypeFactory implements TypedFactory {
             break;
         case 10:
             ret = new HaltRequest();
+            break;
+        case 11:
+            ret = new ProducerRegReply();
             break;
         default:
             ret = new UndefinedRequest();

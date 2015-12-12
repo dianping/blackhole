@@ -20,6 +20,7 @@ import com.dp.blackhole.protocol.data.DataMessageTypeFactory;
 import com.dp.blackhole.protocol.data.HaltRequest;
 import com.dp.blackhole.protocol.data.HeartBeatRequest;
 import com.dp.blackhole.protocol.data.ProduceRequest;
+import com.dp.blackhole.protocol.data.ProducerRegReply;
 import com.dp.blackhole.protocol.data.RegisterRequest;
 import com.dp.blackhole.protocol.data.RollRequest;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
@@ -61,7 +62,7 @@ public class PartitionConnection implements Sender {
         this.reassignDelaySeconds = reassignDelaySeconds;
     }
 
-    public void initializeRemoteConnection() throws IOException {
+    public boolean initializeRemoteConnection() throws IOException {
         messageBuffer = ByteBuffer.allocate(512 * 1024);
         SocketChannel socketChannel = SocketChannel.open();
         socketChannel.configureBlocking(true);
@@ -72,6 +73,9 @@ public class PartitionConnection implements Sender {
         TypedFactory wrappedFactory = new DataMessageTypeFactory();
         connection = factory.makeConnection(socketChannel, wrappedFactory);
         doStreamReg();
+        TransferWrap response = connection.read();//TODO good design is set read timeout
+        ProducerRegReply reply = (ProducerRegReply) response.unwrap();
+        return reply.getResult();
     }
     
     private void doStreamReg() throws IOException {

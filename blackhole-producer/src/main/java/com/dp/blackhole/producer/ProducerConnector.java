@@ -292,7 +292,15 @@ public class ProducerConnector implements Runnable {
                     Producer p = producerMap.get(producerId);
                     PartitionConnection partitionConnection = new PartitionConnection(p.geTopicMeta(), topic, broker, brokerPort, partitionId);
                     try {
-                        partitionConnection.initializeRemoteConnection();
+                        boolean success = partitionConnection.initializeRemoteConnection();
+                        if (success) {
+                            LOG.info(producerId + " TopicReg with ["
+                                    + broker + ":" + brokerPort + "] successfully");
+                        } else {
+                            throw new IOException(producerId + " TopicReg with ["
+                                    + broker + ":" + brokerPort
+                                    + "] unsuccessfully cause broker set partition faild");
+                        }
                     } catch (IOException e) {
                         LOG.error("init remote connection fail, register again.", e);
                         producerReg(topic, producerId, 0);

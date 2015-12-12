@@ -443,7 +443,15 @@ public class Agent implements Runnable {
                         int brokerPort = assignBroker.getBrokerPort();
                         RemoteSender sender = new RemoteSender(topicMeta, broker, brokerPort);
                         try {
-                            sender.initializeRemoteConnection();
+                            boolean success = sender.initializeRemoteConnection();
+                            if (success) {
+                                LOG.info(topicId + " TopicReg with ["
+                                        + broker + ":" + brokerPort + "] successfully");
+                            } else {
+                                throw new IOException(topicId + " TopicReg with ["
+                                        + broker + ":" + brokerPort
+                                        + "] unsuccessfully cause broker set partition faild");
+                            }
                         } catch (IOException e) {
                             LOG.error("init remote connection fail " 
                                     + broker + ":" + brokerPort + ", register again.", e);

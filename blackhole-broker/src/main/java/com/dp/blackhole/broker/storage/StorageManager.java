@@ -55,8 +55,10 @@ public class StorageManager {
         Map<String, Partition> map = storage.get(topic);
         if (map != null) {
             Partition p = map.get(partitionId);
-            p.cleanupSegments(Util.getTS(), 0);
-            map.remove(partitionId);
+            if (p != null) {
+                p.cleanupSegments(Util.getTS(), 0);
+                map.remove(partitionId);
+            }
         }
     }
     
@@ -81,13 +83,27 @@ public class StorageManager {
         
     }
 
-    public Partition getPartition(String topic, String partitionId, boolean createIfNonexist) throws IOException {
+    public Partition getPartition(String topic, String partitionId) {
+        if (topic == null || partitionId == null) {
+            Log.error("topic " + topic + " or partition " + partitionId + " should not be null");
+            return null;
+        }
+        ConcurrentHashMap<String, Partition> map = storage.get(topic);
+        if (map == null) {
+            return null;
+        } else {
+            return map.get(partitionId);
+        }
+    }
+    
+    public boolean setPartition(String topic, String partitionId) throws IOException {
+        if (topic == null || partitionId == null) {
+            Log.error("topic " + topic + " or partition " + partitionId + " should not be null");
+            return false;
+        }
         // add new topic if not exist
         ConcurrentHashMap<String, Partition> map = storage.get(topic);
         if (map == null) {
-            if (!createIfNonexist) {
-                return null;
-            }
             ConcurrentHashMap<String, Partition> newMap = new ConcurrentHashMap<String, Partition>();
             storage.putIfAbsent(topic, newMap);
             map = storage.get(topic);
@@ -96,15 +112,12 @@ public class StorageManager {
         // add new partition if not exist
         Partition partition = map.get(partitionId);
         if (partition == null) {
-            if (!createIfNonexist) {
-                return null;
-            }
             Partition newPartition = new Partition(basedir, topic, partitionId, splitThreshold, flushThreshold);
             map.putIfAbsent(partitionId, newPartition);
-            //use old partition if it has been put in anther thread
-            partition = map.get(partitionId);
+            return true;
+        } else {
+            return false;
         }
-        return partition;
     }
     
     public int getFlushThreshold() {
