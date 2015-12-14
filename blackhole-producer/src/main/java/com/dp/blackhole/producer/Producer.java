@@ -21,7 +21,7 @@ public class Producer {
     private static final Log LOG = LogFactory.getLog(Producer.class);
     private enum PartitionConnectionState {UNASSIGNED, ASSIGNED, STOPPED}
     private final String topic;
-    private String producerId;
+    private AtomicReference<String> producerId;
     private TopicCommonMeta topicMeta;
     private Map<PartitionConnection, String> partitionConnectionMap;
     private ConcurrentHashMap<String, AtomicReference<PartitionConnectionState>> partitionStateMap;
@@ -35,6 +35,7 @@ public class Producer {
     
     public Producer(String topic, Properties prop) {
         this.topic = topic;
+        this.producerId = new AtomicReference<String>();
         this.connector = ProducerConnector.getInstance();
         this.connector.init(prop);
         this.partitionConnectionMap = new ConcurrentHashMap<PartitionConnection, String>();
@@ -49,11 +50,11 @@ public class Producer {
     }
 
     public String getProducerId() {
-        return producerId;
+        return producerId.get();
     }
 
     void setProducerId(String producerId) {
-        this.producerId = producerId;
+        this.producerId.set(producerId);
     }
     
     public TopicCommonMeta geTopicMeta() {
@@ -132,6 +133,7 @@ public class Producer {
     }
     
     public void closeProducer() {
+        //TODO BE REVIEW
         for (Map.Entry<PartitionConnection, String> entry : partitionConnectionMap.entrySet()) {
             PartitionConnection conn = entry.getKey();
             String partitionId = entry.getValue();
@@ -157,15 +159,8 @@ public class Producer {
     void assignPartitionConnection(PartitionConnection partitionConnection) {
         String partitionId = partitionConnection.getPartitionId();
         partitionConnectionMap.put(partitionConnection, partitionId);
-        AtomicReference<PartitionConnectionState> oldState = partitionStateMap.putIfAbsent(
-                partitionId,
-                new AtomicReference<PartitionConnectionState>(
-                        PartitionConnectionState.ASSIGNED));
-        if (oldState == null) {
-            LOG.info("Assign a new parition connection for " + partitionId + " -> " + PartitionConnectionState.ASSIGNED.name());
-        } else {
-            LOG.error("partition connection has been assigned.");
-        }
+        partitionStateMap.put(partitionId, new AtomicReference<PartitionConnectionState>(PartitionConnectionState.ASSIGNED));
+        LOG.info("Assign a new parition connection for " + partitionId + " -> " + PartitionConnectionState.ASSIGNED.name());
     }
     
     private void reassignPartitionConnection(PartitionConnection partitionConnection) {
@@ -173,11 +168,13 @@ public class Producer {
         partitionConnection.close();
         AtomicReference<PartitionConnectionState> currentState = partitionStateMap.get(partitionId);
         if (currentState != null && currentState.compareAndSet(PartitionConnectionState.ASSIGNED, PartitionConnectionState.UNASSIGNED)) {
+            LOG.info("remove partition connection: " + PartitionConnectionState.ASSIGNED.name() + " -> " + currentState.get().name());
             int reassignDelay = partitionConnection.getReassignDelaySeconds();
             connector.getLingeringSender().unregister(partitionConnection);
             partitionConnectionMap.remove(partitionConnection);
+            partitionStateMap.remove(partitionId);
             //must unregister from ConnectionChecker before re-assign
-            connector.reportPartitionConnectionFailure(topic, producerId, partitionId, Util.getTS(), reassignDelay);
+            connector.reportPartitionConnectionFailure(topic, partitionId, Util.getTS(), reassignDelay);
         }
     }
 }

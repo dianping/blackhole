@@ -13,7 +13,7 @@ public class TestSimpleConsumer {
    
     private static final Log LOG = LogFactory.getLog(TestSimpleConsumer.class);
     public static void main( String[] args ) throws InterruptedException {
-        String topic = "localtest";
+        String topic = "testproducer";
         String group = "t123";
         boolean debug = false;
         ConsumerConfig config = new ConsumerConfig();
@@ -28,14 +28,14 @@ public class TestSimpleConsumer {
         while(true) {
             Thread.sleep(1000);
             count++;
-            if (count == 20) {
-                consumer.shutdown();
-            }
-            if (count == 30) {
-                break;
-            }
+//            if (count == 20) {
+//                consumer.shutdown();
+//            }
+//            if (count == 30) {
+//                break;
+//            }
         }
-        t.shutdown();
+//        t.shutdown();
     }
     
     static class MessageConsumeThread extends Thread {

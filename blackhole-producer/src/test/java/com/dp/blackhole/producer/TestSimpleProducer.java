@@ -2,6 +2,7 @@ package com.dp.blackhole.producer;
 
 import java.util.Properties;
 
+import com.dp.blackhole.common.Sender;
 import com.dp.blackhole.common.Util;
 
 public class TestSimpleProducer {
@@ -22,7 +23,11 @@ public class TestSimpleProducer {
         long delay = 10000L;
         String message = Util.getTS() + "-------------";
         boolean ret1 = producer.sendMessage(message);
-        System.out.println("sended " + Util.getTS());
+        if (ret1) {
+            System.out.println("sended " + Util.getTS());
+        } else {
+            System.out.println("not send cause ioexcption");
+        }
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {
