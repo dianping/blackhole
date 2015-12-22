@@ -44,6 +44,7 @@ import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.DumpAppPB.DumpApp;
 import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
+import com.dp.blackhole.protocol.control.HeartbeatPB.Heartbeat;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
 import com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker;
@@ -242,13 +243,19 @@ public class Supervisor {
         }
     }
     
-    private void handleHeartBeat(ByteBufferNonblockingConnection from) {
+    private void handleHeartBeat(Message msg, ByteBufferNonblockingConnection from) {
         ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
             return;
         }
         desc.updateHeartBeat();
+        try {
+            Heartbeat heartbeat = msg.getHeartbeat();
+            desc.setVersion(heartbeat.getVersion());
+        } catch (Exception e) {
+            //Compatible with the old version
+        }
     }
     
     private void addStream(Stream stream) {
@@ -895,6 +902,16 @@ public class Supervisor {
         String listApps = sb.toString();
         Message message = PBwrap.wrapDumpReply(listApps);
         send(from, message);
+    }
+    
+    public List<ConnectionInfo> getConnectionInfoByVersion(String version) {
+        List<ConnectionInfo> infos = new ArrayList<ConnectionInfo>();
+        for(ConnectionDesc desc : connections.values()) {
+            if(desc.getVersion().equalsIgnoreCase(version)) {
+                infos.add(desc.getConnectionInfo());
+            }
+        }
+        return infos;
     }
     
     public void listIdle(ByteBufferNonblockingConnection from) {
@@ -1963,7 +1980,7 @@ public class Supervisor {
             
             switch (msg.getType()) {
             case HEARTBEART:
-                handleHeartBeat(from);
+                handleHeartBeat(msg, from);
                 break;
             case BROKER_REG:
                 LOG.debug("received: " + msg);

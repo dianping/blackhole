@@ -9,6 +9,20 @@
 	<artifactId>blackhole-agent</artifactId>
 	<name>blackhole-agent</name>
 	<packaging>jar</packaging>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<jar-version>${project.artifactId}-${project.version}</jar-version>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>net.contentobjects.jnotify</groupId>

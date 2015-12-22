@@ -34,6 +34,7 @@ public class Broker {
     private static Broker broker;
     private static BrokerService brokerService;
     private static RollManager rollMgr;
+    private static String version = Util.getVersion();
     private BrokerProcessor processor;
     private ByteBufferNonblockingConnection supervisor;
     private GenClient<ByteBuffer, ByteBufferNonblockingConnection, BrokerProcessor> client;
@@ -77,7 +78,8 @@ public class Broker {
             thread.start();
         }
         
-        Cat.logEvent("startup", Util.formatTs(Util.getTS()));
+        Cat.logEvent("startup", version);
+        LOG.info("Broker startup, version " + version);
         rollMgr.init(hdfsbasedir, copmressionAlgoName, recoveryPort, clockSyncBufMillis, maxUploadThreads, maxRecoveryThreads, recoverySocketTimeout);
         
         brokerService = new BrokerService(prop);
@@ -139,7 +141,7 @@ public class Broker {
         public void OnConnected(ByteBufferNonblockingConnection connection) {
             supervisor = connection;          
             registerNode();
-            heartbeat = new HeartBeat(supervisor);
+            heartbeat = new HeartBeat(supervisor, version);
             heartbeat.start();
         }
 

@@ -58,4 +58,5 @@ public abstract class ParamsKey {
     public static final String TOPIC_KEY = "topic";
     public static final String PARTITION_KEY = "partition";
     public static final String BROKER_KEY = "broker";
+    public static final String DEFAULT_VERSION = "UNSPCIFIED";
 }

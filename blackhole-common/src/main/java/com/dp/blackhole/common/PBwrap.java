@@ -22,6 +22,7 @@ import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
 import com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
 import com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType;
+import com.dp.blackhole.protocol.control.HeartbeatPB.Heartbeat;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode;
@@ -56,6 +57,7 @@ public class PBwrap {
             msg.setNoAvailableNode((NoAvailableNode) message);
             break;
         case HEARTBEART:
+            msg.setHeartbeat((Heartbeat) message);
             break;
         case TOPICREPORT:
             msg.setTopicReport((TopicReport) message);
@@ -176,8 +178,12 @@ public class PBwrap {
         return msg.build();
     }
     
-    public static Message wrapHeartBeat() {
-        return wrapMessage(MessageType.HEARTBEART, null);
+    public static Message wrapHeartBeat(String version) {
+        Heartbeat.Builder builder = Heartbeat.newBuilder();
+        if (version != null) {
+            builder.setVersion(version);
+        }
+        return wrapMessage(MessageType.HEARTBEART, builder.build());
     }
     
     public static Message wrapNoAvailableNode(String topic, String instanceId, String source) {

@@ -39,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
+import com.jcabi.manifests.Manifests;
 
 public class Util {
     public static final Log LOG = LogFactory.getLog(Util.class);
@@ -739,5 +740,18 @@ public class Util {
         } else {
             log.error(sb.toString(), t);
         }
+    }
+    
+    public static String getVersion() {
+        String version = null;
+        try {
+            version = Manifests.read("jar-version");
+            if (version.startsWith("$")) {
+                return null;
+            }
+        } catch (Throwable t) {
+            LOG.warn("Can not get jar-version", t);
+        }
+        return version;
     }
 }

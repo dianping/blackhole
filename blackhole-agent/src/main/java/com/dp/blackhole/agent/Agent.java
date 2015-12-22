@@ -54,6 +54,7 @@ public class Agent implements Runnable {
     private ExecutorService recoveryThreadPool;
     private FileListener listener;
     private static String hostname;
+    private static String version = Util.getVersion();
     private ScheduledThreadPoolExecutor scheduler;
     private static Map<TopicId, AgentMeta> topics = new ConcurrentHashMap<TopicId, AgentMeta>();
     private static Map<AgentMeta, LogReader> topicReaders = new ConcurrentHashMap<AgentMeta, LogReader>();
@@ -66,7 +67,6 @@ public class Agent implements Runnable {
     private final String baseDirWildcard;
     private boolean paasModel = false;
     private String snapshotPersistDir;
-    
     private LingeringSender linger;
     
     public Agent() {
@@ -77,9 +77,9 @@ public class Agent implements Runnable {
         this.baseDirWildcard = baseDirWildcard;
         if (baseDirWildcard != null) {
             paasModel = true;
-            LOG.info("Agent deployed for LXC.");
+            LOG.info("Agent deployed for LXC. version is " + version);
         } else {
-            LOG.info("Agent deployed for KVM.");
+            LOG.info("Agent deployed for KVM. version is " + version);
         }
         pool = Executors.newCachedThreadPool(new DaemonThreadFactory("LogReader"));
         recoveryThreadPool = Executors.newFixedThreadPool(2, new DaemonThreadFactory("Recovery"));
@@ -324,7 +324,7 @@ public class Agent implements Runnable {
                 requireConfigFromSupersivor(0);
             }
             if (this.heartbeat == null || !this.heartbeat.isAlive()) {
-                this.heartbeat = new HeartBeat(supervisor);
+                this.heartbeat = new HeartBeat(supervisor, version);
                 this.heartbeat.setDaemon(true);
                 this.heartbeat.start();
             }

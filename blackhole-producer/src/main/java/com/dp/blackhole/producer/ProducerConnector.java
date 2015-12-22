@@ -44,6 +44,7 @@ public class ProducerConnector implements Runnable {
     //this is a static instance, concurrency of all actions should be take to account
     private static ProducerConnector instance = new ProducerConnector();
     private LingeringSender linger;
+    private static String version = Util.getVersion();
     
     public static ProducerConnector getInstance() {
         return instance;
@@ -209,7 +210,7 @@ public class ProducerConnector implements Runnable {
         public void OnConnected(ByteBufferNonblockingConnection connection) {
             LOG.info("ProducerConnector connected");
             supervisor = connection;
-            heartbeat = new HeartBeat(supervisor);
+            heartbeat = new HeartBeat(supervisor, version);
             heartbeat.start();
             if (hasConnectBefore) {
                 for (LinkedBlockingQueue<Producer> unAssignedProducers : unAssignIdProducers.values()) {

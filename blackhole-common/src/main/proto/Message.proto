@@ -34,6 +34,7 @@ import "NoavailableConf.proto";
 import "AssignPartition.proto";
 import "PartitionRequireBroker.proto";
 import "ConsumerExit.proto";
+import "Heartbeat.proto";
 
 message Message {
     enum MessageType {
@@ -119,4 +120,5 @@ message Message {
     optional AssignPartition assignPartition = 31;
     optional PartitionRequireBroker partitionRequireBroker = 32;
     optional ConsumerExit consumerExit = 33;
+    optional Heartbeat heartbeat = 34;
 }

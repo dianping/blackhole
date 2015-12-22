@@ -7,6 +7,7 @@ import com.dp.blackhole.common.Util;
 public class TestSimpleProducer {
     
     public static void main(String[] args) throws InterruptedException {
+        System.out.println(Util.getVersion());
         String supervisorHost = args[0];
         String supervisorPort = args[1];
         String topic = args[2];
