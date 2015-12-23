@@ -392,7 +392,7 @@ public class Agent implements Runnable {
             MessageType type = msg.getType();
             Random random = new Random();
             switch (type) {
-            case NOAVAILABLENODE:
+            case NO_AVAILABLE_NODE:
                 topic = msg.getNoAvailableNode().getTopic();
                 instanceId = msg.getNoAvailableNode().getInstanceId();
                 topicId = new TopicId(topic, instanceId);
@@ -471,7 +471,7 @@ public class Agent implements Runnable {
                             + "] from supervisor message not match with local");
                 }
                 break;
-            case NOAVAILABLECONF:
+            case NO_AVAILABLE_CONF:
                 if (confLoopFactor < 20) {
                     confLoopFactor = confLoopFactor << 1;
                 }

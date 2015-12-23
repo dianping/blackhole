@@ -146,11 +146,11 @@ public class Supervisor {
             return;
         }
         switch (msg.getType()) {
-        case NOAVAILABLECONF:
+        case NO_AVAILABLE_CONF:
         case DUMP_APP:
-        case DUMPCONF:
-        case DUMPSTAT:
-        case DUMPREPLY:
+        case DUMP_CONF:
+        case DUMP_STAT:
+        case DUMP_REPLY:
             break;
         default:
             LOG.debug("send message to " + connection + " :" +msg);
@@ -2026,7 +2026,7 @@ public class Supervisor {
                 LOG.debug("received: " + msg);
                 handleUnrecoverable(msg.getRollID());
                 break;
-            case TOPICREPORT:
+            case TOPIC_REPORT:
                 handleTopicReport(msg.getTopicReport(), from);
                 break;
             case OFFSET_COMMIT:
@@ -2035,19 +2035,19 @@ public class Supervisor {
             case MANUAL_RECOVERY_ROLL:
                 handleManualRecoveryRoll(msg.getRollID());
                 break;
-            case DUMPSTAT:
+            case DUMP_STAT:
                 dumpstat(from);
                 break;
-            case RETIRESTREAM:
+            case RETIRE_STREAM:
                 handleRetireStream(msg.getRetire(), from);
                 break;
             case CONF_REQ:
                 handleConfReq(msg.getConfReq(), from);
                 break;
-            case DUMPCONF:
+            case DUMP_CONF:
                 dumpconf(from);
                 break;
-            case LISTAPPS:
+            case LIST_APPS:
                 listTopics(from);
                 break;
             case REMOVE_CONF:
@@ -2056,7 +2056,7 @@ public class Supervisor {
             case DUMP_APP:
                 dumpTopic(msg.getDumpApp(), from);
                 break;
-            case LISTIDLE:
+            case LIST_IDLE:
                 listIdle(from);
                 break;
             case RESTART:

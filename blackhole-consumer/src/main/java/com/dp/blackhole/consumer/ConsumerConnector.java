@@ -267,7 +267,7 @@ public class ConsumerConnector implements Runnable {
         protected boolean processInternal(Message msg) {
             MessageType type = msg.getType();
             switch (type) {
-            case CONSUMERREGFAIL:
+            case CONSUMER_REG_FAIL:
                 ConsumerReg reg = msg.getConsumerReg();
                 RetryRegTask retry = new RetryRegTask(reg.getTopic(),
                         reg.getGroupId(), reg.getConsumerId());

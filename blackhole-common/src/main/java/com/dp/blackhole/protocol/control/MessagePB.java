@@ -1072,9 +1072,9 @@ public final class MessagePB {
        */
       FAILURE(12, 13),
       /**
-       * <code>NOAVAILABLENODE = 14;</code>
+       * <code>NO_AVAILABLE_NODE = 14;</code>
        */
-      NOAVAILABLENODE(13, 14),
+      NO_AVAILABLE_NODE(13, 14),
       /**
        * <code>UNRECOVERABLE = 15;</code>
        */
@@ -1084,13 +1084,13 @@ public final class MessagePB {
        */
       MANUAL_RECOVERY_ROLL(15, 16),
       /**
-       * <code>DUMPSTAT = 17;</code>
+       * <code>DUMP_STAT = 17;</code>
        */
-      DUMPSTAT(16, 17),
+      DUMP_STAT(16, 17),
       /**
-       * <code>RETIRESTREAM = 18;</code>
+       * <code>RETIRE_STREAM = 18;</code>
        */
-      RETIRESTREAM(17, 18),
+      RETIRE_STREAM(17, 18),
       /**
        * <code>CONF_REQ = 19;</code>
        */
@@ -1100,21 +1100,21 @@ public final class MessagePB {
        */
       CONF_RES(19, 20),
       /**
-       * <code>NOAVAILABLECONF = 21;</code>
+       * <code>NO_AVAILABLE_CONF = 21;</code>
        */
-      NOAVAILABLECONF(20, 21),
+      NO_AVAILABLE_CONF(20, 21),
       /**
-       * <code>DUMPCONF = 22;</code>
+       * <code>DUMP_CONF = 22;</code>
        */
-      DUMPCONF(21, 22),
+      DUMP_CONF(21, 22),
       /**
-       * <code>DUMPREPLY = 23;</code>
+       * <code>DUMP_REPLY = 23;</code>
        */
-      DUMPREPLY(22, 23),
+      DUMP_REPLY(22, 23),
       /**
-       * <code>LISTAPPS = 24;</code>
+       * <code>LIST_APPS = 24;</code>
        */
-      LISTAPPS(23, 24),
+      LIST_APPS(23, 24),
       /**
        * <code>REMOVE_CONF = 25;</code>
        */
@@ -1136,21 +1136,21 @@ public final class MessagePB {
        */
       OFFSET_COMMIT(28, 29),
       /**
-       * <code>TOPICREPORT = 30;</code>
+       * <code>TOPIC_REPORT = 30;</code>
        */
-      TOPICREPORT(29, 30),
+      TOPIC_REPORT(29, 30),
       /**
-       * <code>CONSUMERREGFAIL = 31;</code>
+       * <code>CONSUMER_REG_FAIL = 31;</code>
        */
-      CONSUMERREGFAIL(30, 31),
+      CONSUMER_REG_FAIL(30, 31),
       /**
        * <code>MAKR_UNRECOVERABLE = 32;</code>
        */
       MAKR_UNRECOVERABLE(31, 32),
       /**
-       * <code>LISTIDLE = 33;</code>
+       * <code>LIST_IDLE = 33;</code>
        */
-      LISTIDLE(32, 33),
+      LIST_IDLE(32, 33),
       /**
        * <code>RESTART = 34;</code>
        */
@@ -1262,9 +1262,9 @@ public final class MessagePB {
        */
       public static final int FAILURE_VALUE = 13;
       /**
-       * <code>NOAVAILABLENODE = 14;</code>
+       * <code>NO_AVAILABLE_NODE = 14;</code>
        */
-      public static final int NOAVAILABLENODE_VALUE = 14;
+      public static final int NO_AVAILABLE_NODE_VALUE = 14;
       /**
        * <code>UNRECOVERABLE = 15;</code>
        */
@@ -1274,13 +1274,13 @@ public final class MessagePB {
        */
       public static final int MANUAL_RECOVERY_ROLL_VALUE = 16;
       /**
-       * <code>DUMPSTAT = 17;</code>
+       * <code>DUMP_STAT = 17;</code>
        */
-      public static final int DUMPSTAT_VALUE = 17;
+      public static final int DUMP_STAT_VALUE = 17;
       /**
-       * <code>RETIRESTREAM = 18;</code>
+       * <code>RETIRE_STREAM = 18;</code>
        */
-      public static final int RETIRESTREAM_VALUE = 18;
+      public static final int RETIRE_STREAM_VALUE = 18;
       /**
        * <code>CONF_REQ = 19;</code>
        */
@@ -1290,21 +1290,21 @@ public final class MessagePB {
        */
       public static final int CONF_RES_VALUE = 20;
       /**
-       * <code>NOAVAILABLECONF = 21;</code>
+       * <code>NO_AVAILABLE_CONF = 21;</code>
        */
-      public static final int NOAVAILABLECONF_VALUE = 21;
+      public static final int NO_AVAILABLE_CONF_VALUE = 21;
       /**
-       * <code>DUMPCONF = 22;</code>
+       * <code>DUMP_CONF = 22;</code>
        */
-      public static final int DUMPCONF_VALUE = 22;
+      public static final int DUMP_CONF_VALUE = 22;
       /**
-       * <code>DUMPREPLY = 23;</code>
+       * <code>DUMP_REPLY = 23;</code>
        */
-      public static final int DUMPREPLY_VALUE = 23;
+      public static final int DUMP_REPLY_VALUE = 23;
       /**
-       * <code>LISTAPPS = 24;</code>
+       * <code>LIST_APPS = 24;</code>
        */
-      public static final int LISTAPPS_VALUE = 24;
+      public static final int LIST_APPS_VALUE = 24;
       /**
        * <code>REMOVE_CONF = 25;</code>
        */
@@ -1326,21 +1326,21 @@ public final class MessagePB {
        */
       public static final int OFFSET_COMMIT_VALUE = 29;
       /**
-       * <code>TOPICREPORT = 30;</code>
+       * <code>TOPIC_REPORT = 30;</code>
        */
-      public static final int TOPICREPORT_VALUE = 30;
+      public static final int TOPIC_REPORT_VALUE = 30;
       /**
-       * <code>CONSUMERREGFAIL = 31;</code>
+       * <code>CONSUMER_REG_FAIL = 31;</code>
        */
-      public static final int CONSUMERREGFAIL_VALUE = 31;
+      public static final int CONSUMER_REG_FAIL_VALUE = 31;
       /**
        * <code>MAKR_UNRECOVERABLE = 32;</code>
        */
       public static final int MAKR_UNRECOVERABLE_VALUE = 32;
       /**
-       * <code>LISTIDLE = 33;</code>
+       * <code>LIST_IDLE = 33;</code>
        */
-      public static final int LISTIDLE_VALUE = 33;
+      public static final int LIST_IDLE_VALUE = 33;
       /**
        * <code>RESTART = 34;</code>
        */
@@ -1416,26 +1416,26 @@ public final class MessagePB {
           case 11: return RECOVERY_SUCCESS;
           case 12: return RECOVERY_FAIL;
           case 13: return FAILURE;
-          case 14: return NOAVAILABLENODE;
+          case 14: return NO_AVAILABLE_NODE;
           case 15: return UNRECOVERABLE;
           case 16: return MANUAL_RECOVERY_ROLL;
-          case 17: return DUMPSTAT;
-          case 18: return RETIRESTREAM;
+          case 17: return DUMP_STAT;
+          case 18: return RETIRE_STREAM;
           case 19: return CONF_REQ;
           case 20: return CONF_RES;
-          case 21: return NOAVAILABLECONF;
-          case 22: return DUMPCONF;
-          case 23: return DUMPREPLY;
-          case 24: return LISTAPPS;
+          case 21: return NO_AVAILABLE_CONF;
+          case 22: return DUMP_CONF;
+          case 23: return DUMP_REPLY;
+          case 24: return LIST_APPS;
           case 25: return REMOVE_CONF;
           case 26: return DUMP_APP;
           case 27: return CONSUMER_REG;
           case 28: return ASSIGN_CONSUMER;
           case 29: return OFFSET_COMMIT;
-          case 30: return TOPICREPORT;
-          case 31: return CONSUMERREGFAIL;
+          case 30: return TOPIC_REPORT;
+          case 31: return CONSUMER_REG_FAIL;
           case 32: return MAKR_UNRECOVERABLE;
-          case 33: return LISTIDLE;
+          case 33: return LIST_IDLE;
           case 34: return RESTART;
           case 35: return QUIT;
           case 36: return CLEAN;
@@ -7615,7 +7615,7 @@ public final class MessagePB {
       "ducerReg.proto\032\026ProducerIdAssign.proto\032\025" +
       "NoavailableConf.proto\032\025AssignPartition.p" +
       "roto\032\034PartitionRequireBroker.proto\032\022Cons" +
-      "umerExit.proto\032\017Heartbeat.proto\"\313\022\n\007Mess" +
+      "umerExit.proto\032\017Heartbeat.proto\"\330\022\n\007Mess" +
       "age\022,\n\004type\030\001 \002(\0162\036.blackhole.Message.Me" +
       "ssageType\022!\n\006appReg\030\002 \001(\0132\021.blackhole.Ap" +
       "pReg\022-\n\014assignBroker\030\003 \001(\0132\027.blackhole.A" +
@@ -7653,30 +7653,30 @@ public final class MessagePB {
       "quireBroker\030  \001(\0132!.blackhole.PartitionR" +
       "equireBroker\022-\n\014consumerExit\030! \001(\0132\027.bla" +
       "ckhole.ConsumerExit\022\'\n\theartbeat\030\" \001(\0132\024" +
-      ".blackhole.Heartbeat\"\346\006\n\013MessageType\022\016\n\n" +
+      ".blackhole.Heartbeat\"\363\006\n\013MessageType\022\016\n\n" +
       "HEARTBEART\020\001\022\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020" +
       "\003\022\021\n\rASSIGN_BROKER\020\004\022\020\n\014READY_STREAM\020\005\022\020" +
       "\n\014READY_UPLOAD\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPL" +
       "OAD_SUCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVE" +
       "RY_ROLL\020\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOV" +
-      "ERY_FAIL\020\014\022\013\n\007FAILURE\020\r\022\023\n\017NOAVAILABLENO",
-      "DE\020\016\022\021\n\rUNRECOVERABLE\020\017\022\030\n\024MANUAL_RECOVE" +
-      "RY_ROLL\020\020\022\014\n\010DUMPSTAT\020\021\022\020\n\014RETIRESTREAM\020" +
-      "\022\022\014\n\010CONF_REQ\020\023\022\014\n\010CONF_RES\020\024\022\023\n\017NOAVAIL" +
-      "ABLECONF\020\025\022\014\n\010DUMPCONF\020\026\022\r\n\tDUMPREPLY\020\027\022" +
-      "\014\n\010LISTAPPS\020\030\022\017\n\013REMOVE_CONF\020\031\022\014\n\010DUMP_A" +
-      "PP\020\032\022\020\n\014CONSUMER_REG\020\033\022\023\n\017ASSIGN_CONSUME" +
-      "R\020\034\022\021\n\rOFFSET_COMMIT\020\035\022\017\n\013TOPICREPORT\020\036\022" +
-      "\023\n\017CONSUMERREGFAIL\020\037\022\026\n\022MAKR_UNRECOVERAB" +
-      "LE\020 \022\014\n\010LISTIDLE\020!\022\013\n\007RESTART\020\"\022\010\n\004QUIT\020" +
-      "#\022\t\n\005CLEAN\020$\022\016\n\nROLL_CLEAN\020%\022\027\n\023DUMP_CON",
-      "SUMER_GROUP\020&\022\027\n\023LIST_CONSUMER_GROUP\020\'\022\017" +
-      "\n\013SNAPSHOT_OP\020(\022\020\n\014PAUSE_STREAM\020)\022\020\n\014PRO" +
-      "DUCER_REG\020*\022\026\n\022PRODUCER_ID_ASSIGN\020+\022\024\n\020A" +
-      "SSIGN_PARTITION\020,\022\034\n\030PARTITION_REQUIRE_B" +
-      "ROKER\020-\022\031\n\025UNRESOLVED_CONNECTION\020.\022\021\n\rCO" +
-      "NSUMER_EXIT\020/B.\n!com.dp.blackhole.protoc" +
-      "ol.controlB\tMessagePB"
+      "ERY_FAIL\020\014\022\013\n\007FAILURE\020\r\022\025\n\021NO_AVAILABLE_",
+      "NODE\020\016\022\021\n\rUNRECOVERABLE\020\017\022\030\n\024MANUAL_RECO" +
+      "VERY_ROLL\020\020\022\r\n\tDUMP_STAT\020\021\022\021\n\rRETIRE_STR" +
+      "EAM\020\022\022\014\n\010CONF_REQ\020\023\022\014\n\010CONF_RES\020\024\022\025\n\021NO_" +
+      "AVAILABLE_CONF\020\025\022\r\n\tDUMP_CONF\020\026\022\016\n\nDUMP_" +
+      "REPLY\020\027\022\r\n\tLIST_APPS\020\030\022\017\n\013REMOVE_CONF\020\031\022" +
+      "\014\n\010DUMP_APP\020\032\022\020\n\014CONSUMER_REG\020\033\022\023\n\017ASSIG" +
+      "N_CONSUMER\020\034\022\021\n\rOFFSET_COMMIT\020\035\022\020\n\014TOPIC" +
+      "_REPORT\020\036\022\025\n\021CONSUMER_REG_FAIL\020\037\022\026\n\022MAKR" +
+      "_UNRECOVERABLE\020 \022\r\n\tLIST_IDLE\020!\022\013\n\007RESTA" +
+      "RT\020\"\022\010\n\004QUIT\020#\022\t\n\005CLEAN\020$\022\016\n\nROLL_CLEAN\020",
+      "%\022\027\n\023DUMP_CONSUMER_GROUP\020&\022\027\n\023LIST_CONSU" +
+      "MER_GROUP\020\'\022\017\n\013SNAPSHOT_OP\020(\022\020\n\014PAUSE_ST" +
+      "REAM\020)\022\020\n\014PRODUCER_REG\020*\022\026\n\022PRODUCER_ID_" +
+      "ASSIGN\020+\022\024\n\020ASSIGN_PARTITION\020,\022\034\n\030PARTIT" +
+      "ION_REQUIRE_BROKER\020-\022\031\n\025UNRESOLVED_CONNE" +
+      "CTION\020.\022\021\n\rCONSUMER_EXIT\020/B.\n!com.dp.bla" +
+      "ckhole.protocol.controlB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

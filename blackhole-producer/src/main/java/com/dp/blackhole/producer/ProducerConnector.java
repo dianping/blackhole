@@ -257,7 +257,7 @@ public class ProducerConnector implements Runnable {
             String producerId;
             MessageType type = msg.getType();
             switch (type) {
-            case NOAVAILABLECONF:
+            case NO_AVAILABLE_CONF:
                 NoavailableConf noavailableConf = msg.getNoavailableConf();
                 topic = noavailableConf.getTopic();
                 requireConfigFromSupersivor(topic, FIVE_MINUTES);
@@ -287,7 +287,7 @@ public class ProducerConnector implements Runnable {
                 
                 producerReg(topic, producerId, 0);
                 break;
-            case NOAVAILABLENODE:
+            case NO_AVAILABLE_NODE:
                 NoAvailableNode noAvailableNode = msg.getNoAvailableNode();
                 topic = noAvailableNode.getTopic();
                 producerId = noAvailableNode.getSource();

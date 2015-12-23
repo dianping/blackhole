@@ -116,7 +116,7 @@ public class Broker {
     }
     
     public void send(Message msg) {
-        if (msg.getType() != MessageType.TOPICREPORT) {
+        if (msg.getType() != MessageType.TOPIC_REPORT) {
             LOG.debug("send: " + msg);
         }
         Util.send(supervisor, msg);
