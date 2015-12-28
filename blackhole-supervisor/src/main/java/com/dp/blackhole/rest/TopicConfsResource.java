@@ -1,7 +1,6 @@
 package com.dp.blackhole.rest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +22,6 @@ import org.apache.http.HttpException;
 
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.supervisor.model.Blacklist;
-import com.dp.blackhole.supervisor.model.Topic;
 import com.dp.blackhole.supervisor.model.TopicConfig;
 import com.dp.blackhole.supervisor.model.Stream.StreamId;
 

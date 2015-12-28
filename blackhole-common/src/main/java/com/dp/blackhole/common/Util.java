@@ -43,7 +43,6 @@ import com.jcabi.manifests.Manifests;
 
 public class Util {
     public static final Log LOG = LogFactory.getLog(Util.class);
-    private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static long localTimezoneOffset = TimeZone.getTimeZone("Asia/Shanghai").getRawOffset();
     private static String zkEnv;
     private static int authorizationId;
@@ -434,6 +433,7 @@ public class Util {
     }
     
     public static String formatTs(long ts) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return format.format(new Date(ts));
     }
     

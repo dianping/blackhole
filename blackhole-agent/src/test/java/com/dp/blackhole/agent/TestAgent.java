@@ -3,7 +3,6 @@ package com.dp.blackhole.agent;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
@@ -75,43 +74,6 @@ public class TestAgent {
         Map<AgentMeta, LogReader> map = Agent.getTopicReaders();
         map.clear();
         SimAgent.deleteTmpFile(MAGIC);
-    }
-
-    /**
-     * WATCH_FILE: "/tmp/check1/name.access.log /tmp/check2/name.access.log"
-     * expectedFileName1: "/tmp/check1/name.access.log"
-     * expectedFileName2: "/tmp/check2/name.access.log"
-     * expectedFileName3: "/tmp/check1/hostname.nh.access.log"
-     * expectedFileName4: "/tmp/check2/hostname.nh.access.log"
-     * expectedFileName5: "/tmp/check2/xxxx.access.log"
-     */
-    @Test
-    public void testCheckAllFilesExist() throws IOException {
-        new File("/tmp/check1").mkdir();
-        new File("/tmp/check2").mkdir();
-        String hostname = Util.getLocalHost();
-        String name = hostname.substring(0, 2);
-        String WATCH_FILE = "/tmp/check1/" + name + ".access.log /tmp/check2/" + name + ".access.log";
-        String expectedFileName1 = "/tmp/check1/" + name + ".access.log";
-        String expectedFileName2 = "/tmp/check2/" + name + ".access.log";
-        String expectedFileName5 = "/tmp/check2/xxxxxxx.access.log";
-        File expectedFile;
-        expectedFile = new File(expectedFileName1);
-        expectedFile.createNewFile();
-        assertTrue(agent.checkFilesExist(MAGIC, WATCH_FILE));
-        assertEquals(expectedFileName1, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.TopicConf.WATCH_FILE));
-        expectedFile.delete();
-        expectedFile = new File(expectedFileName2);
-        expectedFile.createNewFile();
-        assertTrue(agent.checkFilesExist(MAGIC, WATCH_FILE));
-        assertEquals(expectedFileName2, ConfigKeeper.configMap.get(MAGIC).getString(ParamsKey.TopicConf.WATCH_FILE));
-        expectedFile.delete();
-        expectedFile = new File(expectedFileName5);
-        expectedFile.createNewFile();
-        assertFalse(agent.checkFilesExist(MAGIC, WATCH_FILE));
-        expectedFile.delete();
-        new File("/tmp/check1").delete();
-        new File("/tmp/check2").delete();
     }
 
     @Test

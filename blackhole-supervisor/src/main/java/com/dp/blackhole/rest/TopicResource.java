@@ -28,6 +28,7 @@ import com.dp.blackhole.supervisor.model.ConnectionDesc.ConnectionInfo;
 import com.dp.blackhole.supervisor.model.ConsumerDesc;
 import com.dp.blackhole.supervisor.model.ConsumerGroup;
 import com.dp.blackhole.supervisor.model.ConsumerGroupKey;
+import com.dp.blackhole.supervisor.model.LogNotFoundEntity;
 import com.dp.blackhole.supervisor.model.Stage;
 import com.dp.blackhole.supervisor.model.Stream;
 import com.dp.blackhole.supervisor.model.TopicConfig;
@@ -186,5 +187,31 @@ public class TopicResource extends BaseResource {
             return new HashMap<String, AtomicLong>();
         }
         return group.getCommitedOffsets();
+    }
+    
+    @GET
+    @Path("/{topic}/lognotfound")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Set<LogNotFoundEntity> getLogNotFoundEntities(
+            @PathParam("topic") final String topic) {
+        LOG.debug("GET: topic[" + topic + "] -> log not found");
+        Set<LogNotFoundEntity> results = new HashSet<LogNotFoundEntity>();
+        for (LogNotFoundEntity logNotFoundEntity : configService.getLogNotFounds().keySet()) {
+            if (logNotFoundEntity.getTopic().equals(topic)) {
+                results.add(logNotFoundEntity);
+            }
+        }
+        return results;
+    }
+
+    @DELETE
+    @Path("/{topic}/lognotfound/{host}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response remoteLogNotFound(
+            @PathParam("topic") final String topic,
+            @PathParam("host") final String host) {
+        LOG.debug("DELETE: topic[" + topic + "] host[" + host + " -> log not found");
+        configService.removeLogNotFound(topic, host);
+        return Response.ok().build();
     }
 }

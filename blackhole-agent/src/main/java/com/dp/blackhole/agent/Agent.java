@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -130,35 +129,17 @@ public class Agent implements Runnable {
                 Util.getSource(hostname, topicId.getInstanceId()), regTimestamp);
         send(msg, delaySecond);
     }
-
-    public boolean checkFilesExist(String topic, String pathCandidateStr) {
-        if (pathCandidateStr == null) {
-            LOG.error("Oops, can not get WATCH_FILE from mapping for topic " + topic);
-            return false;
-        }
-        String[] pathCandidates = pathCandidateStr.split("\\s+");
-        for (int i = 0; i < pathCandidates.length; i++) {
-            File fileForTest = new File(pathCandidates[i]);
-            if (fileForTest.exists()) {
-                LOG.info("Check file " + pathCandidates[i] + " ok.");
-                confKeeper.addRawProperty(topic + "."
-                        + ParamsKey.TopicConf.WATCH_FILE, pathCandidates[i]);
-                break;
-            } else {
-                if (i == pathCandidates.length - 1) {
-                    LOG.error("Topic: " + topic + ", Log: " + Arrays.toString(pathCandidates) + " not found!");
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
     
     public boolean checkFilesExist(String topic, String watchFile, String instanceId) {
         if (watchFile == null || watchFile.trim().length() == 0) {
             return false;
         }
-        String realWatchFile = String.format(baseDirWildcard, instanceId) + watchFile;
+        String realWatchFile;
+        if (instanceId == null) {
+            realWatchFile = watchFile;
+        } else {
+            realWatchFile = String.format(baseDirWildcard, instanceId) + watchFile;
+        }
         File fileForTest = new File(realWatchFile);
         if (fileForTest.exists()) {
             LOG.info("Check file " + realWatchFile + " ok.");
@@ -166,9 +147,14 @@ public class Agent implements Runnable {
                     + ParamsKey.TopicConf.WATCH_FILE, realWatchFile);
             return true;
         } else {
+            reportLogNotFound(topic, realWatchFile, instanceId);
             LOG.error("Topic: " + topic + ", Log: " + realWatchFile + " not found!");
             return false;
         }
+    }
+    
+    public boolean checkFilesExist(String topic, String watchFile) {
+        return checkFilesExist(topic, watchFile, null);
     }
 
     @Override
@@ -290,6 +276,11 @@ public class Agent implements Runnable {
     public void removeRecoverying(TopicId topicId, final long rollTs) {
         String recoveryKey = topicId.toString() + ":" + rollTs;
         recoveryingMap.remove(recoveryKey);
+    }
+
+    public void reportLogNotFound(String topic, String file, String instanceId) {
+        Message message = PBwrap.wrapLogNotFound(topic, file, instanceId);
+        send(message);
     }
 
     public void send(Message message) {

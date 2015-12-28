@@ -23,6 +23,7 @@ import com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
 import com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType;
 import com.dp.blackhole.protocol.control.HeartbeatPB.Heartbeat;
+import com.dp.blackhole.protocol.control.LogNotFoundPB.LogNotFound;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode;
@@ -171,6 +172,9 @@ public class PBwrap {
             break;
         case CONSUMER_EXIT:
             msg.setConsumerExit((ConsumerExit) message);
+            break;
+        case LOG_NOT_FOUND:
+            msg.setLogNotFound((LogNotFound) message);
             break;
         default:
             break;
@@ -634,5 +638,16 @@ public class PBwrap {
 
     public static Message wrapUnresolvedConnection() {
         return wrapMessage(MessageType.UNRESOLVED_CONNECTION, null);
+    }
+
+    public static Message wrapLogNotFound(String topic, String file, String instanceId) {
+        LogNotFound.Builder builder = LogNotFound.newBuilder();
+        builder.setTopic(topic);
+        builder.setFile(file);
+        builder.setTs(Util.getTS());
+        if (instanceId != null) {
+            builder.setInstanceId(instanceId);
+        }
+        return wrapMessage(MessageType.LOG_NOT_FOUND, builder.build());
     }
 }

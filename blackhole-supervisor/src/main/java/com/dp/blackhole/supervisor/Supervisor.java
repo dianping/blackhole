@@ -45,6 +45,7 @@ import com.dp.blackhole.protocol.control.DumpAppPB.DumpApp;
 import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
 import com.dp.blackhole.protocol.control.HeartbeatPB.Heartbeat;
+import com.dp.blackhole.protocol.control.LogNotFoundPB.LogNotFound;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
 import com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker;
@@ -2080,6 +2081,9 @@ public class Supervisor {
             case CONSUMER_EXIT:
                 handleConsumerExit(msg.getConsumerExit(), from);
                 break;
+            case LOG_NOT_FOUND:
+                handleLogNotFound(msg.getLogNotFound(), from);
+                break;
             default:
                 LOG.warn("unknown message: " + msg.toString());
             }
@@ -2173,6 +2177,13 @@ public class Supervisor {
             (executor, factory, null);
 
         server.init("supervisor", configManager.supervisorPort, configManager.numHandler);
+    }
+
+    public void handleLogNotFound(LogNotFound logNotFound, ByteBufferNonblockingConnection from) {
+        String instanceId = logNotFound.getInstanceId();
+        String host = from.getHost();
+        String source = Util.getSource(host, instanceId);
+        configManager.addLogNotFound(logNotFound.getTopic(), host, logNotFound.getFile(), logNotFound.getTs(), source);
     }
 
     public void handleConsumerExit(ConsumerExit consumerExit,
