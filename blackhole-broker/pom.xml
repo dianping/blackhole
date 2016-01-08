@@ -32,6 +32,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-lzo</artifactId>
+			<version>0.4.20-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>blackhole-common</artifactId>
 		</dependency>

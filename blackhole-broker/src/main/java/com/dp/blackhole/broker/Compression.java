@@ -2,6 +2,7 @@ package com.dp.blackhole.broker;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.EOFException;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,10 @@ import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CodecPool;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionInputStream;
@@ -22,6 +27,7 @@ import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.dp.blackhole.common.ParamsKey;
+import com.hadoop.compression.lzo.LzopDecompressor;
 
 /**
  * Compression related stuff.
@@ -131,6 +137,87 @@ public final class Compression {
                         new FinishOnFlushCompressionStream(cos), DATA_OBUF_SIZE);
                 return bos2;
             }
+
+            @Override
+            public void createIndex(FileSystem fs, Path lzoFile, Path tmp)
+                    throws IOException {
+                CompressionCodec codec = getCodec();
+                if (null == codec) {
+                    throw new IOException("Could not find codec");
+                }
+                FSDataInputStream is = null;
+                FSDataOutputStream os = null;
+                Path outputFile = lzoFile.suffix(ParamsKey.LZO_INDEX_SUFFIX);
+                Path tmpOutputFile = lzoFile.suffix(ParamsKey.LZO_TMP_INDEX_SUFFIX);
+
+                // Track whether an exception was thrown or not, so we know to
+                // either
+                // delete the tmp index file on failure, or rename it to the new
+                // index file on success.
+                boolean indexingSucceeded = false;
+                try {
+                    is = fs.open(tmp);
+                    os = fs.create(tmpOutputFile);
+                    LzopDecompressor decompressor = (LzopDecompressor) codec
+                            .createDecompressor();
+                    // Solely for reading the header
+                    codec.createInputStream(is, decompressor);
+                    int numCompressedChecksums = decompressor
+                            .getCompressedChecksumsCount();
+                    int numDecompressedChecksums = decompressor
+                            .getDecompressedChecksumsCount();
+
+                    while (true) {
+                        // read and ignore, we just want to get to the next int
+                        int uncompressedBlockSize = is.readInt();
+                        if (uncompressedBlockSize == 0) {
+                            break;
+                        } else if (uncompressedBlockSize < 0) {
+                            throw new EOFException();
+                        }
+
+                        int compressedBlockSize = is.readInt();
+                        if (compressedBlockSize <= 0) {
+                            throw new IOException(
+                                    "Could not read compressed block size");
+                        }
+
+                        // See LzopInputStream.getCompressedData
+                        boolean isUncompressedBlock = (uncompressedBlockSize == compressedBlockSize);
+                        int numChecksumsToSkip = isUncompressedBlock ? numDecompressedChecksums
+                                : numDecompressedChecksums
+                                        + numCompressedChecksums;
+                        long pos = is.getPos();
+                        // write the pos of the block start
+                        os.writeLong(pos - 8);
+                        // seek to the start of the next block, skip any
+                        // checksums
+                        is.seek(pos + compressedBlockSize
+                                + (4 * numChecksumsToSkip));
+                    }
+                    // If we're here, indexing was successful.
+                    indexingSucceeded = true;
+                } finally {
+                    // Close any open streams.
+                    if (is != null) {
+                        is.close();
+                    }
+
+                    if (os != null) {
+                        os.close();
+                    }
+
+                    if (!indexingSucceeded) {
+                        // If indexing didn't succeed (i.e. an exception was
+                        // thrown), clean up after ourselves.
+                        fs.delete(tmpOutputFile, false);
+                    } else {
+                        // Otherwise, rename filename.lzo.index.tmp to
+                        // filename.lzo.index.
+                        fs.rename(tmpOutputFile, outputFile);
+                    }
+                }
+            }
         },
 
         GZ(ParamsKey.COMPRESSION_GZ) {
@@ -185,6 +272,12 @@ public final class Compression {
             public boolean isSupported() {
                 return true;
             }
+            
+            @Override
+            public void createIndex(FileSystem fs, Path lzoFile, Path tmp)
+                    throws IOException {
+                throw new UnsupportedOperationException("just lzo can create index");
+            }
         },
 
         NONE(ParamsKey.COMPRESSION_NONE) {
@@ -220,6 +313,12 @@ public final class Compression {
             public boolean isSupported() {
                 return true;
             }
+            
+            @Override
+            public void createIndex(FileSystem fs, Path lzoFile, Path tmp)
+                    throws IOException {
+                throw new UnsupportedOperationException("just lzo can create index");
+            }
         };
 
         // We require that all compression related settings are configured
@@ -234,6 +333,8 @@ public final class Compression {
         Algorithm(String name) {
             this.compressName = name;
         }
+
+        public abstract void createIndex(FileSystem fs, Path lzoFile, Path tmp) throws IOException;
 
         abstract CompressionCodec getCodec() throws IOException;
 

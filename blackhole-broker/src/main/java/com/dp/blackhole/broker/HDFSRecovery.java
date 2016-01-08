@@ -11,6 +11,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.Compressor;
 
+import com.dp.blackhole.common.ParamsKey;
+
 public class HDFSRecovery implements Runnable{
     private static final Log LOG = LogFactory.getLog(HDFSRecovery.class);
     private RollManager mgr;
@@ -120,7 +122,20 @@ public class HDFSRecovery implements Runnable{
                     Thread.sleep(10 * 1000);
                 } catch (InterruptedException e) {}
             }
+            try {
+                deleteIndex();
+            } catch (IOException e) {
+            }
             mgr.reportRecovery(ident, recoverySuccess);
+        }
+    }
+    
+    private void deleteIndex() throws IOException {
+        Path targetIndexFile = new Path(mgr.getRollHdfsPath(ident, ParamsKey.COMPRESSION_LZO + ParamsKey.LZO_INDEX_SUFFIX));
+        if (fs.exists(targetIndexFile)) {
+            fs.delete(targetIndexFile, false);
+        } else {
+            System.out.println("------------not exist" + targetIndexFile);
         }
     }
 }
