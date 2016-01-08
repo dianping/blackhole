@@ -64,20 +64,43 @@ public class PartitionConnection implements Sender {
         this.reassignDelaySeconds = reassignDelaySeconds;
     }
 
-    public boolean initializeRemoteConnection() throws IOException {
-        messageBuffer = ByteBuffer.allocate(msgBufSize);
-        SocketChannel socketChannel = SocketChannel.open();
-        socketChannel.configureBlocking(true);
-        SocketAddress server = new InetSocketAddress(broker, brokerPort);
-        socketChannel.connect(server);
-        LOG.info(topic + " with " + partitionId + " connected " + broker + ":" + brokerPort);
-        TransferWrapBlockingConnectionFactory factory = new TransferWrapBlockingConnectionFactory();
-        TypedFactory wrappedFactory = new DataMessageTypeFactory();
-        connection = factory.makeConnection(socketChannel, wrappedFactory);
-        doStreamReg();
-        TransferWrap response = connection.read();//TODO good design is set read timeout
-        ProducerRegReply reply = (ProducerRegReply) response.unwrap();
-        return reply.getResult();
+    public boolean initializeRemoteConnection() {
+        boolean res = false;
+        SocketChannel socketChannel = null;
+        try {
+            messageBuffer = ByteBuffer.allocate(msgBufSize);
+            socketChannel = SocketChannel.open();
+            socketChannel.configureBlocking(true);
+            SocketAddress server = new InetSocketAddress(broker, brokerPort);
+            socketChannel.connect(server);
+            LOG.info(topic + " with " + partitionId + " connected " + broker + ":" + brokerPort);
+            TransferWrapBlockingConnectionFactory factory = new TransferWrapBlockingConnectionFactory();
+            TypedFactory wrappedFactory = new DataMessageTypeFactory();
+            connection = factory.makeConnection(socketChannel, wrappedFactory);
+            doStreamReg();
+            TransferWrap response = connection.read();//TODO good design is set read timeout
+            ProducerRegReply reply = (ProducerRegReply) response.unwrap();
+            res = reply.getResult();
+        } catch (Exception e) {
+            LOG.error("initializeRemoteConnection exception", e);
+        }
+        if (!res) {
+            if (socketChannel != null) {
+                if (socketChannel.isOpen()) {
+                    try {
+                        socketChannel.close();
+                    } catch (IOException e) {
+                        LOG.error("socket channel close exception", e);
+                    }
+                    try {
+                        socketChannel.socket().close();
+                    } catch (IOException e) {
+                        LOG.error("socket close exception", e);
+                    }
+                }
+            }
+        }
+        return res;
     }
     
     private void doStreamReg() throws IOException {

@@ -1,6 +1,5 @@
 package com.dp.blackhole.producer;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
@@ -343,18 +342,14 @@ public class ProducerConnector implements Runnable {
                 return;
             }
             PartitionConnection partitionConnection = new PartitionConnection(p.geTopicMeta(), topic, broker, brokerPort, partitionId);
-            try {
-                boolean success = partitionConnection.initializeRemoteConnection();
-                if (success) {
-                    LOG.info(producerId + " TopicReg with ["
-                            + broker + ":" + brokerPort + "] successfully");
-                } else {
-                    throw new IOException(producerId + " TopicReg with ["
-                            + broker + ":" + brokerPort
-                            + "] unsuccessfully cause broker create partition faild");
-                }
-            } catch (IOException e) {
-                LOG.error("init remote connection fail, register again.", e);
+            boolean success = partitionConnection.initializeRemoteConnection();
+            if (success) {
+                LOG.info(producerId + " TopicReg with ["
+                        + broker + ":" + brokerPort + "] successfully");
+            } else {
+                LOG.error(producerId + " TopicReg with ["
+                        + broker + ":" + brokerPort
+                        + "] unsuccessfully cause broker create partition faild");
                 producerReg(topic, producerId, 0);
                 return;
             }

@@ -433,19 +433,14 @@ public class Agent implements Runnable {
                         broker = assignBroker.getBrokerServer();
                         int brokerPort = assignBroker.getBrokerPort();
                         RemoteSender sender = new RemoteSender(topicMeta, broker, brokerPort);
-                        try {
-                            boolean success = sender.initializeRemoteConnection();
-                            if (success) {
-                                LOG.info(topicId + " TopicReg with ["
-                                        + broker + ":" + brokerPort + "] successfully");
-                            } else {
-                                throw new IOException(topicId + " TopicReg with ["
-                                        + broker + ":" + brokerPort
-                                        + "] unsuccessfully cause broker create partition faild");
-                            }
-                        } catch (IOException e) {
-                            LOG.error("init remote connection fail " 
-                                    + broker + ":" + brokerPort + ", register again.", e);
+                        boolean success = sender.initializeRemoteConnection();
+                        if (success) {
+                            LOG.info(topicId + " TopicReg with ["
+                                    + broker + ":" + brokerPort + "] successfully");
+                        } else {
+                            LOG.error(topicId + " TopicReg with ["
+                                    + broker + ":" + brokerPort
+                                    + "] unsuccessfully cause broker create partition faild");
                             register(topicId, Util.getTS());
                             return false;
                         }
