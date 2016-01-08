@@ -2219,68 +2219,81 @@ public class Supervisor {
     }
 
     public void handleConfReq(ConfReq confReq, ByteBufferNonblockingConnection from) {
-        Message message;
         String topicFromReq = confReq.getTopic();
         if (topicFromReq != null && topicFromReq.length() != 0) {
             //producer request
-            TopicConfig topicConfig = configManager.getConfByTopic(topicFromReq);
-            if (topicConfig == null) {
-                message = PBwrap.wrapNoAvailableConf(topicFromReq);
-            } else {
-                int partitionFactor = topicConfig.getPartitionFactor();
-                producerMgrMap.putIfAbsent(topicFromReq, new ProducerManager(topicFromReq, partitionFactor));
-                ProducerManager manager = producerMgrMap.get(topicFromReq);
-                String producerId = manager.getProducerId();
-                
-                CommonConfRes commonConfRes = PBwrap.wrapCommonConfRes(
-                        topicConfig.getMaxLineSize(),
-                        topicConfig.getMinMsgSent(),
-                        topicConfig.getMsgBufSize(),
-                        topicConfig.getRollPeriod(),
-                        topicConfig.getPartitionFactor());
-                message = PBwrap.wrapProducerIdAssign(topicFromReq, producerId, commonConfRes);
+            triggerConfResOfProducer(from, topicFromReq);
+        } else {
+            //try handle paas request first
+            triggerConfResOfPaaS(from);
+            //then handle kvm request
+            triggerConfResOfKvm(from);
+        }
+    }
+
+    private void triggerConfResOfProducer(ByteBufferNonblockingConnection from,
+            String topicFromReq) {
+        Message message;
+        TopicConfig topicConfig = configManager.getConfByTopic(topicFromReq);
+        if (topicConfig == null) {
+            message = PBwrap.wrapNoAvailableConf(topicFromReq);
+        } else {
+            int partitionFactor = topicConfig.getPartitionFactor();
+            producerMgrMap.putIfAbsent(topicFromReq, new ProducerManager(topicFromReq, partitionFactor));
+            ProducerManager manager = producerMgrMap.get(topicFromReq);
+            String producerId = manager.getProducerId();
+            
+            CommonConfRes commonConfRes = PBwrap.wrapCommonConfRes(
+                    topicConfig.getMaxLineSize(),
+                    topicConfig.getMinMsgSent(),
+                    topicConfig.getMsgBufSize(),
+                    topicConfig.getRollPeriod(),
+                    topicConfig.getPartitionFactor());
+            message = PBwrap.wrapProducerIdAssign(topicFromReq, producerId, commonConfRes);
+        }
+        send(from, message);
+    }
+
+    private void triggerConfResOfKvm(ByteBufferNonblockingConnection from) {
+        Message message;
+        List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
+        Set<String> topicsAssocHost = configManager.getTopicsByHost(from.getHost());
+        if (topicsAssocHost == null || topicsAssocHost.size() == 0) {
+            LOG.debug("No topic mapping to " + from.getHost());
+            message = PBwrap.wrapNoAvailableConf(null);
+            send(from, message);
+            return;
+        }
+        for (String topic : topicsAssocHost) {
+            TopicConfig confInfo = configManager.getConfByTopic(topic);
+            if (confInfo == null) {
+                LOG.error("Can not get topic: " + topic + " from configMap");
+                continue;
             }
+            String rotatePeriod = String.valueOf(confInfo.getRotatePeriod());
+            String rollPeriod = String.valueOf(confInfo.getRollPeriod());
+            String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
+            String readInterval = String.valueOf(confInfo.getReadInterval());
+            String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
+            String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
+            String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
+            long tailPosition = confInfo.getTailPosition();
+            String watchFile = confInfo.getWatchLog();
+            if (watchFile == null) {
+                LOG.error("Can not get watch file of " + topic);
+                continue;
+            }
+            AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile,
+                    rotatePeriod, rollPeriod, maxLineSize, readInterval,
+                    minMsgSent, msgBufSize, bandwidthPerSec, tailPosition);
+            appConfResList.add(appConfRes);
+        }
+        if (appConfResList.isEmpty()) {
+            message = PBwrap.wrapNoAvailableConf(null);
             send(from, message);
         } else {
-            List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
-            Set<String> topicsAssocHost = configManager.getTopicsByHost(from.getHost());
-            if (topicsAssocHost == null || topicsAssocHost.size() == 0) {
-                LOG.debug("No topic mapping to " + from.getHost());
-                message = PBwrap.wrapNoAvailableConf(null);
-                send(from, message);
-                return;
-            }
-            for (String topic : topicsAssocHost) {
-                TopicConfig confInfo = configManager.getConfByTopic(topic);
-                if (confInfo == null) {
-                    LOG.error("Can not get topic: " + topic + " from configMap");
-                    continue;
-                }
-                String rotatePeriod = String.valueOf(confInfo.getRotatePeriod());
-                String rollPeriod = String.valueOf(confInfo.getRollPeriod());
-                String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
-                String readInterval = String.valueOf(confInfo.getReadInterval());
-                String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
-                String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
-                String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
-                long tailPosition = confInfo.getTailPosition();
-                String watchFile = confInfo.getWatchLog();
-                if (watchFile == null) {
-                    LOG.error("Can not get watch file of " + topic);
-                    continue;
-                }
-                AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile,
-                        rotatePeriod, rollPeriod, maxLineSize, readInterval,
-                        minMsgSent, msgBufSize, bandwidthPerSec, tailPosition);
-                appConfResList.add(appConfRes);
-            }
-            if (appConfResList.isEmpty()) {
-                message = PBwrap.wrapNoAvailableConf(null);
-                send(from, message);
-            } else {
-                message = PBwrap.wrapConfRes(appConfResList, null);
-                send(from, message); 
-            }
+            message = PBwrap.wrapConfRes(appConfResList, null);
+            send(from, message);
         }
     }
     
@@ -2295,6 +2308,11 @@ public class Supervisor {
                     LOG.error("Can not get topic: " + topic + " from configMap");
                     continue;
                 }
+                Set<String> ids = confInfo.getInsByHost(connection.getHost());
+                if (ids == null) {
+                    LOG.info("Can not get instances by " + topic + " and " + connection.getHost());
+                    continue;
+                }
                 String rotatePeriod = String.valueOf(confInfo.getRotatePeriod());
                 String rollPeriod = String.valueOf(confInfo.getRollPeriod());
                 String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
@@ -2304,11 +2322,6 @@ public class Supervisor {
                 String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
                 String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
                 long tailPosition = confInfo.getTailPosition();
-                Set<String> ids = confInfo.getInsByHost(connection.getHost());
-                if (ids == null) {
-                    LOG.info("Can not get instances by " + topic + " and " + connection.getHost());
-                    continue;
-                }
                 LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile,
                         rotatePeriod, rollPeriod, maxLineSize, readInterval,
                         minMsgSent, msgBufSize, bandwidthPerSec, tailPosition, ids);
