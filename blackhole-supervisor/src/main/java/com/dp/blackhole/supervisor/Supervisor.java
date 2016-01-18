@@ -1655,6 +1655,9 @@ public class Supervisor {
                 LOG.info("partition back to online: " + pinfo);
             }
         }
+        //delete LogNotFound entry if exists
+        configManager.removeLogNotFound(topic, host);
+        
         //reassign consumer
         reassignConsumers(topic);
     }

@@ -18,14 +18,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.AgentMeta.TopicId;
-import com.dp.blackhole.agent.persist.IRecoder;
 import com.dp.blackhole.common.LingeringSender;
 import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
-import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.common.ParamsKey.TopicConf;
-import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
@@ -41,14 +37,11 @@ import com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit;
 import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
-import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp;
-import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp.OP;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Agent implements Runnable {
     private static final Log LOG = LogFactory.getLog(Agent.class);
     public static final int DEFAULT_DELAY_SECONDS = 5;
-    private final ConfigKeeper confKeeper = new ConfigKeeper();
     private ExecutorService pool;
     private ExecutorService recoveryThreadPool;
     private FileListener listener;
@@ -65,7 +58,6 @@ public class Agent implements Runnable {
     private int confLoopFactor = 1;
     private final String baseDirWildcard;
     private boolean paasModel = false;
-    private String snapshotPersistDir;
     private LingeringSender linger;
     
     public Agent() {
@@ -143,8 +135,6 @@ public class Agent implements Runnable {
         File fileForTest = new File(realWatchFile);
         if (fileForTest.exists()) {
             LOG.info("Check file " + realWatchFile + " ok.");
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.WATCH_FILE, realWatchFile);
             return true;
         } else {
             reportLogNotFound(topic, realWatchFile, instanceId);
@@ -169,8 +159,6 @@ public class Agent implements Runnable {
             LOG.fatal("Load app.properties file fail.", e);
             return;
         }
-        
-        snapshotPersistDir = prop.getProperty("agent.snapshot.persist.dir", "/data/applogs/phoenix/snapshot");
         
         String supervisorHost = prop.getProperty("supervisor.host");
         int supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
@@ -203,18 +191,35 @@ public class Agent implements Runnable {
         this.linger.shutdown();
     }
     
-    public AgentMeta fillUpAppLogsFromConfig(TopicId topicId) {
-        String topic = topicId.getTopic();
-        String path = ConfigKeeper.configMap.get(topic).getString(ParamsKey.TopicConf.WATCH_FILE);
-        long rotatePeriod = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROTATE_PERIOD);
-        long rollPeriod = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROLL_PERIOD);
-        int maxLineSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MAX_LINE_SIZE, 512000);
-        long readInterval = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.READ_INTERVAL, 1L);
-        int minMsgSent = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, 30);
-        int msgBufSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, 512000);
-        int bandwidthPerSec = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.BANDWIDTH_PER_SEC, 10 * 1024 * 1024);
-        int partitionFactor = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.PARTITION_FACTOR, 1);
-        long tailPosition = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.TAIL_POSITION, TopicConf.FILE_TAIL);
+    public AgentMeta fillUpAppLogsFromConfig(TopicId topicId, AppConfRes confRes) {
+        String path = confRes.getWatchFile();
+        long rotatePeriod = Long.parseLong(confRes.getRotatePeriod());
+        long rollPeriod = Long.parseLong(confRes.getRollPeriod());
+        int maxLineSize = Util.parseInt(confRes.getMaxLineSize(), 512000);
+        long readInterval = Util.parseLong(confRes.getReadInterval(), 1L);
+        int minMsgSent = Util.parseInt(confRes.getMinMsgSent(), 30);
+        int msgBufSize = Util.parseInt(confRes.getMsgBufSize(), 512000);
+        int bandwidthPerSec = Util.parseInt(confRes.getBandwidthPerSec(), 10 * 1024 * 1024);
+        int partitionFactor = Util.parseInt(confRes.getPartitionFactor(), 1);
+        long tailPosition = confRes.getTailPosition();
+        AgentMeta topicMeta = new AgentMeta(topicId, path, rotatePeriod,
+                rollPeriod, maxLineSize, readInterval, minMsgSent, msgBufSize,
+                bandwidthPerSec, partitionFactor, tailPosition);
+        topics.put(topicId, topicMeta);
+        return topicMeta;
+    }
+    
+    public AgentMeta fillUpAppLogsFromConfig(TopicId topicId, LxcConfRes confRes) {
+        String path = confRes.getWatchFile();
+        long rotatePeriod = Long.parseLong(confRes.getRotatePeriod());
+        long rollPeriod = Long.parseLong(confRes.getRollPeriod());
+        int maxLineSize = Util.parseInt(confRes.getMaxLineSize(), 512000);
+        long readInterval = Util.parseLong(confRes.getReadInterval(), 1L);
+        int minMsgSent = Util.parseInt(confRes.getMinMsgSent(), 30);
+        int msgBufSize = Util.parseInt(confRes.getMsgBufSize(), 512000);
+        int bandwidthPerSec = Util.parseInt(confRes.getBandwidthPerSec(), 10 * 1024 * 1024);
+        int partitionFactor = Util.parseInt(confRes.getPartitionFactor(), 1);
+        long tailPosition = confRes.getTailPosition();
         AgentMeta topicMeta = new AgentMeta(topicId, path, rotatePeriod,
                 rollPeriod, maxLineSize, readInterval, minMsgSent, msgBufSize,
                 bandwidthPerSec, partitionFactor, tailPosition);
@@ -344,7 +349,6 @@ public class Agent implements Runnable {
                 recoveryingMap.remove(e.getKey());
             }
             topics.clear();
-            ConfigKeeper.configMap.clear();
             
             if (heartbeat != null) {
                 heartbeat.shutdown();
@@ -403,14 +407,13 @@ public class Agent implements Runnable {
                         LOG.error("Can not find reader by " + topicId + " to recovery");
                         return false;
                     }
-                    IRecoder recoder = reader.getRecoder();
                     long rollTs = recoveryRoll.getRollTs();
                     String recoveryKey = topicId.getContent() + ":" + rollTs;
                     if ((rollRecovery = recoveryingMap.get(recoveryKey)) == null) {
                         broker = recoveryRoll.getBrokerServer();
                         int recoveryPort = recoveryRoll.getRecoveryPort();
                         rollRecovery = new RollRecovery(Agent.this,
-                                broker, recoveryPort, topicMeta, rollTs, isFinal, persistent, recoder);
+                                broker, recoveryPort, topicMeta, rollTs, isFinal, persistent);
                         recoveryingMap.put(recoveryKey, rollRecovery);
                         recoveryThreadPool.execute(rollRecovery);
                         return true;
@@ -484,8 +487,7 @@ public class Agent implements Runnable {
                             if (!checkFilesExist(topic, lxcConfRes.getWatchFile(), id)) {
                                 continue;
                             }
-                            buildConfMap(topic, lxcConfRes);
-                            fillUpAppLogsFromConfig(topicId);
+                            fillUpAppLogsFromConfig(topicId, lxcConfRes);
                             startLogReader(topicId);
                             register(topicId, Util.getTS());
                             heartbeat.setInterval(5000);
@@ -506,8 +508,7 @@ public class Agent implements Runnable {
                         if (!checkFilesExist(topic, appConfRes.getWatchFile())) {
                             continue;
                         }
-                        buildConfMap(topic, appConfRes);
-                        fillUpAppLogsFromConfig(topicId);
+                        fillUpAppLogsFromConfig(topicId, appConfRes);
                         ++accepted;
                         startLogReader(topicId);
                         register(topicId, Util.getTS());
@@ -558,10 +559,6 @@ public class Agent implements Runnable {
                             if (topicMeta.isDying()) {
                                 if ((logReader = topicReaders.get(topicMeta)) != null) {
                                     LOG.info("Clean up " + topicMeta);
-                                    IRecoder recoder = logReader.getRecoder();
-                                    if (recoder != null) {
-                                        recoder.cleanup();
-                                    }
                                     logReader.stop();
                                     topicReaders.remove(topicMeta);
                                     topics.remove(topicId);
@@ -595,46 +592,6 @@ public class Agent implements Runnable {
                     LOG.error("Topic [" + topic + "] from supervisor message not match with local");
                 }
                 break;
-            case SNAPSHOT_OP:
-                SnapshotOp snapshotOp = msg.getSnapshotOp();
-                topic = snapshotOp.getTopic();
-                instanceId = Util.getInstanceIdFromSource(snapshotOp.getSource());
-                OP op = snapshotOp.getOp();
-                
-                topicId = new TopicId(topic, instanceId);
-                if ((topicMeta = topics.get(topicId)) != null) {
-                    if ((logReader = topicReaders.get(topicMeta)) != null) {
-                        IRecoder recoder = logReader.getRecoder();
-                        if (recoder != null) {
-                            switch (op) {
-                                case log:
-                                    LOG.debug("Snaphost log for " + topicId);
-                                    recoder.log();
-                                    break;
-                                case clean:
-                                    LOG.debug("Snaphost clean up for " + topicId);
-                                    recoder.tidy();
-                                    recoder.log();
-                                    break;
-                                case del:
-                                    LOG.warn("!!! Force delete snapshot file of " + topicId 
-                                            + ". It may lead to a disordered situation, "
-                                            + "please use it just before restart Agent process");
-                                    recoder.cleanup();
-                                    break;
-                                default:
-                                    break;
-                            }
-                        } else {
-                            LOG.error("Can not find state for " + topicId);
-                        }
-                    } else {
-                        LOG.info("Can not find logReader for " + topicId);
-                    }
-                } else {
-                    LOG.error("Topic [" + topic + "] from supervisor message not match with local");
-                }
-                break;
             case UNRESOLVED_CONNECTION:
                 LOG.fatal("Supervisor can not resolve any hostname for this agent: " + Util.getLocalHost());
                 break;
@@ -644,48 +601,6 @@ public class Agent implements Runnable {
             return false;
         }
 
-        private void buildConfMap(String topic, AppConfRes appConfRes) {
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.ROTATE_PERIOD, appConfRes.getRotatePeriod());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.ROLL_PERIOD, appConfRes.getRollPeriod());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.READ_INTERVAL, appConfRes.getReadInterval());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, appConfRes.getMinMsgSent());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, appConfRes.getMsgBufSize());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.BANDWIDTH_PER_SEC, appConfRes.getBandwidthPerSec());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.PARTITION_FACTOR, appConfRes.getPartitionFactor());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.TAIL_POSITION, String.valueOf(appConfRes.getTailPosition()));
-        }
-
-        private void buildConfMap(String topic, LxcConfRes lxcConfRes) {
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.ROTATE_PERIOD, lxcConfRes.getRotatePeriod());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.ROLL_PERIOD, lxcConfRes.getRollPeriod());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.MAX_LINE_SIZE, lxcConfRes.getMaxLineSize());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.READ_INTERVAL, lxcConfRes.getReadInterval());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, lxcConfRes.getMinMsgSent());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, lxcConfRes.getMsgBufSize());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.BANDWIDTH_PER_SEC, lxcConfRes.getBandwidthPerSec());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.PARTITION_FACTOR, lxcConfRes.getPartitionFactor());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.TAIL_POSITION, String.valueOf(lxcConfRes.getTailPosition()));
-        }
-        
         private void startLogReader(TopicId topicId) {
             AgentMeta topicMeta;
             LogReader logReader;
@@ -695,7 +610,7 @@ public class Agent implements Runnable {
                         LOG.warn(topicMeta + " is dying, do not restart log reader.");
                         return;
                     }
-                    logReader = new LogReader(Agent.this, topicMeta, snapshotPersistDir);
+                    logReader = new LogReader(Agent.this, topicMeta);
                     topicReaders.put(topicMeta, logReader);
                     pool.execute(logReader);
                 }

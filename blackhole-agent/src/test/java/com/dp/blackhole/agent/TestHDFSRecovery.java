@@ -1,7 +1,5 @@
 package com.dp.blackhole.agent;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -25,13 +23,10 @@ import org.junit.Test;
 
 import com.dp.blackhole.agent.SimAgent;
 import com.dp.blackhole.agent.AgentMeta.TopicId;
-import com.dp.blackhole.agent.persist.LocalRecorder;
-import com.dp.blackhole.agent.persist.Record;
 import com.dp.blackhole.broker.Compression;
 import com.dp.blackhole.broker.Compression.Algorithm;
 import com.dp.blackhole.broker.SimBroker;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.conf.ConfigKeeper;
 
 public class TestHDFSRecovery {
     private static final Log LOG = LogFactory.getLog(TestHDFSRecovery.class);
@@ -44,13 +39,9 @@ public class TestHDFSRecovery {
     private Path oldPath;
     private SimAgent agent;
     private SimBroker collecotr;
-    private LocalRecorder state;
 
     @Before
     public void setUp() throws Exception {
-        state = mock(LocalRecorder.class);
-        when(state.retrive(SimAgent.rollTS))
-            .thenReturn(new Record(Record.ROTATE, SimAgent.rollTS, LogReader.BEGIN_OFFSET_OF_FILE, LogReader.END_OFFSET_OF_FILE, Util.getCurrentRotationUnderTimeBuf(SimAgent.rollTS, 3600, 0)));//or 598
         APP_HOST = Util.getLocalHost();
         //build a tmp file
         fileBroken = createBrokenTmpFile(MAGIC + "_broken_", SimAgent.expected);
@@ -75,11 +66,6 @@ public class TestHDFSRecovery {
         
         agent = new SimAgent();
         
-        //deploy some condition
-        ConfigKeeper confKeeper = new ConfigKeeper();
-        confKeeper.addRawProperty(MAGIC + ".rollPeriod", "3600");
-        confKeeper.addRawProperty(MAGIC + ".maxLineSize", "1024");
-        
         collecotr = new SimBroker(port);
         collecotr.start();
     }
@@ -97,7 +83,7 @@ public class TestHDFSRecovery {
     public void test() throws IOException, InterruptedException {
         TopicId topicId = new TopicId(MAGIC, null);
         AgentMeta appLog = new AgentMeta(topicId, file.getAbsolutePath(), 3600, 3600, 1024, 1L, 5, 4096, 1024*1024, 1, -1);
-        RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false, true, state);
+        RollRecovery clientTask = new RollRecovery(agent, SimAgent.HOSTNAME, port, appLog, SimAgent.rollTS, false, true);
         clientTask.setStartWaitTime(0);
         Thread clientThread = new Thread(clientTask);
         clientThread.run();

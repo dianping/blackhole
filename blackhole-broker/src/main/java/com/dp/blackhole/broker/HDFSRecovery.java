@@ -134,8 +134,6 @@ public class HDFSRecovery implements Runnable{
         Path targetIndexFile = new Path(mgr.getRollHdfsPath(ident, ParamsKey.COMPRESSION_LZO + ParamsKey.LZO_INDEX_SUFFIX));
         if (fs.exists(targetIndexFile)) {
             fs.delete(targetIndexFile, false);
-        } else {
-            System.out.println("------------not exist" + targetIndexFile);
         }
     }
 }
