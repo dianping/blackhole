@@ -531,12 +531,17 @@ public class Agent implements Runnable {
                         if ((topicMeta = topics.get(topicId)) != null) {
                             // set a stream status to dying, and send a special rotate message.
                             if (topicMeta.setDying()) {
-                                if (!new File(topicMeta.getTailFile()).exists()) {
-                                    LOG.warn("QUIT but " + topicMeta.getTailFile() + " not exists, retire stream and trigger CLEAN.");
-                                    send(PBwrap.wrapRetireStream(topic, topicMeta.getSource(), true));
-                                } else if ((logReader = topicReaders.get(topicMeta)) != null) {
+                                if ((logReader = topicReaders.get(topicMeta)) != null) {
                                     LOG.info("begin last log rotate");
-                                    logReader.getLogFSM().beginLastLogRotate();
+                                    logReader.getLogFSM().beginHalt();
+                                    if (!logReader.getTailFile().exists()) {
+                                        LOG.warn("QUIT but " + logReader.getTailFile() + " not exists, retire stream and CLEAN after 10 seconds.");
+                                        send(PBwrap.wrapRetireStream(topic, topicMeta.getSource(), true));
+                                        Thread.sleep(10000);
+                                        logReader.stop();
+                                        topicReaders.remove(topicMeta);
+                                        topics.remove(topicId);
+                                    }
                                 } else {
                                     LOG.info(topicMeta + " has already stopped.");
                                 }
@@ -566,7 +571,7 @@ public class Agent implements Runnable {
                                     LOG.info(topicMeta + " has already stopped.");
                                 }
                             } else {
-                                LOG.info(topicId + " clean ignore due to still alive.");
+                                LOG.info(topicId + " clean ignore due to dying.");
                             }
                         }
                     }

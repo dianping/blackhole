@@ -65,6 +65,10 @@ public class LogReader implements Runnable {
         this.currentRotation = rotateTs;
     }
 
+    public File getTailFile() {
+        return tailFile;
+    }
+
     public boolean register() {
         return agent.getListener().registerLogReader(meta.getTailFile(), logFSM);
     }
@@ -173,12 +177,19 @@ public class LogReader implements Runnable {
                 case ROTATE:
                     processRotate();
                     break;
+                case HALT:
+                    processHalt();
+                    break;
                 case FINISHED:
+                    //TODO should refactor
                     //Do not end the loop here, it will terminate the thread and release all resources.
                     //Once the socket (in RemoteSender) closed, broker will lose the agent connection 
                     //and throw EOFExeception instead of uploading data.
                     //So, it should not break the loop until agent receives CLEAN event. 
-                    Thread.sleep(1000);
+                    LOG.info("handle finish, just sleep 60 seconds to wait broker upload, then stop self thread "
+                            + Thread.currentThread().getName());
+                    Thread.sleep(60000);
+                    running = false;
                     break;
                 default:
                     throw new AssertionError("Undefined log status.");
@@ -241,6 +252,28 @@ public class LogReader implements Runnable {
             reassignSender(sender);
         } finally {
             logFSM.finishLogRotate();
+        }
+    }
+    
+    public void processHalt() {
+        try {
+            try {
+                readLines(reader);
+            } catch (SocketException e) {
+                throw e;
+            } catch (IOException e) {
+                LOG.error("Oops, got an exception:", e);
+            } finally {
+                closeFile(reader);
+            }
+            
+            //send left message force
+            sender.sendMessage();
+            sender.sendHaltRequest();
+        } catch (IOException e) {
+            LOG.error("Fail while sending halt request, abort resender", e);
+        } finally {
+            logFSM.finishHalt();
         }
     }
 

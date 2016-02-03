@@ -3,7 +3,7 @@ package com.dp.blackhole.agent;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class LogFSM {
-    public enum LogState {NEW, APPEND, ROLL, ROTATE, LAST_ROLL, FINISHED}
+    public enum LogState {NEW, APPEND, ROLL, ROTATE, HALT, FINISHED}
     private AtomicReference<LogState> currentLogState = new AtomicReference<LogState>(LogState.NEW);
     
     public LogState getCurrentLogStatus() {
@@ -23,13 +23,18 @@ public class LogFSM {
     }
     
     public void beginLogRotate() {
+        if (currentLogState.get() == LogState.FINISHED
+                || currentLogState.get() == LogState.HALT) {
+            return;
+        }
         currentLogState.set(LogState.ROTATE);
     }
     
-    public void beginLastLogRotate() {
-        currentLogState.set(LogState.LAST_ROLL);
+    public void beginHalt() {
+        currentLogState.set(LogState.HALT);
     }
     
+    @Deprecated
     public void beginRollAttempt() {
         currentLogState.set(LogState.ROLL);
     }
@@ -38,8 +43,8 @@ public class LogFSM {
         currentLogState.compareAndSet(LogState.ROTATE, LogState.APPEND);
     }
     
-    public void finishLastRoll() {
-        currentLogState.compareAndSet(LogState.LAST_ROLL, LogState.FINISHED);
+    public void finishHalt() {
+        currentLogState.compareAndSet(LogState.HALT, LogState.FINISHED);
     }
     
     public void finishRoll() {
