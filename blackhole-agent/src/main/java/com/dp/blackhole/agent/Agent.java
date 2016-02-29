@@ -192,7 +192,7 @@ public class Agent implements Runnable {
     }
     
     public AgentMeta fillUpAppLogsFromConfig(TopicId topicId, AppConfRes confRes) {
-        String path = confRes.getWatchFile();
+        String tailFile = confRes.getWatchFile();
         long rotatePeriod = Long.parseLong(confRes.getRotatePeriod());
         long rollPeriod = Long.parseLong(confRes.getRollPeriod());
         int maxLineSize = Util.parseInt(confRes.getMaxLineSize(), 512000);
@@ -202,15 +202,15 @@ public class Agent implements Runnable {
         int bandwidthPerSec = Util.parseInt(confRes.getBandwidthPerSec(), 10 * 1024 * 1024);
         int partitionFactor = Util.parseInt(confRes.getPartitionFactor(), 1);
         long tailPosition = confRes.getTailPosition();
-        AgentMeta topicMeta = new AgentMeta(topicId, path, rotatePeriod,
+        AgentMeta topicMeta = new AgentMeta(topicId, tailFile, rotatePeriod,
                 rollPeriod, maxLineSize, readInterval, minMsgSent, msgBufSize,
                 bandwidthPerSec, partitionFactor, tailPosition);
         topics.put(topicId, topicMeta);
         return topicMeta;
     }
     
-    public AgentMeta fillUpAppLogsFromConfig(TopicId topicId, LxcConfRes confRes) {
-        String path = confRes.getWatchFile();
+    public AgentMeta fillUpAppLogsFromConfig(TopicId topicId, LxcConfRes confRes, String instanceId) {
+        String tailFile = String.format(baseDirWildcard, instanceId) + confRes.getWatchFile();
         long rotatePeriod = Long.parseLong(confRes.getRotatePeriod());
         long rollPeriod = Long.parseLong(confRes.getRollPeriod());
         int maxLineSize = Util.parseInt(confRes.getMaxLineSize(), 512000);
@@ -220,7 +220,7 @@ public class Agent implements Runnable {
         int bandwidthPerSec = Util.parseInt(confRes.getBandwidthPerSec(), 10 * 1024 * 1024);
         int partitionFactor = Util.parseInt(confRes.getPartitionFactor(), 1);
         long tailPosition = confRes.getTailPosition();
-        AgentMeta topicMeta = new AgentMeta(topicId, path, rotatePeriod,
+        AgentMeta topicMeta = new AgentMeta(topicId, tailFile, rotatePeriod,
                 rollPeriod, maxLineSize, readInterval, minMsgSent, msgBufSize,
                 bandwidthPerSec, partitionFactor, tailPosition);
         topics.put(topicId, topicMeta);
@@ -487,7 +487,7 @@ public class Agent implements Runnable {
                             if (!checkFilesExist(topic, lxcConfRes.getWatchFile(), id)) {
                                 continue;
                             }
-                            fillUpAppLogsFromConfig(topicId, lxcConfRes);
+                            fillUpAppLogsFromConfig(topicId, lxcConfRes, id);
                             startLogReader(topicId);
                             register(topicId, Util.getTS());
                             heartbeat.setInterval(5000);
