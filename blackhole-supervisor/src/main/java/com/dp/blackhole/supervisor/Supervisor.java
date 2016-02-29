@@ -15,6 +15,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -1138,7 +1139,7 @@ public class Supervisor {
                     manualRecoveryStage.setSource(source);
                     manualRecoveryStage.setBrokerHost(null);
                     manualRecoveryStage.setCleanstart(false);
-                    manualRecoveryStage.setIssuelist(new ArrayList<Issue>());
+                    manualRecoveryStage.setIssuelist(new Vector<Issue>());
                     manualRecoveryStage.setStatus(Stage.RECOVERYING);
                     manualRecoveryStage.setRollTs(rollTs);
                     manualRecoveryStage.setCurrent(false);
@@ -1454,7 +1455,7 @@ public class Supervisor {
                         next.setCleanstart(true);
                         next.setRollTs(current.getRollTs() + stream.getPeriod() * 1000);
                         next.setStatus(Stage.APPENDING);
-                        next.setIssuelist(new ArrayList<Issue>());
+                        next.setIssuelist(new Vector<Issue>());
                         next.setCurrent(true);
                         stages.add(next);
                     }
@@ -1575,7 +1576,7 @@ public class Supervisor {
             current.setSource(stream.getSource());
             current.setBrokerHost(readyBroker.getBrokerServer());
             current.setCleanstart(false);
-            current.setIssuelist(new ArrayList<Issue>());
+            current.setIssuelist(new Vector<Issue>());
             current.setStatus(Stage.APPENDING);
             current.setRollTs(currentTs);
             current.setCurrent(true);
@@ -1756,7 +1757,7 @@ public class Supervisor {
             } else {
                 stage.setCurrent(false);
             }
-            stage.setIssuelist(new ArrayList<Issue>());
+            stage.setIssuelist(new Vector<Issue>());
             stage.getIssuelist().add(issue);
             stage.setStatus(Stage.RECOVERYING);
             stage.setRollTs(stream.getLastSuccessTs() + stream.getPeriod() * 1000 * (i+1));
