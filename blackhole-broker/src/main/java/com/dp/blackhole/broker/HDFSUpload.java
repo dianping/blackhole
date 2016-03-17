@@ -84,11 +84,13 @@ public class HDFSUpload implements Runnable {
         }
 
         Path tmp = new Path(mgr.getTempHdfsPath(ident));
+        FSDataOutputStream fsDataOutputStream = null;
+        OutputStream out = null;
         try {
             String dfsPath = mgr.getRollHdfsPath(ident, compressionAlgo.getName());
-            FSDataOutputStream fsDataOutputStream = fs.create(tmp, true);
+            fsDataOutputStream = fs.create(tmp, true);
             Compressor compressor = compressionAlgo.getCompressor();
-            OutputStream out = compressionAlgo.createCompressionStream(fsDataOutputStream, compressor, 0);
+            out = compressionAlgo.createCompressionStream(fsDataOutputStream, compressor, 0);
             outChannel = Channels.newChannel(out);
 
             ByteBuffer buffer = ByteBuffer.allocate(BufferSize);
@@ -153,6 +155,18 @@ public class HDFSUpload implements Runnable {
         } catch (IOException e) {
             LOG.error("IOE cached: ", e);
         } finally {
+            try {
+                if (fsDataOutputStream != null) {
+                    fsDataOutputStream.close();
+                }
+            } catch (IOException e1) {
+            }
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException e1) {
+            }
             try {
                 if (outChannel != null) {
                     outChannel.close();
