@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.Encoded;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -137,6 +136,7 @@ public class OperatorResource extends BaseResource {
     
     @GET
     @Path("/checkpoint/view")
+    @Produces({MediaType.APPLICATION_JSON})
     public Response checkpiontView() {
         LOG.debug("GET: checkpoint view asynchronously");
         File checkpointViewFile = new File("/tmp/checkpoint_view." + Util.getTS());

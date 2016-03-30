@@ -49,6 +49,8 @@ public abstract class ParamsKey {
     
     public static final String COMPRESSION_LZO = "lzo";
     public static final String COMPRESSION_GZ = "gz";
+    public static final String LZO_INDEX_SUFFIX = ".index";
+    public static final String LZO_TMP_INDEX_SUFFIX = ".index.tmp";
     public static final String COMPRESSION_NONE = "none";
     public static final String COMPRESSION_UNDEFINED = "undefined";
     public static final long DEFAULT_CLOCK_SYNC_BUF_MILLIS = 20000;
@@ -58,4 +60,5 @@ public abstract class ParamsKey {
     public static final String TOPIC_KEY = "topic";
     public static final String PARTITION_KEY = "partition";
     public static final String BROKER_KEY = "broker";
+    public static final String DEFAULT_VERSION = "UNSPCIFIED";
 }

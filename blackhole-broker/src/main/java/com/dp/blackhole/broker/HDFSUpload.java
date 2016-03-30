@@ -39,6 +39,7 @@ public class HDFSUpload implements Runnable {
     private final int UPLOAD_RETRY_NUM = 3;
     private final long WAIT_TIME_MILLIS = 3 * 60 * 1000;
     private boolean networkError = false;
+    private Algorithm compressionAlgo;
 
     public HDFSUpload(RollManager mgr, StorageManager manager, FileSystem fs, RollIdent ident, RollPartition roll,
             String compression) {
@@ -75,7 +76,6 @@ public class HDFSUpload implements Runnable {
     private void uploadRoll() {
         ByteBuffer newline = ByteBuffer.wrap("\n".getBytes(Charset.forName("UTF-8")));
         WritableByteChannel outChannel = null;
-        Algorithm compressionAlgo = null;
         try {
             compressionAlgo = Compression.getCompressionAlgorithmByName(this.compression);
         } catch (IllegalArgumentException e) {
@@ -83,12 +83,14 @@ public class HDFSUpload implements Runnable {
             this.compression = ParamsKey.COMPRESSION_GZ;
         }
 
+        Path tmp = new Path(mgr.getTempHdfsPath(ident));
+        FSDataOutputStream fsDataOutputStream = null;
+        OutputStream out = null;
         try {
             String dfsPath = mgr.getRollHdfsPath(ident, compressionAlgo.getName());
-            Path tmp = new Path(mgr.getTempHdfsPath(ident));
-            FSDataOutputStream fsDataOutputStream = fs.create(tmp, true);
+            fsDataOutputStream = fs.create(tmp, true);
             Compressor compressor = compressionAlgo.getCompressor();
-            OutputStream out = compressionAlgo.createCompressionStream(fsDataOutputStream, compressor, 0);
+            out = compressionAlgo.createCompressionStream(fsDataOutputStream, compressor, 0);
             outChannel = Channels.newChannel(out);
 
             ByteBuffer buffer = ByteBuffer.allocate(BufferSize);
@@ -142,24 +144,59 @@ public class HDFSUpload implements Runnable {
             }
 
             Path dst = new Path(dfsPath);
+            if (this.compression.equalsIgnoreCase(ParamsKey.COMPRESSION_LZO)) {
+                createIndex(dst, tmp);
+            }
             if (!HDFSUtil.retryRename(fs, tmp, dst)) {
                 networkError = true;
                 throw new IOException("Faild to rename tmp to " + dst);
             }
-
             uploadSuccess = true;
         } catch (IOException e) {
             LOG.error("IOE cached: ", e);
         } finally {
+            try {
+                if (fsDataOutputStream != null) {
+                    fsDataOutputStream.close();
+                }
+            } catch (IOException e1) {
+            }
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException e1) {
+            }
             try {
                 if (outChannel != null) {
                     outChannel.close();
                 }
             } catch (IOException e) {
             }
+            try {
+                if (fs.exists(tmp)) {
+                    HDFSUtil.retryDelete(fs, tmp);
+                }
+            } catch (IOException e) {
+            }
+            Path tmpIndex = tmp.suffix(ParamsKey.LZO_INDEX_SUFFIX);
+            try {
+                if (fs.exists(tmpIndex)) {
+                    HDFSUtil.retryDelete(fs, tmpIndex);
+                }
+            } catch (IOException e) {
+            }
         }
     }
 
+    private void createIndex(Path dst, Path tmp) throws IOException {
+        //if "data.lzo.index" is not exists, create "data.lzo.index.tmp"
+        Path targetIndexFile = dst.suffix(ParamsKey.LZO_INDEX_SUFFIX);
+        if (!fs.exists(targetIndexFile)) {
+            compressionAlgo.createIndex(fs, dst, tmp);
+        }
+    }
+    
     private void fetchFileMessageSet(GatheringByteChannel channel, FileMessageSet messages) throws IOException {
         int read = 0;
         int limit = messages.getSize();

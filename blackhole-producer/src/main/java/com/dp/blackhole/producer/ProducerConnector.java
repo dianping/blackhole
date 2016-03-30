@@ -1,6 +1,5 @@
 package com.dp.blackhole.producer;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +43,7 @@ public class ProducerConnector implements Runnable {
     //this is a static instance, concurrency of all actions should be take to account
     private static ProducerConnector instance = new ProducerConnector();
     private LingeringSender linger;
+    private static String version = Util.getVersion();
     
     public static ProducerConnector getInstance() {
         return instance;
@@ -209,7 +209,7 @@ public class ProducerConnector implements Runnable {
         public void OnConnected(ByteBufferNonblockingConnection connection) {
             LOG.info("ProducerConnector connected");
             supervisor = connection;
-            heartbeat = new HeartBeat(supervisor);
+            heartbeat = new HeartBeat(supervisor, version);
             heartbeat.start();
             if (hasConnectBefore) {
                 for (LinkedBlockingQueue<Producer> unAssignedProducers : unAssignIdProducers.values()) {
@@ -256,7 +256,7 @@ public class ProducerConnector implements Runnable {
             String producerId;
             MessageType type = msg.getType();
             switch (type) {
-            case NOAVAILABLECONF:
+            case NO_AVAILABLE_CONF:
                 NoavailableConf noavailableConf = msg.getNoavailableConf();
                 topic = noavailableConf.getTopic();
                 requireConfigFromSupersivor(topic, FIVE_MINUTES);
@@ -286,7 +286,7 @@ public class ProducerConnector implements Runnable {
                 
                 producerReg(topic, producerId, 0);
                 break;
-            case NOAVAILABLENODE:
+            case NO_AVAILABLE_NODE:
                 NoAvailableNode noAvailableNode = msg.getNoAvailableNode();
                 topic = noAvailableNode.getTopic();
                 producerId = noAvailableNode.getSource();
@@ -342,18 +342,14 @@ public class ProducerConnector implements Runnable {
                 return;
             }
             PartitionConnection partitionConnection = new PartitionConnection(p.geTopicMeta(), topic, broker, brokerPort, partitionId);
-            try {
-                boolean success = partitionConnection.initializeRemoteConnection();
-                if (success) {
-                    LOG.info(producerId + " TopicReg with ["
-                            + broker + ":" + brokerPort + "] successfully");
-                } else {
-                    throw new IOException(producerId + " TopicReg with ["
-                            + broker + ":" + brokerPort
-                            + "] unsuccessfully cause broker create partition faild");
-                }
-            } catch (IOException e) {
-                LOG.error("init remote connection fail, register again.", e);
+            boolean success = partitionConnection.initializeRemoteConnection();
+            if (success) {
+                LOG.info(producerId + " TopicReg with ["
+                        + broker + ":" + brokerPort + "] successfully");
+            } else {
+                LOG.error(producerId + " TopicReg with ["
+                        + broker + ":" + brokerPort
+                        + "] unsuccessfully cause broker create partition faild");
                 producerReg(topic, producerId, 0);
                 return;
             }

@@ -59,7 +59,20 @@ public class RollManager {
         this.defaultCompressionAlgo = Compression.getCompressionAlgorithmByName(defaultCompression);
         uploadPool = Executors.newFixedThreadPool(maxUploadThreads);
         recoveryPool = Executors.newFixedThreadPool(maxRecoveryThreads);
-        fs = (new Path(hdfsbase)).getFileSystem(new Configuration());
+        Configuration conf = new Configuration();
+        if (conf.get("io.compression.codecs") == null) {
+            conf.set("io.compression.codecs",
+                    "org.apache.hadoop.io.compress.GzipCodec,"
+                    + "org.apache.hadoop.io.compress.DefaultCodec,"
+                    + "com.hadoop.compression.lzo.LzoCodec,"
+                    + "com.hadoop.compression.lzo.LzopCodec,"
+                    + "org.apache.hadoop.io.compress.BZip2Codec,"
+                    + "org.apache.hadoop.io.compress.SnappyCodec");
+        }
+        if (conf.get("io.compression.codec.lzo.class") == null) {
+            conf.set("io.compression.codec.lzo.class", "com.hadoop.compression.lzo.LzoCodec");
+        }
+        fs = (new Path(hdfsbase)).getFileSystem(conf);
         rolls = new ConcurrentHashMap<RollIdent, RollPartition>();
         accepter = new RecoveryAcceptor(recoverySocketTimeout);
         accepter.start();

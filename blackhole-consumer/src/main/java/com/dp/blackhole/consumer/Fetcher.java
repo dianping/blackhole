@@ -75,6 +75,8 @@ public class Fetcher extends Thread {
 
     public void shutdown() {
         LOG.debug("shutdown the fetcher " + getName());
+        partitionBlockMap.clear();
+        partitionMap.clear();
         retryPool.shutdown();
         client.shutdown();
     }
@@ -89,7 +91,7 @@ public class Fetcher extends Thread {
         } catch (IOException e) {
             LOG.error("IOException catched: ", e);
         }
-        LOG.debug("stopping fetcher " + getName() + " to broker " + broker);
+        LOG.info("stopping fetcher " + getName() + " to broker " + broker);
     }
     
     @Override
@@ -121,10 +123,7 @@ public class Fetcher extends Thread {
 
         @Override
         public void OnDisconnected(TransferWrapNonblockingConnection connection) {
-            LOG.info("Fetcher " + this + " process disconnected with " + connection);
-            partitionBlockMap.clear();
-            partitionMap.clear();
-            client.shutdown();
+            LOG.info("Fetcher " + this + " disconnected but will reconnect to " + connection);
         }
 
         @Override

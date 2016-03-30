@@ -32,7 +32,6 @@ import com.dp.blackhole.broker.ByteBufferChannel;
 import com.dp.blackhole.broker.SimBroker;
 import com.dp.blackhole.broker.storage.Segment;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.storage.ByteBufferMessageSet;
 import com.dp.blackhole.storage.FileMessageSet;
 import com.dp.blackhole.storage.MessageAndOffset;
@@ -49,8 +48,6 @@ public class TestLogReader {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        ConfigKeeper confKeeper = new ConfigKeeper();
-        confKeeper.addRawProperty(MAGIC + ".rollPeriod", "3600");
         //build a server
         Properties properties = new Properties();
         properties.setProperty("GenServer.handlercount", "1");
@@ -104,7 +101,7 @@ public class TestLogReader {
         RemoteSender sender = new RemoteSender(topicMeta, localhost, port);
         sender.initializeRemoteConnection();
         verifyStatic();
-        LogReader reader = new LogReader(agent, topicMeta, "/tmp");
+        LogReader reader = new LogReader(agent, topicMeta);
         reader.assignSender(sender);
         readerThread = new Thread(reader);
         readerThread.start();

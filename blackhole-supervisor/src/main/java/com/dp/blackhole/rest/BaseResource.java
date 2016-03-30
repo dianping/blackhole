@@ -1,5 +1,7 @@
 package com.dp.blackhole.rest;
 
+import java.util.List;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -15,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import com.dp.blackhole.supervisor.ConfigManager;
 import com.dp.blackhole.supervisor.Supervisor;
+import com.dp.blackhole.supervisor.model.ConnectionDesc.ConnectionInfo;
 
 @Path("/")
 public class BaseResource {
@@ -42,5 +45,19 @@ public class BaseResource {
         Level level = Level.toLevel(l);
         LogManager.getRootLogger().setLevel(level);
         return Response.ok().build();
+    }
+    
+    @GET
+    @Path("/version/{type}/{version}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<ConnectionInfo> getConnectionByVersion(
+            @PathParam("type") String type,
+            @PathParam("version") String version) {
+        if (!type.startsWith("blackhole")) {
+            LOG.error("GET: type must start with blackhole, but now is " + type);
+            return null;
+        }
+        LOG.info("GET: change connection by version: " + type + "-" + version);
+        return supervisorService.getConnectionInfoByVersion(type + "-" + version);
     }
 }

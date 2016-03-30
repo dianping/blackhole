@@ -4,18 +4,14 @@ import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.Random;
-import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.agent.persist.IRecoder;
-import com.dp.blackhole.agent.persist.Record;
 import com.dp.blackhole.common.AgentProtocol;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.AgentProtocol.AgentHead;
@@ -33,7 +29,6 @@ public class RollRecovery implements Runnable{
     private Agent node;
     private boolean isFinal;
     private boolean isPersist;
-    private final IRecoder state;
     private TransferThrottler throttler;
     private File transferFile;
     private boolean isTransferFileCompressed;
@@ -41,7 +36,7 @@ public class RollRecovery implements Runnable{
 
     public RollRecovery(Agent node, String brokerServer, int port,
             AgentMeta topicMeta, final long rollTimestamp, boolean isFinal,
-            boolean isPersist, IRecoder state) {
+            boolean isPersist) {
         this.node = node;
         this.brokerServer = brokerServer;
         this.port = port;
@@ -50,7 +45,6 @@ public class RollRecovery implements Runnable{
         this.inbuf = new byte[DEFAULT_BUFSIZE];
         this.isFinal = isFinal;
         this.isPersist = isPersist;
-        this.state = state;
         if (topicMeta.getBandwidthPerSec() > 0) {
             this.throttler = new TransferThrottler(topicMeta.getBandwidthPerSec());
         }
@@ -100,59 +94,31 @@ public class RollRecovery implements Runnable{
             return;
         }
         try {
-            //retrive record to got recovery offset
-            Record record = state.retrive(rollTimestamp);
             //no need to recovery:
-            //1. loss record, the missing data will recovery into the last missing stage
-            //2. no persist topic
-            if (record == null || !isPersist) {
+            if (!isPersist) {
                 sendIgnoranceToBroker(rollPeriod, toTransferSize, isTransferFileCompressed, rollString);
                 return;
             }
             
-            try {
-                findAppropriateTransferFile(record);
-            } catch (FileNotFoundException e) {
-                LOG.error(e.getMessage());
+            transferFile = findAppropriateTransferFile();
+            if (transferFile == null) {
+                LOG.error("Can not found both rolled file and compressed file");
                 node.reportUnrecoverable(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal, isPersist);
                 return;
             }
             
             // open stream
-            long from = record.getStartOffset();
-            long to = record.getEndOffset();
+            long from = LogReader.BEGIN_OFFSET_OF_FILE;
+            long to = transferFile.length() - 1;
             try {
-                if (isTransferFileCompressed && to == LogReader.END_OFFSET_OF_FILE) {
-                    //If file compressed and end offset was EOF,
-                    //end offset set to length of compressed file and transfer it.
-                    is = new BufferedInputStream(new FileInputStream(transferFile), 65536);
-                    from = LogReader.BEGIN_OFFSET_OF_FILE;
-                    to = transferFile.length() - 1; //minus one to convert offset (from 0)
-                } else if (isTransferFileCompressed) {
-                    //If file compressed but end offset was specified,
-                    //transfer the decompressed file with this specified end offset.
-                    is = new GZIPInputStream(new FileInputStream(transferFile), 65536);
-                    isTransferFileCompressed = false;
-                } else {
-                    //If file uncompressed,
-                    //transfer the uncompressed file with its specified end offset.
-                    is = new BufferedInputStream(new FileInputStream(transferFile), 65536);
-                }
-                
+                //TODO judge batch size
+                is = new BufferedInputStream(new FileInputStream(transferFile), 65536);
             } catch (IOException e) {
                 LOG.error("Can not open an input stream for " + transferFile, e);
                 node.reportUnrecoverable(topicMeta.getTopicId(), topicMeta.getSource(), rollPeriod, rollTimestamp, isFinal, isPersist);
                 return;
             }
             
-            // correct end offset:
-            // RESUME occur at begin of rotate period, its RollTs will be set to the last RotateTs
-            // so that the start offset may be bigger than end offset. It should correct to the end of file.
-            if (to < from) {
-                to = transferFile.length() - 1;
-                LOG.info("Rorrecting " + topicMeta.getTopicId() + "'s record: " + record +  ": from > to, recovery to " + to);
-            }
-    
             // send recovery head, report fail in agent if catch exception.
             try {
                 socket = new Socket(brokerServer, port);
@@ -208,16 +174,16 @@ public class RollRecovery implements Runnable{
         }
     }
 
-    private void findAppropriateTransferFile(Record record) throws FileNotFoundException {
+    private File findAppropriateTransferFile() {
+        File transferFile = null;
         File rolledFile;
         File gzFile = null;
         long rotatePeriod= topicMeta.getRotatePeriod();
         //use origin tail file to recovery because that the rotation is belong to the current rotate stage
-        long rotation = record.getRotation();
-        if (isFinal || Util.belongToSameRotate(Util.getTS(), rotation, topicMeta.getRotatePeriod())) {
+        if (isFinal) {
             rolledFile = new File(topicMeta.getTailFile());
         } else {
-            String rotateString = Util.formatTs(rotation, rotatePeriod);
+            String rotateString = Util.formatTs(rollTimestamp, rotatePeriod);//TODO REVIEW
             rolledFile = Util.findRealFileByIdent(topicMeta.getTailFile(), rotateString);
             gzFile = Util.findGZFileByIdent(topicMeta.getTailFile(), rotateString);
         }
@@ -227,13 +193,12 @@ public class RollRecovery implements Runnable{
         } else if (gzFile != null && gzFile.exists()) {
             transferFile = gzFile;
             isTransferFileCompressed = true;
-        } else if (!Util.belongToSameRotate(record.getRollTs(), rotation, topicMeta.getRotatePeriod())) {
-            //use current watching file again because that this is a special case which file rotate hasn't happened yet
-            transferFile = new File(topicMeta.getTailFile());
-            LOG.warn("using SPECIAL TRANSFER FILE(" + transferFile + ") because file rotate hasn't happened yet");
-        } else {
-            throw new FileNotFoundException("Can not found both " + rolledFile + " and gzFile");
+//        } else if (current file but exceeds current batch)) {
+//            //use current watching file again because that this is a special case which file rotate hasn't happened yet
+//            transferFile = new File(topicMeta.getTailFile());
+//            LOG.warn("using SPECIAL TRANSFER FILE(" + transferFile + ") because file rotate hasn't happened yet");
         }
+        return transferFile;
     }
 
     private void sendIgnoranceToBroker(final long rollPeriod,

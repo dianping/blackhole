@@ -34,6 +34,7 @@ import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.http.HttpClientSingle;
 import com.dp.blackhole.supervisor.model.Blacklist;
+import com.dp.blackhole.supervisor.model.LogNotFoundEntity;
 import com.dp.blackhole.supervisor.model.Stream.StreamId;
 import com.dp.blackhole.supervisor.model.TopicConfig;
 
@@ -46,6 +47,7 @@ public class ConfigManager {
     private final Map<String, TopicConfig> confMap = new ConcurrentHashMap<String, TopicConfig>();
     private final Set<String> newTopicToBroadcast = new CopyOnWriteArraySet<String>();
     private Map<StreamId, String> brokerPreassignment = new HashMap<StreamId, String>();
+    private ConcurrentHashMap<LogNotFoundEntity, String> logNotFounds;// entity -> source
     private ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private Lock rLock = rwLock.readLock();
     private Lock wLock = rwLock.writeLock();
@@ -79,6 +81,7 @@ public class ConfigManager {
         this.cache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
         this.supervisor = supervisor;
         this.blacklist = new Blacklist();
+        this.logNotFounds = new ConcurrentHashMap<LogNotFoundEntity, String>();
     }
     
     public Supervisor getSupervisor() {
@@ -579,6 +582,23 @@ public class ConfigManager {
         }
     }
     
+    public ConcurrentHashMap<LogNotFoundEntity, String> getLogNotFounds() {
+        return logNotFounds;
+    }
+
+    public void addLogNotFound(String topic, String host, String file, long ts, String source) {
+        LogNotFoundEntity entity = new LogNotFoundEntity(topic, host);
+        entity.setFile(file);
+        entity.setTs(ts);
+        if(null == logNotFounds.putIfAbsent(entity, source)) {
+            LOG.info(entity);
+        }
+    }
+
+    public void removeLogNotFound(String topic, String host) {
+        logNotFounds.remove(new LogNotFoundEntity(topic, host));
+    }
+
     class LionChangeListener implements ConfigChange {
     
         @Override

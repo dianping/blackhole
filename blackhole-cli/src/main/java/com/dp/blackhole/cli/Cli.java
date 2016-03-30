@@ -237,7 +237,7 @@ public class Cli {
             }
             
             switch (message.getType()) {
-            case DUMPREPLY:
+            case DUMP_REPLY:
                 DumpReply dumpReply = message.getDumpReply();
                 PrintStream out = new PrintStream(System.out);
                 out.println("receive reply: ");

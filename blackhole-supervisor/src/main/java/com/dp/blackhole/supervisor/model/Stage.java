@@ -1,6 +1,6 @@
 package com.dp.blackhole.supervisor.model;
 
-import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,7 +17,7 @@ public class Stage {
     public static final int BROKERFAIL = 6;
     public static final int PAUSE = 7;
     
-    private List<Issue> issuelist;
+    private Vector<Issue> issuelist;
     private String latestIssue;
     
     private String topic;
@@ -29,12 +29,12 @@ public class Stage {
     private AtomicBoolean isCurrent;
     
     @JsonIgnore
-    public List<Issue> getIssuelist() {
+    public Vector<Issue> getIssuelist() {
         return issuelist;
     }
 
     @JsonIgnore
-    public void setIssuelist(List<Issue> issuelist) {
+    public void setIssuelist(Vector<Issue> issuelist) {
         this.issuelist = issuelist;
     }
 
@@ -132,6 +132,7 @@ public class Stage {
         }
     }
     
+    @Override
     public String toString() {
         String summary = topic + "@" + source + "," + getStatusString(status.get()) + "," + Util.formatTs(rollTs);
         if (!cleanstart) {
@@ -139,8 +140,10 @@ public class Stage {
         }
         summary = summary + "\n";
         if (issuelist.size() != 0) {
-            for(Issue i : issuelist) {
-                summary = summary + i.toString();
+            synchronized (issuelist) {
+                for(Issue i : issuelist) {
+                    summary = summary + i.toString();
+                }
             }
         }
         return summary;

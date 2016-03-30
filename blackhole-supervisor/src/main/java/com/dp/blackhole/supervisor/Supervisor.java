@@ -15,6 +15,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -44,6 +45,8 @@ import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.DumpAppPB.DumpApp;
 import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
+import com.dp.blackhole.protocol.control.HeartbeatPB.Heartbeat;
+import com.dp.blackhole.protocol.control.LogNotFoundPB.LogNotFound;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
 import com.dp.blackhole.protocol.control.PartitionRequireBrokerPB.PartitionRequireBroker;
@@ -145,11 +148,11 @@ public class Supervisor {
             return;
         }
         switch (msg.getType()) {
-        case NOAVAILABLECONF:
+        case NO_AVAILABLE_CONF:
         case DUMP_APP:
-        case DUMPCONF:
-        case DUMPSTAT:
-        case DUMPREPLY:
+        case DUMP_CONF:
+        case DUMP_STAT:
+        case DUMP_REPLY:
             break;
         default:
             LOG.debug("send message to " + connection + " :" +msg);
@@ -242,13 +245,19 @@ public class Supervisor {
         }
     }
     
-    private void handleHeartBeat(ByteBufferNonblockingConnection from) {
+    private void handleHeartBeat(Message msg, ByteBufferNonblockingConnection from) {
         ConnectionDesc desc = connections.get(from);
         if (desc == null) {
             LOG.error("can not find ConnectionDesc by connection " + from);
             return;
         }
         desc.updateHeartBeat();
+        try {
+            Heartbeat heartbeat = msg.getHeartbeat();
+            desc.setVersion(heartbeat.getVersion());
+        } catch (Exception e) {
+            //Compatible with the old version
+        }
     }
     
     private void addStream(Stream stream) {
@@ -897,6 +906,16 @@ public class Supervisor {
         send(from, message);
     }
     
+    public List<ConnectionInfo> getConnectionInfoByVersion(String version) {
+        List<ConnectionInfo> infos = new ArrayList<ConnectionInfo>();
+        for(ConnectionDesc desc : connections.values()) {
+            if(desc.getVersion().equalsIgnoreCase(version)) {
+                infos.add(desc.getConnectionInfo());
+            }
+        }
+        return infos;
+    }
+    
     public void listIdle(ByteBufferNonblockingConnection from) {
         StringBuilder sb = new StringBuilder();
         sb.append("list idle hosts:\n");
@@ -1120,7 +1139,7 @@ public class Supervisor {
                     manualRecoveryStage.setSource(source);
                     manualRecoveryStage.setBrokerHost(null);
                     manualRecoveryStage.setCleanstart(false);
-                    manualRecoveryStage.setIssuelist(new ArrayList<Issue>());
+                    manualRecoveryStage.setIssuelist(new Vector<Issue>());
                     manualRecoveryStage.setStatus(Stage.RECOVERYING);
                     manualRecoveryStage.setRollTs(rollTs);
                     manualRecoveryStage.setCurrent(false);
@@ -1436,7 +1455,7 @@ public class Supervisor {
                         next.setCleanstart(true);
                         next.setRollTs(current.getRollTs() + stream.getPeriod() * 1000);
                         next.setStatus(Stage.APPENDING);
-                        next.setIssuelist(new ArrayList<Issue>());
+                        next.setIssuelist(new Vector<Issue>());
                         next.setCurrent(true);
                         stages.add(next);
                     }
@@ -1557,7 +1576,7 @@ public class Supervisor {
             current.setSource(stream.getSource());
             current.setBrokerHost(readyBroker.getBrokerServer());
             current.setCleanstart(false);
-            current.setIssuelist(new ArrayList<Issue>());
+            current.setIssuelist(new Vector<Issue>());
             current.setStatus(Stage.APPENDING);
             current.setRollTs(currentTs);
             current.setCurrent(true);
@@ -1637,6 +1656,9 @@ public class Supervisor {
                 LOG.info("partition back to online: " + pinfo);
             }
         }
+        //delete LogNotFound entry if exists
+        configManager.removeLogNotFound(topic, host);
+        
         //reassign consumer
         reassignConsumers(topic);
     }
@@ -1735,7 +1757,7 @@ public class Supervisor {
             } else {
                 stage.setCurrent(false);
             }
-            stage.setIssuelist(new ArrayList<Issue>());
+            stage.setIssuelist(new Vector<Issue>());
             stage.getIssuelist().add(issue);
             stage.setStatus(Stage.RECOVERYING);
             stage.setRollTs(stream.getLastSuccessTs() + stream.getPeriod() * 1000 * (i+1));
@@ -1963,7 +1985,7 @@ public class Supervisor {
             
             switch (msg.getType()) {
             case HEARTBEART:
-                handleHeartBeat(from);
+                handleHeartBeat(msg, from);
                 break;
             case BROKER_REG:
                 LOG.debug("received: " + msg);
@@ -2009,7 +2031,7 @@ public class Supervisor {
                 LOG.debug("received: " + msg);
                 handleUnrecoverable(msg.getRollID());
                 break;
-            case TOPICREPORT:
+            case TOPIC_REPORT:
                 handleTopicReport(msg.getTopicReport(), from);
                 break;
             case OFFSET_COMMIT:
@@ -2018,19 +2040,19 @@ public class Supervisor {
             case MANUAL_RECOVERY_ROLL:
                 handleManualRecoveryRoll(msg.getRollID());
                 break;
-            case DUMPSTAT:
+            case DUMP_STAT:
                 dumpstat(from);
                 break;
-            case RETIRESTREAM:
+            case RETIRE_STREAM:
                 handleRetireStream(msg.getRetire(), from);
                 break;
             case CONF_REQ:
                 handleConfReq(msg.getConfReq(), from);
                 break;
-            case DUMPCONF:
+            case DUMP_CONF:
                 dumpconf(from);
                 break;
-            case LISTAPPS:
+            case LIST_APPS:
                 listTopics(from);
                 break;
             case REMOVE_CONF:
@@ -2039,7 +2061,7 @@ public class Supervisor {
             case DUMP_APP:
                 dumpTopic(msg.getDumpApp(), from);
                 break;
-            case LISTIDLE:
+            case LIST_IDLE:
                 listIdle(from);
                 break;
             case RESTART:
@@ -2062,6 +2084,9 @@ public class Supervisor {
                 break;
             case CONSUMER_EXIT:
                 handleConsumerExit(msg.getConsumerExit(), from);
+                break;
+            case LOG_NOT_FOUND:
+                handleLogNotFound(msg.getLogNotFound(), from);
                 break;
             default:
                 LOG.warn("unknown message: " + msg.toString());
@@ -2158,6 +2183,13 @@ public class Supervisor {
         server.init("supervisor", configManager.supervisorPort, configManager.numHandler);
     }
 
+    public void handleLogNotFound(LogNotFound logNotFound, ByteBufferNonblockingConnection from) {
+        String instanceId = logNotFound.getInstanceId();
+        String host = from.getHost();
+        String source = Util.getSource(host, instanceId);
+        configManager.addLogNotFound(logNotFound.getTopic(), host, logNotFound.getFile(), logNotFound.getTs(), source);
+    }
+
     public void handleConsumerExit(ConsumerExit consumerExit,
             ByteBufferNonblockingConnection from) {
         ConnectionDesc desc = connections.get(from);
@@ -2191,68 +2223,81 @@ public class Supervisor {
     }
 
     public void handleConfReq(ConfReq confReq, ByteBufferNonblockingConnection from) {
-        Message message;
         String topicFromReq = confReq.getTopic();
         if (topicFromReq != null && topicFromReq.length() != 0) {
             //producer request
-            TopicConfig topicConfig = configManager.getConfByTopic(topicFromReq);
-            if (topicConfig == null) {
-                message = PBwrap.wrapNoAvailableConf(topicFromReq);
-            } else {
-                int partitionFactor = topicConfig.getPartitionFactor();
-                producerMgrMap.putIfAbsent(topicFromReq, new ProducerManager(topicFromReq, partitionFactor));
-                ProducerManager manager = producerMgrMap.get(topicFromReq);
-                String producerId = manager.getProducerId();
-                
-                CommonConfRes commonConfRes = PBwrap.wrapCommonConfRes(
-                        topicConfig.getMaxLineSize(),
-                        topicConfig.getMinMsgSent(),
-                        topicConfig.getMsgBufSize(),
-                        topicConfig.getRollPeriod(),
-                        topicConfig.getPartitionFactor());
-                message = PBwrap.wrapProducerIdAssign(topicFromReq, producerId, commonConfRes);
+            triggerConfResOfProducer(from, topicFromReq);
+        } else {
+            //try handle paas request first
+            triggerConfResOfPaaS(from);
+            //then handle kvm request
+            triggerConfResOfKvm(from);
+        }
+    }
+
+    private void triggerConfResOfProducer(ByteBufferNonblockingConnection from,
+            String topicFromReq) {
+        Message message;
+        TopicConfig topicConfig = configManager.getConfByTopic(topicFromReq);
+        if (topicConfig == null) {
+            message = PBwrap.wrapNoAvailableConf(topicFromReq);
+        } else {
+            int partitionFactor = topicConfig.getPartitionFactor();
+            producerMgrMap.putIfAbsent(topicFromReq, new ProducerManager(topicFromReq, partitionFactor));
+            ProducerManager manager = producerMgrMap.get(topicFromReq);
+            String producerId = manager.getProducerId();
+            
+            CommonConfRes commonConfRes = PBwrap.wrapCommonConfRes(
+                    topicConfig.getMaxLineSize(),
+                    topicConfig.getMinMsgSent(),
+                    topicConfig.getMsgBufSize(),
+                    topicConfig.getRollPeriod(),
+                    topicConfig.getPartitionFactor());
+            message = PBwrap.wrapProducerIdAssign(topicFromReq, producerId, commonConfRes);
+        }
+        send(from, message);
+    }
+
+    private void triggerConfResOfKvm(ByteBufferNonblockingConnection from) {
+        Message message;
+        List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
+        Set<String> topicsAssocHost = configManager.getTopicsByHost(from.getHost());
+        if (topicsAssocHost == null || topicsAssocHost.size() == 0) {
+            LOG.debug("No topic mapping to " + from.getHost());
+            message = PBwrap.wrapNoAvailableConf(null);
+            send(from, message);
+            return;
+        }
+        for (String topic : topicsAssocHost) {
+            TopicConfig confInfo = configManager.getConfByTopic(topic);
+            if (confInfo == null) {
+                LOG.error("Can not get topic: " + topic + " from configMap");
+                continue;
             }
+            String rotatePeriod = String.valueOf(confInfo.getRotatePeriod());
+            String rollPeriod = String.valueOf(confInfo.getRollPeriod());
+            String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
+            String readInterval = String.valueOf(confInfo.getReadInterval());
+            String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
+            String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
+            String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
+            long tailPosition = confInfo.getTailPosition();
+            String watchFile = confInfo.getWatchLog();
+            if (watchFile == null) {
+                LOG.error("Can not get watch file of " + topic);
+                continue;
+            }
+            AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile,
+                    rotatePeriod, rollPeriod, maxLineSize, readInterval,
+                    minMsgSent, msgBufSize, bandwidthPerSec, tailPosition);
+            appConfResList.add(appConfRes);
+        }
+        if (appConfResList.isEmpty()) {
+            message = PBwrap.wrapNoAvailableConf(null);
             send(from, message);
         } else {
-            List<AppConfRes> appConfResList = new ArrayList<AppConfRes>();
-            Set<String> topicsAssocHost = configManager.getTopicsByHost(from.getHost());
-            if (topicsAssocHost == null || topicsAssocHost.size() == 0) {
-                LOG.debug("No topic mapping to " + from.getHost());
-                message = PBwrap.wrapNoAvailableConf(null);
-                send(from, message);
-                return;
-            }
-            for (String topic : topicsAssocHost) {
-                TopicConfig confInfo = configManager.getConfByTopic(topic);
-                if (confInfo == null) {
-                    LOG.error("Can not get topic: " + topic + " from configMap");
-                    continue;
-                }
-                String rotatePeriod = String.valueOf(confInfo.getRotatePeriod());
-                String rollPeriod = String.valueOf(confInfo.getRollPeriod());
-                String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
-                String readInterval = String.valueOf(confInfo.getReadInterval());
-                String minMsgSent = String.valueOf(confInfo.getMinMsgSent());
-                String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
-                String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
-                long tailPosition = confInfo.getTailPosition();
-                String watchFile = confInfo.getWatchLog();
-                if (watchFile == null) {
-                    LOG.error("Can not get watch file of " + topic);
-                    continue;
-                }
-                AppConfRes appConfRes = PBwrap.wrapAppConfRes(topic, watchFile,
-                        rotatePeriod, rollPeriod, maxLineSize, readInterval,
-                        minMsgSent, msgBufSize, bandwidthPerSec, tailPosition);
-                appConfResList.add(appConfRes);
-            }
-            if (appConfResList.isEmpty()) {
-                message = PBwrap.wrapNoAvailableConf(null);
-                send(from, message);
-            } else {
-                message = PBwrap.wrapConfRes(appConfResList, null);
-                send(from, message); 
-            }
+            message = PBwrap.wrapConfRes(appConfResList, null);
+            send(from, message);
         }
     }
     
@@ -2267,6 +2312,11 @@ public class Supervisor {
                     LOG.error("Can not get topic: " + topic + " from configMap");
                     continue;
                 }
+                Set<String> ids = confInfo.getInsByHost(connection.getHost());
+                if (ids == null) {
+                    LOG.info("Can not get instances by " + topic + " and " + connection.getHost());
+                    continue;
+                }
                 String rotatePeriod = String.valueOf(confInfo.getRotatePeriod());
                 String rollPeriod = String.valueOf(confInfo.getRollPeriod());
                 String maxLineSize = String.valueOf(confInfo.getMaxLineSize());
@@ -2276,11 +2326,6 @@ public class Supervisor {
                 String msgBufSize = String.valueOf(confInfo.getMsgBufSize());
                 String bandwidthPerSec = String.valueOf(confInfo.getBandwidthPerSec());
                 long tailPosition = confInfo.getTailPosition();
-                Set<String> ids = confInfo.getInsByHost(connection.getHost());
-                if (ids == null) {
-                    LOG.info("Can not get instances by " + topic + " and " + connection.getHost());
-                    continue;
-                }
                 LxcConfRes lxcConfRes = PBwrap.wrapLxcConfRes(topic, watchFile,
                         rotatePeriod, rollPeriod, maxLineSize, readInterval,
                         minMsgSent, msgBufSize, bandwidthPerSec, tailPosition, ids);

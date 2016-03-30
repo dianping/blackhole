@@ -12,9 +12,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.agent.persist.IRecoder;
-import com.dp.blackhole.agent.persist.LocalRecorder;
-import com.dp.blackhole.agent.persist.Record;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.common.ParamsKey.TopicConf;
@@ -32,22 +29,19 @@ public class LogReader implements Runnable {
     private volatile RemoteSender sender;
     private LogFSM logFSM;
     private AtomicReference<ReaderState> currentReaderState;
-    private final IRecoder recoder;
     private RandomAccessFile reader;
     private final File tailFile;
     private volatile boolean running = true;
     private final ByteArrayOutputStream lineBuf;
     private boolean accept;
     private final int maxLineSize;
-    private RollTrigger rollTrigger;
     private long currentRotation;
     
-    public LogReader(Agent agent, AgentMeta meta, String snapshotPersistDir) {
+    public LogReader(Agent agent, AgentMeta meta) {
         this.agent = agent;
         this.meta = meta;
         this.currentReaderState = new AtomicReference<ReaderState>(ReaderState.UNASSIGNED);
         this.logFSM = new LogFSM();
-        this.recoder = new LocalRecorder(snapshotPersistDir, meta);
         this.maxLineSize = meta.getMaxLineSize();
         this.currentRotation = setCurrentRotation();
         this.lineBuf = new ByteArrayOutputStream(maxLineSize);
@@ -63,16 +57,16 @@ public class LogReader implements Runnable {
         return sender;
     }
 
-    public IRecoder getRecoder() {
-        return recoder;
-    }
-    
     public long getCurrentRotation() {
         return currentRotation;
     }
     
     public void setCurrentRotation(long rotateTs) {
         this.currentRotation = rotateTs;
+    }
+
+    public File getTailFile() {
+        return tailFile;
     }
 
     public boolean register() {
@@ -104,54 +98,6 @@ public class LogReader implements Runnable {
         }
     }
     
-    long computeStartOffset(long rollTs, long rotatePeriod) {
-        long startOffset;
-        Record perviousRollRecord = getRecoder().getPerviousRollRecord();
-        if (perviousRollRecord == null) {
-            startOffset = LogReader.BEGIN_OFFSET_OF_FILE;
-        } else if (Util.belongToSameRotate(perviousRollRecord.getRollTs(), rollTs, rotatePeriod)
-                && Util.belongToSameRotate(perviousRollRecord.getRotation(), rollTs, rotatePeriod)) {
-            startOffset = perviousRollRecord.getEndOffset() + 1;
-        } else if (hasNotRotated(rollTs, rotatePeriod)) {
-            startOffset = perviousRollRecord.getEndOffset() + 1;
-        } else {
-            startOffset = LogReader.BEGIN_OFFSET_OF_FILE;
-        }
-        return startOffset;
-    }
-    
-    private boolean hasNotRotated(long ts, long rotatePeriod) {
-        long currentRotation = getCurrentRotation();
-        long expectedCurrentRotation = Util.getCurrentRotationUnderTimeBuf(ts, rotatePeriod, ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
-        LOG.debug(ts + "'s currentRotation: " + currentRotation + ", expectedCurrentRotation: " + expectedCurrentRotation);
-        return (currentRotation != 0) && (currentRotation < expectedCurrentRotation);
-    }
-
-    public void record(int type, long rollTs, long endOffset) {
-        long startOffset = computeStartOffset(rollTs, meta.getRotatePeriod());
-        if (endOffset != LogReader.END_OFFSET_OF_FILE && endOffset < startOffset) {
-            // roll or rotation occurs, meanwhile, remote sender do not work
-            // the end offset may be one less than start offset
-            LOG.info("This is a invaild record for " + rollTs + " " +  endOffset + "(end)<" + startOffset +"(start) , ignore it.");
-        } else {
-            getRecoder().record(type, rollTs, startOffset, endOffset, getCurrentRotation());
-        }
-        if (type == Record.ROTATE) {
-            setCurrentRotation();
-        }
-    }
-    
-    private void recordMissingRotation(long missRotateRollTs, long rotatePeriod) {
-        long startOffset = computeStartOffset(missRotateRollTs, rotatePeriod);
-        getRecoder().record(
-                Record.ROTATE,
-                missRotateRollTs,
-                startOffset,
-                END_OFFSET_OF_FILE,
-                Util.getCurrentRotationUnderTimeBuf(missRotateRollTs, rotatePeriod, ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS)
-        );
-    }
-
     long setCurrentRotation() {
         long currentTs = Util.getTS();
         long currentRotation = Util.getCurrentRotationUnderTimeBuf(
@@ -179,11 +125,6 @@ public class LogReader implements Runnable {
                 tailPosition = Util.seekLastLineHeader(reader, reader.length());
             }
             LOG.info("tail " + tailFile + " from " + tailPosition);
-            long resumeRollTs = Util.getCurrentRollTsUnderTimeBuf(
-                    Util.getTS(),
-                    meta.getRollPeriod(),
-                    ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
-            restoreMissingRotationRecords(meta.getRollPeriod(), meta.getRotatePeriod(), resumeRollTs);
         } catch (IOException e) {
             LOG.error("Oops, resume fail", e);
             closeFile(reader);
@@ -200,8 +141,6 @@ public class LogReader implements Runnable {
             currentReaderState.set(ReaderState.STOPPED);
             return;
         }
-        rollTrigger = new RollTrigger(meta, logFSM);
-        rollTrigger.trigger();
         
         // main loop
         loop();
@@ -212,7 +151,6 @@ public class LogReader implements Runnable {
         sender.close();
         sender = null;
         unregister();
-        rollTrigger.stop();
         LOG.warn("terminate log reader " + meta.getTopicId() + ", resources released.");
     }
 
@@ -236,19 +174,22 @@ public class LogReader implements Runnable {
                     process();
                     Thread.sleep(meta.getReadInterval());
                     break;
-                case ROLL:
-                case LAST_ROLL:
-                    processRoll();
-                    break;
                 case ROTATE:
                     processRotate();
                     break;
+                case HALT:
+                    processHalt();
+                    break;
                 case FINISHED:
+                    //TODO should refactor
                     //Do not end the loop here, it will terminate the thread and release all resources.
                     //Once the socket (in RemoteSender) closed, broker will lose the agent connection 
                     //and throw EOFExeception instead of uploading data.
                     //So, it should not break the loop until agent receives CLEAN event. 
-                    Thread.sleep(1000);
+                    LOG.info("handle finish, just sleep 60 seconds to wait broker upload, then stop self thread "
+                            + Thread.currentThread().getName());
+                    Thread.sleep(60000);
+                    running = false;
                     break;
                 default:
                     throw new AssertionError("Undefined log status.");
@@ -261,31 +202,6 @@ public class LogReader implements Runnable {
         }
     }
     
-    /**
-     * restore some missing ROTATE records before RESUME 
-     * if agent crash across at least one period of rotation
-     * @param rollPeriod
-     * @param rotatePeriod
-     * @param resumeRollTs
-     */
-    public void restoreMissingRotationRecords(long rollPeriod,
-            long rotatePeriod, long resumeRollTs) {
-        Record lastRollRecord = getRecoder().getPerviousRollRecord();
-        if (lastRollRecord != null) {
-            long firstMissRotateRollTs = Util.getNextRollTs(lastRollRecord.getRollTs(), rotatePeriod) - rollPeriod * 1000;
-            if (firstMissRotateRollTs > lastRollRecord.getRollTs() && firstMissRotateRollTs < resumeRollTs) {
-                recordMissingRotation(firstMissRotateRollTs, rotatePeriod);
-            }
-            int restMissRotateRollCount = Util.getMissRotateRollCount(firstMissRotateRollTs, resumeRollTs, rotatePeriod);
-            for (int i = 0; i < restMissRotateRollCount; i++) {
-                Record lastRotateRecord = getRecoder().getPerviousRollRecord();
-                long missRotateRollTs = Util.getNextRollTs(lastRotateRecord.getRollTs(), rotatePeriod) + (rotatePeriod  - rollPeriod) * 1000;
-                LOG.debug("find miss rotate roll ts " + missRotateRollTs);
-                recordMissingRotation(missRotateRollTs, rotatePeriod);
-            }
-        }
-    }
-
     public void process() {
         try {
             if (currentReaderState.get() == ReaderState.ASSIGNED) {
@@ -300,65 +216,9 @@ public class LogReader implements Runnable {
         }
     }
     
-    public void processRoll() {
-        long rollEndOffset = END_OFFSET_OF_FILE;
-        try {
-            rollEndOffset = reader.getFilePointer() - 1; //minus 1 points out the previous ROLL end offset
-            //do not handle log rotation any more when dying
-        } catch (IOException e) {
-            LOG.error("Oops, got an exception:", e);
-            throw new RuntimeException("log reader loop terminate, prepare to reboot log reader.");
-        } finally {
-            Long rollTs;
-            if (meta.isDying()) {
-                rollTs = Util.getCurrentRollTsUnderTimeBuf(
-                        Util.getTS(),
-                        meta.getRollPeriod(),
-                        ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
-            } else {
-                rollTs = Util.getLatestRollTsUnderTimeBuf(
-                        Util.getTS(),
-                        meta.getRollPeriod(),
-                        ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
-            }
-            //record snapshot
-            record(Record.ROLL, rollTs, rollEndOffset);
-        }
-        try {
-            if (currentReaderState.get() == ReaderState.ASSIGNED) {
-                sender.sendMessage();   //clear buffer
-                if (meta.isDying()) {
-                    sender.sendHaltRequest();
-                } else {
-                    sender.sendRollRequest();
-                }
-            }
-        } catch (Exception e) {
-            LOG.error("Fail while sending roll request, reassign sender", e);
-            reassignSender(sender);
-        } finally {
-            if (meta.isDying()) {
-                logFSM.finishLastRoll();
-            } else {
-                logFSM.finishRoll();
-            }
-        }
-    }
-    
     public void processRotate() {
-        long previousRotateEndOffset = END_OFFSET_OF_FILE;
-        long currentTs = Util.getTS();
-        Long rotateTs = Util.getLatestRollTsUnderTimeBuf(
-                currentTs,
-                meta.getRollPeriod(),
-                ParamsKey.DEFAULT_CLOCK_SYNC_BUF_MILLIS);
         if (currentReaderState.get() != ReaderState.ASSIGNED) {
             LOG.warn("RemoteSender not ready for " + meta.getTopicId());
-            //record rotation if not been recorded
-            Record record = getRecoder().retrive(rotateTs);
-            if (record == null || record.getType() != Record.ROTATE) {
-                record(Record.ROTATE, rotateTs, previousRotateEndOffset);
-            }
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -371,10 +231,7 @@ public class LogReader implements Runnable {
             final RandomAccessFile save = reader;
             try {
                 this.reader = openFile();
-                // At this point, we're sure that the old file is rotated
-                // Finish scanning the old file and then we'll start with the new one
-                // minus 1 points out the end offset of old file
-                previousRotateEndOffset = readLines(save) - 1;
+                readLines(save);
             } catch (SocketException e) {
                 throw e;
             } catch (IOException e) {
@@ -382,11 +239,6 @@ public class LogReader implements Runnable {
                 throw new RuntimeException("log reader loop terminate, prepare to reboot log reader.");
             } finally {
                 closeFile(save);
-                //record rotation if not been recorded
-                Record record = getRecoder().retrive(rotateTs);
-                if (record == null || record.getType() != Record.ROTATE) {
-                    record(Record.ROTATE, rotateTs, previousRotateEndOffset);
-                }
             }
             
             if (currentReaderState.get() == ReaderState.ASSIGNED) {
@@ -400,6 +252,28 @@ public class LogReader implements Runnable {
             reassignSender(sender);
         } finally {
             logFSM.finishLogRotate();
+        }
+    }
+    
+    public void processHalt() {
+        try {
+            try {
+                readLines(reader);
+            } catch (SocketException e) {
+                throw e;
+            } catch (IOException e) {
+                LOG.error("Oops, got an exception:", e);
+            } finally {
+                closeFile(reader);
+            }
+            
+            //send left message force
+            sender.sendMessage();
+            sender.sendHaltRequest();
+        } catch (IOException e) {
+            LOG.error("Fail while sending halt request, abort resender", e);
+        } finally {
+            logFSM.finishHalt();
         }
     }
 

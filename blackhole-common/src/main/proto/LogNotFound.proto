@@ -1,0 +1,11 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "LogNotFoundPB";
+
+message LogNotFound {
+  optional string topic = 1;
+  optional string file = 2;
+  optional int64 ts = 3;
+  optional string instanceId = 4;
+}

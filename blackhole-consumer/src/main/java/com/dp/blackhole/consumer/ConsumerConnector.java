@@ -42,6 +42,7 @@ public class ConsumerConnector implements Runnable {
     private final Log LOG = LogFactory.getLog(ConsumerConnector.class);
     
     private static ConsumerConnector instance = new ConsumerConnector();
+    private static String version = Util.getVersion();
     
     public static ConsumerConnector getInstance() {
         return instance;
@@ -232,7 +233,7 @@ public class ConsumerConnector implements Runnable {
         public void OnConnected(ByteBufferNonblockingConnection connection) {
             LOG.info("ConsumerConnector connected");
             supervisor = connection;
-            heartbeat = new HeartBeat(supervisor);
+            heartbeat = new HeartBeat(supervisor, version);
             heartbeat.start();
             if (sentReg) {
                 LOG.info("re-register consumers");
@@ -266,7 +267,7 @@ public class ConsumerConnector implements Runnable {
         protected boolean processInternal(Message msg) {
             MessageType type = msg.getType();
             switch (type) {
-            case CONSUMERREGFAIL:
+            case CONSUMER_REG_FAIL:
                 ConsumerReg reg = msg.getConsumerReg();
                 RetryRegTask retry = new RetryRegTask(reg.getTopic(),
                         reg.getGroupId(), reg.getConsumerId());

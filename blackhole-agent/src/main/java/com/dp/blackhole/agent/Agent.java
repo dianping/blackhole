@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -19,14 +18,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.dp.blackhole.agent.AgentMeta.TopicId;
-import com.dp.blackhole.agent.persist.IRecoder;
 import com.dp.blackhole.common.LingeringSender;
 import com.dp.blackhole.common.DaemonThreadFactory;
 import com.dp.blackhole.common.PBwrap;
-import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.common.ParamsKey.TopicConf;
-import com.dp.blackhole.conf.ConfigKeeper;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
@@ -42,18 +37,16 @@ import com.dp.blackhole.protocol.control.QuitAndCleanPB.Clean;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.InstanceGroup;
 import com.dp.blackhole.protocol.control.QuitAndCleanPB.Quit;
 import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
-import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp;
-import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp.OP;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class Agent implements Runnable {
     private static final Log LOG = LogFactory.getLog(Agent.class);
     public static final int DEFAULT_DELAY_SECONDS = 5;
-    private final ConfigKeeper confKeeper = new ConfigKeeper();
     private ExecutorService pool;
     private ExecutorService recoveryThreadPool;
     private FileListener listener;
     private static String hostname;
+    private static String version = Util.getVersion();
     private ScheduledThreadPoolExecutor scheduler;
     private static Map<TopicId, AgentMeta> topics = new ConcurrentHashMap<TopicId, AgentMeta>();
     private static Map<AgentMeta, LogReader> topicReaders = new ConcurrentHashMap<AgentMeta, LogReader>();
@@ -65,8 +58,6 @@ public class Agent implements Runnable {
     private int confLoopFactor = 1;
     private final String baseDirWildcard;
     private boolean paasModel = false;
-    private String snapshotPersistDir;
-    
     private LingeringSender linger;
     
     public Agent() {
@@ -77,9 +68,9 @@ public class Agent implements Runnable {
         this.baseDirWildcard = baseDirWildcard;
         if (baseDirWildcard != null) {
             paasModel = true;
-            LOG.info("Agent deployed for LXC.");
+            LOG.info("Agent deployed for LXC. version is " + version);
         } else {
-            LOG.info("Agent deployed for KVM.");
+            LOG.info("Agent deployed for KVM. version is " + version);
         }
         pool = Executors.newCachedThreadPool(new DaemonThreadFactory("LogReader"));
         recoveryThreadPool = Executors.newFixedThreadPool(2, new DaemonThreadFactory("Recovery"));
@@ -130,45 +121,30 @@ public class Agent implements Runnable {
                 Util.getSource(hostname, topicId.getInstanceId()), regTimestamp);
         send(msg, delaySecond);
     }
-
-    public boolean checkFilesExist(String topic, String pathCandidateStr) {
-        if (pathCandidateStr == null) {
-            LOG.error("Oops, can not get WATCH_FILE from mapping for topic " + topic);
-            return false;
-        }
-        String[] pathCandidates = pathCandidateStr.split("\\s+");
-        for (int i = 0; i < pathCandidates.length; i++) {
-            File fileForTest = new File(pathCandidates[i]);
-            if (fileForTest.exists()) {
-                LOG.info("Check file " + pathCandidates[i] + " ok.");
-                confKeeper.addRawProperty(topic + "."
-                        + ParamsKey.TopicConf.WATCH_FILE, pathCandidates[i]);
-                break;
-            } else {
-                if (i == pathCandidates.length - 1) {
-                    LOG.error("Topic: " + topic + ", Log: " + Arrays.toString(pathCandidates) + " not found!");
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
     
     public boolean checkFilesExist(String topic, String watchFile, String instanceId) {
         if (watchFile == null || watchFile.trim().length() == 0) {
             return false;
         }
-        String realWatchFile = String.format(baseDirWildcard, instanceId) + watchFile;
+        String realWatchFile;
+        if (instanceId == null) {
+            realWatchFile = watchFile;
+        } else {
+            realWatchFile = String.format(baseDirWildcard, instanceId) + watchFile;
+        }
         File fileForTest = new File(realWatchFile);
         if (fileForTest.exists()) {
             LOG.info("Check file " + realWatchFile + " ok.");
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.WATCH_FILE, realWatchFile);
             return true;
         } else {
+            reportLogNotFound(topic, realWatchFile, instanceId);
             LOG.error("Topic: " + topic + ", Log: " + realWatchFile + " not found!");
             return false;
         }
+    }
+    
+    public boolean checkFilesExist(String topic, String watchFile) {
+        return checkFilesExist(topic, watchFile, null);
     }
 
     @Override
@@ -183,8 +159,6 @@ public class Agent implements Runnable {
             LOG.fatal("Load app.properties file fail.", e);
             return;
         }
-        
-        snapshotPersistDir = prop.getProperty("agent.snapshot.persist.dir", "/data/applogs/phoenix/snapshot");
         
         String supervisorHost = prop.getProperty("supervisor.host");
         int supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
@@ -217,19 +191,36 @@ public class Agent implements Runnable {
         this.linger.shutdown();
     }
     
-    public AgentMeta fillUpAppLogsFromConfig(TopicId topicId) {
-        String topic = topicId.getTopic();
-        String path = ConfigKeeper.configMap.get(topic).getString(ParamsKey.TopicConf.WATCH_FILE);
-        long rotatePeriod = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROTATE_PERIOD);
-        long rollPeriod = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.ROLL_PERIOD);
-        int maxLineSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MAX_LINE_SIZE, 512000);
-        long readInterval = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.READ_INTERVAL, 1L);
-        int minMsgSent = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, 30);
-        int msgBufSize = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, 512000);
-        int bandwidthPerSec = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.BANDWIDTH_PER_SEC, 10 * 1024 * 1024);
-        int partitionFactor = ConfigKeeper.configMap.get(topic).getInteger(ParamsKey.TopicConf.PARTITION_FACTOR, 1);
-        long tailPosition = ConfigKeeper.configMap.get(topic).getLong(ParamsKey.TopicConf.TAIL_POSITION, TopicConf.FILE_TAIL);
-        AgentMeta topicMeta = new AgentMeta(topicId, path, rotatePeriod,
+    public AgentMeta fillUpAppLogsFromConfig(TopicId topicId, AppConfRes confRes) {
+        String tailFile = confRes.getWatchFile();
+        long rotatePeriod = Long.parseLong(confRes.getRotatePeriod());
+        long rollPeriod = Long.parseLong(confRes.getRollPeriod());
+        int maxLineSize = Util.parseInt(confRes.getMaxLineSize(), 512000);
+        long readInterval = Util.parseLong(confRes.getReadInterval(), 1L);
+        int minMsgSent = Util.parseInt(confRes.getMinMsgSent(), 30);
+        int msgBufSize = Util.parseInt(confRes.getMsgBufSize(), 512000);
+        int bandwidthPerSec = Util.parseInt(confRes.getBandwidthPerSec(), 10 * 1024 * 1024);
+        int partitionFactor = Util.parseInt(confRes.getPartitionFactor(), 1);
+        long tailPosition = confRes.getTailPosition();
+        AgentMeta topicMeta = new AgentMeta(topicId, tailFile, rotatePeriod,
+                rollPeriod, maxLineSize, readInterval, minMsgSent, msgBufSize,
+                bandwidthPerSec, partitionFactor, tailPosition);
+        topics.put(topicId, topicMeta);
+        return topicMeta;
+    }
+    
+    public AgentMeta fillUpAppLogsFromConfig(TopicId topicId, LxcConfRes confRes, String instanceId) {
+        String tailFile = String.format(baseDirWildcard, instanceId) + confRes.getWatchFile();
+        long rotatePeriod = Long.parseLong(confRes.getRotatePeriod());
+        long rollPeriod = Long.parseLong(confRes.getRollPeriod());
+        int maxLineSize = Util.parseInt(confRes.getMaxLineSize(), 512000);
+        long readInterval = Util.parseLong(confRes.getReadInterval(), 1L);
+        int minMsgSent = Util.parseInt(confRes.getMinMsgSent(), 30);
+        int msgBufSize = Util.parseInt(confRes.getMsgBufSize(), 512000);
+        int bandwidthPerSec = Util.parseInt(confRes.getBandwidthPerSec(), 10 * 1024 * 1024);
+        int partitionFactor = Util.parseInt(confRes.getPartitionFactor(), 1);
+        long tailPosition = confRes.getTailPosition();
+        AgentMeta topicMeta = new AgentMeta(topicId, tailFile, rotatePeriod,
                 rollPeriod, maxLineSize, readInterval, minMsgSent, msgBufSize,
                 bandwidthPerSec, partitionFactor, tailPosition);
         topics.put(topicId, topicMeta);
@@ -292,6 +283,11 @@ public class Agent implements Runnable {
         recoveryingMap.remove(recoveryKey);
     }
 
+    public void reportLogNotFound(String topic, String file, String instanceId) {
+        Message message = PBwrap.wrapLogNotFound(topic, file, instanceId);
+        send(message);
+    }
+
     public void send(Message message) {
         LOG.debug("send: " + message);
         Util.send(supervisor, message);
@@ -324,7 +320,7 @@ public class Agent implements Runnable {
                 requireConfigFromSupersivor(0);
             }
             if (this.heartbeat == null || !this.heartbeat.isAlive()) {
-                this.heartbeat = new HeartBeat(supervisor);
+                this.heartbeat = new HeartBeat(supervisor, version);
                 this.heartbeat.setDaemon(true);
                 this.heartbeat.start();
             }
@@ -353,7 +349,6 @@ public class Agent implements Runnable {
                 recoveryingMap.remove(e.getKey());
             }
             topics.clear();
-            ConfigKeeper.configMap.clear();
             
             if (heartbeat != null) {
                 heartbeat.shutdown();
@@ -392,7 +387,7 @@ public class Agent implements Runnable {
             MessageType type = msg.getType();
             Random random = new Random();
             switch (type) {
-            case NOAVAILABLENODE:
+            case NO_AVAILABLE_NODE:
                 topic = msg.getNoAvailableNode().getTopic();
                 instanceId = msg.getNoAvailableNode().getInstanceId();
                 topicId = new TopicId(topic, instanceId);
@@ -412,14 +407,13 @@ public class Agent implements Runnable {
                         LOG.error("Can not find reader by " + topicId + " to recovery");
                         return false;
                     }
-                    IRecoder recoder = reader.getRecoder();
                     long rollTs = recoveryRoll.getRollTs();
                     String recoveryKey = topicId.getContent() + ":" + rollTs;
                     if ((rollRecovery = recoveryingMap.get(recoveryKey)) == null) {
                         broker = recoveryRoll.getBrokerServer();
                         int recoveryPort = recoveryRoll.getRecoveryPort();
                         rollRecovery = new RollRecovery(Agent.this,
-                                broker, recoveryPort, topicMeta, rollTs, isFinal, persistent, recoder);
+                                broker, recoveryPort, topicMeta, rollTs, isFinal, persistent);
                         recoveryingMap.put(recoveryKey, rollRecovery);
                         recoveryThreadPool.execute(rollRecovery);
                         return true;
@@ -442,19 +436,14 @@ public class Agent implements Runnable {
                         broker = assignBroker.getBrokerServer();
                         int brokerPort = assignBroker.getBrokerPort();
                         RemoteSender sender = new RemoteSender(topicMeta, broker, brokerPort);
-                        try {
-                            boolean success = sender.initializeRemoteConnection();
-                            if (success) {
-                                LOG.info(topicId + " TopicReg with ["
-                                        + broker + ":" + brokerPort + "] successfully");
-                            } else {
-                                throw new IOException(topicId + " TopicReg with ["
-                                        + broker + ":" + brokerPort
-                                        + "] unsuccessfully cause broker create partition faild");
-                            }
-                        } catch (IOException e) {
-                            LOG.error("init remote connection fail " 
-                                    + broker + ":" + brokerPort + ", register again.", e);
+                        boolean success = sender.initializeRemoteConnection();
+                        if (success) {
+                            LOG.info(topicId + " TopicReg with ["
+                                    + broker + ":" + brokerPort + "] successfully");
+                        } else {
+                            LOG.error(topicId + " TopicReg with ["
+                                    + broker + ":" + brokerPort
+                                    + "] unsuccessfully cause broker create partition faild");
                             register(topicId, Util.getTS());
                             return false;
                         }
@@ -471,7 +460,7 @@ public class Agent implements Runnable {
                             + "] from supervisor message not match with local");
                 }
                 break;
-            case NOAVAILABLECONF:
+            case NO_AVAILABLE_CONF:
                 if (confLoopFactor < 20) {
                     confLoopFactor = confLoopFactor << 1;
                 }
@@ -498,8 +487,7 @@ public class Agent implements Runnable {
                             if (!checkFilesExist(topic, lxcConfRes.getWatchFile(), id)) {
                                 continue;
                             }
-                            buildConfMap(topic, lxcConfRes);
-                            fillUpAppLogsFromConfig(topicId);
+                            fillUpAppLogsFromConfig(topicId, lxcConfRes, id);
                             startLogReader(topicId);
                             register(topicId, Util.getTS());
                             heartbeat.setInterval(5000);
@@ -520,8 +508,7 @@ public class Agent implements Runnable {
                         if (!checkFilesExist(topic, appConfRes.getWatchFile())) {
                             continue;
                         }
-                        buildConfMap(topic, appConfRes);
-                        fillUpAppLogsFromConfig(topicId);
+                        fillUpAppLogsFromConfig(topicId, appConfRes);
                         ++accepted;
                         startLogReader(topicId);
                         register(topicId, Util.getTS());
@@ -544,12 +531,17 @@ public class Agent implements Runnable {
                         if ((topicMeta = topics.get(topicId)) != null) {
                             // set a stream status to dying, and send a special rotate message.
                             if (topicMeta.setDying()) {
-                                if (!new File(topicMeta.getTailFile()).exists()) {
-                                    LOG.warn("QUIT but " + topicMeta.getTailFile() + " not exists, retire stream and trigger CLEAN.");
-                                    send(PBwrap.wrapRetireStream(topic, topicMeta.getSource(), true));
-                                } else if ((logReader = topicReaders.get(topicMeta)) != null) {
+                                if ((logReader = topicReaders.get(topicMeta)) != null) {
                                     LOG.info("begin last log rotate");
-                                    logReader.getLogFSM().beginLastLogRotate();
+                                    logReader.getLogFSM().beginHalt();
+                                    if (!logReader.getTailFile().exists()) {
+                                        LOG.warn("QUIT but " + logReader.getTailFile() + " not exists, retire stream and CLEAN after 10 seconds.");
+                                        send(PBwrap.wrapRetireStream(topic, topicMeta.getSource(), true));
+                                        Thread.sleep(10000);
+                                        logReader.stop();
+                                        topicReaders.remove(topicMeta);
+                                        topics.remove(topicId);
+                                    }
                                 } else {
                                     LOG.info(topicMeta + " has already stopped.");
                                 }
@@ -572,10 +564,6 @@ public class Agent implements Runnable {
                             if (topicMeta.isDying()) {
                                 if ((logReader = topicReaders.get(topicMeta)) != null) {
                                     LOG.info("Clean up " + topicMeta);
-                                    IRecoder recoder = logReader.getRecoder();
-                                    if (recoder != null) {
-                                        recoder.cleanup();
-                                    }
                                     logReader.stop();
                                     topicReaders.remove(topicMeta);
                                     topics.remove(topicId);
@@ -583,7 +571,7 @@ public class Agent implements Runnable {
                                     LOG.info(topicMeta + " has already stopped.");
                                 }
                             } else {
-                                LOG.info(topicId + " clean ignore due to still alive.");
+                                LOG.info(topicId + " clean ignore due to dying.");
                             }
                         }
                     }
@@ -609,46 +597,6 @@ public class Agent implements Runnable {
                     LOG.error("Topic [" + topic + "] from supervisor message not match with local");
                 }
                 break;
-            case SNAPSHOT_OP:
-                SnapshotOp snapshotOp = msg.getSnapshotOp();
-                topic = snapshotOp.getTopic();
-                instanceId = Util.getInstanceIdFromSource(snapshotOp.getSource());
-                OP op = snapshotOp.getOp();
-                
-                topicId = new TopicId(topic, instanceId);
-                if ((topicMeta = topics.get(topicId)) != null) {
-                    if ((logReader = topicReaders.get(topicMeta)) != null) {
-                        IRecoder recoder = logReader.getRecoder();
-                        if (recoder != null) {
-                            switch (op) {
-                                case log:
-                                    LOG.debug("Snaphost log for " + topicId);
-                                    recoder.log();
-                                    break;
-                                case clean:
-                                    LOG.debug("Snaphost clean up for " + topicId);
-                                    recoder.tidy();
-                                    recoder.log();
-                                    break;
-                                case del:
-                                    LOG.warn("!!! Force delete snapshot file of " + topicId 
-                                            + ". It may lead to a disordered situation, "
-                                            + "please use it just before restart Agent process");
-                                    recoder.cleanup();
-                                    break;
-                                default:
-                                    break;
-                            }
-                        } else {
-                            LOG.error("Can not find state for " + topicId);
-                        }
-                    } else {
-                        LOG.info("Can not find logReader for " + topicId);
-                    }
-                } else {
-                    LOG.error("Topic [" + topic + "] from supervisor message not match with local");
-                }
-                break;
             case UNRESOLVED_CONNECTION:
                 LOG.fatal("Supervisor can not resolve any hostname for this agent: " + Util.getLocalHost());
                 break;
@@ -658,48 +606,6 @@ public class Agent implements Runnable {
             return false;
         }
 
-        private void buildConfMap(String topic, AppConfRes appConfRes) {
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.ROTATE_PERIOD, appConfRes.getRotatePeriod());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.ROLL_PERIOD, appConfRes.getRollPeriod());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.MAX_LINE_SIZE, appConfRes.getMaxLineSize());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.READ_INTERVAL, appConfRes.getReadInterval());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, appConfRes.getMinMsgSent());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, appConfRes.getMsgBufSize());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.BANDWIDTH_PER_SEC, appConfRes.getBandwidthPerSec());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.PARTITION_FACTOR, appConfRes.getPartitionFactor());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.TAIL_POSITION, String.valueOf(appConfRes.getTailPosition()));
-        }
-
-        private void buildConfMap(String topic, LxcConfRes lxcConfRes) {
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.ROTATE_PERIOD, lxcConfRes.getRotatePeriod());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.ROLL_PERIOD, lxcConfRes.getRollPeriod());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.MAX_LINE_SIZE, lxcConfRes.getMaxLineSize());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.READ_INTERVAL, lxcConfRes.getReadInterval());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.MINIMUM_MESSAGES_SENT, lxcConfRes.getMinMsgSent());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.MESSAGE_BUFFER_SIZE, lxcConfRes.getMsgBufSize());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.BANDWIDTH_PER_SEC, lxcConfRes.getBandwidthPerSec());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.PARTITION_FACTOR, lxcConfRes.getPartitionFactor());
-            confKeeper.addRawProperty(topic + "."
-                    + ParamsKey.TopicConf.TAIL_POSITION, String.valueOf(lxcConfRes.getTailPosition()));
-        }
-        
         private void startLogReader(TopicId topicId) {
             AgentMeta topicMeta;
             LogReader logReader;
@@ -709,7 +615,7 @@ public class Agent implements Runnable {
                         LOG.warn(topicMeta + " is dying, do not restart log reader.");
                         return;
                     }
-                    logReader = new LogReader(Agent.this, topicMeta, snapshotPersistDir);
+                    logReader = new LogReader(Agent.this, topicMeta);
                     topicReaders.put(topicMeta, logReader);
                     pool.execute(logReader);
                 }

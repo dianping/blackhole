@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
+import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 
@@ -22,12 +24,14 @@ public class ConnectionDesc {
     //Storm sets up multi-thread(Executors) in a processor(worker),
     //each executor will register a consumer entity
     private List<NodeDesc> attachments;
+    private String version;
     
     public ConnectionDesc(ByteBufferNonblockingConnection connection) {
         this.connection = connection;
         this.connectionInfo = new ConnectionInfo(connection.getHost(), connection.getIP(), connection.getPort());
         lastHeartBeat = new AtomicLong(Util.getTS());
         attachments = new ArrayList<NodeDesc>();
+        this.version = ParamsKey.DEFAULT_VERSION;
     }
     
     public void setType(int type) {
@@ -70,6 +74,18 @@ public class ConnectionDesc {
         attachments.remove(desc);
     }
     
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        if (StringUtils.isBlank(version)) {
+            this.version = ParamsKey.DEFAULT_VERSION;
+        } else {
+            this.version = version;
+        }
+    }
+
     @Override
     public String toString() {
         String typeName = "";

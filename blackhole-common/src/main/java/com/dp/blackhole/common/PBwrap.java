@@ -22,6 +22,8 @@ import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
 import com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
 import com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType;
+import com.dp.blackhole.protocol.control.HeartbeatPB.Heartbeat;
+import com.dp.blackhole.protocol.control.LogNotFoundPB.LogNotFound;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
 import com.dp.blackhole.protocol.control.NoAvailableNodePB.NoAvailableNode;
@@ -52,12 +54,13 @@ public class PBwrap {
         Message.Builder msg = Message.newBuilder();
         msg.setType(type);
         switch (type) {
-        case NOAVAILABLENODE:
+        case NO_AVAILABLE_NODE:
             msg.setNoAvailableNode((NoAvailableNode) message);
             break;
         case HEARTBEART:
+            msg.setHeartbeat((Heartbeat) message);
             break;
-        case TOPICREPORT:
+        case TOPIC_REPORT:
             msg.setTopicReport((TopicReport) message);
             break;
         case APP_REG:
@@ -91,12 +94,12 @@ public class PBwrap {
         case MAKR_UNRECOVERABLE:
             msg.setRollID((RollID) message);
             break;
-        case RETIRESTREAM:
+        case RETIRE_STREAM:
             msg.setRetire((Retire) message);
             break;
-        case DUMPSTAT:
+        case DUMP_STAT:
             break;
-        case NOAVAILABLECONF:
+        case NO_AVAILABLE_CONF:
             msg.setNoavailableConf((NoavailableConf) message);
             break;
         case CONF_REQ:
@@ -105,14 +108,14 @@ public class PBwrap {
         case CONF_RES:
             msg.setConfRes((ConfRes) message);
             break;
-        case DUMPCONF:
+        case DUMP_CONF:
             break;
-        case DUMPREPLY:
+        case DUMP_REPLY:
             msg.setDumpReply((DumpReply) message);
             break;
-        case LISTAPPS:
+        case LIST_APPS:
             break;
-        case LISTIDLE:
+        case LIST_IDLE:
             break;
         case REMOVE_CONF:
             msg.setRemoveConf((RemoveConf) message);
@@ -121,7 +124,7 @@ public class PBwrap {
             msg.setDumpApp((DumpApp) message);
             break;
         case CONSUMER_REG:
-        case CONSUMERREGFAIL:
+        case CONSUMER_REG_FAIL:
             msg.setConsumerReg((ConsumerReg) message);
             break;
         case ASSIGN_CONSUMER:
@@ -170,14 +173,21 @@ public class PBwrap {
         case CONSUMER_EXIT:
             msg.setConsumerExit((ConsumerExit) message);
             break;
+        case LOG_NOT_FOUND:
+            msg.setLogNotFound((LogNotFound) message);
+            break;
         default:
             break;
         }
         return msg.build();
     }
     
-    public static Message wrapHeartBeat() {
-        return wrapMessage(MessageType.HEARTBEART, null);
+    public static Message wrapHeartBeat(String version) {
+        Heartbeat.Builder builder = Heartbeat.newBuilder();
+        if (version != null) {
+            builder.setVersion(version);
+        }
+        return wrapMessage(MessageType.HEARTBEART, builder.build());
     }
     
     public static Message wrapNoAvailableNode(String topic, String instanceId, String source) {
@@ -189,7 +199,7 @@ public class PBwrap {
         if (source != null) {
             builder.setSource(source);
         }
-        return wrapMessage(MessageType.NOAVAILABLENODE, builder.build());
+        return wrapMessage(MessageType.NO_AVAILABLE_NODE, builder.build());
     }
     
     public static Message wrapTopicReg(String topic, String source, long regTs) {
@@ -334,11 +344,11 @@ public class PBwrap {
         builder.setTopic(topic);
         builder.setSource(source);
         builder.setForce(force);
-        return wrapMessage(MessageType.RETIRESTREAM, builder.build());
+        return wrapMessage(MessageType.RETIRE_STREAM, builder.build());
     }
     
     public static Message wrapDumpStat() {
-        return wrapMessage(MessageType.DUMPSTAT, null);
+        return wrapMessage(MessageType.DUMP_STAT, null);
     }
 
     public static Message wrapConfReq (String topic) {
@@ -402,25 +412,25 @@ public class PBwrap {
         if (topic != null) {
             builder.setTopic(topic);
         }
-        return wrapMessage(MessageType.NOAVAILABLECONF, builder.build());
+        return wrapMessage(MessageType.NO_AVAILABLE_CONF, builder.build());
     }
 
     public static Message wrapDumpConf() {
-        return wrapMessage(MessageType.DUMPCONF, null);
+        return wrapMessage(MessageType.DUMP_CONF, null);
     }
 
     public static Message wrapDumpReply(String dumpReply) {
         DumpReply.Builder builder = DumpReply.newBuilder();
         builder.setReply(dumpReply);
-        return wrapMessage(MessageType.DUMPREPLY, builder.build());
+        return wrapMessage(MessageType.DUMP_REPLY, builder.build());
     }
 
     public static Message wrapListApps() {
-        return wrapMessage(MessageType.LISTAPPS, null);
+        return wrapMessage(MessageType.LIST_APPS, null);
     }
     
     public static Message wrapListIdle() {
-        return wrapMessage(MessageType.LISTIDLE, null);
+        return wrapMessage(MessageType.LIST_IDLE, null);
     }
 
     public static Message wrapRemoveConf(String topic, ArrayList<String> agentServers) {
@@ -456,7 +466,7 @@ public class PBwrap {
         builder.setGroupId(group);
         builder.setConsumerId(consumerId);
         builder.setTopic(topic);
-        return wrapMessage(MessageType.CONSUMERREGFAIL, builder.build());
+        return wrapMessage(MessageType.CONSUMER_REG_FAIL, builder.build());
     }
     
     public static Message wrapConsumerExit(String group, String consumerId, String topic) {
@@ -514,7 +524,7 @@ public class PBwrap {
         for (TopicReport.TopicEntry entry : entryList) {
             builder.addEntries(entry);
         }
-        return wrapMessage(MessageType.TOPICREPORT, builder.build());
+        return wrapMessage(MessageType.TOPIC_REPORT, builder.build());
     }
     
     public static Message Buf2PB(ByteBuffer buf) throws InvalidProtocolBufferException {
@@ -628,5 +638,16 @@ public class PBwrap {
 
     public static Message wrapUnresolvedConnection() {
         return wrapMessage(MessageType.UNRESOLVED_CONNECTION, null);
+    }
+
+    public static Message wrapLogNotFound(String topic, String file, String instanceId) {
+        LogNotFound.Builder builder = LogNotFound.newBuilder();
+        builder.setTopic(topic);
+        builder.setFile(file);
+        builder.setTs(Util.getTS());
+        if (instanceId != null) {
+            builder.setInstanceId(instanceId);
+        }
+        return wrapMessage(MessageType.LOG_NOT_FOUND, builder.build());
     }
 }
