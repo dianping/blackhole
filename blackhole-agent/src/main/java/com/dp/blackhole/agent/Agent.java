@@ -459,7 +459,7 @@ public class Agent implements Runnable {
                             return false;
                         }
                         logReader.assignSender(sender);
-                        linger.register(topic, topicMeta.getSource(), sender);
+                        linger.register(sender);
                         return true;
                     } else {
                         LOG.error("No logreader to be assign for " + topicId + " send ConfReq.");

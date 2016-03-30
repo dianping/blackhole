@@ -90,12 +90,13 @@ public class LogReader implements Runnable {
     public void assignSender(RemoteSender sender) {
         this.sender = sender;
         ReaderState oldReaderState = currentReaderState.getAndSet(ReaderState.ASSIGNED);
-        LOG.info("Assign sender: " + oldReaderState.name() + " -> SENDER_ASSIGNED");
+        LOG.info("Assign sender: " + oldReaderState.name() + " -> " + ReaderState.ASSIGNED.name());
     }
     
     private void reassignSender(RemoteSender sender) {
         sender.close();
         if (currentReaderState.compareAndSet(ReaderState.ASSIGNED, ReaderState.UNASSIGNED)) {
+            LOG.info("remove sender: " + ReaderState.ASSIGNED.name() + " -> " + currentReaderState.get().name());
             int reassignDelay = sender.getReassignDelaySeconds();
             //must unregister from ConnectionChecker before re-assign
             agent.getLingeringSender().unregister(sender);

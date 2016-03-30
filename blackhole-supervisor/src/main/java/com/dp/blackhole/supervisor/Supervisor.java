@@ -199,8 +199,10 @@ public class Supervisor {
             if (connection == null) {
                 connection = getIdleConnectionByHostname(agentHost);
             }
-            if (connection == null) {
+            if (connection != null) {
                 send(connection, message);
+            } else {
+                LOG.warn("Can not get connection by agenthost" + agentHost);
             }
         }
     }

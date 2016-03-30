@@ -132,6 +132,7 @@ public class RollRecovery implements Runnable{
                     //If file compressed but end offset was specified,
                     //transfer the decompressed file with this specified end offset.
                     is = new GZIPInputStream(new FileInputStream(transferFile), 65536);
+                    isTransferFileCompressed = false;
                 } else {
                     //If file uncompressed,
                     //transfer the uncompressed file with its specified end offset.

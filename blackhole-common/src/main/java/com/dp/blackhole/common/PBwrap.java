@@ -319,7 +319,7 @@ public class PBwrap {
     
     public static Message wrapProducerFailure (String app, String source, long failTs) {
         return wrapFailure(app, source, NodeType.PRODUCER, failTs);
-     }
+    }
     
     public static Message wrapUnrecoverable(String appName, String source, long period, long rollTs, boolean isFinal, boolean persistent) {
         return wrapMessage(MessageType.UNRECOVERABLE, wrapRollID(appName, source, period, rollTs, isFinal, persistent));
@@ -618,11 +618,10 @@ public class PBwrap {
         return wrapMessage(MessageType.ASSIGN_PARTITION, builder.build());
     }
 
-    public static Message wrapPartitionBrokerRequire(String topic,
-            String produerId, String partitionId) {
+    public static Message wrapPartitionBrokerRequire(String topic, String producerId, String partitionId) {
         PartitionRequireBroker.Builder builder = PartitionRequireBroker.newBuilder();
         builder.setTopic(topic);
-        builder.setProducerId(produerId);
+        builder.setProducerId(producerId);
         builder.setPartitionId(partitionId);
         return wrapMessage(MessageType.PARTITION_REQUIRE_BROKER, builder.build());
     }

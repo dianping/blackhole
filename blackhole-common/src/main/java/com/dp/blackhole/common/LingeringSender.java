@@ -1,9 +1,12 @@
 package com.dp.blackhole.common;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,15 +16,18 @@ public class LingeringSender extends Thread {
     private volatile boolean running;
     public static final int DEFAULT_LINGER_MS = 10000;
     private static final int MINIMUM_LINGER_MS = 1000;
-    private ConcurrentHashMap<Sender, String> senders;
+    private Set<Sender> senders;
     private AtomicInteger lingerMs = new AtomicInteger();
+    private ReadWriteLock lock = new ReentrantReadWriteLock();
+    private Lock writeLock = lock.writeLock();
+    private Lock readLock = lock.readLock();
     
     public LingeringSender() {
         this(DEFAULT_LINGER_MS);
     }
     
     public LingeringSender(int lingerMs) {
-        this.senders = new ConcurrentHashMap<Sender, String>();
+        this.senders = new HashSet<Sender>();
         this.running = true;
         if (lingerMs < MINIMUM_LINGER_MS) {
             this.lingerMs.set(MINIMUM_LINGER_MS);
@@ -34,12 +40,22 @@ public class LingeringSender extends Thread {
         setDaemon(true);
     }
     
-    public void register(String topic, String partitionId, Sender sender) {
-        senders.putIfAbsent(sender, topic + ":" + partitionId);
+    public void register(Sender sender) {
+        writeLock.lock();
+        try {
+            senders.add(sender);
+        } finally {
+            writeLock.unlock();
+        }
     }
     
     public void unregister(Sender sender) {
-        senders.remove(sender);
+        writeLock.lock();
+        try {
+            senders.remove(sender);
+        } finally {
+            writeLock.unlock();
+        }
     }
     
     public void shutdown() {
@@ -57,6 +73,7 @@ public class LingeringSender extends Thread {
     @Override
     public void run() {
         LOG.info("LingeringSender start, lingerMs is " + lingerMs);
+        Set<Sender> toRemove = new HashSet<Sender>();
         int heartbeatWaitTime = 0;
         while (running) {
             try {
@@ -69,23 +86,29 @@ public class LingeringSender extends Thread {
             if (heartbeatWaitTime % 10 == 0) {
                 heartbeatWaitTime = 0;
             }
-            for (Map.Entry<Sender, String> entry : senders.entrySet()) {
-                Sender sender = entry.getKey();
-                String connStr = entry.getValue();
-                LOG.trace("sender checking..." + connStr);
-                try {
-                    if (sender.canSend()) {
-                        sender.sendMessage();
-                    } else {
-                        if (heartbeatWaitTime == 0) {
-                            sender.heartbeat();
+            readLock.lock();
+            try {
+                for (Sender sender : senders) {
+                    try {
+                        if (sender.canSend()) {
+                            sender.sendMessage();
+                        } else {
+                            if (heartbeatWaitTime == 0) {
+                                sender.heartbeat();
+                            }
                         }
+                    } catch (IOException e) {
+                        LOG.warn("Find socket " + sender.getSource() + "-->" + sender.getTarget() + " dead.");
+                        toRemove.add(sender);
                     }
-                } catch (IOException e) {
-                    LOG.warn("Find socket " + sender.getSource() + "-->" + sender.getTarget() + " dead.");
-                    sender.close();
-                    senders.remove(sender);
                 }
+            } finally {
+                readLock.unlock();
+                for (Sender sender : toRemove) {
+                    sender.close();
+                    unregister(sender);
+                }
+                toRemove.clear();
             }
         }
         senders.clear();
