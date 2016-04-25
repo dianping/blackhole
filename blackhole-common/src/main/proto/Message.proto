@@ -36,6 +36,7 @@ import "PartitionRequireBroker.proto";
 import "ConsumerExit.proto";
 import "Heartbeat.proto";
 import "LogNotFound.proto";
+import "RetireConsumerGroup.proto";
 
 message Message {
     enum MessageType {
@@ -87,6 +88,7 @@ message Message {
         UNRESOLVED_CONNECTION = 46;
         CONSUMER_EXIT = 47;
         LOG_NOT_FOUND = 49;
+        RETIRE_CONSUMER_GROUP = 50;
     }
 
     required MessageType type = 1;
@@ -124,4 +126,5 @@ message Message {
     optional ConsumerExit consumerExit = 33;
     optional Heartbeat heartbeat = 34;
     optional LogNotFound logNotFound = 35;
+    optional RetireConsumerGroup retireConsumerGroup = 36;
 }

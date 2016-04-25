@@ -41,6 +41,7 @@ import com.dp.blackhole.protocol.control.ReadyUploadPB.ReadyUpload;
 import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
 import com.dp.blackhole.protocol.control.RestartPB.Restart;
+import com.dp.blackhole.protocol.control.RetireConsumerGroupPB.RetireConsumerGroup;
 import com.dp.blackhole.protocol.control.RetirePB.Retire;
 import com.dp.blackhole.protocol.control.RollCleanPB.RollClean;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
@@ -175,6 +176,9 @@ public class PBwrap {
             break;
         case LOG_NOT_FOUND:
             msg.setLogNotFound((LogNotFound) message);
+            break;
+        case RETIRE_CONSUMER_GROUP:
+            msg.setRetireConsumerGroup((RetireConsumerGroup) message);
             break;
         default:
             break;
@@ -649,5 +653,12 @@ public class PBwrap {
             builder.setInstanceId(instanceId);
         }
         return wrapMessage(MessageType.LOG_NOT_FOUND, builder.build());
+    }
+
+    public static Message wrapRetireConsumerGroup(String topic, String groupId) {
+        RetireConsumerGroup.Builder builder = RetireConsumerGroup.newBuilder();
+        builder.setTopic(topic);
+        builder.setGroupId(groupId);
+        return wrapMessage(MessageType.RETIRE_CONSUMER_GROUP, builder.build());
     }
 }

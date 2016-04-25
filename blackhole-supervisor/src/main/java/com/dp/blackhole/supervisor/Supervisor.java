@@ -113,6 +113,18 @@ public class Supervisor {
         return consumerGroups.get(groupKey);
     }
     
+    public boolean retireConsumerGroup(ConsumerGroupKey groupKey) {
+        ConsumerGroup group = consumerGroups.get(groupKey);
+        if (group.getConsumerCount() == 0) {
+            consumerGroups.remove(groupKey);
+            LOG.info(groupKey +" removed");
+            return true;
+        } else {
+            LOG.info(groupKey + " has live consumers, thus can not be remove.");
+            return false;
+        }
+    }
+    
     public Set<ConsumerGroup> getCopyOfConsumerGroups() {
         Set<ConsumerGroup> copy = new HashSet<ConsumerGroup>(consumerGroups.size());
         copy.addAll(consumerGroups.values());
@@ -430,7 +442,7 @@ public class Supervisor {
                 for (PartitionInfo info : pinfoList) {
                     String broker = info.getHost()+ ":" + getBrokerPort(info.getHost());
                     long endOffset = info.getEndOffset();
-                    long committedOffset = group.getCommittedOffsetByParitionId(info.getId());
+                    long committedOffset = group.getCommittedOffsetByPartitionId(info.getId());
                     AssignConsumer.PartitionOffset offset = PBwrap.getPartitionOffset(broker, info.getId(), endOffset, committedOffset);
                     offsets.add(offset);
                 }
@@ -468,7 +480,7 @@ public class Supervisor {
             groupId = id.split("-")[0];
         }
         String topic = offsetCommit.getTopic();
-        String partition = offsetCommit.getPartition();
+        String partitionId = offsetCommit.getPartition();
         long offset = offsetCommit.getOffset();
         
         ConsumerGroupKey groupKey = new ConsumerGroupKey(groupId, topic);
@@ -478,7 +490,14 @@ public class Supervisor {
             return;
         }
         
-        group.updateOffset(id, topic, partition, offset);//TODO consumerid to consumer
+        PartitionInfo pinfo = getPartition(topic, partitionId);
+        if (pinfo == null) {
+            LOG.warn("can't find partition by partition: " + topic + "." + partitionId);
+            return;
+        }
+        if (!pinfo.isOffline()) {
+            group.updateOffset(id, topic, partitionId, offset);//TODO consumerid to consumer
+        }
     }
     
     private void markPartitionOffline(String topic, String partitionId) {
@@ -489,6 +508,12 @@ public class Supervisor {
         }
         pinfo.markOffline(true);
         LOG.info(pinfo + " is offline");
+        for (ConsumerGroup group : consumerGroups.values()) {
+            if (!topic.equals(group.getTopic())) {
+                continue;
+            }
+            group.resetCommittedOffsetByPartitionId(partitionId);
+        }
     }
     
     /*
@@ -660,9 +685,7 @@ public class Supervisor {
             if (group.getConsumerCount() != 0) {
                 toBeReAssign.put(groupKey, group);
             } else {
-                LOG.info("consumerGroup " + groupKey +" has not live consumer, thus be removed");
                 toBeReAssign.remove(groupKey);
-                consumerGroups.remove(groupKey);
             }
         }
         
@@ -2213,11 +2236,10 @@ public class Supervisor {
         group.unregisterConsumer(consumerDesc);
         
         if (group.getConsumerCount() == 0) {
-            LOG.info("consumerGroup " + groupKey +" has not live consumer, thus be removed");
-            consumerGroups.remove(groupKey);
+            LOG.warn("consumer exit " + groupKey +" has not live consumers now");
         } else {
             // consumer user thread maybe not work, reassign to avoid data loss
-            LOG.info("handle consumer exit " + consumerDesc + ", try re-assign consumer");
+            LOG.info("consumer exit " + consumerDesc + ", try re-assign consumer");
             tryAssignConsumer(null, group);
         }
     }

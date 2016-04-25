@@ -173,6 +173,17 @@ public class TopicResource extends BaseResource {
         return group.getConsumes();
     }
     
+    @DELETE
+    @Path("/{topic}/groups/{groupId}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response retireConsumerGroup(@PathParam("topic") final String topic,
+        @PathParam("groupId") final String groupId) {
+        LOG.debug("DELETE: topic[" + topic + "] groupId[" + groupId + "] -> consumerGroup");
+        ConsumerGroupKey groupKey = new ConsumerGroupKey(groupId, topic);
+        supervisorService.retireConsumerGroup(groupKey);
+        return Response.ok().build();
+    }
+    
     @GET
     @Path("/{topic}/groups/{groupId}/commit")
     @Produces({MediaType.APPLICATION_JSON})
