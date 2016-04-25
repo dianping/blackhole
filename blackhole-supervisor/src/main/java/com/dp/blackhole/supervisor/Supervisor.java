@@ -1480,7 +1480,9 @@ public class Supervisor {
                         next.setStatus(Stage.APPENDING);
                         next.setIssuelist(new Vector<Issue>());
                         next.setCurrent(true);
-                        stages.add(next);
+                        if (!stages.contains(next)) {
+                            stages.add(next);
+                        }
                     }
                 }
             } else {
@@ -1603,7 +1605,9 @@ public class Supervisor {
             current.setStatus(Stage.APPENDING);
             current.setRollTs(currentTs);
             current.setCurrent(true);
-            stages.add(current);
+            if (!stages.contains(current)) {
+                stages.add(current);
+            }
             stream.setStages(stages);
             addStream(stream);
             if (shouldRecovery) {
