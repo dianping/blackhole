@@ -262,11 +262,11 @@ public class Fetcher extends Thread {
             LOG.info("send offset request for " + info);
             long offset;
             if (OffsetRequest.SMALLES_TIME_STRING.equals(config.getAutoOffsetReset())) {
-                offset = OffsetRequest.EARLIES_TTIME;
+                offset = OffsetRequest.EARLIES_OFFSET;
             } else if (OffsetRequest.LARGEST_TIME_STRING.equals(config.getAutoOffsetReset())) {
-                offset = OffsetRequest.LATES_TTIME;
+                offset = OffsetRequest.LATES_OFFSET;
             } else {
-                offset = OffsetRequest.LATES_TTIME;
+                offset = OffsetRequest.LATES_OFFSET;
             }
             from.send(new TransferWrap(new OffsetRequest(info.topic, info.partition, offset)));
         }

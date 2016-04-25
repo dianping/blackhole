@@ -145,6 +145,7 @@ public class BrokerService extends Thread {
             TransferWrap reply = null;
             if (messages == null) {
                 reply = new TransferWrap(new FetchReply(p.getId(), messages, MessageAndOffset.OFFSET_OUT_OF_RANGE));
+                LOG.warn("Found offset out of range for " + request);
             } else {
                 reply = new TransferWrap(new FetchReply(p.getId(), messages, request.offset));
             }
@@ -179,7 +180,11 @@ public class BrokerService extends Thread {
                 closeClientOfErrorRequest(from, request);
                 return;
             }
-            from.send(new TransferWrap(new OffsetReply(request.topic, request.partition, p.getEndOffset())));
+            if (request.autoOffset == OffsetRequest.EARLIES_OFFSET) {
+                from.send(new TransferWrap(new OffsetReply(request.topic, request.partition, p.getStartOffset())));
+            } else {
+                from.send(new TransferWrap(new OffsetReply(request.topic, request.partition, p.getEndOffset())));
+            }
         }
         
         public void handleRollRequest(RollRequest request, TransferWrapNonblockingConnection from) {
