@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -145,6 +146,7 @@ public final class Compression {
                 if (null == codec) {
                     throw new IOException("Could not find codec");
                 }
+                ((Configurable) codec).setConf(conf);
                 FSDataInputStream is = null;
                 FSDataOutputStream os = null;
                 Path outputFile = lzoFile.suffix(ParamsKey.LZO_INDEX_SUFFIX);

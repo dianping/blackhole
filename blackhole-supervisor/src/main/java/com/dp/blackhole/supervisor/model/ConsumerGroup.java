@@ -67,12 +67,19 @@ public class ConsumerGroup {
         }
     }
     
-    public long getCommittedOffsetByParitionId(String partitionId) {
+    public long getCommittedOffsetByPartitionId(String partitionId) {
         AtomicLong committedOffset = committedOffsetMap.get(partitionId);
         if (committedOffset != null) {
             return committedOffset.get();
         } else {
             return MessageAndOffset.UNINITIALIZED_OFFSET;
+        }
+    }
+    
+    public void resetCommittedOffsetByPartitionId(String partitionId) {
+        AtomicLong committedOffset = committedOffsetMap.get(partitionId);
+        if (committedOffset != null) {
+            committedOffset.getAndSet(MessageAndOffset.UNINITIALIZED_OFFSET);
         }
     }
 

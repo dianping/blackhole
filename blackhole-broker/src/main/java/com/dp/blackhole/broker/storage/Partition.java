@@ -106,6 +106,22 @@ public class Partition {
         return segment;
     }
     
+    private Segment unprotectedGetFirstSegment() {
+        if (segments.size() == 0) {
+            return null;
+        }
+        return segments.get(0);
+    }
+
+    private Segment getFirstSegment() {
+        lock.readLock().lock();
+        try {
+            return unprotectedGetFirstSegment();
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
     private Segment unprotectedGetLastSegment() {
         if (segments.size() == 0) {
             return null;
@@ -149,6 +165,15 @@ public class Partition {
         ret = roll;
         roll = new RollPartition(this, endoffset);
         return ret;
+    }
+
+    public long getStartOffset() {
+        Segment segment = getFirstSegment();
+        if (segment == null) {
+            return 0;
+        } else {
+            return segment.getStartOffset();
+        }
     }
     
     public long getEndOffset() {

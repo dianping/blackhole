@@ -13,12 +13,12 @@ public class OffsetRequest extends NonDelegationTypedWrappable {
     /**
      * reading the latest offset
      */
-    public static final long LATES_TTIME = -1L;
+    public static final long LATES_OFFSET = -1L;
 
     /**
      * reading the earilest offset
      */
-    public static final long EARLIES_TTIME = -2L;
+    public static final long EARLIES_OFFSET = -2L;
 
     ///////////////////////////////////////////////////////////////////////
     /**
@@ -32,12 +32,11 @@ public class OffsetRequest extends NonDelegationTypedWrappable {
     public String partition;
 
     /**
-     * unix milliseconds time
+     * autoOffset is one of the below
      * LATES_TTIME: the latest(largest) offset</li>
      * EARLIES_TTIME: the earilest(smallest) offset</li>
-     * time: the log file offset which lastmodified time earlier than the time
      */
-    public long time;
+    public long autoOffset;
 
     public OffsetRequest() {}
     /**
@@ -45,15 +44,15 @@ public class OffsetRequest extends NonDelegationTypedWrappable {
      * time:the log file created time
      * maxNumOffsets:the number of offsets
      */
-    public OffsetRequest(String topic, String partition, long time) {
+    public OffsetRequest(String topic, String partition, long autoOffset) {
         this.topic = topic;
         this.partition = partition;
-        this.time = time;
+        this.autoOffset = autoOffset;
     }
 
     @Override
     public String toString() {
-        return "OffsetRequest(topic:" + topic + ", part:" + partition + ", time:" + time + ")";
+        return "OffsetRequest(topic:" + topic + ", part:" + partition + ", autoOffset:" + autoOffset + ")";
     }
 
     @Override
@@ -65,14 +64,14 @@ public class OffsetRequest extends NonDelegationTypedWrappable {
     public void read(ByteBuffer buffer) {
         topic = GenUtil.readString(buffer);
         partition = GenUtil.readString(buffer);
-        time = buffer.getLong();
+        autoOffset = buffer.getLong();
     }
 
     @Override
     public void write(ByteBuffer buffer) {
         GenUtil.writeString(topic, buffer);
         GenUtil.writeString(partition, buffer);
-        buffer.putLong(time);
+        buffer.putLong(autoOffset);
     }
 
     @Override
