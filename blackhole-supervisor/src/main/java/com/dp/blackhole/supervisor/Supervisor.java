@@ -1677,11 +1677,9 @@ public class Supervisor {
             LOG.info("new partition online: " + pinfo);
             t.addPartition(partitionId, pinfo);
         } else {
-            if (pinfo.isOffline()) {
-                pinfo.updateHost(brokerHost);
-                pinfo.markOffline(false);
-                LOG.info("partition back to online: " + pinfo);
-            }
+            pinfo.updateHost(brokerHost);
+            pinfo.markOffline(false);
+            LOG.info("partition back to online: " + pinfo);
         }
         //delete LogNotFound entry if exists
         configManager.removeLogNotFound(topic, host);
