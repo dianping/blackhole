@@ -1,0 +1,27 @@
+#blackhole-supervisor.root.logger = INFO, LOGFILE
+blackhole-supervisor.log.dir=./logs
+blackhole-supervisor.log.file=blackhole-supervisor.log
+
+log4j.rootLogger=${blackhole-supervisor.root.logger}
+
+log4j.appender.LOGFILE=org.apache.log4j.RollingFileAppender
+log4j.appender.LOGFILE.MaxFileSize=100MB
+log4j.appender.LOGFILE.MaxBackupIndex=10
+log4j.appender.LOGFILE.File=${blackhole-supervisor.log.dir}/${blackhole-supervisor.log.file}
+log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.LOGFILE.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
+
+blackhole-supervisor.root.logger = INFO, out
+log4j.appender.out = org.apache.log4j.ConsoleAppender
+log4j.appender.out.layout = org.apache.log4j.PatternLayout
+log4j.appender.out.layout.ConversionPattern = %d (%t) [%p - %l] %m%n
+
+log4j.logger.com.dp.blackhole=DEBUG
+
+log4j.logger.com.dp.blackhole.rest=DEBUG,rest
+log4j.appender.rest=org.apache.log4j.RollingFileAppender
+log4j.appender.rest.MaxFileSize=100MB
+log4j.appender.rest.MaxBackupIndex=5
+log4j.appender.rest.File=${blackhole-supervisor.log.dir}/restful.log
+log4j.appender.rest.layout=org.apache.log4j.PatternLayout
+log4j.appender.rest.layout.ConversionPattern=%d{dd MMM yyyy HH:mm:ss,SSS} %-5p [%t] (%C.%M:%L) %x - %m%n
