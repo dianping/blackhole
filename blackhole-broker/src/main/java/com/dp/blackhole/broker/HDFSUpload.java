@@ -144,9 +144,6 @@ public class HDFSUpload implements Runnable {
             }
 
             Path dst = new Path(dfsPath);
-            if (this.compression.equalsIgnoreCase(ParamsKey.COMPRESSION_LZO)) {
-                createIndex(dst, tmp);
-            }
             if (!HDFSUtil.retryRename(fs, tmp, dst)) {
                 networkError = true;
                 throw new IOException("Faild to rename tmp to " + dst);
@@ -189,14 +186,6 @@ public class HDFSUpload implements Runnable {
         }
     }
 
-    private void createIndex(Path dst, Path tmp) throws IOException {
-        //if "data.lzo.index" is not exists, create "data.lzo.index.tmp"
-        Path targetIndexFile = dst.suffix(ParamsKey.LZO_INDEX_SUFFIX);
-        if (!fs.exists(targetIndexFile)) {
-            compressionAlgo.createIndex(fs, dst, tmp);
-        }
-    }
-    
     private void fetchFileMessageSet(GatheringByteChannel channel, FileMessageSet messages) throws IOException {
         int read = 0;
         int limit = messages.getSize();
