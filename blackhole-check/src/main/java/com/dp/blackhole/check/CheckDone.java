@@ -74,7 +74,8 @@ public class CheckDone implements Runnable{
         long nowTS = calendar.getTimeInMillis();
         List<String> attemptSource = new ArrayList<String>();
         while (ident.ts <= Util.getPrevWholeTs(nowTS, ident.period)) {
-            LOG.info("Try to handle [" + ident.topic + ":" + Util.format.format(new Date(ident.ts)) + "]");
+            LOG.info("Try to handle topic " + ident.topic + ":" + Util.format.format(new Date(ident.ts))
+                    + " kvm[" + ident.kvmSources.size() + "] paas[" + ident.paasSources.size() + "]");
             attemptSource.clear();
             if (!Util.wasDone(ident, ident.ts)) {
                 Path[] expectedFile = null;

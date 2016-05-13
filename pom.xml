@@ -55,18 +55,6 @@
 		<module>blackhole-check</module>
 		<module>blackhole-consumer</module>
 	</modules>
-	<distributionManagement>
-		<repository>
-			<id>dianping.repo</id>
-			<name>Dian Ping internal repository for released artifacts</name>
-			<url>http://mvn.dianpingoa.com/dianping-releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>dianping.repo.snapshots</id>
-			<name>mvn.dianpingoa.com-snapshots</name>
-			<url>http://mvn.dianpingoa.com/dianping-snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 	<dependencyManagement>
 		<dependencies>
@@ -113,16 +101,6 @@
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
-		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-			<version>1.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
-		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
