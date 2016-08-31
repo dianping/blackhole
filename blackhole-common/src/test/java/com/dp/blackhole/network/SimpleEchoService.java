@@ -18,6 +18,7 @@ public class SimpleEchoService {
 
     public class Server extends Thread {
         class echoProcessor implements EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection> {
+            NioService<ByteBuffer, ByteBufferNonblockingConnection> service = null;
             
             @Override
             public void OnConnected(ByteBufferNonblockingConnection connection) {
@@ -32,8 +33,25 @@ public class SimpleEchoService {
             }
 
             @Override
-            public void process(ByteBuffer request, ByteBufferNonblockingConnection from) {
-              from.send(request);
+            public void process(ByteBuffer request, ByteBufferNonblockingConnection conn) {
+              service.send(conn, request);
+            }
+
+            @Override
+            public void receiveTimout(ByteBuffer msg, ByteBufferNonblockingConnection from) {
+                
+            }
+
+            @Override
+            public void sendFailure(ByteBuffer msg, ByteBufferNonblockingConnection from) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void setNioService(NioService<ByteBuffer, ByteBufferNonblockingConnection> service) {
+                this.service = service;
+                
             }
             
         }

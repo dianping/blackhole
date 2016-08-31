@@ -31,6 +31,4 @@ public interface NonblockingConnection<Entity> {
     void send(Entity entity);
 
     public boolean isResolved();
-
-    public Lock getLock();
 }

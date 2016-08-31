@@ -9,58 +9,28 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.dp.blackhole.common.DaemonThreadFactory;
-
-public class GenServer<Entity, Connection extends NonblockingConnection<Entity>, Processor extends EntityProcessor<Entity, Connection>> {
+public class GenServer<Entity, Connection extends NonblockingConnection<Entity>, Processor extends EntityProcessor<Entity, Connection>> implements NioService<Entity, Connection> {
 
     public static final Log LOG = LogFactory.getLog(GenServer.class);
     
     private NonblockingConnectionFactory<Connection> factory;
     private TypedFactory wrappedFactory;
     private Processor processor;
-    private ReceiveTimeoutWatcher watcher;
+    private ReceiveTimeoutWatcher<Entity, Connection> receiveTimeoutWatcher;
     
     private Selector selector;
     private ServerSocketChannel serverSocketChannel;
     volatile private boolean running = true;
-    private ArrayList<Handler> handlers = null;
+    private ArrayList<Handler<Entity, Connection>> handlers = null;
     private int handlerCount;
     
-    private class EntityEvent {
-        static final int CONNECTED = 1;
-        static final int DISCONNECTED = 2;
-        static final int RECEIVED = 3;
-        static final int RECEIVE_TIMEOUT = 4;
-        static final int SEND_FALURE = 5;
-        int type;
-        Entity entity;
-        int expect;
-        Connection c;
-        public EntityEvent(int type, Entity entity, Connection c) {
-            this.type = type;
-            this.entity = entity;
-            this.c = c;
-        }
-        public EntityEvent(int type, Entity entity, int expect, Connection c) {
-            this.type = type;
-            this.entity = entity;
-            this.expect = expect;
-            this.c = c;
-        }
-    }
+
     
     public GenServer(Processor processor, NonblockingConnectionFactory<Connection> factory, TypedFactory wrappedFactory) {
         this.processor = processor;
@@ -113,7 +83,7 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         }
         
         if (handlers != null) {
-            for (Handler handler : handlers) {
+            for (Handler<Entity, Connection> handler : handlers) {
                 handler.interrupt();
             }
         }
@@ -131,8 +101,8 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         
         if (connection.readComplete()) {
             Entity entity = connection.getEntity();
-            Handler handler = getHandler(connection);
-            handler.addEvent(new EntityEvent(EntityEvent.RECEIVED, entity, connection));
+            Handler<Entity, Connection> handler = getHandler(connection);
+            handler.addEvent(new EntityEvent<Entity, Connection>(EntityEvent.RECEIVED, entity, connection));
             connection.readyforRead();
         }
     }
@@ -166,8 +136,8 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
             
             Connection connection = factory.makeConnection(channel, selector, wrappedFactory);
             channel.register(selector, SelectionKey.OP_READ, connection);
-            Handler handler = getHandler(connection);
-            handler.addEvent(new EntityEvent(EntityEvent.CONNECTED, null, connection));
+            Handler<Entity, Connection> handler = getHandler(connection);
+            handler.addEvent(new EntityEvent<Entity, Connection>(EntityEvent.CONNECTED, null, connection));
         }
     }
     
@@ -188,8 +158,8 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
             key.attach(null);
             key.cancel();
             
-            Handler handler = getHandler(connection);
-            handler.addEvent(new EntityEvent(EntityEvent.DISCONNECTED, null, connection));
+            Handler<Entity, Connection> handler = getHandler(connection);
+            handler.addEvent(new EntityEvent<Entity, Connection>(EntityEvent.DISCONNECTED, null, connection));
         }
     }
 
@@ -197,13 +167,21 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         if (conn.isActive()) {
             conn.send(event);
         } else {
-            getHandler(conn).addEvent(new EntityEvent(EntityEvent.SEND_FALURE, event, conn));
+            getHandler(conn).addEvent(new EntityEvent<Entity, Connection>(EntityEvent.SEND_FALURE, event, conn));
         }
     }
 
     public void sendWithExpect(Connection conn, Entity event, int expect, int timeout, TimeUnit unit) {
-        send(conn, event);
-        watcher.watch(conn, event, expect, timeout, unit);
+        if (conn.isActive()) {
+            conn.send(event);
+            receiveTimeoutWatcher.watch(conn, event, expect, timeout, unit);
+        } else {
+            getHandler(conn).addEvent(new EntityEvent<Entity, Connection>(EntityEvent.SEND_FALURE, event, conn));
+        }
+    }
+    
+    public EntityEvent<Entity, Connection> unwatch(Connection conn, int expect) {
+        return receiveTimeoutWatcher.unwatch(conn, expect);
     }
 
     public void shutdown() {
@@ -213,114 +191,22 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
     
-    Handler getHandler(Connection connection) {
+    @Override
+    public Handler<Entity, Connection> getHandler(Connection connection) {
         int index = (connection.hashCode() & Integer.MAX_VALUE) % handlerCount;
         return handlers.get(index);
     }
     
-    private class Handler extends Thread {
-        private BlockingQueue<EntityEvent> entityQueue;
-
-        public Handler(int instanceNumber) {
-            entityQueue = new LinkedBlockingQueue<EntityEvent>();
-            this.setDaemon(true);
-            this.setName("process handler thread-"+instanceNumber);
-        }
-        
-        public void addEvent(EntityEvent event) {
-            entityQueue.add(event);
-        }
-        
-        @Override
-        public void run() {
-            while (running) {
-                EntityEvent e;
-                try {
-                    e = entityQueue.take();
-                    Lock lock = e.c.getLock();
-                    try {
-                        lock.lock();
-                        switch (e.type) {
-                        case EntityEvent.CONNECTED:
-                            processor.OnConnected(e.c);
-                            break;
-                        case EntityEvent.DISCONNECTED:
-                            processor.OnDisconnected(e.c);
-                            break;
-                        case EntityEvent.RECEIVED:
-                            processor.process(e.entity, e.c);
-                            break;
-                        case EntityEvent.RECEIVE_TIMEOUT:
-                            processor.receiveTimout(e.entity, e.c);
-                            break;
-                        case EntityEvent.SEND_FALURE:
-                            processor.sendFailure(e.entity, e.c);
-                            break;
-                        default:
-                            LOG.error("unknow entity" + e);
-                        }
-                    } finally {
-                        lock.unlock();
-                    }
-
-                } catch (InterruptedException ie) {
-                    LOG.info("handler thread interrupted");
-                    running = false;
-                } catch (Throwable t) {
-                    LOG.error("exception catched when processing event", t);
-                }
-            }
-        }
+    @Override
+    public boolean running() {
+        return running;
     }
 
-    private class ReceiveTimeoutWatcher {
-
-        private Map<String, EntityEvent> watches;
-        private ScheduledThreadPoolExecutor scheduler;
-
-        private class TimeoutTask implements Runnable {
-            private EntityEvent e;
-
-            public TimeoutTask(EntityEvent e) {
-                this.e = e;
-            }
-
-            @Override
-            public void run() {
-                Lock lock = e.c.getLock();
-                try {
-                    lock.lock();
-                    if (watches.remove(getKey(e.c, e.expect)) != null) {
-                        getHandler(e.c).addEvent(e);
-                    }
-                } finally {
-                    lock.unlock();
-                }
-            }
-        }
-
-        public ReceiveTimeoutWatcher() {
-            watches = Collections.synchronizedMap(new HashMap<String, EntityEvent>());
-            scheduler = new ScheduledThreadPoolExecutor(1, new DaemonThreadFactory("Scheduler"));
-            scheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-            scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-        }
-
-        public String getKey(Connection conn, int expect) {
-            return conn + Integer.toString(expect);
-        }
-
-        public void watch(Connection conn, Entity entity, int expect, int timeout, TimeUnit unit) {
-            EntityEvent v = new EntityEvent(EntityEvent.RECEIVE_TIMEOUT, entity, expect, conn);
-            watches.put(getKey(conn, expect), v);
-            scheduler.schedule(new TimeoutTask(v), timeout, unit);
-        }
-
-        public void unwatch(Connection conn, int expect) {
-            watches.remove(getKey(conn, expect));
-        }
+    @Override
+    public Processor getProcessor() {
+        return processor;
     }
-       
+    
     public void init(String name, int servicePort, int numHandler) throws IOException {
         handlerCount = numHandler;
         serverSocketChannel = ServerSocketChannel.open();
@@ -331,15 +217,16 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
         
         // start message handler thread
-        handlers = new ArrayList<Handler>(handlerCount);
+        handlers = new ArrayList<Handler<Entity, Connection>>(handlerCount);
         for (int i=0; i < handlerCount; i++) {
-            Handler handler = new Handler(i);
+            Handler<Entity, Connection> handler = new Handler<Entity, Connection>(this, i);
             handlers.add(handler);
             handler.start();
         }
 
-        ReceiveTimeoutWatcher receiveTimeoutWatcher = new ReceiveTimeoutWatcher();
-
+        receiveTimeoutWatcher = new ReceiveTimeoutWatcher<Entity, Connection>(this);
+        processor.setNioService(this);
+        
         LOG.info("GenServer " + name + " started at port:" + servicePort);
         
         loop();

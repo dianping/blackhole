@@ -3,6 +3,8 @@ package com.dp.blackhole.network;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class DelegationIOEchoService {
     
@@ -55,6 +57,7 @@ public class DelegationIOEchoService {
     public class Server extends Thread {
         
         class echoProcessor implements EntityProcessor<TransferWrap, TransferWrapNonblockingConnection> {
+            private NioService<TransferWrap, TransferWrapNonblockingConnection> service = null;
 
             @Override
             public void OnConnected(TransferWrapNonblockingConnection connection) {
@@ -69,10 +72,36 @@ public class DelegationIOEchoService {
             }
 
             @Override
-            public void process(TransferWrap request, TransferWrapNonblockingConnection from) {
+            public void process(TransferWrap request, TransferWrapNonblockingConnection conn) {
                 System.out.println("server received request: "+((wappedObject)request.unwrap()).data);
                 TransferWrap replay = new TransferWrap((wappedObject)request.unwrap());
-                from.send(replay);
+                
+                int sleep = (new Random().nextInt(5));
+                try {
+                    System.out.println("Sleep Seconds: " + sleep);
+                    Thread.sleep(sleep * 1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                service.send(conn, replay);
+            }
+
+            @Override
+            public void receiveTimout(TransferWrap msg, TransferWrapNonblockingConnection from) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void sendFailure(TransferWrap msg, TransferWrapNonblockingConnection from) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void setNioService(NioService<TransferWrap, TransferWrapNonblockingConnection> service) {
+                this.service = service;
+                
             }
             
         }
@@ -102,34 +131,52 @@ public class DelegationIOEchoService {
         private int echotimes;
         
         class echoClientProcessor implements EntityProcessor<TransferWrap, TransferWrapNonblockingConnection> {
+            private NioService<TransferWrap, TransferWrapNonblockingConnection> service = null;
 
             @Override
-            public void OnConnected(TransferWrapNonblockingConnection connection) {
+            public void OnConnected(TransferWrapNonblockingConnection conn) {
                 DelegationIOEchoService echo1 = new DelegationIOEchoService();
-                connection.send(new TransferWrap(echo1.new wappedObject("message123")));
+                service.send(conn, new TransferWrap(echo1.new wappedObject("message1")));
                 echotimes++;
             }
 
             @Override
-            public void OnDisconnected(TransferWrapNonblockingConnection connection) {
+            public void OnDisconnected(TransferWrapNonblockingConnection conn) {
                 
             }
 
             @Override
             public void process(TransferWrap request,
-                    TransferWrapNonblockingConnection from) {
+                    TransferWrapNonblockingConnection conn) {
                 wappedObject a = (wappedObject) request.unwrap();
                 System.out.println("client get reply: "+a.data);
-
+                
+                service.unwatch(conn, 0);
                 if (echotimes == 3) {
-                    client.shutdown();
+                    service.shutdown();
                     System.out.println();
                     System.out.println("total echo times: "+echotimes);
                 } else {
                     TransferWrap echoRequest = new TransferWrap(a);
-                    from.send(echoRequest);
+                    service.sendWithExpect(conn, echoRequest, 0, 3, TimeUnit.SECONDS);
                     echotimes++;
                 }
+            }
+
+            @Override
+            public void receiveTimout(TransferWrap msg, TransferWrapNonblockingConnection conn) {
+                System.out.println("### Timeout msg: " + ((wappedObject)msg.unwrap()).data);
+            }
+
+            @Override
+            public void sendFailure(TransferWrap msg, TransferWrapNonblockingConnection conn) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void setNioService(NioService<TransferWrap, TransferWrapNonblockingConnection> service) {
+                this.service = service;
             }
             
         }
