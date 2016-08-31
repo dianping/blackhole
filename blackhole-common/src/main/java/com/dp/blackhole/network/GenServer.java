@@ -9,12 +9,20 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.dp.blackhole.common.DaemonThreadFactory;
 
 public class GenServer<Entity, Connection extends NonblockingConnection<Entity>, Processor extends EntityProcessor<Entity, Connection>> {
 
@@ -23,6 +31,7 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
     private NonblockingConnectionFactory<Connection> factory;
     private TypedFactory wrappedFactory;
     private Processor processor;
+    private ReceiveTimeoutWatcher watcher;
     
     private Selector selector;
     private ServerSocketChannel serverSocketChannel;
@@ -34,12 +43,21 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         static final int CONNECTED = 1;
         static final int DISCONNECTED = 2;
         static final int RECEIVED = 3;
+        static final int RECEIVE_TIMEOUT = 4;
+        static final int SEND_FALURE = 5;
         int type;
         Entity entity;
+        int expect;
         Connection c;
         public EntityEvent(int type, Entity entity, Connection c) {
             this.type = type;
             this.entity = entity;
+            this.c = c;
+        }
+        public EntityEvent(int type, Entity entity, int expect, Connection c) {
+            this.type = type;
+            this.entity = entity;
+            this.expect = expect;
             this.c = c;
         }
     }
@@ -175,6 +193,19 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
 
+    public void send(Connection conn, Entity event) {
+        if (conn.isActive()) {
+            conn.send(event);
+        } else {
+            getHandler(conn).addEvent(new EntityEvent(EntityEvent.SEND_FALURE, event, conn));
+        }
+    }
+
+    public void sendWithExpect(Connection conn, Entity event, int expect, int timeout, TimeUnit unit) {
+        send(conn, event);
+        watcher.watch(conn, event, expect, timeout, unit);
+    }
+
     public void shutdown() {
         running = false;
         if (selector != null) {
@@ -182,7 +213,7 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
     
-    private Handler getHandler(Connection connection) {
+    Handler getHandler(Connection connection) {
         int index = (connection.hashCode() & Integer.MAX_VALUE) % handlerCount;
         return handlers.get(index);
     }
@@ -206,18 +237,30 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
                 EntityEvent e;
                 try {
                     e = entityQueue.take();
-                    switch (e.type) {
-                    case EntityEvent.CONNECTED:
-                        processor.OnConnected(e.c);
-                        break;
-                    case EntityEvent.DISCONNECTED:
-                        processor.OnDisconnected(e.c);
-                        break;
-                    case EntityEvent.RECEIVED:
-                        processor.process(e.entity, e.c);
-                        break;
-                    default:
-                        LOG.error("unknow entity" + e);
+                    Lock lock = e.c.getLock();
+                    try {
+                        lock.lock();
+                        switch (e.type) {
+                        case EntityEvent.CONNECTED:
+                            processor.OnConnected(e.c);
+                            break;
+                        case EntityEvent.DISCONNECTED:
+                            processor.OnDisconnected(e.c);
+                            break;
+                        case EntityEvent.RECEIVED:
+                            processor.process(e.entity, e.c);
+                            break;
+                        case EntityEvent.RECEIVE_TIMEOUT:
+                            processor.receiveTimout(e.entity, e.c);
+                            break;
+                        case EntityEvent.SEND_FALURE:
+                            processor.sendFailure(e.entity, e.c);
+                            break;
+                        default:
+                            LOG.error("unknow entity" + e);
+                        }
+                    } finally {
+                        lock.unlock();
                     }
 
                 } catch (InterruptedException ie) {
@@ -227,6 +270,54 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
                     LOG.error("exception catched when processing event", t);
                 }
             }
+        }
+    }
+
+    private class ReceiveTimeoutWatcher {
+
+        private Map<String, EntityEvent> watches;
+        private ScheduledThreadPoolExecutor scheduler;
+
+        private class TimeoutTask implements Runnable {
+            private EntityEvent e;
+
+            public TimeoutTask(EntityEvent e) {
+                this.e = e;
+            }
+
+            @Override
+            public void run() {
+                Lock lock = e.c.getLock();
+                try {
+                    lock.lock();
+                    if (watches.remove(getKey(e.c, e.expect)) != null) {
+                        getHandler(e.c).addEvent(e);
+                    }
+                } finally {
+                    lock.unlock();
+                }
+            }
+        }
+
+        public ReceiveTimeoutWatcher() {
+            watches = Collections.synchronizedMap(new HashMap<String, EntityEvent>());
+            scheduler = new ScheduledThreadPoolExecutor(1, new DaemonThreadFactory("Scheduler"));
+            scheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
+            scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        }
+
+        public String getKey(Connection conn, int expect) {
+            return conn + Integer.toString(expect);
+        }
+
+        public void watch(Connection conn, Entity entity, int expect, int timeout, TimeUnit unit) {
+            EntityEvent v = new EntityEvent(EntityEvent.RECEIVE_TIMEOUT, entity, expect, conn);
+            watches.put(getKey(conn, expect), v);
+            scheduler.schedule(new TimeoutTask(v), timeout, unit);
+        }
+
+        public void unwatch(Connection conn, int expect) {
+            watches.remove(getKey(conn, expect));
         }
     }
        
@@ -246,7 +337,9 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
             handlers.add(handler);
             handler.start();
         }
-        
+
+        ReceiveTimeoutWatcher receiveTimeoutWatcher = new ReceiveTimeoutWatcher();
+
         LOG.info("GenServer " + name + " started at port:" + servicePort);
         
         loop();
