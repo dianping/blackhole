@@ -13,44 +13,31 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class GenClient<Entity, Connection extends NonblockingConnection<Entity>, Processor extends EntityProcessor<Entity, Connection>> {
+public class GenClient<Entity, Connection extends NonblockingConnection<Entity>, Processor extends EntityProcessor<Entity, Connection>> implements NioService<Entity, Connection> {
     
     public static final Log LOG = LogFactory.getLog(GenClient.class);
     
     private NonblockingConnectionFactory<Connection> factory;
     private TypedFactory wrappedFactory;
     private Processor processor;
+    private ReceiveTimeoutWatcher<Entity, Connection> receiveTimeoutWatcher;
     
     private Selector selector;
     private SocketChannel socketChannel;
     volatile private boolean running = true;
-    private ArrayList<Handler> handlers = null;
+    private ArrayList<Handler<Entity, Connection>> handlers = null;
     private int handlerCount;
     private AtomicBoolean connected = new AtomicBoolean(false);
-    private BlockingQueue<EntityEvent> entityQueue;
 
     private String clientName;
     private String host;
     private int port;
-    
-    private class EntityEvent {
-        static final int CONNECTED = 1;
-        static final int DISCONNECTED = 2;
-        static final int RECEIVED = 3;
-        int type;
-        Entity entity;
-        Connection c;
-        public EntityEvent(int type, Entity entity, Connection c) {
-            this.type = type;
-            this.entity = entity;
-            this.c = c;
-        }
-    }
     
     public GenClient(Processor processor, NonblockingConnectionFactory<Connection> factory, TypedFactory wrappedFactory) {
         this.processor = processor;
@@ -88,7 +75,7 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         }
         
         if (handlers != null) {
-            for (Handler handler : handlers) {
+            for (Handler<Entity, Connection> handler : handlers) {
                 //interrupt the queue.take()
                 handler.interrupt();
             }
@@ -139,7 +126,8 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         
         if (connection.readComplete()) {
             Entity entity = connection.getEntity();
-            entityQueue.add(new EntityEvent(EntityEvent.RECEIVED, entity, connection));
+            Handler<Entity, Connection> handler = getHandler(connection);
+            handler.addEvent(new EntityEvent<Entity, Connection>(EntityEvent.RECEIVED, entity, connection));
             connection.readyforRead();
         }
     }
@@ -176,7 +164,8 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         connected.getAndSet(true);
         Connection connection = factory.makeConnection(channel, selector, wrappedFactory);
         key.attach(connection);
-        entityQueue.add(new EntityEvent(EntityEvent.CONNECTED, null, connection));
+        Handler<Entity, Connection> handler = getHandler(connection);
+        handler.addEvent(new EntityEvent<Entity, Connection>(EntityEvent.CONNECTED, null, connection));
     }
     
     private void closeConnection(Connection connection) {
@@ -196,9 +185,31 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         key.attach(null);
         key.cancel();
         
-        entityQueue.add(new EntityEvent(EntityEvent.DISCONNECTED, null, connection));
+        Handler<Entity, Connection> handler = getHandler(connection);
+        handler.addEvent(new EntityEvent<Entity, Connection>(EntityEvent.DISCONNECTED, null, connection));
     }
 
+    public void send(Connection conn, Entity event) {
+        if (conn.isActive()) {
+            conn.send(event);
+        } else {
+            getHandler(conn).addEvent(new EntityEvent<Entity, Connection>(EntityEvent.SEND_FALURE, event, conn));
+        }
+    }
+
+    public void sendWithExpect(Connection conn, Entity event, int expect, int timeout, TimeUnit unit) {
+        if (conn.isActive()) {
+            conn.send(event);
+            receiveTimeoutWatcher.watch(conn, event, expect, timeout, unit);
+        } else {
+            getHandler(conn).addEvent(new EntityEvent<Entity, Connection>(EntityEvent.SEND_FALURE, event, conn));
+        }
+    }
+    
+    public EntityEvent<Entity, Connection> unwatch(Connection conn, int expect) {
+        return receiveTimeoutWatcher.unwatch(conn, expect);
+    }
+    
     public void shutdown() {
         running = false;
         if (selector != null) {
@@ -206,41 +217,57 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
     
-    private class Handler extends Thread {
+//    private class Handler extends Thread {
+//
+//        public Handler(int instanceNumber) {
+//            this.setDaemon(true);
+//            this.setName("process handler thread@" + Integer.toHexString(hashCode()) + "-"+ instanceNumber );
+//        }
+//        
+//        @Override
+//        public void run() {
+//            while (running) {
+//                EntityEvent e;
+//                try {
+//                    e = entityQueue.take();
+//                    switch (e.type) {
+//                    case EntityEvent.CONNECTED:
+//                        processor.OnConnected(e.c);
+//                        break;
+//                    case EntityEvent.DISCONNECTED:
+//                        processor.OnDisconnected(e.c);
+//                        break;
+//                    case EntityEvent.RECEIVED:
+//                        processor.process(e.entity, e.c);
+//                        break;
+//                    default:
+//                        LOG.error("unknow entity" + e);
+//                    }
+//
+//                } catch (InterruptedException ie) {
+//                    LOG.info("handler thread interrupted");
+//                    running = false;
+//                } catch (Throwable t) {
+//                    LOG.error("exception catched when processing event", t);
+//                }
+//            }
+//        }
+//    }
 
-        public Handler(int instanceNumber) {
-            this.setDaemon(true);
-            this.setName("process handler thread@" + Integer.toHexString(hashCode()) + "-"+ instanceNumber );
-        }
-        
-        @Override
-        public void run() {
-            while (running) {
-                EntityEvent e;
-                try {
-                    e = entityQueue.take();
-                    switch (e.type) {
-                    case EntityEvent.CONNECTED:
-                        processor.OnConnected(e.c);
-                        break;
-                    case EntityEvent.DISCONNECTED:
-                        processor.OnDisconnected(e.c);
-                        break;
-                    case EntityEvent.RECEIVED:
-                        processor.process(e.entity, e.c);
-                        break;
-                    default:
-                        LOG.error("unknow entity" + e);
-                    }
+    @Override
+    public boolean running() {
+        return running;
+    }
 
-                } catch (InterruptedException ie) {
-                    LOG.info("handler thread interrupted");
-                    running = false;
-                } catch (Throwable t) {
-                    LOG.error("exception catched when processing event", t);
-                }
-            }
-        }
+    @Override
+    public Processor getProcessor() {
+        return processor;
+    }
+
+    @Override
+    public com.dp.blackhole.network.Handler<Entity, Connection> getHandler(Connection conn) {
+        int index = (conn.hashCode() & Integer.MAX_VALUE) % handlerCount;
+        return handlers.get(index);
     }
     
     public void init(String clientName, String serverHost, int serverPort) throws IOException, ClosedChannelException {  
@@ -250,18 +277,19 @@ public class GenClient<Entity, Connection extends NonblockingConnection<Entity>,
         Properties prop = new Properties();
         handlerCount = Integer.parseInt(prop.getProperty("GenClient.handlercount", "1"));
         
-        entityQueue = new LinkedBlockingQueue<EntityEvent>();
-        
         socketChannel = SocketChannel.open();
         selector = Selector.open();
         
         // start message handler thread
-        handlers = new ArrayList<Handler>(handlerCount);
+        handlers = new ArrayList<Handler<Entity, Connection>>(handlerCount);
         for (int i=0; i < handlerCount; i++) {
-            Handler handler = new Handler(i);
+            Handler<Entity, Connection> handler = new Handler<Entity, Connection>(this, i);
             handlers.add(handler);
             handler.start();
         }
+        
+        receiveTimeoutWatcher = new ReceiveTimeoutWatcher<Entity, Connection>(this);
+        processor.setNioService(this);
         
         loop();
     }

@@ -10,39 +10,27 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class GenServer<Entity, Connection extends NonblockingConnection<Entity>, Processor extends EntityProcessor<Entity, Connection>> {
+public class GenServer<Entity, Connection extends NonblockingConnection<Entity>, Processor extends EntityProcessor<Entity, Connection>> implements NioService<Entity, Connection> {
 
     public static final Log LOG = LogFactory.getLog(GenServer.class);
     
     private NonblockingConnectionFactory<Connection> factory;
     private TypedFactory wrappedFactory;
     private Processor processor;
+    private ReceiveTimeoutWatcher<Entity, Connection> receiveTimeoutWatcher;
     
     private Selector selector;
     private ServerSocketChannel serverSocketChannel;
     volatile private boolean running = true;
-    private ArrayList<Handler> handlers = null;
+    private ArrayList<Handler<Entity, Connection>> handlers = null;
     private int handlerCount;
     
-    private class EntityEvent {
-        static final int CONNECTED = 1;
-        static final int DISCONNECTED = 2;
-        static final int RECEIVED = 3;
-        int type;
-        Entity entity;
-        Connection c;
-        public EntityEvent(int type, Entity entity, Connection c) {
-            this.type = type;
-            this.entity = entity;
-            this.c = c;
-        }
-    }
+
     
     public GenServer(Processor processor, NonblockingConnectionFactory<Connection> factory, TypedFactory wrappedFactory) {
         this.processor = processor;
@@ -95,7 +83,7 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         }
         
         if (handlers != null) {
-            for (Handler handler : handlers) {
+            for (Handler<Entity, Connection> handler : handlers) {
                 handler.interrupt();
             }
         }
@@ -113,8 +101,8 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         
         if (connection.readComplete()) {
             Entity entity = connection.getEntity();
-            Handler handler = getHandler(connection);
-            handler.addEvent(new EntityEvent(EntityEvent.RECEIVED, entity, connection));
+            Handler<Entity, Connection> handler = getHandler(connection);
+            handler.addEvent(new EntityEvent<Entity, Connection>(EntityEvent.RECEIVED, entity, connection));
             connection.readyforRead();
         }
     }
@@ -148,8 +136,8 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
             
             Connection connection = factory.makeConnection(channel, selector, wrappedFactory);
             channel.register(selector, SelectionKey.OP_READ, connection);
-            Handler handler = getHandler(connection);
-            handler.addEvent(new EntityEvent(EntityEvent.CONNECTED, null, connection));
+            Handler<Entity, Connection> handler = getHandler(connection);
+            handler.addEvent(new EntityEvent<Entity, Connection>(EntityEvent.CONNECTED, null, connection));
         }
     }
     
@@ -170,9 +158,30 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
             key.attach(null);
             key.cancel();
             
-            Handler handler = getHandler(connection);
-            handler.addEvent(new EntityEvent(EntityEvent.DISCONNECTED, null, connection));
+            Handler<Entity, Connection> handler = getHandler(connection);
+            handler.addEvent(new EntityEvent<Entity, Connection>(EntityEvent.DISCONNECTED, null, connection));
         }
+    }
+
+    public void send(Connection conn, Entity event) {
+        if (conn.isActive()) {
+            conn.send(event);
+        } else {
+            getHandler(conn).addEvent(new EntityEvent<Entity, Connection>(EntityEvent.SEND_FALURE, event, conn));
+        }
+    }
+
+    public void sendWithExpect(Connection conn, Entity event, int expect, int timeout, TimeUnit unit) {
+        if (conn.isActive()) {
+            conn.send(event);
+            receiveTimeoutWatcher.watch(conn, event, expect, timeout, unit);
+        } else {
+            getHandler(conn).addEvent(new EntityEvent<Entity, Connection>(EntityEvent.SEND_FALURE, event, conn));
+        }
+    }
+    
+    public EntityEvent<Entity, Connection> unwatch(Connection conn, int expect) {
+        return receiveTimeoutWatcher.unwatch(conn, expect);
     }
 
     public void shutdown() {
@@ -182,54 +191,22 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
     
-    private Handler getHandler(Connection connection) {
+    @Override
+    public Handler<Entity, Connection> getHandler(Connection connection) {
         int index = (connection.hashCode() & Integer.MAX_VALUE) % handlerCount;
         return handlers.get(index);
     }
     
-    private class Handler extends Thread {
-        private BlockingQueue<EntityEvent> entityQueue;
-
-        public Handler(int instanceNumber) {
-            entityQueue = new LinkedBlockingQueue<EntityEvent>();
-            this.setDaemon(true);
-            this.setName("process handler thread-"+instanceNumber);
-        }
-        
-        public void addEvent(EntityEvent event) {
-            entityQueue.add(event);
-        }
-        
-        @Override
-        public void run() {
-            while (running) {
-                EntityEvent e;
-                try {
-                    e = entityQueue.take();
-                    switch (e.type) {
-                    case EntityEvent.CONNECTED:
-                        processor.OnConnected(e.c);
-                        break;
-                    case EntityEvent.DISCONNECTED:
-                        processor.OnDisconnected(e.c);
-                        break;
-                    case EntityEvent.RECEIVED:
-                        processor.process(e.entity, e.c);
-                        break;
-                    default:
-                        LOG.error("unknow entity" + e);
-                    }
-
-                } catch (InterruptedException ie) {
-                    LOG.info("handler thread interrupted");
-                    running = false;
-                } catch (Throwable t) {
-                    LOG.error("exception catched when processing event", t);
-                }
-            }
-        }
+    @Override
+    public boolean running() {
+        return running;
     }
-       
+
+    @Override
+    public Processor getProcessor() {
+        return processor;
+    }
+    
     public void init(String name, int servicePort, int numHandler) throws IOException {
         handlerCount = numHandler;
         serverSocketChannel = ServerSocketChannel.open();
@@ -240,12 +217,15 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
         
         // start message handler thread
-        handlers = new ArrayList<Handler>(handlerCount);
+        handlers = new ArrayList<Handler<Entity, Connection>>(handlerCount);
         for (int i=0; i < handlerCount; i++) {
-            Handler handler = new Handler(i);
+            Handler<Entity, Connection> handler = new Handler<Entity, Connection>(this, i);
             handlers.add(handler);
             handler.start();
         }
+
+        receiveTimeoutWatcher = new ReceiveTimeoutWatcher<Entity, Connection>(this);
+        processor.setNioService(this);
         
         LOG.info("GenServer " + name + " started at port:" + servicePort);
         

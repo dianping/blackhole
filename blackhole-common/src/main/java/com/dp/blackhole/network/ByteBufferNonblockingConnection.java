@@ -9,6 +9,8 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,7 +44,6 @@ public class ByteBufferNonblockingConnection implements NonblockingConnection<By
     private String ip;
     private int port;
     private boolean resolved;
-
 
     public ByteBufferNonblockingConnection(SocketChannel channel, Selector selector) {
         this.channel = channel;
