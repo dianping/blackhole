@@ -64,6 +64,7 @@ public class ConfigManager {
     public int supervisorPort;
     public int jettyPort;
     public int numHandler;
+    public int sendTimeout;
     
     public volatile boolean brokerAssignmentLimitEnable;
     public volatile int brokerAssignmentLimitMin;
@@ -166,6 +167,7 @@ public class ConfigManager {
         supervisorPort = Integer.parseInt(prop.getProperty("supervisor.port"));
         jettyPort = Integer.parseInt(prop.getProperty("rest.jetty.port", "8085"));
         numHandler = Integer.parseInt(prop.getProperty("GenServer.handler.count", "3"));
+        sendTimeout = Integer.parseInt(prop.getProperty("msg.send.timeout", "10"));
         getPaaSInstanceURLPerfix = prop.getProperty("supervisor.paas.url");
         brokerAssignmentLimitEnable = Boolean.parseBoolean(prop.getProperty("supervisor.broker-assignment-limit.enable", "false"));
         

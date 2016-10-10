@@ -510,6 +510,119 @@ public final class MessagePB {
      * <code>optional .blackhole.RetireConsumerGroup retireConsumerGroup = 36;</code>
      */
     com.dp.blackhole.protocol.control.RetireConsumerGroupPB.RetireConsumerGroupOrBuilder getRetireConsumerGroupOrBuilder();
+
+    // optional .blackhole.TransitionToLeader transitionToLeader = 37;
+    /**
+     * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+     */
+    boolean hasTransitionToLeader();
+    /**
+     * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+     */
+    com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader getTransitionToLeader();
+    /**
+     * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+     */
+    com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeaderOrBuilder getTransitionToLeaderOrBuilder();
+
+    // optional .blackhole.TransitionToFollower transitionToFollower = 38;
+    /**
+     * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+     */
+    boolean hasTransitionToFollower();
+    /**
+     * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+     */
+    com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower getTransitionToFollower();
+    /**
+     * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+     */
+    com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollowerOrBuilder getTransitionToFollowerOrBuilder();
+
+    // optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;
+    /**
+     * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+     */
+    boolean hasFollowerSyncStatus();
+    /**
+     * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+     */
+    com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus getFollowerSyncStatus();
+    /**
+     * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+     */
+    com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatusOrBuilder getFollowerSyncStatusOrBuilder();
+
+    // optional .blackhole.ReplicaException replicaException = 40;
+    /**
+     * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+     */
+    boolean hasReplicaException();
+    /**
+     * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+     */
+    com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException getReplicaException();
+    /**
+     * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+     */
+    com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaExceptionOrBuilder getReplicaExceptionOrBuilder();
+
+    // optional .blackhole.LeoReport leoReport = 41;
+    /**
+     * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+     */
+    boolean hasLeoReport();
+    /**
+     * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+     */
+    com.dp.blackhole.protocol.control.LeoReportPB.LeoReport getLeoReport();
+    /**
+     * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+     */
+    com.dp.blackhole.protocol.control.LeoReportPB.LeoReportOrBuilder getLeoReportOrBuilder();
+
+    // optional .blackhole.LeoReply leoReply = 42;
+    /**
+     * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+     */
+    boolean hasLeoReply();
+    /**
+     * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+     */
+    com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply getLeoReply();
+    /**
+     * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+     */
+    com.dp.blackhole.protocol.control.LeoReplyPB.LeoReplyOrBuilder getLeoReplyOrBuilder();
+
+    // optional string callId = 43;
+    /**
+     * <code>optional string callId = 43;</code>
+     */
+    boolean hasCallId();
+    /**
+     * <code>optional string callId = 43;</code>
+     */
+    java.lang.String getCallId();
+    /**
+     * <code>optional string callId = 43;</code>
+     */
+    com.google.protobuf.ByteString
+        getCallIdBytes();
+
+    // optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;
+    /**
+     * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+     */
+    boolean hasFollowerSyncStatusAck();
+    /**
+     * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+     */
+    com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck getFollowerSyncStatusAck();
+    /**
+     * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+     */
+    com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAckOrBuilder getFollowerSyncStatusAckOrBuilder();
   }
   /**
    * Protobuf type {@code blackhole.Message}
@@ -1029,6 +1142,102 @@ public final class MessagePB {
               bitField1_ |= 0x00000008;
               break;
             }
+            case 298: {
+              com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader.Builder subBuilder = null;
+              if (((bitField1_ & 0x00000010) == 0x00000010)) {
+                subBuilder = transitionToLeader_.toBuilder();
+              }
+              transitionToLeader_ = input.readMessage(com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(transitionToLeader_);
+                transitionToLeader_ = subBuilder.buildPartial();
+              }
+              bitField1_ |= 0x00000010;
+              break;
+            }
+            case 306: {
+              com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower.Builder subBuilder = null;
+              if (((bitField1_ & 0x00000020) == 0x00000020)) {
+                subBuilder = transitionToFollower_.toBuilder();
+              }
+              transitionToFollower_ = input.readMessage(com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(transitionToFollower_);
+                transitionToFollower_ = subBuilder.buildPartial();
+              }
+              bitField1_ |= 0x00000020;
+              break;
+            }
+            case 314: {
+              com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus.Builder subBuilder = null;
+              if (((bitField1_ & 0x00000040) == 0x00000040)) {
+                subBuilder = followerSyncStatus_.toBuilder();
+              }
+              followerSyncStatus_ = input.readMessage(com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(followerSyncStatus_);
+                followerSyncStatus_ = subBuilder.buildPartial();
+              }
+              bitField1_ |= 0x00000040;
+              break;
+            }
+            case 322: {
+              com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException.Builder subBuilder = null;
+              if (((bitField1_ & 0x00000080) == 0x00000080)) {
+                subBuilder = replicaException_.toBuilder();
+              }
+              replicaException_ = input.readMessage(com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(replicaException_);
+                replicaException_ = subBuilder.buildPartial();
+              }
+              bitField1_ |= 0x00000080;
+              break;
+            }
+            case 330: {
+              com.dp.blackhole.protocol.control.LeoReportPB.LeoReport.Builder subBuilder = null;
+              if (((bitField1_ & 0x00000100) == 0x00000100)) {
+                subBuilder = leoReport_.toBuilder();
+              }
+              leoReport_ = input.readMessage(com.dp.blackhole.protocol.control.LeoReportPB.LeoReport.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(leoReport_);
+                leoReport_ = subBuilder.buildPartial();
+              }
+              bitField1_ |= 0x00000100;
+              break;
+            }
+            case 338: {
+              com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply.Builder subBuilder = null;
+              if (((bitField1_ & 0x00000200) == 0x00000200)) {
+                subBuilder = leoReply_.toBuilder();
+              }
+              leoReply_ = input.readMessage(com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(leoReply_);
+                leoReply_ = subBuilder.buildPartial();
+              }
+              bitField1_ |= 0x00000200;
+              break;
+            }
+            case 346: {
+              bitField1_ |= 0x00000400;
+              callId_ = input.readBytes();
+              break;
+            }
+            case 354: {
+              com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck.Builder subBuilder = null;
+              if (((bitField1_ & 0x00000800) == 0x00000800)) {
+                subBuilder = followerSyncStatusAck_.toBuilder();
+              }
+              followerSyncStatusAck_ = input.readMessage(com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(followerSyncStatusAck_);
+                followerSyncStatusAck_ = subBuilder.buildPartial();
+              }
+              bitField1_ |= 0x00000800;
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -1269,6 +1478,34 @@ public final class MessagePB {
        * <code>RETIRE_CONSUMER_GROUP = 50;</code>
        */
       RETIRE_CONSUMER_GROUP(48, 50),
+      /**
+       * <code>TRANSITION_TO_LEADER = 51;</code>
+       */
+      TRANSITION_TO_LEADER(49, 51),
+      /**
+       * <code>TRANSITION_TO_FOLLOWER = 52;</code>
+       */
+      TRANSITION_TO_FOLLOWER(50, 52),
+      /**
+       * <code>FOLLOWER_SYNC_STATUS = 53;</code>
+       */
+      FOLLOWER_SYNC_STATUS(51, 53),
+      /**
+       * <code>REPLICA_EXCEPTION = 54;</code>
+       */
+      REPLICA_EXCEPTION(52, 54),
+      /**
+       * <code>LEO_REPORT = 55;</code>
+       */
+      LEO_REPORT(53, 55),
+      /**
+       * <code>LEO_REPLY = 56;</code>
+       */
+      LEO_REPLY(54, 56),
+      /**
+       * <code>FOLLOWER_SYNC_STATUS_ACK = 57;</code>
+       */
+      FOLLOWER_SYNC_STATUS_ACK(55, 57),
       ;
 
       /**
@@ -1467,6 +1704,34 @@ public final class MessagePB {
        * <code>RETIRE_CONSUMER_GROUP = 50;</code>
        */
       public static final int RETIRE_CONSUMER_GROUP_VALUE = 50;
+      /**
+       * <code>TRANSITION_TO_LEADER = 51;</code>
+       */
+      public static final int TRANSITION_TO_LEADER_VALUE = 51;
+      /**
+       * <code>TRANSITION_TO_FOLLOWER = 52;</code>
+       */
+      public static final int TRANSITION_TO_FOLLOWER_VALUE = 52;
+      /**
+       * <code>FOLLOWER_SYNC_STATUS = 53;</code>
+       */
+      public static final int FOLLOWER_SYNC_STATUS_VALUE = 53;
+      /**
+       * <code>REPLICA_EXCEPTION = 54;</code>
+       */
+      public static final int REPLICA_EXCEPTION_VALUE = 54;
+      /**
+       * <code>LEO_REPORT = 55;</code>
+       */
+      public static final int LEO_REPORT_VALUE = 55;
+      /**
+       * <code>LEO_REPLY = 56;</code>
+       */
+      public static final int LEO_REPLY_VALUE = 56;
+      /**
+       * <code>FOLLOWER_SYNC_STATUS_ACK = 57;</code>
+       */
+      public static final int FOLLOWER_SYNC_STATUS_ACK_VALUE = 57;
 
 
       public final int getNumber() { return value; }
@@ -1522,6 +1787,13 @@ public final class MessagePB {
           case 47: return CONSUMER_EXIT;
           case 49: return LOG_NOT_FOUND;
           case 50: return RETIRE_CONSUMER_GROUP;
+          case 51: return TRANSITION_TO_LEADER;
+          case 52: return TRANSITION_TO_FOLLOWER;
+          case 53: return FOLLOWER_SYNC_STATUS;
+          case 54: return REPLICA_EXCEPTION;
+          case 55: return LEO_REPORT;
+          case 56: return LEO_REPLY;
+          case 57: return FOLLOWER_SYNC_STATUS_ACK;
           default: return null;
         }
       }
@@ -2361,6 +2633,203 @@ public final class MessagePB {
       return retireConsumerGroup_;
     }
 
+    // optional .blackhole.TransitionToLeader transitionToLeader = 37;
+    public static final int TRANSITIONTOLEADER_FIELD_NUMBER = 37;
+    private com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader transitionToLeader_;
+    /**
+     * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+     */
+    public boolean hasTransitionToLeader() {
+      return ((bitField1_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+     */
+    public com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader getTransitionToLeader() {
+      return transitionToLeader_;
+    }
+    /**
+     * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+     */
+    public com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeaderOrBuilder getTransitionToLeaderOrBuilder() {
+      return transitionToLeader_;
+    }
+
+    // optional .blackhole.TransitionToFollower transitionToFollower = 38;
+    public static final int TRANSITIONTOFOLLOWER_FIELD_NUMBER = 38;
+    private com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower transitionToFollower_;
+    /**
+     * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+     */
+    public boolean hasTransitionToFollower() {
+      return ((bitField1_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+     */
+    public com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower getTransitionToFollower() {
+      return transitionToFollower_;
+    }
+    /**
+     * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+     */
+    public com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollowerOrBuilder getTransitionToFollowerOrBuilder() {
+      return transitionToFollower_;
+    }
+
+    // optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;
+    public static final int FOLLOWERSYNCSTATUS_FIELD_NUMBER = 39;
+    private com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus followerSyncStatus_;
+    /**
+     * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+     */
+    public boolean hasFollowerSyncStatus() {
+      return ((bitField1_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+     */
+    public com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus getFollowerSyncStatus() {
+      return followerSyncStatus_;
+    }
+    /**
+     * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+     */
+    public com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatusOrBuilder getFollowerSyncStatusOrBuilder() {
+      return followerSyncStatus_;
+    }
+
+    // optional .blackhole.ReplicaException replicaException = 40;
+    public static final int REPLICAEXCEPTION_FIELD_NUMBER = 40;
+    private com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException replicaException_;
+    /**
+     * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+     */
+    public boolean hasReplicaException() {
+      return ((bitField1_ & 0x00000080) == 0x00000080);
+    }
+    /**
+     * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+     */
+    public com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException getReplicaException() {
+      return replicaException_;
+    }
+    /**
+     * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+     */
+    public com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaExceptionOrBuilder getReplicaExceptionOrBuilder() {
+      return replicaException_;
+    }
+
+    // optional .blackhole.LeoReport leoReport = 41;
+    public static final int LEOREPORT_FIELD_NUMBER = 41;
+    private com.dp.blackhole.protocol.control.LeoReportPB.LeoReport leoReport_;
+    /**
+     * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+     */
+    public boolean hasLeoReport() {
+      return ((bitField1_ & 0x00000100) == 0x00000100);
+    }
+    /**
+     * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+     */
+    public com.dp.blackhole.protocol.control.LeoReportPB.LeoReport getLeoReport() {
+      return leoReport_;
+    }
+    /**
+     * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+     */
+    public com.dp.blackhole.protocol.control.LeoReportPB.LeoReportOrBuilder getLeoReportOrBuilder() {
+      return leoReport_;
+    }
+
+    // optional .blackhole.LeoReply leoReply = 42;
+    public static final int LEOREPLY_FIELD_NUMBER = 42;
+    private com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply leoReply_;
+    /**
+     * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+     */
+    public boolean hasLeoReply() {
+      return ((bitField1_ & 0x00000200) == 0x00000200);
+    }
+    /**
+     * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+     */
+    public com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply getLeoReply() {
+      return leoReply_;
+    }
+    /**
+     * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+     */
+    public com.dp.blackhole.protocol.control.LeoReplyPB.LeoReplyOrBuilder getLeoReplyOrBuilder() {
+      return leoReply_;
+    }
+
+    // optional string callId = 43;
+    public static final int CALLID_FIELD_NUMBER = 43;
+    private java.lang.Object callId_;
+    /**
+     * <code>optional string callId = 43;</code>
+     */
+    public boolean hasCallId() {
+      return ((bitField1_ & 0x00000400) == 0x00000400);
+    }
+    /**
+     * <code>optional string callId = 43;</code>
+     */
+    public java.lang.String getCallId() {
+      java.lang.Object ref = callId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          callId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string callId = 43;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCallIdBytes() {
+      java.lang.Object ref = callId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        callId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;
+    public static final int FOLLOWERSYNCSTATUSACK_FIELD_NUMBER = 44;
+    private com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck followerSyncStatusAck_;
+    /**
+     * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+     */
+    public boolean hasFollowerSyncStatusAck() {
+      return ((bitField1_ & 0x00000800) == 0x00000800);
+    }
+    /**
+     * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+     */
+    public com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck getFollowerSyncStatusAck() {
+      return followerSyncStatusAck_;
+    }
+    /**
+     * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+     */
+    public com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAckOrBuilder getFollowerSyncStatusAckOrBuilder() {
+      return followerSyncStatusAck_;
+    }
+
     private void initFields() {
       type_ = com.dp.blackhole.protocol.control.MessagePB.Message.MessageType.HEARTBEART;
       appReg_ = com.dp.blackhole.protocol.control.AppRegPB.AppReg.getDefaultInstance();
@@ -2398,6 +2867,14 @@ public final class MessagePB {
       heartbeat_ = com.dp.blackhole.protocol.control.HeartbeatPB.Heartbeat.getDefaultInstance();
       logNotFound_ = com.dp.blackhole.protocol.control.LogNotFoundPB.LogNotFound.getDefaultInstance();
       retireConsumerGroup_ = com.dp.blackhole.protocol.control.RetireConsumerGroupPB.RetireConsumerGroup.getDefaultInstance();
+      transitionToLeader_ = com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader.getDefaultInstance();
+      transitionToFollower_ = com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower.getDefaultInstance();
+      followerSyncStatus_ = com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus.getDefaultInstance();
+      replicaException_ = com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException.getDefaultInstance();
+      leoReport_ = com.dp.blackhole.protocol.control.LeoReportPB.LeoReport.getDefaultInstance();
+      leoReply_ = com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply.getDefaultInstance();
+      callId_ = "";
+      followerSyncStatusAck_ = com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -2582,6 +3059,48 @@ public final class MessagePB {
           return false;
         }
       }
+      if (hasTransitionToLeader()) {
+        if (!getTransitionToLeader().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasTransitionToFollower()) {
+        if (!getTransitionToFollower().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasFollowerSyncStatus()) {
+        if (!getFollowerSyncStatus().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasReplicaException()) {
+        if (!getReplicaException().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasLeoReport()) {
+        if (!getLeoReport().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasLeoReply()) {
+        if (!getLeoReply().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasFollowerSyncStatusAck()) {
+        if (!getFollowerSyncStatusAck().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -2696,6 +3215,30 @@ public final class MessagePB {
       }
       if (((bitField1_ & 0x00000008) == 0x00000008)) {
         output.writeMessage(36, retireConsumerGroup_);
+      }
+      if (((bitField1_ & 0x00000010) == 0x00000010)) {
+        output.writeMessage(37, transitionToLeader_);
+      }
+      if (((bitField1_ & 0x00000020) == 0x00000020)) {
+        output.writeMessage(38, transitionToFollower_);
+      }
+      if (((bitField1_ & 0x00000040) == 0x00000040)) {
+        output.writeMessage(39, followerSyncStatus_);
+      }
+      if (((bitField1_ & 0x00000080) == 0x00000080)) {
+        output.writeMessage(40, replicaException_);
+      }
+      if (((bitField1_ & 0x00000100) == 0x00000100)) {
+        output.writeMessage(41, leoReport_);
+      }
+      if (((bitField1_ & 0x00000200) == 0x00000200)) {
+        output.writeMessage(42, leoReply_);
+      }
+      if (((bitField1_ & 0x00000400) == 0x00000400)) {
+        output.writeBytes(43, getCallIdBytes());
+      }
+      if (((bitField1_ & 0x00000800) == 0x00000800)) {
+        output.writeMessage(44, followerSyncStatusAck_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -2850,6 +3393,38 @@ public final class MessagePB {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(36, retireConsumerGroup_);
       }
+      if (((bitField1_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(37, transitionToLeader_);
+      }
+      if (((bitField1_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(38, transitionToFollower_);
+      }
+      if (((bitField1_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(39, followerSyncStatus_);
+      }
+      if (((bitField1_ & 0x00000080) == 0x00000080)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(40, replicaException_);
+      }
+      if (((bitField1_ & 0x00000100) == 0x00000100)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(41, leoReport_);
+      }
+      if (((bitField1_ & 0x00000200) == 0x00000200)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(42, leoReply_);
+      }
+      if (((bitField1_ & 0x00000400) == 0x00000400)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(43, getCallIdBytes());
+      }
+      if (((bitField1_ & 0x00000800) == 0x00000800)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(44, followerSyncStatusAck_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
@@ -2993,6 +3568,13 @@ public final class MessagePB {
           getHeartbeatFieldBuilder();
           getLogNotFoundFieldBuilder();
           getRetireConsumerGroupFieldBuilder();
+          getTransitionToLeaderFieldBuilder();
+          getTransitionToFollowerFieldBuilder();
+          getFollowerSyncStatusFieldBuilder();
+          getReplicaExceptionFieldBuilder();
+          getLeoReportFieldBuilder();
+          getLeoReplyFieldBuilder();
+          getFollowerSyncStatusAckFieldBuilder();
         }
       }
       private static Builder create() {
@@ -3213,6 +3795,50 @@ public final class MessagePB {
           retireConsumerGroupBuilder_.clear();
         }
         bitField1_ = (bitField1_ & ~0x00000008);
+        if (transitionToLeaderBuilder_ == null) {
+          transitionToLeader_ = com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader.getDefaultInstance();
+        } else {
+          transitionToLeaderBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000010);
+        if (transitionToFollowerBuilder_ == null) {
+          transitionToFollower_ = com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower.getDefaultInstance();
+        } else {
+          transitionToFollowerBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000020);
+        if (followerSyncStatusBuilder_ == null) {
+          followerSyncStatus_ = com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus.getDefaultInstance();
+        } else {
+          followerSyncStatusBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000040);
+        if (replicaExceptionBuilder_ == null) {
+          replicaException_ = com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException.getDefaultInstance();
+        } else {
+          replicaExceptionBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000080);
+        if (leoReportBuilder_ == null) {
+          leoReport_ = com.dp.blackhole.protocol.control.LeoReportPB.LeoReport.getDefaultInstance();
+        } else {
+          leoReportBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000100);
+        if (leoReplyBuilder_ == null) {
+          leoReply_ = com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply.getDefaultInstance();
+        } else {
+          leoReplyBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000200);
+        callId_ = "";
+        bitField1_ = (bitField1_ & ~0x00000400);
+        if (followerSyncStatusAckBuilder_ == null) {
+          followerSyncStatusAck_ = com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck.getDefaultInstance();
+        } else {
+          followerSyncStatusAckBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000800);
         return this;
       }
 
@@ -3527,6 +4153,66 @@ public final class MessagePB {
         } else {
           result.retireConsumerGroup_ = retireConsumerGroupBuilder_.build();
         }
+        if (((from_bitField1_ & 0x00000010) == 0x00000010)) {
+          to_bitField1_ |= 0x00000010;
+        }
+        if (transitionToLeaderBuilder_ == null) {
+          result.transitionToLeader_ = transitionToLeader_;
+        } else {
+          result.transitionToLeader_ = transitionToLeaderBuilder_.build();
+        }
+        if (((from_bitField1_ & 0x00000020) == 0x00000020)) {
+          to_bitField1_ |= 0x00000020;
+        }
+        if (transitionToFollowerBuilder_ == null) {
+          result.transitionToFollower_ = transitionToFollower_;
+        } else {
+          result.transitionToFollower_ = transitionToFollowerBuilder_.build();
+        }
+        if (((from_bitField1_ & 0x00000040) == 0x00000040)) {
+          to_bitField1_ |= 0x00000040;
+        }
+        if (followerSyncStatusBuilder_ == null) {
+          result.followerSyncStatus_ = followerSyncStatus_;
+        } else {
+          result.followerSyncStatus_ = followerSyncStatusBuilder_.build();
+        }
+        if (((from_bitField1_ & 0x00000080) == 0x00000080)) {
+          to_bitField1_ |= 0x00000080;
+        }
+        if (replicaExceptionBuilder_ == null) {
+          result.replicaException_ = replicaException_;
+        } else {
+          result.replicaException_ = replicaExceptionBuilder_.build();
+        }
+        if (((from_bitField1_ & 0x00000100) == 0x00000100)) {
+          to_bitField1_ |= 0x00000100;
+        }
+        if (leoReportBuilder_ == null) {
+          result.leoReport_ = leoReport_;
+        } else {
+          result.leoReport_ = leoReportBuilder_.build();
+        }
+        if (((from_bitField1_ & 0x00000200) == 0x00000200)) {
+          to_bitField1_ |= 0x00000200;
+        }
+        if (leoReplyBuilder_ == null) {
+          result.leoReply_ = leoReply_;
+        } else {
+          result.leoReply_ = leoReplyBuilder_.build();
+        }
+        if (((from_bitField1_ & 0x00000400) == 0x00000400)) {
+          to_bitField1_ |= 0x00000400;
+        }
+        result.callId_ = callId_;
+        if (((from_bitField1_ & 0x00000800) == 0x00000800)) {
+          to_bitField1_ |= 0x00000800;
+        }
+        if (followerSyncStatusAckBuilder_ == null) {
+          result.followerSyncStatusAck_ = followerSyncStatusAck_;
+        } else {
+          result.followerSyncStatusAck_ = followerSyncStatusAckBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         result.bitField1_ = to_bitField1_;
         onBuilt();
@@ -3651,6 +4337,32 @@ public final class MessagePB {
         }
         if (other.hasRetireConsumerGroup()) {
           mergeRetireConsumerGroup(other.getRetireConsumerGroup());
+        }
+        if (other.hasTransitionToLeader()) {
+          mergeTransitionToLeader(other.getTransitionToLeader());
+        }
+        if (other.hasTransitionToFollower()) {
+          mergeTransitionToFollower(other.getTransitionToFollower());
+        }
+        if (other.hasFollowerSyncStatus()) {
+          mergeFollowerSyncStatus(other.getFollowerSyncStatus());
+        }
+        if (other.hasReplicaException()) {
+          mergeReplicaException(other.getReplicaException());
+        }
+        if (other.hasLeoReport()) {
+          mergeLeoReport(other.getLeoReport());
+        }
+        if (other.hasLeoReply()) {
+          mergeLeoReply(other.getLeoReply());
+        }
+        if (other.hasCallId()) {
+          bitField1_ |= 0x00000400;
+          callId_ = other.callId_;
+          onChanged();
+        }
+        if (other.hasFollowerSyncStatusAck()) {
+          mergeFollowerSyncStatusAck(other.getFollowerSyncStatusAck());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -3831,6 +4543,48 @@ public final class MessagePB {
         }
         if (hasRetireConsumerGroup()) {
           if (!getRetireConsumerGroup().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasTransitionToLeader()) {
+          if (!getTransitionToLeader().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasTransitionToFollower()) {
+          if (!getTransitionToFollower().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasFollowerSyncStatus()) {
+          if (!getFollowerSyncStatus().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasReplicaException()) {
+          if (!getReplicaException().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasLeoReport()) {
+          if (!getLeoReport().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasLeoReply()) {
+          if (!getLeoReply().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasFollowerSyncStatusAck()) {
+          if (!getFollowerSyncStatusAck().isInitialized()) {
             
             return false;
           }
@@ -7989,6 +8743,899 @@ public final class MessagePB {
         return retireConsumerGroupBuilder_;
       }
 
+      // optional .blackhole.TransitionToLeader transitionToLeader = 37;
+      private com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader transitionToLeader_ = com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader, com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader.Builder, com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeaderOrBuilder> transitionToLeaderBuilder_;
+      /**
+       * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+       */
+      public boolean hasTransitionToLeader() {
+        return ((bitField1_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+       */
+      public com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader getTransitionToLeader() {
+        if (transitionToLeaderBuilder_ == null) {
+          return transitionToLeader_;
+        } else {
+          return transitionToLeaderBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+       */
+      public Builder setTransitionToLeader(com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader value) {
+        if (transitionToLeaderBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          transitionToLeader_ = value;
+          onChanged();
+        } else {
+          transitionToLeaderBuilder_.setMessage(value);
+        }
+        bitField1_ |= 0x00000010;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+       */
+      public Builder setTransitionToLeader(
+          com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader.Builder builderForValue) {
+        if (transitionToLeaderBuilder_ == null) {
+          transitionToLeader_ = builderForValue.build();
+          onChanged();
+        } else {
+          transitionToLeaderBuilder_.setMessage(builderForValue.build());
+        }
+        bitField1_ |= 0x00000010;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+       */
+      public Builder mergeTransitionToLeader(com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader value) {
+        if (transitionToLeaderBuilder_ == null) {
+          if (((bitField1_ & 0x00000010) == 0x00000010) &&
+              transitionToLeader_ != com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader.getDefaultInstance()) {
+            transitionToLeader_ =
+              com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader.newBuilder(transitionToLeader_).mergeFrom(value).buildPartial();
+          } else {
+            transitionToLeader_ = value;
+          }
+          onChanged();
+        } else {
+          transitionToLeaderBuilder_.mergeFrom(value);
+        }
+        bitField1_ |= 0x00000010;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+       */
+      public Builder clearTransitionToLeader() {
+        if (transitionToLeaderBuilder_ == null) {
+          transitionToLeader_ = com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader.getDefaultInstance();
+          onChanged();
+        } else {
+          transitionToLeaderBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000010);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+       */
+      public com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader.Builder getTransitionToLeaderBuilder() {
+        bitField1_ |= 0x00000010;
+        onChanged();
+        return getTransitionToLeaderFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+       */
+      public com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeaderOrBuilder getTransitionToLeaderOrBuilder() {
+        if (transitionToLeaderBuilder_ != null) {
+          return transitionToLeaderBuilder_.getMessageOrBuilder();
+        } else {
+          return transitionToLeader_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.TransitionToLeader transitionToLeader = 37;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader, com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader.Builder, com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeaderOrBuilder> 
+          getTransitionToLeaderFieldBuilder() {
+        if (transitionToLeaderBuilder_ == null) {
+          transitionToLeaderBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader, com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader.Builder, com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeaderOrBuilder>(
+                  transitionToLeader_,
+                  getParentForChildren(),
+                  isClean());
+          transitionToLeader_ = null;
+        }
+        return transitionToLeaderBuilder_;
+      }
+
+      // optional .blackhole.TransitionToFollower transitionToFollower = 38;
+      private com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower transitionToFollower_ = com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower, com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower.Builder, com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollowerOrBuilder> transitionToFollowerBuilder_;
+      /**
+       * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+       */
+      public boolean hasTransitionToFollower() {
+        return ((bitField1_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+       */
+      public com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower getTransitionToFollower() {
+        if (transitionToFollowerBuilder_ == null) {
+          return transitionToFollower_;
+        } else {
+          return transitionToFollowerBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+       */
+      public Builder setTransitionToFollower(com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower value) {
+        if (transitionToFollowerBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          transitionToFollower_ = value;
+          onChanged();
+        } else {
+          transitionToFollowerBuilder_.setMessage(value);
+        }
+        bitField1_ |= 0x00000020;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+       */
+      public Builder setTransitionToFollower(
+          com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower.Builder builderForValue) {
+        if (transitionToFollowerBuilder_ == null) {
+          transitionToFollower_ = builderForValue.build();
+          onChanged();
+        } else {
+          transitionToFollowerBuilder_.setMessage(builderForValue.build());
+        }
+        bitField1_ |= 0x00000020;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+       */
+      public Builder mergeTransitionToFollower(com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower value) {
+        if (transitionToFollowerBuilder_ == null) {
+          if (((bitField1_ & 0x00000020) == 0x00000020) &&
+              transitionToFollower_ != com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower.getDefaultInstance()) {
+            transitionToFollower_ =
+              com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower.newBuilder(transitionToFollower_).mergeFrom(value).buildPartial();
+          } else {
+            transitionToFollower_ = value;
+          }
+          onChanged();
+        } else {
+          transitionToFollowerBuilder_.mergeFrom(value);
+        }
+        bitField1_ |= 0x00000020;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+       */
+      public Builder clearTransitionToFollower() {
+        if (transitionToFollowerBuilder_ == null) {
+          transitionToFollower_ = com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower.getDefaultInstance();
+          onChanged();
+        } else {
+          transitionToFollowerBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000020);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+       */
+      public com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower.Builder getTransitionToFollowerBuilder() {
+        bitField1_ |= 0x00000020;
+        onChanged();
+        return getTransitionToFollowerFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+       */
+      public com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollowerOrBuilder getTransitionToFollowerOrBuilder() {
+        if (transitionToFollowerBuilder_ != null) {
+          return transitionToFollowerBuilder_.getMessageOrBuilder();
+        } else {
+          return transitionToFollower_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.TransitionToFollower transitionToFollower = 38;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower, com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower.Builder, com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollowerOrBuilder> 
+          getTransitionToFollowerFieldBuilder() {
+        if (transitionToFollowerBuilder_ == null) {
+          transitionToFollowerBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower, com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower.Builder, com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollowerOrBuilder>(
+                  transitionToFollower_,
+                  getParentForChildren(),
+                  isClean());
+          transitionToFollower_ = null;
+        }
+        return transitionToFollowerBuilder_;
+      }
+
+      // optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;
+      private com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus followerSyncStatus_ = com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus, com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus.Builder, com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatusOrBuilder> followerSyncStatusBuilder_;
+      /**
+       * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+       */
+      public boolean hasFollowerSyncStatus() {
+        return ((bitField1_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+       */
+      public com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus getFollowerSyncStatus() {
+        if (followerSyncStatusBuilder_ == null) {
+          return followerSyncStatus_;
+        } else {
+          return followerSyncStatusBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+       */
+      public Builder setFollowerSyncStatus(com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus value) {
+        if (followerSyncStatusBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          followerSyncStatus_ = value;
+          onChanged();
+        } else {
+          followerSyncStatusBuilder_.setMessage(value);
+        }
+        bitField1_ |= 0x00000040;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+       */
+      public Builder setFollowerSyncStatus(
+          com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus.Builder builderForValue) {
+        if (followerSyncStatusBuilder_ == null) {
+          followerSyncStatus_ = builderForValue.build();
+          onChanged();
+        } else {
+          followerSyncStatusBuilder_.setMessage(builderForValue.build());
+        }
+        bitField1_ |= 0x00000040;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+       */
+      public Builder mergeFollowerSyncStatus(com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus value) {
+        if (followerSyncStatusBuilder_ == null) {
+          if (((bitField1_ & 0x00000040) == 0x00000040) &&
+              followerSyncStatus_ != com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus.getDefaultInstance()) {
+            followerSyncStatus_ =
+              com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus.newBuilder(followerSyncStatus_).mergeFrom(value).buildPartial();
+          } else {
+            followerSyncStatus_ = value;
+          }
+          onChanged();
+        } else {
+          followerSyncStatusBuilder_.mergeFrom(value);
+        }
+        bitField1_ |= 0x00000040;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+       */
+      public Builder clearFollowerSyncStatus() {
+        if (followerSyncStatusBuilder_ == null) {
+          followerSyncStatus_ = com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus.getDefaultInstance();
+          onChanged();
+        } else {
+          followerSyncStatusBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000040);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+       */
+      public com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus.Builder getFollowerSyncStatusBuilder() {
+        bitField1_ |= 0x00000040;
+        onChanged();
+        return getFollowerSyncStatusFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+       */
+      public com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatusOrBuilder getFollowerSyncStatusOrBuilder() {
+        if (followerSyncStatusBuilder_ != null) {
+          return followerSyncStatusBuilder_.getMessageOrBuilder();
+        } else {
+          return followerSyncStatus_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatus followerSyncStatus = 39;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus, com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus.Builder, com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatusOrBuilder> 
+          getFollowerSyncStatusFieldBuilder() {
+        if (followerSyncStatusBuilder_ == null) {
+          followerSyncStatusBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus, com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus.Builder, com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatusOrBuilder>(
+                  followerSyncStatus_,
+                  getParentForChildren(),
+                  isClean());
+          followerSyncStatus_ = null;
+        }
+        return followerSyncStatusBuilder_;
+      }
+
+      // optional .blackhole.ReplicaException replicaException = 40;
+      private com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException replicaException_ = com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException, com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException.Builder, com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaExceptionOrBuilder> replicaExceptionBuilder_;
+      /**
+       * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+       */
+      public boolean hasReplicaException() {
+        return ((bitField1_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+       */
+      public com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException getReplicaException() {
+        if (replicaExceptionBuilder_ == null) {
+          return replicaException_;
+        } else {
+          return replicaExceptionBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+       */
+      public Builder setReplicaException(com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException value) {
+        if (replicaExceptionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          replicaException_ = value;
+          onChanged();
+        } else {
+          replicaExceptionBuilder_.setMessage(value);
+        }
+        bitField1_ |= 0x00000080;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+       */
+      public Builder setReplicaException(
+          com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException.Builder builderForValue) {
+        if (replicaExceptionBuilder_ == null) {
+          replicaException_ = builderForValue.build();
+          onChanged();
+        } else {
+          replicaExceptionBuilder_.setMessage(builderForValue.build());
+        }
+        bitField1_ |= 0x00000080;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+       */
+      public Builder mergeReplicaException(com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException value) {
+        if (replicaExceptionBuilder_ == null) {
+          if (((bitField1_ & 0x00000080) == 0x00000080) &&
+              replicaException_ != com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException.getDefaultInstance()) {
+            replicaException_ =
+              com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException.newBuilder(replicaException_).mergeFrom(value).buildPartial();
+          } else {
+            replicaException_ = value;
+          }
+          onChanged();
+        } else {
+          replicaExceptionBuilder_.mergeFrom(value);
+        }
+        bitField1_ |= 0x00000080;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+       */
+      public Builder clearReplicaException() {
+        if (replicaExceptionBuilder_ == null) {
+          replicaException_ = com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException.getDefaultInstance();
+          onChanged();
+        } else {
+          replicaExceptionBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000080);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+       */
+      public com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException.Builder getReplicaExceptionBuilder() {
+        bitField1_ |= 0x00000080;
+        onChanged();
+        return getReplicaExceptionFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+       */
+      public com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaExceptionOrBuilder getReplicaExceptionOrBuilder() {
+        if (replicaExceptionBuilder_ != null) {
+          return replicaExceptionBuilder_.getMessageOrBuilder();
+        } else {
+          return replicaException_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.ReplicaException replicaException = 40;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException, com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException.Builder, com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaExceptionOrBuilder> 
+          getReplicaExceptionFieldBuilder() {
+        if (replicaExceptionBuilder_ == null) {
+          replicaExceptionBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException, com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException.Builder, com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaExceptionOrBuilder>(
+                  replicaException_,
+                  getParentForChildren(),
+                  isClean());
+          replicaException_ = null;
+        }
+        return replicaExceptionBuilder_;
+      }
+
+      // optional .blackhole.LeoReport leoReport = 41;
+      private com.dp.blackhole.protocol.control.LeoReportPB.LeoReport leoReport_ = com.dp.blackhole.protocol.control.LeoReportPB.LeoReport.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.LeoReportPB.LeoReport, com.dp.blackhole.protocol.control.LeoReportPB.LeoReport.Builder, com.dp.blackhole.protocol.control.LeoReportPB.LeoReportOrBuilder> leoReportBuilder_;
+      /**
+       * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+       */
+      public boolean hasLeoReport() {
+        return ((bitField1_ & 0x00000100) == 0x00000100);
+      }
+      /**
+       * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+       */
+      public com.dp.blackhole.protocol.control.LeoReportPB.LeoReport getLeoReport() {
+        if (leoReportBuilder_ == null) {
+          return leoReport_;
+        } else {
+          return leoReportBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+       */
+      public Builder setLeoReport(com.dp.blackhole.protocol.control.LeoReportPB.LeoReport value) {
+        if (leoReportBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          leoReport_ = value;
+          onChanged();
+        } else {
+          leoReportBuilder_.setMessage(value);
+        }
+        bitField1_ |= 0x00000100;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+       */
+      public Builder setLeoReport(
+          com.dp.blackhole.protocol.control.LeoReportPB.LeoReport.Builder builderForValue) {
+        if (leoReportBuilder_ == null) {
+          leoReport_ = builderForValue.build();
+          onChanged();
+        } else {
+          leoReportBuilder_.setMessage(builderForValue.build());
+        }
+        bitField1_ |= 0x00000100;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+       */
+      public Builder mergeLeoReport(com.dp.blackhole.protocol.control.LeoReportPB.LeoReport value) {
+        if (leoReportBuilder_ == null) {
+          if (((bitField1_ & 0x00000100) == 0x00000100) &&
+              leoReport_ != com.dp.blackhole.protocol.control.LeoReportPB.LeoReport.getDefaultInstance()) {
+            leoReport_ =
+              com.dp.blackhole.protocol.control.LeoReportPB.LeoReport.newBuilder(leoReport_).mergeFrom(value).buildPartial();
+          } else {
+            leoReport_ = value;
+          }
+          onChanged();
+        } else {
+          leoReportBuilder_.mergeFrom(value);
+        }
+        bitField1_ |= 0x00000100;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+       */
+      public Builder clearLeoReport() {
+        if (leoReportBuilder_ == null) {
+          leoReport_ = com.dp.blackhole.protocol.control.LeoReportPB.LeoReport.getDefaultInstance();
+          onChanged();
+        } else {
+          leoReportBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000100);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+       */
+      public com.dp.blackhole.protocol.control.LeoReportPB.LeoReport.Builder getLeoReportBuilder() {
+        bitField1_ |= 0x00000100;
+        onChanged();
+        return getLeoReportFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+       */
+      public com.dp.blackhole.protocol.control.LeoReportPB.LeoReportOrBuilder getLeoReportOrBuilder() {
+        if (leoReportBuilder_ != null) {
+          return leoReportBuilder_.getMessageOrBuilder();
+        } else {
+          return leoReport_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.LeoReport leoReport = 41;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.LeoReportPB.LeoReport, com.dp.blackhole.protocol.control.LeoReportPB.LeoReport.Builder, com.dp.blackhole.protocol.control.LeoReportPB.LeoReportOrBuilder> 
+          getLeoReportFieldBuilder() {
+        if (leoReportBuilder_ == null) {
+          leoReportBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.LeoReportPB.LeoReport, com.dp.blackhole.protocol.control.LeoReportPB.LeoReport.Builder, com.dp.blackhole.protocol.control.LeoReportPB.LeoReportOrBuilder>(
+                  leoReport_,
+                  getParentForChildren(),
+                  isClean());
+          leoReport_ = null;
+        }
+        return leoReportBuilder_;
+      }
+
+      // optional .blackhole.LeoReply leoReply = 42;
+      private com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply leoReply_ = com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply, com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply.Builder, com.dp.blackhole.protocol.control.LeoReplyPB.LeoReplyOrBuilder> leoReplyBuilder_;
+      /**
+       * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+       */
+      public boolean hasLeoReply() {
+        return ((bitField1_ & 0x00000200) == 0x00000200);
+      }
+      /**
+       * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+       */
+      public com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply getLeoReply() {
+        if (leoReplyBuilder_ == null) {
+          return leoReply_;
+        } else {
+          return leoReplyBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+       */
+      public Builder setLeoReply(com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply value) {
+        if (leoReplyBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          leoReply_ = value;
+          onChanged();
+        } else {
+          leoReplyBuilder_.setMessage(value);
+        }
+        bitField1_ |= 0x00000200;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+       */
+      public Builder setLeoReply(
+          com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply.Builder builderForValue) {
+        if (leoReplyBuilder_ == null) {
+          leoReply_ = builderForValue.build();
+          onChanged();
+        } else {
+          leoReplyBuilder_.setMessage(builderForValue.build());
+        }
+        bitField1_ |= 0x00000200;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+       */
+      public Builder mergeLeoReply(com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply value) {
+        if (leoReplyBuilder_ == null) {
+          if (((bitField1_ & 0x00000200) == 0x00000200) &&
+              leoReply_ != com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply.getDefaultInstance()) {
+            leoReply_ =
+              com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply.newBuilder(leoReply_).mergeFrom(value).buildPartial();
+          } else {
+            leoReply_ = value;
+          }
+          onChanged();
+        } else {
+          leoReplyBuilder_.mergeFrom(value);
+        }
+        bitField1_ |= 0x00000200;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+       */
+      public Builder clearLeoReply() {
+        if (leoReplyBuilder_ == null) {
+          leoReply_ = com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply.getDefaultInstance();
+          onChanged();
+        } else {
+          leoReplyBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000200);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+       */
+      public com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply.Builder getLeoReplyBuilder() {
+        bitField1_ |= 0x00000200;
+        onChanged();
+        return getLeoReplyFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+       */
+      public com.dp.blackhole.protocol.control.LeoReplyPB.LeoReplyOrBuilder getLeoReplyOrBuilder() {
+        if (leoReplyBuilder_ != null) {
+          return leoReplyBuilder_.getMessageOrBuilder();
+        } else {
+          return leoReply_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.LeoReply leoReply = 42;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply, com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply.Builder, com.dp.blackhole.protocol.control.LeoReplyPB.LeoReplyOrBuilder> 
+          getLeoReplyFieldBuilder() {
+        if (leoReplyBuilder_ == null) {
+          leoReplyBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply, com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply.Builder, com.dp.blackhole.protocol.control.LeoReplyPB.LeoReplyOrBuilder>(
+                  leoReply_,
+                  getParentForChildren(),
+                  isClean());
+          leoReply_ = null;
+        }
+        return leoReplyBuilder_;
+      }
+
+      // optional string callId = 43;
+      private java.lang.Object callId_ = "";
+      /**
+       * <code>optional string callId = 43;</code>
+       */
+      public boolean hasCallId() {
+        return ((bitField1_ & 0x00000400) == 0x00000400);
+      }
+      /**
+       * <code>optional string callId = 43;</code>
+       */
+      public java.lang.String getCallId() {
+        java.lang.Object ref = callId_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          callId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string callId = 43;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCallIdBytes() {
+        java.lang.Object ref = callId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          callId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string callId = 43;</code>
+       */
+      public Builder setCallId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField1_ |= 0x00000400;
+        callId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string callId = 43;</code>
+       */
+      public Builder clearCallId() {
+        bitField1_ = (bitField1_ & ~0x00000400);
+        callId_ = getDefaultInstance().getCallId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string callId = 43;</code>
+       */
+      public Builder setCallIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField1_ |= 0x00000400;
+        callId_ = value;
+        onChanged();
+        return this;
+      }
+
+      // optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;
+      private com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck followerSyncStatusAck_ = com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck, com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck.Builder, com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAckOrBuilder> followerSyncStatusAckBuilder_;
+      /**
+       * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+       */
+      public boolean hasFollowerSyncStatusAck() {
+        return ((bitField1_ & 0x00000800) == 0x00000800);
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+       */
+      public com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck getFollowerSyncStatusAck() {
+        if (followerSyncStatusAckBuilder_ == null) {
+          return followerSyncStatusAck_;
+        } else {
+          return followerSyncStatusAckBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+       */
+      public Builder setFollowerSyncStatusAck(com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck value) {
+        if (followerSyncStatusAckBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          followerSyncStatusAck_ = value;
+          onChanged();
+        } else {
+          followerSyncStatusAckBuilder_.setMessage(value);
+        }
+        bitField1_ |= 0x00000800;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+       */
+      public Builder setFollowerSyncStatusAck(
+          com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck.Builder builderForValue) {
+        if (followerSyncStatusAckBuilder_ == null) {
+          followerSyncStatusAck_ = builderForValue.build();
+          onChanged();
+        } else {
+          followerSyncStatusAckBuilder_.setMessage(builderForValue.build());
+        }
+        bitField1_ |= 0x00000800;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+       */
+      public Builder mergeFollowerSyncStatusAck(com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck value) {
+        if (followerSyncStatusAckBuilder_ == null) {
+          if (((bitField1_ & 0x00000800) == 0x00000800) &&
+              followerSyncStatusAck_ != com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck.getDefaultInstance()) {
+            followerSyncStatusAck_ =
+              com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck.newBuilder(followerSyncStatusAck_).mergeFrom(value).buildPartial();
+          } else {
+            followerSyncStatusAck_ = value;
+          }
+          onChanged();
+        } else {
+          followerSyncStatusAckBuilder_.mergeFrom(value);
+        }
+        bitField1_ |= 0x00000800;
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+       */
+      public Builder clearFollowerSyncStatusAck() {
+        if (followerSyncStatusAckBuilder_ == null) {
+          followerSyncStatusAck_ = com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck.getDefaultInstance();
+          onChanged();
+        } else {
+          followerSyncStatusAckBuilder_.clear();
+        }
+        bitField1_ = (bitField1_ & ~0x00000800);
+        return this;
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+       */
+      public com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck.Builder getFollowerSyncStatusAckBuilder() {
+        bitField1_ |= 0x00000800;
+        onChanged();
+        return getFollowerSyncStatusAckFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+       */
+      public com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAckOrBuilder getFollowerSyncStatusAckOrBuilder() {
+        if (followerSyncStatusAckBuilder_ != null) {
+          return followerSyncStatusAckBuilder_.getMessageOrBuilder();
+        } else {
+          return followerSyncStatusAck_;
+        }
+      }
+      /**
+       * <code>optional .blackhole.FollowerSyncStatusAck followerSyncStatusAck = 44;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck, com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck.Builder, com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAckOrBuilder> 
+          getFollowerSyncStatusAckFieldBuilder() {
+        if (followerSyncStatusAckBuilder_ == null) {
+          followerSyncStatusAckBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck, com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck.Builder, com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAckOrBuilder>(
+                  followerSyncStatusAck_,
+                  getParentForChildren(),
+                  isClean());
+          followerSyncStatusAck_ = null;
+        }
+        return followerSyncStatusAckBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:blackhole.Message)
     }
 
@@ -8030,72 +9677,90 @@ public final class MessagePB {
       "NoavailableConf.proto\032\025AssignPartition.p" +
       "roto\032\034PartitionRequireBroker.proto\032\022Cons" +
       "umerExit.proto\032\017Heartbeat.proto\032\021LogNotF" +
-      "ound.proto\032\031RetireConsumerGroup.proto\"\360\023" +
-      "\n\007Message\022,\n\004type\030\001 \002(\0162\036.blackhole.Mess" +
-      "age.MessageType\022!\n\006appReg\030\002 \001(\0132\021.blackh" +
-      "ole.AppReg\022-\n\014assignBroker\030\003 \001(\0132\027.black",
-      "hole.AssignBroker\022+\n\013readyUpload\030\004 \001(\0132\026" +
-      ".blackhole.ReadyUpload\022-\n\014recoveryRoll\030\005" +
-      " \001(\0132\027.blackhole.RecoveryRoll\022+\n\013readySt" +
-      "ream\030\006 \001(\0132\026.blackhole.ReadyStream\022!\n\006ro" +
-      "llID\030\007 \001(\0132\021.blackhole.RollID\022#\n\007failure" +
-      "\030\010 \001(\0132\022.blackhole.Failure\0223\n\017noAvailabl" +
-      "eNode\030\t \001(\0132\032.blackhole.NoAvailableNode\022" +
-      "!\n\006retire\030\n \001(\0132\021.blackhole.Retire\022#\n\007co" +
-      "nfRes\030\013 \001(\0132\022.blackhole.ConfRes\022\'\n\tdumpR" +
-      "eply\030\014 \001(\0132\024.blackhole.DumpReply\022)\n\nremo",
-      "veConf\030\r \001(\0132\025.blackhole.RemoveConf\022\'\n\tb" +
-      "rokerReg\030\016 \001(\0132\024.blackhole.BrokerReg\022#\n\007" +
-      "dumpApp\030\017 \001(\0132\022.blackhole.DumpApp\022+\n\013con" +
-      "sumerReg\030\020 \001(\0132\026.blackhole.ConsumerReg\0221" +
-      "\n\016assignConsumer\030\021 \001(\0132\031.blackhole.Assig" +
-      "nConsumer\022-\n\014offsetCommit\030\022 \001(\0132\027.blackh" +
-      "ole.OffsetCommit\022+\n\013topicReport\030\023 \001(\0132\026." +
-      "blackhole.TopicReport\022#\n\007restart\030\024 \001(\0132\022" +
-      ".blackhole.Restart\022\035\n\004quit\030\025 \001(\0132\017.black" +
-      "hole.Quit\022\037\n\005clean\030\026 \001(\0132\020.blackhole.Cle",
-      "an\022\'\n\trollClean\030\027 \001(\0132\024.blackhole.RollCl" +
-      "ean\0227\n\021dumpConsumerGroup\030\030 \001(\0132\034.blackho" +
-      "le.DumpConsumerGroup\022)\n\nsnapshotOp\030\031 \001(\013" +
-      "2\025.blackhole.SnapshotOp\022+\n\013pauseStream\030\032" +
-      " \001(\0132\026.blackhole.PauseStream\022#\n\007confReq\030" +
-      "\033 \001(\0132\022.blackhole.ConfReq\0223\n\017noavailable" +
-      "Conf\030\034 \001(\0132\032.blackhole.NoavailableConf\022+" +
-      "\n\013producerReg\030\035 \001(\0132\026.blackhole.Producer" +
-      "Reg\0225\n\020producerIdAssign\030\036 \001(\0132\033.blackhol" +
-      "e.ProducerIdAssign\0223\n\017assignPartition\030\037 ",
-      "\001(\0132\032.blackhole.AssignPartition\022A\n\026parti" +
-      "tionRequireBroker\030  \001(\0132!.blackhole.Part" +
-      "itionRequireBroker\022-\n\014consumerExit\030! \001(\013" +
-      "2\027.blackhole.ConsumerExit\022\'\n\theartbeat\030\"" +
-      " \001(\0132\024.blackhole.Heartbeat\022+\n\013logNotFoun" +
-      "d\030# \001(\0132\026.blackhole.LogNotFound\022;\n\023retir" +
-      "eConsumerGroup\030$ \001(\0132\036.blackhole.RetireC" +
-      "onsumerGroup\"\241\007\n\013MessageType\022\016\n\nHEARTBEA" +
-      "RT\020\001\022\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021\n\rASS" +
-      "IGN_BROKER\020\004\022\020\n\014READY_STREAM\020\005\022\020\n\014READY_",
-      "UPLOAD\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_SUCC" +
-      "ESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_ROLL\020" +
-      "\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOVERY_FAIL" +
-      "\020\014\022\013\n\007FAILURE\020\r\022\025\n\021NO_AVAILABLE_NODE\020\016\022\021" +
-      "\n\rUNRECOVERABLE\020\017\022\030\n\024MANUAL_RECOVERY_ROL" +
-      "L\020\020\022\r\n\tDUMP_STAT\020\021\022\021\n\rRETIRE_STREAM\020\022\022\014\n" +
-      "\010CONF_REQ\020\023\022\014\n\010CONF_RES\020\024\022\025\n\021NO_AVAILABL" +
-      "E_CONF\020\025\022\r\n\tDUMP_CONF\020\026\022\016\n\nDUMP_REPLY\020\027\022" +
-      "\r\n\tLIST_APPS\020\030\022\017\n\013REMOVE_CONF\020\031\022\014\n\010DUMP_" +
-      "APP\020\032\022\020\n\014CONSUMER_REG\020\033\022\023\n\017ASSIGN_CONSUM",
-      "ER\020\034\022\021\n\rOFFSET_COMMIT\020\035\022\020\n\014TOPIC_REPORT\020" +
-      "\036\022\025\n\021CONSUMER_REG_FAIL\020\037\022\026\n\022MAKR_UNRECOV" +
-      "ERABLE\020 \022\r\n\tLIST_IDLE\020!\022\013\n\007RESTART\020\"\022\010\n\004" +
-      "QUIT\020#\022\t\n\005CLEAN\020$\022\016\n\nROLL_CLEAN\020%\022\027\n\023DUM" +
-      "P_CONSUMER_GROUP\020&\022\027\n\023LIST_CONSUMER_GROU" +
-      "P\020\'\022\017\n\013SNAPSHOT_OP\020(\022\020\n\014PAUSE_STREAM\020)\022\020" +
-      "\n\014PRODUCER_REG\020*\022\026\n\022PRODUCER_ID_ASSIGN\020+" +
-      "\022\024\n\020ASSIGN_PARTITION\020,\022\034\n\030PARTITION_REQU" +
-      "IRE_BROKER\020-\022\031\n\025UNRESOLVED_CONNECTION\020.\022" +
-      "\021\n\rCONSUMER_EXIT\020/\022\021\n\rLOG_NOT_FOUND\0201\022\031\n",
-      "\025RETIRE_CONSUMER_GROUP\0202B.\n!com.dp.black" +
-      "hole.protocol.controlB\tMessagePB"
+      "ound.proto\032\031RetireConsumerGroup.proto\032\030T" +
+      "ransitionToLeader.proto\032\032TransitionToFol" +
+      "lower.proto\032\030FollowerSyncStatus.proto\032\026R" +
+      "eplicaException.proto\032\017LeoReport.proto\032\016",
+      "LeoReply.proto\032\033FollowerSyncStatusAck.pr" +
+      "oto\"\241\030\n\007Message\022,\n\004type\030\001 \002(\0162\036.blackhol" +
+      "e.Message.MessageType\022!\n\006appReg\030\002 \001(\0132\021." +
+      "blackhole.AppReg\022-\n\014assignBroker\030\003 \001(\0132\027" +
+      ".blackhole.AssignBroker\022+\n\013readyUpload\030\004" +
+      " \001(\0132\026.blackhole.ReadyUpload\022-\n\014recovery" +
+      "Roll\030\005 \001(\0132\027.blackhole.RecoveryRoll\022+\n\013r" +
+      "eadyStream\030\006 \001(\0132\026.blackhole.ReadyStream" +
+      "\022!\n\006rollID\030\007 \001(\0132\021.blackhole.RollID\022#\n\007f" +
+      "ailure\030\010 \001(\0132\022.blackhole.Failure\0223\n\017noAv",
+      "ailableNode\030\t \001(\0132\032.blackhole.NoAvailabl" +
+      "eNode\022!\n\006retire\030\n \001(\0132\021.blackhole.Retire" +
+      "\022#\n\007confRes\030\013 \001(\0132\022.blackhole.ConfRes\022\'\n" +
+      "\tdumpReply\030\014 \001(\0132\024.blackhole.DumpReply\022)" +
+      "\n\nremoveConf\030\r \001(\0132\025.blackhole.RemoveCon" +
+      "f\022\'\n\tbrokerReg\030\016 \001(\0132\024.blackhole.BrokerR" +
+      "eg\022#\n\007dumpApp\030\017 \001(\0132\022.blackhole.DumpApp\022" +
+      "+\n\013consumerReg\030\020 \001(\0132\026.blackhole.Consume" +
+      "rReg\0221\n\016assignConsumer\030\021 \001(\0132\031.blackhole" +
+      ".AssignConsumer\022-\n\014offsetCommit\030\022 \001(\0132\027.",
+      "blackhole.OffsetCommit\022+\n\013topicReport\030\023 " +
+      "\001(\0132\026.blackhole.TopicReport\022#\n\007restart\030\024" +
+      " \001(\0132\022.blackhole.Restart\022\035\n\004quit\030\025 \001(\0132\017" +
+      ".blackhole.Quit\022\037\n\005clean\030\026 \001(\0132\020.blackho" +
+      "le.Clean\022\'\n\trollClean\030\027 \001(\0132\024.blackhole." +
+      "RollClean\0227\n\021dumpConsumerGroup\030\030 \001(\0132\034.b" +
+      "lackhole.DumpConsumerGroup\022)\n\nsnapshotOp" +
+      "\030\031 \001(\0132\025.blackhole.SnapshotOp\022+\n\013pauseSt" +
+      "ream\030\032 \001(\0132\026.blackhole.PauseStream\022#\n\007co" +
+      "nfReq\030\033 \001(\0132\022.blackhole.ConfReq\0223\n\017noava",
+      "ilableConf\030\034 \001(\0132\032.blackhole.Noavailable" +
+      "Conf\022+\n\013producerReg\030\035 \001(\0132\026.blackhole.Pr" +
+      "oducerReg\0225\n\020producerIdAssign\030\036 \001(\0132\033.bl" +
+      "ackhole.ProducerIdAssign\0223\n\017assignPartit" +
+      "ion\030\037 \001(\0132\032.blackhole.AssignPartition\022A\n" +
+      "\026partitionRequireBroker\030  \001(\0132!.blackhol" +
+      "e.PartitionRequireBroker\022-\n\014consumerExit" +
+      "\030! \001(\0132\027.blackhole.ConsumerExit\022\'\n\theart" +
+      "beat\030\" \001(\0132\024.blackhole.Heartbeat\022+\n\013logN" +
+      "otFound\030# \001(\0132\026.blackhole.LogNotFound\022;\n",
+      "\023retireConsumerGroup\030$ \001(\0132\036.blackhole.R" +
+      "etireConsumerGroup\0229\n\022transitionToLeader" +
+      "\030% \001(\0132\035.blackhole.TransitionToLeader\022=\n" +
+      "\024transitionToFollower\030& \001(\0132\037.blackhole." +
+      "TransitionToFollower\0229\n\022followerSyncStat" +
+      "us\030\' \001(\0132\035.blackhole.FollowerSyncStatus\022" +
+      "5\n\020replicaException\030( \001(\0132\033.blackhole.Re" +
+      "plicaException\022\'\n\tleoReport\030) \001(\0132\024.blac" +
+      "khole.LeoReport\022%\n\010leoReply\030* \001(\0132\023.blac" +
+      "khole.LeoReply\022\016\n\006callId\030+ \001(\t\022?\n\025follow",
+      "erSyncStatusAck\030, \001(\0132 .blackhole.Follow" +
+      "erSyncStatusAck\"\305\010\n\013MessageType\022\016\n\nHEART" +
+      "BEART\020\001\022\013\n\007APP_REG\020\002\022\016\n\nBROKER_REG\020\003\022\021\n\r" +
+      "ASSIGN_BROKER\020\004\022\020\n\014READY_STREAM\020\005\022\020\n\014REA" +
+      "DY_UPLOAD\020\006\022\017\n\013UPLOAD_ROLL\020\007\022\022\n\016UPLOAD_S" +
+      "UCCESS\020\010\022\017\n\013UPLOAD_FAIL\020\t\022\021\n\rRECOVERY_RO" +
+      "LL\020\n\022\024\n\020RECOVERY_SUCCESS\020\013\022\021\n\rRECOVERY_F" +
+      "AIL\020\014\022\013\n\007FAILURE\020\r\022\025\n\021NO_AVAILABLE_NODE\020" +
+      "\016\022\021\n\rUNRECOVERABLE\020\017\022\030\n\024MANUAL_RECOVERY_" +
+      "ROLL\020\020\022\r\n\tDUMP_STAT\020\021\022\021\n\rRETIRE_STREAM\020\022",
+      "\022\014\n\010CONF_REQ\020\023\022\014\n\010CONF_RES\020\024\022\025\n\021NO_AVAIL" +
+      "ABLE_CONF\020\025\022\r\n\tDUMP_CONF\020\026\022\016\n\nDUMP_REPLY" +
+      "\020\027\022\r\n\tLIST_APPS\020\030\022\017\n\013REMOVE_CONF\020\031\022\014\n\010DU" +
+      "MP_APP\020\032\022\020\n\014CONSUMER_REG\020\033\022\023\n\017ASSIGN_CON" +
+      "SUMER\020\034\022\021\n\rOFFSET_COMMIT\020\035\022\020\n\014TOPIC_REPO" +
+      "RT\020\036\022\025\n\021CONSUMER_REG_FAIL\020\037\022\026\n\022MAKR_UNRE" +
+      "COVERABLE\020 \022\r\n\tLIST_IDLE\020!\022\013\n\007RESTART\020\"\022" +
+      "\010\n\004QUIT\020#\022\t\n\005CLEAN\020$\022\016\n\nROLL_CLEAN\020%\022\027\n\023" +
+      "DUMP_CONSUMER_GROUP\020&\022\027\n\023LIST_CONSUMER_G" +
+      "ROUP\020\'\022\017\n\013SNAPSHOT_OP\020(\022\020\n\014PAUSE_STREAM\020",
+      ")\022\020\n\014PRODUCER_REG\020*\022\026\n\022PRODUCER_ID_ASSIG" +
+      "N\020+\022\024\n\020ASSIGN_PARTITION\020,\022\034\n\030PARTITION_R" +
+      "EQUIRE_BROKER\020-\022\031\n\025UNRESOLVED_CONNECTION" +
+      "\020.\022\021\n\rCONSUMER_EXIT\020/\022\021\n\rLOG_NOT_FOUND\0201" +
+      "\022\031\n\025RETIRE_CONSUMER_GROUP\0202\022\030\n\024TRANSITIO" +
+      "N_TO_LEADER\0203\022\032\n\026TRANSITION_TO_FOLLOWER\020" +
+      "4\022\030\n\024FOLLOWER_SYNC_STATUS\0205\022\025\n\021REPLICA_E" +
+      "XCEPTION\0206\022\016\n\nLEO_REPORT\0207\022\r\n\tLEO_REPLY\020" +
+      "8\022\034\n\030FOLLOWER_SYNC_STATUS_ACK\0209B.\n!com.d" +
+      "p.blackhole.protocol.controlB\tMessagePB"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -8107,7 +9772,7 @@ public final class MessagePB {
           internal_static_blackhole_Message_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_blackhole_Message_descriptor,
-              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "ReadyUpload", "RecoveryRoll", "ReadyStream", "RollID", "Failure", "NoAvailableNode", "Retire", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", "Quit", "Clean", "RollClean", "DumpConsumerGroup", "SnapshotOp", "PauseStream", "ConfReq", "NoavailableConf", "ProducerReg", "ProducerIdAssign", "AssignPartition", "PartitionRequireBroker", "ConsumerExit", "Heartbeat", "LogNotFound", "RetireConsumerGroup", });
+              new java.lang.String[] { "Type", "AppReg", "AssignBroker", "ReadyUpload", "RecoveryRoll", "ReadyStream", "RollID", "Failure", "NoAvailableNode", "Retire", "ConfRes", "DumpReply", "RemoveConf", "BrokerReg", "DumpApp", "ConsumerReg", "AssignConsumer", "OffsetCommit", "TopicReport", "Restart", "Quit", "Clean", "RollClean", "DumpConsumerGroup", "SnapshotOp", "PauseStream", "ConfReq", "NoavailableConf", "ProducerReg", "ProducerIdAssign", "AssignPartition", "PartitionRequireBroker", "ConsumerExit", "Heartbeat", "LogNotFound", "RetireConsumerGroup", "TransitionToLeader", "TransitionToFollower", "FollowerSyncStatus", "ReplicaException", "LeoReport", "LeoReply", "CallId", "FollowerSyncStatusAck", });
           return null;
         }
       };
@@ -8148,6 +9813,13 @@ public final class MessagePB {
           com.dp.blackhole.protocol.control.HeartbeatPB.getDescriptor(),
           com.dp.blackhole.protocol.control.LogNotFoundPB.getDescriptor(),
           com.dp.blackhole.protocol.control.RetireConsumerGroupPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.TransitionToLeaderPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.TransitionToFollowerPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.FollowerSyncStatusPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.ReplicaExceptionPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.LeoReportPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.LeoReplyPB.getDescriptor(),
+          com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.getDescriptor(),
         }, assigner);
   }
 

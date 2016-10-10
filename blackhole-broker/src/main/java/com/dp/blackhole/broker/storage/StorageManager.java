@@ -35,7 +35,7 @@ public class StorageManager {
         
         // currently, clean storage when broker start for simplicity;
         // so load() has not effect
-        Util.rmr(new File(basedir));
+//        Util.rmr(new File(basedir));
         load();
         
         Reporter r = new Reporter();
@@ -64,6 +64,14 @@ public class StorageManager {
         }
     }
     
+    public long getLogEndOffset(String topic, String partition) {
+        Partition p = this.getPartition(topic, partition);
+        if (p == null) {
+            return -1L;
+        }
+        return p.getEndOffset();
+    }
+
     private void load() throws IOException {
         File baseDir = new File(basedir);
         Util.checkDir(baseDir);
@@ -98,6 +106,16 @@ public class StorageManager {
         }
     }
     
+    public int getEntropy(String topic, String partitionId) {
+        Partition p = getPartition(topic, partitionId);
+        return p == null ? -1 : p.getEntropy();
+    }
+
+    public boolean updateEntropy(String topic, String partitionId, int entropy) {
+        Partition p = getPartition(topic, partitionId);
+        return p == null ? false : p.updateEntropy(entropy);
+    }
+
     public boolean createPartition(String topic, String partitionId) throws IOException {
         if (topic == null || partitionId == null) {
             Log.error("topic " + topic + " or partition " + partitionId + " should not be null");

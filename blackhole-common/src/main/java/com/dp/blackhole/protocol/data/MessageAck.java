@@ -4,21 +4,20 @@ import java.nio.ByteBuffer;
 
 import com.dp.blackhole.network.NonDelegationTypedWrappable;
 
-public class ProducerRegReply extends NonDelegationTypedWrappable {
-
+public class MessageAck extends NonDelegationTypedWrappable {
     private short flag;
     private long offset;
 
-    public ProducerRegReply() {
+    public MessageAck() {
     }
 
-    public ProducerRegReply(Boolean success, long offset) {
-        this.offset = offset;
+    public MessageAck(Boolean success, long offset) {
         if (success) {
             this.flag = 1;
         } else {
             this.flag = 0;
         }
+        this.offset = offset;
     }
 
     public Boolean getResult() {
@@ -28,7 +27,7 @@ public class ProducerRegReply extends NonDelegationTypedWrappable {
             return false;
         }
     }
-
+    
     public long getOffset() {
         return this.offset;
     }
@@ -52,6 +51,6 @@ public class ProducerRegReply extends NonDelegationTypedWrappable {
 
     @Override
     public int getType() {
-        return DataMessageTypeFactory.ProducerRegReply;
+        return DataMessageTypeFactory.MessageAck;
     }
 }

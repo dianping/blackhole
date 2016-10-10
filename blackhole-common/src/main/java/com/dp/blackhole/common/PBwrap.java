@@ -2,8 +2,11 @@ package com.dp.blackhole.common;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.dp.blackhole.protocol.control.AppRegPB.AppReg;
 import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
@@ -22,7 +25,11 @@ import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
 import com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
 import com.dp.blackhole.protocol.control.FailurePB.Failure.NodeType;
+import com.dp.blackhole.protocol.control.FollowerSyncStatusAckPB.FollowerSyncStatusAck;
+import com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus;
 import com.dp.blackhole.protocol.control.HeartbeatPB.Heartbeat;
+import com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply;
+import com.dp.blackhole.protocol.control.LeoReportPB.LeoReport;
 import com.dp.blackhole.protocol.control.LogNotFoundPB.LogNotFound;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.MessagePB.Message.MessageType;
@@ -40,6 +47,7 @@ import com.dp.blackhole.protocol.control.ReadyStreamPB.ReadyStream;
 import com.dp.blackhole.protocol.control.ReadyUploadPB.ReadyUpload;
 import com.dp.blackhole.protocol.control.RecoveryRollPB.RecoveryRoll;
 import com.dp.blackhole.protocol.control.RemoveConfPB.RemoveConf;
+import com.dp.blackhole.protocol.control.ReplicaExceptionPB.ReplicaException;
 import com.dp.blackhole.protocol.control.RestartPB.Restart;
 import com.dp.blackhole.protocol.control.RetireConsumerGroupPB.RetireConsumerGroup;
 import com.dp.blackhole.protocol.control.RetirePB.Retire;
@@ -48,11 +56,19 @@ import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp;
 import com.dp.blackhole.protocol.control.SnapshotOpPB.SnapshotOp.OP;
 import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport;
+import com.dp.blackhole.protocol.control.TransitionToFollowerPB.TransitionToFollower;
+import com.dp.blackhole.protocol.control.TransitionToLeaderPB.TransitionToLeader;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class PBwrap {
     public static Message wrapMessage(MessageType type, Object message) {
+        return wrapMessage(type, message, null);
+    }
+    public static Message wrapMessage(MessageType type, Object message, String callId) {
         Message.Builder msg = Message.newBuilder();
+        if (callId != null) {
+            msg.setCallId(callId);
+        }
         msg.setType(type);
         switch (type) {
         case NO_AVAILABLE_NODE:
@@ -180,6 +196,27 @@ public class PBwrap {
         case RETIRE_CONSUMER_GROUP:
             msg.setRetireConsumerGroup((RetireConsumerGroup) message);
             break;
+        case TRANSITION_TO_LEADER:
+            msg.setTransitionToLeader((TransitionToLeader) message);
+            break;
+        case TRANSITION_TO_FOLLOWER:
+            msg.setTransitionToFollower((TransitionToFollower) message);
+            break;
+        case FOLLOWER_SYNC_STATUS:
+            msg.setFollowerSyncStatus((FollowerSyncStatus) message);
+            break;
+        case REPLICA_EXCEPTION:
+            msg.setReplicaException((ReplicaException) message);
+            break;
+        case LEO_REPORT:
+            msg.setLeoReport((LeoReport) message);
+            break;
+        case LEO_REPLY:
+            msg.setLeoReply((LeoReply) message);
+            break;
+        case FOLLOWER_SYNC_STATUS_ACK:
+            msg.setFollowerSyncStatusAck((FollowerSyncStatusAck) message);
+            break;
         default:
             break;
         }
@@ -235,6 +272,86 @@ public class PBwrap {
         return builder.build();
     }
     
+    public static Message wrapTransitionToFollower(int entropy, String topic, String partition, String brokerLeader,
+            int brokerPort, long offset) {
+        TransitionToFollower.Builder builder = TransitionToFollower.newBuilder();
+        builder.setEntropy(entropy);
+        builder.setBrokerLeader(brokerLeader);
+        builder.setTopic(topic);
+        builder.setPartition(partition);
+        builder.setBrokerPort(brokerPort);
+        builder.setOffset(offset);
+        return wrapMessage(MessageType.TRANSITION_TO_FOLLOWER, builder.build());
+    }
+
+    public static Message wrapTransitionToLeader(int entropy, String topic, String partition, long leaderOffset, Map<String, Boolean> followers) {
+        TransitionToLeader.Builder builder = TransitionToLeader.newBuilder();
+        builder.setEntropy(entropy);
+        builder.setTopic(topic);
+        builder.setPartition(partition);
+        builder.setLeaderOffset(leaderOffset);
+        Iterator<String> iter = followers.keySet().iterator();
+        while (iter.hasNext()) {
+            String tmp = iter.next();
+            TransitionToLeader.Follower.Builder followerBuilder = TransitionToLeader.Follower.newBuilder();
+            followerBuilder.setFollower(tmp);
+            followerBuilder.setStatus(followers.get(tmp));
+            builder.addFollowers(followerBuilder);
+        }
+        return wrapMessage(MessageType.TRANSITION_TO_LEADER, builder.build());
+    }
+
+    public static Message wrapFollowerSyncStatus(int entropy, String topic, String partition, String follower,
+            boolean syncStatus) {
+        String callId = UUID.randomUUID().toString();
+        FollowerSyncStatus.Builder builder = FollowerSyncStatus.newBuilder();
+        builder.setEntropy(entropy);
+        builder.setTopic(topic);
+        builder.setPartitionId(partition);
+        builder.setFollower(follower);
+        builder.setSyncStatus(syncStatus);
+        return wrapMessage(MessageType.FOLLOWER_SYNC_STATUS, builder.build(), callId);
+    }
+
+    public static Message wrapFollowerSyncStatusAck(String callId, int entropy, String topic, String partition,
+            String follower, boolean syncStatus, boolean ack) {
+        FollowerSyncStatusAck.Builder builder = FollowerSyncStatusAck.newBuilder();
+        builder.setEntropy(entropy);
+        builder.setTopic(topic);
+        builder.setPartitionId(partition);
+        builder.setFollower(follower);
+        builder.setSyncStatus(syncStatus);
+        builder.setAck(ack);
+        return wrapMessage(MessageType.FOLLOWER_SYNC_STATUS_ACK, builder.build(), callId);
+    }
+
+    public static Message wrapReplicaException(int entropy, String topic, String partition) {
+        ReplicaException.Builder builder = ReplicaException.newBuilder();
+        builder.setEntropy(entropy);
+        builder.setTopic(topic);
+        builder.setPartition(partition);
+        return wrapMessage(MessageType.REPLICA_EXCEPTION, builder.build());
+    }
+
+    public static Message wrapLeoReport(int entropy, String candidate, String topic, String partition) {
+        String callId = UUID.randomUUID().toString();
+        LeoReport.Builder builder = LeoReport.newBuilder();
+        builder.setEntropy(entropy);
+        builder.setCandidate(candidate);
+        builder.setTopic(topic);
+        builder.setPartition(partition);
+        return wrapMessage(MessageType.LEO_REPORT, builder.build(), callId);
+    }
+
+    public static Message wrapLeoReply(String callId, int entropy, String topic, String partition, long offset) {
+        LeoReply.Builder builder = LeoReply.newBuilder();
+        builder.setEntropy(entropy);
+        builder.setTopic(topic);
+        builder.setPartition(partition);
+        builder.setOffset(offset);
+        return wrapMessage(MessageType.LEO_REPLY, builder.build(), callId);
+    }
+
     public static Message wrapAssignBroker(AssignBroker assignBroker) {
         return wrapMessage(MessageType.ASSIGN_BROKER, assignBroker);
     }

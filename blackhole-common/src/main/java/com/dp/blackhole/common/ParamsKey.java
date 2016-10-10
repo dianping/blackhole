@@ -20,6 +20,9 @@ public abstract class ParamsKey {
         
         public static final Long FILE_TAIL = -1L;
         public static final Long FILE_HEAD = 0L;
+        public static int DEFAULT_REPLICA_NUM = 2;
+        public static int DEFAULT_MESSAGE_QUEUE_MIN_ACK = 1;
+        public static int DEFAULT_REPLICA_FETCHSIZE = 1024 * 1024;
     }
 
     public static class LionNode {

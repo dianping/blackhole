@@ -5,6 +5,9 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Date;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,11 +17,12 @@ import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Sender;
 import com.dp.blackhole.network.BlockingConnection;
 import com.dp.blackhole.network.TransferWrap;
-import com.dp.blackhole.network.TypedFactory;
 import com.dp.blackhole.network.TransferWrapBlockingConnection.TransferWrapBlockingConnectionFactory;
+import com.dp.blackhole.network.TypedFactory;
 import com.dp.blackhole.protocol.data.DataMessageTypeFactory;
 import com.dp.blackhole.protocol.data.HaltRequest;
 import com.dp.blackhole.protocol.data.HeartBeatRequest;
+import com.dp.blackhole.protocol.data.MessageAck;
 import com.dp.blackhole.protocol.data.ProduceRequest;
 import com.dp.blackhole.protocol.data.ProducerRegReply;
 import com.dp.blackhole.protocol.data.RegisterRequest;
@@ -39,6 +43,9 @@ public class RemoteSender implements Sender{
     private int minMsgSent;
     private int msgBufSize;
     private int reassignDelaySeconds = Agent.DEFAULT_DELAY_SECONDS;
+    private OffsetInfo offsetInfo;
+    private long initOffset;
+    private Date lastSend;
     
     public RemoteSender(AgentMeta topicMeta, String broker, int port) {
         this.topicId = topicMeta.getTopicId();
@@ -49,6 +56,7 @@ public class RemoteSender implements Sender{
         this.rollPeriod = topicMeta.getRollPeriod();
         this.minMsgSent = topicMeta.getMinMsgSent();
         this.msgBufSize = topicMeta.getMsgBufSize();
+        this.lastSend = new Date();
     }
     
     public TopicId getTopicId() {
@@ -67,6 +75,26 @@ public class RemoteSender implements Sender{
         this.reassignDelaySeconds = reassignDelaySeconds;
     }
 
+    public void setOffsetInfo(OffsetInfo offsetInfo) throws IOException {
+        this.offsetInfo = offsetInfo;
+        TreeMap<Long, ByteBuffer> reSend = this.offsetInfo.initOffset(this.initOffset);
+        for(Entry<Long, ByteBuffer> entry : reSend.entrySet()) {
+            ByteBufferMessageSet messages = new ByteBufferMessageSet(entry.getValue());
+            LOG.debug("re-send messages offset: " +  entry.getKey() + ", message set size: " + messages.getValidSize());
+            ProduceRequest request = new ProduceRequest(topicId.getTopic(), source, messages,
+                    entry.getKey());
+            TransferWrap wrap = new TransferWrap(request);
+            connection.write(wrap);
+        }
+        while (offsetInfo.getMsgQueueSize() >= ParamsKey.TopicConf.DEFAULT_MESSAGE_QUEUE_MIN_ACK) {
+            TransferWrap response = connection.read();
+            MessageAck ackReply = (MessageAck) response.unwrap();
+            LOG.debug("Received message ack of Topic: " + topicId + ", Partition: " + source + ", Offset: "
+                    + ackReply.getOffset());
+            this.offsetInfo.msgAck(ackReply.getOffset());
+        }
+    }
+
     public boolean initializeRemoteConnection() {
         boolean res = false;
         SocketChannel socketChannel = null;
@@ -83,7 +111,12 @@ public class RemoteSender implements Sender{
             doStreamReg();
             TransferWrap response = connection.read();//TODO good design is set read timeout
             ProducerRegReply reply = (ProducerRegReply) response.unwrap();
+            LOG.info("Topic: " + topicId.getTopic() + " Partition: " + source + " InitOffest: " + reply.getOffset()
+                    + " reg with " + broker + " was done.");
             res = reply.getResult();
+            if (res) {
+                this.initOffset = reply.getOffset();
+            }
         } catch (Exception e) {
             LOG.error("initializeRemoteConnection exception", e);
         }
@@ -153,28 +186,49 @@ public class RemoteSender implements Sender{
     
     @Override
     public boolean canSend() {
-        return messageBuffer.position() != 0;
+        return messageBuffer.position() != 0
+                && offsetInfo.getMsgQueueSize() < ParamsKey.TopicConf.DEFAULT_MESSAGE_QUEUE_MIN_ACK;
     }
     
     @Override
     public void sendMessage() throws IOException {
         synchronized (messageBuffer) {
-            if (canSend()) {
-                messageBuffer.flip();
-                ByteBufferMessageSet messages = new ByteBufferMessageSet(messageBuffer.slice());
-                ProduceRequest request = new ProduceRequest(topicId.getTopic(), source, messages);
-                TransferWrap wrap = new TransferWrap(request);
+            if (messageBuffer.position() == 0) {
+                this.lastSend = new Date();
+                this.lastSend.setTime(this.lastSend.getTime() + 1000L);
+                return;
+            }
+            messageBuffer.flip();
+            ByteBuffer bb = messageBuffer.slice();
+            ByteBufferMessageSet messages = new ByteBufferMessageSet(bb);
+            long currentOffset = this.offsetInfo.getCurrentOffset();
+            this.offsetInfo.newMsg(bb, messages.getValidSize());
+            ProduceRequest request = new ProduceRequest(topicId.getTopic(), source, messages, currentOffset);
+            TransferWrap wrap = new TransferWrap(request);
+            while (messageNum != 0) {
                 connection.write(wrap);
+                LOG.debug("send message to leader: " + broker + " for topic: " + topicId + ", Partition: " + source
+                        + ", offset: " + currentOffset + ", message set size: " + messages.getValidSize());
                 messageBuffer.clear();
                 messageNum = 0;
+                this.lastSend = new Date();
+                this.lastSend.setTime(this.lastSend.getTime() + 1000L);
+            }
+            while (offsetInfo.getMsgQueueSize() >= ParamsKey.TopicConf.DEFAULT_MESSAGE_QUEUE_MIN_ACK) {
+                TransferWrap response = connection.read();
+                MessageAck ackReply = (MessageAck) response.unwrap();
+                LOG.debug("Received message ack of Topic: " + topicId + ", Partition: " + source + ", Offset: "
+                        + ackReply.getOffset());
+                this.offsetInfo.msgAck(ackReply.getOffset());
             }
         }
     }
     
     public void cacahAndSendLine(byte[] line) throws IOException {
         Message message = new Message(line); 
+        Date date = new Date();
         
-        if (messageNum >= minMsgSent || message.getSize() > messageBuffer.remaining()) {
+        if (date.compareTo(this.lastSend) >= 0 || message.getSize() > messageBuffer.remaining()) {
             sendMessage();
         }
         

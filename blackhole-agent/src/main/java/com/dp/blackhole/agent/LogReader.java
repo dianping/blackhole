@@ -36,6 +36,7 @@ public class LogReader implements Runnable {
     private boolean accept;
     private final int maxLineSize;
     private long currentRotation;
+    private OffsetInfo infoSaved = null;
     
     public LogReader(Agent agent, AgentMeta meta) {
         this.agent = agent;
@@ -47,6 +48,7 @@ public class LogReader implements Runnable {
         this.lineBuf = new ByteArrayOutputStream(maxLineSize);
         this.tailFile = new File(meta.getTailFile());
         this.accept = true;
+        this.infoSaved = new OffsetInfo(0L, meta.getTopic(), meta.getSource());
     }
     
     public LogFSM getLogFSM() {
@@ -83,6 +85,13 @@ public class LogReader implements Runnable {
     
     public void assignSender(RemoteSender sender) {
         this.sender = sender;
+        try {
+            this.sender.setOffsetInfo(infoSaved);
+        } catch (IOException e) {
+            LOG.error("Fail while re-sending message, reassign sender", e);
+            reassignSender(sender);
+            return;
+        }
         ReaderState oldReaderState = currentReaderState.getAndSet(ReaderState.ASSIGNED);
         LOG.info("Assign sender: " + oldReaderState.name() + " -> " + ReaderState.ASSIGNED.name());
     }
@@ -300,6 +309,8 @@ public class LogReader implements Runnable {
                         try {
                             sender.cacahAndSendLine(lineBuf.toByteArray());
                         } catch (IOException e) {
+                            lineBuf.reset();
+                            reader.seek(rePos);
                             throw new SocketException("send line fail");
                         }
                     }

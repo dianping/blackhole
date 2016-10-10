@@ -22,8 +22,20 @@ public class HDFSMarker implements Runnable {
     @Override
     public void run() {
         Path markFile = new Path(mgr.getMarkHdfsPath(ident));
+        String tmpPathname = mgr.getTempHdfsPath(ident);
+        String recoveryPathname = mgr.getRecoveryHdfsPath(ident);
+        Path tmpPath = new Path(tmpPathname);
+        Path recoveryPath = new Path(recoveryPathname);
         FSDataOutputStream out = null;
         try {
+            if (fs.exists(tmpPath) && !HDFSUtil.retryDelete(fs, tmpPath)) {
+                throw new IOException("could not recovery and faild to delete " + tmpPathname
+                        + ".");
+            }
+            if (fs.exists(recoveryPath) && !HDFSUtil.retryDelete(fs, recoveryPath)) {
+                throw new IOException("could not recovery and faild to delete " + recoveryPathname
+                        + ".");
+            }
             if (!fs.exists(markFile)) {
                 out = fs.create(markFile);
             } else {

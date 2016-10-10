@@ -21,6 +21,7 @@ import com.dp.blackhole.consumer.api.ConsumerConfig;
 import com.dp.blackhole.network.TransferWrapNonblockingConnection;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
+import com.dp.blackhole.network.NioService;
 import com.dp.blackhole.network.TransferWrap;
 import com.dp.blackhole.protocol.data.DataMessageTypeFactory;
 import com.dp.blackhole.protocol.data.FetchReply;
@@ -124,6 +125,21 @@ public class Fetcher extends Thread {
         @Override
         public void OnDisconnected(TransferWrapNonblockingConnection connection) {
             LOG.info("Fetcher " + this + " disconnected but will reconnect to " + connection);
+        }
+
+        @Override
+        public void receiveTimout(TransferWrap msg, TransferWrapNonblockingConnection conn) {
+
+        }
+
+        @Override
+        public void sendFailure(TransferWrap msg, TransferWrapNonblockingConnection conn) {
+
+        }
+
+        @Override
+        public void setNioService(NioService<TransferWrap, TransferWrapNonblockingConnection> service) {
+
         }
 
         @Override

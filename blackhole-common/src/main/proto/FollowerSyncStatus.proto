@@ -1,0 +1,12 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "FollowerSyncStatusPB";
+
+message FollowerSyncStatus {
+    required int32 entropy = 1;
+    required string topic = 2;
+    required string partitionId = 3;
+    required string follower = 4;
+    required bool syncStatus = 5;
+}

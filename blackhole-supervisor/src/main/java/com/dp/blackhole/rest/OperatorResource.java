@@ -157,4 +157,31 @@ public class OperatorResource extends BaseResource {
             }
         }
     }
+
+    @GET
+    @Path("/failover/broker/{topic}/{partition}/{oldLeader}")
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response leaderFailover(
+            @PathParam("topic") final String topic,
+            @PathParam("partition") final String partition,
+            @PathParam("oldLeader") final String oldLeader) {
+        LOG.debug("leader failover without newLeader specified: topic: " + topic + ", partition: " + partition);
+        boolean re = supervisorService.manualBrokerFailover(topic, partition, oldLeader);
+        return re ? Response.ok().entity("processing failover").build()
+                : Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Topic/Partition not found or " + oldLeader + " is not the current leader").build();
+    }
+
+    @GET
+    @Path("/failover/broker/{topic}/{partition}/{oldLeader}/{newLeader}")
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response leaderFailover(
+            @PathParam("topic") final String topic,
+            @PathParam("partition") final String partition,
+            @PathParam("oldLeader") final String oldLeader,
+            @PathParam("newLeader") final String newLeader) {
+        LOG.debug("leader failover with newLeader: " + newLeader + ", specified: topic: " + topic + ", partition: "
+                + partition);
+        return Response.ok().build();
+    }
 }
