@@ -151,14 +151,14 @@ public class DelegationIOEchoService {
                 wappedObject a = (wappedObject) request.unwrap();
                 System.out.println("client get reply: "+a.data);
                 
-                service.unwatch(conn, 0);
+                service.unwatch("CALLID_TEST", conn, 0);
                 if (echotimes == 3) {
                     service.shutdown();
                     System.out.println();
                     System.out.println("total echo times: "+echotimes);
                 } else {
                     TransferWrap echoRequest = new TransferWrap(a);
-                    service.sendWithExpect(conn, echoRequest, 0, 3, TimeUnit.SECONDS);
+                    service.sendWithExpect("CALLID_TEST", conn, echoRequest, 0, 3, TimeUnit.SECONDS);
                     echotimes++;
                 }
             }

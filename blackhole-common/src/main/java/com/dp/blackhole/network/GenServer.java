@@ -171,17 +171,17 @@ public class GenServer<Entity, Connection extends NonblockingConnection<Entity>,
         }
     }
 
-    public void sendWithExpect(Connection conn, Entity event, int expect, int timeout, TimeUnit unit) {
+    public void sendWithExpect(String callId, Connection conn, Entity event, int expect, int timeout, TimeUnit unit) {
         if (conn.isActive()) {
             conn.send(event);
-            receiveTimeoutWatcher.watch(conn, event, expect, timeout, unit);
+            receiveTimeoutWatcher.watch(callId, conn, event, expect, timeout, unit);
         } else {
             getHandler(conn).addEvent(new EntityEvent<Entity, Connection>(EntityEvent.SEND_FALURE, event, conn));
         }
     }
     
-    public EntityEvent<Entity, Connection> unwatch(Connection conn, int expect) {
-        return receiveTimeoutWatcher.unwatch(conn, expect);
+    public EntityEvent<Entity, Connection> unwatch(String callId, Connection conn, int expect) {
+        return receiveTimeoutWatcher.unwatch(callId, conn, expect);
     }
 
     public void shutdown() {

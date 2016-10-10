@@ -23,7 +23,7 @@ class ReceiveTimeoutWatcher<Entity, Connection extends NonblockingConnection<Ent
         @Override
         public void run() {
             synchronized(e.c) {
-                if (unwatch(e.c, e.expect) != null) {
+                if (unwatch(e.callId, e.c, e.expect) != null) {
                     service.getHandler(e.c).addEvent(e);
                 }
             }
@@ -38,17 +38,17 @@ class ReceiveTimeoutWatcher<Entity, Connection extends NonblockingConnection<Ent
         scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
     }
 
-    private String getKey(Connection conn, int expect) {
-        return conn + Integer.toString(expect);
+    private String getKey(String callId, Connection conn, int expect) {
+        return callId + conn + Integer.toString(expect);
     }
 
-    void watch(Connection conn, Entity entity, int expect, int timeout, TimeUnit unit) {
-        EntityEvent<Entity, Connection> v = new EntityEvent<Entity, Connection>(EntityEvent.RECEIVE_TIMEOUT, entity, expect, conn);
-        watches.put(getKey(conn, expect), v);
+    void watch(String callId, Connection conn, Entity entity, int expect, int timeout, TimeUnit unit) {
+        EntityEvent<Entity, Connection> v = new EntityEvent<Entity, Connection>(EntityEvent.RECEIVE_TIMEOUT, entity, expect, conn, callId);
+        watches.put(getKey(callId, conn, expect), v);
         scheduler.schedule(new TimeoutTask(v), timeout, unit);
     }
 
-    public EntityEvent<Entity, Connection> unwatch(Connection conn, int expect) {
-        return watches.remove(getKey(conn, expect));
+    public EntityEvent<Entity, Connection> unwatch(String callId, Connection conn, int expect) {
+        return watches.remove(getKey(callId, conn, expect));
     }
 }
