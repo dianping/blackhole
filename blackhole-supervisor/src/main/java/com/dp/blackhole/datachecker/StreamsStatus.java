@@ -49,6 +49,11 @@ public class StreamsStatus implements Serializable {
         }
     }
     
+    public void removeStream(Stream stream) {
+        StreamStatusKey key = new StreamStatusKey(stream.getTopic(), stream.getSource());
+        remove(key);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -72,6 +77,15 @@ public class StreamsStatus implements Serializable {
         wLock.lock();
         try {
             map.put(key, value);
+        } finally {
+            wLock.unlock();
+        }
+    }
+
+    private void remove(StreamStatusKey key) {
+        wLock.lock();
+        try {
+            map.remove(key);
         } finally {
             wLock.unlock();
         }

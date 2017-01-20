@@ -1183,6 +1183,7 @@ public class Supervisor {
             
             // remove from streamIdMap
             removeStream(topic, source);
+            checkpoint.removeCheckpoint(stream);
             
             // remove the stages from stageConnectionMap
             List<Stage> stages = stream.getStages();
