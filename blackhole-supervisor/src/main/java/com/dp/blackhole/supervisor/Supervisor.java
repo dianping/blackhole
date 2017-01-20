@@ -1208,6 +1208,7 @@ public class Supervisor {
             }
             // remove stream from Streams
             stream.setStages(new ArrayList<Stage>());
+            reassignConsumers(topic);
             return true;
         }
     }
