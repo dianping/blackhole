@@ -1231,6 +1231,10 @@ public class Supervisor {
                 synchronized (stages) {
                     // process stage missed only
                     for (Stage stage : stages) {
+                        if (stage.isCurrent() && stage.getRollTs() <= rollTs) {
+                            LOG.warn("Can't recovery stage manually cause the stage's rollTs: " +  rollTs + " shouldn't >= current stage's rollTs: " + stage.getRollTs());
+                            return true;
+                        }
                         if (stage.getRollTs() == rollTs) {
                             if (stage.getStatus() != Stage.RECOVERYING && stage.getStatus() != Stage.UPLOADING) {
                                 doRecovery(stream, stage);
