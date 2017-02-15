@@ -17,21 +17,26 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.dianping.cat.Cat;
 import com.dianping.lion.client.LionException;
 import com.dp.blackhole.common.PBwrap;
+import com.dp.blackhole.common.ParamsKey;
+import com.dp.blackhole.common.TopicPartitionKey;
 import com.dp.blackhole.common.Util;
 import com.dp.blackhole.datachecker.AbnormalStageChecker;
 import com.dp.blackhole.datachecker.Checkpoint;
 import com.dp.blackhole.http.RequestListener;
-import com.dp.blackhole.network.NonblockingConnectionFactory;
+import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenServer;
-import com.dp.blackhole.network.ByteBufferNonblockingConnection;
+import com.dp.blackhole.network.NioService;
+import com.dp.blackhole.network.NonblockingConnectionFactory;
 import com.dp.blackhole.protocol.control.AppRegPB.AppReg;
 import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.AssignConsumerPB.AssignConsumer;
@@ -45,7 +50,10 @@ import com.dp.blackhole.protocol.control.ConsumerRegPB.ConsumerReg;
 import com.dp.blackhole.protocol.control.DumpAppPB.DumpApp;
 import com.dp.blackhole.protocol.control.DumpConsumerGroupPB.DumpConsumerGroup;
 import com.dp.blackhole.protocol.control.FailurePB.Failure;
+import com.dp.blackhole.protocol.control.FollowerSyncStatusPB.FollowerSyncStatus;
 import com.dp.blackhole.protocol.control.HeartbeatPB.Heartbeat;
+import com.dp.blackhole.protocol.control.LeoReplyPB.LeoReply;
+import com.dp.blackhole.protocol.control.LeoReportPB.LeoReport;
 import com.dp.blackhole.protocol.control.LogNotFoundPB.LogNotFound;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.OffsetCommitPB.OffsetCommit;
@@ -64,6 +72,7 @@ import com.dp.blackhole.protocol.control.TopicReportPB.TopicReport.TopicEntry;
 import com.dp.blackhole.rest.HttpServer;
 import com.dp.blackhole.rest.ServiceFactory;
 import com.dp.blackhole.supervisor.model.BrokerDesc;
+import com.dp.blackhole.supervisor.model.BrokerInfo;
 import com.dp.blackhole.supervisor.model.ConnectionDesc;
 import com.dp.blackhole.supervisor.model.ConnectionDesc.ConnectionInfo;
 import com.dp.blackhole.supervisor.model.ConsumerDesc;
@@ -71,9 +80,9 @@ import com.dp.blackhole.supervisor.model.ConsumerGroup;
 import com.dp.blackhole.supervisor.model.ConsumerGroupKey;
 import com.dp.blackhole.supervisor.model.Issue;
 import com.dp.blackhole.supervisor.model.NodeDesc;
-import com.dp.blackhole.supervisor.model.ProducerManager;
 import com.dp.blackhole.supervisor.model.PartitionInfo;
 import com.dp.blackhole.supervisor.model.ProducerDesc;
+import com.dp.blackhole.supervisor.model.ProducerManager;
 import com.dp.blackhole.supervisor.model.Stage;
 import com.dp.blackhole.supervisor.model.Stream;
 import com.dp.blackhole.supervisor.model.Topic;
@@ -85,7 +94,8 @@ public class Supervisor {
     public static final Log LOG = LogFactory.getLog(Supervisor.class);
     private ConfigManager configManager;
     
-    private GenServer<ByteBuffer, ByteBufferNonblockingConnection, EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection>> server;  
+    private GenServer<ByteBuffer, ByteBufferNonblockingConnection, EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection>> server;
+    private SupervisorExecutor executor = null;
     private ConcurrentHashMap<ByteBufferNonblockingConnection, ArrayList<Stream>> connectionStreamMap;
     private ConcurrentHashMap<Stage, ByteBufferNonblockingConnection> stageConnectionMap;
 
@@ -98,6 +108,7 @@ public class Supervisor {
     private ConcurrentHashMap<String, ByteBufferNonblockingConnection> dataSourceMapping;
     private ConcurrentHashMap<String, ByteBufferNonblockingConnection> brokersMapping;
     private ConcurrentHashMap<String, ProducerManager> producerMgrMap; // topic -> manager
+    private ConcurrentHashMap<TopicPartitionKey, BrokerInfo> tpKeyBrokerInfo;
     
     public Checkpoint checkpoint;
 
@@ -171,7 +182,16 @@ public class Supervisor {
         }
         Util.send(connection, msg);
     }
-    
+
+    private void sendWithExpect(ByteBufferNonblockingConnection conn, int expect, Message msg, String callId) {
+        if (conn == null) {
+            LOG.error("connection is null or closed, message sending abort: " + msg);
+            return;
+        }
+        executor.service.sendWithExpect(callId, conn, PBwrap.PB2Buf(msg), expect, configManager.sendTimeout,
+                TimeUnit.SECONDS);
+    }
+
     public void cachedSend(Map<String, Message> toBeSend) {
         for (Map.Entry<String, Message> entry : toBeSend.entrySet()) {
             cachedSend(entry.getKey(), entry.getValue());
@@ -257,6 +277,29 @@ public class Supervisor {
         }
     }
     
+    private void sendTransitionToLeader(int entropy, String leader, String topic, String partition, long leaderOffset,
+            HashMap<String, Boolean> followers) {
+        Message msgTL = PBwrap.wrapTransitionToLeader(entropy, topic, partition, leaderOffset, followers);
+        LOG.info("sending TransitionToLeader to broker: " + leader + ", replicas: " + followers.keySet().toString()
+                + " for topic: " + topic + ", partition: " + partition);
+        send(brokersMapping.get(leader), msgTL);
+    }
+
+    private void sendTransitionToFollower(int entropy, String follower, String topic, String partition, String leader,
+            int port, long offset) {
+        Message msgTF = PBwrap.wrapTransitionToFollower(entropy, topic, partition, leader, port, offset);
+        LOG.info("sending TransitionToFollower to broker: " + follower + ", leader: " + leader + ", for topic: " + topic
+                + ", partition: " + partition);
+        send(brokersMapping.get(follower), msgTF);
+    }
+
+    private void sendLeoReport(int entropy, String candidate, String topic, String partition) {
+        Message msgLR = PBwrap.wrapLeoReport(entropy, candidate, topic, partition);
+        LOG.info("sending LeoReport to broker: " + candidate + ", entropy: " + entropy + ", topic: " + topic
+                + ", partition: " + partition);
+        sendWithExpect(brokersMapping.get(candidate), Message.MessageType.LEO_REPLY_VALUE, msgLR, msgLR.getCallId());
+    }
+
     private void handleHeartBeat(Message msg, ByteBufferNonblockingConnection from) {
         ConnectionDesc desc = connections.get(from);
         if (desc == null) {
@@ -658,8 +701,47 @@ public class Supervisor {
                 }
             }
         }
+        handleLeaderFail(connection.getHost());
     }
-    
+
+    private void handleLeaderFail(String broker) {
+        for (Entry<TopicPartitionKey, BrokerInfo> entry : tpKeyBrokerInfo.entrySet()) {
+            if (entry.getValue() == null) {
+                continue;
+            }
+            synchronized (entry.getValue()) {
+                if (entry.getValue().getLeader() == null || !entry.getValue().getLeader().equals(broker)) {
+                    continue;
+                }
+                failOver(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    private void failOver(TopicPartitionKey tpKey, BrokerInfo brokerInfo) {
+        Set<String> candidates = brokerInfo.startElection();
+        if (candidates == null) {
+            return;
+        }
+        for (String candidate : candidates) {
+            sendLeoReport(brokerInfo.getEntropy(), candidate, tpKey.getTopic(), tpKey.getPartition());
+        }
+    }
+
+    public boolean manualBrokerFailover(String topic, String partition, String oldLeader) {
+        TopicPartitionKey tpKey = new TopicPartitionKey(topic, partition);
+        BrokerInfo brokerInfo = tpKeyBrokerInfo.get(tpKey);
+        if (brokerInfo == null) {
+            return false;
+        }
+        synchronized(brokerInfo) {
+            if (!brokerInfo.getLeader().equals(oldLeader)) {
+                return false;
+            }
+            failOver(tpKey, brokerInfo);
+            return true;
+        }
+    }
 
     private void handleConsumerFail(ConnectionDesc desc, long now) {
         ByteBufferNonblockingConnection connection = desc.getConnection();
@@ -1101,6 +1183,7 @@ public class Supervisor {
             
             // remove from streamIdMap
             removeStream(topic, source);
+            checkpoint.removeCheckpoint(stream);
             
             // remove the stages from stageConnectionMap
             List<Stage> stages = stream.getStages();
@@ -1126,6 +1209,7 @@ public class Supervisor {
             }
             // remove stream from Streams
             stream.setStages(new ArrayList<Stage>());
+            reassignConsumers(topic);
             return true;
         }
     }
@@ -1147,6 +1231,10 @@ public class Supervisor {
                 synchronized (stages) {
                     // process stage missed only
                     for (Stage stage : stages) {
+                        if (stage.isCurrent() && stage.getRollTs() <= rollTs) {
+                            LOG.warn("Can't recovery stage manually cause the stage's rollTs: " +  rollTs + " shouldn't >= current stage's rollTs: " + stage.getRollTs());
+                            return true;
+                        }
                         if (stage.getRollTs() == rollTs) {
                             if (stage.getStatus() != Stage.RECOVERYING && stage.getStatus() != Stage.UPLOADING) {
                                 doRecovery(stream, stage);
@@ -1567,125 +1655,146 @@ public class Supervisor {
         long connectedTs = readyBroker.getConnectedTs();
         long currentTs = Util.getCurrentRollTs(connectedTs, readyBroker.getPeriod());
         String brokerHost = readyBroker.getBrokerServer();
-        
         String topic = readyBroker.getTopic();
-        Topic t = topics.get(topic);
-        if (t == null) {
-            t = new Topic(topic);
-            topics.put(topic, t);
-            LOG.info("new topic added: " + t);
-        }
-        //source is an alias of partitionId in "Batch Mode"
+        // source is an alias of partitionId in "Batch Mode"
         String source = readyBroker.getPartitionId();
-        Stream stream = getStream(readyBroker.getTopic(), source);
-        // processing stream affairs
-        if (stream == null) {
-            // record new stream
-            stream = new Stream(readyBroker.getTopic(), source);
-            stream.setBrokerHost(readyBroker.getBrokerServer());
-            stream.setStartTs(connectedTs);
-            stream.setPeriod(readyBroker.getPeriod());
-            long initLastSuccessTs = currentTs - stream.getPeriod() * 1000;
-            long storedLastSuccessTs = checkpoint.getStoredLastSuccessTs(stream);
-            LOG.debug("init ts " + initLastSuccessTs + " stored ts " + storedLastSuccessTs);
-            boolean shouldRecovery = false;
-            if (storedLastSuccessTs != initLastSuccessTs && storedLastSuccessTs != 0) {
-                stream.updateLastSuccessTs(storedLastSuccessTs);
-                shouldRecovery = true;
-            } else {
-                stream.updateLastSuccessTs(initLastSuccessTs);
+        TopicPartitionKey tpKey = new TopicPartitionKey(topic, source);
+        BrokerInfo brokerInfo = tpKeyBrokerInfo.get(tpKey);
+        if (brokerInfo == null) {
+            Cat.logEvent("Supervisor brokerInfo is null when handling readyStream topic: " + readyBroker.getTopic(),
+                    readyBroker.getPartitionId());
+            LOG.fatal("BrokerInfo is null when handling readyStream topic: " + readyBroker.getTopic() + ", partition: "
+                    + readyBroker.getPartitionId());
+            return;
+        }
+        synchronized (brokerInfo) {
+            Topic t = topics.get(topic);
+            if (!brokerInfo.isOneOfReplicas(brokerHost) || brokerInfo.containsFollower(brokerHost)) {
+                send(from, PBwrap.wrapReplicaException(brokerInfo.getEntropy(), topic, source));
+                Cat.logEvent("Supervisor readySteam doesn't match with brokerInfo topic: " + readyBroker.getTopic(),
+                        readyBroker.getPartitionId());
+                LOG.fatal("ReadyStream's broker: " + readyBroker.getBrokerServer() + " doesn't match with brokerInfo: "
+                        + brokerInfo.toString());
+                return;
             }
-            ArrayList<Stage> stages = new ArrayList<Stage>();
-            Stage current = new Stage();
-            current.setTopic(stream.getTopic());
-            current.setSource(stream.getSource());
-            current.setBrokerHost(readyBroker.getBrokerServer());
-            current.setCleanstart(false);
-            current.setIssuelist(new Vector<Issue>());
-            current.setStatus(Stage.APPENDING);
-            current.setRollTs(currentTs);
-            current.setCurrent(true);
-            if (!stages.contains(current)) {
-                stages.add(current);
+            if (t == null) {
+                t = new Topic(topic);
+                topics.put(topic, t);
+                LOG.info("new topic added: " + t);
             }
-            stream.setStages(stages);
-            addStream(stream);
-            if (shouldRecovery) {
-                synchronized (stages) {
-                    int missedStageCount = getMissedStageCount(stream, initLastSuccessTs);
-                    LOG.info("need recovery possible missed stages: " + missedStageCount);
-                    Issue issue = new Issue();
-                    issue.setTs(connectedTs);
-                    issue.setDesc("stream reconnected but find should recovery");
-                    ArrayList<Stage> missedStages = getMissedStages(stream, missedStageCount, issue);
-                    for (Stage missedStage : missedStages) {
-                        LOG.info("processing missed stages: " + missedStage);
-                        // check whether it is missed
-                        if (!stages.contains(missedStage)) {
-                            stages.add(missedStage);
-                        }
-                        doRecovery(stream, missedStage);
-                    }
-                }
-            } else {
-                LOG.info("no need to recovery any stage.");
-            }
-        } else {
-            // old stream reconnected
-            LOG.info("stream reconnected: " + stream);
-            if (!stream.isActive()) {
-                stream.updateActive(true);
-            }
-            
-            // update broker on stream
-            stream.setBrokerHost(readyBroker.getBrokerServer());
 
-            List<Stage> currentStages = stream.getStages();
-            if (currentStages != null) {
-                synchronized (currentStages) {
-                    recoveryStages(stream, currentStages, connectedTs, currentTs, readyBroker.getBrokerServer());
+            Stream stream = getStream(readyBroker.getTopic(), source);
+            // processing stream affairs
+            if (stream == null) {
+                // record new stream
+                stream = new Stream(readyBroker.getTopic(), source);
+                stream.setBrokerHost(readyBroker.getBrokerServer());
+                stream.setStartTs(connectedTs);
+                stream.setPeriod(readyBroker.getPeriod());
+                long initLastSuccessTs = currentTs - stream.getPeriod() * 1000;
+                long storedLastSuccessTs = checkpoint.getStoredLastSuccessTs(stream);
+                LOG.debug("init ts " + initLastSuccessTs + " stored ts " + storedLastSuccessTs);
+                boolean shouldRecovery = false;
+                if (storedLastSuccessTs != initLastSuccessTs && storedLastSuccessTs != 0) {
+                    stream.updateLastSuccessTs(storedLastSuccessTs);
+                    shouldRecovery = true;
+                } else {
+                    stream.updateLastSuccessTs(initLastSuccessTs);
+                }
+                ArrayList<Stage> stages = new ArrayList<Stage>();
+                Stage current = new Stage();
+                current.setTopic(stream.getTopic());
+                current.setSource(stream.getSource());
+                current.setBrokerHost(readyBroker.getBrokerServer());
+                current.setCleanstart(false);
+                current.setIssuelist(new Vector<Issue>());
+                current.setStatus(Stage.APPENDING);
+                current.setRollTs(currentTs);
+                current.setCurrent(true);
+                if (!stages.contains(current)) {
+                    stages.add(current);
+                }
+                stream.setStages(stages);
+                addStream(stream);
+                if (shouldRecovery) {
+                    synchronized (stages) {
+                        int missedStageCount = getMissedStageCount(stream, initLastSuccessTs);
+                        LOG.info("need recovery possible missed stages: " + missedStageCount);
+                        Issue issue = new Issue();
+                        issue.setTs(connectedTs);
+                        issue.setDesc("stream reconnected but find should recovery");
+                        ArrayList<Stage> missedStages = getMissedStages(stream, missedStageCount, issue);
+                        for (Stage missedStage : missedStages) {
+                            LOG.info("processing missed stages: " + missedStage);
+                            // check whether it is missed
+                            if (!stages.contains(missedStage)) {
+                                stages.add(missedStage);
+                            }
+                            doRecovery(stream, missedStage);
+                        }
+                    }
+                } else {
+                    LOG.info("no need to recovery any stage.");
                 }
             } else {
-                LOG.error("can not find stages of stream: " + stream);
+                // old stream reconnected
+                LOG.info("stream reconnected: " + stream);
+                if (!stream.isActive()) {
+                    stream.updateActive(true);
+                }
+
+                // update broker on stream
+                stream.setBrokerHost(readyBroker.getBrokerServer());
+
+                List<Stage> currentStages = stream.getStages();
+                if (currentStages != null) {
+                    synchronized (currentStages) {
+                        recoveryStages(stream, currentStages, connectedTs, currentTs, readyBroker.getBrokerServer());
+                    }
+                } else {
+                    LOG.error("can not find stages of stream: " + stream);
+                }
             }
+
+            // register connection with agent and broker
+            recordConnectionStreamMapping(from, stream);
+            // source may be a KVM agent, or a PaaS instance, or a producerId
+            // host may be a KVM agent host, or a PaaS physics machine, or a Storm
+            // worker host
+            String host = Util.getHostFromSource(source);
+            ByteBufferNonblockingConnection dataSourceConnection = dataSourceMapping.get(host);
+            if (dataSourceConnection == null) {
+                LOG.fatal("Oops, can not get Connection by " + host);
+            } else {
+                recordConnectionStreamMapping(dataSourceConnection, stream);
+            }
+
+            // process partition affairs
+            String partitionId = readyBroker.getPartitionId();
+
+            // online partitionId in producer manager
+            ProducerManager producerManager = producerMgrMap.get(topic);
+            if (producerManager != null) {
+                producerManager.switchToOnline(partitionId);
+            }
+
+            PartitionInfo pinfo = t.getPartition(partitionId);
+            if (pinfo == null) {
+                pinfo = new PartitionInfo(partitionId, readyBroker.getBrokerServer());
+                LOG.info("new partition online: " + pinfo);
+                t.addPartition(partitionId, pinfo);
+            } else {
+                pinfo.updateHost(brokerHost);
+                pinfo.markOffline(false);
+                LOG.info("partition back to online: " + pinfo);
+            }
+            // delete LogNotFound entry if exists
+            configManager.removeLogNotFound(topic, host);
+
+            // reassign consumer
+            reassignConsumers(topic);
+
         }
-        
-        // register connection with agent and broker
-        recordConnectionStreamMapping(from, stream);
-        //source may be a KVM agent, or a PaaS instance, or a producerId
-        //host may be a KVM agent host, or a PaaS physics machine, or a Storm worker host
-        String host = Util.getHostFromSource(source);
-        ByteBufferNonblockingConnection dataSourceConnection = dataSourceMapping.get(host);
-        if (dataSourceConnection == null) {
-            LOG.fatal("Oops, can not get Connection by " + host);
-        } else {
-            recordConnectionStreamMapping(dataSourceConnection, stream);
-        }
-        
-        // process partition affairs
-        String partitionId = readyBroker.getPartitionId();
-        
-        // online partitionId in producer manager
-        ProducerManager producerManager = producerMgrMap.get(topic);
-        if (producerManager != null) {
-            producerManager.switchToOnline(partitionId);
-        }
-        
-        PartitionInfo pinfo = t.getPartition(partitionId);
-        if (pinfo == null) {
-            pinfo = new PartitionInfo(partitionId, readyBroker.getBrokerServer());
-            LOG.info("new partition online: " + pinfo);
-            t.addPartition(partitionId, pinfo);
-        } else {
-            pinfo.updateHost(brokerHost);
-            pinfo.markOffline(false);
-            LOG.info("partition back to online: " + pinfo);
-        }
-        //delete LogNotFound entry if exists
-        configManager.removeLogNotFound(topic, host);
-        
-        //reassign consumer
-        reassignConsumers(topic);
     }
 
     private void reassignConsumers(String topic) {
@@ -1813,20 +1922,44 @@ public class Supervisor {
         assignBroker(appReg.getTopic(), from, source, source);
     }
 
-    private String assignBroker(String topic, ByteBufferNonblockingConnection from, String source, String partitionId) {
+    private void assignBroker(String topic, ByteBufferNonblockingConnection from, String source, String partitionId) {
         String instanceId = Util.getInstanceIdFromSource(source);   //null if source is KVM or ProducerId
-        String broker = getBroker(topic, partitionId);
+        TopicPartitionKey tpKey = new TopicPartitionKey(topic, partitionId);
+        BrokerInfo brokerInfo = null;
+        if (tpKeyBrokerInfo.containsKey(tpKey)) {
+            brokerInfo = tpKeyBrokerInfo.get(tpKey);
+        } else {
+            brokerInfo = getBrokerInfoRandom(tpKey);
+        }
+        //TODO review instnaceId and partitionId
         Message message;
-        if (broker != null) {
-            message = PBwrap.wrapAssignBroker(PBwrap.assignBroker(topic, broker, getBrokerPort(broker), instanceId, partitionId));
+
+        if (brokerInfo != null) {
+            if (brokerInfo.getLeader() == null) {
+                message = PBwrap.wrapNoAvailableNode(topic, instanceId, source);
+                LOG.info("no available leader for topic: " + topic + ", partition: " + source);
+            } else {
+                tpKeyBrokerInfo.put(tpKey, brokerInfo);
+                HashMap<String, Boolean> followers = brokerInfo.getFollowers();
+                sendTransitionToLeader(brokerInfo.getEntropy(), brokerInfo.getLeader(), topic, source,
+                        brokerInfo.getOffset(), followers);
+                for (String follower : followers.keySet()) {
+                    if (brokerInfo.containsFollower(follower)) {
+                        sendTransitionToFollower(brokerInfo.getEntropy(), follower, topic, source, brokerInfo.getLeader(),
+                                getBrokerPort(brokerInfo.getLeader()), brokerInfo.getOffset());
+                    }
+                }
+                message = PBwrap.wrapAssignBroker(PBwrap.assignBroker(topic, brokerInfo.getLeader(),
+                        getBrokerPort(brokerInfo.getLeader()), instanceId, partitionId));
+                LOG.info("assign broker: " + brokerInfo.getLeader() + " for topic: " + topic
+                        + ", source/producer: " + source
+                        + (partitionId == null ? "" : (", partition: " + partitionId)));
+            }
         } else {
             message = PBwrap.wrapNoAvailableNode(topic, instanceId, source);
+            LOG.info("no available brokers for topic: " + topic + ", partition: " + source);
         }
-        LOG.info("assign broker: " + broker + " for topic: " + topic
-                + " source/producer: " + source
-                + (partitionId == null ? "" : (" partition: " + partitionId)));
         send(from, message);
-        return broker;
     }
 
     private void handleBrokerReg(BrokerReg brokerReg, ByteBufferNonblockingConnection from) {
@@ -1842,7 +1975,39 @@ public class Supervisor {
         desc.setType(ConnectionDesc.BROKER);
         desc.attach(new BrokerDesc(from.toString(), brokerReg.getBrokerPort(), brokerReg.getRecoveryPort()));
         brokersMapping.put(from.getHost(), from);
+        notifyReplica(from.getHost());
         LOG.info("Broker " + from.getHost() + " registered");
+    }
+
+    private void notifyReplica(String broker) {
+        for (TopicPartitionKey tpKey : tpKeyBrokerInfo.keySet()) {
+            BrokerInfo brokerInfo = tpKeyBrokerInfo.get(tpKey);
+            if (brokerInfo == null) {
+                continue;
+            }
+            synchronized (brokerInfo) {
+                if (broker.equals(brokerInfo.getLeader())) {
+                    sendTransitionToLeader(brokerInfo.getEntropy(), broker, tpKey.getTopic(), tpKey.getPartition(),
+                            brokerInfo.getOffset(), brokerInfo.getFollowers());
+                    continue;
+                }
+                if (!brokerInfo.containsFollower(broker)) {
+                    continue;
+                }
+                if (brokerInfo.getLeader() != null) {
+                    sendTransitionToFollower(brokerInfo.getEntropy(), broker, tpKey.getTopic(), tpKey.getPartition(),
+                            brokerInfo.getLeader(), getBrokerPort(brokerInfo.getLeader()), brokerInfo.getOffset());
+                } else {
+                    Set<String> candidates = brokerInfo.startElection();
+                    if (candidates == null) {
+                        return;
+                    }
+                    for (String candidate : candidates) {
+                        sendLeoReport(brokerInfo.getEntropy(), candidate, tpKey.getTopic(), tpKey.getPartition());
+                    }
+                }
+            }
+        }
     }
 
     /* 
@@ -1886,6 +2051,35 @@ public class Supervisor {
         return broker;
     }
     
+    private BrokerInfo getBrokerInfoRandom(TopicPartitionKey tpKey) {
+        BrokerInfo brokerInfo = null;
+        ArrayList<String> array = new ArrayList<String>(brokersMapping.keySet());
+        if (array.size() == 0 || array.size() < ParamsKey.TopicConf.DEFAULT_REPLICA_NUM + 1
+                || ((configManager.brokerAssignmentLimitEnable)
+                        && (array.size() < configManager.brokerAssignmentLimitMin))) {
+            LOG.info("Can not get any broker! Alive broker number " + array.size() + " < limit min "
+                    + configManager.brokerAssignmentLimitMin + " or <= replica number: "
+                    + ParamsKey.TopicConf.DEFAULT_REPLICA_NUM);
+            return brokerInfo;
+        } else {
+            Random random = new Random();
+            HashSet<Integer> brokerSet = new HashSet<Integer>();
+            int leaderIndex = random.nextInt(array.size());
+            String leader = array.get(leaderIndex);
+            brokerSet.add(leaderIndex);
+            do {
+                brokerSet.add(random.nextInt(array.size()));
+            } while (brokerSet.size() < ParamsKey.TopicConf.DEFAULT_REPLICA_NUM + 1);
+            brokerSet.remove(leaderIndex);
+            ArrayList<String> followers = new ArrayList<String>();
+            for (int brokerIndex : brokerSet) {
+                followers.add(array.get(brokerIndex));
+            }
+            brokerInfo = new BrokerInfo(tpKey, leader, followers);
+            return brokerInfo;
+        }
+    }
+
     private void handleRollingAndTriggerClean(RollClean rollClean, ByteBufferNonblockingConnection from) {
         boolean isFinal = true;
         Stream stream = getStream(rollClean.getTopic(), rollClean.getSource());
@@ -1976,7 +2170,105 @@ public class Supervisor {
         send(from, message);
     }
     
+    public void handleFollowerSyncStatus(String callId, FollowerSyncStatus followerSyncStatus, ByteBufferNonblockingConnection from) {
+        TopicPartitionKey tpKey = new TopicPartitionKey(followerSyncStatus.getTopic(), followerSyncStatus.getPartitionId());
+        String follower = followerSyncStatus.getFollower();
+        boolean status = followerSyncStatus.getSyncStatus();
+        BrokerInfo brokerInfo = tpKeyBrokerInfo.get(tpKey);
+        if (brokerInfo == null) {
+            Cat.logEvent("Supervisor brokerInfo is null when handling followerSyncStatus topic; " + followerSyncStatus.getTopic(),
+                    followerSyncStatus.getPartitionId());
+            LOG.fatal("BrokerInfo is null when handling followrSyncStatus topic: " + tpKey.getTopic() + ", partition: "
+                    + tpKey.getPartition() + ", follower: " + follower + ", status: " + status + " from "
+                    + from.getHost());
+            sendFollowerSyncStatusAck(from.getHost(), callId, followerSyncStatus.getEntropy(), tpKey, follower, status, false);
+            return;
+        }
+        synchronized (brokerInfo) {
+            if (!isEqualEntropy(followerSyncStatus.getEntropy(), brokerInfo)) {
+                return;
+            }
+            if (brokerInfo.setFollowerStatus(follower, status)) {
+                sendFollowerSyncStatusAck(from.getHost(), callId, followerSyncStatus.getEntropy(), tpKey, follower, status, true);
+            } else {
+                sendFollowerSyncStatusAck(from.getHost(), callId, followerSyncStatus.getEntropy(), tpKey, follower, status, false);
+            }
+        }
+    }
+
+    private void sendFollowerSyncStatusAck(String leader, String callId, int entropy, TopicPartitionKey tpKey, String follower,
+            boolean syncStatus, boolean ack) {
+        Message msg = PBwrap.wrapFollowerSyncStatusAck(callId, entropy, tpKey.getTopic(), tpKey.getPartition(), follower,
+                syncStatus, ack);
+        LOG.info("sending followerSyncStatusAck to " + leader + msg);
+        send(brokersMapping.get(leader), msg);
+    }
+
+    private void updateCandidateInfo(int newEntropy, TopicPartitionKey tpKey, BrokerInfo bi, String candidate,
+            long offset) {
+        if (!bi.isValidEntropy(newEntropy)) {
+            return;
+        }
+        bi.updateLeo(candidate, offset);
+        if (!bi.isElectionSupport()) {
+            return;
+        }
+        if (!bi.getElectionResult()) {
+            return;
+        }
+        String leader = bi.getLeader();
+        HashMap<String, Boolean> followers = bi.getFollowers();
+        sendTransitionToLeader(bi.getEntropy(), bi.getLeader(), tpKey.getTopic(), tpKey.getPartition(), bi.getOffset(),
+                followers);
+        for (String follower : followers.keySet()) {
+            sendTransitionToFollower(bi.getEntropy(), follower, tpKey.getTopic(), tpKey.getPartition(), leader,
+                    getBrokerPort(leader), bi.getOffset());
+        }
+    }
+
+    public void handleLeoReply(LeoReply leoReply, ByteBufferNonblockingConnection from) {
+        TopicPartitionKey tpKey = new TopicPartitionKey(leoReply.getTopic(), leoReply.getPartition());
+        BrokerInfo brokerInfo = tpKeyBrokerInfo.get(tpKey);
+        if (brokerInfo == null) {
+            Cat.logEvent("Supervisor brokerInfo is null when handling leoReplyt topic: " + tpKey.getTopic(),
+                    tpKey.getPartition());
+            LOG.fatal("BrokerInfo is null when handling leoReply topic: " + tpKey.getTopic() + ", partition: "
+                    + tpKey.getPartition());
+            return;
+        }
+        synchronized (brokerInfo) {
+            if (isEqualEntropy(leoReply.getEntropy(), brokerInfo)) {
+                updateCandidateInfo(brokerInfo.getEntropy(), tpKey, brokerInfo, from.getHost(), leoReply.getOffset());
+            }
+        }
+    }
+
+    public void handleLeoReportTimeout(LeoReport leoReport) {
+        TopicPartitionKey tpKey = new TopicPartitionKey(leoReport.getTopic(), leoReport.getPartition());
+        BrokerInfo brokerInfo = tpKeyBrokerInfo.get(tpKey);
+        if (brokerInfo == null) {
+            Cat.logEvent("Supervisor brokerInfo is null when handling leoReporTimeout topic: " + tpKey.getTopic(),
+                    tpKey.getPartition());
+            LOG.fatal("BrokerInfo is null when handling leoReportTimeout topic: " + tpKey.getTopic() + ", partition: "
+                    + tpKey.getPartition());
+            return;
+        }
+        synchronized (brokerInfo) {
+            if (isEqualEntropy(leoReport.getEntropy(), brokerInfo)) {
+                updateCandidateInfo(brokerInfo.getEntropy(), tpKey, brokerInfo, leoReport.getCandidate(), -1L);
+            }
+        }
+    }
+
+    private boolean isEqualEntropy(int newEntropy, BrokerInfo brokerInfo) {
+        int oldEntropy = brokerInfo.getEntropy();
+        LOG.debug("EqualEntropy: compare new entropy: " + newEntropy + " and old entropy: " + oldEntropy
+                + " for topic: " + brokerInfo.getTopic() + ", partition: " + brokerInfo.getPartition());
+        return newEntropy == oldEntropy ? true : false;
+    }
+
     public class SupervisorExecutor implements EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection> {
+        private NioService<ByteBuffer, ByteBufferNonblockingConnection> service = null;
 
         @Override
         public void OnConnected(ByteBufferNonblockingConnection connection) {
@@ -1996,6 +2288,36 @@ public class Supervisor {
         @Override
         public void OnDisconnected(ByteBufferNonblockingConnection connection) {
             closeConnection(connection);
+        }
+
+        @Override
+        public void receiveTimout(ByteBuffer msg, ByteBufferNonblockingConnection conn) {
+            Message msgPB = null;
+            try {
+                msgPB = PBwrap.Buf2PB(msg);
+                LOG.warn(msgPB);
+            } catch (InvalidProtocolBufferException e) {
+                LOG.error("InvalidProtocolBufferException catched ", e);
+                return;
+            }
+
+            switch (msgPB.getType()) {
+            case LEO_REPORT:
+                handleLeoReportTimeout(msgPB.getLeoReport());
+                break;
+            default:
+                LOG.warn("unknown message: " + msg.toString());
+            }
+        }
+
+        @Override
+        public void sendFailure(ByteBuffer msg, ByteBufferNonblockingConnection conn) {
+
+        }
+
+        @Override
+        public void setNioService(NioService<ByteBuffer, ByteBufferNonblockingConnection> service) {
+            this.service = service;
         }
         
         @Override
@@ -2113,6 +2435,18 @@ public class Supervisor {
             case LOG_NOT_FOUND:
                 handleLogNotFound(msg.getLogNotFound(), from);
                 break;
+            case FOLLOWER_SYNC_STATUS:
+                LOG.debug("received: " + msg);
+                handleFollowerSyncStatus(msg.getCallId(), msg.getFollowerSyncStatus(), from);
+                break;
+            case LEO_REPLY:
+                boolean accept = (this.service.unwatch(msg.getCallId(), from,
+                        Message.MessageType.LEO_REPLY_VALUE) != null) ? true : false;
+                LOG.debug("received(" + (accept ? "accept" : "ignore") + "): " + msg);
+                if (accept) {
+                    handleLeoReply(msg.getLeoReply(), from);
+                }
+                break;
             default:
                 LOG.warn("unknown message: " + msg.toString());
             }
@@ -2172,6 +2506,7 @@ public class Supervisor {
         dataSourceMapping = new ConcurrentHashMap<String, ByteBufferNonblockingConnection>();
         brokersMapping = new ConcurrentHashMap<String, ByteBufferNonblockingConnection>();
         producerMgrMap = new ConcurrentHashMap<String, ProducerManager>();
+        tpKeyBrokerInfo = new ConcurrentHashMap<TopicPartitionKey, BrokerInfo>();
         
         //initConfManager(or lion/zookeeper)
         configManager = new ConfigManager(this);
@@ -2200,7 +2535,7 @@ public class Supervisor {
         AbnormalStageChecker abnormalStageChecker = new AbnormalStageChecker(configManager.abnormalStageCheckPeriod, configManager.abnormalStageDuration, configManager.normalStageTTL);
         abnormalStageChecker.start();
         
-        SupervisorExecutor executor = new SupervisorExecutor();
+        executor = new SupervisorExecutor();
         NonblockingConnectionFactory<ByteBufferNonblockingConnection> factory = new ByteBufferNonblockingConnection.ByteBufferNonblockingConnectionFactory();
         server = new GenServer<ByteBuffer, ByteBufferNonblockingConnection, EntityProcessor<ByteBuffer, ByteBufferNonblockingConnection>>
             (executor, factory, null);
@@ -2395,7 +2730,7 @@ public class Supervisor {
         BrokerDesc brokerDesc = (BrokerDesc) nodeDescs.get(0);
         return brokerDesc.getRecoveryPort();
     }
-    
+
     /**
      * Attention, this method is not fast, it will traverse all map elements
      * @param hostname

@@ -34,9 +34,14 @@
 	</build>
 	<dependencies>
 		<dependency>
+			<groupId>com.dianping.cat</groupId>
+			<artifactId>cat-client</artifactId>
+			<version>${catVersion}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.dianping.lion</groupId>
 			<artifactId>lion-client</artifactId>
-			<version>0.5.4</version>
+			<version>${lionVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.dianping.cat</groupId>

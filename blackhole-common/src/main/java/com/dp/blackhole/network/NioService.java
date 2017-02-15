@@ -11,9 +11,9 @@ public interface NioService <Entity, Connection extends NonblockingConnection<En
     
     public void send(Connection conn, Entity msg);
     
-    public void sendWithExpect(Connection conn, Entity event, int expect, int timeout, TimeUnit unit);
+    public void sendWithExpect(String callId, Connection conn, Entity event, int expect, int timeout, TimeUnit unit);
     
-    public EntityEvent<Entity, Connection> unwatch(Connection conn, int expect);
+    public EntityEvent<Entity, Connection> unwatch(String callId, Connection conn, int expect);
     
     void shutdown();
 }

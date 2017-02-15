@@ -25,6 +25,7 @@ import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
+import com.dp.blackhole.network.NioService;
 import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.dp.blackhole.protocol.control.AssignBrokerPB.AssignBroker;
 import com.dp.blackhole.protocol.control.ConfResPB.ConfRes;
@@ -354,6 +355,21 @@ public class Agent implements Runnable {
                 heartbeat.shutdown();
                 heartbeat = null;
             }
+        }
+
+        @Override
+        public void receiveTimout(ByteBuffer msg, ByteBufferNonblockingConnection conn) {
+
+        }
+
+        @Override
+        public void sendFailure(ByteBuffer msg, ByteBufferNonblockingConnection conn) {
+
+        }
+
+        @Override
+        public void setNioService(NioService<ByteBuffer, ByteBufferNonblockingConnection> service) {
+
         }
         
         @Override

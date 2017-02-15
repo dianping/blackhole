@@ -19,6 +19,7 @@ public class ByteBufferMessageSet implements MessageSet{
     
     public ByteBufferMessageSet(ByteBuffer buffer) {
         this.buffer = buffer;
+        this.validSize = calcValidSize();
     }
 
     public void write(ByteBuffer buffer) {
@@ -128,5 +129,20 @@ public class ByteBufferMessageSet implements MessageSet{
     
     public long getValidSize() {
         return validSize;
+    }
+
+    public void makeValid() {
+        Iterator<MessageAndOffset> iter = getItertor();
+        MessageAndOffset last = null;
+        int messageSize = 0;
+        while (iter.hasNext()) {
+            last = iter.next();
+            messageSize = messageSize + last.getMessage().getSize();
+        }
+        if (last == null) {
+            buffer.limit(buffer.position());
+            return;
+        }
+        buffer.limit(messageSize);
     }
 }

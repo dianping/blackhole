@@ -17,6 +17,7 @@ import com.dp.blackhole.common.Util;
 import com.dp.blackhole.network.EntityProcessor;
 import com.dp.blackhole.network.GenClient;
 import com.dp.blackhole.network.HeartBeat;
+import com.dp.blackhole.network.NioService;
 import com.dp.blackhole.network.ByteBufferNonblockingConnection;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.dp.blackhole.protocol.control.DumpReplyPB.DumpReply;
@@ -232,6 +233,21 @@ public class Cli {
         @Override
         public void OnDisconnected(ByteBufferNonblockingConnection connection) {
             supervisor = null;
+        }
+
+        @Override
+        public void receiveTimout(ByteBuffer msg, ByteBufferNonblockingConnection conn) {
+
+        }
+
+        @Override
+        public void sendFailure(ByteBuffer msg, ByteBufferNonblockingConnection conn) {
+
+        }
+
+        @Override
+        public void setNioService(NioService<ByteBuffer, ByteBufferNonblockingConnection> service) {
+
         }
 
         @Override

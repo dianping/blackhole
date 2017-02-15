@@ -24,10 +24,10 @@ import com.dp.blackhole.broker.storage.Partition;
 import com.dp.blackhole.broker.storage.RollPartition;
 import com.dp.blackhole.broker.storage.StorageManager;
 import com.dp.blackhole.common.AgentProtocol;
+import com.dp.blackhole.common.AgentProtocol.AgentHead;
 import com.dp.blackhole.common.PBwrap;
 import com.dp.blackhole.common.ParamsKey;
 import com.dp.blackhole.common.Util;
-import com.dp.blackhole.common.AgentProtocol.AgentHead;
 import com.dp.blackhole.protocol.control.MessagePB.Message;
 import com.dp.blackhole.protocol.control.RollIDPB.RollID;
 

@@ -26,6 +26,7 @@ public class Partition {
     private File dir;
     private final ReentrantReadWriteLock lock;
     private RollPartition roll;
+    private int entropy;
     
     int splitThreshold;
     int flushThreshold;
@@ -40,12 +41,22 @@ public class Partition {
         lock = new ReentrantReadWriteLock();
         roll = new RollPartition(this);
         loadSegments();
+        this.entropy = 0;
     }
     
     public String getId() {
         return id;
     }
     
+    public int getEntropy() {
+        return this.entropy;
+    }
+
+    public boolean updateEntropy(int entropy) {
+        this.entropy = entropy;
+        return true;
+    }
+
     long getFileOffset(File f) {
         int dot = f.getName().lastIndexOf('.');
         String offset = f.getName().substring(0, dot);
@@ -254,6 +265,53 @@ public class Partition {
                     s.destory();
                 }
             }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public void reInitSegment(long startOffset) throws IOException {
+        addSegment(startOffset);
+        this.roll.startOffset = startOffset;
+    }
+
+    public void flush() throws IOException {
+        Segment segment = getLastSegment();
+        if (segment == null) {
+            return;
+        }
+        segment.flush();
+    }
+
+    public void truncate(long offset) throws IOException {
+        try {
+            lock.writeLock().lock();
+            Segment s = this.getLastSegment();
+            if (s == null) {
+                throw new IOException("fail to find last segment");
+            }
+            if (s.getEndOffset() <= offset) {
+                return;
+            }
+            s = findSegment(offset);
+            if (s == null) {
+                throw new IOException("fail to find segment for offset: " + offset);
+            }
+            int index = segments.indexOf(s);
+            int size = segments.size();
+            if (index != -1) {
+                for (int i = size - 1; i > index; i--) {
+                    Segment tmp = segments.get(i);
+                    segments.remove(i);
+                    tmp.destory();
+                }
+                s.channel.truncate(offset);
+            }
+        } catch (IOException e) {
+            Log.error("fail to truncate segement topic: " + this.topic + ", partition: "
+                    + this.id + ", offset: " + offset + "\n" + e);
+            this.cleanupSegments(Util.getTS(), 0);
+            this.reInitSegment(offset);
         } finally {
             lock.writeLock().unlock();
         }

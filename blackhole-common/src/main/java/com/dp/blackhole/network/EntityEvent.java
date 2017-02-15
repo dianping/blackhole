@@ -11,16 +11,18 @@ class EntityEvent<Entity, Connection extends NonblockingConnection<Entity>> {
     Entity entity;
     int expect;
     Connection c;
+    String callId;
     public EntityEvent(int type, Entity entity, Connection c) {
         this.type = type;
         this.entity = entity;
         this.expect = EXPECTNONE;
         this.c = c;
     }
-    public EntityEvent(int type, Entity entity, int expect, Connection c) {
+    public EntityEvent(int type, Entity entity, int expect, Connection c, String callId) {
         this.type = type;
         this.entity = entity;
         this.expect = expect;
         this.c = c;
+        this.callId = callId;
     }
 }

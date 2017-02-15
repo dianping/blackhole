@@ -1,0 +1,17 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "TransitionToLeaderPB";
+
+message TransitionToLeader {
+    required int32 entropy = 1;
+    required string topic = 2;
+    required string partition = 3;
+    required int64 leaderOffset = 4;
+    repeated Follower followers = 5;
+
+    message Follower {
+        required string follower = 1;
+        required bool status = 2;
+    }
+}

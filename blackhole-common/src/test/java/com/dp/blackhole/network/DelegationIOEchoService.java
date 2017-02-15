@@ -30,13 +30,11 @@ public class DelegationIOEchoService {
         
         @Override
         public int getType() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         @Override
         public int getSize() {
-            // TODO Auto-generated method stub
             return data.getBytes().length;
         }
 
@@ -61,13 +59,11 @@ public class DelegationIOEchoService {
 
             @Override
             public void OnConnected(TransferWrapNonblockingConnection connection) {
-                // TODO Auto-generated method stub
                 
             }
 
             @Override
             public void OnDisconnected(TransferWrapNonblockingConnection connection) {
-                // TODO Auto-generated method stub
                 
             }
 
@@ -88,13 +84,11 @@ public class DelegationIOEchoService {
 
             @Override
             public void receiveTimout(TransferWrap msg, TransferWrapNonblockingConnection from) {
-                // TODO Auto-generated method stub
                 
             }
 
             @Override
             public void sendFailure(TransferWrap msg, TransferWrapNonblockingConnection from) {
-                // TODO Auto-generated method stub
                 
             }
 
@@ -114,7 +108,6 @@ public class DelegationIOEchoService {
             try {
                 server.init("echo", 2222, 1);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -151,14 +144,14 @@ public class DelegationIOEchoService {
                 wappedObject a = (wappedObject) request.unwrap();
                 System.out.println("client get reply: "+a.data);
                 
-                service.unwatch(conn, 0);
+                service.unwatch("CALLID_TEST", conn, 0);
                 if (echotimes == 3) {
                     service.shutdown();
                     System.out.println();
                     System.out.println("total echo times: "+echotimes);
                 } else {
                     TransferWrap echoRequest = new TransferWrap(a);
-                    service.sendWithExpect(conn, echoRequest, 0, 3, TimeUnit.SECONDS);
+                    service.sendWithExpect("CALLID_TEST", conn, echoRequest, 0, 3, TimeUnit.SECONDS);
                     echotimes++;
                 }
             }
@@ -170,7 +163,6 @@ public class DelegationIOEchoService {
 
             @Override
             public void sendFailure(TransferWrap msg, TransferWrapNonblockingConnection conn) {
-                // TODO Auto-generated method stub
                 
             }
 
@@ -190,10 +182,8 @@ public class DelegationIOEchoService {
             try {
                 client.init("echo", "localhost", 2222);
             } catch (ClosedChannelException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

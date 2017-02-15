@@ -50,6 +50,10 @@ public class Checkpoint extends Thread {
         return status;
     }
     
+    public void removeCheckpoint(Stream stream) {
+        status.removeStream(stream);
+    }
+
     private StreamsStatus reload() throws IOException {
         return (StreamsStatus) Util.deserialize(FileUtils.readFileToByteArray(checkpiontFile));
     }

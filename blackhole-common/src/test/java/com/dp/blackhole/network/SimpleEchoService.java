@@ -22,13 +22,11 @@ public class SimpleEchoService {
             
             @Override
             public void OnConnected(ByteBufferNonblockingConnection connection) {
-                // TODO Auto-generated method stub
                 
             }
 
             @Override
             public void OnDisconnected(ByteBufferNonblockingConnection connection) {
-                // TODO Auto-generated method stub
                 
             }
 
@@ -44,7 +42,6 @@ public class SimpleEchoService {
 
             @Override
             public void sendFailure(ByteBuffer msg, ByteBufferNonblockingConnection from) {
-                // TODO Auto-generated method stub
                 
             }
 
@@ -67,7 +64,6 @@ public class SimpleEchoService {
             try {
                 startService();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

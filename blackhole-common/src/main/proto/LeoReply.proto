@@ -1,0 +1,11 @@
+package blackhole;
+
+option java_package = "com.dp.blackhole.protocol.control";
+option java_outer_classname = "LeoReplyPB";
+
+message LeoReply{
+    required int32 entropy = 1;
+    required string topic = 2;
+    required string partition = 3;
+    required int64 offset = 4;
+}
